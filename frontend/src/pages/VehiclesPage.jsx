@@ -90,33 +90,7 @@ const VehiclesPage = () => {
     navigate(`/vehicle/${vehicleId}/edit`);
   };
 
-  const onUpdateStatus = async ({ vehicleId, newStatus }) => {
-    const promise = async () => {
-      setIsSubmitting(true)
-      try {
-        const { data } = await apiClient.patch(
-          `/vehicle/${vehicleId}`,
-          { status: newStatus === "Expired" ? "0" : "1" },
-          {
-            headers: {
-              Authorization: token,
-            },
-          }
-        );
-        await fetchVehicles();
-        return data;
-      } catch (error) {
-        console.log(error);
-      } finally{
-        setIsSubmitting(false)
-      }
-    };
-    toast.promise(promise(), {
-      loading: "Updating Status...",
-      success: `Vehicle status updated`,
-      error: (error) => error.message || "Failed to update driver",
-    });
-  };
+
 
   return (
     <div className="p-4">
@@ -131,7 +105,6 @@ const VehiclesPage = () => {
           loading={loading}
           onRowClick={onRowClick}
           onEdit={onEdit}
-          onUpdateStatus={onUpdateStatus}
           submitting={submitting}
         />
       </section>

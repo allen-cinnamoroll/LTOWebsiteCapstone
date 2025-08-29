@@ -24,6 +24,7 @@ const EditDriverForm = () => {
   const params = useParams();
   const date = formatDate(Date.now());
   const [driverData, setDriverData] = useState({});
+  const navigate = useNavigate();
 
   const form = useForm({
     resolver: zodResolver(CreateDriverSchema),
@@ -125,7 +126,7 @@ const EditDriverForm = () => {
         toast.success("Driver updated", {
           description: date,
         });
-        fetchData();
+        navigate(-1);
       }
     } catch (error) {
       console.log(error);

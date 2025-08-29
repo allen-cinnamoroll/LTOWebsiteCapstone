@@ -4,6 +4,7 @@ import cors from "cors";
 import http from "http"; 
 import database from "./database/database.js";
 import dotenv from "dotenv"
+import { scheduleVehicleExpirationCheck } from "./util/scheduler.js";
 
 //Load environment variables from .env file
 dotenv.config();
@@ -27,4 +28,7 @@ const PORT = process.env.PORT;
 
 server.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
+  
+  // Start the vehicle expiration scheduler
+  scheduleVehicleExpirationCheck();
 });

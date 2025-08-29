@@ -24,6 +24,7 @@ const EditVehicleForm = () => {
   const params = useParams();
   const date = formatDate(Date.now());
   const [vehicleData, setVehicleData] = useState({});
+  const navigate = useNavigate();
 
   const form = useForm({
     resolver: zodResolver(VehicleSchema),
@@ -180,8 +181,8 @@ const EditVehicleForm = () => {
         toast.success("Vehicle updated", {
           description: date,
         });
-    
-        fetchData();
+        
+        navigate(-1);
       }
     } catch (error) {
       console.log(error);

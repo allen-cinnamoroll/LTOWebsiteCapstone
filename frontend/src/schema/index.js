@@ -120,3 +120,23 @@ export const VehicleSchema = z.object({
   customVehicleType: z.string().optional(),
   customFuelType: z.string().optional(),
 });
+
+export const AccidentSchema = z.object({
+  accident_id: z.string().optional(),
+  driver_id: z.string().min(1, { message: "Driver's license number is required" }),
+  vehicle_id: z.string().min(1, { message: "Vehicle plate number is required" }),
+  accident_date: z.date({ required_error: "Accident date is required" }),
+  street: z.string().min(1, { message: "Street is required" }),
+  barangay: z.string().min(1, { message: "Barangay is required" }),
+  municipality: z.string().min(1, { message: "Municipality is required" }),
+});
+
+export const ViolationCreateSchema = z.object({
+  violation_id: z.string().optional(),
+  driver_id: z.string().min(1, { message: "Driver's license number is required" }),
+  vehicle_id: z.string().min(1, { message: "Vehicle plate number is required" }),
+  violation_type: z.string().min(1, { message: "Violation type is required" }),
+  violation_date: z.date({ required_error: "Violation date is required" }),
+  penalty: z.coerce.number({ required_error: "Penalty is required" }),
+  remarks: z.string().optional(),
+});

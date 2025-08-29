@@ -1,3 +1,69 @@
+export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
+  {
+    accessorKey: "accident_id",
+    header: "Accident ID",
+    cell: ({ row }) => <div className="">{row.getValue("accident_id")}</div>,
+  },
+  {
+    accessorKey: "driver_id",
+    header: "Driver License No.",
+    cell: ({ row }) => <div className="">{row.getValue("driver_id")}</div>,
+  },
+  {
+    accessorKey: "vehicle_id",
+    header: "Vehicle Plate No.",
+    cell: ({ row }) => <div className="">{row.getValue("vehicle_id")}</div>,
+  },
+  {
+    accessorKey: "accident_date",
+    header: "Date",
+    cell: ({ row }) => <div className="">{row.getValue("accident_date")}</div>,
+  },
+  {
+    accessorKey: "street",
+    header: "Street",
+    cell: ({ row }) => <div className="">{row.getValue("street")}</div>,
+  },
+  {
+    accessorKey: "barangay",
+    header: "Barangay",
+    cell: ({ row }) => <div className="">{row.getValue("barangay")}</div>,
+  },
+  {
+    accessorKey: "municipality",
+    header: "Municipality",
+    cell: ({ row }) => <div className="">{row.getValue("municipality")}</div>,
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const accident = row.original;
+      const handleEdit = (e) => {
+        e.stopPropagation();
+        onEdit(accident._id);
+      };
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-5 w-5 p-0">
+              <span className="sr-only">Open menu</span>
+              <DotsHorizontalIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleEdit}>
+              Edit
+              <Edit />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
 import React, { useState } from "react";
 import { CaretSortIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
@@ -21,13 +87,7 @@ import {
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { Badge } from "../ui/badge";
 import apiClient from "@/api/axios";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 
 export const deactivatedDriverColumns = (onAction) => [
   {
@@ -175,6 +235,72 @@ export const driverColumns = (onEdit, onDelete) => [
     },
   },
 ];
+export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
+  {
+    accessorKey: "violation_id",
+    header: "Violation ID",
+    cell: ({ row }) => <div className="">{row.getValue("violation_id")}</div>,
+  },
+  {
+    accessorKey: "driver_id",
+    header: "Driver License No.",
+    cell: ({ row }) => <div className="">{row.getValue("driver_id")}</div>,
+  },
+  {
+    accessorKey: "vehicle_id",
+    header: "Vehicle Plate No.",
+    cell: ({ row }) => <div className="">{row.getValue("vehicle_id")}</div>,
+  },
+  {
+    accessorKey: "violation_type",
+    header: "Type",
+    cell: ({ row }) => <div className="">{row.getValue("violation_type")}</div>,
+  },
+  {
+    accessorKey: "violation_date",
+    header: "Date",
+    cell: ({ row }) => <div className="">{row.getValue("violation_date")}</div>,
+  },
+  {
+    accessorKey: "penalty",
+    header: "Penalty",
+    cell: ({ row }) => <div className="">{row.getValue("penalty")}</div>,
+  },
+  {
+    accessorKey: "remarks",
+    header: "Remarks",
+    cell: ({ row }) => <div className="">{row.getValue("remarks")}</div>,
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const violation = row.original;
+      const handleEdit = (e) => {
+        e.stopPropagation();
+        onEdit(violation._id);
+      };
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-5 w-5 p-0">
+              <span className="sr-only">Open menu</span>
+              <DotsHorizontalIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleEdit}>
+              Edit
+              <Edit />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
 
 export const driverLogs = () => [
   {
@@ -222,7 +348,7 @@ export const logs = () => [
   },
 ];
 
-export const vehicleColumns = (onEdit, onUpdateStatus, submitting) => [
+export const vehicleColumns = (onEdit, submitting) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
@@ -272,33 +398,21 @@ export const vehicleColumns = (onEdit, onUpdateStatus, submitting) => [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const [status, setStatus] = useState(row.original.status);
-      const vehicleId = row.original._id;
-
-      const handleStatusChange = async (newStatus) => {
-        setStatus(newStatus);
-        onUpdateStatus({ vehicleId, newStatus });
-      };
-
+      const status = row.original.status;
+      
       return (
-        <Select
-          value={status}
-          onValueChange={handleStatusChange}
-          disabled={submitting}
-        >
-          <SelectTrigger className="justify-start gap-2 h-8 w-28 px-2 [&_svg]:size-4 rounded-sm">
-            {status === "Active" ? (
-              <CheckCircle2Icon className="" />
-            ) : (
-              <CircleAlert className="" />
-            )}
+        <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
+          {status === "Active" ? (
+            <CheckCircle2Icon className="h-4 w-4 text-green-600" />
+          ) : (
+            <CircleAlert className="h-4 w-4 text-red-600" />
+          )}
+          <span className={`text-sm font-medium ${
+            status === "Active" ? "text-green-700" : "text-red-700"
+          }`}>
             {status}
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Expired">Expired</SelectItem>
-          </SelectContent>
-        </Select>
+          </span>
+        </div>
       );
     },
   },

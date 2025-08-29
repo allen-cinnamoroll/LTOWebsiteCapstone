@@ -3,6 +3,7 @@ import userRoutes from "./user.js";
 import driverRoutes from "./driver.js";
 import vehicleRoutes from "./vehicle.js";
 import violationRoutes from "./violation.js";
+import accidentRoutes from "./accident.js";
 import authRoutes from "./auth.js";
 import logRoutes from "./logs.js";
 
@@ -12,6 +13,7 @@ router.use("/driver", driverRoutes);
 router.use("/user", userRoutes);
 router.use("/vehicle", vehicleRoutes);
 router.use("/violation", violationRoutes);
+router.use("/accident", accidentRoutes);
 router.use("/auth", authRoutes);
 //log routes for admin and driver
 router.use("/logs", logRoutes);

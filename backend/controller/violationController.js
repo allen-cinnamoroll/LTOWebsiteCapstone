@@ -5,39 +5,56 @@ import VehicleModel from "../model/VehicleModel.js";
 // Create a new violation (Only Admin or Superadmin)
 export const createViolation = async (req, res) => {
     try {
-        const { driverStatus, driverId, vehicleStatus, vehicleId } = req.body;
+        console.log("Received violation data:", req.body);
+        const { driver_id, vehicle_id, violation_id } = req.body;
 
-        // Validate driverId if driverStatus is 1
-        if (driverStatus === 1) {
-            const driverExists = await DriverModel.findById(driverId);
-            if (!driverExists) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Invalid driver ID: Driver not found" 
-                });
-            }
+        // Find driver by licenseNo
+        const driver = await DriverModel.findOne({ licenseNo: driver_id });
+        if (!driver) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Invalid driver license number: Driver not found" 
+            });
+        }
+        console.log("Found driver:", driver._id);
+
+        // Find vehicle by plateNo
+        const vehicle = await VehicleModel.findOne({ plateNo: vehicle_id });
+        if (!vehicle) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Invalid vehicle plate number: Vehicle not found" 
+            });
+        }
+        console.log("Found vehicle:", vehicle._id);
+
+        // Generate violation_id if not provided or empty
+        let finalViolationId = violation_id;
+        if (!finalViolationId || finalViolationId.trim() === "") {
+            const timestamp = Date.now();
+            finalViolationId = `VIO-${timestamp}`;
         }
 
-        // Validate vehicleId if vehicleStatus is 1
-        if (vehicleStatus === 1) {
-            const vehicleExists = await VehicleModel.findById(vehicleId);
-            if (!vehicleExists) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Invalid vehicle ID: Vehicle not found" 
-                });
-            }
-        }
+        // Create violation with actual ObjectIds
+        const violationData = {
+            ...req.body,
+            violation_id: finalViolationId,
+            driver_id: driver._id,
+            vehicle_id: vehicle._id
+        };
+        console.log("Violation data to save:", violationData);
 
-        const violation = new ViolationModel(req.body);
-        await violation.save();
+        const violation = new ViolationModel(violationData);
+        const savedViolation = await violation.save();
+        console.log("Saved violation:", savedViolation);
         
         res.status(201).json({
             success: true,
             message: "Violation created successfully",
-            data: violation
+            data: savedViolation
         });
     } catch (error) {
+        console.error("Error creating violation:", error);
         res.status(400).json({ success: false, message: error.message });
     }
 };
@@ -46,14 +63,16 @@ export const createViolation = async (req, res) => {
 export const getViolations = async (req, res) => {
     try {
         const violations = await ViolationModel.find()
-            .populate("driverId", "firstName lastName licenseNo") 
-            .populate("vehicleId", "plateNo make model");
+            .populate("driver_id", "licenseNo firstName lastName middleName")
+            .populate("vehicle_id", "plateNo make series");
+
 
         res.status(200).json({
             success: true,
             data: violations
         });
     } catch (error) {
+
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -62,12 +81,12 @@ export const getViolations = async (req, res) => {
 export const getViolationById = async (req, res) => {
     try {
         const violation = await ViolationModel.findById(req.params.id)
-            .populate("driverId", "firstName lastName licenseNo") 
-            .populate("vehicleId", "plateNo make model");
+            .populate("driver_id", "licenseNo firstName lastName middleName")
+            .populate("vehicle_id", "plateNo make series");
 
         if (!violation) {
             return res.status(404).json({ success: false, message: "Violation not found" });
-        }
+    }
 
         res.status(200).json({
             success: true,
@@ -81,32 +100,39 @@ export const getViolationById = async (req, res) => {
 // Update a violation by ID (Only Admin or Superadmin)
 export const updateViolation = async (req, res) => {
     try {
-        const { driverStatus, driverId, vehicleStatus, vehicleId } = req.body;
+        const { driver_id, vehicle_id } = req.body;
+        let updateData = { ...req.body };
 
-        // Validate driverId if driverStatus is 1
-        if (driverStatus === 1) {
-            const driverExists = await DriverModel.findById(driverId);
-            if (!driverExists) {
+        if (driver_id) {
+            const driver = await DriverModel.findOne({ licenseNo: driver_id });
+            if (!driver) {
                 return res.status(400).json({ 
                     success: false, 
-                    message: "Invalid driver ID: Driver not found" 
+                    message: "Invalid driver license number: Driver not found" 
                 });
             }
+            updateData.driver_id = driver._id;
         }
 
-        // Validate vehicleId if vehicleStatus is 1
-        if (vehicleStatus === 1) {
-            const vehicleExists = await VehicleModel.findById(vehicleId);
-            if (!vehicleExists) {
+        if (vehicle_id) {
+            const vehicle = await VehicleModel.findOne({ plateNo: vehicle_id });
+            if (!vehicle) {
                 return res.status(400).json({ 
                     success: false, 
-                    message: "Invalid vehicle ID: Vehicle not found" 
+                    message: "Invalid vehicle plate number: Vehicle not found" 
                 });
             }
+            updateData.vehicle_id = vehicle._id;
         }
 
-        const violation = await ViolationModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-        
+        const violation = await ViolationModel.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true, runValidators: true }
+        )
+        .populate("driver_id", "licenseNo firstName lastName middleName")
+        .populate("vehicle_id", "plateNo make series");
+
         if (!violation) {
             return res.status(404).json({ success: false, message: "Violation not found" });
         }

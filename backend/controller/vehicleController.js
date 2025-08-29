@@ -2,6 +2,11 @@ import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
 import DriverModel from "../model/DriverModel.js";
 import { logAction } from "../util/logger.js";
+import { 
+  checkVehicleExpirationStatus, 
+  updateVehicleStatusByExpiration,
+  checkAllVehiclesExpiration 
+} from "../util/vehicleStatusChecker.js";
 
 export const createVehicle = async (req, res) => {
   const plateNo = req.body.plateNo;
@@ -25,7 +30,11 @@ export const createVehicle = async (req, res) => {
       })
     }
 
-    const vehicle = await VehicleModel.create(req.body);
+    // Automatically set status based on expiration date
+    const status = checkVehicleExpirationStatus(expirationDate);
+    const vehicleData = { ...req.body, status };
+
+    const vehicle = await VehicleModel.create(vehicleData);
 
     res.status(201).json({
       success: true,
@@ -41,6 +50,9 @@ export const createVehicle = async (req, res) => {
 
 export const getVehicle = async (req, res) => {
   try {
+    // First, check and update all vehicles' expiration status
+    await checkAllVehiclesExpiration();
+    
     const vehicles = await VehicleModel.find().sort({ createdAt: -1 });
 
     const vehicleDetails = vehicles.map((data) => {
@@ -124,18 +136,66 @@ export const updateVehicle = async (req, res) => {
   const vehicleId = req.params.id;
 
   try {
-    const vehicle = await VehicleModel.findByIdAndUpdate(vehicleId, req.body);
+    let updateData = { ...req.body };
+    
+    // Remove status from updateData to prevent manual status changes
+    delete updateData.status;
+    
+    // If expiration date is being updated, automatically update status
+    if (req.body.expirationDate) {
+      const updatedVehicle = await updateVehicleStatusByExpiration(
+        vehicleId, 
+        req.body.expirationDate
+      );
+      
+      if (!updatedVehicle) {
+        return res.status(404).json({
+          success: false,
+          message: "Vehicle not found",
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: "Vehicle updated with automatic status adjustment",
+        data: {
+          status: updatedVehicle.status,
+          expirationDate: updatedVehicle.expirationDate
+        }
+      });
+    } else {
+      // Regular update without expiration date change
+      const vehicle = await VehicleModel.findByIdAndUpdate(vehicleId, updateData);
 
-    if (!vehicle) {
-      return res.status(404).json({
-        success: false,
-        message: "Vehicle not found",
+      if (!vehicle) {
+        return res.status(404).json({
+          success: false,
+          message: "Vehicle not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Vehicle updated",
       });
     }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 
+// Manual endpoint to check and update all vehicles' expiration status
+export const checkVehiclesExpiration = async (req, res) => {
+  try {
+    const result = await checkAllVehiclesExpiration();
+    
     res.status(200).json({
       success: true,
-      message: "Vehicle updated",
+      message: result.message,
+      updatedCount: result.updatedCount
     });
   } catch (err) {
     return res.status(500).json({
@@ -143,4 +203,12 @@ export const updateVehicle = async (req, res) => {
       message: err.message,
     });
   }
+};
+
+// Block manual status updates - status can only be changed automatically
+export const updateVehicleStatus = async (req, res) => {
+  return res.status(403).json({
+    success: false,
+    message: "Vehicle status cannot be manually updated. Status is automatically managed based on expiration date.",
+  });
 };

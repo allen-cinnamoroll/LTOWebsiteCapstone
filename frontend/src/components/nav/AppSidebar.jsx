@@ -155,7 +155,7 @@ export function AppSidebar(props) {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/violation"} asChild>
-                <a href="#">
+                <a href="/violation">
                   <SquareChartGantt />
                   <span>Manage Violations</span>
                 </a>
@@ -163,7 +163,7 @@ export function AppSidebar(props) {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/accident"} asChild>
-                <a href="#">
+                <a href="/accident">
                   <SquareActivity />
                   <span>Manage Accidents</span>
                 </a>

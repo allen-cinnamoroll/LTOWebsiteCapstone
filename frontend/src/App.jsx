@@ -16,6 +16,14 @@ import VehiclesPage from "./pages/VehiclesPage";
 import AddVehicleForm from "./pages/AddVehicleForm";
 import VehicleProfile from "./pages/VehicleProfile";
 import EditVehicleForm from "./pages/EditVehicleForm";
+import ViolationPage from "./pages/ViolationPage";
+import AccidentPage from "./pages/AccidentPage";
+import AddAccidentForm from "./pages/AddAccidentForm";
+import AccidentProfile from "./pages/AccidentProfile";
+import EditAccidentForm from "./pages/EditAccidentForm";
+import AddViolationForm from "./pages/AddViolationForm";
+import ViolationProfile from "./pages/ViolationProfile";
+import EditViolationForm from "./pages/EditViolationForm";
 
 function App() {
   return (
@@ -51,6 +59,18 @@ function App() {
               <Route path="/vehicle/create" element={<AddVehicleForm/>}/>
               <Route path="/vehicle/:id" element={<VehicleProfile />} />
               <Route path="/vehicle/:id/edit" element={<EditVehicleForm />} />
+
+              {/* violation routes */}
+              <Route path="/violation" element={<ViolationPage />} />
+              <Route path="/violation/create" element={<AddViolationForm />} />
+              <Route path="/violation/:id" element={<ViolationProfile />} />
+              <Route path="/violation/:id/edit" element={<EditViolationForm />} />
+
+              {/* accident routes */}
+              <Route path="/accident" element={<AccidentPage />} />
+              <Route path="/accident/create" element={<AddAccidentForm />} />
+              <Route path="/accident/:id" element={<AccidentProfile />} />
+              <Route path="/accident/:id/edit" element={<EditAccidentForm />} />
             </Route>
           </Route>
         </Route>

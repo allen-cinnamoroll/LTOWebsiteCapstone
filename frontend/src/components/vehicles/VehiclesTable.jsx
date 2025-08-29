@@ -46,7 +46,6 @@ const VehiclesTable = ({
   onRowClick,
   onAdd,
   onEdit,
-  onUpdateStatus,
   submitting
 }) => {
   const [sorting, setSorting] = React.useState([]);
@@ -62,7 +61,7 @@ const VehiclesTable = ({
 
   const table = useReactTable({
     data,
-    columns: tableColumn(onEdit, onUpdateStatus, submitting),
+    columns: tableColumn(onEdit, submitting),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,

@@ -35,14 +35,13 @@ export const vehicleRegistrationRules = () =>[
 
 // driver violation
 export const validateViolation = [
-  body("driverStatus").isIn([0, 1]).withMessage("Invalid driver status"),
-  body("vehicleStatus").isIn([0, 1]).withMessage("Invalid vehicle status"),
-  body("violationName").notEmpty().withMessage("Violation name is required"),
-  body("violationDescription").notEmpty().withMessage("Violation description is required"),
+  body("violation_id").optional(),
+  body("driver_id").notEmpty().withMessage("Driver ID is required"),
+  body("vehicle_id").notEmpty().withMessage("Vehicle ID is required"),
+  body("violation_type").notEmpty().withMessage("Violation type is required"),
+  body("violation_date").isISO8601().withMessage("Violation date is required and must be valid"),
   body("penalty").isNumeric().withMessage("Penalty must be a number"),
-  body("place").notEmpty().withMessage("Place is required"),
-  body("datetime").isISO8601().withMessage("Invalid date format"),
-  body("expirationDate").isISO8601().withMessage("Invalid expiration date format"),
+  body("remarks").optional().isString().withMessage("Remarks must be a string"),
 ];
 
 //admin registration validation rules
@@ -51,6 +50,17 @@ export const registrationValidationRules = () => [
   body("password").notEmpty().withMessage("password is required"),
   body("email").notEmpty().withMessage("email is required")
 ]
+
+// Accident validation
+export const validateAccident = [
+  body("accident_id").optional(),
+  body("driver_id").notEmpty().withMessage("Driver ID is required"),
+  body("vehicle_id").notEmpty().withMessage("Vehicle ID is required"),
+  body("accident_date").isISO8601().withMessage("Accident date is required and must be valid"),
+  body("street").notEmpty().withMessage("Street is required"),
+  body("barangay").notEmpty().withMessage("Barangay is required"),
+  body("municipality").notEmpty().withMessage("Municipality is required"),
+];
 
 // Middleware to handle validation errors
 export const validate = (req, res, next) => {
