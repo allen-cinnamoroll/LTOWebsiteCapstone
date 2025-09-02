@@ -171,6 +171,36 @@ export function AppSidebar(props) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={location.pathname === "/analytics/registration"} asChild>
+                <a href="/analytics/registration">
+                  <BookOpen />
+                  <span>Registration</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={location.pathname === "/analytics/violation"} asChild>
+                <a href="/analytics/violation">
+                  <SquareChartGantt />
+                  <span>Violation</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton isActive={location.pathname === "/analytics/accident"} asChild>
+                <a href="/analytics/accident">
+                  <SquareActivity />
+                  <span>Accident</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

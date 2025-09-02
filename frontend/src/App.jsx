@@ -24,6 +24,9 @@ import EditAccidentForm from "./pages/EditAccidentForm";
 import AddViolationForm from "./pages/AddViolationForm";
 import ViolationProfile from "./pages/ViolationProfile";
 import EditViolationForm from "./pages/EditViolationForm";
+import RegistrationAnalyticsPage from "./pages/RegistrationAnalyticsPage";
+import ViolationAnalyticsPage from "./pages/ViolationAnalyticsPage";
+import AccidentAnalyticsPage from "./pages/AccidentAnalyticsPage";
 
 function App() {
   return (
@@ -71,6 +74,11 @@ function App() {
               <Route path="/accident/create" element={<AddAccidentForm />} />
               <Route path="/accident/:id" element={<AccidentProfile />} />
               <Route path="/accident/:id/edit" element={<EditAccidentForm />} />
+
+              {/* analytics routes */}
+              <Route path="/analytics/registration" element={<RegistrationAnalyticsPage />} />
+              <Route path="/analytics/violation" element={<ViolationAnalyticsPage />} />
+              <Route path="/analytics/accident" element={<AccidentAnalyticsPage />} />
             </Route>
           </Route>
         </Route>
