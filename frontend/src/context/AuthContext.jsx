@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }) => {
     const userData = {
       userId: decoded.userId,
       role: decoded.role,
-      username: decoded.username,
       email: decoded.email,
       isPasswordChange: decoded.isPasswordChange
     };

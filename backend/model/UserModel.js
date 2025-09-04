@@ -9,12 +9,24 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    firstName: {
       type: String,
-      required: [true, "username is required"],
+      required: [true, "First name is required"],
+      trim: true
+    },
+    middleName: {
+      type: String,
+      trim: true,
+      default: "" // Optional field
+    },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
+      trim: true
     },
     email: {
       type: String,
+      required: [true, "email is required"],
     },
     password: {
       type: String,
@@ -26,6 +38,23 @@ const userSchema = new mongoose.Schema(
       default: "1",
     },
     isPasswordChange:{
+      type: Boolean,
+      default: false
+    },
+    loginAttempts: {
+      type: Number,
+      default: 0
+    },
+    lastLoginAt: {
+      type: Date
+    },
+    otp: {
+      type: String
+    },
+    otpExpiresAt: {
+      type: Date
+    },
+    isOtpVerified: {
       type: Boolean,
       default: false
     }

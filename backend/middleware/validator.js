@@ -1,5 +1,26 @@
 import { body, validationResult } from "express-validator";
-//dirver registration validation rules
+//user registration validation rules
+export const registrationValidationRules = () => [
+  body("firstName")
+    .notEmpty().withMessage("First name is required")
+    .trim()
+    .isLength({ min: 2 }).withMessage("First name must be at least 2 characters long"),
+  body("middleName")
+    .optional()
+    .trim(),
+  body("lastName")
+    .notEmpty().withMessage("Last name is required")
+    .trim()
+    .isLength({ min: 2 }).withMessage("Last name must be at least 2 characters long"),
+  body("email")
+    .notEmpty().withMessage("Email is required")
+    .isEmail().withMessage("Invalid email format"),
+  body("password")
+    .notEmpty().withMessage("Password is required")
+    .isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
+];
+
+//driver registration validation rules
 export const driverValidationRules = () => [
   body("licenseNo").notEmpty().withMessage("licenseNo is required"),
   body("firstName").notEmpty().withMessage("firstname is required"),
@@ -45,8 +66,7 @@ export const validateViolation = [
 ];
 
 //admin registration validation rules
-export const registrationValidationRules = () => [
-  body("username").notEmpty().withMessage("username is required"),
+export const adminRegistrationValidationRules = () => [
   body("password").notEmpty().withMessage("password is required"),
   body("email").notEmpty().withMessage("email is required")
 ]
