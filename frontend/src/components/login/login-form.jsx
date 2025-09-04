@@ -19,6 +19,7 @@ import {
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function LoginForm({ className, ...props }) {
   const [showPass, setShowPass] = useState(false);
@@ -27,12 +28,8 @@ export function LoginForm({ className, ...props }) {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // if user exists navigate to homepage
-  useLayoutEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  });
+  // Note: Navigation is handled by ProtectedRoutes when using modal approach
+  // No need to navigate here as it can cause conflicts with OTP modal
 
   const tooglePasswordVisibility = () => {
     setShowPass(!showPass);
@@ -52,7 +49,24 @@ export function LoginForm({ className, ...props }) {
       const { data } = await apiClient.post("/auth/login", formData);
       if (data) {
         setIsSubmitting(false);
-        login(data.token);
+        
+        // Check if OTP is required
+        if (data.requiresOTP) {
+          // For admin/employee users, we get a token with isOtpVerified: false
+          // ProtectedRoutes will handle showing the OTP modal
+          toast.success(`OTP has been sent to ${data.email}. Please check your email.`);
+          if (data.token) {
+            login(data.token);
+          }
+          return;
+        }
+        
+        // Direct login for superadmin or after OTP verification
+        if (data.token) {
+          login(data.token);
+          // Navigate to dashboard for direct login
+          navigate("/");
+        }
       }
     } catch (error) {
       const message = error.response;

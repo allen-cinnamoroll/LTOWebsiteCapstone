@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import apiClient from "@/api/axios";
 
 const ProtectedRoutes = ({ allowedRoles }) => {
   const roleMapping = {
-    driver:"2",
+    employee: "2",
     admin: "1",
     superadmin: "0",
   };
-  const [data, setData] = useState();
-  const { isAuthenticated, isLoading, userData, token } = useAuth();
+  const { isAuthenticated, isLoading, userData } = useAuth();
   const location = useLocation();
   const userRole = userData?.role;
 
@@ -23,11 +21,11 @@ const ProtectedRoutes = ({ allowedRoles }) => {
   const mappedAllowedRoles = allowedRoles.map((role) => roleMapping[role]);
 
   // Check if the user is authenticated and has the correct mapped role
-  return isAuthenticated && mappedAllowedRoles.includes(userRole) ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/login" state={{ from: location }} replace />
-  );
+  if (isAuthenticated && mappedAllowedRoles.includes(userRole)) {
+    return <Outlet />;
+  }
+
+  return <Navigate to="/login" state={{ from: location }} replace />;
 };
 
 export default ProtectedRoutes;

@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 /**role ={
  * 0 - superadmin
  * 1 - admin
- * 2 - driver
+ * 2 - employee
 } */
 
 const userSchema = new mongoose.Schema(
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["0", "1", "2"],
-      default: "1",
+      default: "2", // Default to employee role
     },
     isPasswordChange:{
       type: Boolean,

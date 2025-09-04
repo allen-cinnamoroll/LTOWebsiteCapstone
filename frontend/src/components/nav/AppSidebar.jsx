@@ -1,6 +1,6 @@
 "use client";
 import logo from "@/assets/lto.svg";
-import React from "react";
+import React, { useState } from "react";
 import {
   AudioWaveform,
   BookOpen,
@@ -23,6 +23,10 @@ import {
   TriangleAlert,
   User,
   Users,
+  UserPlus,
+  Edit,
+  FileText,
+  ChevronRight,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav/NavMain";
@@ -47,6 +51,12 @@ import {
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 // This is sample data.
 const data = {
   user: {
@@ -103,6 +113,31 @@ const data = {
 
 export function AppSidebar(props) {
   const location = useLocation();
+  const { userData } = useAuth();
+  
+  // State for managing collapsible sections
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isManageAccountOpen, setIsManageAccountOpen] = useState(false);
+  
+  // Handle dropdown state changes - close one when opening another
+  const handleAnalyticsChange = (open) => {
+    setIsAnalyticsOpen(open);
+    if (open) {
+      setIsManageAccountOpen(false);
+    }
+  };
+  
+  const handleManageAccountChange = (open) => {
+    setIsManageAccountOpen(open);
+    if (open) {
+      setIsAnalyticsOpen(false);
+    }
+  };
+  
+  // Check user roles for different permissions
+  const canManageAccounts = userData?.role === "0" || userData?.role === "1"; // Admin and superadmin
+  const userRole = userData?.role;
+  
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -129,6 +164,7 @@ export function AppSidebar(props) {
         <SidebarGroup>
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarMenu className="">
+            {/* Dashboard - accessible to all authenticated users */}
             <SidebarMenuItem >
               <SidebarMenuButton isActive={location.pathname === "/"} asChild>
                 <a href="/">
@@ -137,6 +173,8 @@ export function AppSidebar(props) {
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            
+            {/* Management sections - accessible to all authenticated users */}
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/vehicle"} asChild>
                 <a href="/vehicle">
@@ -175,32 +213,95 @@ export function AppSidebar(props) {
         <SidebarGroup>
           <SidebarGroupLabel>Analytics</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={location.pathname === "/analytics/registration"} asChild>
-                <a href="/analytics/registration">
-                  <BookOpen />
-                  <span>Registration</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={location.pathname === "/analytics/violation"} asChild>
-                <a href="/analytics/violation">
-                  <SquareChartGantt />
-                  <span>Violation</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton isActive={location.pathname === "/analytics/accident"} asChild>
-                <a href="/analytics/accident">
-                  <SquareActivity />
-                  <span>Accident</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <Collapsible asChild className="group/collapsible" open={isAnalyticsOpen} onOpenChange={handleAnalyticsChange}>
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip="Analytics">
+                    <PieChart />
+                    <span>Analytics</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive={location.pathname === "/analytics/registration"} asChild>
+                        <a href="/analytics/registration">
+                          <BookOpen />
+                          <span>Registration</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive={location.pathname === "/analytics/violation"} asChild>
+                        <a href="/analytics/violation">
+                          <SquareChartGantt />
+                          <span>Violation</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive={location.pathname === "/analytics/accident"} asChild>
+                        <a href="/analytics/accident">
+                          <SquareActivity />
+                          <span>Accident</span>
+                        </a>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Manage Account Section - Only visible for Admin and Superadmin */}
+        {canManageAccounts && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Account Management</SidebarGroupLabel>
+            <SidebarMenu>
+              <Collapsible asChild className="group/collapsible" open={isManageAccountOpen} onOpenChange={handleManageAccountChange}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Manage Account">
+                      <User />
+                      <span>Manage Account</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/account/register"} asChild>
+                          <a href="/account/register">
+                            <UserPlus />
+                            <span>Register Account</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/account/update"} asChild>
+                          <a href="/account/update">
+                            <Edit />
+                            <span>Update Account</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/account/logs"} asChild>
+                          <a href="/account/logs">
+                            <FileText />
+                            <span>View Account Logs</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

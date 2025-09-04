@@ -1,0 +1,76 @@
+import mongoose from 'mongoose';
+
+const userLogSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  userName: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    required: true,
+    enum: ['0', '1', '2'] // 0: Superadmin, 1: Admin, 2: Employee
+  },
+  actorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+  actorName: {
+    type: String,
+    required: false
+  },
+  actorEmail: {
+    type: String,
+    required: false
+  },
+  actorRole: {
+    type: String,
+    required: false,
+    enum: ['0', '1', '2']
+  },
+  logType: {
+    type: String,
+    required: true,
+    enum: ['login', 'logout', 'register', 'update', 'delete', 'password_change', 'otp_sent', 'otp_verified']
+  },
+  ipAddress: {
+    type: String,
+    required: true
+  },
+  userAgent: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ['success', 'failed', 'pending']
+  },
+  details: {
+    type: String,
+    default: ''
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
+
+// Index for better query performance
+userLogSchema.index({ userId: 1, timestamp: -1 });
+userLogSchema.index({ email: 1, timestamp: -1 });
+userLogSchema.index({ role: 1, timestamp: -1 });
+userLogSchema.index({ logType: 1, timestamp: -1 });
+
+export default mongoose.model('UserLog', userLogSchema);

@@ -4,7 +4,7 @@ import cors from "cors";
 import http from "http"; 
 import database from "./database/database.js";
 import dotenv from "dotenv"
-import { scheduleVehicleExpirationCheck } from "./util/scheduler.js";
+import { scheduleVehicleExpirationCheck, scheduleWeeklyOTPReset } from "./util/scheduler.js";
 
 //Load environment variables from .env file
 dotenv.config();
@@ -14,7 +14,12 @@ import router from "./routes/index.js";
 
 const app = express();
 
+// Trust proxy for proper IP address detection
+app.set('trust proxy', true);
+
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 //import routes
 app.use("/api", router);
@@ -31,4 +36,7 @@ server.listen(PORT, () => {
   
   // Start the vehicle expiration scheduler
   scheduleVehicleExpirationCheck();
+  
+  // Start the weekly OTP reset scheduler
+  scheduleWeeklyOTPReset();
 });
