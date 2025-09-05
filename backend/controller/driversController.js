@@ -123,31 +123,4 @@ export const updateDriverStatus = async (req, res) => {
     });
   }
 };
-//deprecated. Only admin has access to the system
-const generateUserAcc = async (birthDate, lastName, firstName) => {
-  // Convert birthDate string to Date object (if it's not already a Date object)
-  const date = new Date(birthDate);
-  if (isNaN(date.getTime())) {
-    throw new Error("Invalid birthDate format. Expected YYYY-MM-DD.");
-  }
 
-  // Format birthDate as MMDDYYYY
-  const formattedDate = `${String(date.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}${String(date.getDate()).padStart(2, "0")}${date.getFullYear()}`;
-
-  // Capitalize first letter of lastName
-  const formattedLastName =
-    lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase();
-
-  const password = `${formattedDate}_${formattedLastName}`;
-
-  const user = await UserModel.create({
-    username: `${lastName}${firstName}`,
-    password,
-    role: "2",
-  });
-
-  return user;
-};
