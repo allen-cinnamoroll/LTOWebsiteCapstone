@@ -26,28 +26,14 @@ const AddVehicleForm = () => {
     resolver: zodResolver(VehicleSchema),
     defaultValues: {
       plateNo: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      street: "",
-      barangay: "",
-      municipality: "",
-      province: "",
       fileNo: "",
-      encumbrance: "",
-      classification: undefined,
-      vehicleType: "",
+      engineNo: "",
+      chassisNo: "",
       make: "",
-      fuelType: "",
-      motorNumber: "",
-      serialChassisNumber: "",
       bodyType: "",
-      series: "",
       color: "",
-      yearModel: "",
-      dateRegistered: undefined,
-      customVehicleType: "",
-      customFuelType: "",
+      classification: undefined,
+      dateOfRenewal: undefined,
     },
   });
 
@@ -56,35 +42,14 @@ const AddVehicleForm = () => {
     try {
       const content = {
         plateNo: formData.plateNo,
-        owner: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          middleName: formData.middleName,
-          street: formData.street,
-          barangay: formData.barangay,
-          municipality: formData.municipality,
-          province: formData.province,
-        },
         fileNo: formData.fileNo,
-        encumbrance: formData.encumbrance,
-        vehicleType:
-          formData.vehicleType !== "Other"
-            ? formData.vehicleType
-            : formData.customVehicleType,
-        classification: formData.classification,
+        engineNo: formData.engineNo,
+        chassisNo: formData.chassisNo,
         make: formData.make,
-        fuelType:
-          formData.fuelType === "Other"
-            ? formData.customFuelType
-            : formData.fuelType,
-        motorNumber: formData.motorNumber,
-        serialChassisNumber: formData.serialChassisNumber,
-        series: formData.series,
         bodyType: formData.bodyType,
         color: formData.color,
-        yearModel: formData.yearModel,
-        dateRegistered: formData.dateRegistered,
-        expirationDate: formData.expirationDate
+        classification: formData.classification,
+        dateOfRenewal: formData.dateOfRenewal
       };
 
       const { data } = await apiClient.post("/vehicle", content, {
@@ -98,7 +63,17 @@ const AddVehicleForm = () => {
           description: date,
         });
 
-        form.reset();
+        form.reset({
+          plateNo: "",
+          fileNo: "",
+          engineNo: "",
+          chassisNo: "",
+          make: "",
+          bodyType: "",
+          color: "",
+          classification: undefined,
+          dateOfRenewal: undefined,
+        });
       }
     } catch (error) {
       console.log(error);

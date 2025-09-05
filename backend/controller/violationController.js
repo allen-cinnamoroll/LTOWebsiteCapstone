@@ -1,52 +1,58 @@
 import ViolationModel from "../model/ViolationModel.js";
-import DriverModel from "../model/DriverModel.js";
-import VehicleModel from "../model/VehicleModel.js";
+import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
 // Create a new violation (Only Admin or Superadmin)
 export const createViolation = async (req, res) => {
     try {
+        console.log("=== BACKEND CREATE VIOLATION ===");
         console.log("Received violation data:", req.body);
-        const { driver_id, vehicle_id, violation_id } = req.body;
+        console.log("Violation type:", req.body.violationType);
+        const { topNo, firstName, middleInitial, lastName, suffix, violations, violationType, licenseType, plateNo, dateOfApprehension, apprehendingOfficer } = req.body;
 
-        // Find driver by licenseNo
-        const driver = await DriverModel.findOne({ licenseNo: driver_id });
-        if (!driver) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Invalid driver license number: Driver not found" 
-            });
-        }
-        console.log("Found driver:", driver._id);
-
-        // Find vehicle by plateNo
-        const vehicle = await VehicleModel.findOne({ plateNo: vehicle_id });
-        if (!vehicle) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "Invalid vehicle plate number: Vehicle not found" 
-            });
-        }
-        console.log("Found vehicle:", vehicle._id);
-
-        // Generate violation_id if not provided or empty
-        let finalViolationId = violation_id;
-        if (!finalViolationId || finalViolationId.trim() === "") {
+        // Generate TOP NO. if not provided or empty
+        let finalTopNo = topNo;
+        if (!finalTopNo || finalTopNo.trim() === "") {
             const timestamp = Date.now();
-            finalViolationId = `VIO-${timestamp}`;
+            finalTopNo = `TOP-${timestamp}`;
         }
 
-        // Create violation with actual ObjectIds
+        // Create violation with new structure
         const violationData = {
-            ...req.body,
-            violation_id: finalViolationId,
-            driver_id: driver._id,
-            vehicle_id: vehicle._id
+            topNo: finalTopNo,
+            firstName: violationType === "alarm" ? null : firstName,
+            middleInitial: violationType === "alarm" ? null : middleInitial,
+            lastName: violationType === "alarm" ? null : lastName,
+            suffix: violationType === "alarm" ? null : suffix,
+            violations: violationType === "alarm" ? null : (Array.isArray(violations) ? violations : [violations]), // Ensure it's an array
+            violationType: violationType || "confiscated", // Use string enum values
+            licenseType: (violationType === "alarm" || violationType === "impounded") ? null : licenseType,
+            plateNo,
+            dateOfApprehension,
+            apprehendingOfficer
         };
         console.log("Violation data to save:", violationData);
-
         const violation = new ViolationModel(violationData);
         const savedViolation = await violation.save();
         console.log("Saved violation:", savedViolation);
+
+        // Log the activity
+        if (req.user) {
+            await logUserActivity({
+                userId: req.user._id,
+                userName: `${req.user.firstName} ${req.user.lastName}`,
+                email: req.user.email,
+                role: req.user.role,
+                logType: 'add_violation',
+                ipAddress: getClientIP(req),
+                userAgent: getUserAgent(req),
+                status: 'success',
+                details: `Added violation: ${finalTopNo} (Driver: ${firstName} ${lastName}, Vehicle: ${plateNo})`,
+                actorId: req.user._id,
+                actorName: `${req.user.firstName} ${req.user.lastName}`,
+                actorEmail: req.user.email,
+                actorRole: req.user.role
+            });
+        }
         
         res.status(201).json({
             success: true,
@@ -54,7 +60,10 @@ export const createViolation = async (req, res) => {
             data: savedViolation
         });
     } catch (error) {
+        console.log("=== BACKEND ERROR ===");
         console.error("Error creating violation:", error);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
         res.status(400).json({ success: false, message: error.message });
     }
 };
@@ -62,17 +71,35 @@ export const createViolation = async (req, res) => {
 // Get all violations (Authenticated Users)
 export const getViolations = async (req, res) => {
     try {
-        const violations = await ViolationModel.find()
-            .populate("driver_id", "licenseNo firstName lastName middleName")
-            .populate("vehicle_id", "plateNo make series");
+        const violations = await ViolationModel.find().sort({ createdAt: -1 });
 
+        // Transform violations and handle alarm type fields
+        const transformedViolations = violations.map(violation => {
+            const violationObj = violation.toObject();
+            
+            // For alarm type, set name, violations, and license type to "None"
+            if (violationObj.violationType === "alarm") {
+                violationObj.firstName = "None";
+                violationObj.middleInitial = "None";
+                violationObj.lastName = "None";
+                violationObj.suffix = "None";
+                violationObj.violations = ["None"];
+                violationObj.licenseType = "None";
+            }
+            
+            // For impounded type, set license type to "None"
+            if (violationObj.violationType === "impounded") {
+                violationObj.licenseType = "None";
+            }
+            
+            return violationObj;
+        });
 
         res.status(200).json({
             success: true,
-            data: violations
+            data: transformedViolations
         });
     } catch (error) {
-
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -80,17 +107,33 @@ export const getViolations = async (req, res) => {
 // Get a single violation by ID (Authenticated Users)
 export const getViolationById = async (req, res) => {
     try {
-        const violation = await ViolationModel.findById(req.params.id)
-            .populate("driver_id", "licenseNo firstName lastName middleName")
-            .populate("vehicle_id", "plateNo make series");
+        const violation = await ViolationModel.findById(req.params.id);
 
         if (!violation) {
             return res.status(404).json({ success: false, message: "Violation not found" });
-    }
+        }
+
+        // Transform violation and handle alarm type fields
+        const violationObj = violation.toObject();
+        
+        // For alarm type, set name, violations, and license type to "None"
+        if (violationObj.violationType === "alarm") {
+            violationObj.firstName = "None";
+            violationObj.middleInitial = "None";
+            violationObj.lastName = "None";
+            violationObj.suffix = "None";
+            violationObj.violations = ["None"];
+            violationObj.licenseType = "None";
+        }
+        
+        // For impounded type, set license type to "None"
+        if (violationObj.violationType === "impounded") {
+            violationObj.licenseType = "None";
+        }
 
         res.status(200).json({
             success: true,
-            data: violation
+            data: violationObj
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -100,41 +143,61 @@ export const getViolationById = async (req, res) => {
 // Update a violation by ID (Only Admin or Superadmin)
 export const updateViolation = async (req, res) => {
     try {
-        const { driver_id, vehicle_id } = req.body;
+        const { violations, violationType } = req.body;
         let updateData = { ...req.body };
 
-        if (driver_id) {
-            const driver = await DriverModel.findOne({ licenseNo: driver_id });
-            if (!driver) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Invalid driver license number: Driver not found" 
-                });
-            }
-            updateData.driver_id = driver._id;
+        // Ensure violations is an array
+        if (violations) {
+            updateData.violations = Array.isArray(violations) ? violations : [violations];
         }
 
-        if (vehicle_id) {
-            const vehicle = await VehicleModel.findOne({ plateNo: vehicle_id });
-            if (!vehicle) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: "Invalid vehicle plate number: Vehicle not found" 
-                });
+        // Set violationType field based on violationType
+        if (violationType) {
+            updateData.violationType = violationType;
+            
+            // For alarm type, set name, violations, and license type to null
+            if (violationType === "alarm") {
+                updateData.firstName = null;
+                updateData.middleInitial = null;
+                updateData.lastName = null;
+                updateData.suffix = null;
+                updateData.violations = null;
+                updateData.licenseType = null;
             }
-            updateData.vehicle_id = vehicle._id;
+            
+            // For impounded type, set license type to null
+            if (violationType === "impounded") {
+                updateData.licenseType = null;
+            }
         }
 
         const violation = await ViolationModel.findByIdAndUpdate(
             req.params.id,
             updateData,
             { new: true, runValidators: true }
-        )
-        .populate("driver_id", "licenseNo firstName lastName middleName")
-        .populate("vehicle_id", "plateNo make series");
+        );
 
         if (!violation) {
             return res.status(404).json({ success: false, message: "Violation not found" });
+        }
+
+        // Log the activity
+        if (req.user) {
+            await logUserActivity({
+                userId: req.user._id,
+                userName: `${req.user.firstName} ${req.user.lastName}`,
+                email: req.user.email,
+                role: req.user.role,
+                logType: 'update_violation',
+                ipAddress: getClientIP(req),
+                userAgent: getUserAgent(req),
+                status: 'success',
+                details: `Updated violation: ${violation.topNo} (Driver: ${violation.firstName} ${violation.lastName}, Vehicle: ${violation.plateNo})`,
+                actorId: req.user._id,
+                actorName: `${req.user.firstName} ${req.user.lastName}`,
+                actorEmail: req.user.email,
+                actorRole: req.user.role
+            });
         }
 
         res.status(200).json({
@@ -147,19 +210,44 @@ export const updateViolation = async (req, res) => {
     }
 };
 
-// // Delete a violation by ID (Only Admin or Superadmin)
-// export const deleteViolation = async (req, res) => {
-//     try {
-//         const violation = await ViolationModel.findByIdAndDelete(req.params.id);
-//         if (!violation) {
-//             return res.status(404).json({ success: false, message: "Violation not found" });
-//         }
+// Delete a violation by ID (Only Admin or Superadmin)
+export const deleteViolation = async (req, res) => {
+    try {
+        const violation = await ViolationModel.findById(req.params.id);
+        
+        if (!violation) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Violation not found" 
+            });
+        }
 
-//         res.status(200).json({
-//             success: true,
-//             message: "Violation deleted successfully"
-//         });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: error.message });
-//     }
-// };
+        // Log the activity before deleting
+        if (req.user) {
+            await logUserActivity({
+                userId: req.user._id,
+                userName: `${req.user.firstName} ${req.user.lastName}`,
+                email: req.user.email,
+                role: req.user.role,
+                logType: 'delete_violation',
+                ipAddress: getClientIP(req),
+                userAgent: getUserAgent(req),
+                status: 'success',
+                details: `Deleted violation: ${violation.topNo} (Driver: ${violation.firstName} ${violation.lastName}, Vehicle: ${violation.plateNo})`,
+                actorId: req.user._id,
+                actorName: `${req.user.firstName} ${req.user.lastName}`,
+                actorEmail: req.user.email,
+                actorRole: req.user.role
+            });
+        }
+
+        await ViolationModel.findByIdAndDelete(req.params.id);
+        
+        res.status(200).json({
+            success: true,
+            message: "Violation deleted successfully"
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

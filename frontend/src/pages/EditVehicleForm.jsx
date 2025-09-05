@@ -30,28 +30,14 @@ const EditVehicleForm = () => {
     resolver: zodResolver(VehicleSchema),
     defaultValues: {
       plateNo: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      street: "",
-      barangay: "",
-      municipality: "",
-      province: "",
       fileNo: "",
-      encumbrance: "",
-      classification: undefined,
-      vehicleType: "",
+      engineNo: "",
+      chassisNo: "",
       make: "",
-      fuelType: "",
-      motorNumber: "",
-      serialChassisNumber: "",
       bodyType: "",
-      series: "",
       color: "",
-      yearModel: "",
-      dateRegistered: undefined,
-      customVehicleType: "",
-      customFuelType: "",
+      classification: undefined,
+      dateOfRenewal: undefined,
     },
   });
   const { reset } = form;
@@ -76,55 +62,16 @@ const EditVehicleForm = () => {
         },
       });
       if (data) {
-        const ownerData = data.data?.owner;
-
-        //handle vehicle type validations
-        const validVehicleTypes = [
-          "Car",
-          "Motorcycle",
-          "2nd Hand",
-          "Rebuilt",
-          "Truck",
-        ];
-
-        // If vehicle is NOT among the types above, set to Other
-        const vehicleType = validVehicleTypes.includes(data.data?.vehicleType)
-          ? data.data?.vehicleType
-          : "Other";
-        //handle valid fuel types
-        const validFuelTypes = ["Gas", "Diesel", "LPG", "Electric"];
-
-        // If fuel is NOT among the types above, set to Other
-        const fuelType = validFuelTypes.includes(data.data?.fuelType)
-          ? data.data?.fuelType
-          : "Other";
-
         const vData = {
-          firstName: ownerData.firstName,
-          middleName: ownerData?.middleName,
-          lastName: ownerData?.lastName,
-          street: ownerData?.street,
-          barangay: ownerData?.barangay,
-          municipality: ownerData?.municipality,
-          province: ownerData?.province,
-          make: data.data?.make,
-          series: data.data?.series,
-          encumbrance: data.data?.encumbrance,
-          fileNo: data.data?.fileNo,
-          classification: data.data?.classification,
-          vehicleType: vehicleType,
-          customVehicleType:
-            vehicleType === "Other" ? data.data?.vehicleType || "" : "",
           plateNo: data.data?.plateNo,
+          fileNo: data.data?.fileNo,
+          engineNo: data.data?.engineNo, // Use engineNo directly from API
+          chassisNo: data.data?.chassisNo, // Use chassisNo directly from API
+          make: data.data?.make,
           bodyType: data.data?.bodyType,
           color: data.data?.color,
-          yearModel: data.data?.yearModel ? data.data.yearModel.toString() : "",
-          fuelType: fuelType,
-          customFuelType: fuelType === "Other" ? data.data?.fuelType || "" : "",
-          motorNumber: data.data?.motorNumber,
-          serialChassisNumber: data.data?.serialChassisNumber,
-          dateRegistered: new Date(data.data?.dateRegistered),
-          expirationDate: new Date(data.data?.expirationDate),
+          classification: data.data?.classification,
+          dateOfRenewal: new Date(data.data?.dateOfRenewal), // Use dateOfRenewal directly from API
         };
 
         setVehicleData(vData);
@@ -137,37 +84,16 @@ const EditVehicleForm = () => {
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      const normalizeField = (field, customField) =>
-        field === "Other" ? customField : field;
-
       const content = {
         plateNo: formData.plateNo,
-        owner: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          middleName: formData.middleName,
-          street: formData.street,
-          barangay: formData.barangay,
-          municipality: formData.municipality,
-          province: formData.province,
-        },
         fileNo: formData.fileNo,
-        encumbrance: formData.encumbrance,
-        vehicleType: normalizeField(
-          formData.vehicleType,
-          formData.customVehicleType
-        ),
-        classification: formData.classification,
+        engineNo: formData.engineNo, // Use engineNo directly
+        chassisNo: formData.chassisNo, // Use chassisNo directly
         make: formData.make,
-        fuelType: normalizeField(formData.fuelType, formData.customFuelType),
-        motorNumber: formData.motorNumber,
-        serialChassisNumber: formData.serialChassisNumber,
-        series: formData.series,
         bodyType: formData.bodyType,
         color: formData.color,
-        yearModel: formData.yearModel,
-        dateRegistered: formData.dateRegistered,
-        expirationDate: formData.expirationDate,
+        classification: formData.classification,
+        dateOfRenewal: formData.dateOfRenewal, // Use dateOfRenewal directly
       };
 
 

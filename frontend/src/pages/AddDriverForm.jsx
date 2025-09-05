@@ -26,22 +26,18 @@ const AddDriverForm = () => {
   const form = useForm({
     resolver: zodResolver(CreateDriverSchema),
     defaultValues: {
-      licenseNo: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      street: "",
+      plateNo: "",
+      ownerRepresentativeName: "",
+      purok: "",
       barangay: "",
       municipality: "",
       province: "",
-      // zipCode: "",
-      nationality: "",
-      sex: undefined,
+      region: "",
+      contactNumber: "",
+      emailAddress: "",
+      hasDriversLicense: false,
+      driversLicenseNumber: "",
       birthDate: undefined,
-      civilStatus: "",
-      birthPlace: "",
-      issueDate: undefined,
-      expiryDate: "",
     },
   });
 
@@ -49,23 +45,20 @@ const AddDriverForm = () => {
     setIsSubmitting(true);
     try {
       const content = {
-        licenseNo: formData.licenseNo,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        middleName: formData.middleName,
-        birthDate: formData.birthDate,
-        sex: formData.sex,
-        civilStatus: formData.civilStatus,
+        plateNo: formData.plateNo,
+        ownerRepresentativeName: formData.ownerRepresentativeName,
         address: {
-          street: formData.street,
+          purok: formData.purok,
           barangay: formData.barangay,
           municipality: formData.municipality,
           province: formData.province,
+          region: formData.region,
         },
-        nationality: formData.nationality,
-        birthPlace: formData.birthPlace,
-        issueDate: formData.issueDate,
-        expiryDate: formData.expiryDate,
+        contactNumber: formData.contactNumber,
+        emailAddress: formData.emailAddress,
+        hasDriversLicense: formData.hasDriversLicense,
+        driversLicenseNumber: formData.driversLicenseNumber,
+        birthDate: formData.birthDate,
       };
 
       const { data } = await apiClient.post("/driver", content, {
@@ -79,7 +72,20 @@ const AddDriverForm = () => {
           description: date,
         });
 
-        form.reset();
+        form.reset({
+          plateNo: "",
+          ownerRepresentativeName: "",
+          purok: "",
+          barangay: "",
+          municipality: "",
+          province: "",
+          region: "",
+          contactNumber: "",
+          emailAddress: "",
+          hasDriversLicense: false,
+          driversLicenseNumber: "",
+          birthDate: undefined,
+        });
       }
     } catch (error) {
       console.log(error);

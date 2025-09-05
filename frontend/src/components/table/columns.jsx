@@ -91,41 +91,67 @@ import apiClient from "@/api/axios";
 
 export const deactivatedDriverColumns = (onAction) => [
   {
-    accessorKey: "licenseNo",
-    header: "License No.",
-    cell: ({ row }) => <div className="">{row.getValue("licenseNo")}</div>,
+    accessorKey: "plateNo",
+    header: "Plate No.",
+    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
   },
   {
-    accessorKey: "fullname",
+    accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={"Fullname"} />
+      <DataTableColumnHeader column={column} title={"Owner/Representative Name"} />
     ),
-    cell: ({ row }) => <div className="">{row.getValue("fullname")}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("ownerRepresentativeName")}</div>,
   },
   {
-    accessorKey: "sex",
-    header: "Sex",
-    cell: ({ row }) => <div className="">{row.getValue("sex")}</div>,
+    accessorKey: "hasDriversLicense",
+    header: "Driver's License",
+    cell: ({ row }) => {
+      const hasLicense = row.getValue("hasDriversLicense");
+      const licenseNumber = row.original.driversLicenseNumber;
+      return (
+        <div className="">
+          {hasLicense ? (
+            <div>
+              <div className="font-semibold text-green-600">Yes</div>
+              {licenseNumber && (
+                <div className="text-xs text-muted-foreground">{licenseNumber}</div>
+              )}
+            </div>
+          ) : (
+            <div className="font-semibold text-red-600">No</div>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "birthDate",
     header: "Birthday",
-    cell: ({ row }) => <div className="">{row.getValue("birthDate")}</div>,
+    cell: ({ row }) => {
+      const birthDate = row.getValue("birthDate");
+      return <div className="">{birthDate ? new Date(birthDate).toLocaleDateString() : "None"}</div>;
+    },
   },
   {
-    accessorKey: "civilStatus",
-    header: "Civil Status",
-    cell: ({ row }) => <div className="">{row.getValue("civilStatus")}</div>,
+    accessorKey: "contactNumber",
+    header: "Contact Number",
+    cell: ({ row }) => {
+      const contactNumber = row.getValue("contactNumber");
+      return <div className="">{contactNumber || "None"}</div>;
+    },
   },
   {
-    accessorKey: "issueDate",
-    header: "Date Issued",
-    cell: ({ row }) => <div className="">{row.getValue("issueDate")}</div>,
+    accessorKey: "emailAddress",
+    header: "Email Address",
+    cell: ({ row }) => {
+      const emailAddress = row.getValue("emailAddress");
+      return <div className="">{emailAddress || "None"}</div>;
+    },
   },
   {
-    accessorKey: "expiryDate",
-    header: "Expiration Date",
-    cell: ({ row }) => <div className="">{row.getValue("expiryDate")}</div>,
+    accessorKey: "dateOfRenewal",
+    header: "Date of Renewal",
+    cell: ({ row }) => <div className="">{row.getValue("dateOfRenewal")}</div>,
   },
   {
     id: "actions",
@@ -160,41 +186,97 @@ export const deactivatedDriverColumns = (onAction) => [
 
 export const driverColumns = (onEdit, onDelete) => [
   {
-    accessorKey: "licenseNo",
-    header: "License No.",
-    cell: ({ row }) => <div className="">{row.getValue("licenseNo")}</div>,
+    accessorKey: "plateNo",
+    header: "Plate No.",
+    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
   },
   {
-    accessorKey: "fullname",
+    accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={"Fullname"} />
+      <DataTableColumnHeader column={column} title={"Owner/Representative Name"} />
     ),
-    cell: ({ row }) => <div className="">{row.getValue("fullname")}</div>,
+    cell: ({ row }) => <div className="">{row.getValue("ownerRepresentativeName")}</div>,
   },
   {
-    accessorKey: "sex",
-    header: "Sex",
-    cell: ({ row }) => <div className="">{row.getValue("sex")}</div>,
+    accessorKey: "hasDriversLicense",
+    header: "Driver's License",
+    cell: ({ row }) => {
+      const hasLicense = row.getValue("hasDriversLicense");
+      const licenseNumber = row.original.driversLicenseNumber;
+      return (
+        <div className="">
+          {hasLicense ? (
+            <div>
+              <div className="font-semibold text-green-600">Yes</div>
+              {licenseNumber && (
+                <div className="text-xs text-muted-foreground">{licenseNumber}</div>
+              )}
+            </div>
+          ) : (
+            <div className="font-semibold text-red-600">No</div>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "birthDate",
     header: "Birthday",
-    cell: ({ row }) => <div className="">{row.getValue("birthDate")}</div>,
+    cell: ({ row }) => {
+      const birthDate = row.getValue("birthDate");
+      return <div className="">{birthDate ? new Date(birthDate).toLocaleDateString() : "None"}</div>;
+    },
   },
   {
-    accessorKey: "civilStatus",
-    header: "Civil Status",
-    cell: ({ row }) => <div className="">{row.getValue("civilStatus")}</div>,
+    accessorKey: "contactNumber",
+    header: "Contact Number",
+    cell: ({ row }) => {
+      const contactNumber = row.getValue("contactNumber");
+      return <div className="">{contactNumber || "None"}</div>;
+    },
   },
   {
-    accessorKey: "issueDate",
-    header: "Date Issued",
-    cell: ({ row }) => <div className="">{row.getValue("issueDate")}</div>,
+    accessorKey: "emailAddress",
+    header: "Email Address",
+    cell: ({ row }) => {
+      const emailAddress = row.getValue("emailAddress");
+      return <div className="">{emailAddress || "None"}</div>;
+    },
   },
   {
-    accessorKey: "expiryDate",
-    header: "Expiration Date",
-    cell: ({ row }) => <div className="">{row.getValue("expiryDate")}</div>,
+    accessorKey: "dateOfRenewal",
+    header: "Date of Renewal",
+    cell: ({ row }) => {
+      const date = row.getValue("dateOfRenewal");
+      return (
+        <div className="">
+          {date ? new Date(date).toLocaleDateString() : "Not set"}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status;
+      const isActive = status === "1" || status === 1;
+      
+      return (
+        <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
+          {isActive ? (
+            <CheckCircle2Icon className="h-4 w-4 text-green-600" />
+          ) : (
+            <CircleAlert className="h-4 w-4 text-red-600" />
+          )}
+          <span className={`text-sm font-medium ${
+            isActive ? "text-green-700" : "text-red-700"
+          }`}>
+            {isActive ? "Active" : "Expired"}
+          </span>
+        </div>
+      );
+    },
   },
   {
     id: "actions",
@@ -237,39 +319,107 @@ export const driverColumns = (onEdit, onDelete) => [
 ];
 export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
   {
-    accessorKey: "violation_id",
-    header: "Violation ID",
-    cell: ({ row }) => <div className="">{row.getValue("violation_id")}</div>,
+    accessorKey: "topNo",
+    header: "TOP NO.",
+    cell: ({ row }) => <div className="font-medium">{row.getValue("topNo")}</div>,
+  },
+      {
+      accessorKey: "firstName",
+      header: "Full Name",
+      cell: ({ row }) => {
+        const firstName = row.getValue("firstName");
+        const middleInitial = row.original.middleInitial;
+        const lastName = row.original.lastName;
+        const suffix = row.original.suffix;
+        
+        // If all name fields are "None" or null (alarm type), display "None"
+        if ((firstName === "None" || !firstName) && (middleInitial === "None" || !middleInitial) && (lastName === "None" || !lastName) && (suffix === "None" || !suffix)) {
+          return <div className="">None</div>;
+        }
+        
+        const parts = [firstName];
+        if (middleInitial && middleInitial !== "None") parts.push(middleInitial);
+        if (lastName && lastName !== "None") parts.push(lastName);
+        if (suffix && suffix !== "None") parts.push(suffix);
+        
+        return <div className="">{parts.join(" ")}</div>;
+      },
+    },
+  {
+    accessorKey: "violations",
+    header: "Violations",
+    cell: ({ row }) => {
+      const violations = row.getValue("violations");
+      return (
+        <div className="max-w-xs">
+          {violations && violations.length > 0 && violations[0] !== "None" 
+            ? (Array.isArray(violations) ? violations.join(", ") : violations) 
+            : "None"}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "driver_id",
-    header: "Driver License No.",
-    cell: ({ row }) => <div className="">{row.getValue("driver_id")}</div>,
-  },
-  {
-    accessorKey: "vehicle_id",
-    header: "Vehicle Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("vehicle_id")}</div>,
-  },
-  {
-    accessorKey: "violation_type",
+    accessorKey: "violationType",
     header: "Type",
-    cell: ({ row }) => <div className="">{row.getValue("violation_type")}</div>,
+    cell: ({ row }) => {
+      const violationType = row.getValue("violationType");
+      const getTypeText = (violationType) => {
+        switch (violationType) {
+          case "confiscated":
+            return "Confiscated";
+          case "alarm":
+            return "Alarm";
+          case "impounded":
+            return "Impounded";
+          default:
+            return "Unknown";
+        }
+      };
+                      const getTypeColor = (violationType) => {
+                  switch (violationType) {
+                    case "confiscated":
+                      return "bg-blue-100 text-blue-800";
+                    case "alarm":
+                      return "bg-red-100 text-red-800";
+                    case "impounded":
+                      return "bg-orange-100 text-orange-800";
+                    default:
+                      return "bg-gray-100 text-gray-800";
+                  }
+                };
+      return (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(violationType)}`}>
+          {getTypeText(violationType)}
+        </span>
+      );
+    },
   },
   {
-    accessorKey: "violation_date",
-    header: "Date",
-    cell: ({ row }) => <div className="">{row.getValue("violation_date")}</div>,
+    accessorKey: "licenseType",
+    header: "License Type",
+    cell: ({ row }) => {
+      const licenseType = row.getValue("licenseType");
+      return <div className="">{licenseType && licenseType !== "None" ? licenseType : "None"}</div>;
+    },
   },
   {
-    accessorKey: "penalty",
-    header: "Penalty",
-    cell: ({ row }) => <div className="">{row.getValue("penalty")}</div>,
+    accessorKey: "plateNo",
+    header: "Plate No.",
+    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
   },
   {
-    accessorKey: "remarks",
-    header: "Remarks",
-    cell: ({ row }) => <div className="">{row.getValue("remarks")}</div>,
+    accessorKey: "dateOfApprehension",
+    header: "Date of Apprehension",
+    cell: ({ row }) => {
+      const date = row.getValue("dateOfApprehension");
+      return <div className="">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
+    },
+  },
+  {
+    accessorKey: "apprehendingOfficer",
+    header: "Officer",
+    cell: ({ row }) => <div className="">{row.getValue("apprehendingOfficer") || "None"}</div>,
   },
   {
     id: "actions",
@@ -355,19 +505,29 @@ export const vehicleColumns = (onEdit, submitting) => [
     cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
   },
   {
+    accessorKey: "fileNo",
+    header: "File No.",
+    cell: ({ row }) => <div className="">{row.getValue("fileNo")}</div>,
+  },
+  {
+    accessorKey: "engineNo",
+    header: "Engine No.",
+    cell: ({ row }) => <div className="">{row.getValue("engineNo")}</div>,
+  },
+  {
+    accessorKey: "chassisNo",
+    header: "Chassis No.",
+    cell: ({ row }) => <div className="">{row.getValue("chassisNo")}</div>,
+  },
+  {
     accessorKey: "make",
     header: "Make",
     cell: ({ row }) => <div className="">{row.getValue("make")}</div>,
   },
   {
-    accessorKey: "series",
-    header: "Series",
-    cell: ({ row }) => <div className="">{row.getValue("series")}</div>,
-  },
-  {
-    accessorKey: "type",
-    header: "Type",
-    cell: ({ row }) => <div className="">{row.getValue("type")}</div>,
+    accessorKey: "bodyType",
+    header: "Body Type",
+    cell: ({ row }) => <div className="">{row.getValue("bodyType")}</div>,
   },
   {
     accessorKey: "color",
@@ -380,37 +540,35 @@ export const vehicleColumns = (onEdit, submitting) => [
     cell: ({ row }) => <div className="">{row.getValue("classification")}</div>,
   },
   {
-    accessorKey: "owner",
-    header: "Owner",
-    cell: ({ row }) => <div className="">{row.getValue("owner")}</div>,
-  },
-  {
-    accessorKey: "dateRegistered",
-    header: "Date Registered",
-    cell: ({ row }) => <div className="">{row.getValue("dateRegistered")}</div>,
-  },
-  {
-    accessorKey: "expirationDate",
-    header: "Expiration Date",
-    cell: ({ row }) => <div className="">{row.getValue("expirationDate")}</div>,
+    accessorKey: "dateOfRenewal",
+    header: "Date of Renewal",
+    cell: ({ row }) => {
+      const date = row.getValue("dateOfRenewal");
+      return (
+        <div className="">
+          {date ? new Date(date).toLocaleDateString() : "Not set"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
       const status = row.original.status;
+      const isActive = status === "1" || status === 1;
       
       return (
         <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
-          {status === "Active" ? (
+          {isActive ? (
             <CheckCircle2Icon className="h-4 w-4 text-green-600" />
           ) : (
             <CircleAlert className="h-4 w-4 text-red-600" />
           )}
           <span className={`text-sm font-medium ${
-            status === "Active" ? "text-green-700" : "text-red-700"
+            isActive ? "text-green-700" : "text-red-700"
           }`}>
-            {status}
+            {isActive ? "Active" : "Expired"}
           </span>
         </div>
       );

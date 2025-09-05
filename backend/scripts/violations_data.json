@@ -1,0 +1,15 @@
+[
+    {
+      "topNo": "TOP-20210716001",
+      "firstName": "Juan",
+      "middleInitial": "D",
+      "lastName": "Santos",
+      "suffix": "Jr.",
+      "violations": ["Driving without license"],
+      "violationType": "confiscated",
+      "licenseType": "DL",
+      "plateNo": "ABC-1234",
+      "dateOfApprehension": "2021-07-16T16:00:00.000+00:00",
+      "apprehendingOfficer": "Officer Maria Cruz"
+    }
+  ]

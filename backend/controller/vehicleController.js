@@ -7,6 +7,8 @@ import {
   updateVehicleStatusByExpiration,
   checkAllVehiclesExpiration 
 } from "../util/vehicleStatusChecker.js";
+import { updateDriverStatusByVehicleRenewal } from "../util/driverStatusChecker.js";
+import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
 export const createVehicle = async (req, res) => {
   const plateNo = req.body.plateNo;
@@ -20,27 +22,60 @@ export const createVehicle = async (req, res) => {
       });
     }
 
-    const dateRegistered = req.body.dateRegistered;
-    const expirationDate = req.body.expirationDate;
-
-    if(dateRegistered > expirationDate){
-      return res.status(400).json({
-        success: false,
-        message: "Date registered cannot be greater than expiration date"
-      })
+    // Set default status to active (1) if no dateOfRenewal provided
+    const status = req.body.dateOfRenewal ? checkVehicleExpirationStatus(req.body.dateOfRenewal) : "1";
+    
+    // Map frontend field names to database field names
+    const vehicleData = {
+      ...req.body,
+      serialChassisNumber: req.body.chassisNo, // Map chassisNo to serialChassisNumber
+      status
+    };
+    
+    // Remove the original chassisNo field to avoid confusion
+    delete vehicleData.chassisNo;
+    
+    // Ensure no old chassisNo field exists
+    if (vehicleData.chassisNo !== undefined) {
+      delete vehicleData.chassisNo;
     }
 
-    // Automatically set status based on expiration date
-    const status = checkVehicleExpirationStatus(expirationDate);
-    const vehicleData = { ...req.body, status };
-
     const vehicle = await VehicleModel.create(vehicleData);
+
+    // Sync driver status if renewal date is provided
+    if (req.body.dateOfRenewal) {
+      await updateDriverStatusByVehicleRenewal(plateNo, req.body.dateOfRenewal);
+    }
+
+    // Log the activity
+    if (req.user) {
+      // Fetch full user details from database since JWT only contains userId, role, email
+      const fullUser = await UserModel.findById(req.user.userId);
+      if (fullUser) {
+        await logUserActivity({
+          userId: fullUser._id,
+          userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+          email: fullUser.email,
+          role: fullUser.role,
+          logType: 'add_vehicle',
+          ipAddress: getClientIP(req),
+          userAgent: getUserAgent(req),
+          status: 'success',
+          details: `Added vehicle: ${plateNo} (${req.body.make} ${req.body.bodyType})`,
+          actorId: fullUser._id,
+          actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+          actorEmail: fullUser.email,
+          actorRole: fullUser.role
+        });
+      }
+    }
 
     res.status(201).json({
       success: true,
       message: "Vehicle registered",
     });
   } catch (err) {
+    console.error("Vehicle creation error:", err.message);
     return res.status(500).json({
       success: false,
       message: err.message,
@@ -58,19 +93,15 @@ export const getVehicle = async (req, res) => {
     const vehicleDetails = vehicles.map((data) => {
       return {
         _id: data._id,
-        owner: data.owner,
-        type: data.vehicleType,
-        classification: data.classification,
-        make: data.make,
-        fuelType: data.fuelType,
-        series: data.series,
-        bodyType: data.bodyType,
-        series: data.series,
-        color: data.color,
-        yearModel: data.yearModel,
-        dateRegistered: data.dateRegistered,
-        expirationDate: data.expirationDate,
         plateNo: data.plateNo,
+        fileNo: data.fileNo,
+        engineNo: data.engineNo,
+        chassisNo: data.serialChassisNumber, // Map serialChassisNumber back to chassisNo
+        make: data.make,
+        bodyType: data.bodyType,
+        color: data.color,
+        classification: data.classification,
+        dateOfRenewal: data.dateOfRenewal,
         status: data.status
       };
     });
@@ -103,20 +134,13 @@ export const findVehicle = async (req, res) => {
       _id: vehicle._id,
       plateNo: vehicle.plateNo,
       fileNo: vehicle.fileNo,
-      owner: vehicle.owner,
-      encumbrance: vehicle.encumbrance,
-      vehicleType: vehicle.vehicleType,
-      classification: vehicle.classification,
+      engineNo: vehicle.engineNo,
+      chassisNo: vehicle.serialChassisNumber, // Map serialChassisNumber back to chassisNo
       make: vehicle.make,
-      fuelType: vehicle.fuelType,
-      motorNumber: vehicle.motorNumber,
-      serialChassisNumber: vehicle.serialChassisNumber,
-      series: vehicle.series,
       bodyType: vehicle.bodyType,
       color: vehicle.color,
-      yearModel: vehicle.yearModel,
-      dateRegistered: vehicle.dateRegistered,
-      expirationDate: vehicle.expirationDate,
+      classification: vehicle.classification,
+      dateOfRenewal: vehicle.dateOfRenewal,
       status: vehicle.status
     };
 
@@ -138,14 +162,20 @@ export const updateVehicle = async (req, res) => {
   try {
     let updateData = { ...req.body };
     
+    // Map frontend field names to database field names
+    if (updateData.chassisNo) {
+      updateData.serialChassisNumber = updateData.chassisNo;
+      delete updateData.chassisNo;
+    }
+    
     // Remove status from updateData to prevent manual status changes
     delete updateData.status;
     
-    // If expiration date is being updated, automatically update status
-    if (req.body.expirationDate) {
+    // If date of renewal is being updated, automatically update status
+    if (req.body.dateOfRenewal) {
       const updatedVehicle = await updateVehicleStatusByExpiration(
         vehicleId, 
-        req.body.expirationDate
+        req.body.dateOfRenewal
       );
       
       if (!updatedVehicle) {
@@ -155,12 +185,38 @@ export const updateVehicle = async (req, res) => {
         });
       }
       
+      // Log the activity
+      if (req.user) {
+        // Fetch full user details from database since JWT only contains userId, role, email
+        const fullUser = await UserModel.findById(req.user.userId);
+        if (fullUser) {
+          await logUserActivity({
+            userId: fullUser._id,
+            userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+            email: fullUser.email,
+            role: fullUser.role,
+            logType: 'update_vehicle',
+            ipAddress: getClientIP(req),
+            userAgent: getUserAgent(req),
+            status: 'success',
+            details: `Updated vehicle: ${updatedVehicle.plateNo} (${updatedVehicle.make} ${updatedVehicle.bodyType}) with status adjustment`,
+            actorId: fullUser._id,
+            actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+            actorEmail: fullUser.email,
+            actorRole: fullUser.role
+          });
+        }
+      }
+      
+      // Sync driver status with the new renewal date
+      await updateDriverStatusByVehicleRenewal(updatedVehicle.plateNo, req.body.dateOfRenewal);
+      
       res.status(200).json({
         success: true,
-        message: "Vehicle updated with automatic status adjustment",
+        message: "Vehicle updated with automatic status adjustment and driver sync",
         data: {
           status: updatedVehicle.status,
-          expirationDate: updatedVehicle.expirationDate
+          dateOfRenewal: updatedVehicle.dateOfRenewal
         }
       });
     } else {
@@ -174,11 +230,84 @@ export const updateVehicle = async (req, res) => {
         });
       }
 
+      // Log the activity
+      if (req.user) {
+        // Fetch full user details from database since JWT only contains userId, role, email
+        const fullUser = await UserModel.findById(req.user.userId);
+        if (fullUser) {
+          await logUserActivity({
+            userId: fullUser._id,
+            userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+            email: fullUser.email,
+            role: fullUser.role,
+            logType: 'update_vehicle',
+            ipAddress: getClientIP(req),
+            userAgent: getUserAgent(req),
+            status: 'success',
+            details: `Updated vehicle: ${vehicle.plateNo} (${vehicle.make} ${vehicle.bodyType})`,
+            actorId: fullUser._id,
+            actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+            actorEmail: fullUser.email,
+            actorRole: fullUser.role
+          });
+        }
+      }
+
       res.status(200).json({
         success: true,
         message: "Vehicle updated",
       });
     }
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// Delete vehicle
+export const deleteVehicle = async (req, res) => {
+  const vehicleId = req.params.id;
+  try {
+    const vehicle = await VehicleModel.findById(vehicleId);
+    
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+
+    // Log the activity before deleting
+    if (req.user) {
+      // Fetch full user details from database since JWT only contains userId, role, email
+      const fullUser = await UserModel.findById(req.user.userId);
+      if (fullUser) {
+        await logUserActivity({
+          userId: fullUser._id,
+          userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+          email: fullUser.email,
+          role: fullUser.role,
+          logType: 'delete_vehicle',
+          ipAddress: getClientIP(req),
+          userAgent: getUserAgent(req),
+          status: 'success',
+          details: `Deleted vehicle: ${vehicle.plateNo} (${vehicle.make} ${vehicle.bodyType})`,
+          actorId: fullUser._id,
+          actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
+          actorEmail: fullUser.email,
+          actorRole: fullUser.role
+        });
+      }
+    }
+
+    await VehicleModel.findByIdAndDelete(vehicleId);
+
+    res.status(200).json({
+      success: true,
+      message: "Vehicle deleted successfully",
+    });
   } catch (err) {
     return res.status(500).json({
       success: false,

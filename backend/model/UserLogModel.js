@@ -40,7 +40,7 @@ const userLogSchema = new mongoose.Schema({
   logType: {
     type: String,
     required: true,
-    enum: ['login', 'logout', 'register', 'update', 'delete', 'password_change', 'otp_sent', 'otp_verified']
+    enum: ['login', 'logout', 'register', 'update', 'delete', 'password_change', 'otp_sent', 'otp_verified', 'add_driver', 'add_vehicle', 'add_accident', 'add_violation', 'update_driver', 'update_vehicle', 'update_accident', 'update_violation', 'delete_driver', 'delete_vehicle', 'delete_accident', 'delete_violation']
   },
   ipAddress: {
     type: String,

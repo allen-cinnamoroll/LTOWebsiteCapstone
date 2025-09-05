@@ -6,6 +6,7 @@ import {
   findDriver,
   getDrivers,
   updateDriver,
+  checkDriversExpiration,
 } from "../controller/driversController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
 const driverRouter = express.Router();
@@ -20,6 +21,7 @@ driverRouter.post(
 );
 
 driverRouter.get("/", authenticate, getDrivers);
+driverRouter.get("/check-expiration", authenticate, checkDriversExpiration);
 
 driverRouter.get("/:id", authenticate, findDriver);
 

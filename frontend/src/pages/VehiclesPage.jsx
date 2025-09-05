@@ -1,26 +1,11 @@
 import apiClient from "@/api/axios";
 import { vehicleColumns } from "@/components/table/columns";
 import { useAuth } from "@/context/AuthContext";
-import { createCategoryMap, getFullName } from "@/util/helper";
-import { formatDate, formatSimpleDate } from "@/util/dateFormatter";
+import { formatDate } from "@/util/dateFormatter";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import DriversTable from "@/components/drivers/DriversTable";
-import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
-import { toast } from "sonner";
 import VehiclesTable from "@/components/vehicles/VehiclesTable";
-import { X } from "lucide-react";
 
-const classificationMap = createCategoryMap({
-  0: "Private",
-  1: "For Hire",
-  2: "Government",
-});
-
-const statusMap = createCategoryMap({
-  0: "Expired",
-  1: "Active",
-});
 
 const VehiclesPage = () => {
   const [vehicleData, setVehicleData] = useState([]);
@@ -28,8 +13,6 @@ const VehiclesPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
-  const [showAlert, setShowAlert] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState("");
   const date = formatDate(Date.now());
   const [submitting, setIsSubmitting] = useState(false);
 
@@ -46,24 +29,18 @@ const VehiclesPage = () => {
       });
 
       const vehicleData = data.data.map((dData) => {
-        const owner = getFullName(
-          dData.owner.firstName,
-          dData.owner.lastName,
-          dData.owner.middleName
-        );
-
         return {
           _id: dData._id,
-          owner: owner,
           plateNo: dData.plateNo,
-          color: dData.color,
-          type: dData.type,
+          fileNo: dData.fileNo,
+          engineNo: dData.engineNo,
+          chassisNo: dData.chassisNo,
           make: dData.make,
-          series: dData.series,
-          classification: classificationMap.get(dData.classification),
-          dateRegistered: formatSimpleDate(dData.dateRegistered),
-          expirationDate: formatSimpleDate(dData.expirationDate),
-          status: statusMap.get(dData.status),
+          bodyType: dData.bodyType,
+          color: dData.color,
+          classification: dData.classification,
+          dateOfRenewal: dData.dateOfRenewal,
+          status: dData.status,
         };
       });
 
@@ -99,7 +76,7 @@ const VehiclesPage = () => {
         {/* Call vehicle table component */}
         <VehiclesTable
           data={vehicleData}
-          filters={["plateNo", "make", "series", "type", "owner", "status"]}
+          filters={["plateNo", "fileNo", "engineNo", "chassisNo", "make", "bodyType", "color", "classification", "status"]}
           tableColumn={vehicleColumns}
           onAdd={handleAdd}
           loading={loading}
@@ -108,16 +85,6 @@ const VehiclesPage = () => {
           submitting={submitting}
         />
       </section>
-      {/* <ConfirmationDIalog
-        open={showAlert}
-        onOpenChange={setShowAlert}
-        confirm={confirmDelete}
-        cancel={cancelDelete}
-        title={"Are you sure?"}
-        description={
-          "This action cannot be undone. This will deactivate the driver."
-        }
-      /> */}
     </div>
   );
 };

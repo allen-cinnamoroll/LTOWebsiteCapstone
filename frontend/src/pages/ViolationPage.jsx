@@ -27,13 +27,17 @@ const ViolationPage = () => {
       });
       const violationData = data.data.map((vData) => ({
         _id: vData._id,
-        violation_id: vData.violation_id,
-        driver_id: vData.driver_id?.licenseNo || "N/A",
-        vehicle_id: vData.vehicle_id?.plateNo || "N/A",
-        violation_type: vData.violation_type,
-        violation_date: formatSimpleDate(vData.violation_date),
-        penalty: vData.penalty,
-        remarks: vData.remarks || "",
+        topNo: vData.topNo || "N/A",
+        firstName: vData.firstName || "N/A",
+        middleInitial: vData.middleInitial || "",
+        lastName: vData.lastName || "N/A",
+        suffix: vData.suffix || "",
+        violations: vData.violations || [],
+        violationType: vData.violationType || "confiscated",
+        licenseType: vData.licenseType || "N/A",
+        plateNo: vData.plateNo || "N/A",
+        dateOfApprehension: vData.dateOfApprehension,
+        apprehendingOfficer: vData.apprehendingOfficer || "N/A",
       }));
       setViolationData(violationData);
     } catch (error) {
@@ -62,7 +66,7 @@ const ViolationPage = () => {
       <section>
         <ViolationTable
           data={violationData}
-          filters={["violation_id", "driver_id", "vehicle_id", "violation_type", "violation_date", "penalty", "remarks"]}
+          filters={["topNo", "firstName", "lastName", "violations", "violationType", "licenseType", "plateNo", "dateOfApprehension", "apprehendingOfficer"]}
           tableColumn={violationColumns}
           onAdd={handleAdd}
           loading={loading}

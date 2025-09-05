@@ -10,18 +10,12 @@ import {
 import { Button } from "@/components/ui/button";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
-import { createCategoryMap, getFullName } from "@/util/helper";
 import { formatSimpleDate } from "@/util/dateFormatter";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Edit, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { capitalizeFirstLetter } from "@/util/helper";
 
-const classificationMap = createCategoryMap({
-  0: "Private",
-  1: "For Hire",
-  3: "Government",
-});
 
 const VehicleCard = () => {
   const params = useParams();
@@ -35,6 +29,7 @@ const VehicleCard = () => {
 
   const fetchVehicle = async () => {
     try {
+      setLoading(true);
       const { data } = await apiClient.get(`/vehicle/${params.id}`, {
         headers: {
           Authorization: token,
@@ -45,16 +40,27 @@ const VehicleCard = () => {
         setVehicleData(data.data);
       }
     } catch (error) {
-      const statusCode = error.response.status;
-
-      if (statusCode) {
-        // navigate("/404");
-      }
+      console.error("Error fetching vehicle:", error);
+      toast.error("Failed to load vehicle data");
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
     fetchVehicle();
   }, []);
+
+  if (loading) {
+    return (
+      <Card className="lg:col-span-2 row-span-2 border md:shadow-none">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <div className="text-muted-foreground">Loading vehicle data...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -66,87 +72,62 @@ const VehicleCard = () => {
               : "N/A"}
           </CardTitle>
           <CardDescription>
-            {vehicleData?.series
-              ? capitalizeFirstLetter(vehicleData.series)
-              : "N/A"}
+            {vehicleData?.plateNo || "N/A"}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 pb-6">
           <div className="grid grid-cols-2 text-sm gap-4 mb-2">
             <h1 className="font-bold col-span-2 border-b px-6 py-1">
-              Owner Information
+              Vehicle Information
             </h1>
-            <h2 className="text-muted-foreground px-6">Fullname:</h2>
-            <p className="font-semibold w-full">
-              {vehicleData?.owner
-                ? getFullName(
-                    vehicleData.owner.firstName,
-                    vehicleData.owner.lastName,
-                    vehicleData.owner.middleName
-                  )
-                : "N/A"}
-            </p>
-            <h2 className="text-muted-foreground px-6">Address:</h2>
-            <p className="font-semibold w-full">
-              {`${vehicleData?.owner.street}, ${vehicleData?.owner.barangay}, ${vehicleData?.owner.municipality}, ${vehicleData?.owner.province}`}
-            </p>
-            <h1 className="font-bold col-span-2 border-y px-6 py-1">Documentation</h1>
-            <h2 className="text-muted-foreground px-6">Enumbrance:</h2>
-            <p className="font-semibold w-full">
-              {vehicleData?.encumbrance || "N/A"}
-            </p>
-            <h2 className="text-muted-foreground px-6">File Number:</h2>
-            <p className="font-semibold w-full">
-              {vehicleData?.fileNo || "N/A"}
-            </p>
-            <h2 className="text-muted-foreground px-6">Vehicle Type:</h2>
-            <p className="font-semibold w-full">{vehicleData?.vehicleType}</p>
-            <h1 className="font-bold col-span-2 border-y px-6 py-1">Identification</h1>
-
             <h2 className="text-muted-foreground px-6">Plate Number:</h2>
-            <p className="font-semibold w-full">{vehicleData?.plateNo}</p>
+            <p className="font-semibold w-full">{vehicleData?.plateNo || "N/A"}</p>
+            
+            <h2 className="text-muted-foreground px-6">File Number:</h2>
+            <p className="font-semibold w-full">{vehicleData?.fileNo || "N/A"}</p>
+            
+            <h2 className="text-muted-foreground px-6">Engine Number:</h2>
+            <p className="font-semibold w-full">{vehicleData?.engineNo || "N/A"}</p>
+            
+            <h2 className="text-muted-foreground px-6">Chassis Number:</h2>
+            <p className="font-semibold w-full">{vehicleData?.chassisNo || "N/A"}</p>
+            
             <h2 className="text-muted-foreground px-6">Make:</h2>
             <p className="font-semibold w-full">
               {vehicleData?.make
                 ? capitalizeFirstLetter(vehicleData.make)
                 : "N/A"}
             </p>
-            <h2 className="text-muted-foreground px-6">Series:</h2>
-            <p className="font-semibold w-full">
-              {" "}
-              {vehicleData?.series
-                ? capitalizeFirstLetter(vehicleData.series)
-                : "N/A"}
-            </p>
-            <h2 className="text-muted-foreground px-6">Classification:</h2>
-            <p className="font-semibold w-full">
-              {classificationMap.get(vehicleData?.classification)}
-            </p>
+            
             <h2 className="text-muted-foreground px-6">Body Type:</h2>
-            <p className="font-semibold w-full">{vehicleData?.bodyType}</p>
+            <p className="font-semibold w-full">{vehicleData?.bodyType || "N/A"}</p>
+            
             <h2 className="text-muted-foreground px-6">Color:</h2>
             <p className="font-semibold w-full">
               {vehicleData?.color
                 ? capitalizeFirstLetter(vehicleData.color)
                 : "N/A"}
             </p>
-            <h2 className="text-muted-foreground px-6">Fuel Type:</h2>
-            <p className="font-semibold w-full">{vehicleData?.fuelType}</p>
-            <h2 className="text-muted-foreground px-6">Year Model:</h2>
-            <p className="font-semibold w-full">{vehicleData?.yearModel}</p>
-            <h2 className="text-muted-foreground px-6">Motor Number:</h2>
-            <p className="font-semibold w-full">{vehicleData?.motorNumber}</p>
-            <h2 className="text-muted-foreground px-6">Serial/Chassis Number:</h2>
+            
+            <h2 className="text-muted-foreground px-6">Classification:</h2>
+            <p className="font-semibold w-full">{vehicleData?.classification || "N/A"}</p>
+            
+            <h2 className="text-muted-foreground px-6">Date of Renewal:</h2>
             <p className="font-semibold w-full">
-              {vehicleData?.serialChassisNumber}
+              {vehicleData?.dateOfRenewal 
+                ? formatSimpleDate(vehicleData.dateOfRenewal)
+                : "Not set"}
             </p>
-            <h2 className="text-muted-foreground px-6">Date Registered:</h2>
+            
+            <h2 className="text-muted-foreground px-6">Status:</h2>
             <p className="font-semibold w-full">
-              {formatSimpleDate(vehicleData?.dateRegistered)}
-            </p>
-            <h2 className="text-muted-foreground px-6">Expiration Date:</h2>
-            <p className="font-semibold w-full">
-              {formatSimpleDate(vehicleData?.expirationDate)}
+              <span className={`px-2 py-1 rounded text-xs ${
+                vehicleData?.status === "1" || vehicleData?.status === 1
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}>
+                {vehicleData?.status === "1" || vehicleData?.status === 1 ? "Active" : "Expired"}
+              </span>
             </p>
           </div>
         </CardContent>

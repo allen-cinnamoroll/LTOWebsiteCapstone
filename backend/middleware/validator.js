@@ -22,46 +22,105 @@ export const registrationValidationRules = () => [
 
 //driver registration validation rules
 export const driverValidationRules = () => [
-  body("licenseNo").notEmpty().withMessage("licenseNo is required"),
-  body("firstName").notEmpty().withMessage("firstname is required"),
-  body("lastName").notEmpty().withMessage("lastname is required"),
+  body("plateNo").notEmpty().withMessage("plateNo is required"),
+  body("ownerRepresentativeName").notEmpty().withMessage("ownerRepresentativeName is required"),
   body("address").notEmpty().withMessage("address is required"),
-  // body("zipCode").notEmpty().withMessage("zipCode is required"),
-  body("nationality").notEmpty().withMessage("nationality is required"),
-  body("sex").notEmpty().withMessage("sex is required"),
-  body("birthDate").notEmpty().withMessage("birthDate is required"),
-  body("civilStatus").notEmpty().withMessage("civilStatus is required"),
-  body("birthPlace").notEmpty().withMessage("birthPlace is required"),
-  body("issueDate").notEmpty().withMessage("issueDate is required"),
-  body("expiryDate").notEmpty().withMessage("expiryDate is required"),
+  body("address.purok").optional(),
+  body("address.barangay").notEmpty().withMessage("barangay is required"),
+  body("address.municipality").notEmpty().withMessage("municipality is required"),
+  body("address.province").notEmpty().withMessage("province is required"),
+  body("address.region").notEmpty().withMessage("region is required"),
+  body("contactNumber").optional(),
+  body("emailAddress").optional().custom((value) => {
+    if (value && value.trim() !== '') {
+      const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+      if (!emailRegex.test(value)) {
+        throw new Error("Invalid email format");
+      }
+    }
+    return true;
+  }),
+  body("hasDriversLicense").isBoolean().withMessage("hasDriversLicense must be a boolean"),
+  body("driversLicenseNumber").optional().custom((value, { req }) => {
+    if (req.body.hasDriversLicense === true && !value) {
+      throw new Error("driversLicenseNumber is required when hasDriversLicense is true");
+    }
+    return true;
+  }),
+  body("birthDate").optional(),
 ];
 
 //vehicle registration
 
 export const vehicleRegistrationRules = () =>[
   body("plateNo").notEmpty().withMessage("plateNo is required"),
-  body("owner").notEmpty().withMessage("owner is required"),
-  body("vehicleType").notEmpty().withMessage("vehicleType is required"),
-  body("classification").notEmpty().withMessage("classification is required"),
+  body("fileNo").notEmpty().withMessage("fileNo is required"),
+  body("engineNo").notEmpty().withMessage("engineNo is required"),
+  body("chassisNo").notEmpty().withMessage("chassisNo is required"),
   body("make").notEmpty().withMessage("make is required"),
-  body("fuelType").notEmpty().withMessage("fuelType is required"),
-  body("motorNumber").notEmpty().withMessage("motorNumber is required"),
-  body("serialChassisNumber").notEmpty().withMessage("serialChassisNumber is required"),
-  body("series").notEmpty().withMessage("series is required"),
   body("bodyType").notEmpty().withMessage("bodyType is required"),
   body("color").notEmpty().withMessage("color is required"),
-  body("yearModel").notEmpty().withMessage("yearModel is required"),
-  body("dateRegistered").notEmpty().withMessage("dateRegistered is required"),
+  body("classification").notEmpty().withMessage("classification is required"),
+  body("dateOfRenewal").optional().isISO8601().withMessage("dateOfRenewal must be a valid date"),
 ]
 
 // driver violation
 export const validateViolation = [
-  body("violation_id").optional(),
-  body("driver_id").notEmpty().withMessage("Driver ID is required"),
-  body("vehicle_id").notEmpty().withMessage("Vehicle ID is required"),
-  body("violation_type").notEmpty().withMessage("Violation type is required"),
-  body("violation_date").isISO8601().withMessage("Violation date is required and must be valid"),
-  body("penalty").isNumeric().withMessage("Penalty must be a number"),
+  body("topNo").optional(),
+  body("violationType").isIn(["violation", "alarm", "impound"]).withMessage("Violation type must be violation, alarm, or impound"),
+  
+  // Conditional validation for firstName (required for violation and impound)
+  body("firstName").custom((value, { req }) => {
+    const violationType = req.body.violationType;
+    if ((violationType === 'violation' || violationType === 'impound') && (!value || value.trim() === '')) {
+      throw new Error("First name is required for violation and impound types");
+    }
+    return true;
+  }),
+  
+  body("middleInitial").optional(),
+  
+  // Conditional validation for lastName (required for violation and impound)
+  body("lastName").custom((value, { req }) => {
+    const violationType = req.body.violationType;
+    if ((violationType === 'violation' || violationType === 'impound') && (!value || value.trim() === '')) {
+      throw new Error("Last name is required for violation and impound types");
+    }
+    return true;
+  }),
+  
+  body("suffix").optional(),
+  
+  // Conditional validation for violations (required for violation and impound)
+  body("violations").custom((value, { req }) => {
+    const violationType = req.body.violationType;
+    if ((violationType === 'violation' || violationType === 'impound')) {
+      if (!Array.isArray(value) || value.length === 0 || value.every(v => !v || v.trim() === '')) {
+        throw new Error("At least one violation is required for violation and impound types");
+      }
+    }
+    return true;
+  }),
+  
+  // Conditional validation for licenseType (required for violation only)
+  body("licenseType").custom((value, { req }) => {
+    const violationType = req.body.violationType;
+    if (violationType === 'violation') {
+      if (!value || !["SP", "DL", "CL"].includes(value)) {
+        throw new Error("License type is required and must be SP, DL, or CL for violation type");
+      }
+    } else if (violationType === 'alarm') {
+      // For alarm type, licenseType should be null or valid enum
+      if (value && !["SP", "DL", "CL"].includes(value)) {
+        throw new Error("License type must be SP, DL, CL, or null for alarm type");
+      }
+    }
+    return true;
+  }),
+  
+  body("plateNo").notEmpty().withMessage("Plate number is required"),
+  body("dateOfApprehension").isISO8601().withMessage("Date of apprehension is required and must be valid"),
+  body("apprehendingOfficer").notEmpty().withMessage("Apprehending officer is required"),
   body("remarks").optional().isString().withMessage("Remarks must be a string"),
 ];
 
@@ -86,6 +145,9 @@ export const validateAccident = [
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("=== VALIDATION ERRORS ===");
+    console.log("Validation errors:", errors.array());
+    console.log("Request body:", req.body);
     return res.status(400).json({
       success: false,
       message: errors.array().map((error) => error.msg),

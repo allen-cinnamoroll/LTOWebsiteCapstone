@@ -8,7 +8,7 @@ const vehicleRouter = express.Router();
 vehicleRouter.post(
   "/",
   authenticate,
-  authorizeRole("admin", "superadmin"),
+  authorizeRole("admin", "superadmin", "employee"),
   express.json(),
   vehicleRegistrationRules(),
   validate,

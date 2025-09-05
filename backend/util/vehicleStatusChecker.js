@@ -1,40 +1,40 @@
 import VehicleModel from "../model/VehicleModel.js";
 
 /**
- * Check if a vehicle's expiration date has passed and update status accordingly
- * @param {Date} expirationDate - The vehicle's expiration date
+ * Check if a vehicle's renewal date has passed and update status accordingly
+ * @param {Date} renewalDate - The vehicle's renewal date
  * @returns {string} - "0" for expired, "1" for active
  */
-export const checkVehicleExpirationStatus = (expirationDate) => {
+export const checkVehicleExpirationStatus = (renewalDate) => {
   const currentDate = new Date();
-  const expDate = new Date(expirationDate);
+  const renewalDateObj = new Date(renewalDate);
   
   // Reset time to compare only dates
   currentDate.setHours(0, 0, 0, 0);
-  expDate.setHours(0, 0, 0, 0);
+  renewalDateObj.setHours(0, 0, 0, 0);
   
-  const isExpired = expDate < currentDate;
-  console.log(`Vehicle expiration check: ${expDate.toDateString()} vs ${currentDate.toDateString()} = ${isExpired ? 'EXPIRED' : 'ACTIVE'}`);
+  const isExpired = renewalDateObj < currentDate;
+  console.log(`Vehicle expiration check: ${renewalDateObj.toDateString()} vs ${currentDate.toDateString()} = ${isExpired ? 'EXPIRED' : 'ACTIVE'}`);
   
   return isExpired ? "0" : "1"; // "0" = expired, "1" = active
 };
 
 /**
- * Update vehicle status based on expiration date
+ * Update vehicle status based on renewal date
  * @param {string} vehicleId - The vehicle ID
- * @param {Date} expirationDate - The new expiration date
+ * @param {Date} renewalDate - The new renewal date
  * @returns {Promise<Object>} - Updated vehicle object
  */
-export const updateVehicleStatusByExpiration = async (vehicleId, expirationDate) => {
+export const updateVehicleStatusByExpiration = async (vehicleId, renewalDate) => {
   try {
-    const newStatus = checkVehicleExpirationStatus(expirationDate);
+    const newStatus = checkVehicleExpirationStatus(renewalDate);
     console.log(`Updating vehicle ${vehicleId} status to: ${newStatus === "0" ? "EXPIRED" : "ACTIVE"}`);
     
     const updatedVehicle = await VehicleModel.findByIdAndUpdate(
       vehicleId,
       { 
         status: newStatus,
-        expirationDate: expirationDate 
+        dateOfRenewal: renewalDate 
       },
       { new: true }
     );
@@ -48,7 +48,7 @@ export const updateVehicleStatusByExpiration = async (vehicleId, expirationDate)
 };
 
 /**
- * Check and update all vehicles' status based on their expiration dates
+ * Check and update all vehicles' status based on their renewal dates
  * This can be called periodically or manually
  */
 export const checkAllVehiclesExpiration = async () => {
@@ -60,19 +60,25 @@ export const checkAllVehiclesExpiration = async () => {
     let updatedCount = 0;
     
     for (const vehicle of vehicles) {
-      const expDate = new Date(vehicle.expirationDate);
-      expDate.setHours(0, 0, 0, 0);
+      // Skip vehicles without renewal date
+      if (!vehicle.dateOfRenewal) {
+        continue;
+      }
       
-      const shouldBeExpired = expDate < currentDate;
+      const renewalDate = new Date(vehicle.dateOfRenewal);
+      renewalDate.setHours(0, 0, 0, 0);
+      
+      const shouldBeExpired = renewalDate < currentDate;
       const isCurrentlyExpired = vehicle.status === "0";
       
-      // Update status if it doesn't match the expiration date
+      // Update status if it doesn't match the renewal date
       if (shouldBeExpired !== isCurrentlyExpired) {
         await VehicleModel.findByIdAndUpdate(
           vehicle._id,
           { status: shouldBeExpired ? "0" : "1" }
         );
         updatedCount++;
+        console.log(`Updated vehicle ${vehicle._id} status to: ${shouldBeExpired ? "EXPIRED" : "ACTIVE"}`);
       }
     }
     

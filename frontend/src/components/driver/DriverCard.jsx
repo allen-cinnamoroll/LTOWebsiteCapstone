@@ -116,28 +116,39 @@ const DriverCard = () => {
           <CardTitle className="text-3xl font-bold">
             {driverData?.fullname}
           </CardTitle>
-          <CardDescription>{driverData?.licenseNo}</CardDescription>
+          <CardDescription>{driverData?.plateNo}</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid grid-cols-2 text-sm gap-4 mb-2">
-            <h2 className="text-muted-foreground ">Sex:</h2>
+            <h2 className="text-muted-foreground ">Plate No.:</h2>
             <p className="font-semibold w-full">
-              {sexMap.get(driverData?.sex)}
+              {driverData?.plateNo}
+            </p>
+            <h2 className="text-muted-foreground ">Owner/Representative Name:</h2>
+            <p className="font-semibold w-full">
+              {driverData?.ownerRepresentativeName}
             </p>
             <h2 className="text-muted-foreground ">Date of Birth:</h2>
             <p className="font-semibold w-full">
-              {formatSimpleDate(driverData?.birthDate)}
+              {driverData?.birthDate ? formatSimpleDate(driverData.birthDate) : "None"}
             </p>
-            <h2 className="text-muted-foreground ">Civil Status:</h2>
+            <h2 className="text-muted-foreground ">Contact Number:</h2>
             <p className="font-semibold w-full">
-              {civilStatusMap.get(driverData?.civilStatus)}
+              {driverData?.contactNumber || "None"}
             </p>
-            <h2 className="text-muted-foreground ">Nationality:</h2>
-            <p className="font-semibold w-full">{driverData?.nationality}</p>
-
-            <h2 className="text-muted-foreground ">Street:</h2>
+            <h2 className="text-muted-foreground ">Email Address:</h2>
+            <p className="font-semibold w-full">{driverData?.emailAddress || "None"}</p>
+            <h2 className="text-muted-foreground ">Has Driver's License:</h2>
             <p className="font-semibold w-full">
-              {driverData?.address?.street}
+              {driverData?.hasDriversLicense ? "Yes" : "No"}
+            </p>
+            <h2 className="text-muted-foreground ">Driver's License Number:</h2>
+            <p className="font-semibold w-full">
+              {driverData?.driversLicenseNumber || "N/A"}
+            </p>
+            <h2 className="text-muted-foreground ">Purok:</h2>
+            <p className="font-semibold w-full">
+              {driverData?.address?.purok || "N/A"}
             </p>
             <h2 className="text-muted-foreground ">Barangay:</h2>
             <p className="font-semibold w-full">
@@ -151,15 +162,13 @@ const DriverCard = () => {
             <p className="font-semibold w-full">
               {driverData?.address?.province}
             </p>
-            <h2 className="text-muted-foreground ">Birthplace:</h2>
-            <p className="font-semibold w-full">{driverData?.birthPlace}</p>
-            <h2 className="text-muted-foreground ">Issue Date:</h2>
+            <h2 className="text-muted-foreground ">Region:</h2>
             <p className="font-semibold w-full">
-              {formatSimpleDate(driverData?.issueDate)}
+              {driverData?.address?.region}
             </p>
-            <h2 className="text-muted-foreground ">Expiry Date:</h2>
+            <h2 className="text-muted-foreground ">Date of Renewal:</h2>
             <p className="font-semibold w-full">
-              {formatSimpleDate(driverData?.expiryDate)}
+              {formatSimpleDate(driverData?.dateOfRenewal)}
             </p>
           </div>
         </CardContent>

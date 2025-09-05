@@ -29,6 +29,18 @@ const logTypes = [
   { value: "otp_verified", label: "OTP Verification" },
   { value: "otp_sent", label: "OTP Sent" },
   { value: "otp_reset", label: "OTP Reset" },
+  { value: "add_driver", label: "Add Driver" },
+  { value: "add_vehicle", label: "Add Vehicle" },
+  { value: "add_accident", label: "Add Accident" },
+  { value: "add_violation", label: "Add Violation" },
+  { value: "update_driver", label: "Update Driver" },
+  { value: "update_vehicle", label: "Update Vehicle" },
+  { value: "update_accident", label: "Update Accident" },
+  { value: "update_violation", label: "Update Violation" },
+  { value: "delete_driver", label: "Delete Driver" },
+  { value: "delete_vehicle", label: "Delete Vehicle" },
+  { value: "delete_accident", label: "Delete Accident" },
+  { value: "delete_violation", label: "Delete Violation" },
 ];
 
 export default function ViewAccountLogsPage() {
@@ -145,7 +157,7 @@ export default function ViewAccountLogsPage() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `account-logs-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -174,6 +186,30 @@ export default function ViewAccountLogsPage() {
       case "otp_sent":
         return "outline";
       case "otp_reset":
+        return "destructive";
+      case "add_driver":
+        return "default";
+      case "add_vehicle":
+        return "default";
+      case "add_accident":
+        return "destructive";
+      case "add_violation":
+        return "destructive";
+      case "update_driver":
+        return "secondary";
+      case "update_vehicle":
+        return "secondary";
+      case "update_accident":
+        return "destructive";
+      case "update_violation":
+        return "destructive";
+      case "delete_driver":
+        return "destructive";
+      case "delete_vehicle":
+        return "destructive";
+      case "delete_accident":
+        return "destructive";
+      case "delete_violation":
         return "destructive";
       default:
         return "outline";
@@ -207,7 +243,7 @@ export default function ViewAccountLogsPage() {
               <div className="flex gap-2">
                 <Button onClick={exportLogs} variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
-                  Export
+                  Export Excel
                 </Button>
                 <Button onClick={handleSearch} size="sm">
                   <Search className="mr-2 h-4 w-4" />
@@ -359,6 +395,7 @@ export default function ViewAccountLogsPage() {
                         <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Activity</TableHead>
+                        <TableHead>Details</TableHead>
                         <TableHead>IP Address</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
@@ -399,6 +436,11 @@ export default function ViewAccountLogsPage() {
                             <Badge variant={getLogTypeBadgeVariant(log.logType)}>
                               {logTypes.find(t => t.value === log.logType)?.label || log.logType}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {log.details || "N/A"}
+                            </span>
                           </TableCell>
                           <TableCell>
                             <span className="font-mono text-sm">

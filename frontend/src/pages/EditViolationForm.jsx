@@ -20,13 +20,17 @@ const EditViolationForm = () => {
   const form = useForm({
     resolver: zodResolver(ViolationCreateSchema),
     defaultValues: {
-      violation_id: "",
-      driver_id: "",
-      vehicle_id: "",
-      violation_type: "",
-      violation_date: undefined,
-      penalty: 0,
-      remarks: "",
+      topNo: "",
+      firstName: "",
+      middleInitial: "",
+      lastName: "",
+      suffix: "",
+      violations: [],
+      violationType: "confiscated",
+      licenseType: undefined,
+      plateNo: "",
+      dateOfApprehension: undefined,
+      apprehendingOfficer: "",
     },
   });
   const { reset } = form;
@@ -43,14 +47,22 @@ const EditViolationForm = () => {
       });
       if (data?.data) {
         const v = data.data;
+        
+        // Use violationType directly (now using string enum values)
+        const violationType = v.violationType || "confiscated";
+        
         reset({
-          violation_id: v.violation_id,
-          driver_id: v.driver_id?.licenseNo || "",
-          vehicle_id: v.vehicle_id?.plateNo || "",
-          violation_type: v.violation_type,
-          violation_date: new Date(v.violation_date),
-          penalty: v.penalty,
-          remarks: v.remarks || "",
+          topNo: v.topNo || "",
+          firstName: v.firstName || "",
+          middleInitial: v.middleInitial || "",
+          lastName: v.lastName || "",
+          suffix: v.suffix || "",
+          violations: v.violations || [""],
+          violationType: violationType,
+          licenseType: v.licenseType || undefined,
+          plateNo: v.plateNo || "",
+          dateOfApprehension: v.dateOfApprehension ? new Date(v.dateOfApprehension) : undefined,
+          apprehendingOfficer: v.apprehendingOfficer || "",
         });
       }
     } catch (error) {
@@ -61,15 +73,39 @@ const EditViolationForm = () => {
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
+      // Prepare content based on violation type
       const content = {
-        violation_id: formData.violation_id,
-        driver_id: formData.driver_id,
-        vehicle_id: formData.vehicle_id,
-        violation_type: formData.violation_type,
-        violation_date: formData.violation_date,
-        penalty: formData.penalty,
-        remarks: formData.remarks,
+        topNo: formData.topNo,
+        violationType: formData.violationType,
+        plateNo: formData.plateNo,
+        dateOfApprehension: formData.dateOfApprehension,
+        apprehendingOfficer: formData.apprehendingOfficer,
       };
+
+      // Add fields based on violation type
+      if (formData.violationType === "confiscated") {
+        content.firstName = formData.firstName;
+        content.middleInitial = formData.middleInitial;
+        content.lastName = formData.lastName;
+        content.suffix = formData.suffix;
+        content.violations = formData.violations ? formData.violations.filter(v => v.trim() !== "") : [];
+        content.licenseType = formData.licenseType;
+      } else if (formData.violationType === "impounded") {
+        content.firstName = formData.firstName;
+        content.middleInitial = formData.middleInitial;
+        content.lastName = formData.lastName;
+        content.suffix = formData.suffix;
+        content.violations = formData.violations ? formData.violations.filter(v => v.trim() !== "") : [];
+        content.licenseType = null;
+      } else if (formData.violationType === "alarm") {
+        // For alarm type, set all fields to null
+        content.firstName = null;
+        content.middleInitial = null;
+        content.lastName = null;
+        content.suffix = null;
+        content.violations = null;
+        content.licenseType = null;
+      }
 
       const { data } = await apiClient.patch(`/violation/${params.id}`, content, {
         headers: { Authorization: token },

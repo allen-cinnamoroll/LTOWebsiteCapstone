@@ -1,6 +1,7 @@
 import AccidentModel from "../model/AccidentModel.js";
 import DriverModel from "../model/DriverModel.js";
 import VehicleModel from "../model/VehicleModel.js";
+import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
 export const getAccidents = async (req, res) => {
   try {
@@ -54,6 +55,26 @@ export const createAccident = async (req, res) => {
 
     const accident = new AccidentModel(accidentData);
     await accident.save();
+
+    // Log the activity
+    if (req.user) {
+      await logUserActivity({
+        userId: req.user._id,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role,
+        logType: 'add_accident',
+        ipAddress: getClientIP(req),
+        userAgent: getUserAgent(req),
+        status: 'success',
+        details: `Added accident: ${finalAccidentId} (Driver: ${driver_id}, Vehicle: ${vehicle_id})`,
+        actorId: req.user._id,
+        actorName: `${req.user.firstName} ${req.user.lastName}`,
+        actorEmail: req.user.email,
+        actorRole: req.user.role
+      });
+    }
+
     res
       .status(201)
       .json({ success: true, message: "Accident created", data: accident });
@@ -115,8 +136,73 @@ export const updateAccident = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Accident not found" });
     }
+
+    // Log the activity
+    if (req.user) {
+      await logUserActivity({
+        userId: req.user._id,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role,
+        logType: 'update_accident',
+        ipAddress: getClientIP(req),
+        userAgent: getUserAgent(req),
+        status: 'success',
+        details: `Updated accident: ${accident.accident_id} (Driver: ${driver_id || 'unchanged'}, Vehicle: ${vehicle_id || 'unchanged'})`,
+        actorId: req.user._id,
+        actorName: `${req.user.firstName} ${req.user.lastName}`,
+        actorEmail: req.user.email,
+        actorRole: req.user.role
+      });
+    }
+
     res.json({ success: true, message: "Accident updated", data: accident });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// Delete accident
+export const deleteAccident = async (req, res) => {
+  try {
+    const accident = await AccidentModel.findById(req.params.id);
+    
+    if (!accident) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Accident not found" 
+      });
+    }
+
+    // Log the activity before deleting
+    if (req.user) {
+      await logUserActivity({
+        userId: req.user._id,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        email: req.user.email,
+        role: req.user.role,
+        logType: 'delete_accident',
+        ipAddress: getClientIP(req),
+        userAgent: getUserAgent(req),
+        status: 'success',
+        details: `Deleted accident: ${accident.accident_id}`,
+        actorId: req.user._id,
+        actorName: `${req.user.firstName} ${req.user.lastName}`,
+        actorEmail: req.user.email,
+        actorRole: req.user.role
+      });
+    }
+
+    await AccidentModel.findByIdAndDelete(req.params.id);
+    
+    res.json({ 
+      success: true, 
+      message: "Accident deleted successfully" 
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };

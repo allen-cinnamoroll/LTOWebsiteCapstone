@@ -42,17 +42,32 @@ const DeactivatedDriversPage = () => {
         },
       });
 
-      const driverData = data.data.map((dData) => ({
-        _id: dData._id,
-        licenseNo: dData.licenseNo,
-        fullname: dData.fullname,
-        birthDate: formatSimpleDate(dData.birthDate),
-        issueDate: formatSimpleDate(dData.issueDate),
-        expiryDate: formatSimpleDate(dData.expiryDate),
-        sex: sexMap.get(dData.sex),
-        civilStatus: civilStatusMap.get(dData.civilStatus),
-        isActive: dData.isActive,
-      }));
+      // Get vehicle data to get renewal dates
+      const { data: vehicleData } = await apiClient.get("/vehicle", {
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      const driverData = data.data.map((dData) => {
+        // Find vehicle with matching plate number to get renewal date
+        const vehicle = vehicleData.data.find(v => v.plateNo === dData.plateNo);
+        
+        return {
+          _id: dData._id,
+          plateNo: dData.plateNo,
+          ownerRepresentativeName: dData.ownerRepresentativeName,
+          fullname: dData.fullname,
+          birthDate: formatSimpleDate(dData.birthDate),
+          contactNumber: dData.contactNumber,
+          emailAddress: dData.emailAddress,
+          hasDriversLicense: dData.hasDriversLicense,
+          driversLicenseNumber: dData.driversLicenseNumber,
+          dateOfRenewal: vehicle ? formatSimpleDate(vehicle.dateOfRenewal) : "Not set",
+          isActive: dData.isActive,
+          status: dData.status,
+        };
+      });
 
       const deactivatedDrivers = driverData.filter(
         (data) => data.isActive === false
@@ -129,7 +144,7 @@ const DeactivatedDriversPage = () => {
         <TableComponent
           data={driverData}
           searchPlaceholder={"Search Driver..."}
-          filters={["fullname", "licenseNo"]}
+          filters={["fullname", "plateNo", "ownerRepresentativeName"]}
           tableColumn={deactivatedDriverColumns}
           loading={loading}
           onAction={handleActivate}

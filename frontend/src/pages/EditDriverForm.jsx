@@ -29,21 +29,18 @@ const EditDriverForm = () => {
   const form = useForm({
     resolver: zodResolver(CreateDriverSchema),
     defaultValues: {
-      licenseNo: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      street: "",
+      plateNo: "",
+      ownerRepresentativeName: "",
+      purok: "",
       barangay: "",
       municipality: "",
       province: "",
-      nationality: "",
-      sex: undefined,
+      region: "",
+      contactNumber: "",
+      emailAddress: "",
+      hasDriversLicense: false,
+      driversLicenseNumber: "",
       birthDate: undefined,
-      civilStatus: "",
-      birthPlace: "",
-      issueDate: undefined,
-      expiryDate: undefined,
     },
   });
   const { reset } = form;
@@ -69,21 +66,18 @@ const EditDriverForm = () => {
       });
       if (data) {
         const dData = {
-          licenseNo: data.data?.licenseNo,
-          firstName: data.data?.firstName,
-          middleName: data.data?.middleName,
-          lastName: data.data?.lastName,
-          street: data.data?.address?.street,
+          plateNo: data.data?.plateNo,
+          ownerRepresentativeName: data.data?.ownerRepresentativeName,
+          purok: data.data?.address?.purok,
           barangay: data.data?.address?.barangay,
           municipality: data.data?.address?.municipality,
           province: data.data?.address?.province,
-          nationality: data.data?.nationality,
-          sex: data.data?.sex,
+          region: data.data?.address?.region,
+          contactNumber: data.data?.contactNumber,
+          emailAddress: data.data?.emailAddress,
+          hasDriversLicense: data.data?.hasDriversLicense,
+          driversLicenseNumber: data.data?.driversLicenseNumber,
           birthDate: new Date(data.data?.birthDate),
-          civilStatus: data.data?.civilStatus,
-          birthPlace: data.data?.birthPlace,
-          issueDate: new Date(data.data?.issueDate),
-          expiryDate: new Date(data.data?.expiryDate),
         };
 
         setDriverData(dData);
@@ -97,23 +91,20 @@ const EditDriverForm = () => {
     setIsSubmitting(true);
     try {
       const content = {
-        licenseNo: formData.licenseNo,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        middleName: formData.middleName,
-        birthDate: formData.birthDate,
-        sex: formData.sex,
-        civilStatus: formData.civilStatus,
+        plateNo: formData.plateNo,
+        ownerRepresentativeName: formData.ownerRepresentativeName,
         address: {
-          street: formData.street,
+          purok: formData.purok,
           barangay: formData.barangay,
           municipality: formData.municipality,
           province: formData.province,
+          region: formData.region,
         },
-        nationality: formData.nationality,
-        birthPlace: formData.birthPlace,
-        issueDate: formData.issueDate,
-        expiryDate: formData.expiryDate,
+        contactNumber: formData.contactNumber,
+        emailAddress: formData.emailAddress,
+        hasDriversLicense: formData.hasDriversLicense,
+        driversLicenseNumber: formData.driversLicenseNumber,
+        birthDate: formData.birthDate,
       };
 
       const { data } = await apiClient.patch(`/driver/${params.id}`, content, {

@@ -1,6 +1,7 @@
 import UserModel from "../model/UserModel.js";
 import UserLog from "../model/UserLogModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
+import * as XLSX from 'xlsx';
 
 export const findUser = async (req, res) => {
   const userId = req.user.userId;
@@ -244,4 +245,152 @@ export const getUserLogs = async (req, res) => {
       message: err.message,
     });
   }
+};
+
+// Export user logs to Excel
+export const exportUserLogs = async (req, res) => {
+  try {
+    const { 
+      email, 
+      role, 
+      roles, 
+      logType, 
+      dateFrom, 
+      dateTo 
+    } = req.query;
+
+    // Build filter object (same as getUserLogs)
+    const filter = {};
+    
+    if (email) {
+      filter.email = { $regex: email, $options: 'i' };
+    }
+    
+    if (role) {
+      filter.role = role;
+    } else if (roles) {
+      const roleArray = roles.split(',');
+      filter.role = { $in: roleArray };
+    }
+    
+    if (logType && logType !== "all") {
+      filter.logType = logType;
+    }
+    
+    if (dateFrom || dateTo) {
+      filter.timestamp = {};
+      if (dateFrom) {
+        filter.timestamp.$gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        filter.timestamp.$lte = new Date(dateTo);
+      }
+    }
+
+    // Get all logs without pagination for export
+    const logs = await UserLog.find(filter).sort({ timestamp: -1 }).lean();
+
+    // Transform logs for Excel export
+    const excelData = logs.map(log => ({
+      'Performed By': log.actorName || 'N/A',
+      'Actor Email': log.actorEmail || 'N/A',
+      'Actor Role': getRoleLabel(log.actorRole),
+      'Timestamp': new Date(log.timestamp).toLocaleString(),
+      'User Name': log.userName || 'N/A',
+      'Email': log.email,
+      'Role': getRoleLabel(log.role),
+      'Activity': getLogTypeLabel(log.logType),
+      'Details': log.details || 'N/A',
+      'IP Address': log.ipAddress === '::1' ? '127.0.0.1' : 
+                   log.ipAddress === '::ffff:127.0.0.1' ? '127.0.0.1' :
+                   log.ipAddress || 'N/A',
+      'Status': log.status
+    }));
+
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    const columnWidths = [
+      { wch: 20 }, // Performed By
+      { wch: 25 }, // Actor Email
+      { wch: 15 }, // Actor Role
+      { wch: 20 }, // Timestamp
+      { wch: 20 }, // User Name
+      { wch: 25 }, // Email
+      { wch: 15 }, // Role
+      { wch: 20 }, // Activity
+      { wch: 30 }, // Details
+      { wch: 15 }, // IP Address
+      { wch: 10 }  // Status
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Account Logs');
+
+    // Generate Excel buffer
+    const excelBuffer = XLSX.write(workbook, { 
+      type: 'buffer', 
+      bookType: 'xlsx' 
+    });
+
+    // Set response headers for Excel download
+    const filename = `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', excelBuffer.length);
+
+    // Send Excel file
+    res.send(excelBuffer);
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// Helper function to get role label
+const getRoleLabel = (role) => {
+  switch (role) {
+    case "0":
+      return "Superadmin";
+    case "1":
+      return "Admin";
+    case "2":
+      return "Employee";
+    default:
+      return "Unknown";
+  }
+};
+
+// Helper function to get log type label
+const getLogTypeLabel = (logType) => {
+  const logTypes = {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Registration",
+    "update": "Account Update",
+    "delete": "Delete",
+    "password_change": "Password Change",
+    "otp_verified": "OTP Verification",
+    "otp_sent": "OTP Sent",
+    "otp_reset": "OTP Reset",
+    "add_driver": "Add Driver",
+    "add_vehicle": "Add Vehicle",
+    "add_accident": "Add Accident",
+    "add_violation": "Add Violation",
+    "update_driver": "Update Driver",
+    "update_vehicle": "Update Vehicle",
+    "update_accident": "Update Accident",
+    "update_violation": "Update Violation",
+    "delete_driver": "Delete Driver",
+    "delete_vehicle": "Delete Vehicle",
+    "delete_accident": "Delete Accident",
+    "delete_violation": "Delete Violation"
+  };
+  return logTypes[logType] || logType;
 };

@@ -19,32 +19,67 @@ const AddViolationForm = () => {
   const form = useForm({
     resolver: zodResolver(ViolationCreateSchema),
     defaultValues: {
-      violation_id: "",
-      driver_id: "",
-      vehicle_id: "",
-      violation_type: "",
-      violation_date: undefined,
-      penalty: 0,
-      remarks: "",
+      topNo: "",
+      firstName: "",
+      middleInitial: "",
+      lastName: "",
+      suffix: "",
+      violations: [],
+      violationType: "confiscated",
+      licenseType: undefined,
+      plateNo: "",
+      dateOfApprehension: undefined,
+      apprehendingOfficer: "",
     },
   });
 
   const onSubmit = async (formData) => {
+    console.log("=== FORM SUBMISSION DEBUG ===");
+    console.log("Form data:", formData);
+    console.log("Violation type:", formData.violationType);
+    console.log("Violations array:", formData.violations);
+    console.log("Form validation errors:", form.formState.errors);
     setIsSubmitting(true);
     try {
+      // Prepare content based on violation type
       const content = {
-        violation_id: formData.violation_id,
-        driver_id: formData.driver_id,
-        vehicle_id: formData.vehicle_id,
-        violation_type: formData.violation_type,
-        violation_date: formData.violation_date,
-        penalty: formData.penalty,
-        remarks: formData.remarks,
+        topNo: formData.topNo,
+        violationType: formData.violationType,
+        plateNo: formData.plateNo,
+        dateOfApprehension: formData.dateOfApprehension,
+        apprehendingOfficer: formData.apprehendingOfficer,
       };
 
+      // Add fields based on violation type
+      if (formData.violationType === "confiscated") {
+        content.firstName = formData.firstName;
+        content.middleInitial = formData.middleInitial;
+        content.lastName = formData.lastName;
+        content.suffix = formData.suffix;
+        content.violations = formData.violations ? formData.violations.filter(v => v.trim() !== "") : [];
+        content.licenseType = formData.licenseType;
+      } else if (formData.violationType === "impounded") {
+        content.firstName = formData.firstName;
+        content.middleInitial = formData.middleInitial;
+        content.lastName = formData.lastName;
+        content.suffix = formData.suffix;
+        content.violations = formData.violations ? formData.violations.filter(v => v.trim() !== "") : [];
+        content.licenseType = null;
+      } else if (formData.violationType === "alarm") {
+        // For alarm type, set all fields to null
+        content.firstName = null;
+        content.middleInitial = null;
+        content.lastName = null;
+        content.suffix = null;
+        content.violations = null;
+        content.licenseType = null;
+      }
+
+      console.log("Content being sent to API:", content);
       const { data } = await apiClient.post("/violation", content, {
         headers: { Authorization: token },
       });
+      console.log("API Response:", data);
 
       if (data.success) {
         toast.success("Violation has been added", { description: date });
@@ -52,6 +87,11 @@ const AddViolationForm = () => {
         navigate("/violation");
       }
     } catch (error) {
+      console.log("=== API ERROR ===");
+      console.log("Error object:", error);
+      console.log("Error response:", error?.response);
+      console.log("Error data:", error?.response?.data);
+      console.log("Error status:", error?.response?.status);
       const message = error?.response?.data?.message || "Failed to add violation";
       toast.error(message, { description: `${date}` });
     } finally {

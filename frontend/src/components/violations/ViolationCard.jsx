@@ -49,7 +49,7 @@ const ViolationCard = () => {
     <Card className="lg:col-span-2 row-span-2 border md:shadow-none">
       <CardHeader className="border-b">
         <CardTitle className="text-3xl font-bold">
-          Violation #{violationData?.violation_id || "Details"}
+          TOP #{violationData?.topNo || "Details"}
         </CardTitle>
         <CardDescription>
           {violationData?.remarks || "No remarks available."}
@@ -57,25 +57,29 @@ const ViolationCard = () => {
       </CardHeader>
       <CardContent className="p-0 pb-6">
         <div className="grid grid-cols-2 text-sm gap-4 mb-2">
-          <h1 className="font-bold col-span-2 border-b px-6 py-1">Violation Information</h1>
-          <h2 className="text-muted-foreground px-6">Date:</h2>
-          <p className="font-semibold w-full">{formatSimpleDate(violationData?.violation_date)}</p>
-          <h2 className="text-muted-foreground px-6">Type:</h2>
-          <p className="font-semibold w-full">{violationData?.violation_type || "N/A"}</p>
-          <h2 className="text-muted-foreground px-6">Penalty:</h2>
-          <p className="font-semibold w-full">{violationData?.penalty || "N/A"}</p>
-          <h2 className="text-muted-foreground px-6">Driver:</h2>
+          <h1 className="font-bold col-span-2 border-b px-6 py-1">Apprehension Details</h1>
+          <h2 className="text-muted-foreground px-6">Name:</h2>
           <p className="font-semibold w-full">
-            {violationData?.driver_id
-              ? `${violationData.driver_id.firstName} ${violationData.driver_id.middleName || ""} ${violationData.driver_id.lastName}`
+            {violationData?.firstName && violationData?.lastName
+              ? `${violationData.firstName}${violationData.middleInitial ? ` ${violationData.middleInitial}.` : ''} ${violationData.lastName}${violationData.suffix ? ` ${violationData.suffix}` : ''}`
               : "N/A"}
           </p>
-          <h2 className="text-muted-foreground px-6">License No:</h2>
+          <h2 className="text-muted-foreground px-6">Violations:</h2>
           <p className="font-semibold w-full">
-            {violationData?.driver_id?.licenseNo || "N/A"}
+            {violationData?.violations && Array.isArray(violationData.violations)
+              ? violationData.violations.join(", ")
+              : "N/A"}
           </p>
-          <h2 className="text-muted-foreground px-6">Vehicle:</h2>
-          <p className="font-semibold w-full">{violationData?.vehicle_id ? `${violationData.vehicle_id.plateNo} (${violationData.vehicle_id.make} ${violationData.vehicle_id.series})` : "N/A"}</p>
+          
+          <h1 className="font-bold col-span-2 border-b px-6 py-1 mt-4">Confiscated Item</h1>
+          <h2 className="text-muted-foreground px-6">License Type:</h2>
+          <p className="font-semibold w-full">{violationData?.licenseType || "N/A"}</p>
+          <h2 className="text-muted-foreground px-6">Plate No:</h2>
+          <p className="font-semibold w-full">{violationData?.plateNo || "N/A"}</p>
+          <h2 className="text-muted-foreground px-6">Date of Apprehension:</h2>
+          <p className="font-semibold w-full">{formatSimpleDate(violationData?.dateOfApprehension)}</p>
+          <h2 className="text-muted-foreground px-6">Apprehending Officer:</h2>
+          <p className="font-semibold w-full">{violationData?.apprehendingOfficer || "N/A"}</p>
         </div>
       </CardContent>
       <CardFooter className="gap-2 text-sm ">

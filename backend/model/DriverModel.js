@@ -1,10 +1,11 @@
 import mongoose, { mongo } from "mongoose";
 
 const addressSchema = new mongoose.Schema({
-  street: { type: String },
+  purok: { type: String },
   barangay: { type: String },
   municipality: { type: String },
   province: { type: String },
+  region: { type: String },
 });
 
 // const birthPlaceSchema = new mongoose.Schema({
@@ -16,57 +17,54 @@ const addressSchema = new mongoose.Schema({
 
 const driverSchema = new mongoose.Schema(
   {
-    licenseNo: {
+    plateNo: {
       type: String,
-      required: [true, "licenseNo is required"],
-      unique: true,
-      match: [/^[a-zA-Z0-9]{3}-\d{2}-\d{6}$/, "Invalid license number format"],
-    },    
-    firstName: {
-      type: String,
-      required: [true, "firstName is required"],
+      required: [true, "plateNo is required"],
     },
-    lastName: {
+    ownerRepresentativeName: {
       type: String,
-      required: [true, "lastName is required"],
-    },
-    middleName: {
-      type: String,
+      required: [true, "ownerRepresentativeName is required"],
     },
     address: { type: addressSchema, required: [true, "address is required"] },
-    nationality: {
+    contactNumber: {
       type: String,
-      required: [true, "nationality is required"],
+      required: false,
     },
-    sex: {
+    emailAddress: {
       type: String,
-      enum: ["0", "1"],
-      default: "0",
+      required: false,
+      validate: {
+        validator: function(v) {
+          // Allow null, undefined, or empty string
+          if (!v || v === '') return true;
+          // Validate email format if value is provided
+          return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+        },
+        message: "Invalid email format"
+      }
     },
+    hasDriversLicense: {
+      type: Boolean,
+      required: [true, "hasDriversLicense is required"],
+    },
+    driversLicenseNumber: {
+      type: String,
+      required: function() {
+        return this.hasDriversLicense === true;
+      },
+    },    
     birthDate: {
       type: Date,
-      required: [true, "birthDate is required"],
-    },
-    civilStatus: {
-      type: String,
-      enum: ["0", "1","2"],
-      default: "0",
-    },
-    birthPlace: {
-      type: String,
-      required: [true, "birthPlace is required"],
-    },
-    issueDate: {
-      type: Date,
-      required: [true, "issueDate is required"],
-    },
-    expiryDate: {
-      type: Date,
-      required: [true, "expiryDate is required"],
+      required: false,
     },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    status: {
+      type: String,
+      enum: ["0", "1"], // "0" = expired, "1" = active
+      default: "1"
     },
     userAccount :{
       type: mongoose.Schema.Types.ObjectId,
@@ -83,8 +81,7 @@ const driverSchema = new mongoose.Schema(
 
 // Virtual for full name
 driverSchema.virtual("fullname").get(function () {
-  const middleInitial = this.middleName ? `${this.middleName.charAt(0)}. ` : "";
-  return `${this.firstName} ${middleInitial}${this.lastName}`.trim();
+  return this.ownerRepresentativeName;
 });
 
 const DriverModel = mongoose.model("Drivers", driverSchema);

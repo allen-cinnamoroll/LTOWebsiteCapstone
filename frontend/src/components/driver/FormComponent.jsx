@@ -37,21 +37,20 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
           <div>
-            <Label>Personal Information</Label>
-
+            <Label>Vehicle Information</Label>
             <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-x-3">
               <FormField
                 control={form.control}
-                name="firstName"
+                name="plateNo"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
-                        form.formState.errors.firstName && "text-red-400"
+                        form.formState.errors.plateNo && "text-red-400"
                       )}
                     >
-                      Firstname
+                      Plate No.
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -59,7 +58,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         type="text"
                         className={cn(
                           "border border-input focus:ring-0",
-                          form.formState.errors.firstName && "border-red-400"
+                          form.formState.errors.plateNo && "border-red-400"
                         )}
                       />
                     </FormControl>
@@ -69,39 +68,24 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
               />
               <FormField
                 control={form.control}
-                name="middleName"
+                name="ownerRepresentativeName"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
-                    <FormLabel className="text-muted-foreground">
-                      Middlename
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} type="text" />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
-                        form.formState.errors.lastName && "text-red-400"
+                        form.formState.errors.ownerRepresentativeName && "text-red-400"
                       )}
                     >
-                      Lastname
+                      Owner/Representative Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
                         className={cn(
-                          "text-muted-foreground",
-                          form.formState.errors.lastName && "border-red-400"
+                          "border border-input focus:ring-0",
+                          form.formState.errors.ownerRepresentativeName && "border-red-400"
                         )}
                       />
                     </FormControl>
@@ -109,47 +93,13 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
+              <div className="lg:col-span-3"></div>
+            </div>
+          </div>
+          <div>
+            <Label>Personal Information</Label>
 
-              <FormField
-                control={form.control}
-                name="sex"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.sex && "text-red-400"
-                      )}
-                    >
-                      Sex
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger
-                          className={cn(
-                            "text-muted-foreground",
-                            form.formState.errors.sex && "border-red-400"
-                          )}
-                        >
-                          <SelectValue placeholder="Choose sex" />
-                        </SelectTrigger>
-                      </FormControl>
-
-                      <SelectContent className="">
-                        <SelectGroup>
-                          {/* <SelectLabel>Sex</SelectLabel> */}
-                          <SelectItem value="0">Male</SelectItem>
-                          <SelectItem value="1">Female</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
+            <div className="grid md:grid-cols-2 lg:grid-cols-9 gap-x-3">
               <FormField
                 control={form.control}
                 name="birthDate"
@@ -205,67 +155,51 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
               />
               <FormField
                 control={form.control}
-                name="civilStatus"
+                name="contactNumber"
                 render={({ field }) => (
                   <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
-                        form.formState.errors.civilStatus && "text-red-400"
+                        form.formState.errors.contactNumber && "text-red-400"
                       )}
                     >
-                      Civil Status
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger
-                          className={cn(
-                            "text-muted-foreground",
-                            form.formState.errors.civilStatus &&
-                              "border-red-400"
-                          )}
-                        >
-                          <SelectValue placeholder="Choose civil status" />
-                        </SelectTrigger>
-                      </FormControl>
-
-                      <SelectContent className="">
-                        <SelectGroup>
-                          {/* <SelectLabel>Sex</SelectLabel> */}
-                          <SelectItem value="0">Single</SelectItem>
-                          <SelectItem value="1">Married</SelectItem>
-                          <SelectItem value="3">Divorced</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="nationality"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2 lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.nationality && "text-red-400"
-                      )}
-                    >
-                      Nationality
+                      Contact Number
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        type="text"
+                        type="tel"
                         className={cn(
                           "text-muted-foreground",
-                          form.formState.errors.nationality && "border-red-400"
+                          form.formState.errors.contactNumber && "border-red-400"
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="emailAddress"
+                render={({ field }) => (
+                  <FormItem className="lg:col-span-3">
+                    <FormLabel
+                      className={cn(
+                        "text-muted-foreground",
+                        form.formState.errors.emailAddress && "text-red-400"
+                      )}
+                    >
+                      Email Address
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        className={cn(
+                          "text-muted-foreground",
+                          form.formState.errors.emailAddress && "border-red-400"
                         )}
                       />
                     </FormControl>
@@ -277,19 +211,19 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
           </div>
           <div>
             <Label>Address</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-x-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-x-3">
               <FormField
                 control={form.control}
-                name="street"
+                name="purok"
                 render={({ field }) => (
-                  <FormItem className="col-span-1 lg:col-span-2">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
-                        form.formState.errors.street && "text-red-400"
+                        form.formState.errors.purok && "text-red-400"
                       )}
                     >
-                      Street
+                      Purok
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -297,7 +231,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         type="text"
                         className={cn(
                           "text-muted-foreground",
-                          form.formState.errors.street && "border-red-400"
+                          form.formState.errors.purok && "border-red-400"
                         )}
                       />
                     </FormControl>
@@ -305,12 +239,11 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="barangay"
                 render={({ field }) => (
-                  <FormItem className="col-span-1 lg:col-span-2">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
@@ -333,12 +266,11 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="municipality"
                 render={({ field }) => (
-                  <FormItem className="col-span-1 lg:col-span-2">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
@@ -361,12 +293,11 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="province"
                 render={({ field }) => (
-                  <FormItem className="col-span-1 lg:col-span-2">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
@@ -389,19 +320,18 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
-                name="birthPlace"
+                name="region"
                 render={({ field }) => (
-                  <FormItem className="md:col-span-2 lg:col-span-8">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
-                        form.formState.errors.birthPlace && "text-red-400"
+                        form.formState.errors.region && "text-red-400"
                       )}
                     >
-                      Birthplace
+                      Region
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -409,7 +339,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         type="text"
                         className={cn(
                           "text-muted-foreground",
-                          form.formState.errors.birthPlace && "border-red-400"
+                          form.formState.errors.region && "border-red-400"
                         )}
                       />
                     </FormControl>
@@ -417,32 +347,70 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
+
             </div>
           </div>
           <div>
-            <Label>Other</Label>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-3">
+            <Label>Driver's License Information</Label>
+            <div className="grid md:grid-cols-2 lg:grid-cols-9 gap-x-3">
               <FormField
                 control={form.control}
-                name="licenseNo"
+                name="hasDriversLicense"
                 render={({ field }) => (
-                  <FormItem className="md:col-span-2 lg:col-span-1">
+                  <FormItem className="lg:col-span-3">
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
-                        form.formState.errors.licenseNo && "text-red-400"
+                        form.formState.errors.hasDriversLicense && "text-red-400"
                       )}
                     >
-                      License No.
+                      Do you have Driver's License?
+                    </FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value === "true")}
+                      value={field.value?.toString() || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          className={cn(
+                            "text-muted-foreground",
+                            form.formState.errors.hasDriversLicense && "border-red-400"
+                          )}
+                        >
+                          <SelectValue placeholder="Choose option" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="true">Yes</SelectItem>
+                          <SelectItem value="false">No</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="driversLicenseNumber"
+                render={({ field }) => (
+                  <FormItem className="lg:col-span-3">
+                    <FormLabel
+                      className={cn(
+                        "text-muted-foreground",
+                        form.formState.errors.driversLicenseNumber && "text-red-400"
+                      )}
+                    >
+                      Driver's License Number
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
-                        placeholder="00L-00-000000"
                         className={cn(
                           "text-muted-foreground",
-                          form.formState.errors.licenseNo && "border-red-400"
+                          form.formState.errors.driversLicenseNumber && "border-red-400"
                         )}
                       />
                     </FormControl>
@@ -450,116 +418,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="issueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.issueDate && "text-red-400"
-                      )}
-                    >
-                      Issued Date
-                    </FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full text-left font-normal justify-start",
-                                !field.value && "text-muted-foreground",
-                                form.formState.errors.issueDate &&
-                                  "border-red-400"
-                              )}
-                            >
-                              <CalendarIcon className="h-4 w-4 opacity-50" />
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-
-                        <PopoverContent
-                          className="w-auto p-2 space-y-2"
-                          align="start"
-                        >
-                          <DatePicker
-                            fieldValue={field.value}
-                            dateValue={(date) =>
-                              form.setValue("issueDate", date, {
-                                shouldValidate: true,
-                              })
-                            }
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="expiryDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.expiryDate && "text-red-400"
-                      )}
-                    >
-                      Expiration Date
-                    </FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full text-left font-normal justify-start",
-                                !field.value && "text-muted-foreground",
-                                form.formState.errors.expiryDate &&
-                                  "border-red-400"
-                              )}
-                            >
-                              <CalendarIcon className="h-4 w-4 opacity-50" />
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-
-                        <PopoverContent
-                          className="w-auto p-2 space-y-2"
-                          align="start"
-                        >
-                          <DatePicker
-                            fieldValue={field.value}
-                            dateValue={(date) =>
-                              form.setValue("expiryDate", date, {
-                                shouldValidate: true,
-                              })
-                            }
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
+              <div className="lg:col-span-6"></div>
             </div>
           </div>
           <div className="space-x-2">

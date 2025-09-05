@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { format, addMonths, setYear, setMonth } from "date-fns";
 import {
@@ -22,15 +22,15 @@ import { CalendarIcon } from "lucide-react";
 const DatePicker = ({ fieldValue, dateValue }) => {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(fieldValue || today);
-  const [selectedYear, setSelectedYear] = useState(selectedDate.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(selectedDate.getMonth());
+  const [selectedYear, setSelectedYear] = useState((fieldValue || today).getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState((fieldValue || today).getMonth());
 
   // Handle Year Change
   const handleYearChange = (year) => {
     setSelectedYear(year);
     const updatedDate = setYear(selectedDate, year);
     setSelectedDate(updatedDate);
-    dateValue(updatedDate);
+    if (dateValue) dateValue(updatedDate);
   };
 
   // Handle Month Change
@@ -38,8 +38,27 @@ const DatePicker = ({ fieldValue, dateValue }) => {
     setSelectedMonth(month);
     const updatedDate = setMonth(selectedDate, month);
     setSelectedDate(updatedDate);
-    dateValue(updatedDate);
+    if (dateValue) dateValue(updatedDate);
   };
+
+  // Handle Date Selection
+  const handleDateSelect = (date) => {
+    if (date) {
+      setSelectedDate(date);
+      setSelectedYear(date.getFullYear());
+      setSelectedMonth(date.getMonth());
+      if (dateValue) dateValue(date);
+    }
+  };
+
+  // Update state when fieldValue prop changes
+  useEffect(() => {
+    if (fieldValue) {
+      setSelectedDate(fieldValue);
+      setSelectedYear(fieldValue.getFullYear());
+      setSelectedMonth(fieldValue.getMonth());
+    }
+  }, [fieldValue]);
 
   return (
     <>
@@ -86,18 +105,17 @@ const DatePicker = ({ fieldValue, dateValue }) => {
       <div className="border rounded-md">
         <Calendar
           mode="single"
-          selected={fieldValue}
-          onSelect={(date) => {
-            setSelectedDate(date);
-            dateValue(date);
-          }}
+          selected={selectedDate}
+          onSelect={handleDateSelect}
           disabled={(date) => date < new Date("1900-01-01")}
           fromYear={1900}
-          toYear={new Date().getFullYear()}
+          toYear={new Date().getFullYear() + 10}
           month={selectedDate}
-          onMonthChange={setSelectedDate}
-          year={selectedDate}
-          onYearChange={setSelectedDate}
+          onMonthChange={(date) => {
+            setSelectedDate(date);
+            setSelectedYear(date.getFullYear());
+            setSelectedMonth(date.getMonth());
+          }}
         />
       </div>
       <div className="flex justify-end">
@@ -108,7 +126,7 @@ const DatePicker = ({ fieldValue, dateValue }) => {
             setSelectedMonth(today.getMonth());
             setSelectedYear(today.getFullYear());
             setSelectedDate(today);
-            dateValue(today);
+            if (dateValue) dateValue(today);
           }}
         >
           Today

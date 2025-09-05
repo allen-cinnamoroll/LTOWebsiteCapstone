@@ -40,53 +40,36 @@
       },
       fileNo: {
         type: String,
+        required: [true, "fileNo is required"],
       },
-      owner: {
-        type: ownerSchema,
-      },
-      encumbrance: { type: String },
-      vehicleType: {
+      engineNo: {
         type: String,
-        required: true,
+        required: [true, "engineNo is required"],
       },
-      classification: {
+      serialChassisNumber: {
         type: String,
-        required: [true, "classification is required"],
+        required: [true, "serialChassisNumber is required"],
+        unique: true,
       },
       make: {
         type: String,
         required: [true, "make is required"],
       },
-      fuelType: {
-        type: String, 
-      },
-      motorNumber: {
+      bodyType: {
         type: String,
-        required: true,
+        required: [true, "bodyType is required"],
       },
-      serialChassisNumber: {
-        type: String,
-        required: true,
-        unique: true,
-      },
-      series: { type: String, required: true, trim: true },
-      bodyType: { type: String, required: true, trim: true },
       color: {
         type: String,
         required: [true, "color is required"],
       },
-      yearModel: {
-        type: Number,
-        required: [true, "yearModel is required"],
-        min: 1900, // Ensures valid year
+      classification: {
+        type: String,
+        required: [true, "classification is required"],
       },
-      dateRegistered: {
+      dateOfRenewal: {
         type: Date,
-        required: [true, "dateRegistered is required"],
-      },
-      expirationDate: {
-        type: Date,
-        required: [true, "dateRegistered is required"],
+        required: false,
       },
       status:{
         type: String,
@@ -100,9 +83,6 @@
       toObject: { virtuals: true }, // Enable virtuals when using .toObject()
     }
   );
-
-  vehicleSchema.index({ owner: 1 });
-
 
   const VehicleModel = mongoose.model("Vehicles", vehicleSchema);
 
