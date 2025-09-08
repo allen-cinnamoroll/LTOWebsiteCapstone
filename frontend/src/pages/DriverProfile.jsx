@@ -8,7 +8,7 @@ import DriverLogs from "@/components/driver/DriverLogs";
 import DriverCard from "@/components/driver/DriverCard";
 
 const DriverProfile = () => {
-
+  const params = useParams();
   const navigate = useNavigate();
 
   
@@ -26,7 +26,7 @@ const DriverProfile = () => {
       <div className="grid lg:grid-cols-3 gap-4  p-4 md:p-0">
         <DriverCard />
         <div className="row-span-2 border rounded-md  overflow-hidden ">
-          <DriverChart />
+          <DriverChart driverId={params.id} />
         </div>
         <DriverLogs />
       </div>

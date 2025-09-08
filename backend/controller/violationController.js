@@ -7,7 +7,7 @@ export const createViolation = async (req, res) => {
         console.log("=== BACKEND CREATE VIOLATION ===");
         console.log("Received violation data:", req.body);
         console.log("Violation type:", req.body.violationType);
-        const { topNo, firstName, middleInitial, lastName, suffix, violations, violationType, licenseType, plateNo, dateOfApprehension, apprehendingOfficer } = req.body;
+        const { topNo, firstName, middleInitial, lastName, suffix, violations, violationType, licenseType, plateNo, dateOfApprehension, apprehendingOfficer, chassisNo, engineNo } = req.body;
 
         // Generate TOP NO. if not provided or empty
         let finalTopNo = topNo;
@@ -16,19 +16,21 @@ export const createViolation = async (req, res) => {
             finalTopNo = `TOP-${timestamp}`;
         }
 
-        // Create violation with new structure
+        // Create violation with new structure - all fields available for all types
         const violationData = {
             topNo: finalTopNo,
-            firstName: violationType === "alarm" ? null : firstName,
-            middleInitial: violationType === "alarm" ? null : middleInitial,
-            lastName: violationType === "alarm" ? null : lastName,
-            suffix: violationType === "alarm" ? null : suffix,
-            violations: violationType === "alarm" ? null : (Array.isArray(violations) ? violations : [violations]), // Ensure it's an array
+            firstName: firstName,
+            middleInitial: middleInitial,
+            lastName: lastName,
+            suffix: suffix,
+            violations: Array.isArray(violations) ? violations : [violations], // Ensure it's an array
             violationType: violationType || "confiscated", // Use string enum values
-            licenseType: (violationType === "alarm" || violationType === "impounded") ? null : licenseType,
+            licenseType: licenseType,
             plateNo,
             dateOfApprehension,
-            apprehendingOfficer
+            apprehendingOfficer,
+            chassisNo,
+            engineNo
         };
         console.log("Violation data to save:", violationData);
         const violation = new ViolationModel(violationData);
@@ -73,27 +75,8 @@ export const getViolations = async (req, res) => {
     try {
         const violations = await ViolationModel.find().sort({ createdAt: -1 });
 
-        // Transform violations and handle alarm type fields
-        const transformedViolations = violations.map(violation => {
-            const violationObj = violation.toObject();
-            
-            // For alarm type, set name, violations, and license type to "None"
-            if (violationObj.violationType === "alarm") {
-                violationObj.firstName = "None";
-                violationObj.middleInitial = "None";
-                violationObj.lastName = "None";
-                violationObj.suffix = "None";
-                violationObj.violations = ["None"];
-                violationObj.licenseType = "None";
-            }
-            
-            // For impounded type, set license type to "None"
-            if (violationObj.violationType === "impounded") {
-                violationObj.licenseType = "None";
-            }
-            
-            return violationObj;
-        });
+        // Return violations as-is without transformation
+        const transformedViolations = violations.map(violation => violation.toObject());
 
         res.status(200).json({
             success: true,
@@ -113,23 +96,8 @@ export const getViolationById = async (req, res) => {
             return res.status(404).json({ success: false, message: "Violation not found" });
         }
 
-        // Transform violation and handle alarm type fields
+        // Return violation as-is without transformation
         const violationObj = violation.toObject();
-        
-        // For alarm type, set name, violations, and license type to "None"
-        if (violationObj.violationType === "alarm") {
-            violationObj.firstName = "None";
-            violationObj.middleInitial = "None";
-            violationObj.lastName = "None";
-            violationObj.suffix = "None";
-            violationObj.violations = ["None"];
-            violationObj.licenseType = "None";
-        }
-        
-        // For impounded type, set license type to "None"
-        if (violationObj.violationType === "impounded") {
-            violationObj.licenseType = "None";
-        }
 
         res.status(200).json({
             success: true,
@@ -151,24 +119,9 @@ export const updateViolation = async (req, res) => {
             updateData.violations = Array.isArray(violations) ? violations : [violations];
         }
 
-        // Set violationType field based on violationType
+        // Set violationType field based on violationType - no field clearing
         if (violationType) {
             updateData.violationType = violationType;
-            
-            // For alarm type, set name, violations, and license type to null
-            if (violationType === "alarm") {
-                updateData.firstName = null;
-                updateData.middleInitial = null;
-                updateData.lastName = null;
-                updateData.suffix = null;
-                updateData.violations = null;
-                updateData.licenseType = null;
-            }
-            
-            // For impounded type, set license type to null
-            if (violationType === "impounded") {
-                updateData.licenseType = null;
-            }
         }
 
         const violation = await ViolationModel.findByIdAndUpdate(

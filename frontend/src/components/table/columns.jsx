@@ -400,7 +400,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     header: "License Type",
     cell: ({ row }) => {
       const licenseType = row.getValue("licenseType");
-      return <div className="">{licenseType && licenseType !== "None" ? licenseType : "None"}</div>;
+      return <div className="">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
     },
   },
   {

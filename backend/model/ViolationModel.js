@@ -8,12 +8,9 @@ const ViolationSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    // Apprehension Details (Required for violation and impound)
+    // Apprehension Details (Available for all violation types)
     firstName: {
       type: String,
-      required: function() {
-        return this.violationType === 'confiscated' || this.violationType === 'impounded';
-      },
       trim: true,
     },
     middleInitial: {
@@ -23,9 +20,6 @@ const ViolationSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: function() {
-        return this.violationType === 'confiscated' || this.violationType === 'impounded';
-      },
       trim: true,
     },
     suffix: {
@@ -34,9 +28,6 @@ const ViolationSchema = new mongoose.Schema(
     },
     violations: {
       type: [String],
-      required: function() {
-        return this.violationType === 'confiscated' || this.violationType === 'impounded';
-      },
     },
     violationType: {
       type: String,
@@ -44,12 +35,9 @@ const ViolationSchema = new mongoose.Schema(
       enum: ["confiscated", "alarm", "impounded"],
       default: "confiscated",
     },
-    // Confiscated Item Details (Required for violation only)
+    // License Type Details (Available for all violation types)
     licenseType: {
       type: String,
-      required: function() {
-        return this.violationType === 'confiscated';
-      },
       enum: ["SP", "DL", "CL", "PLATE", "SP RECEIPT", "DL RECEIPT", "REFUSE TO SUR.", "DL TEMPORARY"],
     },
     plateNo: {
@@ -64,6 +52,14 @@ const ViolationSchema = new mongoose.Schema(
     apprehendingOfficer: {
       type: String,
       required: true, // Always required for all types
+      trim: true,
+    },
+    chassisNo: {
+      type: String,
+      trim: true,
+    },
+    engineNo: {
+      type: String,
       trim: true,
     },
   },

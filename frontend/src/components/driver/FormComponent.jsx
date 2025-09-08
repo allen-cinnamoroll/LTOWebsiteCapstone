@@ -28,6 +28,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import DatePicker from "../calendar/DatePicker";
+import HierarchicalLocationSelector from "../location/HierarchicalLocationSelector";
 import { useNavigate } from "react-router-dom";
 
 const FormComponent = ({ onSubmit, form, submitting }) => {
@@ -211,143 +212,14 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
           </div>
           <div>
             <Label>Address</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-x-3">
-              <FormField
-                control={form.control}
-                name="purok"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.purok && "text-red-400"
-                      )}
-                    >
-                      Purok
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        className={cn(
-                          "text-muted-foreground",
-                          form.formState.errors.purok && "border-red-400"
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
+            <div className="mt-4">
+              <HierarchicalLocationSelector 
+                form={form}
+                onLocationChange={(location) => {
+                  // Optional: Handle location changes if needed
+                  console.log("Location changed:", location);
+                }}
               />
-              <FormField
-                control={form.control}
-                name="barangay"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.barangay && "text-red-400"
-                      )}
-                    >
-                      Barangay
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        className={cn(
-                          "text-muted-foreground",
-                          form.formState.errors.barangay && "border-red-400"
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="municipality"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.municipality && "text-red-400"
-                      )}
-                    >
-                      Municipality
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        className={cn(
-                          "text-muted-foreground",
-                          form.formState.errors.municipality && "border-red-400"
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="province"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.province && "text-red-400"
-                      )}
-                    >
-                      Province
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        className={cn(
-                          "text-muted-foreground",
-                          form.formState.errors.province && "border-red-400"
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.region && "text-red-400"
-                      )}
-                    >
-                      Region
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        className={cn(
-                          "text-muted-foreground",
-                          form.formState.errors.region && "border-red-400"
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-xs text-red-400" />
-                  </FormItem>
-                )}
-              />
-
             </div>
           </div>
           <div>

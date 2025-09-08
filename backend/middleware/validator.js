@@ -67,47 +67,47 @@ export const vehicleRegistrationRules = () =>[
 // driver violation
 export const validateViolation = [
   body("topNo").optional(),
-  body("violationType").isIn(["violation", "alarm", "impound"]).withMessage("Violation type must be violation, alarm, or impound"),
+  body("violationType").isIn(["confiscated", "alarm", "impounded"]).withMessage("Violation type must be confiscated, alarm, or impounded"),
   
-  // Conditional validation for firstName (required for violation and impound)
+  // Conditional validation for firstName (required for confiscated and impounded)
   body("firstName").custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if ((violationType === 'violation' || violationType === 'impound') && (!value || value.trim() === '')) {
-      throw new Error("First name is required for violation and impound types");
+    if ((violationType === 'confiscated' || violationType === 'impounded') && (!value || value.trim() === '')) {
+      throw new Error("First name is required for confiscated and impounded types");
     }
     return true;
   }),
   
   body("middleInitial").optional(),
   
-  // Conditional validation for lastName (required for violation and impound)
+  // Conditional validation for lastName (required for confiscated and impounded)
   body("lastName").custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if ((violationType === 'violation' || violationType === 'impound') && (!value || value.trim() === '')) {
-      throw new Error("Last name is required for violation and impound types");
+    if ((violationType === 'confiscated' || violationType === 'impounded') && (!value || value.trim() === '')) {
+      throw new Error("Last name is required for confiscated and impounded types");
     }
     return true;
   }),
   
   body("suffix").optional(),
   
-  // Conditional validation for violations (required for violation and impound)
+  // Conditional validation for violations (required for confiscated and impounded)
   body("violations").custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if ((violationType === 'violation' || violationType === 'impound')) {
+    if ((violationType === 'confiscated' || violationType === 'impounded')) {
       if (!Array.isArray(value) || value.length === 0 || value.every(v => !v || v.trim() === '')) {
-        throw new Error("At least one violation is required for violation and impound types");
+        throw new Error("At least one violation is required for confiscated and impounded types");
       }
     }
     return true;
   }),
   
-  // Conditional validation for licenseType (required for violation only)
+  // Conditional validation for licenseType (required for confiscated only)
   body("licenseType").custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if (violationType === 'violation') {
+    if (violationType === 'confiscated') {
       if (!value || !["SP", "DL", "CL"].includes(value)) {
-        throw new Error("License type is required and must be SP, DL, or CL for violation type");
+        throw new Error("License type is required and must be SP, DL, or CL for confiscated type");
       }
     } else if (violationType === 'alarm') {
       // For alarm type, licenseType should be null or valid enum

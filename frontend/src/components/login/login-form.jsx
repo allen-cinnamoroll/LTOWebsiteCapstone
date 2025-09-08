@@ -43,9 +43,16 @@ export function LoginForm({ className, ...props }) {
     },
   });
 
-  const onSubmit = async (formData) => {
+  const onSubmit = async (formData, event) => {
+    // Prevent default form submission behavior
+    if (event) {
+      event.preventDefault();
+    }
+    
     try {
       setIsSubmitting(true);
+      setErrorMessage(null); // Clear any previous error messages
+      
       const { data } = await apiClient.post("/auth/login", formData);
       if (data) {
         setIsSubmitting(false);
@@ -69,10 +76,13 @@ export function LoginForm({ className, ...props }) {
         }
       }
     } catch (error) {
-      const message = error.response;
-
+      console.error("Login error:", error);
+      
+      // Clear any previous form errors
+      form.clearErrors();
+      
       const errorType =
-        error.response.data.message === "Password is incorrect" ? "0" : "1";
+        error.response?.data?.message === "Password is incorrect" ? "0" : "1";
 
       if (errorType === "0") {
         form.setError("password", {
@@ -86,7 +96,6 @@ export function LoginForm({ className, ...props }) {
         });
       }
 
-      //   setErrorMessage(message);
       setIsSubmitting(false);
     }
   };

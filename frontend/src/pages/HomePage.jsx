@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import StatCard from "@/components/home/StatCard";
@@ -8,31 +8,71 @@ import { Calendar } from "@/components/ui/calendar";
 import DriverLogs from "@/components/home/DriverLogs";
 
 const HomePage = () => {
-  const loading = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    vehicles: { total: 0, active: 0, expired: 0 },
+    drivers: { total: 0, active: 0, expired: 0 },
+    violations: { total: 0, recent: 0, byType: [] },
+    accidents: { total: 0 },
+    trends: { monthlyViolations: [] }
+  });
+  const { token } = useAuth();
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      const { data } = await apiClient.get("/dashboard/stats", {
+        headers: {
+          Authorization: token,
+        },
+      });
+      
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-4 space-y-4">
       <section className="text-3xl font-bold">Dashboard</section>
       <section className="max-h-full w-full grid grid-flow-row lg:grid-flow-col grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           name={"Registered Vehicles"}
-          value={"100"}
+          value={loading ? "..." : stats.vehicles.total.toString()}
           icon={Car}
           statuses={[
-            { label: "87 Active", color: "#047857", bgColor: "#d1fae5" }, // Green
-            { label: "13 Expired", color: "#dc2626", bgColor: "#fee2e2" }, // Red
+            { label: `${stats.vehicles.active} Active`, color: "#047857", bgColor: "#d1fae5" }, // Green
+            { label: `${stats.vehicles.expired} Expired`, color: "#dc2626", bgColor: "#fee2e2" }, // Red
           ]}
         />
         <StatCard
           name={"Registered Drivers"}
-          value={"130"}
+          value={loading ? "..." : stats.drivers.total.toString()}
           icon={Users}
           statuses={[
-            { label: "100 Active", color: "#047857", bgColor: "#d1fae5" }, // Green
-            { label: "30 Expired", color: "#dc2626", bgColor: "#fee2e2" }, // Red
+            { label: `${stats.drivers.active} Active`, color: "#047857", bgColor: "#d1fae5" }, // Green
+            { label: `${stats.drivers.expired} Expired`, color: "#dc2626", bgColor: "#fee2e2" }, // Red
           ]}
         />
-        <StatCard name={"Violations"} value={"24,828"} icon={ChartSpline} />
-        <StatCard name={"Accidents"} value={"25,010"} icon={ChartPie} />
+        <StatCard 
+          name={"Violations"} 
+          value={loading ? "..." : stats.violations.total.toString()} 
+          icon={ChartSpline} 
+        />
+        <StatCard 
+          name={"Accidents"} 
+          value={loading ? "..." : stats.accidents.total.toString()} 
+          icon={ChartPie} 
+        />
       </section>
 
       <ViolationsChart />

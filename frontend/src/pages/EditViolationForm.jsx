@@ -31,6 +31,8 @@ const EditViolationForm = () => {
       plateNo: "",
       dateOfApprehension: undefined,
       apprehendingOfficer: "",
+      chassisNo: "",
+      engineNo: "",
     },
   });
   const { reset } = form;

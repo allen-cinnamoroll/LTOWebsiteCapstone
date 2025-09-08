@@ -21,9 +21,6 @@ export const CreateDriverSchema = z.object({
   municipality: z.string().min(1, {
     message: "Municipality is required",
   }),
-  province: z.string().min(1, {
-    message: "Province is required",
-  }),
   region: z.string().min(1, {
     message: "Region is required",
   }),
@@ -98,34 +95,8 @@ export const ViolationCreateSchema = z.object({
   plateNo: z.string().min(1, { message: "Plate number is required" }),
   dateOfApprehension: z.date({ required_error: "Date of apprehension is required" }),
   apprehendingOfficer: z.string().min(1, { message: "Apprehending officer is required" }),
-}).refine((data) => {
-  // For confiscated and impounded types, firstName and lastName are required
-  if ((data.violationType === 'confiscated' || data.violationType === 'impounded')) {
-    if (!data.firstName || data.firstName === null || data.firstName.trim() === '') {
-      return false;
-    }
-    if (!data.lastName || data.lastName === null || data.lastName.trim() === '') {
-      return false;
-    }
-    if (!data.violations || data.violations === null || data.violations.length === 0 || data.violations.every(v => !v || v.trim() === '')) {
-      return false;
-    }
-  }
-  return true;
-}, {
-  message: "First name, last name, and violations are required for confiscated and impounded types",
-  path: ["firstName"]
-}).refine((data) => {
-  // For confiscated type only, licenseType is required
-  if (data.violationType === 'confiscated') {
-    if (!data.licenseType || data.licenseType === null) {
-      return false;
-    }
-  }
-  return true;
-}, {
-  message: "License type is required for confiscated type",
-  path: ["licenseType"]
+  chassisNo: z.string().optional().nullable(),
+  engineNo: z.string().optional().nullable(),
 }).refine((data) => {
   // Validate middleInitial length only if it has a value and is not null
   if (data.middleInitial && data.middleInitial !== null && data.middleInitial.trim() !== '') {

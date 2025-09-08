@@ -22,39 +22,13 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
     defaultValue: "confiscated"
   });
 
-  // Clear form fields when switching violation types
+  // Initialize violations array if empty for all violation types
   useEffect(() => {
-    if (violationType === "alarm") {
-      // Set fields to null for alarm type
-      form.setValue("firstName", null);
-      form.setValue("middleInitial", null);
-      form.setValue("lastName", null);
-      form.setValue("suffix", null);
-      form.setValue("violations", null);
-      form.setValue("licenseType", null);
-      setViolations([]);
-      // Clear any validation errors
-      form.clearErrors();
-    } else if (violationType === "confiscated") {
-      // Clear fields not needed for confiscated
-      form.setValue("licenseType", "");
-      // Initialize violations array if empty
-      if (violations.length === 0) {
-        setViolations([""]);
-        form.setValue("violations", [""]);
-      }
-      form.clearErrors();
-    } else if (violationType === "impounded") {
-      // Clear fields not needed for impound
-      form.setValue("licenseType", null);
-      // Initialize violations array if empty
-      if (violations.length === 0) {
-        setViolations([""]);
-        form.setValue("violations", [""]);
-      }
-      form.clearErrors();
+    if (violations.length === 0) {
+      setViolations([""]);
+      form.setValue("violations", [""]);
     }
-  }, [violationType, form, violations.length]);
+  }, [violations.length, form]);
 
   const addViolation = () => {
     setViolations([...violations, ""]);
@@ -125,10 +99,8 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
           />
         </div>
 
-        {/* Conditional Fields Based on Violation Type */}
-        {violationType === "confiscated" && (
-          <>
-            {/* Apprehension Details Section - Only for Violation */}
+        {/* All Fields Available for All Violation Types */}
+        {/* Apprehension Details Section */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Apprehension Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -178,23 +150,23 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                 <FormItem>
                   <FormLabel>Suffix</FormLabel>
                   <FormControl>
-                        <Input placeholder="Jr." {...field} />
+                    <Input placeholder="Jr." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-              </div>
           </div>
+        </div>
 
-            {/* Violations Section - Only for Violation */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Violations</h3>
+        {/* Violations Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Violations</h3>
           <div className="space-y-2">
             {violations.map((violation, index) => (
               <div key={index} className="flex gap-2">
                 <Input
-                      placeholder={`Violation ${index + 1}`}
+                  placeholder={`Violation ${index + 1}`}
                   value={violation}
                   onChange={(e) => updateViolation(index, e.target.value)}
                 />
@@ -222,9 +194,9 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
           </div>
         </div>
 
-            {/* Confiscated Item Section - Only for Violation */}
+        {/* License Type Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Confiscated Item</h3>
+          <h3 className="text-lg font-semibold">License Type</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -253,6 +225,14 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                 </FormItem>
               )}
             />
+            <div></div>
+          </div>
+        </div>
+
+        {/* Vehicle Details Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Vehicle Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="plateNo"
@@ -266,8 +246,38 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="chassisNo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Chassis No. (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Chassis Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="engineNo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Engine No. (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Engine Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
+        </div>
 
+        {/* Apprehension Information Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Apprehension Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -282,250 +292,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                           <Button
                             variant="outline"
                             className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <DatePicker
-                              fieldValue={field.value}
-                              dateValue={field.onChange}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="apprehendingOfficer"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Apprehending Officer</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Officer Name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Alarm Type - Only Plate No, Date, and Officer */}
-        {violationType === "alarm" && (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Alarm Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="plateNo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Plate No.</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ABC-1234" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dateOfApprehension"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date of Apprehension</FormLabel>
-                    <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <DatePicker
-                            fieldValue={field.value}
-                            dateValue={field.onChange}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="apprehendingOfficer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Apprehending Officer</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Officer Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Impounded Type - Driver Details + Plate No, Date, Officer */}
-        {violationType === "impounded" && (
-          <>
-            {/* Apprehension Details Section - Only for Impound */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Apprehension Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="middleInitial"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Middle Initial</FormLabel>
-                      <FormControl>
-                        <Input placeholder="D" maxLength={1} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="suffix"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Suffix</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Jr." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Violations Section - Only for Impound */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Violations</h3>
-              <div className="space-y-2">
-                {violations.map((violation, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder={`Violation ${index + 1}`}
-                      value={violation}
-                      onChange={(e) => updateViolation(index, e.target.value)}
-                    />
-                    {violations.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => removeViolation(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addViolation}
-                  className="w-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Violation
-                </Button>
-              </div>
-            </div>
-
-            {/* Vehicle Details Section - Only for Impound */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Vehicle Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="plateNo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Plate No.</FormLabel>
-                      <FormControl>
-                        <Input placeholder="ABC-1234" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dateOfApprehension"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date of Apprehension</FormLabel>
-                      <FormControl>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -534,14 +301,14 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                             ) : (
                               <span>Pick a date</span>
                             )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-0" align="start">
                         <DatePicker
                           fieldValue={field.value}
-                              dateValue={field.onChange}
+                          dateValue={field.onChange}
                         />
                       </PopoverContent>
                     </Popover>
@@ -565,8 +332,6 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             />
           </div>
         </div>
-          </>
-        )}
 
 
         <div className="space-x-2">

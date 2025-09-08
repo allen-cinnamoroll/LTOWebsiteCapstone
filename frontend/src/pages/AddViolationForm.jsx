@@ -30,6 +30,8 @@ const AddViolationForm = () => {
       plateNo: "",
       dateOfApprehension: undefined,
       apprehendingOfficer: "",
+      chassisNo: "",
+      engineNo: "",
     },
   });
 

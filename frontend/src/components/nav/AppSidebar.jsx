@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
   Collapsible,
@@ -167,44 +167,44 @@ export function AppSidebar(props) {
             {/* Dashboard - accessible to all authenticated users */}
             <SidebarMenuItem >
               <SidebarMenuButton isActive={location.pathname === "/"} asChild>
-                <a href="/">
+                <Link to="/">
                   <SquareTerminal />
                   <span>Dashboard</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             
             {/* Management sections - accessible to all authenticated users */}
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/vehicle"} asChild>
-                <a href="/vehicle">
+                <Link to="/vehicle">
                   <Car />
                   <span>Manage Vehicles</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/driver"} asChild>
-                <a href="/driver">
+                <Link to="/driver">
                   <Users />
                   <span>Manage Drivers</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/violation"} asChild>
-                <a href="/violation">
+                <Link to="/violation">
                   <SquareChartGantt />
                   <span>Manage Violations</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton isActive={location.pathname === "/accident"} asChild>
-                <a href="/accident">
+                <Link to="/accident">
                   <SquareActivity />
                   <span>Manage Accidents</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -226,26 +226,26 @@ export function AppSidebar(props) {
                   <SidebarMenuSub>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton isActive={location.pathname === "/analytics/registration"} asChild>
-                        <a href="/analytics/registration">
+                        <Link to="/analytics/registration">
                           <BookOpen />
                           <span>Registration</span>
-                        </a>
+                        </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton isActive={location.pathname === "/analytics/violation"} asChild>
-                        <a href="/analytics/violation">
+                        <Link to="/analytics/violation">
                           <SquareChartGantt />
                           <span>Violation</span>
-                        </a>
+                        </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
                       <SidebarMenuSubButton isActive={location.pathname === "/analytics/accident"} asChild>
-                        <a href="/analytics/accident">
+                        <Link to="/analytics/accident">
                           <SquareActivity />
                           <span>Accident</span>
-                        </a>
+                        </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
@@ -270,32 +270,32 @@ export function AppSidebar(props) {
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton isActive={location.pathname === "/account/register"} asChild>
-                          <a href="/account/register">
-                            <UserPlus />
-                            <span>Register Account</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton isActive={location.pathname === "/account/update"} asChild>
-                          <a href="/account/update">
-                            <Edit />
-                            <span>Update Account</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton isActive={location.pathname === "/account/logs"} asChild>
-                          <a href="/account/logs">
-                            <FileText />
-                            <span>View Account Logs</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive={location.pathname === "/account/register"} asChild>
+                        <Link to="/account/register">
+                          <UserPlus />
+                          <span>Register Account</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive={location.pathname === "/account/update"} asChild>
+                        <Link to="/account/update">
+                          <Edit />
+                          <span>Update Account</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton isActive={location.pathname === "/account/logs"} asChild>
+                        <Link to="/account/logs">
+                          <FileText />
+                          <span>View Account Logs</span>
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>

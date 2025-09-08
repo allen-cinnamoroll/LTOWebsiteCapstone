@@ -34,7 +34,7 @@ const ViolationPage = () => {
         suffix: vData.suffix || "",
         violations: vData.violations || [],
         violationType: vData.violationType || "confiscated",
-        licenseType: vData.licenseType || "N/A",
+        licenseType: vData.licenseType || null,
         plateNo: vData.plateNo || "N/A",
         dateOfApprehension: vData.dateOfApprehension,
         apprehendingOfficer: vData.apprehendingOfficer || "N/A",

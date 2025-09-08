@@ -6,6 +6,7 @@ import violationRoutes from "./violation.js";
 import accidentRoutes from "./accident.js";
 import authRoutes from "./auth.js";
 import logRoutes from "./logs.js";
+import dashboardRoutes from "./dashboard.js";
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.use("/vehicle", vehicleRoutes);
 router.use("/violation", violationRoutes);
 router.use("/accident", accidentRoutes);
 router.use("/auth", authRoutes);
+router.use("/dashboard", dashboardRoutes);
 //log routes for admin and driver
 router.use("/logs", logRoutes);
 
