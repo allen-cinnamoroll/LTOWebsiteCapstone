@@ -29,7 +29,6 @@ export const driverValidationRules = () => [
   body("address.barangay").notEmpty().withMessage("barangay is required"),
   body("address.municipality").notEmpty().withMessage("municipality is required"),
   body("address.province").notEmpty().withMessage("province is required"),
-  body("address.region").notEmpty().withMessage("region is required"),
   body("contactNumber").optional(),
   body("emailAddress").optional().custom((value) => {
     if (value && value.trim() !== '') {
@@ -61,7 +60,15 @@ export const vehicleRegistrationRules = () =>[
   body("bodyType").notEmpty().withMessage("bodyType is required"),
   body("color").notEmpty().withMessage("color is required"),
   body("classification").notEmpty().withMessage("classification is required"),
-  body("dateOfRenewal").optional().isISO8601().withMessage("dateOfRenewal must be a valid date"),
+  body("dateOfRenewal").optional().custom((value) => {
+    if (value && value !== '') {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) {
+        throw new Error("dateOfRenewal must be a valid date");
+      }
+    }
+    return true;
+  }),
 ]
 
 // driver violation
@@ -133,12 +140,16 @@ export const adminRegistrationValidationRules = () => [
 // Accident validation
 export const validateAccident = [
   body("accident_id").optional(),
-  body("driver_id").notEmpty().withMessage("Driver ID is required"),
-  body("vehicle_id").notEmpty().withMessage("Vehicle ID is required"),
+  body("plateNo").notEmpty().withMessage("Plate number is required"),
   body("accident_date").isISO8601().withMessage("Accident date is required and must be valid"),
   body("street").notEmpty().withMessage("Street is required"),
   body("barangay").notEmpty().withMessage("Barangay is required"),
   body("municipality").notEmpty().withMessage("Municipality is required"),
+  body("vehicle_type").isIn(['motorcycle', 'car', 'truck', 'bus', 'van', 'jeepney', 'tricycle', 'other']).withMessage("Vehicle type must be one of: motorcycle, car, truck, bus, van, jeepney, tricycle, other"),
+  body("severity").isIn(['minor', 'moderate', 'severe', 'fatal']).withMessage("Severity must be one of: minor, moderate, severe, fatal"),
+  body("notes").optional().isString().withMessage("Notes must be a string"),
+  body("coordinates.lat").optional().isNumeric().withMessage("Latitude must be a number"),
+  body("coordinates.lng").optional().isNumeric().withMessage("Longitude must be a number"),
 ];
 
 // Middleware to handle validation errors

@@ -1,11 +1,5 @@
 import DriverModel from "../model/DriverModel.js";
 import UserModel from "../model/UserModel.js";
-import VehicleModel from "../model/VehicleModel.js";
-import { 
-  checkDriverExpirationStatus, 
-  updateDriverStatusByExpiration,
-  checkAllDriversExpiration 
-} from "../util/driverStatusChecker.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
 export const createDriver = async (req, res) => {
@@ -33,8 +27,12 @@ export const createDriver = async (req, res) => {
       }
     }
 
-    // Set initial status to active (will be updated based on vehicle renewal date)
-    const driverData = { ...req.body, status: "1" };
+    const driverData = { ...req.body };
+    
+    // Convert plateNo to array if it's a string
+    if (driverData.plateNo && typeof driverData.plateNo === 'string') {
+      driverData.plateNo = driverData.plateNo.split(',').map(plate => plate.trim()).filter(plate => plate.length > 0);
+    }
     
     // Clean up optional fields - convert empty strings and undefined to null
     if (!driverData.contactNumber || driverData.contactNumber === '' || driverData.contactNumber === undefined) {
@@ -42,6 +40,9 @@ export const createDriver = async (req, res) => {
     }
     if (!driverData.emailAddress || driverData.emailAddress === '' || driverData.emailAddress === undefined) {
       driverData.emailAddress = null;
+    }
+    if (!driverData.fileNo || driverData.fileNo === '' || driverData.fileNo === undefined) {
+      driverData.fileNo = null;
     }
     if (!driverData.birthDate || driverData.birthDate === '' || driverData.birthDate === undefined) {
       driverData.birthDate = null;
@@ -79,6 +80,7 @@ export const createDriver = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Driver registered successfully",
+      data: newDriver
     });
   } catch (err) {
     return res.status(500).json({
@@ -90,14 +92,14 @@ export const createDriver = async (req, res) => {
 
 export const getDrivers = async (req, res) => {
   try {
-    // First, check and update all drivers' expiration status
-    await checkAllDriversExpiration();
-    
-    const drivers = await DriverModel.find().select("fullname plateNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate isActive status").sort({createdAt:-1})
+    const drivers = await DriverModel.find().select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate isActive").sort({createdAt:-1})
+
+    // Return drivers without status and dateOfRenewal calculations
+    const driversWithCalculatedStatus = drivers.map(driver => driver.toObject());
 
     res.status(200).json({
       success: true,
-      data: drivers,
+      data: driversWithCalculatedStatus,
     });
   } catch (err) {
     return res.status(500).json({
@@ -110,7 +112,7 @@ export const getDrivers = async (req, res) => {
 export const findDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
-    const driver = await DriverModel.findById(driverId).select("fullname plateNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive status");
+    const driver = await DriverModel.findById(driverId).select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive");
 
     if (!driver) {
       return res.status(404).json({
@@ -119,9 +121,11 @@ export const findDriver = async (req, res) => {
       });
     }
 
+    const driverWithCalculatedStatus = driver.toObject();
+
     res.status(200).json({
       success: true,
-      data: driver,
+      data: driverWithCalculatedStatus,
     });
   } catch (err) {
     return res.status(500).json({
@@ -136,6 +140,11 @@ export const updateDriver = async (req, res) => {
   try {
     let updateData = { ...req.body };
     
+    // Convert plateNo to array if it's a string
+    if (updateData.plateNo && typeof updateData.plateNo === 'string') {
+      updateData.plateNo = updateData.plateNo.split(',').map(plate => plate.trim()).filter(plate => plate.length > 0);
+    }
+    
     // Clean up optional fields - convert empty strings and undefined to null
     if (!updateData.contactNumber || updateData.contactNumber === '' || updateData.contactNumber === undefined) {
       updateData.contactNumber = null;
@@ -143,12 +152,13 @@ export const updateDriver = async (req, res) => {
     if (!updateData.emailAddress || updateData.emailAddress === '' || updateData.emailAddress === undefined) {
       updateData.emailAddress = null;
     }
+    if (!updateData.fileNo || updateData.fileNo === '' || updateData.fileNo === undefined) {
+      updateData.fileNo = null;
+    }
     if (!updateData.birthDate || updateData.birthDate === '' || updateData.birthDate === undefined) {
       updateData.birthDate = null;
     }
     
-    // Remove status from updateData to prevent manual status changes
-    delete updateData.status;
     
     const driver = await DriverModel.findByIdAndUpdate(driverId, updateData);
 
@@ -182,8 +192,6 @@ export const updateDriver = async (req, res) => {
       }
     }
 
-    // Check and update driver status based on vehicle renewal date
-    await checkAllDriversExpiration();
 
     res.status(200).json({
       success: true,
@@ -247,15 +255,26 @@ export const deleteDriver = async (req, res) => {
   }
 };
 
-// Manual endpoint to check and update all drivers' expiration status
-export const checkDriversExpiration = async (req, res) => {
+
+// Search drivers by name for vehicle form
+export const searchDrivers = async (req, res) => {
   try {
-    const result = await checkAllDriversExpiration();
+    const { name } = req.query;
     
+    if (!name || name.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Name search term must be at least 2 characters long",
+      });
+    }
+
+    const drivers = await DriverModel.find({
+      ownerRepresentativeName: { $regex: name.trim(), $options: 'i' }
+    }).select("_id ownerRepresentativeName plateNo birthDate").limit(10);
+
     res.status(200).json({
       success: true,
-      message: result.message,
-      updatedCount: result.updatedCount
+      data: drivers,
     });
   } catch (err) {
     return res.status(500).json({
@@ -263,13 +282,5 @@ export const checkDriversExpiration = async (req, res) => {
       message: err.message,
     });
   }
-};
-
-// Block manual status updates - status can only be changed automatically
-export const updateDriverStatus = async (req, res) => {
-  return res.status(403).json({
-    success: false,
-    message: "Driver status cannot be manually updated. Status is automatically managed based on renewal date.",
-  });
 };
 

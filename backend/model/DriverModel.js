@@ -18,8 +18,18 @@ const addressSchema = new mongoose.Schema({
 const driverSchema = new mongoose.Schema(
   {
     plateNo: {
-      type: String,
+      type: [String],
       required: [true, "plateNo is required"],
+      validate: {
+        validator: function(v) {
+          return Array.isArray(v) && v.length > 0;
+        },
+        message: "At least one plate number is required"
+      }
+    },
+    fileNo: {
+      type: String,
+      required: false,
     },
     ownerRepresentativeName: {
       type: String,
@@ -60,11 +70,6 @@ const driverSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
-    },
-    status: {
-      type: String,
-      enum: ["0", "1"], // "0" = expired, "1" = active
-      default: "1"
     },
     userAccount :{
       type: mongoose.Schema.Types.ObjectId,

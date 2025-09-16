@@ -6,14 +6,8 @@ const AccidentSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  driver_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Drivers",
-    required: true,
-  },
-  vehicle_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Vehicles",
+  plateNo: {
+    type: String,
     required: true,
   },
   accident_date: {
@@ -31,6 +25,30 @@ const AccidentSchema = new mongoose.Schema({
   municipality: {
     type: String,
     required: true,
+  },
+  vehicle_type: {
+    type: String,
+    required: true,
+    enum: ['motorcycle', 'car', 'truck', 'bus', 'van', 'jeepney', 'tricycle', 'other']
+  },
+  severity: {
+    type: String,
+    required: true,
+    enum: ['minor', 'moderate', 'severe', 'fatal']
+  },
+  notes: {
+    type: String,
+    required: false,
+  },
+  coordinates: {
+    lat: {
+      type: Number,
+      required: false,
+    },
+    lng: {
+      type: Number,
+      required: false,
+    }
   },
   time_edited: {
     type: Date,

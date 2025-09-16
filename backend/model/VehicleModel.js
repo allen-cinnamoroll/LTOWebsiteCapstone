@@ -19,6 +19,7 @@
    * classification:
    * 0 = private
    * 1 = for hire
+   * 2 = government
    */
 
   const ownerSchema = new mongoose.Schema({
@@ -75,6 +76,11 @@
         type: String,
         enum:["0","1"],
         default:"1"
+      },
+      driver: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Drivers',
+        required: false
       }
     },
     {

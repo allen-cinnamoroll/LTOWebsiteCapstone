@@ -1,0 +1,127 @@
+{
+  "timestamp": "2025-09-16T22:29:21.658483",
+  "basic_metrics": {
+    "accuracy": 0.5161290322580645,
+    "precision": 0.4458064516129032,
+    "recall": 0.5161290322580645,
+    "f1_score": 0.45253852918035825,
+    "precision_per_class": [
+      0.52,
+      0.5,
+      0.0
+    ],
+    "recall_per_class": [
+      0.8125,
+      0.2727272727272727,
+      0.0
+    ],
+    "f1_per_class": [
+      0.6341463414634146,
+      0.35294117647058826,
+      0.0
+    ]
+  },
+  "classification_report": {
+    "1": {
+      "precision": 0.52,
+      "recall": 0.8125,
+      "f1-score": 0.6341463414634146,
+      "support": 16.0
+    },
+    "2": {
+      "precision": 0.5,
+      "recall": 0.2727272727272727,
+      "f1-score": 0.35294117647058826,
+      "support": 11.0
+    },
+    "3": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 4.0
+    },
+    "accuracy": 0.5161290322580645,
+    "macro avg": {
+      "precision": 0.34,
+      "recall": 0.36174242424242425,
+      "f1-score": 0.32902917264466763,
+      "support": 31.0
+    },
+    "weighted avg": {
+      "precision": 0.4458064516129032,
+      "recall": 0.5161290322580645,
+      "f1-score": 0.45253852918035825,
+      "support": 31.0
+    }
+  },
+  "feature_importance": [
+    {
+      "feature": "latitude",
+      "importance": 0.16696301459371984
+    },
+    {
+      "feature": "longitude",
+      "importance": 0.1019039859322558
+    },
+    {
+      "feature": "hour",
+      "importance": 0.09130127871399292
+    },
+    {
+      "feature": "street_encoded",
+      "importance": 0.08636915143319573
+    },
+    {
+      "feature": "month",
+      "importance": 0.08182466191938416
+    },
+    {
+      "feature": "day",
+      "importance": 0.08076782657733703
+    },
+    {
+      "feature": "barangay_encoded",
+      "importance": 0.0801370830553652
+    },
+    {
+      "feature": "location_cluster_encoded",
+      "importance": 0.07092653494110326
+    },
+    {
+      "feature": "vehicle_type_encoded",
+      "importance": 0.06908751301269674
+    },
+    {
+      "feature": "municipality_encoded",
+      "importance": 0.06550569285956212
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.05562853547375314
+    },
+    {
+      "feature": "road_type_encoded",
+      "importance": 0.04958472148763421
+    },
+    {
+      "feature": "year",
+      "importance": 0.0
+    }
+  ],
+  "rule_system_evaluation": {
+    "risk_distribution": {
+      "medium_risk": 28,
+      "high_risk": 2,
+      "low_risk": 1
+    },
+    "average_confidence": 0.5456173951496532,
+    "high_risk_percentage": 6.451612903225806,
+    "medium_risk_percentage": 90.32258064516128,
+    "low_risk_percentage": 3.225806451612903
+  },
+  "model_info": {
+    "model_type": "RandomForestClassifier",
+    "n_features": 13,
+    "n_classes": 3
+  }
+}

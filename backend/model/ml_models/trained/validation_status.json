@@ -1,0 +1,29 @@
+{
+  "validation_date": "2025-09-16T22:29:21.669578",
+  "status": "PASSED",
+  "metrics": {
+    "accuracy": 0.5161290322580645,
+    "precision": 0.4458064516129032,
+    "recall": 0.5161290322580645,
+    "f1_score": 0.45253852918035825,
+    "precision_per_class": [
+      0.52,
+      0.5,
+      0.0
+    ],
+    "recall_per_class": [
+      0.8125,
+      0.2727272727272727,
+      0.0
+    ],
+    "f1_per_class": [
+      0.6341463414634146,
+      0.35294117647058826,
+      0.0
+    ]
+  },
+  "requirements": {
+    "min_accuracy": 0.5,
+    "min_f1_score": 0.4
+  }
+}

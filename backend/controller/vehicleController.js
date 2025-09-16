@@ -9,10 +9,12 @@ import {
 } from "../util/vehicleStatusChecker.js";
 import { updateDriverStatusByVehicleRenewal } from "../util/driverStatusChecker.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
+import { getVehicleStatus, calculateExpirationDate, getExpirationInfo } from "../util/plateStatusCalculator.js";
 
 export const createVehicle = async (req, res) => {
   const plateNo = req.body.plateNo;
   try {
+    // Check if plate number is already taken
     const plateNoTaken = await VehicleModel.findOne({ plateNo });
 
     if (plateNoTaken) {
@@ -22,14 +24,21 @@ export const createVehicle = async (req, res) => {
       });
     }
 
-    // Set default status to active (1) if no dateOfRenewal provided
-    const status = req.body.dateOfRenewal ? checkVehicleExpirationStatus(req.body.dateOfRenewal) : "1";
+    // Calculate status based on plate number and date of renewal
+    const dateOfRenewal = req.body.dateOfRenewal || null;
+    const plateBasedStatus = getVehicleStatus(plateNo, dateOfRenewal);
+    const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal);
+    
+    // Use plate-based status calculation
+    const status = plateBasedStatus;
     
     // Map frontend field names to database field names
     const vehicleData = {
       ...req.body,
       serialChassisNumber: req.body.chassisNo, // Map chassisNo to serialChassisNumber
-      status
+      status,
+      // Add calculated expiration date if not manually provided
+      dateOfRenewal: dateOfRenewal || expirationDate
     };
     
     // Remove the original chassisNo field to avoid confusion
@@ -39,8 +48,35 @@ export const createVehicle = async (req, res) => {
     if (vehicleData.chassisNo !== undefined) {
       delete vehicleData.chassisNo;
     }
+    
+    // Handle empty driver field - convert empty string to null
+    if (vehicleData.driver === "" || vehicleData.driver === undefined) {
+      vehicleData.driver = null;
+    }
 
     const vehicle = await VehicleModel.create(vehicleData);
+
+    // If a driver is specified, update the driver's plateNo list
+    if (vehicleData.driver) {
+      try {
+        const driver = await DriverModel.findById(vehicleData.driver);
+        if (driver) {
+          // Get current plate numbers and add the new one if not already present
+          const currentPlates = Array.isArray(driver.plateNo) ? driver.plateNo : 
+                               (driver.plateNo ? driver.plateNo.split(',').map(p => p.trim()) : []);
+          
+          if (!currentPlates.includes(plateNo)) {
+            currentPlates.push(plateNo);
+            await DriverModel.findByIdAndUpdate(vehicleData.driver, {
+              plateNo: currentPlates
+            });
+          }
+        }
+      } catch (driverError) {
+        console.error("Error updating driver plateNo:", driverError);
+        // Don't fail the vehicle creation if driver update fails
+      }
+    }
 
     // Sync driver status if renewal date is provided
     if (req.body.dateOfRenewal) {
@@ -76,6 +112,7 @@ export const createVehicle = async (req, res) => {
     });
   } catch (err) {
     console.error("Vehicle creation error:", err.message);
+    console.error("Vehicle creation error details:", err);
     return res.status(500).json({
       success: false,
       message: err.message,
@@ -91,9 +128,13 @@ export const getVehicle = async (req, res) => {
     const vehicles = await VehicleModel.find().sort({ createdAt: -1 });
 
     const vehicleDetails = vehicles.map((data) => {
+      // Calculate current status based on plate number and date of renewal
+      const currentStatus = getVehicleStatus(data.plateNo, data.dateOfRenewal);
+      const expirationInfo = getExpirationInfo(data.plateNo, data.dateOfRenewal);
+      
       return {
         _id: data._id,
-        plateNo: data.plateNo,
+        plateNo: data.plateNo, // This is a single string
         fileNo: data.fileNo,
         engineNo: data.engineNo,
         chassisNo: data.serialChassisNumber, // Map serialChassisNumber back to chassisNo
@@ -102,7 +143,8 @@ export const getVehicle = async (req, res) => {
         color: data.color,
         classification: data.classification,
         dateOfRenewal: data.dateOfRenewal,
-        status: data.status
+        status: currentStatus, // Use calculated status
+        expirationInfo: expirationInfo // Include expiration details
       };
     });
 
@@ -130,6 +172,10 @@ export const findVehicle = async (req, res) => {
       });
     }
 
+    // Calculate current status based on plate number and date of renewal
+    const currentStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+    const expirationInfo = getExpirationInfo(vehicle.plateNo, vehicle.dateOfRenewal);
+
     const vehicleDetails = {
       _id: vehicle._id,
       plateNo: vehicle.plateNo,
@@ -141,7 +187,8 @@ export const findVehicle = async (req, res) => {
       color: vehicle.color,
       classification: vehicle.classification,
       dateOfRenewal: vehicle.dateOfRenewal,
-      status: vehicle.status
+      status: currentStatus, // Use calculated status
+      expirationInfo: expirationInfo // Include expiration details
     };
 
     res.status(200).json({
@@ -168,10 +215,30 @@ export const updateVehicle = async (req, res) => {
       delete updateData.chassisNo;
     }
     
+    // Handle empty driver field - convert empty string to null
+    if (updateData.driver === "" || updateData.driver === undefined) {
+      updateData.driver = null;
+    }
+    
     // Remove status from updateData to prevent manual status changes
     delete updateData.status;
     
-    // If date of renewal is being updated, automatically update status
+    // Get current vehicle to check plate number
+    const currentVehicle = await VehicleModel.findById(vehicleId);
+    if (!currentVehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+    
+    // Calculate new status based on plate number and date of renewal
+    const plateNo = updateData.plateNo || currentVehicle.plateNo;
+    const dateOfRenewal = updateData.dateOfRenewal || currentVehicle.dateOfRenewal;
+    const plateBasedStatus = getVehicleStatus(plateNo, dateOfRenewal);
+    const calculatedExpirationDate = calculateExpirationDate(plateNo, dateOfRenewal);
+    
+    // If date of renewal is being updated, use that; otherwise use calculated date
     if (req.body.dateOfRenewal) {
       const updatedVehicle = await updateVehicleStatusByExpiration(
         vehicleId, 
@@ -220,7 +287,10 @@ export const updateVehicle = async (req, res) => {
         }
       });
     } else {
-      // Regular update without expiration date change
+      // Regular update - use plate-based status and expiration date
+      updateData.status = plateBasedStatus;
+      updateData.dateOfRenewal = updateData.dateOfRenewal || calculatedExpirationDate;
+      
       const vehicle = await VehicleModel.findByIdAndUpdate(vehicleId, updateData);
 
       if (!vehicle) {
@@ -250,6 +320,36 @@ export const updateVehicle = async (req, res) => {
             actorEmail: fullUser.email,
             actorRole: fullUser.role
           });
+        }
+      }
+
+      // Handle driver plate number synchronization if driver is being updated
+      if (updateData.driver !== undefined) {
+        try {
+          const updatedVehicle = await VehicleModel.findById(vehicleId);
+          if (updatedVehicle) {
+            // If a driver is specified, update the driver's plateNo list
+            if (updateData.driver) {
+              const driver = await DriverModel.findById(updateData.driver);
+              if (driver) {
+                // Get current plate numbers and add the new one if not already present
+                const currentPlates = Array.isArray(driver.plateNo) ? driver.plateNo : 
+                                     (driver.plateNo ? driver.plateNo.split(',').map(p => p.trim()) : []);
+                
+                if (!currentPlates.includes(updatedVehicle.plateNo)) {
+                  currentPlates.push(updatedVehicle.plateNo);
+                  await DriverModel.findByIdAndUpdate(updateData.driver, {
+                    plateNo: currentPlates
+                  });
+                }
+              }
+            }
+            // If driver is being set to null, we could remove the plate from the old driver
+            // but that's more complex and might not be necessary for this use case
+          }
+        } catch (driverError) {
+          console.error("Error updating driver plateNo during vehicle update:", driverError);
+          // Don't fail the vehicle update if driver update fails
         }
       }
 
@@ -340,4 +440,66 @@ export const updateVehicleStatus = async (req, res) => {
     success: false,
     message: "Vehicle status cannot be manually updated. Status is automatically managed based on expiration date.",
   });
+};
+
+// Get vehicle owner information by plate number
+export const getVehicleOwnerByPlate = async (req, res) => {
+  const { plateNo } = req.params;
+  
+  try {
+    // Find the vehicle first
+    const vehicle = await VehicleModel.findOne({ plateNo });
+    
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+    
+    // Find the driver/owner by plate number (handle array format)
+    const driver = await DriverModel.findOne({ plateNo: { $in: [plateNo] } });
+    
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle owner not found",
+      });
+    }
+    
+    // Get expiration info using plate-based calculation
+    const expirationInfo = getExpirationInfo(plateNo, vehicle.dateOfRenewal);
+    
+    // Calculate current status using plate-based calculation for consistency
+    const currentStatus = getVehicleStatus(plateNo, vehicle.dateOfRenewal);
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        vehicle: {
+          _id: vehicle._id,
+          plateNo: vehicle.plateNo, // This is a single string
+          make: vehicle.make,
+          bodyType: vehicle.bodyType,
+          color: vehicle.color,
+          dateOfRenewal: vehicle.dateOfRenewal,
+          status: currentStatus // Use calculated status instead of database status
+        },
+        owner: {
+          name: driver.ownerRepresentativeName,
+          address: driver.address,
+          contactNumber: driver.contactNumber,
+          emailAddress: driver.emailAddress,
+          driversLicenseNumber: driver.driversLicenseNumber
+        },
+        expirationInfo: expirationInfo
+      }
+    });
+  } catch (err) {
+    console.error("Get vehicle owner error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };

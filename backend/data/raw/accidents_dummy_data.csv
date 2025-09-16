@@ -1,0 +1,101 @@
+accident_id,plateNo,accident_date,street,barangay,municipality,vehicle_type,severity,notes,latitude,longitude
+ACC-2024-001,TGD-1679,2024-09-19T19:17:46.000Z,Rizal St.,Poblacion,Tarragona,van,moderate,Side-swipe while overtaking,6.90543,125.971907
+ACC-2024-002,NAF-8928,2024-06-11T22:12:29.000Z,Purok 1 (Poblacion),Kinablangan,Baganga,car,minor,Collision with roadside object (lamp post/fence),7.138566,126.19839
+ACC-2024-003,HFT-1674,2024-02-06T00:27:14.000Z,Purok 4 (Lagoon),Manggas,Banaybanay,tricycle,minor,Brake failure suspected,7.052637,126.271871
+ACC-2024-004,DXC-4803,2024-11-18T02:36:42.000Z,Cabasagan Road,Sanghay,Mati,van,moderate,Brake failure suspected,6.946798,126.198137
+ACC-2024-005,FHC-3814,2024-12-02T12:12:47.000Z,Rizal Extension,Poblacion,Baganga,motorcycle,moderate,Single-vehicle rollover; driver evacuated,7.128141,126.21989
+ACC-2024-006,RSR-1169,2024-08-24T13:30:44.000Z,Don Leon Balante St.,San Jose,Cateel,van,minor,Animal on road caused sudden swerve,7.040689,126.405736
+ACC-2024-007,ORV-0916,2024-03-29T22:52:57.000Z,Purok 6 (San Miguel),Lamiawan,Caraga,jeepney,minor,Tricycle struck by oncoming vehicle,7.03907,126.073971
+ACC-2024-008,RKX-7517,2024-02-25T11:39:35.000Z,Don Leon Balante St.,Cagangan,San Isidro,truck,minor,Animal on road caused sudden swerve,7.023682,126.135764
+ACC-2024-009,KFZ-8348,2024-07-10T15:54:03.000Z,Palma Gil St.,Buanas,San Isidro,motorcycle,severe,Brake failure suspected,6.996579,126.157647
+ACC-2024-010,BJZ-8669,2024-04-07T15:20:57.000Z,Pichon Road,Tabunok,Tarragona,bus,severe,Rear-end collision at intersection during rush hour,6.910817,125.976873
+ACC-2024-011,IHE-0053,2024-10-07T10:23:08.000Z,Rizal Hwy.,Matiao,Manay,van,minor,Hit-and-run reported; suspect fled scene,7.026718,126.399461
+ACC-2024-012,NFJ-2646,2024-07-28T11:22:36.000Z,Rizal Hwy.,Dapnan,Baganga,jeepney,severe,Tire blowout led to loss of control,7.090034,126.217449
+ACC-2024-013,WVH-0949,2024-04-03T13:05:09.000Z,Purok 5 (Kapit-Bisig),Poblacion,Mati,bus,severe,Side-swipe while overtaking,6.969014,126.235561
+ACC-2024-014,RYE-8645,2024-12-04T19:39:55.000Z,Mabini St.,Dahican,Manay,bus,moderate,Driver lost control; possible brake failure,7.036735,126.414316
+ACC-2024-015,ZQL-8479,2024-06-24T08:09:21.000Z,Barangay Road,San Jose,Boston,motorcycle,minor,Side-swipe while overtaking,7.012285,125.970299
+ACC-2024-016,BQF-0514,2024-11-29T20:22:57.000Z,Rizal St.,Cabasagan,Boston,truck,minor,Driver lost control; possible brake failure,7.008709,125.964125
+ACC-2024-017,OGM-6669,2024-03-14T22:44:56.000Z,Palma Gil St.,Dahican,Manay,motorcycle,minor,Multiple-vehicle pileup; heavy damage reported,7.002258,126.393666
+ACC-2024-018,KIW-4073,2024-03-15T09:44:56.000Z,National Highway,Poblacion,Mati,car,moderate,Vehicle skidded on wet road,6.950413,126.203313
+ACC-2024-019,VWC-8856,2024-11-20T16:20:30.000Z,Brgy. San Isidro Road,Poblacion,Boston,motorcycle,severe,Tire blowout led to loss of control,7.037214,125.949183
+ACC-2024-020,FKB-6209,2024-01-01T20:05:22.000Z,Brgy. Canaway Road,Bagacay,Governor Generoso,tricycle,minor,Low visibility due to heavy rain,6.931108,126.216115
+ACC-2024-021,EFB-8883,2024-01-24T16:09:56.000Z,Mabini St.,Santo Niño,Manay,van,minor,Rear-end collision at intersection during rush hour,7.016051,126.399171
+ACC-2024-022,YCE-9749,2024-01-27T09:26:28.000Z,National Highway,Dahican,Manay,van,moderate,Multiple-vehicle pileup; heavy damage reported,6.988193,126.422417
+ACC-2024-023,CRO-5183,2024-12-29T00:05:37.000Z,Pichon Road,Poblacion,Boston,truck,minor,Animal on road caused sudden swerve,7.010851,125.950937
+ACC-2024-024,ITB-7508,2024-08-29T05:37:25.000Z,Brgy. San Isidro Road,Castillo,Banaybanay,bus,severe,Side-swipe while overtaking,7.064258,126.286353
+ACC-2024-025,WJE-8900,2024-09-30T05:28:02.000Z,Quezon Ave.,Castillo,Banaybanay,truck,moderate,Low visibility due to heavy rain,7.071239,126.256469
+ACC-2024-026,CWG-1753,2024-10-15T07:49:30.000Z,Rizal Extension,Matiao,Manay,bus,minor,Collision with roadside object (lamp post/fence),7.01729,126.412057
+ACC-2024-027,MXV-1512,2024-09-03T07:57:34.000Z,San Jose St.,San Jose,Boston,tricycle,moderate,Rear-end collision at intersection during rush hour,6.992213,125.981267
+ACC-2024-028,TOL-0158,2024-02-13T10:44:24.000Z,Ramon Magsaysay Ave.,Limao,Tarragona,motorcycle,severe,Animal on road caused sudden swerve,6.924236,126.002735
+ACC-2024-029,DDI-0653,2024-12-15T02:35:05.000Z,Cabasagan Road,San Antonio,Cateel,truck,minor,Driver lost control; possible brake failure,7.066016,126.399221
+ACC-2024-030,TYG-2662,2024-11-06T15:29:14.000Z,Pichon Road,Santo Niño,Manay,jeepney,minor,Multiple-vehicle pileup; heavy damage reported,6.982487,126.413194
+ACC-2024-031,WVG-1771,2024-05-28T13:32:50.000Z,Rizal Extension,San Luis,Cateel,jeepney,minor,Single-vehicle rollover; driver evacuated,7.039346,126.426995
+ACC-2024-032,VWF-3164,2024-06-03T17:58:19.000Z,Purok 3 (Maligaya),Tag-anongan,Lupon,truck,minor,Side-swipe while overtaking,7.0810130000000004,126.044747
+ACC-2024-033,ZNY-1889,2024-12-06T14:35:25.000Z,Rizal Extension,Tabunok,Tarragona,truck,minor,Collision with roadside object (lamp post/fence),6.872295,126.005794
+ACC-2024-034,PNK-9446,2024-03-14T19:39:45.000Z,Main Road,San Jose,Cateel,truck,minor,Multiple-vehicle pileup; heavy damage reported,7.026101,126.433535
+ACC-2024-035,LYX-5143,2024-09-14T15:13:09.000Z,Purok 5 (Kapit-Bisig),Dahican,Manay,jeepney,minor,Tire blowout led to loss of control,6.999019,126.387557
+ACC-2024-036,SOE-6211,2024-09-20T01:03:38.000Z,Barangay Road,Manlayag,Governor Generoso,van,severe,Pedestrian involved; minor injuries reported,6.918146,126.223365
+ACC-2024-037,FUP-5279,2024-06-29T14:00:14.000Z,Purok 3 (Maligaya),Lavigan,Mati,tricycle,minor,Driver lost control; possible brake failure,6.95577,126.234224
+ACC-2024-038,NQI-3848,2024-09-18T06:54:36.000Z,Purok 3 (Maligaya),Poblacion,Banaybanay,truck,minor,Driver lost control; possible brake failure,7.040841,126.258773
+ACC-2024-039,KQF-6291,2024-07-10T23:55:45.000Z,Brgy. San Isidro Road,Poblacion,Lupon,tricycle,minor,Driver suspected under influence,7.064257,126.08156
+ACC-2024-040,EYN-0822,2024-08-04T11:23:54.000Z,Purok 1 (Poblacion),Madre De Dios,Baganga,car,severe,Side-swipe while overtaking,7.117388,126.246085
+ACC-2024-041,PSN-8976,2024-06-22T04:12:57.000Z,Brgy. San Isidro Road,Limao,Tarragona,car,moderate,Single-vehicle rollover; driver evacuated,6.897004,126.015107
+ACC-2024-042,MGL-4681,2024-04-01T01:38:18.000Z,San Jose St.,Limao,Tarragona,truck,moderate,Tire blowout led to loss of control,6.902409,125.978302
+ACC-2024-043,DFK-5421,2024-07-29T17:30:08.000Z,Purok 6 (San Miguel),Sibajay,Boston,tricycle,minor,Driver lost control; possible brake failure,7.041973,125.958369
+ACC-2024-044,JAJ-6389,2024-11-27T10:42:41.000Z,Palma Gil St.,Poblacion,San Isidro,jeepney,minor,Animal on road caused sudden swerve,7.034078,126.167992
+ACC-2024-045,HMK-6624,2024-10-08T05:51:34.000Z,Purok 1 (Poblacion),Sibajay,Boston,car,moderate,Tire blowout led to loss of control,6.999658,125.972335
+ACC-2024-046,OAQ-2223,2024-12-02T15:38:24.000Z,Palma Gil St.,Sanghay,Mati,tricycle,minor,Collision with roadside object (lamp post/fence),6.947846,126.1993
+ACC-2024-047,HYK-1341,2024-07-01T15:34:38.000Z,Barangay Road,San Jose,Cateel,motorcycle,moderate,Rear-end collision at intersection during rush hour,7.085994,126.398998
+ACC-2024-048,BAG-0333,2024-08-29T07:16:05.000Z,Rizal Hwy.,Poblacion,Tarragona,car,minor,Single-vehicle rollover; driver evacuated,6.910168,126.003838
+ACC-2024-049,GJP-1876,2024-10-29T01:32:44.000Z,Purok 6 (San Miguel),Sibajay,Boston,jeepney,minor,Collision with roadside object (lamp post/fence),6.998486,125.936541
+ACC-2024-050,XJY-3249,2024-01-30T12:20:18.000Z,Rizal Extension,San Miguel,Caraga,bus,moderate,Driver suspected under influence,7.029571,126.111832
+ACC-2024-051,PDZ-0672,2024-05-14T20:10:25.000Z,Rizal Extension,Mercedes,Caraga,bus,moderate,Tricycle struck by oncoming vehicle,7.019137,126.108853
+ACC-2024-052,CYQ-7532,2024-10-01T16:35:39.000Z,Brgy. Canaway Road,Sanghay,Mati,car,minor,Animal on road caused sudden swerve,6.956405,126.225627
+ACC-2024-053,LTG-4022,2024-11-18T14:58:27.000Z,Brgy. San Isidro Road,Buanas,San Isidro,motorcycle,moderate,Single-vehicle rollover; driver evacuated,7.004632,126.147883
+ACC-2024-054,AWE-3475,2024-05-17T19:12:30.000Z,Purok 4 (Lagoon),Buanas,San Isidro,jeepney,minor,Collision with roadside object (lamp post/fence),7.042819,126.162071
+ACC-2024-055,NEG-6658,2024-07-08T17:52:32.000Z,Rizal St.,San Miguel,Caraga,bus,moderate,Animal on road caused sudden swerve,7.043566,126.112711
+ACC-2024-056,HKG-9528,2024-05-23T07:31:11.000Z,Quezon Ave.,Poblacion,Lupon,tricycle,moderate,Tricycle struck by oncoming vehicle,7.04853,126.072756
+ACC-2024-057,LHF-3155,2024-05-02T13:07:12.000Z,Purok 6 (San Miguel),San Jose,Cateel,motorcycle,moderate,Low visibility due to heavy rain,7.06741,126.389492
+ACC-2024-058,ZNH-1647,2024-11-19T08:39:31.000Z,Palma Gil St.,Tag-anongan,Lupon,car,minor,Tricycle struck by oncoming vehicle,7.033766,126.028849
+ACC-2024-059,BBH-2068,2024-09-04T17:22:33.000Z,Purok 2 (Barangay Hall),Dahican,Manay,jeepney,moderate,Side-swipe while overtaking,7.033363,126.403444
+ACC-2024-060,IZG-7827,2024-02-14T07:22:09.000Z,Brgy. San Isidro Road,Guinsang-an,Lupon,jeepney,minor,Single-vehicle rollover; driver evacuated,7.027445,126.065767
+ACC-2024-061,VYC-4066,2024-02-16T00:02:54.000Z,Mabini St.,Dahican,Mati,bus,moderate,Pedestrian involved; minor injuries reported,6.960868,126.223705
+ACC-2024-062,XHP-7025,2024-04-28T14:21:00.000Z,Brgy. San Isidro Road,Santo Niño,Manay,bus,moderate,Pedestrian involved; minor injuries reported,7.038607,126.374954
+ACC-2024-063,REE-1229,2024-03-01T18:59:23.000Z,Purok 2 (Barangay Hall),Cabasagan,Boston,motorcycle,moderate,Animal on road caused sudden swerve,7.027629,125.952476
+ACC-2024-064,HWB-3824,2024-12-24T19:28:30.000Z,Purok 6 (San Miguel),San Jose,Boston,truck,moderate,Driver suspected under influence,7.027387,125.983234
+ACC-2024-065,OQX-2330,2024-01-28T17:35:16.000Z,Coastal Road,Sibajay,Boston,motorcycle,minor,Collision with roadside object (lamp post/fence),7.027703,125.984454
+ACC-2024-066,MHK-4460,2024-07-13T08:44:19.000Z,Coastal Road,Pichon,Caraga,bus,moderate,Side-swipe while overtaking,7.050882,126.123365
+ACC-2024-067,AFR-9424,2024-08-16T00:22:56.000Z,Purok 2 (Barangay Hall),San Antonio,Cateel,motorcycle,severe,Driver suspected under influence,7.075285,126.412575
+ACC-2024-068,QXE-9590,2024-06-18T06:44:33.000Z,San Jose St.,Manggas,Banaybanay,van,moderate,Side-swipe while overtaking,7.060201,126.280501
+ACC-2024-069,ISH-6561,2024-11-11T22:59:06.000Z,Ramon Magsaysay Ave.,Poblacion,Cateel,jeepney,moderate,Single-vehicle rollover; driver evacuated,7.031284,126.393144
+ACC-2024-070,VAW-7569,2024-06-09T11:44:47.000Z,San Jose St.,Madre De Dios,Baganga,motorcycle,minor,Tricycle struck by oncoming vehicle,7.127358,126.22791
+ACC-2024-071,GDH-7941,2024-02-17T03:46:23.000Z,Don Leon Balante St.,Poblacion,Lupon,motorcycle,severe,Pedestrian involved; minor injuries reported,7.070959,126.070587
+ACC-2024-072,OCZ-1858,2024-06-28T05:00:21.000Z,Rizal St.,San Miguel,Caraga,motorcycle,moderate,Vehicle skidded on wet road,7.044903,126.112996
+ACC-2024-073,VZG-9031,2024-02-26T04:09:39.000Z,Main Road,Matiao,Manay,tricycle,minor,Pedestrian involved; minor injuries reported,7.011494,126.42176
+ACC-2024-074,IUG-0042,2024-04-19T20:15:01.000Z,Main Road,Dapnan,Baganga,van,minor,Pedestrian involved; minor injuries reported,7.124795,126.237596
+ACC-2024-075,MIT-6180,2024-06-25T20:07:09.000Z,Cabasagan Road,Manggas,Banaybanay,truck,severe,Animal on road caused sudden swerve,7.046328,126.278978
+ACC-2024-076,TSV-6325,2024-09-14T18:01:41.000Z,Purok 4 (Lagoon),Poblacion,Governor Generoso,jeepney,moderate,Vehicle skidded on wet road,6.91372,126.201221
+ACC-2024-077,WLN-7486,2024-01-06T23:02:59.000Z,Coastal Road,Matiao,Manay,van,minor,Brake failure suspected,7.020287,126.378262
+ACC-2024-078,QKC-5383,2024-11-27T00:23:49.000Z,Purok 4 (Lagoon),Tag-anongan,Lupon,van,moderate,Multiple-vehicle pileup; heavy damage reported,7.080248,126.065608
+ACC-2024-079,BQX-3727,2024-10-17T00:22:01.000Z,Pichon Road,Poblacion,Lupon,motorcycle,moderate,Side-swipe while overtaking,7.068622,126.070233
+ACC-2024-080,SXB-0919,2024-04-23T22:23:09.000Z,Ramon Magsaysay Ave.,Madre De Dios,Baganga,truck,moderate,Vehicle skidded on wet road,7.104652,126.222723
+ACC-2024-081,EPJ-3945,2024-07-12T06:35:41.000Z,Ramon Magsaysay Ave.,San Roque,Tarragona,bus,minor,Single-vehicle rollover; driver evacuated,6.908274,125.997574
+ACC-2024-082,XRE-7237,2024-05-14T04:54:18.000Z,Brgy. San Isidro Road,Poblacion,Tarragona,bus,minor,Multiple-vehicle pileup; heavy damage reported,6.911419,125.99741
+ACC-2024-083,WCJ-5881,2024-08-11T05:38:07.000Z,Barangay Road,Alvar,Caraga,truck,severe,Collision with roadside object (lamp post/fence),7.016316,126.119802
+ACC-2024-084,ORT-0803,2024-12-19T15:33:54.000Z,Rizal St.,Manlayag,Governor Generoso,bus,moderate,Brake failure suspected,6.938249,126.216172
+ACC-2024-085,QQR-2240,2024-08-31T23:41:48.000Z,Purok 1 (Poblacion),San Jose,Boston,motorcycle,severe,Driver suspected under influence,6.994365,125.982317
+ACC-2024-086,TCH-6807,2024-03-09T05:05:02.000Z,Purok 5 (Kapit-Bisig),Mabungol,Mati,car,minor,Hit-and-run reported; suspect fled scene,6.977688,126.208551
+ACC-2024-087,GVM-4835,2024-10-16T22:26:14.000Z,Ramon Magsaysay Ave.,Matiao,Manay,jeepney,minor,Side-swipe while overtaking,7.0091,126.373518
+ACC-2024-088,JUA-8791,2024-02-17T23:55:49.000Z,Cabasagan Road,Sibajay,Boston,tricycle,minor,Animal on road caused sudden swerve,7.03234,125.970074
+ACC-2024-089,RMQ-9198,2024-05-07T09:14:24.000Z,Coastal Road,Limao,Tarragona,bus,minor,Side-swipe while overtaking,6.908124,125.997856
+ACC-2024-090,DBA-8071,2024-02-15T02:19:16.000Z,Main Road,Lamiawan,Caraga,motorcycle,minor,Hit-and-run reported; suspect fled scene,7.02314,126.097219
+ACC-2024-091,TEK-1622,2024-11-19T18:34:57.000Z,Palma Gil St.,Tabunok,Tarragona,tricycle,moderate,Collision with roadside object (lamp post/fence),6.871963,125.992232
+ACC-2024-092,WCR-8920,2024-12-16T04:25:04.000Z,Purok 1 (Poblacion),Guinsang-an,Lupon,van,minor,Multiple-vehicle pileup; heavy damage reported,7.039553,126.086092
+ACC-2024-093,FQZ-0828,2024-11-01T13:27:25.000Z,Rizal Extension,Poblacion,Lupon,truck,minor,Vehicle skidded on wet road,7.070219,126.040312
+ACC-2024-094,FWI-2417,2024-11-02T06:41:33.000Z,Palma Gil St.,Dahican,Manay,bus,minor,Brake failure suspected,7.040042,126.428252
+ACC-2024-095,CWD-5869,2024-11-02T19:11:26.000Z,Ramon Magsaysay Ave.,Matiao,Manay,jeepney,minor,Tricycle struck by oncoming vehicle,6.981947,126.384922
+ACC-2024-096,CBL-5931,2024-07-18T07:43:28.000Z,San Jose St.,Manggas,Banaybanay,bus,minor,Hit-and-run reported; suspect fled scene,7.045293,126.292906
+ACC-2024-097,QAZ-6580,2024-06-14T13:09:29.000Z,Brgy. San Isidro Road,Limao,Tarragona,van,minor,Animal on road caused sudden swerve,6.924582,125.974409
+ACC-2024-098,DDQ-9590,2024-07-31T23:03:08.000Z,Pichon Road,Dapnan,Baganga,van,minor,Pedestrian involved; minor injuries reported,7.121833,126.225223
+ACC-2024-099,UCR-9033,2024-10-06T22:42:53.000Z,Coastal Road,Buanas,San Isidro,jeepney,minor,Single-vehicle rollover; driver evacuated,7.043285,126.144829
+ACC-2024-100,SII-4176,2024-05-25T08:44:18.000Z,Main Road,Guinsang-an,Lupon,car,moderate,Single-vehicle rollover; driver evacuated,7.027028,126.077906

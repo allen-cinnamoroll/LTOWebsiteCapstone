@@ -2,19 +2,31 @@ import VehicleModel from "../model/VehicleModel.js";
 import DriverModel from "../model/DriverModel.js";
 import ViolationModel from "../model/ViolationModel.js";
 import AccidentModel from "../model/AccidentModel.js";
+import { getVehicleStatus } from "../util/plateStatusCalculator.js";
 
 // Get dashboard statistics
 export const getDashboardStats = async (req, res) => {
   try {
-    // Get vehicle statistics
+    // Get vehicle statistics with proper status calculation
     const totalVehicles = await VehicleModel.countDocuments();
-    const activeVehicles = await VehicleModel.countDocuments({ status: "1" });
-    const expiredVehicles = await VehicleModel.countDocuments({ status: "0" });
+    
+    // Get all vehicles to calculate proper active/expired status based on plate number and renewal date
+    // This ensures accurate status calculation instead of relying on potentially outdated database status
+    const allVehicles = await VehicleModel.find({}, 'plateNo dateOfRenewal');
+    let activeVehicles = 0;
+    let expiredVehicles = 0;
+    
+    allVehicles.forEach(vehicle => {
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      if (status === "1") {
+        activeVehicles++;
+      } else {
+        expiredVehicles++;
+      }
+    });
 
-    // Get driver statistics
+    // Get driver statistics (no active/expired status for drivers - drivers don't have expiration status)
     const totalDrivers = await DriverModel.countDocuments();
-    const activeDrivers = await DriverModel.countDocuments({ status: "1" });
-    const expiredDrivers = await DriverModel.countDocuments({ status: "0" });
 
     // Get violation statistics
     const totalViolations = await ViolationModel.countDocuments();
@@ -72,9 +84,7 @@ export const getDashboardStats = async (req, res) => {
           expired: expiredVehicles
         },
         drivers: {
-          total: totalDrivers,
-          active: activeDrivers,
-          expired: expiredDrivers
+          total: totalDrivers
         },
         violations: {
           total: totalViolations,
@@ -303,9 +313,11 @@ export const getDriverChartData = async (req, res) => {
       });
     }
     
-    console.log("Driver found:", driver.ownerRepresentativeName, "Plate:", driver.plateNo);
+    console.log("Driver found:", driver.ownerRepresentativeName, "Plates:", driver.plateNo);
     
-    let matchStage = { plateNo: driver.plateNo };
+    // Handle multiple plate numbers - use $in operator to match any of the driver's plates
+    const driverPlates = Array.isArray(driver.plateNo) ? driver.plateNo : [driver.plateNo];
+    let matchStage = { plateNo: { $in: driverPlates } };
     let groupStage = {};
     let sortStage = {};
 
@@ -318,7 +330,7 @@ export const getDriverChartData = async (req, res) => {
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 7);
         matchStage = { 
-          plateNo: driver.plateNo,
+          plateNo: { $in: driverPlates },
           dateOfApprehension: { $gte: startDate } 
         };
         groupStage = {
@@ -337,7 +349,7 @@ export const getDriverChartData = async (req, res) => {
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 3);
         matchStage = { 
-          plateNo: driver.plateNo,
+          plateNo: { $in: driverPlates },
           dateOfApprehension: { $gte: startDate } 
         };
         groupStage = {
@@ -355,7 +367,7 @@ export const getDriverChartData = async (req, res) => {
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 6);
         matchStage = { 
-          plateNo: driver.plateNo,
+          plateNo: { $in: driverPlates },
           dateOfApprehension: { $gte: startDate } 
         };
         groupStage = {
@@ -373,7 +385,7 @@ export const getDriverChartData = async (req, res) => {
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 12);
         matchStage = { 
-          plateNo: driver.plateNo,
+          plateNo: { $in: driverPlates },
           dateOfApprehension: { $gte: startDate } 
         };
         groupStage = {
@@ -391,7 +403,7 @@ export const getDriverChartData = async (req, res) => {
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 1);
         matchStage = { 
-          plateNo: driver.plateNo,
+          plateNo: { $in: driverPlates },
           dateOfApprehension: { $gte: startDate } 
         };
         groupStage = {
@@ -409,7 +421,7 @@ export const getDriverChartData = async (req, res) => {
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 5);
         matchStage = { 
-          plateNo: driver.plateNo,
+          plateNo: { $in: driverPlates },
           dateOfApprehension: { $gte: startDate } 
         };
         groupStage = {
@@ -425,7 +437,7 @@ export const getDriverChartData = async (req, res) => {
       case 'all':
       default:
         // All time - no date filter, only plate filter
-        matchStage = { plateNo: driver.plateNo };
+        matchStage = { plateNo: { $in: driverPlates } };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },

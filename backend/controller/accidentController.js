@@ -1,13 +1,12 @@
 import AccidentModel from "../model/AccidentModel.js";
 import DriverModel from "../model/DriverModel.js";
 import VehicleModel from "../model/VehicleModel.js";
+import UserModel from "../model/UserModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
 export const getAccidents = async (req, res) => {
   try {
-    const accidents = await AccidentModel.find()
-      .populate("driver_id", "licenseNo firstName lastName middleName")
-      .populate("vehicle_id", "plateNo make series");
+    const accidents = await AccidentModel.find();
 
     res.json({ success: true, data: accidents });
   } catch (error) {
@@ -18,25 +17,7 @@ export const getAccidents = async (req, res) => {
 
 export const createAccident = async (req, res) => {
   try {
-    const { driver_id, vehicle_id, accident_id } = req.body;
-
-    // Find driver by licenseNo
-    const driver = await DriverModel.findOne({ licenseNo: driver_id });
-    if (!driver) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid driver license number: Driver not found" 
-      });
-    }
-
-    // Find vehicle by plateNo
-    const vehicle = await VehicleModel.findOne({ plateNo: vehicle_id });
-    if (!vehicle) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid vehicle plate number: Vehicle not found" 
-      });
-    }
+    const { plateNo, accident_id } = req.body;
 
     // Generate accident_id if not provided or empty
     let finalAccidentId = accident_id;
@@ -45,34 +26,43 @@ export const createAccident = async (req, res) => {
       finalAccidentId = `ACC-${timestamp}`;
     }
 
-    // Create accident with actual ObjectIds
+    // Create accident with plateNo directly
     const accidentData = {
       ...req.body,
-      accident_id: finalAccidentId,
-      driver_id: driver._id,
-      vehicle_id: vehicle._id
+      accident_id: finalAccidentId
     };
 
     const accident = new AccidentModel(accidentData);
     await accident.save();
 
     // Log the activity
-    if (req.user) {
-      await logUserActivity({
-        userId: req.user._id,
-        userName: `${req.user.firstName} ${req.user.lastName}`,
-        email: req.user.email,
-        role: req.user.role,
-        logType: 'add_accident',
-        ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
-        status: 'success',
-        details: `Added accident: ${finalAccidentId} (Driver: ${driver_id}, Vehicle: ${vehicle_id})`,
-        actorId: req.user._id,
-        actorName: `${req.user.firstName} ${req.user.lastName}`,
-        actorEmail: req.user.email,
-        actorRole: req.user.role
-      });
+    if (req.user && req.user.userId) {
+      try {
+        // Fetch user details for logging
+        const user = await UserModel.findById(req.user.userId);
+        if (user) {
+          await logUserActivity({
+            userId: user._id,
+            userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+            email: user.email,
+            role: user.role,
+            logType: 'add_accident',
+            ipAddress: getClientIP(req),
+            userAgent: getUserAgent(req),
+            status: 'success',
+            details: `Added accident: ${finalAccidentId} (Plate: ${plateNo})`,
+            actorId: user._id,
+            actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+            actorEmail: user.email,
+            actorRole: user.role
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+        // Don't fail the main operation if logging fails
+      }
+    } else {
+      console.warn('User not authenticated or user.userId is missing for accident creation');
     }
 
     res
@@ -85,9 +75,7 @@ export const createAccident = async (req, res) => {
 
 export const getAccidentById = async (req, res) => {
   try {
-    const accident = await AccidentModel.findById(req.params.id)
-      .populate("driver_id", "licenseNo firstName lastName middleName")
-      .populate("vehicle_id", "plateNo make series");
+    const accident = await AccidentModel.findById(req.params.id);
     if (!accident) {
       return res
         .status(404)
@@ -101,30 +89,7 @@ export const getAccidentById = async (req, res) => {
 
 export const updateAccident = async (req, res) => {
   try {
-    const { driver_id, vehicle_id } = req.body;
-    let updateData = { ...req.body };
-
-    if (driver_id) {
-      const driver = await DriverModel.findOne({ licenseNo: driver_id });
-      if (!driver) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid driver license number: Driver not found" 
-        });
-      }
-      updateData.driver_id = driver._id;
-    }
-
-    if (vehicle_id) {
-      const vehicle = await VehicleModel.findOne({ plateNo: vehicle_id });
-      if (!vehicle) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid vehicle plate number: Vehicle not found" 
-        });
-      }
-      updateData.vehicle_id = vehicle._id;
-    }
+    const updateData = { ...req.body };
 
     const accident = await AccidentModel.findByIdAndUpdate(
       req.params.id,
@@ -138,22 +103,33 @@ export const updateAccident = async (req, res) => {
     }
 
     // Log the activity
-    if (req.user) {
-      await logUserActivity({
-        userId: req.user._id,
-        userName: `${req.user.firstName} ${req.user.lastName}`,
-        email: req.user.email,
-        role: req.user.role,
-        logType: 'update_accident',
-        ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
-        status: 'success',
-        details: `Updated accident: ${accident.accident_id} (Driver: ${driver_id || 'unchanged'}, Vehicle: ${vehicle_id || 'unchanged'})`,
-        actorId: req.user._id,
-        actorName: `${req.user.firstName} ${req.user.lastName}`,
-        actorEmail: req.user.email,
-        actorRole: req.user.role
-      });
+    if (req.user && req.user.userId) {
+      try {
+        // Fetch user details for logging
+        const user = await UserModel.findById(req.user.userId);
+        if (user) {
+          await logUserActivity({
+            userId: user._id,
+            userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+            email: user.email,
+            role: user.role,
+            logType: 'update_accident',
+            ipAddress: getClientIP(req),
+            userAgent: getUserAgent(req),
+            status: 'success',
+            details: `Updated accident: ${accident.accident_id} (Plate: ${updateData.plateNo || 'unchanged'})`,
+            actorId: user._id,
+            actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+            actorEmail: user.email,
+            actorRole: user.role
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+        // Don't fail the main operation if logging fails
+      }
+    } else {
+      console.warn('User not authenticated or user.userId is missing for accident update');
     }
 
     res.json({ success: true, message: "Accident updated", data: accident });
@@ -175,22 +151,33 @@ export const deleteAccident = async (req, res) => {
     }
 
     // Log the activity before deleting
-    if (req.user) {
-      await logUserActivity({
-        userId: req.user._id,
-        userName: `${req.user.firstName} ${req.user.lastName}`,
-        email: req.user.email,
-        role: req.user.role,
-        logType: 'delete_accident',
-        ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
-        status: 'success',
-        details: `Deleted accident: ${accident.accident_id}`,
-        actorId: req.user._id,
-        actorName: `${req.user.firstName} ${req.user.lastName}`,
-        actorEmail: req.user.email,
-        actorRole: req.user.role
-      });
+    if (req.user && req.user.userId) {
+      try {
+        // Fetch user details for logging
+        const user = await UserModel.findById(req.user.userId);
+        if (user) {
+          await logUserActivity({
+            userId: user._id,
+            userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+            email: user.email,
+            role: user.role,
+            logType: 'delete_accident',
+            ipAddress: getClientIP(req),
+            userAgent: getUserAgent(req),
+            status: 'success',
+            details: `Deleted accident: ${accident.accident_id}`,
+            actorId: user._id,
+            actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+            actorEmail: user.email,
+            actorRole: user.role
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+        // Don't fail the main operation if logging fails
+      }
+    } else {
+      console.warn('User not authenticated or user.userId is missing for accident deletion');
     }
 
     await AccidentModel.findByIdAndDelete(req.params.id);
