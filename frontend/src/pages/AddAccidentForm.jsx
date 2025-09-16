@@ -20,12 +20,18 @@ const AddAccidentForm = () => {
     resolver: zodResolver(AccidentSchema),
     defaultValues: {
       accident_id: "",
-      driver_id: "",
-      vehicle_id: "",
+      plateNo: "",
       accident_date: undefined,
       street: "",
       barangay: "",
       municipality: "",
+      vehicle_type: "",
+      severity: "",
+      notes: "",
+      coordinates: {
+        lat: 0,
+        lng: 0
+      }
     },
   });
 
@@ -34,13 +40,18 @@ const AddAccidentForm = () => {
     try {
       const content = {
         accident_id: formData.accident_id,
-        driver_id: formData.driver_id,
-        vehicle_id: formData.vehicle_id,
-        accident_date: formData.accident_date,
+        plateNo: formData.plateNo,
+        accident_date: formData.accident_date ? formData.accident_date.toISOString() : null,
         street: formData.street,
         barangay: formData.barangay,
         municipality: formData.municipality,
+        vehicle_type: formData.vehicle_type,
+        severity: formData.severity,
+        notes: formData.notes,
+        coordinates: formData.coordinates
       };
+
+      console.log("Sending accident data:", content);
 
       const { data } = await apiClient.post("/accident", content, {
         headers: { Authorization: token },

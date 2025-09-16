@@ -11,7 +11,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     vehicles: { total: 0, active: 0, expired: 0 },
-    drivers: { total: 0, active: 0, expired: 0 },
+    drivers: { total: 0 },
     violations: { total: 0, recent: 0, byType: [] },
     accidents: { total: 0 },
     trends: { monthlyViolations: [] }
@@ -58,10 +58,6 @@ const HomePage = () => {
           name={"Registered Drivers"}
           value={loading ? "..." : stats.drivers.total.toString()}
           icon={Users}
-          statuses={[
-            { label: `${stats.drivers.active} Active`, color: "#047857", bgColor: "#d1fae5" }, // Green
-            { label: `${stats.drivers.expired} Expired`, color: "#dc2626", bgColor: "#fee2e2" }, // Red
-          ]}
         />
         <StatCard 
           name={"Violations"} 

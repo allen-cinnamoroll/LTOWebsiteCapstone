@@ -5,14 +5,9 @@ export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
     cell: ({ row }) => <div className="">{row.getValue("accident_id")}</div>,
   },
   {
-    accessorKey: "driver_id",
-    header: "Driver License No.",
-    cell: ({ row }) => <div className="">{row.getValue("driver_id")}</div>,
-  },
-  {
-    accessorKey: "vehicle_id",
-    header: "Vehicle Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("vehicle_id")}</div>,
+    accessorKey: "plateNo",
+    header: "Plate No.",
+    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "accident_date",
@@ -33,6 +28,29 @@ export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
     accessorKey: "municipality",
     header: "Municipality",
     cell: ({ row }) => <div className="">{row.getValue("municipality")}</div>,
+  },
+  {
+    accessorKey: "vehicle_type",
+    header: "Vehicle Type",
+    cell: ({ row }) => <div className="">{row.getValue("vehicle_type")}</div>,
+  },
+  {
+    accessorKey: "severity",
+    header: "Severity",
+    cell: ({ row }) => {
+      const severity = row.getValue("severity");
+      const severityColors = {
+        minor: "text-green-600 bg-green-100",
+        moderate: "text-yellow-600 bg-yellow-100", 
+        severe: "text-orange-600 bg-orange-100",
+        fatal: "text-red-600 bg-red-100"
+      };
+      return (
+        <div className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${severityColors[severity] || 'text-gray-600 bg-gray-100'}`}>
+          {severity}
+        </div>
+      );
+    },
   },
   {
     id: "actions",
@@ -149,11 +167,6 @@ export const deactivatedDriverColumns = (onAction) => [
     },
   },
   {
-    accessorKey: "dateOfRenewal",
-    header: "Date of Renewal",
-    cell: ({ row }) => <div className="">{row.getValue("dateOfRenewal")}</div>,
-  },
-  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
@@ -188,7 +201,11 @@ export const driverColumns = (onEdit, onDelete) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => {
+      const plateNo = row.getValue("plateNo");
+      const plateNoArray = Array.isArray(plateNo) ? plateNo : [plateNo];
+      return <div className="">{plateNoArray.join(", ")}</div>;
+    },
   },
   {
     accessorKey: "ownerRepresentativeName",
@@ -224,7 +241,16 @@ export const driverColumns = (onEdit, onDelete) => [
     header: "Birthday",
     cell: ({ row }) => {
       const birthDate = row.getValue("birthDate");
-      return <div className="">{birthDate ? new Date(birthDate).toLocaleDateString() : "None"}</div>;
+      if (!birthDate) {
+        return <div className="">None</div>;
+      }
+      
+      const dateObj = new Date(birthDate);
+      if (isNaN(dateObj.getTime())) {
+        return <div className="">Invalid Date</div>;
+      }
+      
+      return <div className="">{dateObj.toLocaleDateString()}</div>;
     },
   },
   {
@@ -241,41 +267,6 @@ export const driverColumns = (onEdit, onDelete) => [
     cell: ({ row }) => {
       const emailAddress = row.getValue("emailAddress");
       return <div className="">{emailAddress || "None"}</div>;
-    },
-  },
-  {
-    accessorKey: "dateOfRenewal",
-    header: "Date of Renewal",
-    cell: ({ row }) => {
-      const date = row.getValue("dateOfRenewal");
-      return (
-        <div className="">
-          {date ? new Date(date).toLocaleDateString() : "Not set"}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.original.status;
-      const isActive = status === "1" || status === 1;
-      
-      return (
-        <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
-          {isActive ? (
-            <CheckCircle2Icon className="h-4 w-4 text-green-600" />
-          ) : (
-            <CircleAlert className="h-4 w-4 text-red-600" />
-          )}
-          <span className={`text-sm font-medium ${
-            isActive ? "text-green-700" : "text-red-700"
-          }`}>
-            {isActive ? "Active" : "Expired"}
-          </span>
-        </div>
-      );
     },
   },
   {
@@ -410,7 +401,9 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
   },
   {
     accessorKey: "dateOfApprehension",
-    header: "Date of Apprehension",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Date of Apprehension" />
+    ),
     cell: ({ row }) => {
       const date = row.getValue("dateOfApprehension");
       return <div className="">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
@@ -556,20 +549,32 @@ export const vehicleColumns = (onEdit, submitting) => [
     header: "Status",
     cell: ({ row }) => {
       const status = row.original.status;
+      const expirationInfo = row.original.expirationInfo;
       const isActive = status === "1" || status === 1;
       
       return (
-        <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
-          {isActive ? (
-            <CheckCircle2Icon className="h-4 w-4 text-green-600" />
-          ) : (
-            <CircleAlert className="h-4 w-4 text-red-600" />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
+            {isActive ? (
+              <CheckCircle2Icon className="h-4 w-4 text-green-600" />
+            ) : (
+              <CircleAlert className="h-4 w-4 text-red-600" />
+            )}
+            <span className={`text-sm font-medium ${
+              isActive ? "text-green-700" : "text-red-700"
+            }`}>
+              {isActive ? "Active" : "Expired"}
+            </span>
+          </div>
+          {expirationInfo && (
+            <div className="text-xs text-muted-foreground px-2">
+              <div>Last 2 digits: {expirationInfo.lastTwoDigits}</div>
+              <div>{expirationInfo.week} week of {expirationInfo.month}</div>
+              {expirationInfo.expirationDate && (
+                <div>Expires: {new Date(expirationInfo.expirationDate).toLocaleDateString()}</div>
+              )}
+            </div>
           )}
-          <span className={`text-sm font-medium ${
-            isActive ? "text-green-700" : "text-red-700"
-          }`}>
-            {isActive ? "Active" : "Expired"}
-          </span>
         </div>
       );
     },

@@ -8,9 +8,25 @@ export const LoginSchema = z.object({
 });
 
 export const CreateDriverSchema = z.object({
-  plateNo: z.string().min(1, {
-    message: "Plate number is required",
-  }),
+  plateNo: z
+    .union([
+      z.string().min(1, {
+        message: "Plate number is required",
+      }),
+      z.array(z.string().min(1, {
+        message: "Each plate number must not be empty",
+      })).min(1, {
+        message: "At least one plate number is required",
+      })
+    ])
+    .transform((val) => {
+      // Convert string to array if needed
+      if (typeof val === 'string') {
+        return val.split(',').map(plate => plate.trim()).filter(plate => plate.length > 0);
+      }
+      return val;
+    }),
+  fileNo: z.string().optional(),
   ownerRepresentativeName: z.string().min(1, {
     message: "Owner/Representative name is required",
   }),
@@ -21,8 +37,8 @@ export const CreateDriverSchema = z.object({
   municipality: z.string().min(1, {
     message: "Municipality is required",
   }),
-  region: z.string().min(1, {
-    message: "Region is required",
+  province: z.string().min(1, {
+    message: "Province is required",
   }),
   contactNumber: z.string().optional(),
   emailAddress: z.string().email({
@@ -44,11 +60,9 @@ export const CreateDriverSchema = z.object({
 });
 
 export const VehicleSchema = z.object({
-  plateNo: z
-    .string()
-    .min(1, {
-      message: "Plate number is required",
-    }),
+  plateNo: z.string().min(1, {
+    message: "Plate number is required",
+  }),
   fileNo: z.string().min(1, {
     message: "File number is required",
   }),
@@ -71,16 +85,23 @@ export const VehicleSchema = z.object({
     message: "Classification is required",
   }),
   dateOfRenewal: z.date().optional(),
+  driver: z.string().optional(),
 });
 
 export const AccidentSchema = z.object({
   accident_id: z.string().optional(),
-  driver_id: z.string().min(1, { message: "Driver's license number is required" }),
-  vehicle_id: z.string().min(1, { message: "Vehicle plate number is required" }),
+  plateNo: z.string().min(1, { message: "Plate number is required" }),
   accident_date: z.date({ required_error: "Accident date is required" }),
   street: z.string().min(1, { message: "Street is required" }),
   barangay: z.string().min(1, { message: "Barangay is required" }),
   municipality: z.string().min(1, { message: "Municipality is required" }),
+  vehicle_type: z.string().min(1, { message: "Vehicle type is required" }),
+  severity: z.string().min(1, { message: "Severity is required" }),
+  notes: z.string().optional(),
+  coordinates: z.object({
+    lat: z.number(),
+    lng: z.number()
+  }).optional(),
 });
 
 export const ViolationCreateSchema = z.object({

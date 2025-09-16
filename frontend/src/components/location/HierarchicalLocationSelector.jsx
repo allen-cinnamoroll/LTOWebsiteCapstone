@@ -60,7 +60,7 @@ const HierarchicalLocationSelector = ({
     form.setValue("municipality", value);
     form.setValue("barangay", "");
     form.setValue("purok", "");
-    form.setValue("region", davaoOrientalData.region);
+    form.setValue("province", davaoOrientalData.region);
     
     if (onLocationChange) {
       onLocationChange({
@@ -113,7 +113,7 @@ const HierarchicalLocationSelector = ({
 
   // Initialize region value on component mount
   useEffect(() => {
-    form.setValue("region", davaoOrientalData.region);
+    form.setValue("province", davaoOrientalData.region);
   }, [form]);
 
   // Close dropdown when clicking outside
@@ -134,10 +134,10 @@ const HierarchicalLocationSelector = ({
 
   return (
     <div className="space-y-4">
-      {/* Region - Fixed */}
+      {/* Province - Fixed */}
       <div>
         <label className="text-sm font-medium text-muted-foreground">
-          Region
+          Province
         </label>
         <div className="mt-1 p-3 bg-muted rounded-md border">
           <span className="text-sm font-medium">{davaoOrientalData.region}</span>
@@ -174,7 +174,7 @@ const HierarchicalLocationSelector = ({
               )}
             />
             {municipalitySearch && (
-              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto scrollbar-transparent">
                 {municipalities.length > 0 ? (
                   municipalities.map((municipality) => (
                     <div
@@ -227,7 +227,7 @@ const HierarchicalLocationSelector = ({
               )}
             />
             {selectedMunicipality && barangaySearch && (
-              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto scrollbar-transparent">
                 {barangays.length > 0 ? (
                   barangays.map((barangay) => (
                     <div
@@ -279,7 +279,7 @@ const HierarchicalLocationSelector = ({
               )}
             />
             {selectedBarangay && purokSearch && (
-              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto scrollbar-transparent">
                 {puroks.length > 0 ? (
                   puroks.map((purok) => (
                     <div

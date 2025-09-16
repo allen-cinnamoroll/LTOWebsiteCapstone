@@ -30,6 +30,7 @@ import {
   Plus,
   Settings2,
   Trash,
+  RefreshCw,
 } from "lucide-react";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import { Label } from "@/components/ui/label";
@@ -46,6 +47,7 @@ const VehiclesTable = ({
   onRowClick,
   onAdd,
   onEdit,
+  onRenewal,
   submitting
 }) => {
   const [sorting, setSorting] = React.useState([]);
@@ -106,6 +108,10 @@ const VehiclesTable = ({
           <Button onClick={onAdd} className={"w-min flex items-center gap-2"}>
             <Plus />
             <span className="hidden lg:inline">{"Add Vehicle"}</span>
+          </Button>
+          <Button onClick={onRenewal} variant="outline" className={"w-min flex items-center gap-2"}>
+            <RefreshCw />
+            <span className="hidden lg:inline">{"Renewal"}</span>
           </Button>
           <DataTableViewOptions table={table} />
         </div>

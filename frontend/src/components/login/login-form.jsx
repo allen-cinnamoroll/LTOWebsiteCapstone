@@ -43,11 +43,7 @@ export function LoginForm({ className, ...props }) {
     },
   });
 
-  const onSubmit = async (formData, event) => {
-    // Prevent default form submission behavior
-    if (event) {
-      event.preventDefault();
-    }
+  const onSubmit = async (formData) => {
     
     try {
       setIsSubmitting(true);
@@ -78,7 +74,7 @@ export function LoginForm({ className, ...props }) {
     } catch (error) {
       console.error("Login error:", error);
       
-      // Clear any previous form errors
+      // Clear any previous form errors but keep form values
       form.clearErrors();
       
       const errorType =
@@ -103,17 +99,22 @@ export function LoginForm({ className, ...props }) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form 
+          key="login-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit(onSubmit)(e);
+          }}
+        >
           <div className="flex flex-col gap-6">
             <div className="flex flex-col  gap-2">
-              <a
-                href="#"
+              <div
                 className="flex flex-col items-center gap-2 font-medium"
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-md">
                   <GalleryVerticalEnd className="size-6" />
                 </div>
-              </a>
+              </div>
               <h1 className="text-xl font-bold">Login</h1>
               <div className="text-start text-sm">
                 Fill in the form to get started.{" "}
@@ -186,7 +187,7 @@ export function LoginForm({ className, ...props }) {
                 )}
               />
 
-              <Button disabled={submitting} id="submit" className="w-full">
+              <Button type="submit" disabled={submitting} id="submit" className="w-full">
                 {submitting ? (
                   <LoaderCircle className="w-6 h-6 text-primary-foreground mx-auto animate-spin" />
                 ) : (
@@ -195,12 +196,12 @@ export function LoginForm({ className, ...props }) {
               </Button>
             </div>
             <div className="relative text-end text-sm ">
-              <a
-                href="#"
-                className="relative z-10 bg-background px-2 text-muted-foreground"
+              <button
+                type="button"
+                className="relative z-10 bg-background px-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 Forgot your password?
-              </a>
+              </button>
             </div>
           </div>
         </form>

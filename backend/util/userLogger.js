@@ -19,6 +19,15 @@ import UserLog from '../model/UserLogModel.js';
  */
 const logUserActivity = async (logData) => {
   try {
+    // Validate required fields
+    if (!logData.userId) {
+      throw new Error('userId is required for user activity logging');
+    }
+    
+    if (!logData.userName || !logData.email || !logData.role) {
+      throw new Error('userName, email, and role are required for user activity logging');
+    }
+
     const log = new UserLog({
       userId: logData.userId,
       userName: logData.userName,
@@ -38,7 +47,7 @@ const logUserActivity = async (logData) => {
     await log.save();
     return log;
   } catch (error) {
-    console.error('Error logging user activity:', error);
+    console.error('Error logging user activity:', error.message);
     // Don't throw error to avoid breaking the main flow
   }
 };
@@ -61,14 +70,16 @@ const getClientIP = (req) => {
     ip = '127.0.0.1';
   }
   
-  // Log IP detection for debugging
-  console.log('IP Detection:', {
-    reqIp: req.ip,
-    connectionRemoteAddress: req.connection.remoteAddress,
-    socketRemoteAddress: req.socket.remoteAddress,
-    xForwardedFor: req.headers['x-forwarded-for'],
-    finalIp: ip
-  });
+  // Log IP detection for debugging (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('IP Detection:', {
+      reqIp: req.ip,
+      connectionRemoteAddress: req.connection.remoteAddress,
+      socketRemoteAddress: req.socket.remoteAddress,
+      xForwardedFor: req.headers['x-forwarded-for'],
+      finalIp: ip
+    });
+  }
   
   return ip;
 };

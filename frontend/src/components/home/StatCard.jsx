@@ -14,9 +14,9 @@ const StatCard = ({ name, icon: Icon, value, color, loading, statuses=[] }) => {
           <span className="flex items-center justify-between text-xs text-muted-foreground ">
             
             {name}
-            <Icon size={20} className={`mr-2 text-accent-foreground`}  />
+            <Icon size={20} className={`mr-3 text-accent-foreground`}  />
           </span>
-          <p className="mt-1 text-2xl md:text-3xl tracking-tight font-bold ">{value}</p>
+          <p className="mt-1 text-3xl md:text-4xl tracking-tight font-bold ">{value}</p>
          {/* Render statuses if available */}
          {statuses.length > 0 && (
             <div className="space-x-2 mt-2">

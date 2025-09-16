@@ -90,3 +90,51 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom scrollbar styling for dropdowns and other elements */
+@layer utilities {
+  .scrollbar-transparent {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  
+  .scrollbar-transparent::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-transparent::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-transparent::-webkit-scrollbar-thumb:hover {
+    background: transparent;
+  }
+  
+  /* Alternative: Subtle scrollbar that adapts to theme */
+  .scrollbar-theme {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  .scrollbar-theme::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-theme::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-theme::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-theme::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}

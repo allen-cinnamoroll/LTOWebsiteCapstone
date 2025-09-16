@@ -42,17 +42,7 @@ const DeactivatedDriversPage = () => {
         },
       });
 
-      // Get vehicle data to get renewal dates
-      const { data: vehicleData } = await apiClient.get("/vehicle", {
-        headers: {
-          Authorization: token,
-        },
-      });
-
       const driverData = data.data.map((dData) => {
-        // Find vehicle with matching plate number to get renewal date
-        const vehicle = vehicleData.data.find(v => v.plateNo === dData.plateNo);
-        
         return {
           _id: dData._id,
           plateNo: dData.plateNo,
@@ -63,9 +53,7 @@ const DeactivatedDriversPage = () => {
           emailAddress: dData.emailAddress,
           hasDriversLicense: dData.hasDriversLicense,
           driversLicenseNumber: dData.driversLicenseNumber,
-          dateOfRenewal: vehicle ? formatSimpleDate(vehicle.dateOfRenewal) : "Not set",
           isActive: dData.isActive,
-          status: dData.status,
         };
       });
 
@@ -99,7 +87,7 @@ const DeactivatedDriversPage = () => {
     const promise = async () => {
       try {
         const response = await apiClient.patch(
-          `/driver/${currentDriver}/updateStatus`,
+          `/driver/${currentDriver}`,
           {
             isActive: data,
           },

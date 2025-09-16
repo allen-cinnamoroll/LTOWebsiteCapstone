@@ -1,34 +1,32 @@
 import DriverModel from "../model/DriverModel.js";
 import VehicleModel from "../model/VehicleModel.js";
+import { getVehicleStatus, getExpirationInfo } from "./plateStatusCalculator.js";
 
 /**
  * Check if a driver's renewal date has passed and update status accordingly
+ * Uses plate-based calculation for consistency with vehicle status
+ * @param {string} plateNo - The plate number
  * @param {Date} renewalDate - The driver's renewal date
  * @returns {string} - "0" for expired, "1" for active
  */
-export const checkDriverExpirationStatus = (renewalDate) => {
-  const currentDate = new Date();
-  const renewalDateObj = new Date(renewalDate);
+export const checkDriverExpirationStatus = (plateNo, renewalDate) => {
+  // Use plate-based status calculation for consistency with vehicle status
+  const status = getVehicleStatus(plateNo, renewalDate);
+  console.log(`Driver expiration check for plate ${plateNo}: ${renewalDate ? new Date(renewalDate).toDateString() : 'No date'} = ${status === "0" ? 'EXPIRED' : 'ACTIVE'}`);
   
-  // Reset time to compare only dates
-  currentDate.setHours(0, 0, 0, 0);
-  renewalDateObj.setHours(0, 0, 0, 0);
-  
-  const isExpired = renewalDateObj < currentDate;
-  console.log(`Driver expiration check: ${renewalDateObj.toDateString()} vs ${currentDate.toDateString()} = ${isExpired ? 'EXPIRED' : 'ACTIVE'}`);
-  
-  return isExpired ? "0" : "1"; // "0" = expired, "1" = active
+  return status; // "0" = expired, "1" = active
 };
 
 /**
  * Update driver status based on renewal date
  * @param {string} driverId - The driver ID
+ * @param {string} plateNo - The plate number
  * @param {Date} renewalDate - The new renewal date
  * @returns {Promise<Object>} - Updated driver object
  */
-export const updateDriverStatusByExpiration = async (driverId, renewalDate) => {
+export const updateDriverStatusByExpiration = async (driverId, plateNo, renewalDate) => {
   try {
-    const newStatus = checkDriverExpirationStatus(renewalDate);
+    const newStatus = checkDriverExpirationStatus(plateNo, renewalDate);
     console.log(`Updating driver ${driverId} status to: ${newStatus === "0" ? "EXPIRED" : "ACTIVE"}`);
     
     const updatedDriver = await DriverModel.findByIdAndUpdate(
@@ -55,15 +53,15 @@ export const updateDriverStatusByExpiration = async (driverId, renewalDate) => {
  */
 export const updateDriverStatusByVehicleRenewal = async (plateNo, renewalDate) => {
   try {
-    // Find driver by plate number
-    const driver = await DriverModel.findOne({ plateNo });
+    // Find driver by plate number (handle array format)
+    const driver = await DriverModel.findOne({ plateNo: { $in: [plateNo] } });
     
     if (!driver) {
       console.log(`No driver found with plate number ${plateNo}`);
       return null;
     }
     
-    const newStatus = checkDriverExpirationStatus(renewalDate);
+    const newStatus = checkDriverExpirationStatus(plateNo, renewalDate);
     console.log(`Updating driver ${driver._id} status to: ${newStatus === "0" ? "EXPIRED" : "ACTIVE"} based on vehicle renewal date`);
     
     const updatedDriver = await DriverModel.findByIdAndUpdate(
@@ -82,39 +80,45 @@ export const updateDriverStatusByVehicleRenewal = async (plateNo, renewalDate) =
 
 /**
  * Check and update all drivers' status based on their renewal dates
+ * Uses plate-based calculation for consistency with vehicle status
  * This can be called periodically or manually
  */
 export const checkAllDriversExpiration = async () => {
   try {
     const drivers = await DriverModel.find();
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
     
     let updatedCount = 0;
     
     for (const driver of drivers) {
       // Get renewal date from vehicle using plate number
-      const vehicle = await VehicleModel.findOne({ plateNo: driver.plateNo });
+      // Handle both array and string plateNo formats for drivers
+      const driverPlates = Array.isArray(driver.plateNo) ? driver.plateNo : 
+                          (driver.plateNo ? driver.plateNo.split(',').map(p => p.trim()) : []);
+      
+      let vehicle = null;
+      for (const plate of driverPlates) {
+        vehicle = await VehicleModel.findOne({ plateNo: plate });
+        if (vehicle) break;
+      }
       
       if (!vehicle || !vehicle.dateOfRenewal) {
         console.log(`No vehicle or renewal date found for driver ${driver._id} with plate ${driver.plateNo}`);
         continue;
       }
       
-      const renewalDate = new Date(vehicle.dateOfRenewal);
-      renewalDate.setHours(0, 0, 0, 0);
+      // Use plate-based status calculation for consistency
+      const firstPlate = driverPlates[0];
+      const correctStatus = getVehicleStatus(firstPlate, vehicle.dateOfRenewal);
+      const currentStatus = driver.status;
       
-      const shouldBeExpired = renewalDate < currentDate;
-      const isCurrentlyExpired = driver.status === "0";
-      
-      // Update status if it doesn't match the renewal date
-      if (shouldBeExpired !== isCurrentlyExpired) {
+      // Update status if it doesn't match the plate-based calculation
+      if (correctStatus !== currentStatus) {
         await DriverModel.findByIdAndUpdate(
           driver._id,
-          { status: shouldBeExpired ? "0" : "1" }
+          { status: correctStatus }
         );
         updatedCount++;
-        console.log(`Updated driver ${driver._id} status to: ${shouldBeExpired ? "EXPIRED" : "ACTIVE"} based on vehicle renewal date ${renewalDate.toDateString()}`);
+        console.log(`Updated driver ${driver._id} status to: ${correctStatus === "0" ? "EXPIRED" : "ACTIVE"} based on plate-based calculation for plate ${firstPlate}`);
       }
     }
     

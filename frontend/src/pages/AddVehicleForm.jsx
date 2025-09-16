@@ -34,6 +34,7 @@ const AddVehicleForm = () => {
       color: "",
       classification: undefined,
       dateOfRenewal: undefined,
+      driver: "",
     },
   });
 
@@ -49,8 +50,13 @@ const AddVehicleForm = () => {
         bodyType: formData.bodyType,
         color: formData.color,
         classification: formData.classification,
-        dateOfRenewal: formData.dateOfRenewal
+        driver: formData.driver
       };
+
+      // Only include dateOfRenewal if it has a value
+      if (formData.dateOfRenewal) {
+        content.dateOfRenewal = formData.dateOfRenewal;
+      }
 
       const { data } = await apiClient.post("/vehicle", content, {
         headers: {
@@ -73,6 +79,7 @@ const AddVehicleForm = () => {
           color: "",
           classification: undefined,
           dateOfRenewal: undefined,
+          driver: "",
         });
       }
     } catch (error) {

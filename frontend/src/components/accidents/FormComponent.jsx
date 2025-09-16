@@ -2,6 +2,8 @@ import React from "react";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -15,7 +17,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Row 1: Accident ID, Driver ID */}
+        {/* Row 1: Accident ID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -30,29 +32,16 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="driver_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Driver ID</FormLabel>
-                <FormControl>
-                  <Input placeholder="Driver ID" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
-        {/* Row 2: Vehicle ID, Accident Date */}
+        {/* Row 2: Plate No., Accident Date */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="vehicle_id"
+            name="plateNo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Vehicle Plate No.</FormLabel>
+                <FormLabel>Plate No.</FormLabel>
                 <FormControl>
                   <Input placeholder="Enter vehicle plate number" {...field} />
                 </FormControl>
@@ -138,6 +127,122 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                 <FormLabel>Municipality</FormLabel>
                 <FormControl>
                   <Input placeholder="Municipality" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 4: Vehicle Type, Severity */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="vehicle_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Vehicle Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select vehicle type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="motorcycle">Motorcycle</SelectItem>
+                    <SelectItem value="car">Car</SelectItem>
+                    <SelectItem value="truck">Truck</SelectItem>
+                    <SelectItem value="bus">Bus</SelectItem>
+                    <SelectItem value="van">Van</SelectItem>
+                    <SelectItem value="jeepney">Jeepney</SelectItem>
+                    <SelectItem value="tricycle">Tricycle</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="severity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Severity</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select severity" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="moderate">Moderate</SelectItem>
+                    <SelectItem value="severe">Severe</SelectItem>
+                    <SelectItem value="fatal">Fatal</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 5: Notes */}
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Enter additional notes about the accident..." 
+                  className="resize-none"
+                  rows={3}
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 6: Coordinates */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="coordinates.lat"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Latitude</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="any"
+                    placeholder="e.g., 6.9551" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="coordinates.lng"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Longitude</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="any"
+                    placeholder="e.g., 126.2166" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

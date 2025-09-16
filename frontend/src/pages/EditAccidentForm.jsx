@@ -21,12 +21,18 @@ const EditAccidentForm = () => {
     resolver: zodResolver(AccidentSchema),
     defaultValues: {
       accident_id: "",
-      driver_id: "",
-      vehicle_id: "",
+      plateNo: "",
       accident_date: undefined,
       street: "",
       barangay: "",
       municipality: "",
+      vehicle_type: "",
+      severity: "",
+      notes: "",
+      coordinates: {
+        lat: 0,
+        lng: 0
+      }
     },
   });
   const { reset } = form;
@@ -45,12 +51,15 @@ const EditAccidentForm = () => {
         const a = data.data;
         reset({
           accident_id: a.accident_id,
-          driver_id: a.driver_id?.licenseNo || "",
-          vehicle_id: a.vehicle_id?.plateNo || "",
+          plateNo: a.plateNo || "",
           accident_date: new Date(a.accident_date),
           street: a.street,
           barangay: a.barangay,
           municipality: a.municipality,
+          vehicle_type: a.vehicle_type || "",
+          severity: a.severity || "",
+          notes: a.notes || "",
+          coordinates: a.coordinates || { lat: 0, lng: 0 }
         });
       }
     } catch (error) {
@@ -63,12 +72,15 @@ const EditAccidentForm = () => {
     try {
       const content = {
         accident_id: formData.accident_id,
-        driver_id: formData.driver_id,
-        vehicle_id: formData.vehicle_id,
-        accident_date: formData.accident_date,
+        plateNo: formData.plateNo,
+        accident_date: formData.accident_date ? formData.accident_date.toISOString() : null,
         street: formData.street,
         barangay: formData.barangay,
         municipality: formData.municipality,
+        vehicle_type: formData.vehicle_type,
+        severity: formData.severity,
+        notes: formData.notes,
+        coordinates: formData.coordinates
       };
 
       const { data } = await apiClient.patch(`/accident/${params.id}`, content, {

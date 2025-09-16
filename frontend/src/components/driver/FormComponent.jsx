@@ -39,24 +39,32 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
         <div className="space-y-4">
           <div>
             <Label>Vehicle Information</Label>
-            <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-x-3">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-3">
               <FormField
                 control={form.control}
                 name="plateNo"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
+                  <FormItem>
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
                         form.formState.errors.plateNo && "text-red-400"
                       )}
                     >
-                      Plate No.
+                      Plate No. (comma-separated for multiple)
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
+                        placeholder="ABC-123, DEF-456"
+                        value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Convert comma-separated string to array
+                          const plateArray = value.split(",").map(plate => plate.trim()).filter(plate => plate.length > 0);
+                          field.onChange(plateArray.length > 0 ? plateArray : value);
+                        }}
                         className={cn(
                           "border border-input focus:ring-0",
                           form.formState.errors.plateNo && "border-red-400"
@@ -69,9 +77,36 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
               />
               <FormField
                 control={form.control}
+                name="fileNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel
+                      className={cn(
+                        "text-muted-foreground",
+                        form.formState.errors.fileNo && "text-red-400"
+                      )}
+                    >
+                      File No. (Optional)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        className={cn(
+                          "border border-input focus:ring-0",
+                          form.formState.errors.fileNo && "border-red-400"
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="ownerRepresentativeName"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
+                  <FormItem>
                     <FormLabel
                       className={cn(
                         "text-muted-foreground",
@@ -94,7 +129,6 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                   </FormItem>
                 )}
               />
-              <div className="lg:col-span-3"></div>
             </div>
           </div>
           <div>
@@ -112,7 +146,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         form.formState.errors.birthDate && "text-red-400"
                       )}
                     >
-                      Birthday
+                      Birthday (Optional)
                     </FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -165,7 +199,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         form.formState.errors.contactNumber && "text-red-400"
                       )}
                     >
-                      Contact Number
+                      Contact Number (Optional)
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -192,7 +226,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         form.formState.errors.emailAddress && "text-red-400"
                       )}
                     >
-                      Email Address
+                      Email Address (Optional)
                     </FormLabel>
                     <FormControl>
                       <Input

@@ -5,6 +5,7 @@ import { formatDate } from "@/util/dateFormatter";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import VehiclesTable from "@/components/vehicles/VehiclesTable";
+import VehicleRenewalModal from "@/components/vehicle/VehicleRenewalModal";
 
 
 const VehiclesPage = () => {
@@ -15,6 +16,7 @@ const VehiclesPage = () => {
   const [loading, setLoading] = useState(true);
   const date = formatDate(Date.now());
   const [submitting, setIsSubmitting] = useState(false);
+  const [renewalModalOpen, setRenewalModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVehicles();
@@ -67,6 +69,15 @@ const VehiclesPage = () => {
     navigate(`/vehicle/${vehicleId}/edit`);
   };
 
+  const handleRenewal = () => {
+    setRenewalModalOpen(true);
+  };
+
+  const handleVehicleUpdated = () => {
+    // Refresh the vehicle list when a vehicle is updated through renewal modal
+    fetchVehicles();
+  };
+
 
 
   return (
@@ -82,9 +93,17 @@ const VehiclesPage = () => {
           loading={loading}
           onRowClick={onRowClick}
           onEdit={onEdit}
+          onRenewal={handleRenewal}
           submitting={submitting}
         />
       </section>
+
+      {/* Renewal Modal */}
+      <VehicleRenewalModal 
+        open={renewalModalOpen} 
+        onOpenChange={setRenewalModalOpen}
+        onVehicleUpdated={handleVehicleUpdated}
+      />
     </div>
   );
 };

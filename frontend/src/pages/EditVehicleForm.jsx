@@ -37,7 +37,7 @@ const EditVehicleForm = () => {
       bodyType: "",
       color: "",
       classification: undefined,
-      dateOfRenewal: undefined,
+      // dateOfRenewal removed - can only be updated through renewal modal
     },
   });
   const { reset } = form;
@@ -71,7 +71,7 @@ const EditVehicleForm = () => {
           bodyType: data.data?.bodyType,
           color: data.data?.color,
           classification: data.data?.classification,
-          dateOfRenewal: new Date(data.data?.dateOfRenewal), // Use dateOfRenewal directly from API
+          // dateOfRenewal removed - can only be updated through renewal modal
         };
 
         setVehicleData(vData);
@@ -93,7 +93,7 @@ const EditVehicleForm = () => {
         bodyType: formData.bodyType,
         color: formData.color,
         classification: formData.classification,
-        dateOfRenewal: formData.dateOfRenewal, // Use dateOfRenewal directly
+        // dateOfRenewal removed - can only be updated through renewal modal
       };
 
 
@@ -137,6 +137,7 @@ const EditVehicleForm = () => {
           form={form}
           onSubmit={onSubmit}
           submitting={submitting}
+          hideDateOfRenewal={true}
         />
       </CardContent>
     </Card>

@@ -81,7 +81,7 @@ const DriverCard = () => {
     const promise = async () => {
       try {
         const response = await apiClient.patch(
-          `/driver/${driverId}/updateStatus`,
+          `/driver/${driverId}`,
           {
             isActive: data,
           },
@@ -165,10 +165,6 @@ const DriverCard = () => {
             <h2 className="text-muted-foreground ">Region:</h2>
             <p className="font-semibold w-full">
               {driverData?.address?.region}
-            </p>
-            <h2 className="text-muted-foreground ">Date of Renewal:</h2>
-            <p className="font-semibold w-full">
-              {formatSimpleDate(driverData?.dateOfRenewal)}
             </p>
           </div>
         </CardContent>

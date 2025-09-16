@@ -63,18 +63,34 @@ const AccidentCard = () => {
           <p className="font-semibold w-full">{formatSimpleDate(accidentData?.accident_date)}</p>
           <h2 className="text-muted-foreground px-6">Location:</h2>
           <p className="font-semibold w-full">{`${accidentData?.street || ""}, ${accidentData?.barangay || ""}, ${accidentData?.municipality || ""}`}</p>
-          <h2 className="text-muted-foreground px-6">Driver:</h2>
+          <h2 className="text-muted-foreground px-6">Plate No:</h2>
+          <p className="font-semibold w-full">{accidentData?.plateNo || "N/A"}</p>
+          <h2 className="text-muted-foreground px-6">Vehicle Type:</h2>
+          <p className="font-semibold w-full">{accidentData?.vehicle_type || "N/A"}</p>
+          <h2 className="text-muted-foreground px-6">Severity:</h2>
           <p className="font-semibold w-full">
-            {accidentData?.driver_id
-              ? `${accidentData.driver_id.firstName} ${accidentData.driver_id.middleName || ""} ${accidentData.driver_id.lastName}`
-              : "N/A"}
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+              accidentData?.severity === 'minor' ? 'text-green-600 bg-green-100' :
+              accidentData?.severity === 'moderate' ? 'text-yellow-600 bg-yellow-100' :
+              accidentData?.severity === 'severe' ? 'text-orange-600 bg-orange-100' :
+              accidentData?.severity === 'fatal' ? 'text-red-600 bg-red-100' :
+              'text-gray-600 bg-gray-100'
+            }`}>
+              {accidentData?.severity || "N/A"}
+            </span>
           </p>
-          <h2 className="text-muted-foreground px-6">License No:</h2>
-          <p className="font-semibold w-full">
-            {accidentData?.driver_id?.licenseNo || "N/A"}
-          </p>
-          <h2 className="text-muted-foreground px-6">Vehicle:</h2>
-          <p className="font-semibold w-full">{accidentData?.vehicle_id ? `${accidentData.vehicle_id.plateNo} (${accidentData.vehicle_id.make} ${accidentData.vehicle_id.series})` : "N/A"}</p>
+          {accidentData?.notes && (
+            <>
+              <h2 className="text-muted-foreground px-6">Notes:</h2>
+              <p className="font-semibold w-full col-span-2">{accidentData.notes}</p>
+            </>
+          )}
+          {accidentData?.coordinates && (accidentData.coordinates.lat !== 0 || accidentData.coordinates.lng !== 0) && (
+            <>
+              <h2 className="text-muted-foreground px-6">Coordinates:</h2>
+              <p className="font-semibold w-full">{accidentData.coordinates.lat}, {accidentData.coordinates.lng}</p>
+            </>
+          )}
           <h2 className="text-muted-foreground px-6">Last Edited:</h2>
           <p className="font-semibold w-full">{formatSimpleDate(accidentData?.time_edited)}</p>
         </div>

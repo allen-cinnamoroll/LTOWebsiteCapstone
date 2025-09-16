@@ -28,12 +28,15 @@ const AccidentPage = () => {
       const accidentData = data.data.map((aData) => ({
         _id: aData._id,
         accident_id: aData.accident_id,
-        driver_id: aData.driver_id?.licenseNo || "N/A",
-        vehicle_id: aData.vehicle_id?.plateNo || "N/A",
+        plateNo: aData.plateNo || "N/A",
         accident_date: formatSimpleDate(aData.accident_date),
         street: aData.street,
         barangay: aData.barangay,
         municipality: aData.municipality,
+        vehicle_type: aData.vehicle_type || "N/A",
+        severity: aData.severity || "N/A",
+        notes: aData.notes || "",
+        coordinates: aData.coordinates || { lat: 0, lng: 0 }
       }));
       setAccidentData(accidentData);
     } catch (error) {
@@ -62,7 +65,7 @@ const AccidentPage = () => {
       <section>
         <AccidentTable
           data={accidentData}
-          filters={["accident_id", "driver_id", "vehicle_id", "accident_date", "street", "barangay", "municipality"]}
+          filters={["accident_id", "plateNo", "accident_date", "street", "barangay", "municipality", "vehicle_type", "severity"]}
           tableColumn={accidentColumns}
           onAdd={handleAdd}
           loading={loading}

@@ -179,7 +179,7 @@ export function DriverChart({ driverId }) {
       {!loading && !error && violations.length > 0 && (
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-4">Violations for {getPeriodLabel(timePeriod)}</h3>
-          <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto">
+          <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto scrollbar-transparent">
             {violations.map((violation, index) => 
               violation.violations && violation.violations.length > 0 ? 
                 violation.violations.map((v, idx) => (
