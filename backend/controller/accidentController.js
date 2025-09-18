@@ -193,3 +193,310 @@ export const deleteAccident = async (req, res) => {
     });
   }
 };
+
+// Analytics endpoints for accident data
+export const getAccidentAnalytics = async (req, res) => {
+  try {
+    const { period = '6months' } = req.query;
+    
+    // Calculate date range based on period
+    const now = new Date();
+    let startDate;
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case '3months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        break;
+      case '6months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case 'year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 6);
+    }
+
+    // Get total accidents
+    const totalAccidents = await AccidentModel.countDocuments({
+      accident_date: { $gte: startDate }
+    });
+
+    // Get previous period for comparison
+    const previousStartDate = new Date(startDate);
+    const previousEndDate = new Date(startDate);
+    const periodLength = now.getTime() - startDate.getTime();
+    previousStartDate.setTime(previousStartDate.getTime() - periodLength);
+    
+    const previousTotalAccidents = await AccidentModel.countDocuments({
+      accident_date: { $gte: previousStartDate, $lt: previousEndDate }
+    });
+
+    // Calculate percentage change
+    const accidentChange = previousTotalAccidents > 0 
+      ? ((totalAccidents - previousTotalAccidents) / previousTotalAccidents * 100).toFixed(1)
+      : 0;
+
+    // Get fatalities count
+    const fatalities = await AccidentModel.countDocuments({
+      accident_date: { $gte: startDate },
+      severity: 'fatal'
+    });
+
+    const previousFatalities = await AccidentModel.countDocuments({
+      accident_date: { $gte: previousStartDate, $lt: previousEndDate },
+      severity: 'fatal'
+    });
+
+    const fatalitiesChange = previousFatalities > 0 
+      ? (fatalities - previousFatalities)
+      : 0;
+
+    // Get severity distribution
+    const severityDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          accident_date: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$severity',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Get vehicle type distribution
+    const vehicleTypeDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          accident_date: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$vehicle_type',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Get monthly trends
+    const monthlyTrends = await AccidentModel.aggregate([
+      {
+        $match: {
+          accident_date: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$accident_date' },
+            month: { $month: '$accident_date' }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year': 1, '_id.month': 1 }
+      }
+    ]);
+
+    // Get municipality distribution
+    const municipalityDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          accident_date: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$municipality',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+
+    // Get accidents with coordinates for map
+    const accidentsWithCoordinates = await AccidentModel.find({
+      accident_date: { $gte: startDate },
+      'coordinates.lat': { $exists: true, $ne: null },
+      'coordinates.lng': { $exists: true, $ne: null }
+    }).select('coordinates severity municipality barangay street accident_date');
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          totalAccidents,
+          accidentChange: parseFloat(accidentChange),
+          fatalities,
+          fatalitiesChange,
+          period
+        },
+        distributions: {
+          severity: severityDistribution,
+          vehicleType: vehicleTypeDistribution,
+          municipality: municipalityDistribution
+        },
+        trends: {
+          monthly: monthlyTrends
+        },
+        mapData: accidentsWithCoordinates
+      }
+    });
+  } catch (error) {
+    console.error('Accident analytics error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Get accident risk predictions analytics
+export const getAccidentRiskAnalytics = async (req, res) => {
+  try {
+    const { period = '6months' } = req.query;
+    
+    // Calculate date range
+    const now = new Date();
+    let startDate;
+    
+    switch (period) {
+      case 'week':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case 'month':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 1);
+        break;
+      case '3months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        break;
+      case '6months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case 'year':
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 6);
+    }
+
+    // Get all accidents in the period
+    const accidents = await AccidentModel.find({
+      accident_date: { $gte: startDate }
+    });
+
+    // For now, we'll simulate risk predictions based on severity
+    // In a real implementation, you would call the ML prediction service
+    const riskPredictions = accidents.map(accident => {
+      let riskLevel = 'low';
+      let confidence = 0.3;
+      
+      switch (accident.severity) {
+        case 'fatal':
+          riskLevel = 'high';
+          confidence = 0.9;
+          break;
+        case 'severe':
+          riskLevel = 'high';
+          confidence = 0.8;
+          break;
+        case 'moderate':
+          riskLevel = 'medium';
+          confidence = 0.6;
+          break;
+        case 'minor':
+          riskLevel = 'low';
+          confidence = 0.4;
+          break;
+      }
+
+      return {
+        accident_id: accident.accident_id,
+        riskLevel,
+        confidence,
+        severity: accident.severity,
+        municipality: accident.municipality,
+        vehicle_type: accident.vehicle_type
+      };
+    });
+
+    // Group by risk level
+    const riskDistribution = riskPredictions.reduce((acc, prediction) => {
+      acc[prediction.riskLevel] = (acc[prediction.riskLevel] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Calculate high-risk percentage
+    const highRiskCount = riskDistribution.high || 0;
+    const highRiskPercentage = accidents.length > 0 
+      ? ((highRiskCount / accidents.length) * 100).toFixed(1)
+      : 0;
+
+    // Rule-based detection (simplified)
+    const ruleBasedFlagged = accidents.filter(accident => 
+      accident.severity === 'fatal' || accident.severity === 'severe'
+    ).length;
+
+    const ruleBasedPercentage = accidents.length > 0 
+      ? ((ruleBasedFlagged / accidents.length) * 100).toFixed(1)
+      : 0;
+
+    res.json({
+      success: true,
+      data: {
+        riskPredictions: {
+          total: accidents.length,
+          highRisk: highRiskCount,
+          highRiskPercentage: parseFloat(highRiskPercentage),
+          mediumRisk: riskDistribution.medium || 0,
+          lowRisk: riskDistribution.low || 0,
+          distribution: riskDistribution
+        },
+        ruleBasedDetection: {
+          flagged: ruleBasedFlagged,
+          flaggedPercentage: parseFloat(ruleBasedPercentage),
+          safe: accidents.length - ruleBasedFlagged,
+          safePercentage: parseFloat((100 - ruleBasedPercentage).toFixed(1))
+        },
+        predictions: riskPredictions
+      }
+    });
+  } catch (error) {
+    console.error('Risk analytics error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

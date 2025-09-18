@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-16T22:29:21.658483",
+  "timestamp": "2025-09-18T21:25:06.594585",
   "basic_metrics": {
     "accuracy": 0.5161290322580645,
     "precision": 0.4458064516129032,
@@ -114,7 +114,7 @@
       "high_risk": 2,
       "low_risk": 1
     },
-    "average_confidence": 0.5456173951496532,
+    "average_confidence": 0.5456173951496531,
     "high_risk_percentage": 6.451612903225806,
     "medium_risk_percentage": 90.32258064516128,
     "low_risk_percentage": 3.225806451612903

@@ -11,7 +11,7 @@ async function importData() {
   const collection = db.collection('accidents');
   
   // Read JSON file from the same directory
-  const dataPath = path.join(__dirname, 'accidents_2024_davao_oriental_100.json');
+  const dataPath = path.join(__dirname, 'accidents_2024_2025_davao_oriental_150.json');
   const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
   
   // Transform data to convert date strings to Date objects

@@ -6,6 +6,9 @@ import {
 	getAccidents,
 	getAccidentById,
 	updateAccident,
+	deleteAccident,
+	getAccidentAnalytics,
+	getAccidentRiskAnalytics,
 } from "../controller/accidentController.js";
 
 const accidentRouter = express.Router();
@@ -35,5 +38,12 @@ accidentRouter.patch(
 	validate,
 	updateAccident
 );
+
+// Delete an accident (Only Admin or Superadmin)
+accidentRouter.delete("/:id", authenticate, deleteAccident);
+
+// Analytics endpoints
+accidentRouter.get("/analytics/summary", authenticate, getAccidentAnalytics);
+accidentRouter.get("/analytics/risk", authenticate, getAccidentRiskAnalytics);
 
 export default accidentRouter;
