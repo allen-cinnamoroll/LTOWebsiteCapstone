@@ -40,7 +40,11 @@ import apiClient from '@/api/axios';
 import { useAuth } from '@/context/AuthContext';
 import AccidentMap from './AccidentMap';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+// Theme-aware colors that work in both light and dark modes
+const COLORS = {
+  light: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'],
+  dark: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+};
 
 export function AccidentAnalytics() {
   const [timePeriod, setTimePeriod] = useState('6months');
@@ -49,6 +53,34 @@ export function AccidentAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { token } = useAuth();
+
+  // Detect theme (light/dark mode)
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  useEffect(() => {
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark') || 
+                    window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(isDark);
+    };
+    
+    checkTheme();
+    
+    // Listen for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkTheme);
+    
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkTheme);
+    };
+  }, []);
+
+  // Get theme-appropriate colors
+  const getColors = () => isDarkMode ? COLORS.dark : COLORS.light;
 
   useEffect(() => {
     fetchAnalyticsData();
@@ -90,6 +122,7 @@ export function AccidentAnalytics() {
       case '3months': return 'Last 3 Months';
       case '6months': return 'Last 6 Months';
       case 'year': return 'Last Year';
+      case 'alltime': return 'All Time';
       default: return 'Last 6 Months';
     }
   };
@@ -135,8 +168,8 @@ export function AccidentAnalytics() {
   }
 
   if (error) {
-    return (
-      <div className="container mx-auto p-6">
+  return (
+    <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-red-500">{error}</div>
         </div>
@@ -164,6 +197,7 @@ export function AccidentAnalytics() {
             <SelectItem value="3months">Last 3 Months</SelectItem>
             <SelectItem value="6months">Last 6 Months</SelectItem>
             <SelectItem value="year">Last Year</SelectItem>
+            <SelectItem value="alltime">All Time</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -265,12 +299,18 @@ export function AccidentAnalytics() {
                       const date = new Date(value);
                       return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                     }}
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      color: isDarkMode ? '#f9fafb' : '#111827'
+                    }}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="accidents" 
-                    stroke="#8884d8" 
-                    fill="#8884d8" 
+                    stroke={getColors()[0]} 
+                    fill={getColors()[0]} 
                     fillOpacity={0.3}
                   />
                 </AreaChart>
@@ -298,14 +338,21 @@ export function AccidentAnalytics() {
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
-                    fill="#8884d8"
+                    fill="currentColor"
                     dataKey="value"
                   >
                     {formatSeverityData(analyticsData.distributions.severity).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={getColors()[index % getColors().length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      color: isDarkMode ? '#f9fafb' : '#111827'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -327,8 +374,15 @@ export function AccidentAnalytics() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#8884d8" />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      color: isDarkMode ? '#f9fafb' : '#111827'
+                    }}
+                  />
+                  <Bar dataKey="value" fill={getColors()[1]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -350,8 +404,15 @@ export function AccidentAnalytics() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="accidents" fill="#82ca9d" />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      color: isDarkMode ? '#f9fafb' : '#111827'
+                    }}
+                  />
+                  <Bar dataKey="accidents" fill={getColors()[2]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -449,7 +510,7 @@ export function AccidentAnalytics() {
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  {analyticsData.mapData.length} accidents with precise location coordinates
+                  {analyticsData.mapData.length} accidents with location data
                 </span>
               </div>
               <div className="text-xs text-muted-foreground">

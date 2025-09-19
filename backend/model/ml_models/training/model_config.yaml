@@ -2,9 +2,9 @@
 
 # Data Configuration
 data:
-  raw_data_path: "../../../data/raw/accidents_dummy_data.csv"
+  raw_data_path: "../../../data/raw/accidents_data.csv"
   processed_data_path: "../../../data/processed/"
-  train_test_split: 0.7  # 70% for training, 30% for testing
+  train_test_split: 0.8  # 80% for training, 20% for testing
   random_state: 42
 
 # Feature Engineering
@@ -14,9 +14,7 @@ features:
     - municipality
     - barangay
     - street
-  numerical_features:
-    - latitude
-    - longitude
+  numerical_features: []
   target_feature: severity
   date_feature: accident_date
 

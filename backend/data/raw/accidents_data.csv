@@ -1,0 +1,201 @@
+accident_id,plateNo,accident_date,street,barangay,municipality,vehicle_type,severity,notes
+ACC-2024-001,PWL-0059,2024-05-20T02:45:23Z,Purok 4,Sainz,Boston,truck,fatal,Mechanical failure caused the accident
+ACC-2024-002,ZBT-2953,2024-07-02T14:55:29Z,Rizal St.,Bato,San Isidro,bus,severe,Mechanical failure caused the accident
+ACC-2024-003,LOF-3153,2024-06-22T13:03:33Z,San Pedro St.,Don Enrique Lopez,Cateel,bus,moderate,Poor visibility due to heavy rain
+ACC-2024-004,SIH-8088,2024-04-15T14:23:54Z,Rizal St.,Lambajon,Mati City,car,moderate,Swerved to avoid an animal crossing
+ACC-2024-005,SCG-9006,2024-05-01T00:06:54Z,Purok 3,Kinablangan,Governor Generoso,truck,fatal,Driver lost control due to slippery road
+ACC-2024-006,PNW-0049,2024-09-14T07:47:30Z,San Pedro St.,Don Enrique Lopez,Lupon,car,fatal,Hit an electric post
+ACC-2024-007,BVO-3789,2024-11-09T14:43:45Z,Purok 3,Bato,Mati City,van,moderate,Mechanical failure caused the accident
+ACC-2024-008,BWQ-9818,2024-09-06T07:00:35Z,Bonifacio St.,Lambajon,Caraga,truck,minor,Swerved to avoid an animal crossing
+ACC-2024-009,KRO-0063,2024-09-27T03:24:15Z,Rizal St.,Bato,Lupon,truck,fatal,Swerved to avoid an animal crossing
+ACC-2024-010,CLA-3639,2024-06-14T20:27:20Z,Purok 2,Sainz,Tarragona,tricycle,minor,Ran over a pothole
+ACC-2024-011,ZIU-3654,2024-03-18T06:38:12Z,Bonifacio St.,Don Enrique Lopez,Baganga,car,fatal,Ran over a pothole
+ACC-2024-012,BSC-8521,2024-07-07T08:35:02Z,Purok 3,Don Enrique Lopez,Banaybanay,car,minor,Collision with another vehicle
+ACC-2024-013,KWD-7044,2024-07-16T11:07:23Z,Purok 1,Don Enrique Lopez,Cateel,car,severe,Ran over a pothole
+ACC-2024-014,LJR-7146,2024-05-04T01:04:35Z,San Pedro St.,Kinablangan,San Isidro,van,fatal,Over speeding incident
+ACC-2024-015,VHC-3887,2024-08-06T15:05:30Z,San Pedro St.,Lambajon,San Isidro,truck,moderate,Driver lost control due to slippery road
+ACC-2024-016,PHV-0444,2024-05-07T20:30:31Z,Purok 3,Lambajon,Tarragona,bus,severe,Poor visibility due to heavy rain
+ACC-2024-017,UXA-4852,2024-07-20T16:47:39Z,Quezon St.,Bato,Caraga,truck,fatal,Poor visibility due to heavy rain
+ACC-2024-018,KTA-6394,2024-03-13T16:14:30Z,San Pedro St.,Lambajon,Mati City,tricycle,fatal,Hit an electric post
+ACC-2024-019,WFF-9041,2024-02-29T00:09:37Z,Bonifacio St.,Bato,Mati City,tricycle,minor,Over speeding incident
+ACC-2024-020,CCY-9335,2024-06-26T15:45:13Z,Purok 1,Dahican,Lupon,tricycle,fatal,Mechanical failure caused the accident
+ACC-2024-021,BET-0111,2024-12-29T00:41:14Z,Quezon St.,Don Enrique Lopez,Banaybanay,bus,minor,Over speeding incident
+ACC-2024-022,FYC-7371,2024-05-09T06:19:40Z,Purok 4,Lambajon,Mati City,truck,minor,Driver lost control due to slippery road
+ACC-2024-023,BMB-6847,2024-01-31T11:43:00Z,Rizal St.,Lambajon,Baganga,truck,minor,Collision with another vehicle
+ACC-2024-024,BRU-4061,2024-04-09T02:54:44Z,Purok 4,Central,Mati City,tricycle,severe,Mechanical failure caused the accident
+ACC-2024-025,ALO-4538,2024-03-13T05:28:24Z,San Pedro St.,Macambol,Mati City,truck,minor,Swerved to avoid an animal crossing
+ACC-2024-026,ONE-9747,2024-05-03T13:15:21Z,San Pedro St.,Bato,Tarragona,van,severe,Collision with another vehicle
+ACC-2024-027,QYH-3273,2024-05-06T01:04:22Z,San Pedro St.,Bato,Tarragona,car,minor,Collision with another vehicle
+ACC-2024-028,EDL-8543,2024-07-30T04:34:34Z,Quezon St.,Sainz,Mati City,tricycle,minor,Collision with another vehicle
+ACC-2024-029,WAP-1313,2024-06-09T15:00:35Z,Purok 1,Bato,Baganga,van,minor,Poor visibility due to heavy rain
+ACC-2024-030,KPP-8324,2024-04-26T07:03:45Z,Purok 3,Lambajon,Governor Generoso,truck,moderate,Collision with another vehicle
+ACC-2024-031,OUI-7877,2024-09-21T11:11:03Z,San Pedro St.,Lambajon,Lupon,motorcycle,moderate,Ran over a pothole
+ACC-2024-032,ZXN-9351,2024-07-11T03:16:54Z,Rizal St.,Don Enrique Lopez,Caraga,bus,minor,Ran over a pothole
+ACC-2024-033,FIA-6982,2024-09-25T20:00:11Z,Purok 4,Lambajon,Tarragona,motorcycle,minor,Poor visibility due to heavy rain
+ACC-2024-034,DRS-9208,2024-12-03T19:04:27Z,Bonifacio St.,Central,Manay,tricycle,fatal,Collision with another vehicle
+ACC-2024-035,QKR-7558,2024-04-13T12:24:20Z,San Pedro St.,Kinablangan,Cateel,bus,severe,Poor visibility due to heavy rain
+ACC-2024-036,GHS-8417,2024-11-14T10:32:47Z,San Pedro St.,Kinablangan,Caraga,car,severe,Collision with another vehicle
+ACC-2024-037,YWY-2461,2024-07-20T04:22:20Z,San Pedro St.,Sainz,Tarragona,van,moderate,Poor visibility due to heavy rain
+ACC-2024-038,SCV-3622,2024-05-30T04:47:14Z,San Pedro St.,Kinablangan,Mati City,truck,minor,Ran over a pothole
+ACC-2024-039,BHV-3256,2024-08-01T21:42:42Z,Quezon St.,Lambajon,Caraga,van,minor,Collision with another vehicle
+ACC-2024-040,IOB-1588,2024-03-14T05:24:40Z,Purok 1,Don Enrique Lopez,Manay,truck,moderate,Over speeding incident
+ACC-2024-041,GRC-5036,2024-05-29T20:36:11Z,Rizal St.,Don Enrique Lopez,Tarragona,tricycle,fatal,Mechanical failure caused the accident
+ACC-2024-042,JCC-0044,2024-07-12T03:50:20Z,San Pedro St.,Kinablangan,Manay,tricycle,minor,Poor visibility due to heavy rain
+ACC-2024-043,PYO-9255,2024-05-01T13:25:18Z,Purok 2,Central,San Isidro,van,severe,Poor visibility due to heavy rain
+ACC-2024-044,EQT-4691,2024-10-14T01:02:20Z,Purok 1,Dahican,Manay,car,fatal,Driver lost control due to slippery road
+ACC-2024-045,TEF-6680,2024-01-01T13:28:15Z,Purok 3,Central,Cateel,tricycle,severe,Poor visibility due to heavy rain
+ACC-2024-046,EQA-1203,2024-03-30T12:02:51Z,Purok 1,Macambol,Lupon,tricycle,minor,Collision with another vehicle
+ACC-2024-047,GUC-9459,2024-08-23T08:22:38Z,Purok 4,Dahican,Banaybanay,car,severe,Collision with another vehicle
+ACC-2024-048,SYD-5085,2024-02-14T07:24:33Z,Bonifacio St.,Macambol,Caraga,bus,moderate,Mechanical failure caused the accident
+ACC-2024-049,WPU-5827,2024-10-09T05:31:47Z,San Pedro St.,Lambajon,Boston,bus,fatal,Swerved to avoid an animal crossing
+ACC-2024-050,TNO-4641,2024-03-29T10:06:55Z,San Pedro St.,Bato,Governor Generoso,car,fatal,Mechanical failure caused the accident
+ACC-2024-051,VME-7711,2024-08-15T22:33:57Z,Quezon St.,Sainz,Tarragona,car,minor,Hit an electric post
+ACC-2024-052,HPK-9633,2024-12-05T11:27:52Z,Purok 4,Bato,Tarragona,truck,fatal,Ran over a pothole
+ACC-2024-053,JSH-9588,2024-05-31T19:44:33Z,Quezon St.,Sainz,Banaybanay,bus,severe,Driver lost control due to slippery road
+ACC-2024-054,DAH-0457,2024-02-06T13:36:18Z,Bonifacio St.,Sainz,Lupon,motorcycle,minor,Swerved to avoid an animal crossing
+ACC-2024-055,WLR-7886,2024-03-08T09:00:50Z,Rizal St.,Bato,Tarragona,bus,minor,Swerved to avoid an animal crossing
+ACC-2024-056,QLS-5144,2024-09-25T09:29:30Z,Purok 3,Bato,Banaybanay,van,minor,Swerved to avoid an animal crossing
+ACC-2024-057,BEL-4284,2024-06-29T08:59:08Z,Purok 1,Dahican,Governor Generoso,van,fatal,Driver lost control due to slippery road
+ACC-2024-058,CIV-5658,2024-07-04T04:43:05Z,Bonifacio St.,Lambajon,Manay,truck,severe,Swerved to avoid an animal crossing
+ACC-2024-059,BNZ-4089,2024-11-14T23:54:01Z,Purok 4,Macambol,Banaybanay,motorcycle,minor,Collision with another vehicle
+ACC-2024-060,YBG-9142,2024-01-07T00:13:38Z,Bonifacio St.,Don Enrique Lopez,Cateel,motorcycle,severe,Poor visibility due to heavy rain
+ACC-2024-061,VMC-8538,2024-07-10T12:42:45Z,Purok 2,Macambol,Baganga,motorcycle,minor,Collision with another vehicle
+ACC-2024-062,SSD-8546,2024-09-26T02:44:48Z,Purok 4,Dahican,Governor Generoso,motorcycle,fatal,Poor visibility due to heavy rain
+ACC-2024-063,DDU-9322,2024-05-18T19:35:21Z,Purok 2,Don Enrique Lopez,Banaybanay,tricycle,minor,Over speeding incident
+ACC-2024-064,JTM-3719,2024-01-14T19:27:08Z,Purok 3,Macambol,Banaybanay,bus,severe,Mechanical failure caused the accident
+ACC-2024-065,PPX-9557,2024-03-05T03:29:46Z,Purok 3,Dahican,Caraga,bus,minor,Swerved to avoid an animal crossing
+ACC-2024-066,ARE-5346,2024-09-12T07:10:18Z,Purok 4,Central,San Isidro,van,fatal,Ran over a pothole
+ACC-2024-067,CYM-9517,2024-10-10T21:22:02Z,Purok 3,Sainz,Mati City,tricycle,severe,Collision with another vehicle
+ACC-2024-068,UNV-0493,2024-09-13T14:13:46Z,Rizal St.,Sainz,Tarragona,car,minor,Mechanical failure caused the accident
+ACC-2024-069,TQI-7815,2024-10-25T19:47:27Z,Purok 2,Bato,Banaybanay,truck,minor,Poor visibility due to heavy rain
+ACC-2024-070,IGR-0621,2024-04-26T12:00:46Z,Bonifacio St.,Lambajon,Mati City,motorcycle,moderate,Hit an electric post
+ACC-2024-071,YKK-5974,2024-02-07T06:16:47Z,San Pedro St.,Bato,Manay,tricycle,severe,Over speeding incident
+ACC-2024-072,CMX-3116,2024-01-24T14:03:31Z,Purok 2,Sainz,Mati City,bus,fatal,Poor visibility due to heavy rain
+ACC-2024-073,QNC-5214,2024-05-21T13:47:35Z,San Pedro St.,Central,Caraga,truck,moderate,Over speeding incident
+ACC-2024-074,ZRT-6210,2024-10-14T16:17:20Z,Purok 1,Macambol,Tarragona,tricycle,severe,Swerved to avoid an animal crossing
+ACC-2024-075,NAP-6127,2024-08-02T01:13:58Z,Purok 4,Dahican,Tarragona,car,minor,Hit an electric post
+ACC-2024-076,KWI-8748,2024-07-05T10:27:16Z,Purok 4,Sainz,Boston,car,fatal,Driver lost control due to slippery road
+ACC-2024-077,CGO-1079,2024-04-20T14:40:53Z,Bonifacio St.,Central,Caraga,motorcycle,minor,Ran over a pothole
+ACC-2024-078,WFA-7870,2024-10-17T18:58:19Z,San Pedro St.,Sainz,Caraga,car,moderate,Ran over a pothole
+ACC-2024-079,JSW-9221,2024-11-05T14:51:04Z,Purok 2,Don Enrique Lopez,San Isidro,tricycle,fatal,Mechanical failure caused the accident
+ACC-2024-080,BCI-8563,2024-11-25T23:24:45Z,Bonifacio St.,Central,Baganga,tricycle,moderate,Driver lost control due to slippery road
+ACC-2024-081,QXK-5403,2024-08-19T09:48:03Z,Bonifacio St.,Lambajon,Tarragona,car,moderate,Driver lost control due to slippery road
+ACC-2024-082,PBG-6750,2024-07-14T09:01:42Z,Rizal St.,Don Enrique Lopez,San Isidro,van,fatal,Collision with another vehicle
+ACC-2024-083,KAC-2102,2024-01-30T19:48:15Z,Purok 1,Macambol,Lupon,bus,fatal,Swerved to avoid an animal crossing
+ACC-2024-084,VEJ-5380,2024-01-11T14:46:57Z,Rizal St.,Sainz,Tarragona,truck,fatal,Mechanical failure caused the accident
+ACC-2024-085,FAC-9695,2024-10-25T12:22:22Z,Purok 1,Sainz,Mati City,motorcycle,fatal,Hit an electric post
+ACC-2024-086,BMN-2317,2024-07-05T05:04:05Z,Purok 2,Kinablangan,Banaybanay,bus,moderate,Over speeding incident
+ACC-2024-087,NWX-4946,2024-10-05T10:12:24Z,San Pedro St.,Don Enrique Lopez,Tarragona,van,minor,Hit an electric post
+ACC-2024-088,WCV-7195,2024-11-29T20:17:45Z,Bonifacio St.,Macambol,Tarragona,bus,fatal,Driver lost control due to slippery road
+ACC-2024-089,UHR-2609,2024-09-18T19:33:40Z,San Pedro St.,Bato,Lupon,motorcycle,fatal,Ran over a pothole
+ACC-2024-090,FAR-9863,2024-12-30T04:58:12Z,Purok 4,Dahican,Caraga,bus,moderate,Poor visibility due to heavy rain
+ACC-2024-091,GFH-7357,2024-08-20T00:37:02Z,Quezon St.,Don Enrique Lopez,Tarragona,truck,fatal,Driver lost control due to slippery road
+ACC-2024-092,HOU-4997,2024-10-30T12:40:50Z,Purok 2,Kinablangan,Mati City,car,fatal,Swerved to avoid an animal crossing
+ACC-2024-093,QBH-2531,2024-02-06T16:12:46Z,Purok 2,Dahican,Tarragona,bus,severe,Mechanical failure caused the accident
+ACC-2024-094,YLN-3345,2024-04-05T18:19:26Z,Purok 3,Lambajon,Mati City,van,fatal,Hit an electric post
+ACC-2024-095,FHM-6201,2024-05-15T13:41:37Z,Rizal St.,Sainz,Lupon,bus,moderate,Hit an electric post
+ACC-2024-096,XOP-7430,2024-08-16T06:05:09Z,San Pedro St.,Dahican,Mati City,motorcycle,severe,Swerved to avoid an animal crossing
+ACC-2024-097,ALJ-7886,2024-05-13T16:20:22Z,Purok 3,Bato,Tarragona,bus,minor,Over speeding incident
+ACC-2024-098,JDE-5972,2024-03-27T00:18:59Z,San Pedro St.,Kinablangan,Cateel,truck,fatal,Over speeding incident
+ACC-2024-099,YVM-5304,2024-11-09T06:05:23Z,Purok 4,Lambajon,Tarragona,tricycle,fatal,Collision with another vehicle
+ACC-2024-100,GWU-5039,2024-02-11T14:13:41Z,San Pedro St.,Lambajon,Mati City,truck,fatal,Over speeding incident
+ACC-2025-001,YWD-3137,2025-02-17T20:10:36Z,Purok 2,Central,Lupon,van,fatal,Driver lost control due to slippery road
+ACC-2025-002,PGG-5440,2025-05-25T09:21:49Z,Purok 2,Lambajon,Caraga,motorcycle,severe,Hit an electric post
+ACC-2025-003,LYJ-7686,2025-07-20T23:04:40Z,Quezon St.,Lambajon,Tarragona,motorcycle,minor,Swerved to avoid an animal crossing
+ACC-2025-004,VFL-8842,2025-06-25T06:06:41Z,Purok 4,Don Enrique Lopez,Caraga,bus,minor,Ran over a pothole
+ACC-2025-005,ISH-1356,2025-06-20T12:42:49Z,Rizal St.,Don Enrique Lopez,Governor Generoso,truck,moderate,Over speeding incident
+ACC-2025-006,STR-5447,2025-05-10T19:13:37Z,Quezon St.,Bato,Manay,motorcycle,severe,Poor visibility due to heavy rain
+ACC-2025-007,DWE-1393,2025-12-18T22:08:45Z,Purok 4,Macambol,Banaybanay,tricycle,severe,Mechanical failure caused the accident
+ACC-2025-008,XJU-4723,2025-07-16T05:22:23Z,Purok 3,Don Enrique Lopez,Governor Generoso,tricycle,minor,Poor visibility due to heavy rain
+ACC-2025-009,VXF-9335,2025-09-27T16:37:11Z,Purok 1,Bato,Mati City,car,minor,Ran over a pothole
+ACC-2025-010,LHU-3219,2025-09-06T05:28:28Z,Quezon St.,Sainz,Banaybanay,car,moderate,Over speeding incident
+ACC-2025-011,SKS-8795,2025-08-12T01:56:15Z,Purok 2,Don Enrique Lopez,Cateel,tricycle,minor,Hit an electric post
+ACC-2025-012,DVS-7188,2025-12-19T19:32:12Z,Quezon St.,Macambol,Banaybanay,tricycle,severe,Swerved to avoid an animal crossing
+ACC-2025-013,FTX-7807,2025-07-08T18:10:27Z,Purok 3,Kinablangan,Tarragona,truck,minor,Swerved to avoid an animal crossing
+ACC-2025-014,OXW-7382,2025-08-09T12:26:00Z,Purok 4,Dahican,Caraga,car,severe,Mechanical failure caused the accident
+ACC-2025-015,PIR-5823,2025-09-23T15:15:57Z,Rizal St.,Sainz,Lupon,car,moderate,Swerved to avoid an animal crossing
+ACC-2025-016,RTP-4400,2025-05-17T18:11:25Z,Rizal St.,Sainz,Banaybanay,truck,moderate,Mechanical failure caused the accident
+ACC-2025-017,ZIM-0372,2025-07-04T15:30:31Z,Purok 1,Lambajon,Baganga,truck,severe,Collision with another vehicle
+ACC-2025-018,NYR-6329,2025-04-24T18:09:57Z,Purok 3,Kinablangan,Cateel,bus,severe,Poor visibility due to heavy rain
+ACC-2025-019,IKT-5992,2025-10-10T17:54:48Z,Purok 4,Sainz,Mati City,bus,minor,Ran over a pothole
+ACC-2025-020,IVI-1055,2025-07-02T14:42:14Z,Bonifacio St.,Kinablangan,Cateel,van,minor,Mechanical failure caused the accident
+ACC-2025-021,MPM-2104,2025-02-11T19:43:42Z,Bonifacio St.,Central,Banaybanay,tricycle,severe,Collision with another vehicle
+ACC-2025-022,ENR-5395,2025-05-16T05:49:40Z,Bonifacio St.,Kinablangan,Tarragona,motorcycle,minor,Driver lost control due to slippery road
+ACC-2025-023,DWW-8084,2025-05-13T18:35:26Z,Quezon St.,Bato,Cateel,motorcycle,minor,Ran over a pothole
+ACC-2025-024,GDB-9477,2025-01-30T12:38:44Z,Bonifacio St.,Macambol,Manay,van,fatal,Swerved to avoid an animal crossing
+ACC-2025-025,OHG-1755,2025-08-11T18:10:46Z,Quezon St.,Dahican,Boston,van,minor,Poor visibility due to heavy rain
+ACC-2025-026,ITQ-0912,2025-01-13T07:44:30Z,Purok 2,Kinablangan,San Isidro,tricycle,fatal,Mechanical failure caused the accident
+ACC-2025-027,WMA-1889,2025-04-20T13:16:51Z,Bonifacio St.,Bato,Manay,tricycle,moderate,Ran over a pothole
+ACC-2025-028,KQA-7474,2025-11-28T11:04:59Z,Purok 4,Bato,Tarragona,van,moderate,Collision with another vehicle
+ACC-2025-029,DOW-2945,2025-09-26T10:57:15Z,Purok 2,Sainz,San Isidro,tricycle,fatal,Swerved to avoid an animal crossing
+ACC-2025-030,PGQ-4338,2025-08-16T22:08:46Z,Purok 3,Don Enrique Lopez,San Isidro,truck,minor,Driver lost control due to slippery road
+ACC-2025-031,YWB-9637,2025-05-06T18:08:52Z,Purok 3,Don Enrique Lopez,Governor Generoso,truck,fatal,Collision with another vehicle
+ACC-2025-032,WSL-4171,2025-10-07T01:50:42Z,San Pedro St.,Sainz,Tarragona,bus,fatal,Ran over a pothole
+ACC-2025-033,JIK-9659,2025-06-18T05:16:15Z,Purok 1,Don Enrique Lopez,Tarragona,truck,severe,Swerved to avoid an animal crossing
+ACC-2025-034,JQP-2951,2025-10-25T07:45:03Z,Purok 2,Kinablangan,Boston,bus,severe,Swerved to avoid an animal crossing
+ACC-2025-035,MNK-3784,2025-05-28T13:29:48Z,Quezon St.,Central,San Isidro,bus,severe,Over speeding incident
+ACC-2025-036,ZWW-9332,2025-01-13T05:27:05Z,Rizal St.,Lambajon,Manay,motorcycle,minor,Poor visibility due to heavy rain
+ACC-2025-037,UEQ-1955,2025-05-04T06:41:57Z,Bonifacio St.,Lambajon,Lupon,truck,minor,Driver lost control due to slippery road
+ACC-2025-038,IVQ-3708,2025-02-21T14:49:47Z,Purok 4,Central,San Isidro,van,fatal,Over speeding incident
+ACC-2025-039,EZV-9182,2025-07-30T18:41:04Z,Purok 4,Central,Manay,motorcycle,moderate,Mechanical failure caused the accident
+ACC-2025-040,VAL-8945,2025-04-05T06:13:48Z,Quezon St.,Central,Banaybanay,tricycle,minor,Ran over a pothole
+ACC-2025-041,IMN-1477,2025-03-27T21:48:23Z,Purok 1,Dahican,Caraga,truck,severe,Over speeding incident
+ACC-2025-042,WAW-5235,2025-07-20T07:36:00Z,Rizal St.,Macambol,Boston,bus,moderate,Swerved to avoid an animal crossing
+ACC-2025-043,KRQ-0047,2025-10-24T14:49:15Z,Quezon St.,Macambol,Caraga,tricycle,minor,Hit an electric post
+ACC-2025-044,KHC-5192,2025-10-03T04:59:15Z,Bonifacio St.,Dahican,Tarragona,van,severe,Mechanical failure caused the accident
+ACC-2025-045,WZS-3857,2025-05-16T00:58:43Z,San Pedro St.,Lambajon,Cateel,motorcycle,moderate,Hit an electric post
+ACC-2025-046,KOD-4297,2025-04-05T19:22:16Z,Quezon St.,Lambajon,Tarragona,truck,moderate,Ran over a pothole
+ACC-2025-047,QPL-9479,2025-07-24T03:25:51Z,San Pedro St.,Lambajon,Governor Generoso,car,severe,Hit an electric post
+ACC-2025-048,GGR-6107,2025-07-28T17:23:01Z,Bonifacio St.,Don Enrique Lopez,Tarragona,motorcycle,minor,Driver lost control due to slippery road
+ACC-2025-049,NCB-7261,2025-05-11T17:41:02Z,Purok 3,Central,Baganga,tricycle,minor,Over speeding incident
+ACC-2025-050,HIX-8745,2025-06-09T04:37:48Z,Bonifacio St.,Kinablangan,Manay,van,fatal,Mechanical failure caused the accident
+ACC-2025-051,XFI-0924,2025-10-19T16:35:24Z,Purok 4,Central,Manay,tricycle,severe,Mechanical failure caused the accident
+ACC-2025-052,QWY-4920,2025-02-21T12:34:55Z,Rizal St.,Bato,Cateel,truck,moderate,Mechanical failure caused the accident
+ACC-2025-053,DTX-7631,2025-11-12T23:25:15Z,San Pedro St.,Don Enrique Lopez,Governor Generoso,tricycle,fatal,Driver lost control due to slippery road
+ACC-2025-054,XQK-8584,2025-05-19T05:57:37Z,Purok 3,Don Enrique Lopez,Banaybanay,car,severe,Ran over a pothole
+ACC-2025-055,EFB-6282,2025-10-04T21:10:21Z,Quezon St.,Macambol,Tarragona,tricycle,severe,Mechanical failure caused the accident
+ACC-2025-056,AHT-6642,2025-10-04T11:04:59Z,Bonifacio St.,Central,Cateel,motorcycle,moderate,Mechanical failure caused the accident
+ACC-2025-057,WYC-8764,2025-02-12T14:24:46Z,Quezon St.,Macambol,Cateel,bus,severe,Mechanical failure caused the accident
+ACC-2025-058,UOZ-6880,2025-08-27T13:19:27Z,Purok 2,Sainz,Banaybanay,tricycle,moderate,Poor visibility due to heavy rain
+ACC-2025-059,WMW-0707,2025-07-04T10:31:34Z,Purok 4,Dahican,San Isidro,car,moderate,Ran over a pothole
+ACC-2025-060,AMQ-8005,2025-10-02T20:41:25Z,Purok 2,Bato,Cateel,motorcycle,moderate,Over speeding incident
+ACC-2025-061,HGI-8254,2025-02-16T05:53:41Z,Quezon St.,Don Enrique Lopez,Lupon,bus,fatal,Hit an electric post
+ACC-2025-062,PAO-5007,2025-03-14T11:43:28Z,Rizal St.,Dahican,Governor Generoso,truck,fatal,Poor visibility due to heavy rain
+ACC-2025-063,FSU-1342,2025-07-14T06:00:43Z,Quezon St.,Don Enrique Lopez,Baganga,van,severe,Hit an electric post
+ACC-2025-064,EFY-2496,2025-06-09T11:52:12Z,Rizal St.,Sainz,Banaybanay,motorcycle,minor,Ran over a pothole
+ACC-2025-065,PUK-1918,2025-08-22T14:24:35Z,Quezon St.,Macambol,Banaybanay,car,severe,Over speeding incident
+ACC-2025-066,RDA-2507,2025-04-20T13:35:04Z,Purok 1,Kinablangan,Boston,van,severe,Driver lost control due to slippery road
+ACC-2025-067,TJJ-8435,2025-05-30T02:50:48Z,Purok 2,Lambajon,Baganga,motorcycle,moderate,Driver lost control due to slippery road
+ACC-2025-068,TYP-2046,2025-03-01T15:18:25Z,Purok 2,Central,Tarragona,motorcycle,minor,Mechanical failure caused the accident
+ACC-2025-069,VDR-3550,2025-10-01T02:29:06Z,Purok 3,Sainz,Mati City,van,severe,Hit an electric post
+ACC-2025-070,TJM-6099,2025-11-26T17:57:27Z,Purok 3,Lambajon,Lupon,motorcycle,moderate,Hit an electric post
+ACC-2025-071,LJJ-2775,2025-01-19T19:50:09Z,Purok 2,Macambol,Governor Generoso,car,moderate,Swerved to avoid an animal crossing
+ACC-2025-072,PNA-6016,2025-05-19T07:56:31Z,Purok 1,Central,Boston,truck,moderate,Ran over a pothole
+ACC-2025-073,GXF-9015,2025-08-17T02:29:59Z,Bonifacio St.,Don Enrique Lopez,Governor Generoso,van,moderate,Mechanical failure caused the accident
+ACC-2025-074,RWW-9462,2025-11-25T00:10:37Z,Purok 4,Kinablangan,Tarragona,tricycle,minor,Swerved to avoid an animal crossing
+ACC-2025-075,HEX-8727,2025-10-15T07:26:02Z,Bonifacio St.,Macambol,Lupon,motorcycle,moderate,Mechanical failure caused the accident
+ACC-2025-076,VWO-9183,2025-09-19T16:35:16Z,Purok 4,Lambajon,Banaybanay,van,severe,Poor visibility due to heavy rain
+ACC-2025-077,OEK-4092,2025-03-22T16:59:52Z,San Pedro St.,Kinablangan,Caraga,van,moderate,Driver lost control due to slippery road
+ACC-2025-078,YAB-2206,2025-05-21T08:14:18Z,Purok 4,Sainz,Baganga,van,severe,Mechanical failure caused the accident
+ACC-2025-079,BEA-6029,2025-04-17T02:22:10Z,San Pedro St.,Macambol,Cateel,tricycle,moderate,Hit an electric post
+ACC-2025-080,QKA-6058,2025-06-22T10:26:42Z,Bonifacio St.,Kinablangan,San Isidro,van,fatal,Driver lost control due to slippery road
+ACC-2025-081,ZGR-8166,2025-01-28T15:53:33Z,Purok 1,Sainz,Caraga,van,fatal,Mechanical failure caused the accident
+ACC-2025-082,OEB-3401,2025-10-29T04:29:02Z,Bonifacio St.,Central,Lupon,motorcycle,minor,Collision with another vehicle
+ACC-2025-083,VZL-0607,2025-04-01T00:49:14Z,Quezon St.,Bato,Manay,motorcycle,minor,Hit an electric post
+ACC-2025-084,ZFO-7311,2025-08-24T14:44:53Z,Quezon St.,Kinablangan,Manay,van,severe,Collision with another vehicle
+ACC-2025-085,DLG-6084,2025-10-04T17:44:28Z,Purok 1,Macambol,Boston,bus,fatal,Hit an electric post
+ACC-2025-086,PZP-1394,2025-06-24T02:40:14Z,Purok 2,Lambajon,Boston,motorcycle,severe,Mechanical failure caused the accident
+ACC-2025-087,QBH-6775,2025-09-01T14:13:59Z,Bonifacio St.,Sainz,Governor Generoso,tricycle,moderate,Ran over a pothole
+ACC-2025-088,PGJ-4935,2025-04-13T04:05:26Z,Quezon St.,Don Enrique Lopez,Manay,tricycle,severe,Hit an electric post
+ACC-2025-089,BPA-2912,2025-01-30T22:00:32Z,Purok 4,Bato,Governor Generoso,truck,fatal,Driver lost control due to slippery road
+ACC-2025-090,HCQ-4454,2025-10-15T12:18:57Z,Purok 3,Dahican,Manay,van,fatal,Mechanical failure caused the accident
+ACC-2025-091,LYX-6413,2025-07-28T22:51:44Z,Purok 4,Dahican,Cateel,van,severe,Mechanical failure caused the accident
+ACC-2025-092,FXE-7126,2025-01-19T10:24:58Z,Purok 2,Sainz,Mati City,tricycle,moderate,Driver lost control due to slippery road
+ACC-2025-093,EKL-9984,2025-06-08T03:29:03Z,Rizal St.,Lambajon,Cateel,tricycle,minor,Mechanical failure caused the accident
+ACC-2025-094,EFB-0781,2025-01-07T01:27:53Z,Rizal St.,Bato,Banaybanay,truck,moderate,Collision with another vehicle
+ACC-2025-095,SSZ-9390,2025-10-29T21:30:53Z,Purok 1,Kinablangan,Tarragona,car,minor,Poor visibility due to heavy rain
+ACC-2025-096,DEE-3188,2025-04-11T02:26:26Z,Purok 4,Sainz,Boston,tricycle,minor,Hit an electric post
+ACC-2025-097,AZB-7323,2025-09-05T04:52:24Z,Purok 4,Macambol,Governor Generoso,motorcycle,fatal,Poor visibility due to heavy rain
+ACC-2025-098,ATW-0153,2025-06-28T10:34:08Z,San Pedro St.,Kinablangan,Tarragona,truck,minor,Poor visibility due to heavy rain
+ACC-2025-099,LHZ-3248,2025-01-27T06:22:32Z,Purok 4,Dahican,Tarragona,bus,severe,Poor visibility due to heavy rain
+ACC-2025-100,HUV-6436,2025-01-20T20:41:17Z,San Pedro St.,Sainz,Cateel,bus,fatal,Collision with another vehicle

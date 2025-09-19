@@ -9,7 +9,7 @@ This guide explains how to train and deploy the Machine Learning models for the 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Raw Data      │───▶│  Feature         │───▶│  Model Training │
-│   (CSV)         │    │  Engineering     │    │  (70/30 Split)  │
+│   (CSV)         │    │  Engineering     │    │  (80/20 Split)  │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
                                                          │
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐

@@ -236,7 +236,7 @@ def main():
     # Paths (adjust as needed)
     model_path = "../trained/accident_rf_model.pkl"
     rule_system_path = "../trained/accident_rule_system.pkl"
-    data_path = "../../data/raw/accidents_dummy_data.csv"
+    data_path = "../../../data/raw/accidents_data.csv"
     
     try:
         # Load model and data

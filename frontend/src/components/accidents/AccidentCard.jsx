@@ -85,12 +85,6 @@ const AccidentCard = () => {
               <p className="font-semibold w-full col-span-2">{accidentData.notes}</p>
             </>
           )}
-          {accidentData?.coordinates && (accidentData.coordinates.lat !== 0 || accidentData.coordinates.lng !== 0) && (
-            <>
-              <h2 className="text-muted-foreground px-6">Coordinates:</h2>
-              <p className="font-semibold w-full">{accidentData.coordinates.lat}, {accidentData.coordinates.lng}</p>
-            </>
-          )}
           <h2 className="text-muted-foreground px-6">Last Edited:</h2>
           <p className="font-semibold w-full">{formatSimpleDate(accidentData?.time_edited)}</p>
         </div>

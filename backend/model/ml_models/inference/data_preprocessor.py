@@ -89,30 +89,12 @@ class InferencePreprocessor:
     
     def _extract_location_features(self, df):
         """Extract location-based features"""
-        # Create location clusters (simplified for inference)
-        if 'latitude' in df.columns and 'longitude' in df.columns:
-            # Simple binning approach for inference
-            df['location_cluster'] = self._simple_location_cluster(
-                df['latitude'].iloc[0], df['longitude'].iloc[0]
-            )
-        
         # Extract road type from street names
         if 'street' in df.columns:
             df['road_type'] = df['street'].apply(self._extract_road_type)
         
         return df
     
-    def _simple_location_cluster(self, lat, lon):
-        """Simple location clustering for inference"""
-        # This is a simplified version - in production, you'd use the same clustering
-        # method used during training
-        if pd.isna(lat) or pd.isna(lon):
-            return 0
-        
-        # Simple grid-based clustering
-        lat_bin = int((lat - 6.8) * 10) % 10
-        lon_bin = int((lon - 125.9) * 10) % 10
-        return lat_bin * 10 + lon_bin
     
     def _extract_road_type(self, street_name):
         """Extract road type from street name"""
@@ -155,7 +137,7 @@ class InferencePreprocessor:
     
     def _scale_numerical_features(self, df):
         """Scale numerical features using trained scaler"""
-        numerical_features = ['latitude', 'longitude', 'year', 'month', 'day', 'day_of_week', 'hour']
+        numerical_features = ['year', 'month', 'day', 'day_of_week', 'hour']
         
         # Add encoded categorical features
         encoded_features = [col for col in df.columns if col.endswith('_encoded')]
@@ -203,9 +185,7 @@ if __name__ == "__main__":
         'street': 'Rizal Street',
         'barangay': 'Poblacion',
         'municipality': 'Mati',
-        'vehicle_type': 'car',
-        'latitude': 6.95,
-        'longitude': 126.20
+        'vehicle_type': 'car'
     }
     
     try:

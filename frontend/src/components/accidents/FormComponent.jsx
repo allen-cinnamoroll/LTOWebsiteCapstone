@@ -208,47 +208,6 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
           )}
         />
 
-        {/* Row 6: Coordinates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="coordinates.lat"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Latitude</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    step="any"
-                    placeholder="e.g., 6.9551" 
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="coordinates.lng"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Longitude</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    step="any"
-                    placeholder="e.g., 126.2166" 
-                    {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
         <div className="space-x-2">
           <Button type="submit" disabled={submitting}>

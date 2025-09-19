@@ -50,20 +50,6 @@ class DataValidator:
                 'allowed_values': ['car', 'motorcycle', 'truck', 'bus', 'van', 'jeepney', 'tricycle'],
                 'description': 'Vehicle type'
             },
-            'latitude': {
-                'required': True,
-                'type': 'float',
-                'min_value': 6.0,
-                'max_value': 8.0,
-                'description': 'Latitude coordinate'
-            },
-            'longitude': {
-                'required': True,
-                'type': 'float',
-                'min_value': 125.0,
-                'max_value': 127.0,
-                'description': 'Longitude coordinate'
-            },
             'severity': {
                 'required': False,
                 'allowed_values': ['minor', 'moderate', 'severe'],

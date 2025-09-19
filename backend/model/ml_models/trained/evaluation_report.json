@@ -1,0 +1,114 @@
+{
+  "timestamp": "2025-09-18T22:50:15.416661",
+  "basic_metrics": {
+    "accuracy": 0.4,
+    "precision": 0.375,
+    "recall": 0.4,
+    "f1_score": 0.3777777777777777,
+    "precision_per_class": [
+      0.4375,
+      0.25,
+      0.4
+    ],
+    "recall_per_class": [
+      0.5833333333333334,
+      0.125,
+      0.4
+    ],
+    "f1_per_class": [
+      0.5,
+      0.16666666666666666,
+      0.4
+    ]
+  },
+  "classification_report": {
+    "1.0": {
+      "precision": 0.4375,
+      "recall": 0.5833333333333334,
+      "f1-score": 0.5,
+      "support": 12.0
+    },
+    "2.0": {
+      "precision": 0.25,
+      "recall": 0.125,
+      "f1-score": 0.16666666666666666,
+      "support": 8.0
+    },
+    "3.0": {
+      "precision": 0.4,
+      "recall": 0.4,
+      "f1-score": 0.4,
+      "support": 10.0
+    },
+    "accuracy": 0.4,
+    "macro avg": {
+      "precision": 0.3625,
+      "recall": 0.36944444444444446,
+      "f1-score": 0.35555555555555557,
+      "support": 30.0
+    },
+    "weighted avg": {
+      "precision": 0.375,
+      "recall": 0.4,
+      "f1-score": 0.3777777777777777,
+      "support": 30.0
+    }
+  },
+  "feature_importance": [
+    {
+      "feature": "day",
+      "importance": 0.18224153614058747
+    },
+    {
+      "feature": "municipality_encoded",
+      "importance": 0.15162677362792362
+    },
+    {
+      "feature": "hour",
+      "importance": 0.14313162964177123
+    },
+    {
+      "feature": "month",
+      "importance": 0.11886393140101162
+    },
+    {
+      "feature": "street_encoded",
+      "importance": 0.10118685500883437
+    },
+    {
+      "feature": "vehicle_type_encoded",
+      "importance": 0.08711381189983944
+    },
+    {
+      "feature": "barangay_encoded",
+      "importance": 0.08294034948272357
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.06641417431910386
+    },
+    {
+      "feature": "year",
+      "importance": 0.03411213320051665
+    },
+    {
+      "feature": "road_type_encoded",
+      "importance": 0.032368805277688185
+    }
+  ],
+  "rule_system_evaluation": {
+    "risk_distribution": {
+      "medium_risk": 27,
+      "low_risk": 3
+    },
+    "average_confidence": 0.506435582010582,
+    "high_risk_percentage": 0.0,
+    "medium_risk_percentage": 90.0,
+    "low_risk_percentage": 10.0
+  },
+  "model_info": {
+    "model_type": "RandomForestClassifier",
+    "n_features": 10,
+    "n_classes": 3
+  }
+}
