@@ -98,10 +98,6 @@ export const AccidentSchema = z.object({
   vehicle_type: z.string().min(1, { message: "Vehicle type is required" }),
   severity: z.string().min(1, { message: "Severity is required" }),
   notes: z.string().optional(),
-  coordinates: z.object({
-    lat: z.number(),
-    lng: z.number()
-  }).optional(),
 });
 
 export const ViolationCreateSchema = z.object({

@@ -40,16 +40,6 @@ const AccidentSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  coordinates: {
-    lat: {
-      type: Number,
-      required: false,
-    },
-    lng: {
-      type: Number,
-      required: false,
-    }
-  },
   time_edited: {
     type: Date,
     default: Date.now,

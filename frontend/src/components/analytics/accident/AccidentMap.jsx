@@ -1,12 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { getLocationCoordinates } from '@/util/geocoding';
 
 const AccidentMap = ({ accidents, className = "" }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detect theme
+  useEffect(() => {
+    const checkTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark') || 
+                    window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(isDark);
+    };
+    
+    checkTheme();
+    
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkTheme);
+    
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkTheme);
+    };
+  }, []);
 
   useEffect(() => {
     if (!accidents || accidents.length === 0) return;
@@ -42,9 +66,23 @@ const AccidentMap = ({ accidents, className = "" }) => {
     const existingMarkers = document.querySelectorAll('.accident-marker');
     existingMarkers.forEach(marker => marker.remove());
 
-    // Add markers for each accident
+    // Add markers for each accident using geocoding
     accidents.forEach((accident, index) => {
-      if (accident.coordinates && accident.coordinates.lat && accident.coordinates.lng) {
+      let coordinates = null;
+      
+      // Get coordinates from municipality/barangay/street using geocoding
+      if (accident.municipality) {
+        const geocodedCoords = getLocationCoordinates(
+          accident.municipality, 
+          accident.barangay, 
+          accident.street
+        );
+        if (geocodedCoords) {
+          coordinates = geocodedCoords;
+        }
+      }
+      
+      if (coordinates) {
         // Create marker element
         const markerEl = document.createElement('div');
         markerEl.className = 'accident-marker';
@@ -53,7 +91,7 @@ const AccidentMap = ({ accidents, className = "" }) => {
           height: 20px;
           border-radius: 50%;
           background-color: ${getSeverityColor(accident.severity)};
-          border: 2px solid white;
+          border: 2px solid #ffd700;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
           cursor: pointer;
           display: flex;
@@ -62,6 +100,7 @@ const AccidentMap = ({ accidents, className = "" }) => {
           font-size: 10px;
           color: white;
           font-weight: bold;
+          opacity: 0.9;
         `;
         markerEl.textContent = '!';
 
@@ -69,7 +108,7 @@ const AccidentMap = ({ accidents, className = "" }) => {
         const popupContent = `
           <div style="padding: 12px; min-width: 220px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
             <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold; color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
-              ${accident.accident_id || 'Unknown ID'}
+              ${accident.accident_id || 'Accident ID: N/A'}
             </h3>
             <div style="font-size: 13px; line-height: 1.5; color: #374151;">
               <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Plate:</strong> ${accident.plateNo || 'N/A'}</p>
@@ -82,6 +121,8 @@ const AccidentMap = ({ accidents, className = "" }) => {
               <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Location:</strong> ${accident.municipality || 'N/A'}, ${accident.barangay || 'N/A'}</p>
               <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Street:</strong> ${accident.street || 'N/A'}</p>
               <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Date:</strong> ${accident.accident_date ? new Date(accident.accident_date).toLocaleDateString() : 'N/A'}</p>
+              <p style="margin: 4px 0; color: #f59e0b; font-size: 11px;"><em>📍 Location based on municipality</em></p>
+              ${accident.notes ? `<p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Notes:</strong> ${accident.notes}</p>` : ''}
             </div>
           </div>
         `;
@@ -89,27 +130,53 @@ const AccidentMap = ({ accidents, className = "" }) => {
         // Create popup
         const popup = new mapboxgl.Popup({
           offset: 25,
-          closeButton: true,
+          closeButton: false,
           closeOnClick: false,
+          closeOnMove: false,
           className: 'accident-popup'
         }).setHTML(popupContent);
 
         // Create marker
         new mapboxgl.Marker(markerEl)
-          .setLngLat([accident.coordinates.lng, accident.coordinates.lat])
+          .setLngLat([coordinates.lng, coordinates.lat])
           .setPopup(popup)
           .addTo(map.current);
       }
     });
 
-    // Fit map to show all markers
+    // Fit map to show all valid markers
     if (accidents.length > 0) {
       const bounds = new mapboxgl.LngLatBounds();
+      let validAccidentCount = 0;
+      
       accidents.forEach(accident => {
-        if (accident.coordinates && accident.coordinates.lat && accident.coordinates.lng) {
-          bounds.extend([accident.coordinates.lng, accident.coordinates.lat]);
+        let coordinates = null;
+        
+        // Get coordinates from municipality using geocoding
+        if (accident.municipality) {
+          const geocodedCoords = getLocationCoordinates(
+            accident.municipality, 
+            accident.barangay, 
+            accident.street
+          );
+          if (geocodedCoords) {
+            coordinates = geocodedCoords;
+          }
+        }
+          
+        if (coordinates) {
+          bounds.extend([coordinates.lng, coordinates.lat]);
+          validAccidentCount++;
+        } else {
+          console.warn('No valid coordinates for accident:', {
+            id: accident.accident_id,
+            municipality: accident.municipality,
+            reason: 'Municipality not found in geocoding database'
+          });
         }
       });
+      
+      console.log(`Valid accidents with geocoded coordinates: ${validAccidentCount} out of ${accidents.length}`);
       
       if (!bounds.isEmpty()) {
         map.current.fitBounds(bounds, {
@@ -170,24 +237,18 @@ const AccidentMap = ({ accidents, className = "" }) => {
       {/* Custom styles for popup */}
       <style jsx>{`
         :global(.accident-popup .mapboxgl-popup-content) {
-          background: white;
-          border: 1px solid #e5e7eb;
+          background: ${isDarkMode ? '#1f2937' : '#ffffff'};
+          border: 1px solid ${isDarkMode ? '#374151' : '#e5e7eb'};
           border-radius: 8px;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
           padding: 0;
+          color: ${isDarkMode ? '#f9fafb' : '#111827'};
         }
         :global(.accident-popup .mapboxgl-popup-tip) {
-          border-top-color: white;
+          border-top-color: ${isDarkMode ? '#1f2937' : '#ffffff'};
         }
         :global(.accident-popup .mapboxgl-popup-close-button) {
-          color: #6b7280;
-          font-size: 18px;
-          padding: 4px;
-        }
-        :global(.accident-popup .mapboxgl-popup-close-button:hover) {
-          color: #374151;
-          background-color: #f3f4f6;
-          border-radius: 4px;
+          display: none !important;
         }
       `}</style>
       
@@ -198,31 +259,48 @@ const AccidentMap = ({ accidents, className = "" }) => {
       />
       
       {/* Legend */}
-      <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 text-xs">
+      <div className={`absolute top-4 left-4 rounded-lg shadow-lg p-3 text-xs ${
+        isDarkMode 
+          ? 'bg-gray-800 border border-gray-700 text-gray-100' 
+          : 'bg-white border border-gray-200 text-gray-900'
+      }`}>
         <div className="font-semibold mb-2">Accident Severity</div>
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-red-600"></div>
+            <div className="w-3 h-3 rounded-full bg-red-600 border-2 border-white"></div>
             <span>Fatal</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-orange-600"></div>
+            <div className="w-3 h-3 rounded-full bg-orange-600 border-2 border-white"></div>
             <span>Severe</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+            <div className="w-3 h-3 rounded-full bg-amber-500 border-2 border-white"></div>
             <span>Moderate</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-green-600"></div>
+            <div className="w-3 h-3 rounded-full bg-green-600 border-2 border-white"></div>
             <span>Minor</span>
+          </div>
+        </div>
+        <div className="mt-3 pt-2 border-t border-gray-300">
+          <div className="font-semibold mb-1">Location Type</div>
+          <div className="space-y-1">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-gray-500 border-2 border-yellow-400"></div>
+              <span>Municipality-based</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Map info */}
-      <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-2 text-xs">
-        <div className="text-gray-600">
+      <div className={`absolute bottom-4 right-4 rounded-lg shadow-lg p-2 text-xs ${
+        isDarkMode 
+          ? 'bg-gray-800 border border-gray-700 text-gray-300' 
+          : 'bg-white border border-gray-200 text-gray-600'
+      }`}>
+        <div>
           {accidents.length} accident{accidents.length !== 1 ? 's' : ''} shown
         </div>
       </div>

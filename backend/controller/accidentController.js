@@ -224,25 +224,31 @@ export const getAccidentAnalytics = async (req, res) => {
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 1);
         break;
+      case 'alltime':
+        startDate = null; // No date filter for all time
+        break;
       default:
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 6);
     }
 
     // Get total accidents
-    const totalAccidents = await AccidentModel.countDocuments({
-      accident_date: { $gte: startDate }
-    });
+    const totalAccidents = await AccidentModel.countDocuments(
+      startDate ? { accident_date: { $gte: startDate } } : {}
+    );
 
-    // Get previous period for comparison
-    const previousStartDate = new Date(startDate);
-    const previousEndDate = new Date(startDate);
-    const periodLength = now.getTime() - startDate.getTime();
-    previousStartDate.setTime(previousStartDate.getTime() - periodLength);
-    
-    const previousTotalAccidents = await AccidentModel.countDocuments({
-      accident_date: { $gte: previousStartDate, $lt: previousEndDate }
-    });
+    // Get previous period for comparison (skip for alltime)
+    let previousTotalAccidents = 0;
+    if (startDate) {
+      const previousStartDate = new Date(startDate);
+      const previousEndDate = new Date(startDate);
+      const periodLength = now.getTime() - startDate.getTime();
+      previousStartDate.setTime(previousStartDate.getTime() - periodLength);
+      
+      previousTotalAccidents = await AccidentModel.countDocuments({
+        accident_date: { $gte: previousStartDate, $lt: previousEndDate }
+      });
+    }
 
     // Calculate percentage change
     const accidentChange = previousTotalAccidents > 0 
@@ -251,14 +257,22 @@ export const getAccidentAnalytics = async (req, res) => {
 
     // Get fatalities count
     const fatalities = await AccidentModel.countDocuments({
-      accident_date: { $gte: startDate },
+      ...(startDate ? { accident_date: { $gte: startDate } } : {}),
       severity: 'fatal'
     });
 
-    const previousFatalities = await AccidentModel.countDocuments({
-      accident_date: { $gte: previousStartDate, $lt: previousEndDate },
-      severity: 'fatal'
-    });
+    let previousFatalities = 0;
+    if (startDate) {
+      const previousStartDate = new Date(startDate);
+      const previousEndDate = new Date(startDate);
+      const periodLength = now.getTime() - startDate.getTime();
+      previousStartDate.setTime(previousStartDate.getTime() - periodLength);
+      
+      previousFatalities = await AccidentModel.countDocuments({
+        accident_date: { $gte: previousStartDate, $lt: previousEndDate },
+        severity: 'fatal'
+      });
+    }
 
     const fatalitiesChange = previousFatalities > 0 
       ? (fatalities - previousFatalities)
@@ -268,7 +282,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const severityDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          accident_date: { $gte: startDate }
+          ...(startDate ? { accident_date: { $gte: startDate } } : {})
         }
       },
       {
@@ -283,7 +297,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const vehicleTypeDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          accident_date: { $gte: startDate }
+          ...(startDate ? { accident_date: { $gte: startDate } } : {})
         }
       },
       {
@@ -301,7 +315,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const monthlyTrends = await AccidentModel.aggregate([
       {
         $match: {
-          accident_date: { $gte: startDate }
+          ...(startDate ? { accident_date: { $gte: startDate } } : {})
         }
       },
       {
@@ -322,7 +336,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const municipalityDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          accident_date: { $gte: startDate }
+          ...(startDate ? { accident_date: { $gte: startDate } } : {})
         }
       },
       {
@@ -339,12 +353,10 @@ export const getAccidentAnalytics = async (req, res) => {
       }
     ]);
 
-    // Get accidents with coordinates for map
-    const accidentsWithCoordinates = await AccidentModel.find({
-      accident_date: { $gte: startDate },
-      'coordinates.lat': { $exists: true, $ne: null },
-      'coordinates.lng': { $exists: true, $ne: null }
-    }).select('coordinates severity municipality barangay street accident_date');
+    // Get all accidents for map (using geocoding based on location)
+    const accidentsWithCoordinates = await AccidentModel.find(
+      startDate ? { accident_date: { $gte: startDate } } : {}
+    ).select('accident_id plateNo severity municipality barangay street accident_date vehicle_type notes');
 
     res.json({
       success: true,
@@ -406,15 +418,18 @@ export const getAccidentRiskAnalytics = async (req, res) => {
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 1);
         break;
+      case 'alltime':
+        startDate = null; // No date filter for all time
+        break;
       default:
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 6);
     }
 
     // Get all accidents in the period
-    const accidents = await AccidentModel.find({
-      accident_date: { $gte: startDate }
-    });
+    const accidents = await AccidentModel.find(
+      startDate ? { accident_date: { $gte: startDate } } : {}
+    );
 
     // For now, we'll simulate risk predictions based on severity
     // In a real implementation, you would call the ML prediction service

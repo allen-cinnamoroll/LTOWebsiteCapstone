@@ -29,10 +29,6 @@ const EditAccidentForm = () => {
       vehicle_type: "",
       severity: "",
       notes: "",
-      coordinates: {
-        lat: 0,
-        lng: 0
-      }
     },
   });
   const { reset } = form;
@@ -59,7 +55,6 @@ const EditAccidentForm = () => {
           vehicle_type: a.vehicle_type || "",
           severity: a.severity || "",
           notes: a.notes || "",
-          coordinates: a.coordinates || { lat: 0, lng: 0 }
         });
       }
     } catch (error) {
@@ -80,7 +75,6 @@ const EditAccidentForm = () => {
         vehicle_type: formData.vehicle_type,
         severity: formData.severity,
         notes: formData.notes,
-        coordinates: formData.coordinates
       };
 
       const { data } = await apiClient.patch(`/accident/${params.id}`, content, {

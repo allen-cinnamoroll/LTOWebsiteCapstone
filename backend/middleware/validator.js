@@ -148,8 +148,6 @@ export const validateAccident = [
   body("vehicle_type").isIn(['motorcycle', 'car', 'truck', 'bus', 'van', 'jeepney', 'tricycle', 'other']).withMessage("Vehicle type must be one of: motorcycle, car, truck, bus, van, jeepney, tricycle, other"),
   body("severity").isIn(['minor', 'moderate', 'severe', 'fatal']).withMessage("Severity must be one of: minor, moderate, severe, fatal"),
   body("notes").optional().isString().withMessage("Notes must be a string"),
-  body("coordinates.lat").optional().isNumeric().withMessage("Latitude must be a number"),
-  body("coordinates.lng").optional().isNumeric().withMessage("Longitude must be a number"),
 ];
 
 // Middleware to handle validation errors

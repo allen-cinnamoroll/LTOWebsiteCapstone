@@ -28,10 +28,6 @@ const AddAccidentForm = () => {
       vehicle_type: "",
       severity: "",
       notes: "",
-      coordinates: {
-        lat: 0,
-        lng: 0
-      }
     },
   });
 
@@ -48,7 +44,6 @@ const AddAccidentForm = () => {
         vehicle_type: formData.vehicle_type,
         severity: formData.severity,
         notes: formData.notes,
-        coordinates: formData.coordinates
       };
 
       console.log("Sending accident data:", content);

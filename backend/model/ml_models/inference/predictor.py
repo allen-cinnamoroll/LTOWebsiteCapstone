@@ -154,7 +154,7 @@ class AccidentPredictor:
     
     def validate_input(self, accident_data):
         """Validate input data for prediction"""
-        required_fields = ['accident_date', 'vehicle_type', 'municipality', 'latitude', 'longitude']
+        required_fields = ['accident_date', 'vehicle_type', 'municipality']
         missing_fields = [field for field in required_fields if field not in accident_data]
         
         if missing_fields:
@@ -163,8 +163,6 @@ class AccidentPredictor:
         # Validate data types
         try:
             pd.to_datetime(accident_data['accident_date'])
-            float(accident_data['latitude'])
-            float(accident_data['longitude'])
         except (ValueError, TypeError) as e:
             return False, f"Invalid data types: {str(e)}"
         
@@ -281,9 +279,7 @@ if __name__ == "__main__":
                 'street': 'Rizal Street',
                 'barangay': 'Poblacion',
                 'municipality': 'Mati',
-                'vehicle_type': 'car',
-                'latitude': 6.95,
-                'longitude': 126.20
+                'vehicle_type': 'car'
             }
             
             # Test prediction

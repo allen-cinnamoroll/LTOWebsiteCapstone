@@ -50,22 +50,11 @@ class FeatureEngineer:
     
     def extract_location_features(self, df):
         """Extract location-based features"""
-        # Create location clusters based on coordinates
-        df['location_cluster'] = self._create_location_clusters(df)
-        
         # Extract road type from street names
         df['road_type'] = df['street'].apply(self._extract_road_type)
         
         return df
     
-    def _create_location_clusters(self, df, n_clusters=10):
-        """Create location clusters using simple binning"""
-        from sklearn.cluster import KMeans
-        
-        coords = df[['latitude', 'longitude']].values
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-        clusters = kmeans.fit_predict(coords)
-        return clusters
     
     def _extract_road_type(self, street_name):
         """Extract road type from street name"""
@@ -88,7 +77,7 @@ class FeatureEngineer:
     
     def encode_categorical_features(self, df, fit_encoders=True):
         """Encode categorical features"""
-        categorical_features = self.config['features']['categorical_features'] + ['road_type', 'location_cluster']
+        categorical_features = self.config['features']['categorical_features'] + ['road_type']
         
         for feature in categorical_features:
             if feature in df.columns:

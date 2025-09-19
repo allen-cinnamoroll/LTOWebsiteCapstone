@@ -36,7 +36,6 @@ const AccidentPage = () => {
         vehicle_type: aData.vehicle_type || "N/A",
         severity: aData.severity || "N/A",
         notes: aData.notes || "",
-        coordinates: aData.coordinates || { lat: 0, lng: 0 }
       }));
       setAccidentData(accidentData);
     } catch (error) {

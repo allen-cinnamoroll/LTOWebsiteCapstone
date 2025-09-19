@@ -1,12 +1,12 @@
 {
   "model_name": "accident_rf_model",
   "rule_system_name": "accident_rule_system",
-  "training_date": "2025-09-18T21:24:59.365989",
+  "training_date": "2025-09-18T22:50:22.727496",
   "config": {
     "data": {
-      "raw_data_path": "../../../data/raw/accidents_dummy_data.csv",
+      "raw_data_path": "../../../data/raw/accidents_data.csv",
       "processed_data_path": "../../../data/processed/",
-      "train_test_split": 0.7,
+      "train_test_split": 0.8,
       "random_state": 42
     },
     "features": {
@@ -16,10 +16,7 @@
         "barangay",
         "street"
       ],
-      "numerical_features": [
-        "latitude",
-        "longitude"
-      ],
+      "numerical_features": [],
       "target_feature": "severity",
       "date_feature": "accident_date"
     },
@@ -78,8 +75,6 @@
     }
   },
   "feature_columns": [
-    "latitude",
-    "longitude",
     "year",
     "month",
     "day",
@@ -89,8 +84,7 @@
     "municipality_encoded",
     "barangay_encoded",
     "street_encoded",
-    "road_type_encoded",
-    "location_cluster_encoded"
+    "road_type_encoded"
   ],
   "model_type": "RandomForestClassifier",
   "rule_system_type": "PrescriptiveRuleBased"
