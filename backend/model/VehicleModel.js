@@ -37,7 +37,6 @@
       plateNo: {
         type: String,
         required: [true, "plateNo is required"],
-        unique: true,
       },
       fileNo: {
         type: String,
@@ -54,19 +53,15 @@
       },
       make: {
         type: String,
-        required: [true, "make is required"],
       },
       bodyType: {
         type: String,
-        required: [true, "bodyType is required"],
       },
       color: {
         type: String,
-        required: [true, "color is required"],
       },
       classification: {
         type: String,
-        required: [true, "classification is required"],
       },
       dateOfRenewal: {
         type: Date,

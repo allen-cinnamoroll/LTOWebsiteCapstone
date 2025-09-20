@@ -1,0 +1,6122 @@
+[
+  {
+    "_id": "driver_1",
+    "fullName": "GUILABTAN, JONA ARBOL",
+    "address": {
+      "purok": "MALINAWON LIMATOC",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_2",
+    "fullName": "PABELLON, GINALYN Q.",
+    "address": {
+      "purok": "PUNTA TAGAWISAN",
+      "barangay": "BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9650905919,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_3",
+    "fullName": "LAMBOJON, MAR JOHN CAÑETE",
+    "address": {
+      "purok": "PRK. BLISS",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_4",
+    "fullName": "SUNGGAY, MARICHU BASOC",
+    "address": {
+      "purok": "MLGR MADANG",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9759601590,
+    "emailAddress": "sunggaymaricho00@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-003904",
+    "birthDate": "09/08/1975",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_5",
+    "fullName": "BERNIL JR, VICENTE D",
+    "address": {
+      "purok": null,
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_6",
+    "fullName": "MAGBUTONG, JUSUEL BIGCAS",
+    "address": {
+      "purok": "PRK. GAWAD KALINGA",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_7",
+    "fullName": "CODILLA, RYAN MAHINAY",
+    "address": {
+      "purok": "PRK. MAGKUNO",
+      "barangay": "DON AURELLO CHICOTE",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_8",
+    "fullName": "DELA CRUZ, ARNALDO B.",
+    "address": {
+      "purok": "MARTINEZ",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_9",
+    "fullName": "JAUM, EVITA AMOGUIS",
+    "address": {
+      "purok": "PRK. DALAMPASIGAN BILAWAN",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9369163054,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "D04-98-127817",
+    "birthDate": "08/18/1970",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_10",
+    "fullName": "ATOMA, MAIKEE DUNGAN",
+    "address": {
+      "purok": "PRK. MATAHIMIK 2",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_11",
+    "fullName": "ARREZA, CARMELITA N.",
+    "address": {
+      "purok": "MARTINEZ SUBD.",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_12",
+    "fullName": "MONDAY, ARTURO C.",
+    "address": {
+      "purok": "PRK. TUAJON ",
+      "barangay": "DAPNAN",
+      "municipality": "BAGANGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9759628892,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "08/26/1987",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_13",
+    "fullName": "DANDO, RINO MAHINAY",
+    "address": {
+      "purok": null,
+      "barangay": "CAGANGANAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_14",
+    "fullName": "ELAN, LLUWILYN H.",
+    "address": {
+      "purok": "PRK. 1 DWARF SANTAN ",
+      "barangay": "LIBUDON",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_15",
+    "fullName": "BOYLES, AEROSMITH",
+    "address": {
+      "purok": "PRK. MANGGAHAN LEMENTE VILL.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_16",
+    "fullName": "VALDESPINOSA, MAYPA VENUS",
+    "address": {
+      "purok": "DEL PILAR",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_17",
+    "fullName": "MOHAMAD, NOR D",
+    "address": {
+      "purok": "BILAWAN 2",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_18",
+    "fullName": "MAGBAGO, LERMA BULAHAN",
+    "address": {
+      "purok": "PRK. ROSAL CHAN VILLAGE",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9057186146,
+    "emailAddress": "sprechelljayll23@yahoo.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "KO8-16-001815",
+    "birthDate": "11/23/1994",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_19",
+    "fullName": "MOLDEZ, DERLYN MADANLO",
+    "address": {
+      "purok": "PRK. 2 LOGPOND",
+      "barangay": "LUZON",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9274756072,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-23-001314",
+    "birthDate": "04/21/1979",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_20",
+    "fullName": "IMPANG, JAYCARL F.",
+    "address": {
+      "purok": "PRK. ROSE MABUHAY",
+      "barangay": "CAGANGANAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9531174804,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-09-001851",
+    "birthDate": "09/27/1898",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_21",
+    "fullName": "QUIBO, MODESTA GAMO",
+    "address": {
+      "purok": "PRK. MAGBUGOS",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_22",
+    "fullName": "MATI TELEPHONE CORPORATION, C-22-0068676",
+    "address": {
+      "purok": null,
+      "barangay": "CENTRAL ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_23",
+    "fullName": "PAREDES, HEIL MARC C",
+    "address": {
+      "purok": "GUANG GUANG MARTINEZ",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_24",
+    "fullName": "MANTE, HARVEY MAASIN",
+    "address": {
+      "purok": "PRK. 1",
+      "barangay": "CABANGCALAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_25",
+    "fullName": "YBAÑEZ, LENELYN BANGCAYAON",
+    "address": {
+      "purok": null,
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_26",
+    "fullName": "ESCALANTE JR, PLACIDO QUIBIDO",
+    "address": {
+      "purok": "PRK. LOWER MANSANAS",
+      "barangay": "SANTIAGO",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_27",
+    "fullName": "LGU MUNICIPALITY OF LUPON",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_28",
+    "fullName": "BARANGGAY MANIKLING",
+    "address": {
+      "purok": null,
+      "barangay": "MANIKLING",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_29",
+    "fullName": "MUNICIPAL GOVERNMENT OF LUPON",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_30",
+    "fullName": "NABO, MELVIN JOHN BARRIDO",
+    "address": {
+      "purok": "DOÑA ROSA 1 LEMENTE",
+      "barangay": "CENTRAL ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9530365900,
+    "emailAddress": "melvinskyler@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-303556",
+    "birthDate": "03/1/1997",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_31",
+    "fullName": "PICHON, EDNA C. ",
+    "address": {
+      "purok": "PICHON ST.",
+      "barangay": "POBLACION",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9261640450,
+    "emailAddress": "pichon.yoram@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L04-93-032108",
+    "birthDate": "09/12/1962",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_32",
+    "fullName": "SARACAL, EDWIN BANTAYAN",
+    "address": {
+      "purok": "PUROK OMAR",
+      "barangay": "BOBON",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9304158365,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "07/21/1969",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_33",
+    "fullName": "BENITO, JEFFREY ANDOYO",
+    "address": {
+      "purok": "PRK. MAGANDA LAWAAN",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_34",
+    "fullName": "MARTINEZ, ALBERT BIABE",
+    "address": {
+      "purok": "PRK. BAYBAY",
+      "barangay": "CENTRAL",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9665611843,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-12-000464",
+    "birthDate": "12/07/1982",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_35",
+    "fullName": "LUBIANO, DIOSDADO L.",
+    "address": {
+      "purok": null,
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_36",
+    "fullName": "DPWH DAVAO ORIENTAL END DEO",
+    "address": {
+      "purok": null,
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_37",
+    "fullName": "SILAT, LANDO D. ",
+    "address": {
+      "purok": "PRK. LUCATAN",
+      "barangay": "PICHON",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9264072322,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "08/22/1970",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_38",
+    "fullName": "BODADONG, REGIEMAR NOBLEZA",
+    "address": {
+      "purok": "PRK. DAISY 1",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_39",
+    "fullName": "MOATON, LAPURIZA DIZON",
+    "address": {
+      "purok": "PRK. BUTOG ",
+      "barangay": "LIMOT",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9093477024,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-303501",
+    "birthDate": "02/08/1981",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_40",
+    "fullName": "BATOC, FRANKYLN PILIPINAS",
+    "address": {
+      "purok": "PRK. BUSOBUSO",
+      "barangay": "LAVIGAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_41",
+    "fullName": "CABURNAY, DEXTER MENDARO",
+    "address": {
+      "purok": "SILVER HILLS CAPITOL",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_42",
+    "fullName": "GUMOBAO, ALAN BAGAY",
+    "address": {
+      "purok": "PRK. ANCOP 2",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_43",
+    "fullName": "LANGOYAN JR, JOHNIE S.",
+    "address": {
+      "purok": "PRK. MAHOGANY",
+      "barangay": "SAN ROQUE",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9070558363,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "07/04/1999",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_44",
+    "fullName": "IGNACIO, JESUS TANO",
+    "address": {
+      "purok": "PRK. 5 NEW MATI ESTATES SUBD.",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9354303492,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "K11-07000430",
+    "birthDate": "04/26/1964",
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_45",
+    "fullName": "BASOC, MERLITA SAMOT",
+    "address": {
+      "purok": "PRK. AMELIA 1 SUDLON",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_46",
+    "fullName": "PEREGRINO, MEL DUVAN E.",
+    "address": {
+      "purok": "PRK. 5 SAN FRANCISCO",
+      "barangay": "LIBUDON",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_47",
+    "fullName": "CRAPE, PERLIE MAGHOYOP",
+    "address": {
+      "purok": "PRK. ADELFA ST. DON LUIS VILL CENT",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.947Z"
+  },
+  {
+    "_id": "driver_48",
+    "fullName": "BERNALDO, TROY BAUTISTA",
+    "address": {
+      "purok": "PRK. SAMPAGUITA",
+      "barangay": "BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.947Z",
+    "updatedAt": "2025-09-19T22:52:30.948Z"
+  },
+  {
+    "_id": "driver_49",
+    "fullName": "CASAWITAN, SHYNAMAE D.",
+    "address": {
+      "purok": "MABIGA",
+      "barangay": "MANORIGAO",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.948Z",
+    "updatedAt": "2025-09-19T22:52:30.948Z"
+  },
+  {
+    "_id": "driver_50",
+    "fullName": "BALUSAN, EMELITO A.",
+    "address": {
+      "purok": null,
+      "barangay": "TUBAON",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.948Z",
+    "updatedAt": "2025-09-19T22:52:30.948Z"
+  },
+  {
+    "_id": "driver_51",
+    "fullName": "COMMERCIAL TRADE FINANCIAL SERVICES",
+    "address": {
+      "purok": "LSDTO REDULLA, JOEL B/MADANG HILLSIDE",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9093985381,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-12-000386",
+    "birthDate": "04/26/1985",
+    "createdAt": "2025-09-19T22:52:30.948Z",
+    "updatedAt": "2025-09-19T22:52:30.948Z"
+  },
+  {
+    "_id": "driver_52",
+    "fullName": "SUYMAN, ROWENA P.",
+    "address": {
+      "purok": "PRK. 9 SANTAN",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9765305330,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L06-07-008756",
+    "birthDate": "09/10/1989",
+    "createdAt": "2025-09-19T22:52:30.948Z",
+    "updatedAt": "2025-09-19T22:52:30.948Z"
+  },
+  {
+    "_id": "driver_53",
+    "fullName": "GALULA, EMMANUEL BANDAYANON",
+    "address": {
+      "purok": "PRK. INSULAR",
+      "barangay": "SAN LUIS",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.948Z",
+    "updatedAt": "2025-09-19T22:52:30.948Z"
+  },
+  {
+    "_id": "driver_54",
+    "fullName": "GOLES, DOMINGO P.",
+    "address": {
+      "purok": "PRL. PAG LAUM",
+      "barangay": "BAGUMBAYAN",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9104758666,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "09/21/1950",
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_55",
+    "fullName": "DIGAYNON, HERMIE JOY D.",
+    "address": {
+      "purok": "PRK. CENTRO",
+      "barangay": "LAMIAWAN",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_56",
+    "fullName": "AREGLADO, JOSHUA C.",
+    "address": {
+      "purok": "PRK. TINAGO",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_57",
+    "fullName": "PICHON, ROGERINE P.",
+    "address": {
+      "purok": "PHASE 2 DOÑA CARLOTA MARTINEZ",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_58",
+    "fullName": "TOLENTINO, JULIE MONES",
+    "address": {
+      "purok": "PRK. 8-7 MENZI",
+      "barangay": "DON MARTIN MARUNDAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_59",
+    "fullName": "ANACAYA, ACHILLES ERPE MEJOS",
+    "address": {
+      "purok": "PRK. PAG-ASA MAITUM",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9364148262,
+    "emailAddress": "achilleserpeanacaya@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-07-001093",
+    "birthDate": "08/03/1979",
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_60",
+    "fullName": "VALLES, EDGARDO B.",
+    "address": {
+      "purok": "PRK. LIWAYWAY-2",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_61",
+    "fullName": "CALIPAYAN, EDGAR SUMAMBOT",
+    "address": {
+      "purok": "PRK. 3",
+      "barangay": "CENTRAL",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9534961071,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "09/20/1998",
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_62",
+    "fullName": "BANG-AY, RIZZA CABARRUBIAS",
+    "address": {
+      "purok": "PRK. MONTENEGRO",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9757420105,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_63",
+    "fullName": "CANOY, RENE RAMO",
+    "address": {
+      "purok": "PRK. 6 BUENAVIST A",
+      "barangay": "DANAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_64",
+    "fullName": "VALDEZ, MICHELLE P.",
+    "address": {
+      "purok": null,
+      "barangay": "JOVELLAR",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9078483570,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.949Z",
+    "updatedAt": "2025-09-19T22:52:30.949Z"
+  },
+  {
+    "_id": "driver_65",
+    "fullName": "SIMAN, MICHELLE DAO",
+    "address": {
+      "purok": "PRK. PAGKAKAISA",
+      "barangay": "MARTINEZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_66",
+    "fullName": "BADUDAO, MARITO LANABAN",
+    "address": {
+      "purok": null,
+      "barangay": "MAGLAHUS",
+      "municipality": "CATEEL",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_67",
+    "fullName": "CABAÑOG, REYNALDA S.",
+    "address": {
+      "purok": null,
+      "barangay": "CORPORACIO",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_68",
+    "fullName": "MABANDOS, GLORIA MIE P.",
+    "address": {
+      "purok": null,
+      "barangay": "PALMA GIL",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9097779413,
+    "emailAddress": "vincentmabandos17@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-001509",
+    "birthDate": "04/12/2000",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_69",
+    "fullName": "ACMAD JR, ALFREDO QUINCO ",
+    "address": {
+      "purok": "PRK. 5",
+      "barangay": "POBLACION",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9352030344,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "02/09/1979",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_70",
+    "fullName": "BARASBARAS,FRANCISCO BAREGA",
+    "address": {
+      "purok": "PRK. 2 SAMPAGUITA",
+      "barangay": "LIBUDON",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-21-201899",
+    "birthDate": "11/10/1963",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_71",
+    "fullName": "SAMPAGA, CAREN FRANCIA MOTILLA",
+    "address": {
+      "purok": "PRK. LOWER CAPAYAS",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9352566449,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "01/03/1989",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_72",
+    "fullName": "GAUDICOS, JESON CABALUAN",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9510788240,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-14-002677",
+    "birthDate": "04/02/1993",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_73",
+    "fullName": "PAÑA, ALBERTO G.",
+    "address": {
+      "purok": "PRK. 1 SAMPAGUITA",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_74",
+    "fullName": "ABAPO, CORNELIO G.",
+    "address": {
+      "purok": "PRK. SAN LORENZO RUIZ",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_75",
+    "fullName": "JOAQUIN, PREGON TINDUGAN",
+    "address": {
+      "purok": "PRK. PADADA 1",
+      "barangay": "CENTRAL",
+      "municipality": "BAGANGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_76",
+    "fullName": "MACAPALA, CRISTOPHER CARRIEDO",
+    "address": {
+      "purok": "PRK. MAKUGUIHON I KATIPUNAN",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9106746695,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "06/17/75",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_77",
+    "fullName": "AURESTILA, ADEL AUCILLO",
+    "address": {
+      "purok": "PRK. MAPAGMAHAL ",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9163724931,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-18-000648",
+    "birthDate": "12/28/1988",
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_78",
+    "fullName": "LOYOLA, JUVELITO CAMPION",
+    "address": {
+      "purok": "PRK. 5 LOWER TAWAGISAN",
+      "barangay": "BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_79",
+    "fullName": "MATANOG, LEAH CANDAR",
+    "address": {
+      "purok": "PRK. 17-V MAGSAYSAY",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_80",
+    "fullName": "CELINO, MELDRED M.",
+    "address": {
+      "purok": null,
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.950Z"
+  },
+  {
+    "_id": "driver_81",
+    "fullName": "ODOY, EDGAR MUYA",
+    "address": {
+      "purok": "LOWER BLISS",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.950Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_82",
+    "fullName": "AGUJETAS, JOEL O.",
+    "address": {
+      "purok": "DON BOSCO",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_83",
+    "fullName": "GRESONES, MARY JEAN M. ",
+    "address": {
+      "purok": "PRK. 15 CABALLERO",
+      "barangay": "LIBUDON",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9979514502,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_84",
+    "fullName": "LGU LUPON",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_85",
+    "fullName": "RIVAS, JENNY ESCOBIDO",
+    "address": {
+      "purok": "PRK. SAN FRANCISCO 1",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9637498529,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "02/09/1981",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_86",
+    "fullName": "SANGO, EMALYN A.",
+    "address": {
+      "purok": "P-7 WALING WALING",
+      "barangay": "PUNTA LINAO",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "12/17/1973",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_87",
+    "fullName": "LAMBONG, JOSEPH MAGBASA",
+    "address": {
+      "purok": "P-MANCUNO",
+      "barangay": "DON AURELIO CHICOTE",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9972989222,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "10/03/1986",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_88",
+    "fullName": "CUDADA, MACHER C.",
+    "address": {
+      "purok": "PRK. 7",
+      "barangay": "SAN FERMIN",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9513881804,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "10/06/1973",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_89",
+    "fullName": "PANGULIBAY, ROBERT",
+    "address": {
+      "purok": "PRK. SAMPALOK",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_90",
+    "fullName": "VALENTEROS, FELICIDAD S.",
+    "address": {
+      "purok": "506 MABINI BONIFACIO ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9457469231,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "03/28/1988",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_91",
+    "fullName": "GUBALANI, RAULITO JAVILES",
+    "address": {
+      "purok": "P-LOGPOUND3",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9555724001,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L01-18-007079",
+    "birthDate": "12/30/1999",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_92",
+    "fullName": "SOLIS, JOHN REYNALD DE ERIO",
+    "address": {
+      "purok": "PRK. 7",
+      "barangay": "DANAO ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_93",
+    "fullName": "BAUTISTA, ALFA AMOR L.",
+    "address": {
+      "purok": "PRK. EL CENTRO ",
+      "barangay": "BAGUMBAYAN",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9094402360,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-09-001326",
+    "birthDate": "04/05/1977",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_94",
+    "fullName": "BANTAYAN, REMOND CADAO",
+    "address": {
+      "purok": "PRK. 8",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEOROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_95",
+    "fullName": "YOSORES, ROWEN DELA PEÑA",
+    "address": {
+      "purok": "PRK. MABIGA",
+      "barangay": "MANORIGAO",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_96",
+    "fullName": "SAMILLANO, RAMEL LUAYON",
+    "address": {
+      "purok": "PRK. AGUINALDO",
+      "barangay": "NEW ALBAY",
+      "municipality": "MARAGUSAN",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_97",
+    "fullName": "CAMBALON, PAPAS ALBOROTO",
+    "address": {
+      "purok": "PRK. PAYPAY",
+      "barangay": "BRGY. TAGBINONGA",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": null,
+    "birthDate": "06/04/1963",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_98",
+    "fullName": "CASIMERO, JULYVEN ARCENAL",
+    "address": {
+      "purok": "LOWER CAPAYAS",
+      "barangay": "BRGY. MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9057412087,
+    "emailAddress": "julyvencasimero@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-11-000413",
+    "birthDate": "29/07/1984",
+    "createdAt": "2025-09-19T22:52:30.951Z",
+    "updatedAt": "2025-09-19T22:52:30.951Z"
+  },
+  {
+    "_id": "driver_99",
+    "fullName": "BANGCUANG, NOEL B.",
+    "address": {
+      "purok": "PRK. WAGON",
+      "barangay": "BRGY. MACAMBOL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9518466250,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": null,
+    "birthDate": "18/05/1970",
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_100",
+    "fullName": "DAVAN, RUBEN TABARNO",
+    "address": {
+      "purok": "PRK. 4",
+      "barangay": "BRGY. POBLACION",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9760520347,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-12-014081",
+    "birthDate": "18/01/1989",
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_101",
+    "fullName": "MATUTINA, ESTER C.",
+    "address": {
+      "purok": "PRK. 5",
+      "barangay": "BRGY. TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9083313229,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": null,
+    "birthDate": "21/09/1962",
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_102",
+    "fullName": "DAO, IMELDO P.",
+    "address": {
+      "purok": null,
+      "barangay": "BRGY. DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_103",
+    "fullName": "CUMING, RENATO P.",
+    "address": {
+      "purok": null,
+      "barangay": "BRGY. SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9393988613,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "A,A1,B,B1,B2,C0",
+    "birthDate": "11/04/1960",
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_104",
+    "fullName": "CASICNAN JR, NARCISO S.",
+    "address": {
+      "purok": "CHAN VILLAGE",
+      "barangay": "BRGY. CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9560241345,
+    "emailAddress": "lowellcasicnan@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-19-00-1257",
+    "birthDate": "25/08/2000",
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_105",
+    "fullName": "DANDO, RINO M.",
+    "address": {
+      "purok": "PRK. TATE ACACIA MARTINEZ",
+      "barangay": "BRGY. DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_106",
+    "fullName": "PINDURUAN, JOHAIMA B.",
+    "address": {
+      "purok": "PRK. CORBADA",
+      "barangay": "BRGY. DAWAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_107",
+    "fullName": "MORALES, GLENN B.",
+    "address": {
+      "purok": "PRK. LIWAYWAY",
+      "barangay": "BRGY. SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_108",
+    "fullName": "LINGO, VINCENT REY A.",
+    "address": {
+      "purok": "PRK. SAMPALOK DUMPING",
+      "barangay": "BRGY. MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_109",
+    "fullName": "COMMERCIAL TRADE FINANCIAL SERVICES, C-22-0094772",
+    "address": {
+      "purok": "LSDTO LAMONON JOMERI",
+      "barangay": "BRGY. DON ENRIQUE LOPEZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_110",
+    "fullName": "PAULIN, APRIL CATHERINE DELOSO",
+    "address": {
+      "purok": "PH2 MARTINEZ SUBD",
+      "barangay": "BRGY. DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_111",
+    "fullName": "REMEDIOS, CARLOS B.",
+    "address": {
+      "purok": "CHAN VILLAGE",
+      "barangay": "BRGY. CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_112",
+    "fullName": "IRIS, RENE WAREZA",
+    "address": {
+      "purok": "PRK. PAGKAKAISA",
+      "barangay": "BRGY. DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9066912839,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "G01-95-191677",
+    "birthDate": "01/11/1969",
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_113",
+    "fullName": "ASIS, FERNANDO A.",
+    "address": {
+      "purok": "PRK. DINAGSAAN UNIT-1",
+      "barangay": "BRGY. PUNTA LINAO",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_114",
+    "fullName": "CANDOL, ANGELO TEOLA",
+    "address": {
+      "purok": "PRK. PAGLAUM",
+      "barangay": "BRGY. BAGUMBAYAN",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_115",
+    "fullName": "BANTUGAN JR, DEMETRIO T.",
+    "address": {
+      "purok": "PRK. MATULUNGIN-1 PAHAMOTANG",
+      "barangay": "BRGY. MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.952Z",
+    "updatedAt": "2025-09-19T22:52:30.952Z"
+  },
+  {
+    "_id": "driver_116",
+    "fullName": "BONGHANOY, RODEL ASUPRE",
+    "address": {
+      "purok": "PRK. PANGIG",
+      "barangay": "BRGY. TAMISAM",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_117",
+    "fullName": "TAG AT, CHRISTINE JOY AQUINO",
+    "address": {
+      "purok": "385 PRK. TULAY",
+      "barangay": "BRGY. TAGAMOT DAWAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_118",
+    "fullName": "OMAYA, SULPICIO MIRAL",
+    "address": {
+      "purok": "PRK. MADASIGON",
+      "barangay": "BRGY. LANGKA",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9300669541,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": null,
+    "birthDate": "04/06/1971",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_119",
+    "fullName": "FELIZARDO, EDITO AGUIWA",
+    "address": {
+      "purok": "SITIO PALINA",
+      "barangay": "BRGY. BINONDO",
+      "municipality": "BAGANGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9104460389,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "29/09/1997",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_120",
+    "fullName": "ABITONA, CHRISTIAN JAMES S",
+    "address": {
+      "purok": null,
+      "barangay": "BRGY. SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9125411446,
+    "emailAddress": "christian.abitona@deped.gov.ph",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "A,A1,B,B1,B2",
+    "birthDate": "25/12/1989",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_121",
+    "fullName": "ARCEÃ‘O, REYNALDO C.",
+    "address": {
+      "purok": "PRK. DALAMPASIGAN",
+      "barangay": "BRGY. DON ENRIQUE LOPEZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9532569806,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "LO7-17-000560",
+    "birthDate": "26/02/1988",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_122",
+    "fullName": "RELATIVO, ARTEMIA LEPASANA",
+    "address": {
+      "purok": "PRK. 4",
+      "barangay": "BRGY. CABANGCALAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9676497212,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "24/08/1954",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_123",
+    "fullName": "COMMERCIAL TRADE FINANCIAL SERVICES,",
+    "address": {
+      "purok": "LST TO ESCOBIDO MERIA G / PRK. 1",
+      "barangay": "BRGY. MAMALI",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_124",
+    "fullName": "COMISION, BALTAZAR BADILLA",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "BRGY. BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_125",
+    "fullName": "SOTTO, MARIBEL PILAPIL",
+    "address": {
+      "purok": "PRK. SEASIDE",
+      "barangay": "BRGY. BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_126",
+    "fullName": "CATALAN, JOEL L.",
+    "address": {
+      "purok": "PRK. 7",
+      "barangay": "BRGY. PINTATAGAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_127",
+    "fullName": "DEPARTMENT OF ENVIRONMENT AND NATURE, C-22-0044961",
+    "address": {
+      "purok": "PENRO DAHICAN GOV. CENTER",
+      "barangay": "BRGY. DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_128",
+    "fullName": "MOCAM, ROELITO ONGCOY",
+    "address": {
+      "purok": "PRK. PANTUYAN",
+      "barangay": "BRGY. SOBRECAREY",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9693084192,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "A,A1,B,B1,B2",
+    "birthDate": "30/10/1981",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_129",
+    "fullName": "PLARISAN, MYRA MARTINEZ",
+    "address": {
+      "purok": "BLK16 LOT 2 NHA",
+      "barangay": "BRGY. DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_130",
+    "fullName": "PANES, KRISTIAN NOEL U",
+    "address": {
+      "purok": "SITIO TAGAMOT",
+      "barangay": "BRGY. DAWAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9084712270,
+    "emailAddress": "paneskristianskyn3t@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "K02-17-004992",
+    "birthDate": "24/12/1985",
+    "createdAt": "2025-09-19T22:52:30.953Z",
+    "updatedAt": "2025-09-19T22:52:30.953Z"
+  },
+  {
+    "_id": "driver_131",
+    "fullName": "SAN SALVADOR DEL MUNDO AGRICULTURE, COOPERATIVE (SMAC)",
+    "address": {
+      "purok": "PRK. CLACHUCHI",
+      "barangay": "BRGY. POBLACION",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9502297493,
+    "emailAddress": "sansalvadordelmundoagri.coop@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.954Z",
+    "updatedAt": "2025-09-19T22:52:30.954Z"
+  },
+  {
+    "_id": "driver_132",
+    "fullName": "MASLOG JR, ELVIN B",
+    "address": {
+      "purok": "PRK. 8",
+      "barangay": "BRGY. NANGAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9265035802,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "A,A1",
+    "birthDate": "19/03/1998",
+    "createdAt": "2025-09-19T22:52:30.954Z",
+    "updatedAt": "2025-09-19T22:52:30.954Z"
+  },
+  {
+    "_id": "driver_133",
+    "fullName": "CABONITA, FRANCIS FEDERICO",
+    "address": {
+      "purok": "PRK. 8 ORCHIDS ",
+      "barangay": "BRGY. TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9460480297,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-19-000782",
+    "birthDate": "24/03/1986",
+    "createdAt": "2025-09-19T22:52:30.954Z",
+    "updatedAt": "2025-09-19T22:52:30.954Z"
+  },
+  {
+    "_id": "driver_134",
+    "fullName": "BANTILAN, RICHARD SOLIVEN",
+    "address": {
+      "purok": "PRK. MAGBOHOS",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-13-000966",
+    "birthDate": "12/11/1973",
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_135",
+    "fullName": "ANDOYO, JHON LITO P.",
+    "address": {
+      "purok": null,
+      "barangay": "DEL PILAR",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9062546357,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-301993",
+    "birthDate": "06/13/1997",
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_136",
+    "fullName": "REQUISO, NERIO B.",
+    "address": {
+      "purok": null,
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_137",
+    "fullName": "MANDA, MIRALUNA PED",
+    "address": {
+      "purok": "PRK. 8 ",
+      "barangay": "TIBLAWAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9653876723,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "07/20/1970",
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_138",
+    "fullName": "FLORES, JOSEPHINE T.",
+    "address": {
+      "purok": "PRK. AZUCENA",
+      "barangay": "LIMBAHAN ",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_139",
+    "fullName": "JOSE, REDEN M.",
+    "address": {
+      "purok": "MAGSAYSAY 17-1A",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_140",
+    "fullName": "BERNAL, JANICE CIRILO",
+    "address": {
+      "purok": "0205 SAN VICENTE ST.",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_141",
+    "fullName": "MONTON SR, HENRY GOCOTANO",
+    "address": {
+      "purok": null,
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9564852262,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "07/01/1974",
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_142",
+    "fullName": "BARRAL, SUSAN P.",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "CABADIANGAN",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9169670159,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "04/07/1969",
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_143",
+    "fullName": "ALGALLAR, WENCY MAE QUILATON",
+    "address": {
+      "purok": "PRK. MATAHIMIK",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_144",
+    "fullName": "OMAC, NOEL M.",
+    "address": {
+      "purok": "PRK. 5C",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9635579920,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "K08-04-009832",
+    "birthDate": "06/12/1981",
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_145",
+    "fullName": "BUSILAOCO SR, FAUSTO BUSANO",
+    "address": {
+      "purok": "718 ANDRADA ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.955Z",
+    "updatedAt": "2025-09-19T22:52:30.955Z"
+  },
+  {
+    "_id": "driver_146",
+    "fullName": "BANSUAN, NASSER M.",
+    "address": {
+      "purok": "#750-A CALAMANSI ST. JUNA SUBD.",
+      "barangay": "MATINA",
+      "municipality": "DAVAO CITY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_147",
+    "fullName": "ANADIA, SHIRLEY D.",
+    "address": {
+      "purok": null,
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9150572010,
+    "emailAddress": "shinleyanadia80@gmail.com",
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_148",
+    "fullName": "JUAN, ROLANDO R.",
+    "address": {
+      "purok": "RIZAL EXT.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_149",
+    "fullName": "UY, SAMUEL LOPEZ",
+    "address": {
+      "purok": null,
+      "barangay": "CENTRAL",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9398165088,
+    "emailAddress": "zedjaluy@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-10-001506",
+    "birthDate": "08/10/1987",
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_150",
+    "fullName": "SIAROT, GASPAR NAMCA",
+    "address": {
+      "purok": "PRK. BILAWAN 2",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_151",
+    "fullName": "LANDASAN JR, NORBERTO D.",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_152",
+    "fullName": "NUÃ‘EZ, GERALD DONGUILA",
+    "address": {
+      "purok": "PRK. CENTRO",
+      "barangay": "PANIKIAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9171494042,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "03/08/1994",
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_153",
+    "fullName": "QUIAMCO, CRISPIL G.",
+    "address": {
+      "purok": "UPPER SALAZAR",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9955005089,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-11-000985",
+    "birthDate": "01/21/1990",
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_154",
+    "fullName": "BASA, NESTOR T.",
+    "address": {
+      "purok": null,
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9352029226,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-90-004537",
+    "birthDate": "10/08/1959",
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_155",
+    "fullName": "DISTRICT ENGINEER-DPWH BAGANGA",
+    "address": {
+      "purok": "DAVAO ORIENTAL FIRST DISTRICT ENGINEERING OFFICE",
+      "barangay": "LUCOD",
+      "municipality": "BAGANGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_156",
+    "fullName": "SACRO, JAY H.",
+    "address": {
+      "purok": "B8 L2 PH1 CASA VERDE SUBD. SITIO SUDLON MADANG",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9632170505,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.956Z",
+    "updatedAt": "2025-09-19T22:52:30.956Z"
+  },
+  {
+    "_id": "driver_157",
+    "fullName": "SUNGGAY, MARIA CERENIA S.",
+    "address": {
+      "purok": "PRK. SEABREEZE CALAGUNDIAN",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-99-014128",
+    "birthDate": "11/07/1959",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_158",
+    "fullName": "DAO, CALIXTO P.",
+    "address": {
+      "purok": "PRK. HANDUMANAN MENZI",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_159",
+    "fullName": "BANZON, DENNIS S.",
+    "address": {
+      "purok": "PRK. MALINAWON CAMANSI ST.",
+      "barangay": "BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9534627808,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-01-077279",
+    "birthDate": "05/12/1983",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_160",
+    "fullName": "MANDAWE, ARVI JOYCEE B.",
+    "address": {
+      "purok": "LOWER CAPAYAS",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9176363210,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L06-19-003865",
+    "birthDate": "04/22/1991",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_161",
+    "fullName": "GAYTA, KATRINA FIDES FRANCO",
+    "address": {
+      "purok": "NATIONAL HIGHWAY",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9154638525,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-98-013558",
+    "birthDate": "06/10/1980",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_162",
+    "fullName": "INJOLAES, ED LAURENCE P.",
+    "address": {
+      "purok": null,
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9533007763,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-012472",
+    "birthDate": "02/15/1994",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_163",
+    "fullName": "SALLOMAN, JAYSON CAÃ‘ETE",
+    "address": {
+      "purok": "PKR. 1",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L06-15-000526",
+    "birthDate": "15/23/1996",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_164",
+    "fullName": "DADONG, ROSEBELL P.",
+    "address": {
+      "purok": null,
+      "barangay": "MAHANUB",
+      "municipality": "BAGANGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_165",
+    "fullName": "SOLIBIO, ALAN VILLO",
+    "address": {
+      "purok": "PRK. JINGLE VILLE CAPITOL HILLS",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_166",
+    "fullName": "CATADA, RUEL SAYSON",
+    "address": {
+      "purok": "PRK. 3 ",
+      "barangay": "SUROP",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-93-089382",
+    "birthDate": "09/14/1970",
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_167",
+    "fullName": "MUNICIPALITY OF CARAGA, C-22-0153056",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.957Z",
+    "updatedAt": "2025-09-19T22:52:30.957Z"
+  },
+  {
+    "_id": "driver_168",
+    "fullName": "QUIAMCO, NEIL BUGHAO",
+    "address": {
+      "purok": "BIGUE 2",
+      "barangay": "DAWAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_169",
+    "fullName": "MANDABON, JAY D.",
+    "address": {
+      "purok": null,
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9544495235,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_170",
+    "fullName": "BUCIO, ROZEL CASTELLANO",
+    "address": {
+      "purok": "BLK 1 LOT 13 BGR EXECUTIVE HOMES",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9655428842,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-009676",
+    "birthDate": "06/13/02",
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_171",
+    "fullName": "TEODORO, HANEDINA P.",
+    "address": {
+      "purok": "PHASE 1 MARTINEZ SUBD. ",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 910923849,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-07-000411",
+    "birthDate": "01/28/1981",
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_172",
+    "fullName": "JUNSAY, REY FABIAN",
+    "address": {
+      "purok": "PRK. 7 TOWNSITE",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_173",
+    "fullName": "MARUNDAN JR, ALEXANDER M.",
+    "address": {
+      "purok": "PRK. 1 MAGANONOK",
+      "barangay": "DANAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9654288096,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-17-000469",
+    "birthDate": "07/05/1991",
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_174",
+    "fullName": "CABALES, JULIUS S.",
+    "address": {
+      "purok": "PRK. 6 SITIO KINILAW",
+      "barangay": "LUBAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-004166",
+    "birthDate": "07/01/1989",
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_175",
+    "fullName": "PARDILLO, MEDELINA SERVILLA",
+    "address": {
+      "purok": "PRK. 10 NASA",
+      "barangay": "POBLACION",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9755563874,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-17-000067",
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_176",
+    "fullName": "PODANG, EDELBERTO G.",
+    "address": {
+      "purok": "PRK. ANDAPON",
+      "barangay": "ABIJOD",
+      "municipality": "CATEEL",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9512593449,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_177",
+    "fullName": "SATORRE, APOLINARIO PUGOSA",
+    "address": {
+      "purok": "PRK. MAGIC ROSE",
+      "barangay": "MOGBONGCOGON",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9278012331,
+    "emailAddress": "paolosalassatorre14@gmail.com",
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "11/13/1999",
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_178",
+    "fullName": "BEÑEZ, JOHNREL L.",
+    "address": {
+      "purok": "PRK. 12",
+      "barangay": "SAN VICENTE",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_179",
+    "fullName": "REDULLA, ROMEO J.",
+    "address": {
+      "purok": "PRK. SAN ROQUE",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_180",
+    "fullName": "AGUIMOD, DIODELITO SAMOT",
+    "address": {
+      "purok": "PRK. LANGKA",
+      "barangay": "CANINGAG",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9383921328,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "03/23/1982",
+    "createdAt": "2025-09-19T22:52:30.958Z",
+    "updatedAt": "2025-09-19T22:52:30.958Z"
+  },
+  {
+    "_id": "driver_181",
+    "fullName": "MILLAN, BERNARD J.",
+    "address": {
+      "purok": "PRK. MALIPAYON",
+      "barangay": "BAGUMBAYAN",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9175767651,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "12/01/1968",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_182",
+    "fullName": "PALMA, ABDUL MUDJEB CAMBING",
+    "address": {
+      "purok": "PRK. MATINGON UPPER SALAZAR",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9120433363,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "12/15/1989",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_183",
+    "fullName": "MAHINAY, EDNA MONTUERTO",
+    "address": {
+      "purok": "PRK. 1",
+      "barangay": "LUZON",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9858112396,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": "L07-13-601358",
+    "birthDate": "10/11/1967",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_184",
+    "fullName": "ANTOPUESTO, ENRICO M.",
+    "address": {
+      "purok": "PRK. TAMIA 1",
+      "barangay": "DON MARTIN MARUNDAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9999392407,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-04-000779",
+    "birthDate": "11/12/1974",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_185",
+    "fullName": "UMPAD, LOWEILA T.",
+    "address": {
+      "purok": "P4",
+      "barangay": "LIBUDON",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_186",
+    "fullName": "PALMA GIL, FELIZARDO ALTIZO",
+    "address": {
+      "purok": "CLADO SUBD.",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_187",
+    "fullName": "FLORO, MARIO NOLY F.",
+    "address": {
+      "purok": "PRK. TATE ACASIA PH 7 MARTINEZ SUBD.",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9168286558,
+    "emailAddress": "marionolyfloro@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "K02-07-000945",
+    "birthDate": "03/06/1976",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_188",
+    "fullName": "BUENCAMINO, PETER JULES GALAN",
+    "address": {
+      "purok": "CAPITOL HILLS",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9206506189,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "09/16/1969",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_189",
+    "fullName": "VIDAL, JOAN PANIMDIM",
+    "address": {
+      "purok": "PRK. 4",
+      "barangay": "POBLACION",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 935199078,
+    "emailAddress": "joanpanimdim@deped.gov.ph",
+    "hasDriversLicense": "yes",
+    "driversLicenseNumber": "L02-10-006802",
+    "birthDate": "08/02/1980",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_190",
+    "fullName": "MASUCOL SR, GEENROSO ROTANTE",
+    "address": {
+      "purok": "PRK. 10 LA ESPERANZA",
+      "barangay": "TIBLAWAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_191",
+    "fullName": "SOCOBOS, LILA BERSABAL",
+    "address": {
+      "purok": "PRK. 1",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9264796213,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "D09-16-000684",
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_192",
+    "fullName": "ANIEL, ISIDRO B.",
+    "address": {
+      "purok": "503 SAMPAGUITA -1 LOWER SALAZAR",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_193",
+    "fullName": "ATASON, RASED S.",
+    "address": {
+      "purok": null,
+      "barangay": "DAWAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 95257935517,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-07-000963",
+    "birthDate": "10/25/1985",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_194",
+    "fullName": "MARTINEZ, MARVEN",
+    "address": {
+      "purok": "CHAN VILLAGE CARNATION ST. L5 B11",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9266750658,
+    "emailAddress": "martinezmarven4@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-301707",
+    "birthDate": "01/21/2001",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_195",
+    "fullName": "CABAN, MERCEDITA L.",
+    "address": {
+      "purok": "MLGR COMPOUND ",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_196",
+    "fullName": "LICAROS JR, BUENAVENTURA JOROLAN",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9509604267,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "07/14/1974",
+    "createdAt": "2025-09-19T22:52:30.959Z",
+    "updatedAt": "2025-09-19T22:52:30.959Z"
+  },
+  {
+    "_id": "driver_197",
+    "fullName": "ESTRERA, DOMINADOR S.",
+    "address": {
+      "purok": "PRK. LIGARAN 1",
+      "barangay": "DON SALVADOR LOPEZ, SR.",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9516474976,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-003500",
+    "birthDate": "01/24/1996",
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_198",
+    "fullName": "CLARABAL, NARCISO NAVARRO",
+    "address": {
+      "purok": "PRK. BAYANIHAN",
+      "barangay": "LIMBAHAN",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_199",
+    "fullName": "COMMERCIAL TRADE FINANCIAL SERVICES, C-22-0109942",
+    "address": {
+      "purok": "LSDTO GUIADVIN, RODRIGO B/LOPEZ ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_200",
+    "fullName": "DINDIN, ANNABEL COMODAS",
+    "address": {
+      "purok": "PRK. 17-2 MAGSAYSAY",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_201",
+    "fullName": "SURIL, EDGARDO VILLA",
+    "address": {
+      "purok": "PRK. MALINAWON LIMATOC ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_202",
+    "fullName": "ABASOLO, JOEPEE S.",
+    "address": {
+      "purok": "PRK. BUWAD",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9069072804,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-21-000937",
+    "birthDate": "06/18/1995",
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_203",
+    "fullName": "PLAZA, EVANGELINE U.",
+    "address": {
+      "purok": "BLK. 15 L 15 NHA",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_204",
+    "fullName": "CABANTAO, GERONIMO",
+    "address": {
+      "purok": "B6 TOWNSITE",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_205",
+    "fullName": "LUGATIMAN, FLORGELITO RAMIREZ",
+    "address": {
+      "purok": "932 LAWAAN ST. ",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9995448758,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-87-001970",
+    "birthDate": "05/06/1958",
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_206",
+    "fullName": "LEE, VANESSA B.",
+    "address": {
+      "purok": "NHA",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_207",
+    "fullName": "MAGANDAMA, SAIDALI PASANDALAN",
+    "address": {
+      "purok": "PRK. DARRUSALAM DOÑA ROSA 2 MARANAO COMPOUND",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_208",
+    "fullName": "HONTANOSAS, GENE PAULETTE ABAYON",
+    "address": {
+      "purok": "SEASIDE SNACK HOUSE",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_209",
+    "fullName": "VERDADERO, CLARIEMAR BATAC",
+    "address": {
+      "purok": "PRK. 4 EDEN",
+      "barangay": "MANUEL ROXAS",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_210",
+    "fullName": "QUIMPAN, DEONISIO A.",
+    "address": {
+      "purok": "PRK. 4",
+      "barangay": "SANGHAY",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.960Z",
+    "updatedAt": "2025-09-19T22:52:30.960Z"
+  },
+  {
+    "_id": "driver_211",
+    "fullName": "SALVANI, TEOFILO DALOPIRE",
+    "address": {
+      "purok": "PRK. 8",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9093808778,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-95-009137",
+    "birthDate": "08/05/1952",
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_212",
+    "fullName": "COMMERCIAL TRADE FINANCIAL SERVICES, C-22-0071041",
+    "address": {
+      "purok": "ARCHIE MASAGANA",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_213",
+    "fullName": "NOBLE, ROGER FUENTES",
+    "address": {
+      "purok": "PRK. 6",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_214",
+    "fullName": "PERALTA, JOEL M.",
+    "address": {
+      "purok": "PRK. 6",
+      "barangay": "PINTATAGAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_215",
+    "fullName": "ARELLANO, ALDRIN TANGENTE",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_216",
+    "fullName": "BARCELONA, ARIEL P.",
+    "address": {
+      "purok": null,
+      "barangay": "PANIKIAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_217",
+    "fullName": "ANDRADA, JOSE MARI CORPUS",
+    "address": {
+      "purok": "96 RIZAL ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_218",
+    "fullName": "PEÑAFLOR, ARNIEL T.",
+    "address": {
+      "purok": "P1 CAMIA ST. DON LUIS VILLAGE",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_219",
+    "fullName": "NACIONAL, EPRAEM Q.",
+    "address": {
+      "purok": "PRK. TAMAYO",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_220",
+    "fullName": "DIOLA, RANDY S.",
+    "address": {
+      "purok": "PRK. DALISAY",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_221",
+    "fullName": "CUIZON, MARLON B.",
+    "address": {
+      "purok": "PRK. CONCHITA OG SUBD.",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_222",
+    "fullName": "DACUA, YANCY ACE INDONG",
+    "address": {
+      "purok": "LAWAAN ST. ",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9477537714,
+    "emailAddress": "yancyacedacua@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-18-000555",
+    "birthDate": "02/16/1995",
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_223",
+    "fullName": "CONSTANTINOPLA, ALEJA DALILAN",
+    "address": {
+      "purok": "BUGACAN",
+      "barangay": "TAGABAKID",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_224",
+    "fullName": "VALLES, ORDISI J.",
+    "address": {
+      "purok": "P IHMA 1049 QUEZON ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.961Z",
+    "updatedAt": "2025-09-19T22:52:30.961Z"
+  },
+  {
+    "_id": "driver_225",
+    "fullName": "MERANDA,, NENITA BALDOZ",
+    "address": {
+      "purok": "CENTRO 1",
+      "barangay": "DON MARTIN MARUNDAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_226",
+    "fullName": "NONONG, KEVIN JOHN MIASCO",
+    "address": {
+      "purok": "P-2 MAKUGIHON PROPER",
+      "barangay": "DON MARTIN MARUNDAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_227",
+    "fullName": "DALHOG, DEJIE J.",
+    "address": {
+      "purok": "PRK.  BAYANIHAN",
+      "barangay": "PISO PROPER",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9948038769,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "05/22/1998",
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_228",
+    "fullName": "COMMERCIAL TRADE FINANCIAL SERVICES",
+    "address": {
+      "purok": "ISDTO ZAMORA CONCEPCION S/P-3",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_229",
+    "fullName": "SALIBAY, ARIEL LUARDO",
+    "address": {
+      "purok": "PRK. 6 ALOP",
+      "barangay": "TIBLAWAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_230",
+    "fullName": "DIGNOS, ARTHUR U.",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-10-000812",
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_231",
+    "fullName": "LOREN, LIBRADO MAUSISA",
+    "address": {
+      "purok": "PRK. 6 A",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-04-000848",
+    "birthDate": "01/18/1948",
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_232",
+    "fullName": "DUETIZ SR, MARIO M.",
+    "address": {
+      "purok": "PRK. 1 EVERLASTING 1 ",
+      "barangay": "COCORNON",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9813611902,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-16-000693",
+    "birthDate": "06/12/1988",
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_233",
+    "fullName": "CATALONIA, DEXTER L.",
+    "address": {
+      "purok": "B7 L9 CLADO SUBD.",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_234",
+    "fullName": "TOLENTINO, CRISENCIO C.",
+    "address": {
+      "purok": "PRK. 4",
+      "barangay": "SAN VICENTE",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9091292082,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-10-001321",
+    "birthDate": "04/15/1954",
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_235",
+    "fullName": "TARONG, SERVANDO D.",
+    "address": {
+      "purok": null,
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9972137903,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-91-004804",
+    "birthDate": "05/12/1967",
+    "createdAt": "2025-09-19T22:52:30.962Z",
+    "updatedAt": "2025-09-19T22:52:30.962Z"
+  },
+  {
+    "_id": "driver_236",
+    "fullName": "CADAMPOG, MERLINO CUESTA",
+    "address": {
+      "purok": "PRK. MAKIANGAYON",
+      "barangay": "MANIKLING",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_237",
+    "fullName": "SOTTO, ANNA RIZA TAGALOG",
+    "address": {
+      "purok": "PRK. MALINAWON CAMANSI",
+      "barangay": "BADAS",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9534074746,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "03/22/1988",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_238",
+    "fullName": "MONTIZO, JOSHUA ARIAS",
+    "address": {
+      "purok": "PRK. 5",
+      "barangay": "SERGIO OSMEÑA",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_239",
+    "fullName": "BARIQUIT, MARK ANGEL APAO",
+    "address": {
+      "purok": "PRK. CADENA DE AMOR",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_240",
+    "fullName": "CHAMEN, AGA CORTEZO",
+    "address": {
+      "purok": "PRK. MATAHIMIK 1",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9756058126,
+    "emailAddress": "agachamen09@gmail.com",
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "09/25/1994",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_241",
+    "fullName": "IBAÑEZ, DALMACIO LIBAN",
+    "address": {
+      "purok": "PRK. BADYUHAN",
+      "barangay": "SAN PEDRO",
+      "municipality": "CARAGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9477545896,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-004272",
+    "birthDate": "06/14/1985",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_242",
+    "fullName": "MARIMON, ARMAND SANICO",
+    "address": {
+      "purok": "PRK. 2",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9538402128,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "11/30/1994",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_243",
+    "fullName": "ELTAGONDE, STEPHEN ELLORIN",
+    "address": {
+      "purok": null,
+      "barangay": "DON MARTIN MARUNDAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9656453131,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "05/27/1992",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_244",
+    "fullName": "TACDORO, REX G.",
+    "address": {
+      "purok": "PRK. 6-C",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_245",
+    "fullName": "SALIENTES, JEAN DORIA",
+    "address": {
+      "purok": "PRK. LANDING FISH UNIT 2 ",
+      "barangay": "PUNTA LINAO",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9261586257,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-19-002793",
+    "birthDate": "11/13/1978",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_246",
+    "fullName": "PRIETO, JONALYN N.",
+    "address": {
+      "purok": "PRK. ORCHIDS",
+      "barangay": "DON MARIANO MARCOS",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_247",
+    "fullName": "JADRAQUE, ALQUEN CATULONG",
+    "address": {
+      "purok": "PRK. MAGBUHOS",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9124591669,
+    "emailAddress": "jakcatulong@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-000447",
+    "birthDate": "06/19/2002",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_248",
+    "fullName": "ERFE, ROMEO ALQUINO",
+    "address": {
+      "purok": "PRK. CONCHITA VALLES COMP STO NIÑO",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9168503443,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-16-001581",
+    "birthDate": "07/02/1958",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_249",
+    "fullName": "COMANIA, MINDA B.",
+    "address": {
+      "purok": "PRK. ANISLAG",
+      "barangay": "RIZAL",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9534629749,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "01/06/1992",
+    "createdAt": "2025-09-19T22:52:30.963Z",
+    "updatedAt": "2025-09-19T22:52:30.963Z"
+  },
+  {
+    "_id": "driver_250",
+    "fullName": "RUELAN, DENTON DIVINAGRACIA",
+    "address": {
+      "purok": "PRK. TAMAYO",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9164547093,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-002211",
+    "birthDate": "02/05/2005",
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_251",
+    "fullName": "ESTIOCA, MADELYN JOY P.",
+    "address": {
+      "purok": "PRK. 7 TOWNSITE",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9090191601,
+    "emailAddress": "madelynjoy6@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-005449",
+    "birthDate": "03/15/1989",
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_252",
+    "fullName": "MAGBUTONG, RYAN M.",
+    "address": {
+      "purok": "MAPANTAD",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9673496226,
+    "emailAddress": "ryan.magbutong@deped.gov.ph",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-17-000516",
+    "birthDate": "04/12/1992",
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_253",
+    "fullName": "TUGAP, EDILBERTO PARAGAS",
+    "address": {
+      "purok": null,
+      "barangay": "DON MARTIN MARUNDAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9513925406,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_254",
+    "fullName": "GAMBONG, GIOVANI G.",
+    "address": {
+      "purok": "B8 L5 NHA",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_255",
+    "fullName": "CURILAN, HAROLD FLORENTINO",
+    "address": {
+      "purok": "PRK. IHMA QUEZON ST.",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_256",
+    "fullName": "SALVANA, EDDIE",
+    "address": {
+      "purok": "PRK. 5",
+      "barangay": "MAPUTI",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_257",
+    "fullName": "MASAMBAY, WILLIE BALABA",
+    "address": {
+      "purok": "PRK. 17 4B MAGSAYSAY",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_258",
+    "fullName": "BESTES, MARIA LUZ B.",
+    "address": {
+      "purok": "PRK. LOGPOND MAGAPO",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_259",
+    "fullName": "PANCHO, MARLON MANGOSUNG",
+    "address": {
+      "purok": "PH-7 MARTINEZ SUBD.",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_260",
+    "fullName": "PELY III, ARSENIO S.",
+    "address": {
+      "purok": "PRK. 1",
+      "barangay": "PINTATAGAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_261",
+    "fullName": "PENDON, JOHNRED TALE",
+    "address": {
+      "purok": "PRK. 2A",
+      "barangay": "NANGAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_262",
+    "fullName": "CAMARQUEZ, CARLOS LONZAGA",
+    "address": {
+      "purok": "PRK. BOUGAINVILLEA",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9658214293,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-19-000116",
+    "birthDate": "04/01/1961",
+    "createdAt": "2025-09-19T22:52:30.964Z",
+    "updatedAt": "2025-09-19T22:52:30.964Z"
+  },
+  {
+    "_id": "driver_263",
+    "fullName": "ONTONG, FLORENCIO LAGRADA",
+    "address": {
+      "purok": "PRK. 4",
+      "barangay": "CALUBIHAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9700324703,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-09-001327",
+    "birthDate": "07/28/1986",
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_264",
+    "fullName": "BALA JR, ROSITO G.",
+    "address": {
+      "purok": "PRK. MAKUGIHON",
+      "barangay": "SANTO ROSARIO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_265",
+    "fullName": "YANA, RONNEL CABREROS",
+    "address": {
+      "purok": "PRK. 5C",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_266",
+    "fullName": "TEQUIN, TARA NICOLLETE CABINGATAN",
+    "address": {
+      "purok": "PRK. MABUHAY",
+      "barangay": "SANTO ROSARIO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_267",
+    "fullName": "JAGAPE, CYRIL PILAPIL",
+    "address": {
+      "purok": "PRK. DALSA",
+      "barangay": "ILANGAY",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_268",
+    "fullName": "BUSTILLO, ARNEL B. ",
+    "address": {
+      "purok": "P-LIWAYWAY MAPANTAD ",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "N04-07-024823",
+    "birthDate": "07/26/1982",
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_269",
+    "fullName": "AMARO, DIVINA",
+    "address": {
+      "purok": "BILAWAN 2",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9107873082,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-002285",
+    "birthDate": "11/12/1986",
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_270",
+    "fullName": "RAMOS, MICHAEL M.",
+    "address": {
+      "purok": "PRK. MALIPAYON 1",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "N03-97-238075",
+    "birthDate": "01/08/1968",
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_271",
+    "fullName": "BUSTAMANTE, CARLOS B.",
+    "address": {
+      "purok": "PRK. 2 LOWER ",
+      "barangay": "BAON ",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L01-19-00897",
+    "birthDate": "03/27/1959",
+    "createdAt": "2025-09-19T22:52:30.965Z",
+    "updatedAt": "2025-09-19T22:52:30.965Z"
+  },
+  {
+    "_id": "driver_272",
+    "fullName": "LUPIAHAN, IMELDA FUERZAS",
+    "address": {
+      "purok": "PRK. SAN LORENZO",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9078847885,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-10-000610",
+    "birthDate": "03/03/1993",
+    "createdAt": "2025-09-19T22:52:30.966Z",
+    "updatedAt": "2025-09-19T22:52:30.966Z"
+  },
+  {
+    "_id": "driver_273",
+    "fullName": "CAMELOTES, DANTE SALITRERO",
+    "address": {
+      "purok": "PRK. MABUHAY",
+      "barangay": "ILANGAY",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9472756653,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-12-000157",
+    "birthDate": "04/10/1970",
+    "createdAt": "2025-09-19T22:52:30.966Z",
+    "updatedAt": "2025-09-19T22:52:30.966Z"
+  },
+  {
+    "_id": "driver_274",
+    "fullName": "REDULLA, GLENDELLE A.",
+    "address": {
+      "purok": "PRK. SAN ROQUE",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-04-010322",
+    "birthDate": "01/10/1959",
+    "createdAt": "2025-09-19T22:52:30.966Z",
+    "updatedAt": "2025-09-19T22:52:30.966Z"
+  },
+  {
+    "_id": "driver_275",
+    "fullName": "TAGOON, ALEX ATINEN",
+    "address": {
+      "purok": "PRK. 11",
+      "barangay": "CABANGCALAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": "L07-12-001235",
+    "birthDate": "08/16/1991",
+    "createdAt": "2025-09-19T22:52:30.966Z",
+    "updatedAt": "2025-09-19T22:52:30.966Z"
+  },
+  {
+    "_id": "driver_276",
+    "fullName": "DAVAO ORIENTAL SEED PRODUCERS CORP. ",
+    "address": {
+      "purok": "PRK. 2",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.966Z",
+    "updatedAt": "2025-09-19T22:52:30.966Z"
+  },
+  {
+    "_id": "driver_277",
+    "fullName": "DAVAO ORIENTAL SEEDS PRODUCERS COOPERATIVE",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.966Z",
+    "updatedAt": "2025-09-19T22:52:30.966Z"
+  },
+  {
+    "_id": "driver_278",
+    "fullName": "MANIKLAY, ARJAY ENALIOS",
+    "address": {
+      "purok": "PRK. 29",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.967Z",
+    "updatedAt": "2025-09-19T22:52:30.967Z"
+  },
+  {
+    "_id": "driver_279",
+    "fullName": "SANCHEZ, MILAGROSN DONDE",
+    "address": {
+      "purok": "DON. AVE",
+      "barangay": "DON AURELIO CHICOTE",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9263804921,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-19-003137",
+    "birthDate": "12/22/1987",
+    "createdAt": "2025-09-19T22:52:30.967Z",
+    "updatedAt": "2025-09-19T22:52:30.967Z"
+  },
+  {
+    "_id": "driver_280",
+    "fullName": "GUBALANE JR, AVELINO FLORES",
+    "address": {
+      "purok": "BIGUE 1",
+      "barangay": "DAWAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9765627713,
+    "emailAddress": "avelino.gubalane@deped.gov.ph",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-001322",
+    "birthDate": "09/24/1995",
+    "createdAt": "2025-09-19T22:52:30.967Z",
+    "updatedAt": "2025-09-19T22:52:30.967Z"
+  },
+  {
+    "_id": "driver_281",
+    "fullName": "AYTONG, CLINT KENNECTH C.",
+    "address": {
+      "purok": "P-6A",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9679613072,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-002516",
+    "birthDate": "01/22/1990",
+    "createdAt": "2025-09-19T22:52:30.968Z",
+    "updatedAt": "2025-09-19T22:52:30.968Z"
+  },
+  {
+    "_id": "driver_282",
+    "fullName": "LGU-LUPON, C-22-0083146",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.968Z",
+    "updatedAt": "2025-09-19T22:52:30.968Z"
+  },
+  {
+    "_id": "driver_283",
+    "fullName": "TORILLO, RAUL M.",
+    "address": {
+      "purok": null,
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9161213522,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-98-013370",
+    "birthDate": "05/11/1962",
+    "createdAt": "2025-09-19T22:52:30.968Z",
+    "updatedAt": "2025-09-19T22:52:30.968Z"
+  },
+  {
+    "_id": "driver_284",
+    "fullName": "TAPARAN, MARITES",
+    "address": {
+      "purok": null,
+      "barangay": "KINABLANGAN",
+      "municipality": "BAGANGA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9060169595,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L09-22-004435",
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.968Z",
+    "updatedAt": "2025-09-19T22:52:30.968Z"
+  },
+  {
+    "_id": "driver_285",
+    "fullName": "LUERA, MICHAEL G.",
+    "address": {
+      "purok": "PRK. 6A",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9107527427,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.968Z",
+    "updatedAt": "2025-09-19T22:52:30.968Z"
+  },
+  {
+    "_id": "driver_286",
+    "fullName": "PACIANO, RONNEL BALINO",
+    "address": {
+      "purok": "PRK. 29",
+      "barangay": "CENTRAL",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9164547093,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-002211",
+    "birthDate": "02/05/2005",
+    "createdAt": "2025-09-19T22:52:30.969Z",
+    "updatedAt": "2025-09-19T22:52:30.969Z"
+  },
+  {
+    "_id": "driver_287",
+    "fullName": "DOMINADOR, PRINCESS JEAN BASOC",
+    "address": {
+      "purok": "LEMENTE VILL. ",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9755012455,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-25-002364",
+    "birthDate": "01/28/1988",
+    "createdAt": "2025-09-19T22:52:30.969Z",
+    "updatedAt": "2025-09-19T22:52:30.969Z"
+  },
+  {
+    "_id": "driver_288",
+    "fullName": "ARAÑEZ, ERNANIE D.",
+    "address": {
+      "purok": "PRK. 7 RELOCATION",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.969Z",
+    "updatedAt": "2025-09-19T22:52:30.969Z"
+  },
+  {
+    "_id": "driver_289",
+    "fullName": "FLORES, CHRISTOPHER MATUCO",
+    "address": {
+      "purok": "ORK. MOLINA PINAKPAKAN",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9654281250,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "K07-18-000262",
+    "birthDate": "05/11/1988",
+    "createdAt": "2025-09-19T22:52:30.969Z",
+    "updatedAt": "2025-09-19T22:52:30.969Z"
+  },
+  {
+    "_id": "driver_290",
+    "fullName": "KWAN TIU, ROMEO A.",
+    "address": {
+      "purok": "VICENTE YUST",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-94-101472",
+    "birthDate": "12/04/1963",
+    "createdAt": "2025-09-19T22:52:30.970Z",
+    "updatedAt": "2025-09-19T22:52:30.970Z"
+  },
+  {
+    "_id": "driver_291",
+    "fullName": "RAGURO, ELENITA PALAMOS",
+    "address": {
+      "purok": "PRK. SITE",
+      "barangay": "MACAMBOL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.970Z",
+    "updatedAt": "2025-09-19T22:52:30.970Z"
+  },
+  {
+    "_id": "driver_292",
+    "fullName": "ROÑA, RONILO A.",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9283361082,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-05-000637",
+    "birthDate": "11/15/1957",
+    "createdAt": "2025-09-19T22:52:30.971Z",
+    "updatedAt": "2025-09-19T22:52:30.971Z"
+  },
+  {
+    "_id": "driver_293",
+    "fullName": "MEJOS, GERTRUDES L.",
+    "address": {
+      "purok": "PRK. HAYAHAY",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9105714528,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "G03-89-015521",
+    "birthDate": "05/18/1957",
+    "createdAt": "2025-09-19T22:52:30.971Z",
+    "updatedAt": "2025-09-19T22:52:30.971Z"
+  },
+  {
+    "_id": "driver_294",
+    "fullName": "BANAGLIS, ANTHONY G.",
+    "address": {
+      "purok": "PRK. STO NIÑO",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9304551112,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-11-000739",
+    "birthDate": "09/17/1991",
+    "createdAt": "2025-09-19T22:52:30.971Z",
+    "updatedAt": "2025-09-19T22:52:30.971Z"
+  },
+  {
+    "_id": "driver_295",
+    "fullName": "PALMERA, FIDEL C.",
+    "address": {
+      "purok": "P6 MARTINEZ SUBD.",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9816010223,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-86-000936",
+    "birthDate": "10/18/1968",
+    "createdAt": "2025-09-19T22:52:30.971Z",
+    "updatedAt": "2025-09-19T22:52:30.971Z"
+  },
+  {
+    "_id": "driver_296",
+    "fullName": "SUGANDAY, PRINCE L.",
+    "address": {
+      "purok": "P TIAGO",
+      "barangay": "SAN IGNACIO",
+      "municipality": "MANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.971Z",
+    "updatedAt": "2025-09-19T22:52:30.971Z"
+  },
+  {
+    "_id": "driver_297",
+    "fullName": "CORBETA, ALBERTO MANDAGUAY",
+    "address": {
+      "purok": "PRK. MOLAVE 2",
+      "barangay": "BATOBATO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9058744836,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L06-16-001585",
+    "birthDate": "03/26/1967",
+    "createdAt": "2025-09-19T22:52:30.971Z",
+    "updatedAt": "2025-09-19T22:52:30.971Z"
+  },
+  {
+    "_id": "driver_298",
+    "fullName": "BARRERA, MARIO ALAMPAY",
+    "address": {
+      "purok": "PRK. 2 BILAWAN",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.972Z",
+    "updatedAt": "2025-09-19T22:52:30.972Z"
+  },
+  {
+    "_id": "driver_299",
+    "fullName": "JUMAMOY, PETER PAUL L.",
+    "address": {
+      "purok": "PRK. TIMBUANG",
+      "barangay": "LIMOT",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.972Z",
+    "updatedAt": "2025-09-19T22:52:30.972Z"
+  },
+  {
+    "_id": "driver_300",
+    "fullName": "LUBIANO, RAMIL CABATCHETE",
+    "address": {
+      "purok": "SUMIKAP-1",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9165915800,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "05/23/1983",
+    "createdAt": "2025-09-19T22:52:30.972Z",
+    "updatedAt": "2025-09-19T22:52:30.972Z"
+  },
+  {
+    "_id": "driver_301",
+    "fullName": "R. EXPRESS LENDING HOUSE CORPORATION",
+    "address": {
+      "purok": "RIZAL ST. ",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9264446493,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-003613",
+    "birthDate": "10/03/1989",
+    "createdAt": "2025-09-19T22:52:30.972Z",
+    "updatedAt": "2025-09-19T22:52:30.972Z"
+  },
+  {
+    "_id": "driver_302",
+    "fullName": "MANABAT, LORENA BALUD",
+    "address": {
+      "purok": "PRK. MILLENIUM RIVERSIDE SUDLON",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9655891044,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "01/02/1991",
+    "createdAt": "2025-09-19T22:52:30.972Z",
+    "updatedAt": "2025-09-19T22:52:30.972Z"
+  },
+  {
+    "_id": "driver_303",
+    "fullName": "MAGDAYAO, MICHAEL C.",
+    "address": {
+      "purok": "PRK. BANIKANHON",
+      "barangay": "BITAOGAN",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9163352333,
+    "emailAddress": "michaelcorpusmagdayao@gmail.com",
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-06-012440",
+    "birthDate": "09/01/1980",
+    "createdAt": "2025-09-19T22:52:30.972Z",
+    "updatedAt": "2025-09-19T22:52:30.972Z"
+  },
+  {
+    "_id": "driver_304",
+    "fullName": "FANO, MATILDE PLAZA",
+    "address": {
+      "purok": "CHAN VILLAGE",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.973Z",
+    "updatedAt": "2025-09-19T22:52:30.973Z"
+  },
+  {
+    "_id": "driver_305",
+    "fullName": "TUGOTAN, EMELITA SAAVEDRA",
+    "address": {
+      "purok": "PRK. PUTI",
+      "barangay": "CABAGAYAN",
+      "municipality": "TARRAGONA",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.973Z",
+    "updatedAt": "2025-09-19T22:52:30.973Z"
+  },
+  {
+    "_id": "driver_306",
+    "fullName": "PORTUGALIZA, HAM M.",
+    "address": {
+      "purok": "HEBRON",
+      "barangay": "TAYTAYAN",
+      "municipality": "CATEEL",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.973Z",
+    "updatedAt": "2025-09-19T22:52:30.973Z"
+  },
+  {
+    "_id": "driver_307",
+    "fullName": "FORMENTERA JR, CESAR D.",
+    "address": {
+      "purok": "P-MALINAWON",
+      "barangay": "CAGANGANAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-12-610547",
+    "birthDate": "01/09/1973",
+    "createdAt": "2025-09-19T22:52:30.973Z",
+    "updatedAt": "2025-09-19T22:52:30.973Z"
+  },
+  {
+    "_id": "driver_308",
+    "fullName": "VICENTE, ARJIE PANGASATE",
+    "address": {
+      "purok": "PRK. CAPANGAN",
+      "barangay": "PISO PROPER",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9297960513,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-11-000781",
+    "birthDate": "09/18/1987",
+    "createdAt": "2025-09-19T22:52:30.973Z",
+    "updatedAt": "2025-09-19T22:52:30.973Z"
+  },
+  {
+    "_id": "driver_309",
+    "fullName": "MOLLE, ALLAN JHOVELL M.",
+    "address": {
+      "purok": "PRK. KAWAYAN SUDLON",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.974Z",
+    "updatedAt": "2025-09-19T22:52:30.974Z"
+  },
+  {
+    "_id": "driver_310",
+    "fullName": "RESPONTE, NERI C.",
+    "address": {
+      "purok": "PRK. ROSAL 1 MAPANTAD",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9491280263,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-03-000303",
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.974Z",
+    "updatedAt": "2025-09-19T22:52:30.974Z"
+  },
+  {
+    "_id": "driver_311",
+    "fullName": "ADLAWAN, CAESAR JAN MAMILIC",
+    "address": {
+      "purok": "PRK. IMMACULADA AGUINALDO ST.",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.974Z",
+    "updatedAt": "2025-09-19T22:52:30.974Z"
+  },
+  {
+    "_id": "driver_312",
+    "fullName": "DUQUE, CRIS F.",
+    "address": {
+      "purok": "PRK. MAKUGUIHON GSIS",
+      "barangay": "DAHICAN",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.974Z",
+    "updatedAt": "2025-09-19T22:52:30.974Z"
+  },
+  {
+    "_id": "driver_313",
+    "fullName": "SEREÑO, ELMERIO OTILIANO",
+    "address": {
+      "purok": "DINAGSAAN",
+      "barangay": "PUNTA LINAO",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9815182579,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-09-003883",
+    "birthDate": "05/17/1988",
+    "createdAt": "2025-09-19T22:52:30.974Z",
+    "updatedAt": "2025-09-19T22:52:30.974Z"
+  },
+  {
+    "_id": "driver_314",
+    "fullName": "GUIGUI, ELSIE ALAGASE",
+    "address": {
+      "purok": "P SAN FRANCISCO",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9090642362,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-94-007885",
+    "birthDate": "03/01/1978",
+    "createdAt": "2025-09-19T22:52:30.975Z",
+    "updatedAt": "2025-09-19T22:52:30.975Z"
+  },
+  {
+    "_id": "driver_315",
+    "fullName": "FELIX, RICARDO S.",
+    "address": {
+      "purok": "P- IMMACULADA",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9168544738,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-16-001634",
+    "birthDate": "06/02/1960",
+    "createdAt": "2025-09-19T22:52:30.975Z",
+    "updatedAt": "2025-09-19T22:52:30.975Z"
+  },
+  {
+    "_id": "driver_316",
+    "fullName": "AUSTRIA, KRISTIAN LEIGH RULE",
+    "address": {
+      "purok": "PRK. SAN VICENTE ST.",
+      "barangay": "POBLACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9635729633,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-303198",
+    "birthDate": "12/07/1998",
+    "createdAt": "2025-09-19T22:52:30.975Z",
+    "updatedAt": "2025-09-19T22:52:30.975Z"
+  },
+  {
+    "_id": "driver_317",
+    "fullName": "MACAGUBANG, ROGELIO ABISTANO",
+    "address": {
+      "purok": "PRK. SAN FRANCISCO",
+      "barangay": "BAON",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9058744836,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L06-16-001585",
+    "birthDate": "03/26/1967",
+    "createdAt": "2025-09-19T22:52:30.975Z",
+    "updatedAt": "2025-09-19T22:52:30.975Z"
+  },
+  {
+    "_id": "driver_318",
+    "fullName": "CATULONG, LEAH C.",
+    "address": {
+      "purok": "PRK. ACACIA ",
+      "barangay": "BITAOGAN",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9539741977,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-24-002463",
+    "birthDate": "04/17/1977",
+    "createdAt": "2025-09-19T22:52:30.975Z",
+    "updatedAt": "2025-09-19T22:52:30.975Z"
+  },
+  {
+    "_id": "driver_319",
+    "fullName": "DAQUIZ, LEONARDO PINAR",
+    "address": {
+      "purok": "PRK. DALISAY",
+      "barangay": "CORPORACION",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9485527069,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "Q06-26-001217",
+    "birthDate": "04/18/2001",
+    "createdAt": "2025-09-19T22:52:30.976Z",
+    "updatedAt": "2025-09-19T22:52:30.976Z"
+  },
+  {
+    "_id": "driver_320",
+    "fullName": "GUBALANE, DANILO C.",
+    "address": {
+      "purok": "PRK. 9 RIVERSIDE",
+      "barangay": "TAGUGPO",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.976Z",
+    "updatedAt": "2025-09-19T22:52:30.976Z"
+  },
+  {
+    "_id": "driver_321",
+    "fullName": "GOGO, ABIGAIL B.",
+    "address": {
+      "purok": "PRK. SAN ISIDRO",
+      "barangay": "MACANGAO",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9040642362,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-94-007885",
+    "birthDate": "03/01/1978",
+    "createdAt": "2025-09-19T22:52:30.976Z",
+    "updatedAt": "2025-09-19T22:52:30.976Z"
+  },
+  {
+    "_id": "driver_322",
+    "fullName": "ALAGASE, MARC JASON B. ",
+    "address": {
+      "purok": "PRK. ANAHAW",
+      "barangay": "CAGANGANAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9971050015,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-22-303566",
+    "birthDate": "12/14/2004",
+    "createdAt": "2025-09-19T22:52:30.976Z",
+    "updatedAt": "2025-09-19T22:52:30.976Z"
+  },
+  {
+    "_id": "driver_323",
+    "fullName": "ALAGASE, JAN EDREN B.",
+    "address": {
+      "purok": "PRK. ANAHAW",
+      "barangay": "CAGANGANAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9261110263,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-23-000278",
+    "birthDate": "01/11/2006",
+    "createdAt": "2025-09-19T22:52:30.977Z",
+    "updatedAt": "2025-09-19T22:52:30.977Z"
+  },
+  {
+    "_id": "driver_324",
+    "fullName": "LEMENTE, BRIAN T.",
+    "address": {
+      "purok": "PRK. MANGGA RIVERSIDE ",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9362002037,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L01-17-006918",
+    "birthDate": "04/12/1995",
+    "createdAt": "2025-09-19T22:52:30.977Z",
+    "updatedAt": "2025-09-19T22:52:30.977Z"
+  },
+  {
+    "_id": "driver_325",
+    "fullName": "AVERGONZADO, RANDY BASAY",
+    "address": {
+      "purok": "P-1",
+      "barangay": "TIBLAWAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-17-000761",
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.977Z",
+    "updatedAt": "2025-09-19T22:52:30.977Z"
+  },
+  {
+    "_id": "driver_326",
+    "fullName": "VISCONDE, MICHAEL DIAZ",
+    "address": {
+      "purok": "PRK. MALINAWON",
+      "barangay": "MOGBONGCOGON",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-94-007904",
+    "birthDate": "01/05/1972",
+    "createdAt": "2025-09-19T22:52:30.977Z",
+    "updatedAt": "2025-09-19T22:52:30.977Z"
+  },
+  {
+    "_id": "driver_327",
+    "fullName": "HOLGADO, ALVIN GABINETE",
+    "address": {
+      "purok": "PRK. DALSA",
+      "barangay": "ILANGAY ",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L06-99-002902",
+    "birthDate": "08/20/1975",
+    "createdAt": "2025-09-19T22:52:30.977Z",
+    "updatedAt": "2025-09-19T22:52:30.977Z"
+  },
+  {
+    "_id": "driver_328",
+    "fullName": "BALONGA JR, EDUARDO N.",
+    "address": {
+      "purok": "PRK. 17 1 MAGSAYSAY",
+      "barangay": "CENTRAL",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9057603020,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": "02/08/1978",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_329",
+    "fullName": "ZAPANTA, ROLAN D.",
+    "address": {
+      "purok": "P 11 ",
+      "barangay": "CALUBIHAN",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9654437156,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-10-001152",
+    "birthDate": "12/15/1971",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_330",
+    "fullName": "GENANDOY, MARCELINO M.",
+    "address": {
+      "purok": "PRK. PUNONG I",
+      "barangay": "ILANGAY ",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_331",
+    "fullName": "RANISES, EDELBERTO D.",
+    "address": {
+      "purok": null,
+      "barangay": "SANTO ROSARIO",
+      "municipality": "SAN ISIDRO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9485564341,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "Q03-23-004402",
+    "birthDate": "03/13/2003",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_332",
+    "fullName": "BARBA, BRYAN D.",
+    "address": {
+      "purok": "P-5B",
+      "barangay": "POBLACION",
+      "municipality": "BANAYBANAY",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-98-013613",
+    "birthDate": "06/10/1978",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_333",
+    "fullName": "LACASAN, AHN JAY SAMSON",
+    "address": {
+      "purok": "PRK. PAG-ASA",
+      "barangay": "ILANGAY ",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9121656120,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L05-07-005149",
+    "birthDate": "07/28/1986",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_334",
+    "fullName": "TIGAO, RANILO B.",
+    "address": {
+      "purok": "DATICOR",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 91683225516,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-96-010757",
+    "birthDate": "11/05/1972",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_335",
+    "fullName": "BANICO, AILYN L.",
+    "address": {
+      "purok": "PRK. 2 ",
+      "barangay": "MAGDUG",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-20-006322",
+    "birthDate": "04/01/1983",
+    "createdAt": "2025-09-19T22:52:30.978Z",
+    "updatedAt": "2025-09-19T22:52:30.978Z"
+  },
+  {
+    "_id": "driver_336",
+    "fullName": "BRIONES, JACINTO G.",
+    "address": {
+      "purok": "PRK. DAISY 1 MAPANTAD",
+      "barangay": "SAINZ",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "NO",
+    "driversLicenseNumber": null,
+    "birthDate": null,
+    "createdAt": "2025-09-19T22:52:30.979Z",
+    "updatedAt": "2025-09-19T22:52:30.979Z"
+  },
+  {
+    "_id": "driver_337",
+    "fullName": "GOLISAO, GINA DUMANDAN",
+    "address": {
+      "purok": "PRK. MATULUNGIN 2",
+      "barangay": "MATIAO",
+      "municipality": "CITY OF MATI",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9816079571,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-23-001900",
+    "birthDate": "08/06/1974",
+    "createdAt": "2025-09-19T22:52:30.979Z",
+    "updatedAt": "2025-09-19T22:52:30.979Z"
+  },
+  {
+    "_id": "driver_338",
+    "fullName": "RAMIRO, DEOBETH ORTIGA",
+    "address": {
+      "purok": "PRK. 5 ROSE",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L07-00-142040",
+    "birthDate": "03/31/1966",
+    "createdAt": "2025-09-19T22:52:30.979Z",
+    "updatedAt": "2025-09-19T22:52:30.979Z"
+  },
+  {
+    "_id": "driver_339",
+    "fullName": "DELEBIOS, KENT FERNAN B.",
+    "address": {
+      "purok": "PRK. 5 ",
+      "barangay": "TIBANBAN",
+      "municipality": "GOVERNOR GENEROSO",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": 9351997099,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L02-06-000762",
+    "birthDate": "12/01/1965",
+    "createdAt": "2025-09-19T22:52:30.979Z",
+    "updatedAt": "2025-09-19T22:52:30.979Z"
+  },
+  {
+    "_id": "driver_340",
+    "fullName": "SASAM, SAMUELL BARQUIO",
+    "address": {
+      "purok": "PRK. SAMPAGUITA",
+      "barangay": "DON MARIANO MARCOS",
+      "municipality": "LUPON",
+      "province": "DAVAO ORIENTAL",
+      "region": "REGION 11"
+    },
+    "contactNumber": null,
+    "emailAddress": null,
+    "hasDriversLicense": "YES",
+    "driversLicenseNumber": "L01-19-005927",
+    "birthDate": "06/11/1972",
+    "createdAt": "2025-09-19T22:52:30.979Z",
+    "updatedAt": "2025-09-19T22:52:30.979Z"
+  }
+]

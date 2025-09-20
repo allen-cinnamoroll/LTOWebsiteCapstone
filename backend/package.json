@@ -6,7 +6,10 @@
     "scripts": {
         "build": "npm install",
         "start": "node server",
-        "dev": "node --watch server"
+        "dev": "node --watch server",
+        "import": "node scripts/import_with_relationships.js",
+        "verify": "node scripts/verify_relationships.js",
+        "migrate": "node scripts/migrate_to_correct_format.js"
     },
     "keywords": [],
     "author": "",

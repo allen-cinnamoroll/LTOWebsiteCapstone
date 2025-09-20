@@ -49,34 +49,15 @@ export const createVehicle = async (req, res) => {
       delete vehicleData.chassisNo;
     }
     
-    // Handle empty driver field - convert empty string to null
-    if (vehicleData.driver === "" || vehicleData.driver === undefined) {
-      vehicleData.driver = null;
+    // Handle empty ownerId field - convert empty string to null
+    if (vehicleData.ownerId === "" || vehicleData.ownerId === undefined) {
+      vehicleData.ownerId = null;
     }
 
     const vehicle = await VehicleModel.create(vehicleData);
 
-    // If a driver is specified, update the driver's plateNo list
-    if (vehicleData.driver) {
-      try {
-        const driver = await DriverModel.findById(vehicleData.driver);
-        if (driver) {
-          // Get current plate numbers and add the new one if not already present
-          const currentPlates = Array.isArray(driver.plateNo) ? driver.plateNo : 
-                               (driver.plateNo ? driver.plateNo.split(',').map(p => p.trim()) : []);
-          
-          if (!currentPlates.includes(plateNo)) {
-            currentPlates.push(plateNo);
-            await DriverModel.findByIdAndUpdate(vehicleData.driver, {
-              plateNo: currentPlates
-            });
-          }
-        }
-      } catch (driverError) {
-        console.error("Error updating driver plateNo:", driverError);
-        // Don't fail the vehicle creation if driver update fails
-      }
-    }
+    // Note: With the new structure, we don't need to update driver's plateNo list
+    // since vehicles now reference drivers via ownerId, not the other way around
 
     // Sync driver status if renewal date is provided
     if (req.body.dateOfRenewal) {
