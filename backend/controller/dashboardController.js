@@ -300,18 +300,51 @@ export const getRegistrationAnalytics = async (req, res) => {
     // Create date filter based on month and year
     let dateFilter = {};
     if (month && year) {
+      // Both month and year provided - filter by specific month/year
       const startDate = new Date(year, month - 1, 1); // month is 0-indexed
       const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
       dateFilter = {
-        createdAt: {
+        dateOfRenewal: {
           $gte: startDate,
-          $lte: endDate
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
         }
       };
+      console.log(`Filtering by month ${month}, year ${year}`);
+      console.log(`Date range: ${startDate} to ${endDate}`);
+    } else if (year && !month) {
+      // Only year provided - filter by entire year
+      const startDate = new Date(year, 0, 1); // January 1st
+      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+      console.log(`Filtering by year ${year}`);
+      console.log(`Date range: ${startDate} to ${endDate}`);
+    } else if (month && !year) {
+      // Only month provided - filter by that month across all years using aggregation
+      dateFilter = {
+        $expr: {
+          $and: [
+            { $eq: [{ $month: "$dateOfRenewal" }, month] },
+            { $ne: ["$dateOfRenewal", null] }
+          ]
+        }
+      };
+      console.log(`Filtering by month ${month} across all years`);
+    } else {
+      console.log('No date filter applied - showing all data');
     }
+    // If neither month nor year provided, dateFilter remains empty (shows all data)
 
     // Get vehicle statistics
     const totalVehicles = await VehicleModel.countDocuments(dateFilter);
+    console.log(`Total vehicles found: ${totalVehicles}`);
+    console.log(`Date filter applied:`, JSON.stringify(dateFilter, null, 2));
     
     // Get all vehicles to calculate proper active/expired status
     const allVehicles = await VehicleModel.find(dateFilter, 'plateNo dateOfRenewal');
@@ -327,20 +360,39 @@ export const getRegistrationAnalytics = async (req, res) => {
       }
     });
 
-    // Get driver statistics
-    const totalDrivers = await DriverModel.countDocuments(dateFilter);
-    const driversWithLicense = await DriverModel.countDocuments({
-      ...dateFilter,
-      hasDriversLicense: true
-    });
-    const driversWithoutLicense = totalDrivers - driversWithLicense;
+    // Get driver statistics based on vehicle renewal dates
+    let totalDrivers = 0;
+    let driversWithLicense = 0;
+    let driversWithoutLicense = 0;
+    
+    if (Object.keys(dateFilter).length > 0) {
+      // If we have a date filter, find drivers whose vehicles match the date criteria
+      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'driver').distinct('driver');
+      const validDriverIds = vehiclesInDateRange.filter(id => id !== null);
+      
+      if (validDriverIds.length > 0) {
+        totalDrivers = await DriverModel.countDocuments({ _id: { $in: validDriverIds } });
+        driversWithLicense = await DriverModel.countDocuments({ 
+          _id: { $in: validDriverIds },
+          hasDriversLicense: true 
+        });
+        driversWithoutLicense = totalDrivers - driversWithLicense;
+      }
+    } else {
+      // No date filter - get all drivers
+      totalDrivers = await DriverModel.countDocuments();
+      driversWithLicense = await DriverModel.countDocuments({ hasDriversLicense: true });
+      driversWithoutLicense = totalDrivers - driversWithLicense;
+    }
 
     // Get plate number classification
-    const permanentPlates = await VehicleModel.countDocuments({
+    // Temporary plates: no letters (only numbers)
+    // Permanent plates: contains letters
+    const temporaryPlates = await VehicleModel.countDocuments({
       ...dateFilter,
-      plateNo: { $regex: /^[A-Z]{2,3}[0-9]{4}$/ } // Pattern for permanent plates (e.g., ABC1234)
+      plateNo: { $regex: /^[0-9]+$/ } // Only numbers (temporary)
     });
-    const temporaryPlates = totalVehicles - permanentPlates;
+    const permanentPlates = totalVehicles - temporaryPlates;
 
     res.status(200).json({
       success: true,

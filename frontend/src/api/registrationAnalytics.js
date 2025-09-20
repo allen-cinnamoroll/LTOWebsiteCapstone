@@ -32,3 +32,4 @@ export const getMonthNumber = (monthName) => {
   ];
   return months.indexOf(monthName) + 1;
 };
+
