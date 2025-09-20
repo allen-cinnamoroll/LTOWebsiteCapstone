@@ -292,6 +292,89 @@ export const getChartData = async (req, res) => {
   }
 };
 
+// Get registration analytics data
+export const getRegistrationAnalytics = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    // Create date filter based on month and year
+    let dateFilter = {};
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
+      dateFilter = {
+        createdAt: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      };
+    }
+
+    // Get vehicle statistics
+    const totalVehicles = await VehicleModel.countDocuments(dateFilter);
+    
+    // Get all vehicles to calculate proper active/expired status
+    const allVehicles = await VehicleModel.find(dateFilter, 'plateNo dateOfRenewal');
+    let activeVehicles = 0;
+    let expiredVehicles = 0;
+    
+    allVehicles.forEach(vehicle => {
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      if (status === "1") {
+        activeVehicles++;
+      } else {
+        expiredVehicles++;
+      }
+    });
+
+    // Get driver statistics
+    const totalDrivers = await DriverModel.countDocuments(dateFilter);
+    const driversWithLicense = await DriverModel.countDocuments({
+      ...dateFilter,
+      hasDriversLicense: true
+    });
+    const driversWithoutLicense = totalDrivers - driversWithLicense;
+
+    // Get plate number classification
+    const permanentPlates = await VehicleModel.countDocuments({
+      ...dateFilter,
+      plateNo: { $regex: /^[A-Z]{2,3}[0-9]{4}$/ } // Pattern for permanent plates (e.g., ABC1234)
+    });
+    const temporaryPlates = totalVehicles - permanentPlates;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        vehicles: {
+          total: totalVehicles,
+          active: activeVehicles,
+          expired: expiredVehicles
+        },
+        drivers: {
+          total: totalDrivers,
+          withLicense: driversWithLicense,
+          withoutLicense: driversWithoutLicense
+        },
+        plateClassification: {
+          total: totalVehicles,
+          permanent: permanentPlates,
+          temporary: temporaryPlates
+        },
+        period: {
+          month: month || null,
+          year: year || null
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Registration analytics error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 // Get driver-specific chart data with time period filter
 export const getDriverChartData = async (req, res) => {
   try {

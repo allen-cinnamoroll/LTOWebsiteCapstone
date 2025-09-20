@@ -34,13 +34,15 @@
 
   const vehicleSchema = new mongoose.Schema(
     {
-      plateNo: {
-        type: String,
-        required: [true, "plateNo is required"],
-      },
+      
       fileNo: {
         type: String,
         required: [true, "fileNo is required"],
+      },
+      plateNo: {
+        type: String,
+        required: [true, "plateNo is required"],
+        index: true, // Create regular index, not unique
       },
       engineNo: {
         type: String,

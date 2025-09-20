@@ -8,6 +8,83 @@ import path from 'path';
 // Load environment variables
 dotenv.config();
 
+const fixDatabaseIndexes = async (db) => {
+  try {
+    console.log('🔧 Fixing database indexes...');
+    
+    // Get the drivers collection
+    const driversCollection = db.collection('drivers');
+    
+    // Drop the problematic index on driversLicenseNumber
+    try {
+      await driversCollection.dropIndex('driversLicenseNumber_1');
+      console.log('✅ Dropped driversLicenseNumber_1 index');
+    } catch (error) {
+      if (error.code === 27) {
+        console.log('ℹ️  driversLicenseNumber_1 index does not exist');
+      } else {
+        console.log('⚠️  Error dropping driversLicenseNumber_1 index:', error.message);
+      }
+    }
+    
+    // Drop the problematic index on licenseNo
+    try {
+      await driversCollection.dropIndex('licenseNo_1');
+      console.log('✅ Dropped licenseNo_1 index');
+    } catch (error) {
+      if (error.code === 27) {
+        console.log('ℹ️  licenseNo_1 index does not exist');
+      } else {
+        console.log('⚠️  Error dropping licenseNo_1 index:', error.message);
+      }
+    }
+    
+    // Get the vehicles collection
+    const vehiclesCollection = db.collection('vehicles');
+    
+    // Drop the unique index on plateNo for vehicles
+    try {
+      await vehiclesCollection.dropIndex('plateNo_1');
+      console.log('✅ Dropped plateNo_1 unique index from vehicles');
+    } catch (error) {
+      if (error.code === 27) {
+        console.log('ℹ️  plateNo_1 index does not exist on vehicles');
+      } else {
+        console.log('⚠️  Error dropping plateNo_1 index from vehicles:', error.message);
+      }
+    }
+    
+    // Drop the sparse unique index if it exists
+    try {
+      await driversCollection.dropIndex('driversLicenseNumber_sparse_unique');
+      console.log('✅ Dropped driversLicenseNumber_sparse_unique index');
+    } catch (error) {
+      if (error.code === 27) {
+        console.log('ℹ️  driversLicenseNumber_sparse_unique index does not exist');
+      } else {
+        console.log('⚠️  Error dropping driversLicenseNumber_sparse_unique index:', error.message);
+      }
+    }
+    
+    // Create a regular (non-unique) index on driversLicenseNumber for performance
+    try {
+      await driversCollection.createIndex(
+        { driversLicenseNumber: 1 }, 
+        { 
+          name: 'driversLicenseNumber_index'
+        }
+      );
+      console.log('✅ Created regular index on driversLicenseNumber (non-unique)');
+    } catch (error) {
+      console.log('⚠️  Error creating regular index:', error.message);
+    }
+    
+    console.log('✅ Database indexes fixed!');
+  } catch (error) {
+    console.error('Failed to fix database indexes:', error);
+  }
+};
+
 const importRobust = async () => {
   try {
     // Connect to MongoDB
@@ -24,6 +101,10 @@ const importRobust = async () => {
 
     await mongoose.connect(DB_URI);
     console.log(`Connected to MongoDB (${NODE_ENV} environment)`);
+
+    // Fix database indexes before importing
+    const db = mongoose.connection.db;
+    await fixDatabaseIndexes(db);
 
     // Read the JSON file
     const jsonFilePath = path.join(process.cwd(), 'json', 'merged_2-4-3-5-11.json');

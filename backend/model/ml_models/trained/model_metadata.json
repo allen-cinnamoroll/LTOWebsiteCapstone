@@ -1,7 +1,7 @@
 {
   "model_name": "accident_rf_model",
   "rule_system_name": "accident_rule_system",
-  "training_date": "2025-09-20T14:22:50.412770",
+  "training_date": "2025-09-20T23:05:06.485157",
   "config": {
     "data": {
       "raw_data_path": "../../../data/raw/accidents_data.csv",

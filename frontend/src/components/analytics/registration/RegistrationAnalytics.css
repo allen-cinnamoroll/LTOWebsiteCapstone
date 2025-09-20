@@ -1,0 +1,199 @@
+/* Registration Analytics Component Styles */
+
+.registration-analytics-header {
+  @apply flex items-center justify-between mb-6;
+}
+
+.registration-analytics-title {
+  @apply text-3xl font-bold text-foreground;
+}
+
+.registration-analytics-subtitle {
+  @apply text-sm text-muted-foreground mt-1;
+}
+
+.registration-analytics-controls {
+  @apply flex gap-3 items-center;
+}
+
+.registration-analytics-dropdown {
+  @apply relative inline-block;
+}
+
+.registration-analytics-dropdown-button {
+  @apply flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors duration-200 cursor-pointer;
+  min-width: 120px;
+}
+
+.registration-analytics-dropdown-button.placeholder {
+  @apply text-muted-foreground;
+}
+
+.registration-analytics-dropdown-button:focus {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+.registration-analytics-dropdown-content {
+  @apply absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50;
+  max-height: 200px;
+  overflow-y: auto;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.registration-analytics-dropdown-item {
+  @apply px-4 py-2 text-sm text-foreground hover:bg-accent cursor-pointer transition-colors duration-150;
+}
+
+.registration-analytics-dropdown-item:first-child {
+  @apply rounded-t-lg;
+}
+
+.registration-analytics-dropdown-item:last-child {
+  @apply rounded-b-lg;
+}
+
+.registration-analytics-dropdown-item:hover {
+  @apply bg-accent;
+}
+
+.registration-analytics-chevron {
+  @apply w-4 h-4 transition-transform duration-200;
+}
+
+.registration-analytics-chevron.open {
+  @apply rotate-180;
+}
+
+/* Dark mode specific adjustments */
+.dark .registration-analytics-dropdown-button {
+  @apply bg-card border-border text-foreground;
+}
+
+.dark .registration-analytics-dropdown-content {
+  @apply bg-card border-border shadow-xl;
+}
+
+/* Light mode specific adjustments */
+.light .registration-analytics-dropdown-button {
+  @apply bg-white border-gray-200 text-gray-900;
+}
+
+.light .registration-analytics-dropdown-content {
+  @apply bg-white border-gray-200 shadow-lg;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .registration-analytics-header {
+    @apply flex-col items-start gap-4;
+  }
+  
+  .registration-analytics-controls {
+    @apply w-full justify-between;
+  }
+  
+  .registration-analytics-dropdown-button {
+    @apply flex-1 justify-center;
+  }
+}
+
+/* Animation for smooth transitions */
+.registration-analytics-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar for dropdown if needed */
+.registration-analytics-dropdown-content {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+}
+
+.registration-analytics-dropdown-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.registration-analytics-dropdown-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.registration-analytics-dropdown-content::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 2px;
+}
+
+.registration-analytics-dropdown-content::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Metrics Cards Styling */
+.registration-analytics-metrics-card {
+  @apply bg-card border border-border rounded-lg p-6 transition-all duration-200 hover:shadow-lg;
+}
+
+.registration-analytics-metrics-card:hover {
+  @apply border-primary/20;
+}
+
+.registration-analytics-metrics-icon {
+  @apply w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center transition-colors duration-200;
+}
+
+.registration-analytics-metrics-icon:hover {
+  @apply bg-primary/30;
+}
+
+.registration-analytics-metrics-value {
+  @apply text-3xl font-bold text-foreground mb-2;
+}
+
+.registration-analytics-metrics-label {
+  @apply text-sm text-muted-foreground;
+}
+
+.registration-analytics-metrics-badge {
+  @apply px-3 py-1 text-xs font-medium rounded-full transition-colors duration-200;
+}
+
+.registration-analytics-metrics-badge.active {
+  @apply bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400;
+}
+
+.registration-analytics-metrics-badge.expired {
+  @apply bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400;
+}
+
+.registration-analytics-metrics-badge.with-license {
+  @apply bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400;
+}
+
+.registration-analytics-metrics-badge.without-license {
+  @apply bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400;
+}
+
+/* Responsive adjustments for metrics */
+@media (max-width: 768px) {
+  .registration-analytics-metrics-card {
+    @apply p-4;
+  }
+  
+  .registration-analytics-metrics-value {
+    @apply text-2xl;
+  }
+  
+  .registration-analytics-metrics-badge {
+    @apply px-2 py-1 text-xs;
+  }
+}
