@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics } from "../controller/dashboardController.js";
+import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals } from "../controller/dashboardController.js";
 
 const dashboardRouter = express.Router();
 
@@ -15,5 +15,11 @@ dashboardRouter.get("/driver-chart", authenticate, getDriverChartData);
 
 // Get registration analytics data (Authenticated Users)
 dashboardRouter.get("/registration-analytics", authenticate, getRegistrationAnalytics);
+
+// Get municipality analytics data (Authenticated Users)
+dashboardRouter.get("/municipality-analytics", authenticate, getMunicipalityAnalytics);
+
+// Get municipality registration totals for bar chart (Authenticated Users)
+dashboardRouter.get("/municipality-registration-totals", authenticate, getMunicipalityRegistrationTotals);
 
 export default dashboardRouter;

@@ -33,3 +33,35 @@ export const getMonthNumber = (monthName) => {
   return months.indexOf(monthName) + 1;
 };
 
+// Get municipality analytics data
+export const getMunicipalityAnalytics = async (month = null, year = null) => {
+  try {
+    const params = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await apiClient.get('/dashboard/municipality-analytics', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching municipality analytics:', error);
+    throw error;
+  }
+};
+
+// Get municipality registration totals for bar chart
+export const getMunicipalityRegistrationTotals = async (month = null, year = null) => {
+  try {
+    const params = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await apiClient.get('/dashboard/municipality-registration-totals', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching municipality registration totals:', error);
+    throw error;
+  }
+};
+
+
+

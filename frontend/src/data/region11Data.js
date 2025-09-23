@@ -1,585 +1,585 @@
-// Davao Oriental hierarchical data
+// DAVAO ORIENTAL HIERARCHICAL DATA
 export const davaoOrientalData = {
-  region: "Davao Oriental",
+  region: "DAVAO ORIENTAL",
   municipalities: {
-    "Banaybanay": {
+    "BANAYBANAY": {
       barangays: {
-        "Cabangcalan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "CABANGCALAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Caganganan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CAGANGANAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Calubihan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CALUBIHAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Causwagan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CAUSWAGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Mahayag": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAHAYAG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Maputi": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MAPUTI": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Mogbongcogon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MOGBONGCOGON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Panikian": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "PANIKIAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Pintatagan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "PINTATAGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Piso Proper": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "PISO PROPER": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Poblacion": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "POBLACION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Punta Linao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "PUNTA LINAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Rang-ay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "RANG-AY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Vicente": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN VICENTE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         }
       }
     },
-    "Boston": {
+    "BOSTON": {
       barangays: {
-        "Caatihan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CAATIHAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Cabasagan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CABASAGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Carmen": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CARMEN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Cawayanan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CAWAYANAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Poblacion": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "POBLACION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "San Jose": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN JOSE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Sibajay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SIBAJAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Simulao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SIMULAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         }
       }
     },
-    "Baganga": {
+    "BAGANGA": {
       barangays: {
-        "Baculin": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BACULIN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Ban-ao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "BANAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Batawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BATAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Batiano": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "BATIANO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Binondo": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BINONDO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Bobonao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "BOBONAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Campawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CAMPAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Central": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "CENTRAL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Dapnan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DAPNAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Kinablangan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "KINABLANGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Lambajon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LAMBAJON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Lucod": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LUCOD": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Mahan-ub": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAHANUB": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Mikit": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MIKIT": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Salingcomot": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SALINGCOMOT": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Isidro": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN ISIDRO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Victor": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN VICTOR": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Saoquigue": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAOQUEGUE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         }
       }
     },
-    "Caraga": {
+    "CARAGA": {
       barangays: {
-        "Alvar": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "ALVAR": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Caningag": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CANINGAG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Don Leon Balante": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "DON LEON BALANTE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Lamiawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LAMIAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Manorigao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MANORIGAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Mercedes": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MERCEDES": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Palma Gil": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "PALMA GIL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Pichon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "PICHON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Poblacion": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "POBLACION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "San Antonio": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN ANTONIO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Jose": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN JOSE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Luis": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN LUIS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Miguel": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN MIGUEL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Pedro": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN PEDRO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Santa Fe": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SANTA FE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Santiago": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SANTIAGO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "P.M. Sobrecarey": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SOBRECAREY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         }
       }
     },
-    "Cateel": {
+    "CATEEL": {
       barangays: {
-        "Abihod": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "ABIJOD": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Alegria": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "ALEGRIA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Aliwagwag": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "ALIWAGWAG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Aragon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "ARAGON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Baybay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BAYBAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Maglahus": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAGLAHUS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Mainit": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MAINIT": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Malibago": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MALIBAGO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Alfonso": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN ALFONSO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Antonio": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN ANTONIO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Miguel": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN MIGUEL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Rafael": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN RAFAEL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Vicente": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN VICENTE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Santa Filomena": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SANTA FILOMENA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Taytayan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TAYTAYAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Poblacion": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "POBLACION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         }
       }
     },
-    "Governor Generoso": {
+    "GOVERNOR GENEROSO": {
       barangays: {
-        "Anitap": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "ANITAP": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Crispin Dela Cruz": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CRISPIN DELA CRUZ": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Don Aurelio Chicote": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "DON AURELIO CHICOTE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Lavigan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LAVIGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Luzon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LUZON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Magdug": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAGDUG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Manuel Roxas": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MANUEL ROXAS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Montserrat": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MONTSERRAT": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Nangan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "NANGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Oregon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "OREGON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Poblacion (Sigaboy)": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "POBLACION (SIGABOY)": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Pundaguitan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "PUNDAGUITAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Sergio Osmeña": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SERGIO OSMEÑA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Surop": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SUROP": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Tagabebe": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TAGABEBE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Tamban": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TAMBAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Tandang Sora": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TANDANG SORA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Tibanban": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TIBANBAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Tiblawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TIBLAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Upper Tibanban": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "UPPER TIBANBAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         }
       }
     },
-    "Lupon": {
+    "LUPON": {
       barangays: {
-        "Bagumbayan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BAGUMBAYAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Cabadiangan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CABADIANGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Calapagan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CALAPAGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Cocornon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "COCORNON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Corporacion": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CORPORACION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Don Mariano Marcos": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DON MARIANO MARCOS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Ilangay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "ILANGAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Langka": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LANGKA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Lantawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LANTAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Limbahan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LIMBAHAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Macangao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MACANGAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Magsaysay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAGSAYSAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Mahayahay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MAHAYAHAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Maragatas": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MARAGATAS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Rang-ay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "RANG-AY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Jose": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN JOSE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Tagboa": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TAGBOA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Tagugpo": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TAGUGPO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         }
       }
     },
-    "Manay": {
+    "MANAY": {
       barangays: {
-        "Capasnan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CAPASNAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Cayawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CAYAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Central (Poblacion)": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "CENTRAL (POBLACION)": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Concepcion": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CONCEPCION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Del Pilar": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "DEL PILAR": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Guza": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "GUZA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Holy Cross": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "HOLY CROSS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Lambog": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LAMBOG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Mabini": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MABINI": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Manreza": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MANREZA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "New Taokanga": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "NEW TAOKANGA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Old Macopa": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "OLD MACOPA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Rizal": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "RIZAL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Fermin": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN FERMIN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Ignacio": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN IGNACIO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "San Isidro": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN ISIDRO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Zaragosa": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "ZARAGOSA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         }
       }
     },
-    "Mati (City)": {
+    "CITY OF MATI": {
       barangays: {
-        "Badas": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BADAS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Bobon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "BOBON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Buso": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BUSO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Cabuaya": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CABUAYA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Central (City Proper)": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "CENTRAL (CITY PROPER)": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Culian": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "CULIAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Dahican": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "DAHICAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Danao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DANAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Dawan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "DAWAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Don Enrique Lopez": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DON ENRIQUE LOPEZ": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Don Martin Marundan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "DON MARTIN MARUNDAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Don Salvador Lopez, Sr.": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DON SALVADOR LOPEZ, SR.": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Langka": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LANGKA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Lawigan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LAWIGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Libudon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LIBUDON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Luban": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LUBAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Macambol": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MACAMBOL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Mamali": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAMALI": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Matiao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MATIAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Mayo": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAYO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Sainz": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAINZ": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Sanghay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SANGHAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Tagabakid": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TAGABAKID": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Tagbinonga": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TAGBINONGA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Taguibo": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TAGUIBO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Tamisan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TAMISAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         }
       }
     },
-    "San Isidro": {
+    "SAN ISIDRO": {
       barangays: {
-        "Baon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "BAON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Bitaogan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "BITAOGAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Cambaleon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CAMBALEON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Dugmanon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DUGMANON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Iba": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "IBA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "La Union": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LA UNION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Lapu-lapu": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LAPU-LAPU": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Manikling": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MANIKLING": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Maputi": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "MAPUTI": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Batobato (Poblacion)": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "BATOBATO (POBLACION)": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "San Miguel": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SAN MIGUEL": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "San Roque": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SAN ROQUE": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Santo Rosario": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "SANTO ROSARIO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Sudlon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "SUDLON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Talisay": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TALISAY": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         }
       }
     },
-    "Tarragona": {
+    "TARRAGONA": {
       barangays: {
-        "Cabagayan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "CABAGAYAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Central (Poblacion)": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5"]
+        "CENTRAL (POBLACION)": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
-        "Dadong": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "DADONG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Jovellar": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "JOVELLAR": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Limot": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "LIMOT": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Lucatan": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "LUCATAN": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Maganda": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "MAGANDA": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Ompao": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "OMPAO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "Tomoaong": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3"]
+        "TOMOAONG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "Tubaon": {
-          puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4"]
+        "TUBAON": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         }
       }
     }

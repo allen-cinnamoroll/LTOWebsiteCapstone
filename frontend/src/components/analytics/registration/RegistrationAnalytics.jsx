@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './RegistrationAnalytics.css';
 import { getRegistrationAnalytics, getMonthName, getMonthNumber } from '../../../api/registrationAnalytics.js';
+import MunicipalityChart from './MunicipalityChart.jsx';
 
 export function RegistrationAnalytics() {
   const [selectedMonth, setSelectedMonth] = useState('');
@@ -21,6 +22,7 @@ export function RegistrationAnalytics() {
 
   const currentYear = new Date().getFullYear();
   const years = ['All', ...Array.from({ length: 7 }, (_, i) => (currentYear + i).toString())];
+
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -115,6 +117,10 @@ export function RegistrationAnalytics() {
     }
   };
 
+
+
+
+
   // Load initial data and fetch data when month or year changes
   useEffect(() => {
     fetchAnalyticsData(selectedMonth, selectedYear);
@@ -157,7 +163,7 @@ export function RegistrationAnalytics() {
                   right: 0,
                   top: '100%',
                   marginTop: '8px',
-                  width: '192px',
+                  width: '180px',
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
@@ -259,20 +265,25 @@ export function RegistrationAnalytics() {
       {/* Metrics Section */}
       <div className="registration-analytics-fade-in">
         <div className="mb-6">
-          <div className="flex gap-6">
-            <div className="bg-card border border-border rounded-lg p-4 w-[400px]">
+          <div className="flex justify-start">
+            {/* Metrics Section */}
+            <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg p-4 w-[400px] h-fit shadow-sm dark:!bg-[#171725] dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 flex items-center justify-center">
                   <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M3 3v18h18"/>
-                    <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-                    <path d="M16 5l3 3-3 3"/>
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
                   </svg>
                 </div>
                 <h2 className="text-1xl font-bold text-foreground">Metrics</h2>
               </div>
               {/* Registered Vehicles Row */}
-              <div className="flex items-center justify-between py-2 border-b border-border">
+              <div className="flex items-center justify-between py-2 border-b border-border group cursor-pointer relative rounded-md">
+                {/* Hover background highlight */}
+                <div className="absolute inset-0 bg-gray-200/70 dark:bg-gray-600/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                <div className="relative z-10 w-full flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 flex items-center justify-center">
                     <svg className="w-4 h-4 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -299,10 +310,14 @@ export function RegistrationAnalytics() {
                   </div>
                   <div className="text-xs text-muted-foreground">Total</div>
                 </div>
+                </div>
               </div>
 
               {/* Registered Owners Row */}
-              <div className="flex items-center justify-between py-2 border-b border-border">
+              <div className="flex items-center justify-between py-2 border-b border-border group cursor-pointer relative rounded-md">
+                {/* Hover background highlight */}
+                <div className="absolute inset-0 bg-gray-200/70 dark:bg-gray-600/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                <div className="relative z-10 w-full flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 flex items-center justify-center">
                     <svg className="w-4 h-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,17 +341,25 @@ export function RegistrationAnalytics() {
                   </div>
                   <div className="text-xs text-muted-foreground">Total</div>
                 </div>
+                </div>
               </div>
 
               {/* Plate Number Classification Row */}
-              <div className="flex items-center justify-between py-2">
+              <div className="flex items-center justify-between py-2 group cursor-pointer relative rounded-md">
+                {/* Hover background highlight */}
+                <div className="absolute inset-0 bg-gray-200/70 dark:bg-gray-600/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+                <div className="relative z-10 w-full flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 flex items-center justify-center">
                     <svg className="w-4 h-4 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                      <rect x="3" y="8" width="18" height="8" rx="2" ry="2"/>
-                      <path d="M7 8V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/>
-                      <path d="M9 12h6"/>
-                      <path d="M9 14h6"/>
+                      <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>
+                      <rect x="4" y="8" width="16" height="8" rx="1" ry="1"/>
+                      <path d="M8 10h2"/>
+                      <path d="M12 10h2"/>
+                      <path d="M16 10h2"/>
+                      <path d="M8 12h2"/>
+                      <path d="M12 12h2"/>
+                      <path d="M16 12h2"/>
                     </svg>
                   </div>
                   <div>
@@ -356,16 +379,21 @@ export function RegistrationAnalytics() {
                   </div>
                   <div className="text-xs text-muted-foreground">Total</div>
                 </div>
+                </div>
               </div>
             </div>
             
-             {/* Space for future card */}
-             <div className="flex-1">
-               {/* Future card will go here */}
-             </div>
-           </div>
-         </div>
-       </div>
+            {/* Municipality Chart */}
+            <MunicipalityChart 
+              selectedMonth={selectedMonth} 
+              selectedYear={selectedYear} 
+              loading={loading}
+            />
+          </div>
+        </div>
+      </div>
+
+
     </div>
   );
 }

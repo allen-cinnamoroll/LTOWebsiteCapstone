@@ -427,6 +427,444 @@ export const getRegistrationAnalytics = async (req, res) => {
   }
 };
 
+
+// Get  registration analytics data
+export const getMunicipalityAnalytics = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    // Create date filter based on month and year
+    let dateFilter = {};
+    if (month && year) {
+      // Both month and year provided - filter by specific month/year
+      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (year && !month) {
+      // Only year provided - filter by entire year
+      const startDate = new Date(year, 0, 1); // January 1st
+      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (month && !year) {
+      // Only month provided - filter by that month across all years using aggregation
+      dateFilter = {
+        $expr: {
+          $and: [
+            { $eq: [{ $month: "$dateOfRenewal" }, month] },
+            { $ne: ["$dateOfRenewal", null] }
+          ]
+        }
+      };
+    }
+    // If neither month nor year provided, dateFilter remains empty (shows all data)
+
+    // Define the municipalities of Davao Oriental
+    const davaoOrientalMunicipalities = [
+      'Baganga', 'Banaybanay', 'Boston', 'Caraga', 'Cateel', 
+      'Governor Generoso', 'Lupon', 'Manay', 'San Isidro', 
+      'Tarragona', 'City of Mati'
+    ];
+
+    // Get vehicle data grouped by municipality (case-insensitive)
+    const vehicleAggregation = [
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driver',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          municipality: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.municipality', null] },
+              then: '$driverInfo.address.municipality',
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          municipality: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $toLower: '$municipality'
+          },
+          vehicleCount: { $sum: 1 },
+          activeVehicles: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: [
+                    {
+                      $function: {
+                        body: function(plateNo, dateOfRenewal) {
+                          // Import the getVehicleStatus function logic here
+                          if (!plateNo || !dateOfRenewal) return "0";
+                          
+                          const currentDate = new Date();
+                          const renewalDate = new Date(dateOfRenewal);
+                          const timeDiff = currentDate.getTime() - renewalDate.getTime();
+                          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                          
+                          // Check if plate number contains letters (permanent) or only numbers (temporary)
+                          const hasLetters = /[A-Za-z]/.test(plateNo);
+                          
+                          if (hasLetters) {
+                            // Permanent plates: valid for 3 years
+                            return daysDiff <= 1095 ? "1" : "0";
+                          } else {
+                            // Temporary plates: valid for 1 year
+                            return daysDiff <= 365 ? "1" : "0";
+                          }
+                        },
+                        args: ['$plateNo', '$dateOfRenewal'],
+                        lang: 'js'
+                      }
+                    },
+                    "1"
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          },
+          expiredVehicles: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: [
+                    {
+                      $function: {
+                        body: function(plateNo, dateOfRenewal) {
+                          if (!plateNo || !dateOfRenewal) return "0";
+                          
+                          const currentDate = new Date();
+                          const renewalDate = new Date(dateOfRenewal);
+                          const timeDiff = currentDate.getTime() - renewalDate.getTime();
+                          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                          
+                          const hasLetters = /[A-Za-z]/.test(plateNo);
+                          
+                          if (hasLetters) {
+                            return daysDiff <= 1095 ? "1" : "0";
+                          } else {
+                            return daysDiff <= 365 ? "1" : "0";
+                          }
+                        },
+                        args: ['$plateNo', '$dateOfRenewal'],
+                        lang: 'js'
+                      }
+                    },
+                    "0"
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      }
+    ];
+
+    const vehicleData = await VehicleModel.aggregate(vehicleAggregation);
+
+    // Get driver data grouped by municipality (case-insensitive)
+    const driverAggregation = [
+      {
+        $addFields: {
+          municipality: '$address.municipality'
+        }
+      },
+      {
+        $match: {
+          municipality: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $toLower: '$municipality'
+          },
+          driverCount: { $sum: 1 },
+          driversWithLicense: {
+            $sum: {
+              $cond: ['$hasDriversLicense', 1, 0]
+            }
+          },
+          driversWithoutLicense: {
+            $sum: {
+              $cond: ['$hasDriversLicense', 0, 1]
+            }
+          }
+        }
+      }
+    ];
+
+    const driverData = await DriverModel.aggregate(driverAggregation);
+
+    // Combine and normalize the data
+    const municipalityData = {};
+    
+    // Initialize all municipalities with zero counts
+    davaoOrientalMunicipalities.forEach(municipality => {
+      const key = municipality.toLowerCase();
+      municipalityData[key] = {
+        municipality: municipality,
+        vehicles: {
+          total: 0,
+          active: 0,
+          expired: 0
+        },
+        drivers: {
+          total: 0,
+          withLicense: 0,
+          withoutLicense: 0
+        }
+      };
+    });
+
+    // Add vehicle data
+    vehicleData.forEach(item => {
+      const municipalityKey = item._id;
+      if (municipalityData[municipalityKey]) {
+        municipalityData[municipalityKey].vehicles = {
+          total: item.vehicleCount,
+          active: item.activeVehicles,
+          expired: item.expiredVehicles
+        };
+      }
+    });
+
+    // Add driver data
+    driverData.forEach(item => {
+      const municipalityKey = item._id;
+      if (municipalityData[municipalityKey]) {
+        municipalityData[municipalityKey].drivers = {
+          total: item.driverCount,
+          withLicense: item.driversWithLicense,
+          withoutLicense: item.driversWithoutLicense
+        };
+      }
+    });
+
+    // Convert to array and sort by municipality name
+    const finalData = Object.values(municipalityData).sort((a, b) => 
+      a.municipality.localeCompare(b.municipality)
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        municipalities: finalData,
+        period: {
+          month: month || null,
+          year: year || null
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Municipality analytics error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Get municipality registration totals for bar chart (vehicles and drivers per municipality)
+export const getMunicipalityRegistrationTotals = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    // Create date filter based on month and year
+    let dateFilter = {};
+    if (month && year) {
+      // Both month and year provided - filter by specific month/year
+      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (year && !month) {
+      // Only year provided - filter by entire year
+      const startDate = new Date(year, 0, 1); // January 1st
+      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (month && !year) {
+      // Only month provided - filter by that month across all years using aggregation
+      dateFilter = {
+        $expr: {
+          $and: [
+            { $eq: [{ $month: "$dateOfRenewal" }, month] },
+            { $ne: ["$dateOfRenewal", null] }
+          ]
+        }
+      };
+    }
+    // If neither month nor year provided, dateFilter remains empty (shows all data)
+
+    // Define the municipalities of Davao Oriental
+    const davaoOrientalMunicipalities = [
+      'Baganga', 'Banaybanay', 'Boston', 'Caraga', 'Cateel', 
+      'Governor Generoso', 'Lupon', 'Manay', 'San Isidro', 
+      'Tarragona', 'City of Mati'
+    ];
+
+    // Get vehicle data grouped by municipality (case-insensitive)
+    const vehicleAggregation = [
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driver',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          municipality: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.municipality', null] },
+              then: '$driverInfo.address.municipality',
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          municipality: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $toLower: '$municipality'
+          },
+          vehicleCount: { $sum: 1 }
+        }
+      }
+    ];
+
+    const vehicleData = await VehicleModel.aggregate(vehicleAggregation);
+
+    // Get driver data grouped by municipality (case-insensitive)
+    const driverAggregation = [
+      {
+        $addFields: {
+          municipality: '$address.municipality'
+        }
+      },
+      {
+        $match: {
+          municipality: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $toLower: '$municipality'
+          },
+          driverCount: { $sum: 1 }
+        }
+      }
+    ];
+
+    const driverData = await DriverModel.aggregate(driverAggregation);
+
+    // Combine vehicle and driver data by municipality
+    const municipalityData = {};
+    
+    // Initialize all Davao Oriental municipalities with zero counts
+    davaoOrientalMunicipalities.forEach(municipality => {
+      const key = municipality.toLowerCase();
+      municipalityData[key] = {
+        municipality: municipality,
+        vehicles: 0,
+        drivers: 0
+      };
+    });
+
+    // Add vehicle counts
+    vehicleData.forEach(item => {
+      const municipalityKey = item._id;
+      if (municipalityData[municipalityKey]) {
+        municipalityData[municipalityKey].vehicles = item.vehicleCount;
+      }
+    });
+
+    // Add driver counts
+    driverData.forEach(item => {
+      const municipalityKey = item._id;
+      if (municipalityData[municipalityKey]) {
+        municipalityData[municipalityKey].drivers = item.driverCount;
+      }
+    });
+
+    // Convert to array and sort by total registrations (vehicles + drivers) in descending order
+    const finalData = Object.values(municipalityData)
+      .map(item => ({
+        municipality: item.municipality,
+        vehicles: item.vehicles,
+        drivers: item.drivers
+      }))
+      .sort((a, b) => (b.vehicles + b.drivers) - (a.vehicles + a.drivers));
+
+    res.status(200).json(finalData);
+  } catch (error) {
+    console.error("Municipality registration totals error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 // Get driver-specific chart data with time period filter
 export const getDriverChartData = async (req, res) => {
   try {
