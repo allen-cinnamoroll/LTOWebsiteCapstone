@@ -349,8 +349,17 @@ export const davaoOrientalData = {
         "MARAGATAS": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "RANG-AY": {
-          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
+        "MARAYAG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
+        },
+        "NEW VISAYAS": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
+        },
+        "POBLACION": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
+        },
+        "SAN ISIDRO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
         "SAN JOSE": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
@@ -371,7 +380,7 @@ export const davaoOrientalData = {
         "CAYAWAN": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "CENTRAL (POBLACION)": {
+        "CENTRAL": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
         "CONCEPCION": {
@@ -432,7 +441,7 @@ export const davaoOrientalData = {
         "CABUAYA": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "CENTRAL (CITY PROPER)": {
+        "CENTRAL": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
         "CULIAN": {
@@ -505,6 +514,9 @@ export const davaoOrientalData = {
         "BAON": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
+        "BATOBATO": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
+        },
         "BITAOGAN": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
@@ -523,14 +535,14 @@ export const davaoOrientalData = {
         "LAPU-LAPU": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
+        "MAAG": {
+          puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
+        },
         "MANIKLING": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
         "MAPUTI": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
-        },
-        "BATOBATO (POBLACION)": {
-          puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
         "SAN MIGUEL": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
@@ -554,7 +566,7 @@ export const davaoOrientalData = {
         "CABAGAYAN": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4"]
         },
-        "CENTRAL (POBLACION)": {
+        "CENTRAL": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
         "DADONG": {
