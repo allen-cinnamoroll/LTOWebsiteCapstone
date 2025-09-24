@@ -61,14 +61,37 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   }, [municipalityData]);
   const maxValue = Math.max(...municipalityData.map(item => item.vehicles), 0);
 
-  // Calculate bar width percentage
+  // Calculate bar width percentage with balanced scaling for optimal visibility
   const getBarWidth = (vehicles) => {
     if (maxValue === 0) return 0;
-    return (vehicles / maxValue) * 100;
+    
+    // Use a hybrid approach: linear for low values, compressed for high values
+    if (vehicles <= 50) {
+      // Linear scaling for values 0-50 to preserve exact differences
+      const percentage = (vehicles / maxValue) * 100;
+      
+      // Only apply minimum height for very small values, and make it proportional
+      if (vehicles === 0) {
+        return 1; // Boston gets minimal height
+      } else if (vehicles <= 10) {
+        return Math.max(percentage, 3); // Small values get 3% minimum
+      } else {
+        return percentage; // Larger values use exact percentage
+      }
+    } else {
+      // Compressed scaling for higher values to prevent dominance
+      const adjustedValue = 50 + Math.sqrt(vehicles - 50) * 10;
+      const adjustedMax = 50 + Math.sqrt(maxValue - 50) * 10;
+      const percentage = (adjustedValue / adjustedMax) * 100;
+      return Math.max(percentage, 2);
+    }
   };
 
   // Get bar color based on registration level and sort order
   const getBarColor = (vehicles, index, totalCount) => {
+    // Calculate percentage of max value for more meaningful coloring
+    const percentageOfMax = maxValue > 0 ? (vehicles / maxValue) * 100 : 0;
+    
     if (sortOrder === 'asc') {
       // Ascending: lowest to highest (red → blue)
       if (index < 5) {
@@ -313,6 +336,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
         municipality={selectedMunicipality}
         selectedMonth={selectedMonth}
         selectedYear={selectedYear}
+        municipalitiesList={sortedMunicipalities}
       />
     </>
   );

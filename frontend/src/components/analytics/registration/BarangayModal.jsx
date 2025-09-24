@@ -2,13 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { getBarangayRegistrationTotals } from '../../../api/registrationAnalytics.js';
 import './RegistrationAnalytics.css';
 
-const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedYear }) => {
+const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedYear, municipalitiesList = [] }) => {
   const [barangayData, setBarangayData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState('desc'); // 'desc' for highest to lowest, 'asc' for lowest to highest
   const [isSorting, setIsSorting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentMunicipalityIndex, setCurrentMunicipalityIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState('right');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Find current municipality index when modal opens
+  useEffect(() => {
+    if (isOpen && municipality && municipalitiesList.length > 0) {
+      const index = municipalitiesList.findIndex(m => m.municipality === municipality);
+      setCurrentMunicipalityIndex(index >= 0 ? index : 0);
+    }
+  }, [isOpen, municipality, municipalitiesList]);
 
   // Fetch barangay data when modal opens
   useEffect(() => {
@@ -26,7 +37,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
     }
   }, [isOpen]);
 
-  const fetchBarangayData = async () => {
+  const fetchBarangayData = async (targetMunicipality = municipality) => {
     try {
       setLoading(true);
       setError(null);
@@ -47,13 +58,42 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
         yearValue = selectedYear;
       }
       
-      const response = await getBarangayRegistrationTotals(municipality, monthNumber, yearValue);
+      const response = await getBarangayRegistrationTotals(targetMunicipality, monthNumber, yearValue);
       setBarangayData(response.data || []);
     } catch (err) {
       console.error('Error fetching barangay data:', err);
       setError('Error loading barangay data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Navigation functions
+  const handlePreviousMunicipality = () => {
+    if (currentMunicipalityIndex > 0) {
+      setSlideDirection('left');
+      setIsTransitioning(true);
+      setTimeout(() => {
+        const newIndex = currentMunicipalityIndex - 1;
+        setCurrentMunicipalityIndex(newIndex);
+        const newMunicipality = municipalitiesList[newIndex].municipality;
+        fetchBarangayData(newMunicipality);
+        setTimeout(() => setIsTransitioning(false), 50);
+      }, 150);
+    }
+  };
+
+  const handleNextMunicipality = () => {
+    if (currentMunicipalityIndex < municipalitiesList.length - 1) {
+      setSlideDirection('right');
+      setIsTransitioning(true);
+      setTimeout(() => {
+        const newIndex = currentMunicipalityIndex + 1;
+        setCurrentMunicipalityIndex(newIndex);
+        const newMunicipality = municipalitiesList[newIndex].municipality;
+        fetchBarangayData(newMunicipality);
+        setTimeout(() => setIsTransitioning(false), 50);
+      }, 150);
     }
   };
 
@@ -93,13 +133,60 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                   <path d="M16 5l3 3-3 3"/>
                 </svg>
               </div>
-              <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400">
-                  {municipality}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">Barangay Registration Data</p>
+              <div className="flex items-center gap-3">
+                {/* Navigation Arrows */}
+                {municipalitiesList.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePreviousMunicipality}
+                      disabled={currentMunicipalityIndex === 0}
+                      className={`p-1.5 rounded-lg transition-all duration-200 ${
+                        currentMunicipalityIndex === 0
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20'
+                      }`}
+                      title="Previous Municipality"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                
+                <div className="overflow-hidden">
+                  <h2 
+                    className={`text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 transition-all duration-300 ease-in-out ${
+                      isTransitioning 
+                        ? 'opacity-0 transform translate-x-2' 
+                        : 'opacity-100 transform translate-x-0'
+                    }`}
+                  >
+                    {municipalitiesList[currentMunicipalityIndex]?.municipality || municipality}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">Barangay Registration Data</p>
+                </div>
+                
+                {/* Navigation Arrows */}
+                {municipalitiesList.length > 1 && (
+                  <button
+                    onClick={handleNextMunicipality}
+                    disabled={currentMunicipalityIndex === municipalitiesList.length - 1}
+                    className={`p-1.5 rounded-lg transition-all duration-200 ${
+                      currentMunicipalityIndex === municipalitiesList.length - 1
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20'
+                    }`}
+                    title="Next Municipality"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
+            
             <button
               onClick={onClose}
               className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200 hover:scale-105"
@@ -154,24 +241,31 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 scrollbar-hide">
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-32 text-red-500">
-              <p>{error}</p>
-            </div>
-          ) : barangayData.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-muted-foreground">
-              <p>No barangay data available for {municipality}</p>
-            </div>
-          ) : (
-            <div>
-              {/* Barangay Table */}
-              <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
-                <table className="w-full">
+        <div className="overflow-y-auto flex-1 scrollbar-hide overflow-x-hidden">
+          <div 
+            className={`transition-all duration-300 ease-in-out ${
+              isTransitioning 
+                ? 'opacity-0 transform translate-x-4' 
+                : 'opacity-100 transform translate-x-0'
+            }`}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center h-32 text-red-500">
+                <p>{error}</p>
+              </div>
+            ) : barangayData.length === 0 ? (
+              <div className="flex items-center justify-center h-32 text-muted-foreground">
+                <p>No barangay data available for {municipalitiesList[currentMunicipalityIndex]?.municipality || municipality}</p>
+              </div>
+            ) : (
+              <div>
+                {/* Barangay Table */}
+                <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
+                  <table className="w-full">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
@@ -268,6 +362,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

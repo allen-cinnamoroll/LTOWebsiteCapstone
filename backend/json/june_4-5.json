@@ -9,7 +9,7 @@
         "color":"BLACK\/RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112807",
         "ownerRepresentativeName":"QUI\u00d1ONES JR, FEDERICO PLACENCIA",
         "address_purok":"PRK. PAG ASA",
@@ -22,7 +22,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L06-15-007214",
         "birthDate":"08\/25\/1981",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"386LWS",
@@ -34,7 +34,7 @@
         "color":"YELLOW",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"386LWS",
         "ownerRepresentativeName":"TIBO JR, DARIO P.",
         "address_purok":"NBL LOWER VILLAGE",
@@ -47,7 +47,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LO13616",
@@ -59,7 +59,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LO13616",
         "ownerRepresentativeName":"DE ERIO, LEO DEL ROSARIO",
         "address_purok":null,
@@ -72,7 +72,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NF75206",
@@ -84,7 +84,7 @@
         "color":"BLUE",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NF75206",
         "ownerRepresentativeName":"SUPETRAN JR, ELEUTERIO TUTOR",
         "address_purok":"PRK. MADUNGGANON",
@@ -97,7 +97,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112806",
@@ -109,7 +109,7 @@
         "color":"RED",
         "classification":"FOR HRE ",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112806",
         "ownerRepresentativeName":"SAMPILO, DENNIS TOLENTINO",
         "address_purok":"PRK. 1",
@@ -122,7 +122,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-14-001833",
         "birthDate":"12\/13\/1986",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"246LGC",
@@ -134,7 +134,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"246LGC",
         "ownerRepresentativeName":"PAGLINAWAN, DIOSDADO BUSCAGAN",
         "address_purok":"PRK. 5",
@@ -147,7 +147,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"896LON",
@@ -159,7 +159,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"896LON",
         "ownerRepresentativeName":"LABAYA, NONITO POLISTICO",
         "address_purok":"PRK. SAN ROQUE BAYBAY",
@@ -172,7 +172,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112806",
@@ -184,7 +184,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112806",
         "ownerRepresentativeName":"VISCAYNO JR, FIORELLO LAURENTE",
         "address_purok":"PRK. HAYAHAY",
@@ -197,7 +197,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-14-000080",
         "birthDate":"02\/13\/1961",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"876LGR",
@@ -209,7 +209,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"876LGR",
         "ownerRepresentativeName":"DUMADAG, SATURNINO R.",
         "address_purok":"PRK. 3",
@@ -222,7 +222,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"3416LV",
@@ -234,7 +234,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"3416LV",
         "ownerRepresentativeName":"ASUPRE JR, LEON S",
         "address_purok":"PRK. AMELIA-2",
@@ -247,7 +247,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LD98766",
@@ -259,7 +259,7 @@
         "color":"EBONY",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LD98766",
         "ownerRepresentativeName":"ONGCOY SR, MARIO T.",
         "address_purok":"PRK. BAGONG SILANG DATICOR",
@@ -272,7 +272,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-15-000001",
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112807",
@@ -284,7 +284,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112807",
         "ownerRepresentativeName":"BULASO, MELCHOR JAY YORDAN",
         "address_purok":"PRK. 4",
@@ -297,7 +297,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-19-000026",
         "birthDate":"01\/06\/1992",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112807",
@@ -309,7 +309,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112807",
         "ownerRepresentativeName":"GUDES, JENNY HECHANOVA",
         "address_purok":"PRK. SAN MIGUEL",
@@ -322,7 +322,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"714LCG",
@@ -334,7 +334,7 @@
         "color":"BLACK\/RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"714LCG",
         "ownerRepresentativeName":"DURA, GERALDINE FERNANDEZ",
         "address_purok":"PRK. B1 L20 NHA",
@@ -347,7 +347,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"455LGJ",
@@ -359,7 +359,7 @@
         "color":"BLUE",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"455LGJ",
         "ownerRepresentativeName":"MELECIO, RODELYN U.",
         "address_purok":"PRK. 1 TUBOD",
@@ -372,7 +372,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112805",
@@ -384,7 +384,7 @@
         "color":"BLACK",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112805",
         "ownerRepresentativeName":"CANTOJA, CARLO C",
         "address_purok":"MAGAPO-1",
@@ -397,7 +397,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"03\/10\/1932",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112801",
@@ -409,7 +409,7 @@
         "color":"BLACK",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112801",
         "ownerRepresentativeName":"CAPUYAN, DENNIS ARA\u00d1O",
         "address_purok":"PRK. LIGARAN",
@@ -422,7 +422,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-15-000391",
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"1048LZ",
@@ -434,7 +434,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"1048LZ",
         "ownerRepresentativeName":"SOLAIMAN, NILMA S.",
         "address_purok":"PRK. LAWIS",
@@ -447,7 +447,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAI8041",
@@ -459,7 +459,7 @@
         "color":"SAPPHIRE METALLIC BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAI8041",
         "ownerRepresentativeName":"ORBUDA, JOEL DELA RAMA",
         "address_purok":"PRK. BOUGAINVILLA",
@@ -472,7 +472,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"YEG783",
@@ -484,7 +484,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"YEG783",
         "ownerRepresentativeName":"DOPING, JOCELYN LABASANO",
         "address_purok":null,
@@ -497,7 +497,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAI6370",
@@ -509,11 +509,11 @@
         "color":"SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAI6370",
         "ownerRepresentativeName":"BITAC, NORIVEN M.",
         "address_purok":"CLEMENTE VILLAGE",
-        "address_barangay":null,
+        "address_barangay":"CENTRAL",
         "address_municipality":"CITY OF MATI",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -522,7 +522,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAG7955",
@@ -534,7 +534,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAG7955",
         "ownerRepresentativeName":"FAITH TABERNANCE CHRISTIAN FELLOWSHIP, CENTER PHILIPPINES INC",
         "address_purok":"PRK. 6B",
@@ -547,7 +547,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MGC614",
@@ -559,7 +559,7 @@
         "color":"OCEAN BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MGC614",
         "ownerRepresentativeName":"PADUNGAO, MICHAEL L.",
         "address_purok":"PANUCIALMAN STREET",
@@ -572,7 +572,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"WIS735",
@@ -584,7 +584,7 @@
         "color":"WHITE PEARL",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"WIS735",
         "ownerRepresentativeName":"OMPANG, JURGEN DELOS REYES",
         "address_purok":"LOWER KAPAYAS SIBALA VILL",
@@ -597,7 +597,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAC9446",
@@ -609,7 +609,7 @@
         "color":"BRILLIANT SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAC9446",
         "ownerRepresentativeName":"MASINADIONG, SOPHIA LOREN R",
         "address_purok":null,
@@ -622,7 +622,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"FAL5166",
@@ -634,7 +634,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"FAL5166",
         "ownerRepresentativeName":"REMPARES, JOEL YTING",
         "address_purok":"P6 KUMINTANG",
@@ -647,7 +647,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-14-000234",
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAJ3166",
@@ -659,11 +659,11 @@
         "color":"RED SOLID CLEAR",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAJ3166",
         "ownerRepresentativeName":"TANUDRA, CATHYRINE L",
-        "address_purok":"DALSA-ILANGAY",
-        "address_barangay":null,
+        "address_purok":"DALSA",
+        "address_barangay":"ILANGAY",
         "address_municipality":"LUPON",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -672,7 +672,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"YGL726",
@@ -684,7 +684,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"YGL726",
         "ownerRepresentativeName":"MOB  RURAL KONSRA K INCORPO RATED",
         "address_purok":null,
@@ -697,7 +697,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MBH5426",
@@ -709,7 +709,7 @@
         "color":"GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MBH5426",
         "ownerRepresentativeName":"TAG-AT, FLORISA M.",
         "address_purok":"PRK. SAN PEDRO",
@@ -722,7 +722,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MCY456",
@@ -734,7 +734,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MCY456",
         "ownerRepresentativeName":"RO\u00d1A, RONILO A.",
         "address_purok":"PRK. MALINAWON",
@@ -747,7 +747,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDP4716",
@@ -759,7 +759,7 @@
         "color":"VIRGIL GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDP4716",
         "ownerRepresentativeName":"BASCO, NENITA M",
         "address_purok":"P5",
@@ -772,7 +772,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"VEG436",
@@ -784,7 +784,7 @@
         "color":"XTREME BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"VEG436",
         "ownerRepresentativeName":"LAGRADA, JULIUS CEASAR VELEZ",
         "address_purok":"PRK. 3",
@@ -797,7 +797,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"GAC3346",
@@ -809,7 +809,7 @@
         "color":"EARTH BROWN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"GAC3346",
         "ownerRepresentativeName":"PANTALAN, SITIMARIAM S.",
         "address_purok":"PRK. MOLAVE",
@@ -822,7 +822,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"ABZ1065",
@@ -834,7 +834,7 @@
         "color":"GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"ABZ1065",
         "ownerRepresentativeName":"LABUTAP, ANA MARIA G",
         "address_purok":null,
@@ -847,7 +847,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"TRF526",
@@ -859,7 +859,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"TRF526",
         "ownerRepresentativeName":"JUMAG, JIEROWEN SERRANO",
         "address_purok":"PRK. TOWNSITE",
@@ -872,7 +872,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAB7966",
@@ -884,7 +884,7 @@
         "color":"ORANGE METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAB7966",
         "ownerRepresentativeName":"JUBAC, VIVIEN CASTILLON",
         "address_purok":"PRK. MALINAWON UPPER LMATOC ST",
@@ -897,7 +897,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"UQT936",
@@ -909,7 +909,7 @@
         "color":"PYRENESE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"UQT936",
         "ownerRepresentativeName":"ARCE, CHRISTOPHER REYES",
         "address_purok":"SITTIO WASON",
@@ -922,7 +922,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"AEA4736",
@@ -934,7 +934,7 @@
         "color":"DARK BROWN METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"AEA4736",
         "ownerRepresentativeName":"TELERON, RICHARD ALDE",
         "address_purok":"PRK. USA UPPPER SALAZAR VILL",
@@ -947,7 +947,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAI9016",
@@ -959,7 +959,7 @@
         "color":"ALUMINA JADE MEALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAI9016",
         "ownerRepresentativeName":"GRACIA, REMAN A.",
         "address_purok":"B1 PRK. MAUSWAGON",
@@ -972,7 +972,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L02-10-002511",
         "birthDate":"02\/05\/1990",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"CAQ4356",
@@ -984,7 +984,7 @@
         "color":"THERMALYTE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"CAQ4356",
         "ownerRepresentativeName":"MAKILING, JANNE IVY PAGONG",
         "address_purok":"PH 4 MARTINEZ SUBD.",
@@ -997,7 +997,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"N01-19-018746",
         "birthDate":"08\/18\/1995",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"ZAA5166",
@@ -1009,7 +1009,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"ZAA5166",
         "ownerRepresentativeName":"NGOHO, MC JAMMIL NI\u00d1O VESMANOS",
         "address_purok":"17-2 MAGSAYSAY",
@@ -1022,7 +1022,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"06\/24\/1998",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"DAG4286",
@@ -1034,7 +1034,7 @@
         "color":"FREEDOM WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"DAG4286",
         "ownerRepresentativeName":"DUAY JR, PEDRO MANTOG",
         "address_purok":"PRK. 13",
@@ -1047,7 +1047,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAC5336",
@@ -1059,7 +1059,7 @@
         "color":"NEBULA BLUE METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAC5336",
         "ownerRepresentativeName":"PONCE, MAY GUANCO",
         "address_purok":"PHASE 1 MARTINEZ SUBDIVISION",
@@ -1072,7 +1072,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LFM246",
@@ -1084,7 +1084,7 @@
         "color":"WARM SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LFM246",
         "ownerRepresentativeName":"DIAZ, ROMMELITO DAQUIADO",
         "address_purok":null,
@@ -1097,7 +1097,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAV5746",
@@ -1109,7 +1109,7 @@
         "color":"DARK GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAV5746",
         "ownerRepresentativeName":"SERENADO, APRIL JOY PANDAN",
         "address_purok":"BAYVIEW ESTATES",
@@ -1122,7 +1122,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LGW916",
@@ -1134,7 +1134,7 @@
         "color":"QUARTZ BROWN METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LGW916",
         "ownerRepresentativeName":"TOMASETE, LEO A.",
         "address_purok":"PRK. MABUHAY",
@@ -1147,7 +1147,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L02-97-123717",
         "birthDate":"04\/03\/1973",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"WWI916",
@@ -1159,7 +1159,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"WWI916",
         "ownerRepresentativeName":"MARIANITO, JOEL RONQUILLO",
         "address_purok":"PRK. MASAGANA LI INTERCO DRIVE",
@@ -1172,7 +1172,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-17-000126",
         "birthDate":"02\/18\/1969",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAX2606",
@@ -1184,7 +1184,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAX2606",
         "ownerRepresentativeName":"TUGAP, EDILBERTO P.",
         "address_purok":null,
@@ -1197,7 +1197,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NDD8536",
@@ -1209,7 +1209,7 @@
         "color":"THERMALYTE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NDD8536",
         "ownerRepresentativeName":"BONGAR, MANOLITO OLACO",
         "address_purok":"PRK. D A",
@@ -1222,7 +1222,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-11-001543",
         "birthDate":"01\/20\/1981",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDJ878",
@@ -1234,7 +1234,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDJ878",
         "ownerRepresentativeName":"LIM JR, PEDRO AGCAOILI",
         "address_purok":"PRK. 4",
@@ -1247,7 +1247,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAC6286",
@@ -1259,7 +1259,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAC6286",
         "ownerRepresentativeName":"LAGUE, NORAFLOR PAREJA",
         "address_purok":"TINAGO",
@@ -1272,7 +1272,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-16-000061",
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LD95970",
@@ -1284,7 +1284,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LD95970",
         "ownerRepresentativeName":"CUESTA, DANNY BOY LIBAN",
         "address_purok":"PRK. 1 CATIGOD ",
@@ -1297,7 +1297,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-08-000386",
         "birthDate":"12\/28\/1981",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"375LOG",
@@ -1309,7 +1309,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"375LOG",
         "ownerRepresentativeName":"BAHANDI, JOHN JUMAWAN",
         "address_purok":"PRK. 2-B",
@@ -1322,7 +1322,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"03\/09\/1989",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"241LMO",
@@ -1334,7 +1334,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"241LMO",
         "ownerRepresentativeName":"TAMPOS, MARY JANE REBUCAS",
         "address_purok":"PRK. MALIPAYON ",
@@ -1347,7 +1347,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-08-001574",
         "birthDate":"10\/20\/1773",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"640LVB",
@@ -1359,7 +1359,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"640LVB",
         "ownerRepresentativeName":"FORTUNA, ARGEL F.",
         "address_purok":"LIMATOC ST. ",
@@ -1372,7 +1372,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"L889BH",
@@ -1384,7 +1384,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"L889BH",
         "ownerRepresentativeName":"LENOY JR, ROMULO C.",
         "address_purok":"PRK. ILANG ILANG UPPER LIMATOC",
@@ -1397,7 +1397,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"LO7-23-001673",
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"218LRC",
@@ -1409,11 +1409,11 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"218LRC",
         "ownerRepresentativeName":"RADJAIE, AIEL H.",
         "address_purok":"PRK. VILLAGE",
-        "address_barangay":"DON ENRIQUE L",
+        "address_barangay":"DON ENRIQUE LOPEZ",
         "address_municipality":"CITY OF MATI",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -1422,7 +1422,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -1434,7 +1434,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"MASANGAY, ROBERTO T.",
         "address_purok":"PANLAISAN",
@@ -1447,7 +1447,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110102",
@@ -1459,7 +1459,7 @@
         "color":"MATTE BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110102",
         "ownerRepresentativeName":"BILBAO, ALMALYN MAMPARO",
         "address_purok":"PRK. DAISY",
@@ -1472,7 +1472,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-24-001242",
         "birthDate":"08\/22\/1982",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"635LZX",
@@ -1484,7 +1484,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"635LZX",
         "ownerRepresentativeName":"DUETIZ, ROMMEL N.",
         "address_purok":"PRK. MAGAPO 1",
@@ -1497,7 +1497,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-19-000741",
         "birthDate":"12\/03\/1984",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"765PTH",
@@ -1509,7 +1509,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"765PTH",
         "ownerRepresentativeName":"AMPARADO, ADAM BALDWIN C.",
         "address_purok":"PRK. DAFILLA",
@@ -1522,7 +1522,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-16-000912",
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"861LAE",
@@ -1534,7 +1534,7 @@
         "color":"RED\/BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"861LAE",
         "ownerRepresentativeName":"BUCIO, RHESA T.",
         "address_purok":"B4 L8 NHA",
@@ -1547,7 +1547,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-08-001704",
         "birthDate":"08\/22\/1985",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -1559,7 +1559,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"MABA, NAFFY ALKHAIR SAJOL",
         "address_purok":"L5 BLK16 NHA",
@@ -1572,7 +1572,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"636LDX",
@@ -1584,7 +1584,7 @@
         "color":"BLACK\/RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"636LDX",
         "ownerRepresentativeName":"DALAGUIT, LEONORA ESIL",
         "address_purok":"PRK. TAGUMLUM",
@@ -1597,7 +1597,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NG45146",
@@ -1609,7 +1609,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NG45146",
         "ownerRepresentativeName":"HERNANDEZ, MICHAEL QUI\u00d1ONES",
         "address_purok":"PRK. PAG-ASA",
@@ -1622,7 +1622,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"1326QL",
@@ -1634,7 +1634,7 @@
         "color":"YELLOW BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"1326QL",
         "ownerRepresentativeName":"RABAT, FRANCISCO JOSE NAKPIL",
         "address_purok":null,
@@ -1647,7 +1647,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"326LMC",
@@ -1659,7 +1659,7 @@
         "color":"BLACK\/BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"326LMC",
         "ownerRepresentativeName":"DECOY, GENA TOLENTINO",
         "address_purok":"PRK. SAN ATONIO",
@@ -1672,7 +1672,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"516LQK",
@@ -1684,7 +1684,7 @@
         "color":"PINK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"516LQK",
         "ownerRepresentativeName":"BALANAY, KATHYRINE B.",
         "address_purok":"PRK. 3 MABUHAY",
@@ -1697,7 +1697,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"356PTY",
@@ -1709,7 +1709,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"356PTY",
         "ownerRepresentativeName":"DELAGUA, LEONIDA P",
         "address_purok":"PRK. LOPEZ NAZARENO",
@@ -1722,7 +1722,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L06-80-001382",
         "birthDate":"05\/22\/1952",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110107",
@@ -1734,7 +1734,7 @@
         "color":"ORANGE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110107",
         "ownerRepresentativeName":"TAGUBA, LENIE SUAN",
         "address_purok":"PRK. 8 IMPOG",
@@ -1747,7 +1747,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L02-12-014081",
         "birthDate":"01\/18\/1989",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"426LXX",
@@ -1759,7 +1759,7 @@
         "color":"MATTE DARK GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"426LXX",
         "ownerRepresentativeName":"DELIGERO, RAFF LOUIE MONTEDERAMOS",
         "address_purok":"LEMENTE",
@@ -1772,7 +1772,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-14-001382",
         "birthDate":"04\/05\/1987",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"376LXT",
@@ -1784,7 +1784,7 @@
         "color":"MATTE GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"376LXT",
         "ownerRepresentativeName":"LAYAOEN, NEIL IAN RAMIREZ",
         "address_purok":"890 LAWAAN ST.",
@@ -1797,7 +1797,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LD3936",
@@ -1809,7 +1809,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LD3936",
         "ownerRepresentativeName":"SACARE, ELWYN",
         "address_purok":null,
@@ -1822,7 +1822,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"07\/10\/1967",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110108",
@@ -1834,7 +1834,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110108",
         "ownerRepresentativeName":"LIM JR, PEDRO A.",
         "address_purok":"PRK. 4",
@@ -1847,7 +1847,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":"7\/16\/19971",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"826LEV",
@@ -1859,7 +1859,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"826LEV",
         "ownerRepresentativeName":"MONCANO, MATEO CUTOB",
         "address_purok":"PRK. DAISY",
@@ -1872,7 +1872,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-15-001412",
         "birthDate":"03\/31\/1990",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LD11436",
@@ -1884,11 +1884,11 @@
         "color":"BLACK\/BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LD11436",
         "ownerRepresentativeName":"ROSALES, EMMA C.",
         "address_purok":"PRK. 1",
-        "address_barangay":"CRISPIN DELE CRUZ",
+        "address_barangay":"CRISPIN DELA CRUZ",
         "address_municipality":"GOVERNOR GENEROSO",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -1897,7 +1897,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-13-000215",
         "birthDate":"10\/02\/1977",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"706TZV",
@@ -1909,7 +1909,7 @@
         "color":"RED\/WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"706TZV",
         "ownerRepresentativeName":"EDOLOVERIO, EDGAR LASTIMOSA",
         "address_purok":"PRK. 4",
@@ -1922,7 +1922,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"N03-05-013791",
         "birthDate":"04\/17\/1970",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"7746LB",
@@ -1934,7 +1934,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"7746LB",
         "ownerRepresentativeName":"ALICANTE JR, LEOPOLDO T.",
         "address_purok":"SILVER HILLS CAPITOL",
@@ -1947,7 +1947,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"09\/06\/1974",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LE20826",
@@ -1959,7 +1959,7 @@
         "color":"SILVER BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LE20826",
         "ownerRepresentativeName":"BUNOD, JOERY MAYMANAN",
         "address_purok":"PRK. DAISY",
@@ -1972,7 +1972,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"09\/15\/1985",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LA45936",
@@ -1984,7 +1984,7 @@
         "color":"RED\/BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LA45936",
         "ownerRepresentativeName":"CARLOS, BENVIENIDO B.",
         "address_purok":"PRK. MAGKONO",
@@ -1997,7 +1997,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-15-000413",
         "birthDate":"09\/04\/1971",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110106",
@@ -2009,7 +2009,7 @@
         "color":"MATTE ORANGE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110106",
         "ownerRepresentativeName":"OREJAS, JOSE ALEX PLAZA",
         "address_purok":"PRK. MALIGAYA",
@@ -2022,7 +2022,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110106",
@@ -2034,7 +2034,7 @@
         "color":"BLACK\/RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110106",
         "ownerRepresentativeName":"LIGOD, ELMER MASANGUID",
         "address_purok":"PRK. MELON MADANG",
@@ -2047,7 +2047,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":"03\/25\/1974",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LT3407",
@@ -2059,7 +2059,7 @@
         "color":"SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LT3407",
         "ownerRepresentativeName":"FELIZARTA, CHRISTY B.",
         "address_purok":"B-13 L10 NHA",
@@ -2072,7 +2072,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"4836LZ",
@@ -2084,7 +2084,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"4836LZ",
         "ownerRepresentativeName":"PATAYON, RAMELLE ROY L.",
         "address_purok":"PRK. MAG UUMA",
@@ -2097,7 +2097,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"3486QL",
@@ -2109,7 +2109,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"3486QL",
         "ownerRepresentativeName":"LAGMAN, RENATO A.",
         "address_purok":null,
@@ -2122,7 +2122,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"4336LZ",
@@ -2134,7 +2134,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"4336LZ",
         "ownerRepresentativeName":"IHMA",
         "address_purok":"QUEZON ST. ",
@@ -2147,7 +2147,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"L436DB",
@@ -2159,11 +2159,11 @@
         "color":"GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"L436DB",
         "ownerRepresentativeName":"TALLEDO, VINCENT LOUIE C.",
         "address_purok":null,
-        "address_barangay":null,
+        "address_barangay":"CENTRAL",
         "address_municipality":"CITY OF MATI",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -2172,7 +2172,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"138008",
@@ -2184,7 +2184,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"138008",
         "ownerRepresentativeName":"VELOSO, JENNIFER FERNANDICO",
         "address_purok":"MALIPAYON 2",
@@ -2197,7 +2197,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-21-201484",
         "birthDate":"07\/11\/1981",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"818LPB",
@@ -2209,7 +2209,7 @@
         "color":"MATTE GRAY SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"818LPB",
         "ownerRepresentativeName":"GERE, LYNDON P.",
         "address_purok":"SAN VICENTE 1",
@@ -2222,7 +2222,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"658LPI",
@@ -2234,7 +2234,7 @@
         "color":"PINK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"658LP1",
         "ownerRepresentativeName":"EPAL, EIREEN C.",
         "address_purok":"PRK. MAHOGANY-1",
@@ -2247,7 +2247,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-21-200265",
         "birthDate":"08\/14\/1980",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"116LAQ",
@@ -2259,11 +2259,11 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"116LAQ",
         "ownerRepresentativeName":"SARAGENA, GREZON MESA",
         "address_purok":"ADO SUBD POB",
-        "address_barangay":null,
+        "address_barangay":"POBLACION",
         "address_municipality":"LUPON",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -2272,7 +2272,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"936LXQ",
@@ -2284,7 +2284,7 @@
         "color":"BLUE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"936LXQ",
         "ownerRepresentativeName":"GALINDO III, SILVERIO M.",
         "address_purok":"PRK. 6 TIMBO",
@@ -2297,7 +2297,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LA76572",
@@ -2309,7 +2309,7 @@
         "color":"RED BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LA76572",
         "ownerRepresentativeName":"DALAGUIT, CONRADO CABUNIAS",
         "address_purok":"PRK. ALEGRE",
@@ -2322,7 +2322,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"502LYM",
@@ -2334,7 +2334,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"502LYM",
         "ownerRepresentativeName":"PALEN, IAN ALO",
         "address_purok":"PRK. KASILAK",
@@ -2347,7 +2347,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L02-06-009638",
         "birthDate":"09\/27\/1984",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"246LFE",
@@ -2359,7 +2359,7 @@
         "color":"ORANGE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"246LFE",
         "ownerRepresentativeName":"MARIBAO, LITO ALDIANO",
         "address_purok":"PANAGHIUSA-2 CAMANSI ",
@@ -2372,7 +2372,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-19-002824",
         "birthDate":"04\/03\/1972",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110104",
@@ -2384,7 +2384,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110104",
         "ownerRepresentativeName":"GALIA, ELEY B.",
         "address_purok":"PRK. 1",
@@ -2397,7 +2397,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"109LIM",
@@ -2409,7 +2409,7 @@
         "color":"BLACK RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"109LIM",
         "ownerRepresentativeName":"GENERAL, MIGUEL LOPEZ",
         "address_purok":"PAHAMOTANG",
@@ -2422,7 +2422,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-07-001120",
         "birthDate":"11\/18\/1979",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -2434,7 +2434,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"TABUDLONG, DAISY",
         "address_purok":"PRK. SAN ISIDRO I CATUMBAL",
@@ -2447,7 +2447,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"588LVE",
@@ -2459,7 +2459,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"588LVE",
         "ownerRepresentativeName":"DE VERA, JOHN CARLO LUCERO",
         "address_purok":"PRK. MALINAWON",
@@ -2472,7 +2472,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"516LII",
@@ -2484,11 +2484,11 @@
         "color":"GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"516LII",
         "ownerRepresentativeName":"ESTOPITO, ROLDAN M.",
         "address_purok":"PRK. KALINISAN",
-        "address_barangay":null,
+        "address_barangay":"MAAG",
         "address_municipality":"SAN ISIDRO",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -2497,7 +2497,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LC52523",
@@ -2509,7 +2509,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LC52523",
         "ownerRepresentativeName":"COGOLLODO, LOVELY T.",
         "address_purok":"PRK. MAKUGIHON II KATIPUNAN",
@@ -2522,7 +2522,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"945LBZ",
@@ -2534,7 +2534,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"945LBZ",
         "ownerRepresentativeName":"CABANSAY, JOCEL MAMETIS",
         "address_purok":"PRK. 1 SAMPAGUITA",
@@ -2547,7 +2547,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -2559,7 +2559,7 @@
         "color":"MAGENTA",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"MAQUILAN, EFREN C.",
         "address_purok":"P7B",
@@ -2572,7 +2572,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110106",
@@ -2584,7 +2584,7 @@
         "color":"MATTE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110106",
         "ownerRepresentativeName":"SAAVEDRA, JAYPETH D.",
         "address_purok":"CONCHITA HOME SUBDV",
@@ -2597,7 +2597,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-20-002914",
         "birthDate":"04\/01\/1996",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110108",
@@ -2609,7 +2609,7 @@
         "color":"RED BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110108",
         "ownerRepresentativeName":"GAMBONG, DAVID",
         "address_purok":"PRK. CALACHUCHI",
@@ -2622,7 +2622,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LA41367",
@@ -2634,7 +2634,7 @@
         "color":"BLUE\/WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LA41367",
         "ownerRepresentativeName":"AUDITOR, JOVANNE M.",
         "address_purok":"PRK. BAYANIHAN",
@@ -2647,7 +2647,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-22-000452",
         "birthDate":"07\/20\/1981",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"YD4363",
@@ -2659,7 +2659,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"YD4363",
         "ownerRepresentativeName":"UY JR, NI\u00d1O SOTERO LOPEZ",
         "address_purok":"PRK. BILAWAN 1",
@@ -2672,7 +2672,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"855LYH",
@@ -2684,7 +2684,7 @@
         "color":"RED\/BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"855LYH",
         "ownerRepresentativeName":"DAPITANON, REYMOND RABINO",
         "address_purok":"PRK. DANAO",
@@ -2697,7 +2697,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-23-000611",
         "birthDate":"04\/14\/1998",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"545LHK",
@@ -2709,7 +2709,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"545LHK",
         "ownerRepresentativeName":"CADAA, ROSENDO MAIMAD",
         "address_purok":"PRK. PAGPAG",
@@ -2722,7 +2722,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -2734,7 +2734,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"RICHARD, RIZA ORTIZ",
         "address_purok":"PRK. 4",
@@ -2747,7 +2747,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-23-000053",
         "birthDate":"02\/10\/1981",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LC8432",
@@ -2759,7 +2759,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LC8432",
         "ownerRepresentativeName":"BASILAD, JOSELITO C.",
         "address_purok":null,
@@ -2772,7 +2772,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"405LWN",
@@ -2784,7 +2784,7 @@
         "color":"MATTE GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"405LWN",
         "ownerRepresentativeName":"ROA, RUEL JAMES",
         "address_purok":"MAPANTAD",
@@ -2797,7 +2797,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LA65185",
@@ -2809,7 +2809,7 @@
         "color":"BLUE\/BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LA65185",
         "ownerRepresentativeName":"LUTOG JR, MARIO P.",
         "address_purok":"B13 L2 NHA",
@@ -2822,7 +2822,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-11-002174",
         "birthDate":"04\/12\/1988",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -2834,7 +2834,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"DIDAL JR, SALVADOR DALAYGON",
         "address_purok":null,
@@ -2847,7 +2847,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-95-008944",
         "birthDate":"03\/17\/1976",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -2859,7 +2859,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"R EXPRESS LENDING HOUSE CORP, C-22-0071438",
         "address_purok":"DR. 5 MJI BLDG RIZAL EXTENSION",
@@ -2872,7 +2872,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-20-003613",
         "birthDate":"10\/03\/1989",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -2884,7 +2884,7 @@
         "color":"MATTE ORANGE BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"MANZANO, MARIANNE REGINE N.",
         "address_purok":"PRK. EL VIBO",
@@ -2897,7 +2897,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":"07\/12\/1999",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"L483BE",
@@ -2909,7 +2909,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"L483BE",
         "ownerRepresentativeName":"GAYTA, BEN DENNIS R.",
         "address_purok":"BGR COMPOUND DO\u00d1A ROSA ST.",
@@ -2922,7 +2922,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110109",
@@ -2934,7 +2934,7 @@
         "color":"BLACK RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110109",
         "ownerRepresentativeName":"MORALES, DAFFODIL D.",
         "address_purok":"PRK. PANAGHIUSA CAPITOL HILLS",
@@ -2947,7 +2947,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-20-000876",
         "birthDate":"11\/02\/1991",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110103",
@@ -2959,7 +2959,7 @@
         "color":"BLACK RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110103",
         "ownerRepresentativeName":"MIQUE, ELECIA LIBATON",
         "address_purok":"PRK. NVL LOWER",
@@ -2972,7 +2972,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LA37855",
@@ -2984,7 +2984,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LA37855",
         "ownerRepresentativeName":"GONZAGA, IDA Q.",
         "address_purok":"PRK. PAG ASA",
@@ -2997,7 +2997,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110101",
@@ -3009,7 +3009,7 @@
         "color":"GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110101",
         "ownerRepresentativeName":"UY SR, NI\u00d1O SOTERO L.",
         "address_purok":"PRK. BILAWAN-1",
@@ -3022,7 +3022,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LA14064",
@@ -3034,7 +3034,7 @@
         "color":"BLUE\/WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LA14064",
         "ownerRepresentativeName":"DONATO, JORDAN OBATONON",
         "address_purok":"PRK. GUMAMELA",
@@ -3047,7 +3047,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -3059,7 +3059,7 @@
         "color":"GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"MAGDIPIG, LOIMEL DOMAGONOT",
         "address_purok":"PRK. BAYANIHAN",
@@ -3072,7 +3072,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110104",
@@ -3084,7 +3084,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110104",
         "ownerRepresentativeName":"MALINTAD, MANILYN M.",
         "address_purok":"PRK. PANAGHIUSA BILAWAN 1",
@@ -3097,7 +3097,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-08-001294",
         "birthDate":"03\/10\/1993",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110105",
@@ -3109,7 +3109,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110105",
         "ownerRepresentativeName":"ENRILE, YVONNIE T.",
         "address_purok":null,
@@ -3122,7 +3122,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LD44339",
@@ -3134,7 +3134,7 @@
         "color":"BLACK RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/04\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LD44339",
         "ownerRepresentativeName":"GANIA, JANNIE ONOFRE",
         "address_purok":"P-DAFILLA",
@@ -3147,7 +3147,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LC29761",
@@ -3159,11 +3159,11 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LC29761",
         "ownerRepresentativeName":"VISITACION, NONOY B.",
-        "address_purok":null,
-        "address_barangay":"POBLACION MANGAHAN BARIO PIKAS POBLACION",
+        "address_purok":"POBLACION MANGAHAN BARIO PIKAS",
+        "address_barangay":"POBLACION",
         "address_municipality":"LUPON",
         "address_province":"DAVAO ORIENTAL",
         "address_region":"REGION 11",
@@ -3172,7 +3172,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"N25-11-001615",
         "birthDate":"08\/15\/1983",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LC55785",
@@ -3184,7 +3184,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LC55785",
         "ownerRepresentativeName":"PACAY, JIGGER F.",
         "address_purok":"PRK. NASA",
@@ -3197,7 +3197,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"675LEB",
@@ -3209,7 +3209,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"675LEB",
         "ownerRepresentativeName":"WENCESLAO, ROBERTO PLE\u00d1OS",
         "address_purok":"PRK. SAN ROQUE",
@@ -3222,7 +3222,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-18-001065",
         "birthDate":"12\/29\/1991",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"L906CP",
@@ -3234,7 +3234,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"L906CP",
         "ownerRepresentativeName":"DANGANON, ANNABEL MANLANGIT",
         "address_purok":"PRK. HAYAHAY",
@@ -3247,7 +3247,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"602LKX",
@@ -3259,7 +3259,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"602LKX",
         "ownerRepresentativeName":"GAMALE, JEFREY PALOSO",
         "address_purok":"PRK. HILLSIDE MAPANTAD",
@@ -3272,7 +3272,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-12-000445",
         "birthDate":"01\/13\/1984",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"XR6315",
@@ -3284,7 +3284,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"XR6315",
         "ownerRepresentativeName":"MAQUITAR, JOEL ANDAN",
         "address_purok":"PRK. CANIPA",
@@ -3297,7 +3297,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LC78292",
@@ -3309,7 +3309,7 @@
         "color":"BLACK",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LC78292",
         "ownerRepresentativeName":"DONATO, ROSELITO O.",
         "address_purok":"DO\u00d1A ROSA 1",
@@ -3322,7 +3322,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-11-000151",
         "birthDate":"08\/10\/1952",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"XR6015",
@@ -3334,7 +3334,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"XR6015",
         "ownerRepresentativeName":"CONDOR, ALAN G.",
         "address_purok":"PRK. PAGLAUM CLADO SUBD",
@@ -3347,7 +3347,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112803",
@@ -3359,7 +3359,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112803",
         "ownerRepresentativeName":"BASBAS, RHODORA ISONA",
         "address_purok":"PUNTA GEMELINA",
@@ -3372,7 +3372,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-12-001754",
         "birthDate":"10\/07\/1980",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110103",
@@ -3384,7 +3384,7 @@
         "color":"YELLOW",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110103",
         "ownerRepresentativeName":"NERI, ANASTACIA DIONALDO",
         "address_purok":"PRK. PAGKAKAISA-3",
@@ -3397,7 +3397,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"110102",
@@ -3409,7 +3409,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"110102",
         "ownerRepresentativeName":"CAINTANG, RAMIL LONGYAPON",
         "address_purok":"UPPER LIMATOC",
@@ -3422,7 +3422,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"8516LY",
@@ -3434,7 +3434,7 @@
         "color":"BLACK",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"8516LY",
         "ownerRepresentativeName":"NAMOCA, EDEN PERAS",
         "address_purok":"PRK. DAISY 2 LEMENTE VILL",
@@ -3447,7 +3447,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":"07\/15\/1977",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NF83517",
@@ -3459,7 +3459,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NF83517",
         "ownerRepresentativeName":"DIAMANTE, JERRY BOY MADOC",
         "address_purok":"PRK. HAYAHAY",
@@ -3472,7 +3472,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"3456LV",
@@ -3484,7 +3484,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"3456LV",
         "ownerRepresentativeName":"MAKILING, ARNOLD L.",
         "address_purok":"SAMPAGUITA P6 MARTINEZ SUBD",
@@ -3497,7 +3497,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":"07\/01\/1985",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LO13426",
@@ -3509,7 +3509,7 @@
         "color":"WHITE",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LO13426",
         "ownerRepresentativeName":"MANAPOS, MARJORIE I.",
         "address_purok":"PHASE 8 MARTINEZ SUBD",
@@ -3522,7 +3522,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112806",
@@ -3534,7 +3534,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112806",
         "ownerRepresentativeName":"MEJOS, VICENTE TUBIO",
         "address_purok":"PRK. CARA 2 RIVERSIDE MADANG",
@@ -3547,7 +3547,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"G03-96-033556",
         "birthDate":"10\/27\/1965",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"112806",
@@ -3559,7 +3559,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"112806",
         "ownerRepresentativeName":"CANONIGO, SAMUEL RAMOS",
         "address_purok":"PRK. 8",
@@ -3572,7 +3572,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"656LCL",
@@ -3584,7 +3584,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"656LCL",
         "ownerRepresentativeName":"EBATE, ROMMEL A.",
         "address_purok":"PRK. 1 CABADIANGAN",
@@ -3597,7 +3597,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"2416LZ",
@@ -3609,7 +3609,7 @@
         "color":"RED",
         "classification":"FOR HIRE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"2416LZ",
         "ownerRepresentativeName":"JAPINAN, AIDA SABIO",
         "address_purok":"PRK. MAUSWAGON",
@@ -3622,7 +3622,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-08-000156",
         "birthDate":"07\/10\/1973",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAH7976",
@@ -3634,7 +3634,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAH7976",
         "ownerRepresentativeName":"POLESTICO, RODOLFO CASALMIR",
         "address_purok":"B2 TOWNSITE",
@@ -3647,32 +3647,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
-    },
-    {
-        "plateNo":"AFA4446",
-        "fileNo":"0901-51472",
-        "engineNo":"JT357220",
-        "serialChassisNumber":"KN3HAP53A2K820335",
-        "make":"KIA",
-        "bodyType":"DROPSIDE",
-        "color":"RED",
-        "classification":"PRIVATE",
-        "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
-        "plateNo.1":"AFA4446",
-        "ownerRepresentativeName":"ANACLETO, EMEE E.",
-        "address_purok":null,
-        "address_barangay":null,
-        "address_municipality":"SAN ISIDRO",
-        "address_province":"DAVAO ORIENTAL",
-        "address_region":"REGION 11",
-        "contactNumber":null,
-        "emailAddress":null,
-        "hasDriversLicense":"NO",
-        "driversLicenseNumber":null,
-        "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAW7346",
@@ -3684,7 +3659,7 @@
         "color":"RED ORANGE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAW7346",
         "ownerRepresentativeName":"CUBELO, NOEL DUMANACAL",
         "address_purok":"PRK. 8",
@@ -3697,7 +3672,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-98-013233",
         "birthDate":"08\/10\/1967",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAZ7416",
@@ -3709,7 +3684,7 @@
         "color":"GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAZ7416",
         "ownerRepresentativeName":"CA\u00d1ETE JR, TEOTIMO M.",
         "address_purok":"P 7B",
@@ -3722,7 +3697,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L06-87-006840",
         "birthDate":"02\/021965",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KAE4216",
@@ -3734,7 +3709,7 @@
         "color":"METALLIC BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KAE4216",
         "ownerRepresentativeName":"NAGAL, CRISTINE JIL BENIGI-AN",
         "address_purok":"PRK. MOLAVE II",
@@ -3747,7 +3722,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KAT3076",
@@ -3759,7 +3734,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KAT3076",
         "ownerRepresentativeName":"GALIA JR, LORENZO PAGAPONG",
         "address_purok":"PRK. CALAMANSI",
@@ -3772,7 +3747,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDP5146",
@@ -3784,7 +3759,7 @@
         "color":"AUBURN BROWN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDP5146",
         "ownerRepresentativeName":"AVILA, JANICE G.",
         "address_purok":"P-ORCHIDS",
@@ -3797,7 +3772,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAH5056",
@@ -3809,7 +3784,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAH5056",
         "ownerRepresentativeName":"AGUANTA, RHEY C.",
         "address_purok":"PRK. BRGY SITE",
@@ -3822,7 +3797,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"AAW3446",
@@ -3834,7 +3809,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"AAW3446",
         "ownerRepresentativeName":"HOUSE OF JOY FOUNDATION INC.",
         "address_purok":"PRK. SAN LORENZO",
@@ -3847,7 +3822,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"ABE6916",
@@ -3859,7 +3834,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"ABE6916",
         "ownerRepresentativeName":"MAMUSOG, MICHAEL ILAON",
         "address_purok":"PRK. BAYONG",
@@ -3872,7 +3847,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAH7716",
@@ -3884,7 +3859,7 @@
         "color":"GALAXY BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAH7716",
         "ownerRepresentativeName":"PLAZA, EVANGELINE UY",
         "address_purok":"BLK 15 LOT - NHA",
@@ -3897,7 +3872,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KAO1896",
@@ -3909,7 +3884,7 @@
         "color":"STEEL GRAY METTALIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KAO1896",
         "ownerRepresentativeName":"ALIMPOOS, MA MABEL SIBLOS",
         "address_purok":"VICTOR RABAT ST DON LUIS VILL",
@@ -3922,7 +3897,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-18-000300",
         "birthDate":"06\/15\/1990",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KAQ9466",
@@ -3934,7 +3909,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KAQ9466",
         "ownerRepresentativeName":"MAGALONA, AL G.",
         "address_purok":"PRK. 7 DAHLIA",
@@ -3947,7 +3922,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L01-10-000619",
         "birthDate":"08\/25\/1983",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAJ2526",
@@ -3959,7 +3934,7 @@
         "color":"COOL SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAJ2526",
         "ownerRepresentativeName":"CABANES, CHRISTINE FAITH M.",
         "address_purok":"BLK 2 LOPEZ SUBD",
@@ -3972,7 +3947,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-17-000132",
         "birthDate":"05\/02\/1996",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAJ5436",
@@ -3984,7 +3959,7 @@
         "color":"BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAJ5436",
         "ownerRepresentativeName":"MANLIGOY, JEANETH P.",
         "address_purok":"PRK. PANOMBON",
@@ -3997,7 +3972,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAG82266",
@@ -4009,7 +3984,7 @@
         "color":"SUNRISE ORANGE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAG82266",
         "ownerRepresentativeName":"OLEA, MELBA P.",
         "address_purok":"PRK. CENTRO",
@@ -4022,32 +3997,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
-    },
-    {
-        "plateNo":"MAZ1876",
-        "fileNo":"1230-137325",
-        "engineNo":"K6A1440224",
-        "serialChassisNumber":"DG64W110145",
-        "make":"SUZUKI",
-        "bodyType":"PICK-UP",
-        "color":"WHITE",
-        "classification":"PRIVATE",
-        "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
-        "plateNo.1":"MAZ1876",
-        "ownerRepresentativeName":"LABO, RICHARD P.",
-        "address_purok":null,
-        "address_barangay":null,
-        "address_municipality":"LUPON",
-        "address_province":"DAVAO ORIENTAL",
-        "address_region":"REGION 11",
-        "contactNumber":"9100761345",
-        "emailAddress":"salmusxi@gmail.com",
-        "hasDriversLicense":"YES",
-        "driversLicenseNumber":"L02-06-001074",
-        "birthDate":"10\/28\/1984",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAJ9516",
@@ -4059,7 +4009,7 @@
         "color":"FORGED METALLIC COPPER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAJ9516",
         "ownerRepresentativeName":"MATUCOL, RICHARD B.",
         "address_purok":"PRK. CALACHUCHI",
@@ -4072,7 +4022,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MBJ1478",
@@ -4084,7 +4034,7 @@
         "color":"YELLOW\/BLACK",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MBJ1478",
         "ownerRepresentativeName":"LEONES, ERWIN BOYOSE",
         "address_purok":"PRK. 1",
@@ -4097,7 +4047,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-20-002759",
         "birthDate":"07\/22\/1991",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LHE177",
@@ -4109,7 +4059,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LHE177",
         "ownerRepresentativeName":"REDULLA, HAZEL A.",
         "address_purok":"RIZAL EXT",
@@ -4122,7 +4072,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-19-002828",
         "birthDate":"07\/18\/1999",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LHA426",
@@ -4134,7 +4084,7 @@
         "color":"SLEEK SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LHA426",
         "ownerRepresentativeName":"ORAIZ, ROMMIL BAGAPORO",
         "address_purok":"BLK 9 LOT26 CAMIA ST CHAN VILL PH1",
@@ -4147,7 +4097,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAL2146",
@@ -4159,7 +4109,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAL2146",
         "ownerRepresentativeName":"CONCORDIA, MANUELA",
         "address_purok":"PRK. 9 SAMPAGUITA",
@@ -4172,7 +4122,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LHG426",
@@ -4184,7 +4134,7 @@
         "color":"CARNELIAN RED PEARL",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LHG426",
         "ownerRepresentativeName":"PIZARRO, CATHERINE EULALIA SERRANO",
         "address_purok":"PHASE 1 MARTINEZ SUBD",
@@ -4197,7 +4147,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MCA396",
@@ -4209,7 +4159,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MCA396",
         "ownerRepresentativeName":"PORTILLANO, EDGARDO L.",
         "address_purok":null,
@@ -4222,7 +4172,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDL836",
@@ -4234,7 +4184,7 @@
         "color":"LIGHT BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDL836",
         "ownerRepresentativeName":"MANTUA, ELIZABETH V.",
         "address_purok":"BILAWAN 1",
@@ -4247,7 +4197,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"FGY336",
@@ -4259,7 +4209,7 @@
         "color":"HYPER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"FGY336",
         "ownerRepresentativeName":"PARCON, ARCHIE PADILLA",
         "address_purok":"PRK. 2",
@@ -4272,7 +4222,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-06-000887",
         "birthDate":"03\/24\/1988",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"UCN786",
@@ -4284,7 +4234,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"UCN786",
         "ownerRepresentativeName":"CALE, HARSON L.",
         "address_purok":null,
@@ -4297,7 +4247,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAA5886",
@@ -4309,7 +4259,7 @@
         "color":"POLAR WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAA5886",
         "ownerRepresentativeName":"PERALTA, JOEL M.",
         "address_purok":"PRK. 6",
@@ -4322,7 +4272,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L06-00-073530",
         "birthDate":"12\/05\/1972",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"UJR246",
@@ -4334,7 +4284,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"UJR246",
         "ownerRepresentativeName":"SELGAS, LEAH S.",
         "address_purok":null,
@@ -4347,7 +4297,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":"12\/14\/1982",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"AAF9886",
@@ -4359,7 +4309,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"AAF9886",
         "ownerRepresentativeName":"PANG, EDMUNDO Y.",
         "address_purok":"MADANG",
@@ -4372,7 +4322,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDY896",
@@ -4384,7 +4334,7 @@
         "color":"G BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDY896",
         "ownerRepresentativeName":"ORIAS, ERNESTO N.",
         "address_purok":null,
@@ -4397,7 +4347,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDH636",
@@ -4409,7 +4359,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDH636",
         "ownerRepresentativeName":"ORIAS, ERNIKKA L.",
         "address_purok":"CARA SABD MADANG",
@@ -4422,7 +4372,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LDD446",
@@ -4434,7 +4384,7 @@
         "color":"BLUE MICA",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LDD446",
         "ownerRepresentativeName":"MONTESCO, RONALD MAGHANOY",
         "address_purok":"17-4 MAGSAYSAY",
@@ -4447,7 +4397,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L02-90-064431",
         "birthDate":"12\/20\/1962",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"GHB161",
@@ -4459,7 +4409,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"GHB161",
         "ownerRepresentativeName":"OUANO, RODOLFO S.",
         "address_purok":null,
@@ -4472,7 +4422,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-12-002133",
         "birthDate":"08\/22\/1983",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"YGP726",
@@ -4484,7 +4434,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"YGP726",
         "ownerRepresentativeName":"WATING, ARNOLD MANLITOC",
         "address_purok":"MABUA",
@@ -4497,7 +4447,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KAM9786",
@@ -4509,7 +4459,7 @@
         "color":"APPLE GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KAM9786",
         "ownerRepresentativeName":"OBGUIA, ED PANNLILIO",
         "address_purok":"PRK. 1",
@@ -4522,7 +4472,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"PNT626",
@@ -4534,7 +4484,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"PNT626",
         "ownerRepresentativeName":"TOMOGDAN, ABDON RONQUILLO",
         "address_purok":"LOWER BLISS",
@@ -4547,7 +4497,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAQ2726",
@@ -4559,7 +4509,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAQ2726",
         "ownerRepresentativeName":"JADRAQUE, PIO Q.",
         "address_purok":"PRK. 5",
@@ -4572,7 +4522,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":"06\/26\/1073",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAU2487",
@@ -4584,7 +4534,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAU2487",
         "ownerRepresentativeName":"PADPAD, REYGLENN C.",
         "address_purok":"015 PRK. 6A",
@@ -4597,7 +4547,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-96-009622",
         "birthDate":"05\/31\/1972",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"AAG5046",
@@ -4609,7 +4559,7 @@
         "color":"POLAR WHITE\/VERONA",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"AAG5046",
         "ownerRepresentativeName":"QUINITIO, AMALIA G.",
         "address_purok":"DATICOR",
@@ -4622,7 +4572,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAB1126",
@@ -4634,7 +4584,7 @@
         "color":"BLACK MICA",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAB1126",
         "ownerRepresentativeName":"DAVAO ORIENTAL ELECTRIC COOPERATIVE INC, C-22-0100373",
         "address_purok":"NATIONAL HIGHWAY MADANG",
@@ -4647,7 +4597,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"TOM656",
@@ -4659,7 +4609,7 @@
         "color":"SAVANNA WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"TOM656",
         "ownerRepresentativeName":"PAJARO, RHOLLY JOHN ANDILAB",
         "address_purok":"PRK. ILANG-ILANG LIMATOC",
@@ -4672,7 +4622,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L07-21-203872",
         "birthDate":"10\/13\/1998",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"AAG2447",
@@ -4684,7 +4634,7 @@
         "color":"QUARTZ BROWN METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"AAG2447",
         "ownerRepresentativeName":"FRANCO, ARTEMIO P.",
         "address_purok":"629 MAYOR LUIS RABAT ST",
@@ -4697,7 +4647,7 @@
         "hasDriversLicense":"YES",
         "driversLicenseNumber":"L01-18-011347",
         "birthDate":"10\/23\/1992",
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"TOR836",
@@ -4709,7 +4659,7 @@
         "color":"LITHIUM",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"TOR836",
         "ownerRepresentativeName":"ABE, JULIE PLENOS",
         "address_purok":"PRK 1",
@@ -4722,7 +4672,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KBR316",
@@ -4734,7 +4684,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KBR316",
         "ownerRepresentativeName":"BELANISO, ARNOLD A.",
         "address_purok":"CHAN VILL PH2",
@@ -4747,7 +4697,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LFH336",
@@ -4759,7 +4709,7 @@
         "color":"WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LFH336",
         "ownerRepresentativeName":"GASO, PRIMO A.",
         "address_purok":"CROSSING",
@@ -4772,7 +4722,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LCV4406",
@@ -4784,7 +4734,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LCV4406",
         "ownerRepresentativeName":"UY, RUSSEL NIRZA",
         "address_purok":"MENZI HOUSING",
@@ -4797,7 +4747,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"KAK4676",
@@ -4809,7 +4759,7 @@
         "color":"RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"KAK4676",
         "ownerRepresentativeName":"LUPOGAN, JOHNEVEN M.",
         "address_purok":"PRK. TUMOGPA",
@@ -4822,7 +4772,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NCN6539",
@@ -4834,7 +4784,7 @@
         "color":"SAVANNA WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NCN6539",
         "ownerRepresentativeName":"IBA\u00d1ES, MAXELL MENDOZA",
         "address_purok":"5103 MOLAVE LI",
@@ -4847,7 +4797,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NAD7455",
@@ -4859,7 +4809,7 @@
         "color":"ALPINE WHITE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NAD7455",
         "ownerRepresentativeName":"MACQUINTO JR, GODOFREDO B.",
         "address_purok":"PRK. 1 ZAPANTA ST",
@@ -4872,7 +4822,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NFX8004",
@@ -4884,7 +4834,7 @@
         "color":"CREAM GREEN",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NFX8004",
         "ownerRepresentativeName":"DOPING, FRANCIS JAY GAMBONG",
         "address_purok":null,
@@ -4897,7 +4847,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"NCQ8161",
@@ -4909,7 +4859,7 @@
         "color":"WHITE YELLOW",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"NCQ8161",
         "ownerRepresentativeName":"TALBIN, DEO JOHN EMILIO",
         "address_purok":null,
@@ -4922,7 +4872,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"JDO1822",
@@ -4934,7 +4884,7 @@
         "color":"YELLOW",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"JDO1822",
         "ownerRepresentativeName":"ILAG ILAG, CHRISTOPHER M.",
         "address_purok":"PRK. MALIPAYON",
@@ -4947,7 +4897,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LWZ381",
@@ -4959,7 +4909,7 @@
         "color":"SILVER",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LWZ381",
         "ownerRepresentativeName":"PALMA GIL, FELIZARDO ALTIZO",
         "address_purok":"CLADO SUBD",
@@ -4972,7 +4922,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAB5905",
@@ -4984,7 +4934,7 @@
         "color":"SOUL RED",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAB5905",
         "ownerRepresentativeName":"OMPANG, JURGEN DELOS REYES",
         "address_purok":"PRK. LOWER KAPAYAS SIBALA VILL",
@@ -4997,7 +4947,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MBH7374",
@@ -5009,7 +4959,7 @@
         "color":"BLACK BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MBH7374",
         "ownerRepresentativeName":"ANDRADA, ERVIN JURIE BROCOY",
         "address_purok":null,
@@ -5022,7 +4972,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAA3137",
@@ -5034,7 +4984,7 @@
         "color":"SILVER METALLIC",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAA3137",
         "ownerRepresentativeName":"LANUGAN, ALMA A.",
         "address_purok":"PRK. BRGY SITE",
@@ -5047,7 +4997,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAP9626",
@@ -5059,7 +5009,7 @@
         "color":"MULTI-CLOR",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAP9626",
         "ownerRepresentativeName":"LAUREANO JR, ELVISON E.",
         "address_purok":"PRK. 2",
@@ -5072,7 +5022,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MAV2245",
@@ -5084,7 +5034,7 @@
         "color":"BLUE",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MAV2245",
         "ownerRepresentativeName":"SUYMAN, HEZZEKIAH LEE",
         "address_purok":"PRK. KUMINTANG",
@@ -5097,7 +5047,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"MBE8452",
@@ -5109,7 +5059,7 @@
         "color":"GRAY",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"MBE8452",
         "ownerRepresentativeName":"ORIAS, JONATHAN J.",
         "address_purok":"PRK. KINAUN SITIO MAITUM",
@@ -5122,7 +5072,7 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     },
     {
         "plateNo":"LAH5548",
@@ -5134,7 +5084,7 @@
         "color":"SUNFLARE ORANGE PEARL WHITE BLACK ROOF",
         "classification":"PRIVATE",
         "dateOfRenewal":"06\/05\/2025",
-        "status":1.0,
+        "status":1,
         "plateNo.1":"LAH5548",
         "ownerRepresentativeName":"AMARDO, NORA N.",
         "address_purok":"PRK. MALINAWON MAGDAGONGDONG ST",
@@ -5147,6 +5097,6 @@
         "hasDriversLicense":"NO",
         "driversLicenseNumber":null,
         "birthDate":null,
-        "status.1":1.0
+        "status.1":1
     }
 ]
