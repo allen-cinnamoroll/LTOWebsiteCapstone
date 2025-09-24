@@ -267,7 +267,7 @@ export function RegistrationAnalytics() {
         <div className="mb-6">
           <div className="flex justify-start">
             {/* Metrics Section */}
-            <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg p-4 w-[400px] h-fit shadow-sm dark:!bg-[#171725] dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+            <div className="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-[400px] h-fit shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-8 h-8 flex items-center justify-center">
                   <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">

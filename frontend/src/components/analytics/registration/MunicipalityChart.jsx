@@ -158,7 +158,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   return (
     <>
       {/* Municipality Chart Container */}
-      <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg p-4 w-[600px] h-fit ml-4 shadow-sm dark:!bg-[#171725] dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+      <div className="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-[600px] h-fit ml-4 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center">
@@ -195,7 +195,30 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
         </div>
 
         {/* Chart */}
-        <div className="h-64 flex items-end justify-between gap-2 px-4">
+        <div className="h-64 flex items-end justify-between gap-2 px-4 relative">
+          {/* Grid Background */}
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Horizontal Grid Lines */}
+            <div className="absolute inset-0 flex flex-col justify-between">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-full border-t border-dotted border-gray-300 dark:border-gray-600 opacity-30"
+                  style={{ height: '1px' }}
+                />
+              ))}
+            </div>
+            {/* Vertical Grid Lines */}
+            <div className="absolute inset-0 flex justify-between px-4">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="h-full border-l border-dotted border-gray-300 dark:border-gray-600 opacity-30"
+                  style={{ width: '1px' }}
+                />
+              ))}
+            </div>
+          </div>
           {loading || parentLoading ? (
             <div className="flex items-center justify-center w-full h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -217,7 +240,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
               return (
                 <div 
                   key={municipality.municipality} 
-                  className="flex flex-col items-center flex-1 group cursor-pointer relative"
+                  className="flex flex-col items-center flex-1 group cursor-pointer relative z-10"
                   onClick={() => handleMunicipalityClick(municipality.municipality)}
                   title="View Barangays' Total Registration"
                 >
@@ -258,7 +281,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       {/* View All Modal */}
       {showAllModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-lg dark:!bg-[#171725] dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+          <div className="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-lg">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 flex items-center justify-center">
@@ -281,7 +304,30 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
             </div>
 
             {/* All Municipalities Chart */}
-            <div className="h-96 flex items-end justify-between gap-1 px-4 overflow-x-auto">
+            <div className="h-96 flex items-end justify-between gap-1 px-4 overflow-x-auto relative">
+              {/* Grid Background */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Horizontal Grid Lines */}
+                <div className="absolute inset-0 flex flex-col justify-between">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <div
+                      key={i}
+                      className="w-full border-t border-dotted border-gray-300 dark:border-gray-600 opacity-30"
+                      style={{ height: '1px' }}
+                    />
+                  ))}
+                </div>
+                {/* Vertical Grid Lines - More lines for the larger chart */}
+                <div className="absolute inset-0 flex justify-between px-4">
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <div
+                      key={i}
+                      className="h-full border-l border-dotted border-gray-300 dark:border-gray-600 opacity-30"
+                      style={{ width: '1px' }}
+                    />
+                  ))}
+                </div>
+              </div>
               {sortedMunicipalities.map((municipality, index) => {
                 const vehicles = municipality.vehicles;
                 const barHeight = getBarWidth(vehicles);
@@ -290,7 +336,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                 return (
                   <div 
                     key={municipality.municipality} 
-                    className="flex flex-col items-center flex-shrink-0 min-w-[60px] group cursor-pointer relative"
+                    className="flex flex-col items-center flex-shrink-0 min-w-[60px] group cursor-pointer relative z-10"
                     onClick={() => handleMunicipalityClick(municipality.municipality)}
                     title="View Barangays' Total Registration"
                   >

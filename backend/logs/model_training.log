@@ -593,3 +593,46 @@ weighted avg       0.38      0.40      0.38        30
 2025-09-20 23:05:06,412 - INFO - Saving models...
 2025-09-20 23:05:06,486 - INFO - Models saved to ../trained/
 2025-09-20 23:05:06,487 - INFO - Training pipeline completed successfully!
+2025-09-25 07:40:04,639 - INFO - Starting complete training pipeline...
+2025-09-25 07:40:04,640 - INFO - Loading and preparing data...
+2025-09-25 07:40:04,711 - INFO - Data prepared: 119 training samples, 30 test samples
+2025-09-25 07:40:04,711 - INFO - Training Random Forest Classifier...
+2025-09-25 07:40:06,281 - INFO - Random Forest CV Accuracy: 0.3779 (+/- 0.1143)
+2025-09-25 07:40:06,281 - INFO - Evaluating model...
+2025-09-25 07:40:06,344 - INFO - Test Accuracy: 0.4000
+2025-09-25 07:40:06,345 - INFO - Test Precision: 0.3750
+2025-09-25 07:40:06,345 - INFO - Test Recall: 0.4000
+2025-09-25 07:40:06,345 - INFO - Test F1-Score: 0.3778
+2025-09-25 07:40:06,345 - INFO - Classification Report:
+2025-09-25 07:40:06,359 - INFO - 
+              precision    recall  f1-score   support
+
+         1.0       0.44      0.58      0.50        12
+         2.0       0.25      0.12      0.17         8
+         3.0       0.40      0.40      0.40        10
+
+    accuracy                           0.40        30
+   macro avg       0.36      0.37      0.36        30
+weighted avg       0.38      0.40      0.38        30
+
+2025-09-25 07:40:06,368 - INFO - Confusion Matrix:
+[[7 1 4]
+ [5 1 2]
+ [4 2 4]]
+2025-09-25 07:40:06,416 - INFO - Top 10 Most Important Features:
+2025-09-25 07:40:06,420 - INFO -                 feature  importance
+2                   day    0.182242
+6  municipality_encoded    0.151627
+4                  hour    0.143132
+1                 month    0.118864
+8        street_encoded    0.101187
+5  vehicle_type_encoded    0.087114
+7      barangay_encoded    0.082940
+3           day_of_week    0.066414
+0                  year    0.034112
+9     road_type_encoded    0.032369
+2025-09-25 07:40:06,423 - INFO - Creating rule-based system...
+2025-09-25 07:40:06,455 - INFO - Rule-based system created successfully
+2025-09-25 07:40:06,456 - INFO - Saving models...
+2025-09-25 07:40:06,519 - INFO - Models saved to ../trained/
+2025-09-25 07:40:06,519 - INFO - Training pipeline completed successfully!
