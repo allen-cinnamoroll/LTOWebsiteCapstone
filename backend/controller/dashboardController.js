@@ -472,9 +472,9 @@ export const getMunicipalityAnalytics = async (req, res) => {
 
     // Define the municipalities of Davao Oriental
     const davaoOrientalMunicipalities = [
-      'Baganga', 'Banaybanay', 'Boston', 'Caraga', 'Cateel', 
-      'Governor Generoso', 'Lupon', 'Manay', 'San Isidro', 
-      'Tarragona', 'City of Mati'
+      'BAGANGA', 'BANAYBANAY', 'BOSTON', 'CARAGA', 'CATEEL', 
+      'GOVERNOR GENEROSO', 'LUPON', 'MANAY', 'SAN ISIDRO', 
+      'TARRAGONA', 'CITY OF MATI'
     ];
 
     // Get vehicle data grouped by municipality (case-insensitive)
@@ -743,9 +743,9 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
 
     // Define the municipalities of Davao Oriental
     const davaoOrientalMunicipalities = [
-      'Baganga', 'Banaybanay', 'Boston', 'Caraga', 'Cateel', 
-      'Governor Generoso', 'Lupon', 'Manay', 'San Isidro', 
-      'Tarragona', 'City of Mati'
+      'BAGANGA', 'BANAYBANAY', 'BOSTON', 'CARAGA', 'CATEEL', 
+      'GOVERNOR GENEROSO', 'LUPON', 'MANAY', 'SAN ISIDRO', 
+      'TARRAGONA', 'CITY OF MATI'
     ];
 
     // Get vehicle data grouped by municipality (case-insensitive)
@@ -770,7 +770,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
           municipality: {
             $cond: {
               if: { $ne: ['$driverInfo.address.municipality', null] },
-              then: '$driverInfo.address.municipality',
+              then: { $toUpper: { $trim: { input: '$driverInfo.address.municipality' } } },
               else: null
             }
           }
@@ -783,9 +783,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
       },
       {
         $group: {
-          _id: {
-            $toLower: '$municipality'
-          },
+          _id: '$municipality',
           vehicleCount: { $sum: 1 }
         }
       }
@@ -797,7 +795,13 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
     const driverAggregation = [
       {
         $addFields: {
-          municipality: '$address.municipality'
+          municipality: {
+            $cond: {
+              if: { $ne: ['$address.municipality', null] },
+              then: { $toUpper: { $trim: { input: '$address.municipality' } } },
+              else: null
+            }
+          }
         }
       },
       {
@@ -807,9 +811,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
       },
       {
         $group: {
-          _id: {
-            $toLower: '$municipality'
-          },
+          _id: '$municipality',
           driverCount: { $sum: 1 }
         }
       }
@@ -822,8 +824,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
     
     // Initialize all Davao Oriental municipalities with zero counts
     davaoOrientalMunicipalities.forEach(municipality => {
-      const key = municipality.toLowerCase();
-      municipalityData[key] = {
+      municipalityData[municipality] = {
         municipality: municipality,
         vehicles: 0,
         drivers: 0
@@ -1097,6 +1098,189 @@ export const getDriverChartData = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message
+    });
+  }
+};
+
+// Get barangay registration totals for a specific municipality
+export const getBarangayRegistrationTotals = async (req, res) => {
+  try {
+    const { municipality, month, year } = req.query;
+    
+    if (!municipality) {
+      return res.status(400).json({
+        success: false,
+        message: 'Municipality parameter is required'
+      });
+    }
+    
+    // List of Davao Oriental municipalities (matching your Python code)
+    const davaoOrientalMunicipalities = [
+      "BAGANGA", "BANAYBANAY", "BOSTON", "CARAGA", "CATEEL",
+      "GOVERNOR GENEROSO", "LUPON", "MANAY", "SAN ISIDRO",
+      "TARRAGONA", "CITY OF MATI"
+    ];
+    
+    // Define all barangays for each municipality in Davao Oriental
+    const davaoOrientalBarangays = {
+      'BANAYBANAY': ['CABANGCALAN', 'CAGANGANAN', 'CALUBIHAN', 'CAUSWAGAN', 'MAHAYAG', 'MAPUTI', 'MOGBONGCOGON', 'PANIKIAN', 'PINTATAGAN', 'PISO PROPER', 'POBLACION', 'PUNTA LINAO', 'RANG-AY', 'SAN VICENTE'],
+
+      'BOSTON': ['CAATIHAN', 'CABASAGAN', 'CARMEN', 'CAWAYANAN', 'POBLACION', 'SAN JOSE', 'SIBAJAY', 'SIMULAO'],
+
+      'BAGANGA': ['BACULIN', 'BANAO', 'BATAWAN', 'BATIANO', 'BINONDO', 'BOBONAO', 'CAMPAWAN', 'CENTRAL', 'DAPNAN', 'KINABLANGAN', 'LAMBAJON', 'LUCOD', 'MAHANUB', 'MIKIT', 'SALINGCOMOT', 'SAN ISIDRO', 'SAN VICTOR', 'SAOQUEGUE'],
+
+      'CARAGA': ['ALVAR', 'CANINGAG', 'DON LEON BALANTE', 'LAMIAWAN', 'MANORIGAO', 'MERCEDES', 'PALMA GIL', 'PICHON', 'POBLACION', 'SAN ANTONIO', 'SAN JOSE', 'SAN LUIS', 'SAN MIGUEL', 'SAN PEDRO', 'SANTA FE', 'SANTIAGO', 'SOBRECAREY'],
+
+      'CATEEL': ['ABIJOD', 'ALEGRIA', 'ALIWAGWAG', 'ARAGON', 'BAYBAY', 'MAGLAHUS', 'MAINIT', 'MALIBAGO', 'SAN ALFONSO', 'SAN ANTONIO', 'SAN MIGUEL', 'SAN RAFAEL', 'SAN VICENTE', 'SANTA FILOMENA', 'TAYTAYAN', 'POBLACION'],
+
+      'GOVERNOR GENEROSO': ['ANITAP', 'CRISPIN DELA CRUZ', 'DON AURELIO CHICOTE', 'LAVIGAN', 'LUZON', 'MAGDUG', 'MANUEL ROXAS', 'MONTSERRAT', 'NANGAN', 'OREGON', 'POBLACION', 'PUNDAGUITAN', 'SERGIO OSMEÑA', 'SUROP', 'TAGABEBE', 'TAMBAN', 'TANDANG SORA', 'TIBANBAN', 'TIBLAWAN', 'UPPER TIBANBAN'],
+
+      'LUPON': ['BAGUMBAYAN', 'CABADIANGAN', 'CALAPAGAN', 'COCORNON', 'CORPORACION', 'DON MARIANO MARCOS', 'ILANGAY', 'LANGKA', 'LANTAWAN', 'LIMBAHAN', 'MACANGAO', 'MAGSAYSAY', 'MAHAYAHAY', 'MARAGATAS', 'MARAYAG', 'NEW VISAYAS', 'POBLACION', 'SAN ISIDRO', 'SAN JOSE', 'TAGBOA', 'TAGUGPO'],
+
+      'MANAY': ['CAPASNAN', 'CAYAWAN', 'CENTRAL', 'CONCEPCION', 'DEL PILAR', 'GUZA', 'HOLY CROSS', 'LAMBOG', 'MABINI', 'MANREZA', 'NEW TAOKANGA', 'OLD MACOPA', 'RIZAL', 'SAN FERMIN', 'SAN IGNACIO', 'SAN ISIDRO', 'ZARAGOSA'],
+
+      'CITY OF MATI': ['BADAS', 'BOBON', 'BUSO', 'CABUAYA', 'CENTRAL', 'CULIAN', 'DAHICAN', 'DANAO', 'DAWAN', 'DON ENRIQUE LOPEZ', 'DON MARTIN MARUNDAN', 'DON SALVADOR LOPEZ, SR.', 'LANGKA', 'LAWIGAN', 'LIBUDON', 'LUBAN', 'MACAMBOL', 'MAMALI', 'MATIAO', 'MAYO', 'SAINZ', 'SANGHAY', 'TAGABAKID', 'TAGBINONGA', 'TAGUIBO', 'TAMISAN'],
+
+      'SAN ISIDRO': ['BAON', 'BATOBATO', 'BITAOGAN', 'CAMBALEON', 'DUGMANON', 'IBA', 'LA UNION', 'LAPU-LAPU', 'MAAG', 'MANIKLING', 'MAPUTI', 'SAN MIGUEL', 'SAN ROQUE', 'SANTO ROSARIO', 'SUDLON', 'TALISAY'],
+      
+      'TARRAGONA': ['CABAGAYAN', 'CENTRAL', 'DADONG', 'JOVELLAR', 'LIMOT', 'LUCATAN', 'MAGANDA', 'OMPAO', 'TOMOAONG', 'TUBAON']
+    };
+    
+    // Normalize municipality name to match the list
+    const municipalityKey = municipality.toUpperCase().trim();
+    
+    // Check if municipality is in the valid list
+    if (!davaoOrientalMunicipalities.includes(municipalityKey)) {
+      return res.status(404).json({
+        success: false,
+        message: `Municipality '${municipality}' not found in Davao Oriental`
+      });
+    }
+    
+    // Get all barangays for the specified municipality
+    const allBarangays = davaoOrientalBarangays[municipalityKey] || [];
+    
+    // Create date filter based on month and year
+    let dateFilter = {};
+    if (month && year) {
+      // Both month and year provided - filter by specific month/year
+      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (year && !month) {
+      // Only year provided - filter by entire year
+      const startDate = new Date(year, 0, 1); // January 1st
+      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (month && !year) {
+      // Only month provided - filter by that month across all years using aggregation
+      dateFilter = {
+        $expr: {
+          $and: [
+            { $eq: [{ $month: "$dateOfRenewal" }, month] },
+            { $ne: ["$dateOfRenewal", null] }
+          ]
+        }
+      };
+    }
+    // If neither month nor year provided, dateFilter remains empty (shows all data)
+
+    // Get vehicle data grouped by barangay for the specified municipality
+    const vehicleAggregation = [
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driver',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          municipality: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.municipality', null] },
+              then: { $toUpper: { $trim: { input: '$driverInfo.address.municipality' } } },
+              else: null
+            }
+          },
+          barangay: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.barangay', null] },
+              then: { $toUpper: { $trim: { input: '$driverInfo.address.barangay' } } },
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          municipality: { $eq: municipalityKey } // Exact match with normalized name
+        }
+      },
+      {
+        $match: {
+          barangay: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            barangay: '$barangay'
+          },
+          vehicleCount: { $sum: 1 }
+        }
+      }
+    ];
+
+    const barangayData = await VehicleModel.aggregate(vehicleAggregation);
+
+    // Create a map of actual registration data
+    const registrationMap = {};
+    
+    barangayData.forEach(item => {
+      registrationMap[item._id.barangay] = item.vehicleCount;
+    });
+
+    // Initialize all barangays with zero counts, then merge with actual data
+    const formattedData = allBarangays.map(barangay => ({
+      barangay: barangay,
+      vehicles: registrationMap[barangay] || 0
+    })).sort((a, b) => b.vehicles - a.vehicles); // Sort by vehicle count descending
+
+    res.status(200).json({
+      success: true,
+      data: formattedData,
+      municipality: municipality,
+      totalBarangays: formattedData.length,
+      totalVehicles: formattedData.reduce((sum, item) => sum + item.vehicles, 0)
+    });
+
+  } catch (error) {
+    console.error('Error in getBarangayRegistrationTotals:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching barangay registration totals',
+      error: error.message
     });
   }
 };

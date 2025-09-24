@@ -63,5 +63,20 @@ export const getMunicipalityRegistrationTotals = async (month = null, year = nul
   }
 };
 
+// Get barangay registration totals for a specific municipality
+export const getBarangayRegistrationTotals = async (municipality, month = null, year = null) => {
+  try {
+    const params = { municipality };
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await apiClient.get('/dashboard/barangay-registration-totals', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching barangay registration totals:', error);
+    throw error;
+  }
+};
+
 
 

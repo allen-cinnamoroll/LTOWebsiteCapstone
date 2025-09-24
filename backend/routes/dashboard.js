@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals } from "../controller/dashboardController.js";
+import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals } from "../controller/dashboardController.js";
 
 const dashboardRouter = express.Router();
 
@@ -21,5 +21,8 @@ dashboardRouter.get("/municipality-analytics", authenticate, getMunicipalityAnal
 
 // Get municipality registration totals for bar chart (Authenticated Users)
 dashboardRouter.get("/municipality-registration-totals", authenticate, getMunicipalityRegistrationTotals);
+
+// Get barangay registration totals for a specific municipality (Authenticated Users)
+dashboardRouter.get("/barangay-registration-totals", authenticate, getBarangayRegistrationTotals);
 
 export default dashboardRouter;

@@ -273,7 +273,7 @@ export const davaoOrientalData = {
         "OREGON": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3"]
         },
-        "POBLACION (SIGABOY)": {
+        "POBLACION": {
           puroks: ["PUROK 1", "PUROK 2", "PUROK 3", "PUROK 4", "PUROK 5"]
         },
         "PUNDAGUITAN": {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getMunicipalityRegistrationTotals } from '../../../api/registrationAnalytics.js';
 import { getMonthNumber } from '../../../api/registrationAnalytics.js';
+import BarangayModal from './BarangayModal.jsx';
 
 const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading }) => {
   const [municipalityData, setMunicipalityData] = useState([]);
@@ -9,6 +10,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   const [showAllModal, setShowAllModal] = useState(false);
   const [sortOrder, setSortOrder] = useState('asc'); // 'asc' for lowest to highest, 'desc' for highest to lowest
   const [animationComplete, setAnimationComplete] = useState(false);
+  const [showBarangayModal, setShowBarangayModal] = useState(false);
+  const [selectedMunicipality, setSelectedMunicipality] = useState(null);
 
   // Fetch municipality data
   const fetchMunicipalityData = async () => {
@@ -117,6 +120,18 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
     return num.toLocaleString();
   };
 
+  // Handle municipality bar click
+  const handleMunicipalityClick = (municipality) => {
+    setSelectedMunicipality(municipality);
+    setShowBarangayModal(true);
+  };
+
+  // Close barangay modal
+  const handleCloseBarangayModal = () => {
+    setShowBarangayModal(false);
+    setSelectedMunicipality(null);
+  };
+
   return (
     <>
       {/* Municipality Chart Container */}
@@ -180,6 +195,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                 <div 
                   key={municipality.municipality} 
                   className="flex flex-col items-center flex-1 group cursor-pointer relative"
+                  onClick={() => handleMunicipalityClick(municipality.municipality)}
+                  title="View Barangays' Total Registration"
                 >
                   
                   {/* Bar */}
@@ -251,6 +268,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                   <div 
                     key={municipality.municipality} 
                     className="flex flex-col items-center flex-shrink-0 min-w-[60px] group cursor-pointer relative"
+                    onClick={() => handleMunicipalityClick(municipality.municipality)}
+                    title="View Barangays' Total Registration"
                   >
                     
                     {/* Bar */}
@@ -286,6 +305,15 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
           </div>
         </div>
       )}
+
+      {/* Barangay Modal */}
+      <BarangayModal
+        isOpen={showBarangayModal}
+        onClose={handleCloseBarangayModal}
+        municipality={selectedMunicipality}
+        selectedMonth={selectedMonth}
+        selectedYear={selectedYear}
+      />
     </>
   );
 };
