@@ -1156,6 +1156,153 @@ export const getDriverChartData = async (req, res) => {
   }
 };
 
+// Get owner data by municipality with license status breakdown
+export const getOwnerMunicipalityData = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    // Create date filter based on month and year
+    let dateFilter = {};
+    if (month && year) {
+      // Both month and year provided - filter by specific month/year
+      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
+      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (year && !month) {
+      // Only year provided - filter by entire year
+      const startDate = new Date(year, 0, 1); // January 1st
+      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
+      dateFilter = {
+        dateOfRenewal: {
+          $gte: startDate,
+          $lte: endDate,
+          $ne: null // Exclude vehicles with null dateOfRenewal
+        }
+      };
+    } else if (month && !year) {
+      // Only month provided - filter by that month across all years using aggregation
+      dateFilter = {
+        $expr: {
+          $and: [
+            { $eq: [{ $month: "$dateOfRenewal" }, month] },
+            { $ne: ["$dateOfRenewal", null] }
+          ]
+        }
+      };
+    }
+    // If neither month nor year provided, dateFilter remains empty (shows all data)
+
+    // Define the municipalities of Davao Oriental
+    const davaoOrientalMunicipalities = [
+      'BAGANGA', 'BANAYBANAY', 'BOSTON', 'CARAGA', 'CATEEL', 
+      'GOVERNOR GENEROSO', 'LUPON', 'MANAY', 'SAN ISIDRO', 
+      'TARRAGONA', 'CITY OF MATI'
+    ];
+
+    // Get owner data grouped by municipality with license status breakdown
+    const ownerAggregation = [
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driver',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          municipality: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.municipality', null] },
+              then: { $toUpper: { $trim: { input: '$driverInfo.address.municipality' } } },
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $match: Object.keys(dateFilter).length > 0 
+          ? { municipality: { $ne: null }, ...dateFilter }
+          : { municipality: { $ne: null } }
+      },
+      {
+        $group: {
+          _id: '$municipality',
+          totalOwners: { $sum: 1 },
+          withLicense: {
+            $sum: {
+              $cond: ['$driverInfo.hasDriversLicense', 1, 0]
+            }
+          },
+          withoutLicense: {
+            $sum: {
+              $cond: ['$driverInfo.hasDriversLicense', 0, 1]
+            }
+          }
+        }
+      }
+    ];
+
+    const ownerData = await VehicleModel.aggregate(ownerAggregation);
+    console.log(`Owner municipality endpoint - Owner data found: ${ownerData.length} municipalities`);
+    console.log(`Sample owner data:`, ownerData.slice(0, 3));
+
+    // Initialize all municipalities with zero counts
+    const municipalityData = {};
+    davaoOrientalMunicipalities.forEach(municipality => {
+      municipalityData[municipality] = {
+        municipality: municipality,
+        totalOwners: 0,
+        withLicense: 0,
+        withoutLicense: 0
+      };
+    });
+
+    // Add owner data
+    ownerData.forEach(item => {
+      const municipalityKey = item._id;
+      if (municipalityData[municipalityKey]) {
+        municipalityData[municipalityKey] = {
+          municipality: municipalityKey,
+          totalOwners: item.totalOwners,
+          withLicense: item.withLicense,
+          withoutLicense: item.withoutLicense
+        };
+      }
+    });
+
+    // Convert to array and sort by total owners in descending order
+    const finalData = Object.values(municipalityData)
+      .sort((a, b) => b.totalOwners - a.totalOwners);
+
+    console.log(`Owner municipality endpoint - Final data: ${finalData.length} municipalities with data`);
+    console.log('Sample final data:', finalData.slice(0, 3));
+
+    res.status(200).json({
+      success: true,
+      data: finalData
+    });
+  } catch (error) {
+    console.error("Owner municipality data error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 // Get barangay registration totals for a specific municipality
 export const getBarangayRegistrationTotals = async (req, res) => {
   try {

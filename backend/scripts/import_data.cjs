@@ -3,11 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 async function importData() {
-  const client = new MongoClient('mongodb://localhost:27017');
+  // Use your remote database connection string
+  const client = new MongoClient('mongodb://lto_user:jessa_allen_kent@72.60.198.244:27017/lto_website?authSource=lto_website');
   await client.connect();
   
-  // Replace 'your_database_name' with your actual database name from Compass
-  const db = client.db('lto_db');
+  // Use the database from your connection string
+  const db = client.db('lto_website');
   const collection = db.collection('accidents');
   
   // Read JSON file from the same directory

@@ -109,5 +109,20 @@ export const getMonthlyVehicleTrends = async (year, municipality = null) => {
   }
 };
 
+// Get owner data by municipality with license status breakdown
+export const getOwnerMunicipalityData = async (month = null, year = null) => {
+  try {
+    const params = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await apiClient.get('/dashboard/owner-municipality-data', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching owner municipality data:', error);
+    throw error;
+  }
+};
+
 
 

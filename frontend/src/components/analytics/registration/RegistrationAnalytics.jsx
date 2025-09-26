@@ -3,6 +3,7 @@ import './RegistrationAnalytics.css';
 import { getRegistrationAnalytics, getMonthName, getMonthNumber } from '../../../api/registrationAnalytics.js';
 import MunicipalityChart from './MunicipalityChart.jsx';
 import VehicleTrendChart from './VehicleTrendChart.jsx';
+import OwnerMunicipalityChart from './OwnerMunicipalityChart.jsx';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -458,6 +459,22 @@ export function RegistrationAnalytics() {
             </div>
             <div className="flex-1 lg:flex-1">
               <VehicleTrendChart />
+            </div>
+          </div>
+          
+          {/* Owner Municipality Chart - Same width as MunicipalityChart with consistent spacing */}
+          <div className="mt-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1 lg:flex-1">
+                <OwnerMunicipalityChart 
+                  selectedMonth={selectedMonth} 
+                  selectedYear={selectedYear} 
+                  loading={loading}
+                />
+              </div>
+              <div className="flex-1 lg:flex-1">
+                {/* Empty space to maintain layout balance */}
+              </div>
             </div>
           </div>
         </div>
