@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals } from "../controller/dashboardController.js";
+import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals, getYearlyVehicleTrends, getMonthlyVehicleTrends } from "../controller/dashboardController.js";
 
 const dashboardRouter = express.Router();
 
@@ -24,5 +24,11 @@ dashboardRouter.get("/municipality-registration-totals", authenticate, getMunici
 
 // Get barangay registration totals for a specific municipality (Authenticated Users)
 dashboardRouter.get("/barangay-registration-totals", authenticate, getBarangayRegistrationTotals);
+
+// Get yearly vehicle registration trends (Authenticated Users)
+dashboardRouter.get("/yearly-vehicle-trends", authenticate, getYearlyVehicleTrends);
+
+// Get monthly vehicle registration trends (Authenticated Users)
+dashboardRouter.get("/monthly-vehicle-trends", authenticate, getMonthlyVehicleTrends);
 
 export default dashboardRouter;

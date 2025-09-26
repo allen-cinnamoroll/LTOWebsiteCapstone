@@ -750,7 +750,6 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
 
     // Get vehicle data grouped by municipality (case-insensitive)
     const vehicleAggregation = [
-      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
       {
         $lookup: {
           from: 'drivers',
@@ -777,9 +776,9 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
         }
       },
       {
-        $match: {
-          municipality: { $ne: null }
-        }
+        $match: Object.keys(dateFilter).length > 0 
+          ? { municipality: { $ne: null }, ...dateFilter }
+          : { municipality: { $ne: null } }
       },
       {
         $group: {
@@ -790,34 +789,83 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
     ];
 
     const vehicleData = await VehicleModel.aggregate(vehicleAggregation);
+    console.log(`Municipality endpoint - Vehicle data found: ${vehicleData.length} municipalities`);
+    console.log(`Date filter applied:`, JSON.stringify(dateFilter, null, 2));
+    console.log(`Vehicle aggregation pipeline:`, JSON.stringify(vehicleAggregation, null, 2));
+    console.log(`Sample vehicle data:`, vehicleData.slice(0, 3));
 
     // Get driver data grouped by municipality (case-insensitive)
-    const driverAggregation = [
-      {
-        $addFields: {
-          municipality: {
-            $cond: {
-              if: { $ne: ['$address.municipality', null] },
-              then: { $toUpper: { $trim: { input: '$address.municipality' } } },
-              else: null
+    // Use the same approach as the main analytics endpoint: find drivers whose vehicles match the date criteria
+    let driverData = [];
+    
+    if (Object.keys(dateFilter).length > 0) {
+      // If we have a date filter, find drivers whose vehicles match the date criteria
+      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'driver').distinct('driver');
+      const validDriverIds = vehiclesInDateRange.filter(id => id !== null);
+      
+      if (validDriverIds.length > 0) {
+        const driverAggregation = [
+          {
+            $match: { _id: { $in: validDriverIds } }
+          },
+          {
+            $addFields: {
+              municipality: {
+                $cond: {
+                  if: { $ne: ['$address.municipality', null] },
+                  then: { $toUpper: { $trim: { input: '$address.municipality' } } },
+                  else: null
+                }
+              }
+            }
+          },
+          {
+            $match: {
+              municipality: { $ne: null }
+            }
+          },
+          {
+            $group: {
+              _id: '$municipality',
+              driverCount: { $sum: 1 }
             }
           }
-        }
-      },
-      {
-        $match: {
-          municipality: { $ne: null }
-        }
-      },
-      {
-        $group: {
-          _id: '$municipality',
-          driverCount: { $sum: 1 }
-        }
+        ];
+        
+        driverData = await DriverModel.aggregate(driverAggregation);
       }
-    ];
-
-    const driverData = await DriverModel.aggregate(driverAggregation);
+    } else {
+      // No date filter - get all drivers
+      const driverAggregation = [
+        {
+          $addFields: {
+            municipality: {
+              $cond: {
+                if: { $ne: ['$address.municipality', null] },
+                then: { $toUpper: { $trim: { input: '$address.municipality' } } },
+                else: null
+              }
+            }
+          }
+        },
+        {
+          $match: {
+            municipality: { $ne: null }
+          }
+        },
+        {
+          $group: {
+            _id: '$municipality',
+            driverCount: { $sum: 1 }
+          }
+        }
+      ];
+      
+      driverData = await DriverModel.aggregate(driverAggregation);
+    }
+    
+    console.log(`Municipality endpoint - Driver data found: ${driverData.length} municipalities`);
+    console.log(`Sample driver data:`, driverData.slice(0, 3));
 
     // Combine vehicle and driver data by municipality
     const municipalityData = {};
@@ -856,7 +904,13 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
       }))
       .sort((a, b) => (b.vehicles + b.drivers) - (a.vehicles + a.drivers));
 
-    res.status(200).json(finalData);
+    console.log(`Municipality endpoint - Final data: ${finalData.length} municipalities with data`);
+    console.log('Sample data:', finalData.slice(0, 3));
+
+    res.status(200).json({
+      success: true,
+      data: finalData
+    });
   } catch (error) {
     console.error("Municipality registration totals error:", error);
     res.status(500).json({
@@ -1280,6 +1334,285 @@ export const getBarangayRegistrationTotals = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching barangay registration totals',
+      error: error.message
+    });
+  }
+};
+
+// Get yearly vehicle registration trends
+export const getYearlyVehicleTrends = async (req, res) => {
+  try {
+    const { startYear, endYear, municipality } = req.query;
+    
+    // Set default year range if not provided
+    const currentYear = new Date().getFullYear();
+    const defaultStartYear = startYear ? parseInt(startYear) : currentYear - 5;
+    const defaultEndYear = endYear ? parseInt(endYear) : currentYear;
+    
+    console.log(`Fetching yearly trends from ${defaultStartYear} to ${defaultEndYear}, municipality: ${municipality || 'All'}`);
+    
+    // Build aggregation pipeline to get vehicles with municipality data
+    const aggregationPipeline = [
+      {
+        $match: {
+          dateOfRenewal: {
+            $ne: null,
+            $gte: new Date(defaultStartYear, 0, 1),
+            $lte: new Date(defaultEndYear, 11, 31, 23, 59, 59)
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driver',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          municipality: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.municipality', null] },
+              then: { $toUpper: { $trim: { input: '$driverInfo.address.municipality' } } },
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          municipality: { $ne: null }
+        }
+      }
+    ];
+    
+    // Add municipality filter if specified and not 'All'
+    if (municipality && municipality !== 'All') {
+      aggregationPipeline.push({
+        $match: {
+          municipality: municipality.toUpperCase()
+        }
+      });
+    }
+    
+    // Get all vehicles that were renewed in the specified year range
+    console.log('Aggregation pipeline:', JSON.stringify(aggregationPipeline, null, 2));
+    const vehicles = await VehicleModel.aggregate(aggregationPipeline);
+    
+    console.log(`Found ${vehicles.length} vehicles in date range`);
+    if (vehicles.length > 0) {
+      console.log('Sample vehicle data:', JSON.stringify(vehicles[0], null, 2));
+      // Log unique municipalities found
+      const uniqueMunicipalities = [...new Set(vehicles.map(v => v.municipality))];
+      console.log('Unique municipalities found:', uniqueMunicipalities);
+    }
+    
+    // Group vehicles by renewal year and calculate status using the same logic as main analytics
+    const yearlyData = {};
+    
+    vehicles.forEach(vehicle => {
+      const renewalYear = new Date(vehicle.dateOfRenewal).getFullYear();
+      
+      if (!yearlyData[renewalYear]) {
+        yearlyData[renewalYear] = {
+          total: 0,
+          active: 0,
+          expired: 0
+        };
+      }
+      
+      yearlyData[renewalYear].total++;
+      
+      // Use the same getVehicleStatus function as the main analytics
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      if (status === "1") {
+        yearlyData[renewalYear].active++;
+      } else {
+        yearlyData[renewalYear].expired++;
+      }
+    });
+    
+    // Fill in missing years with zero values
+    const result = [];
+    for (let year = defaultStartYear; year <= defaultEndYear; year++) {
+      result.push({
+        year: year,
+        total: yearlyData[year] ? yearlyData[year].total : 0,
+        active: yearlyData[year] ? yearlyData[year].active : 0,
+        expired: yearlyData[year] ? yearlyData[year].expired : 0
+      });
+    }
+    
+    console.log(`Yearly trends data:`, result);
+    
+    res.status(200).json({
+      success: true,
+      data: result,
+      period: {
+        startYear: defaultStartYear,
+        endYear: defaultEndYear
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in getYearlyVehicleTrends:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching yearly vehicle trends',
+      error: error.message
+    });
+  }
+};
+
+// Get monthly vehicle registration trends for a specific year
+export const getMonthlyVehicleTrends = async (req, res) => {
+  try {
+    const { year, municipality } = req.query;
+    
+    if (!year) {
+      return res.status(400).json({
+        success: false,
+        message: 'Year parameter is required'
+      });
+    }
+    
+    const yearValue = parseInt(year);
+    const currentYear = new Date().getFullYear();
+    
+    if (yearValue < 2000 || yearValue > currentYear) {
+      return res.status(400).json({
+        success: false,
+        message: `Year must be between 2000 and ${currentYear}`
+      });
+    }
+    
+    console.log(`Fetching monthly trends for year ${yearValue}, municipality: ${municipality || 'All'}`);
+    
+    // Build aggregation pipeline to get vehicles with municipality data
+    const aggregationPipeline = [
+      {
+        $match: {
+          dateOfRenewal: {
+            $ne: null,
+            $gte: new Date(yearValue, 0, 1),
+            $lte: new Date(yearValue, 11, 31, 23, 59, 59)
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driver',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          municipality: {
+            $cond: {
+              if: { $ne: ['$driverInfo.address.municipality', null] },
+              then: { $toUpper: { $trim: { input: '$driverInfo.address.municipality' } } },
+              else: null
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          municipality: { $ne: null }
+        }
+      }
+    ];
+    
+    // Add municipality filter if specified and not 'All'
+    if (municipality && municipality !== 'All') {
+      aggregationPipeline.push({
+        $match: {
+          municipality: municipality.toUpperCase()
+        }
+      });
+    }
+    
+    // Get all vehicles that were renewed in the specified year
+    console.log('Aggregation pipeline:', JSON.stringify(aggregationPipeline, null, 2));
+    const vehicles = await VehicleModel.aggregate(aggregationPipeline);
+    
+    console.log(`Found ${vehicles.length} vehicles in year ${yearValue}`);
+    if (vehicles.length > 0) {
+      console.log('Sample vehicle data:', JSON.stringify(vehicles[0], null, 2));
+      // Log unique municipalities found
+      const uniqueMunicipalities = [...new Set(vehicles.map(v => v.municipality))];
+      console.log('Unique municipalities found:', uniqueMunicipalities);
+    }
+    
+    // Group vehicles by renewal month and calculate status using the same logic as main analytics
+    const monthlyData = {};
+    
+    vehicles.forEach(vehicle => {
+      const renewalMonth = new Date(vehicle.dateOfRenewal).getMonth(); // 0-11
+      
+      if (!monthlyData[renewalMonth]) {
+        monthlyData[renewalMonth] = {
+          total: 0,
+          active: 0,
+          expired: 0
+        };
+      }
+      
+      monthlyData[renewalMonth].total++;
+      
+      // Use the same getVehicleStatus function as the main analytics
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      if (status === "1") {
+        monthlyData[renewalMonth].active++;
+      } else {
+        monthlyData[renewalMonth].expired++;
+      }
+    });
+    
+    // Fill in missing months with zero values
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const result = [];
+    
+    for (let month = 0; month < 12; month++) {
+      const monthData = monthlyData[month];
+      result.push({
+        month: monthNames[month],
+        total: monthData ? monthData.total : 0,
+        active: monthData ? monthData.active : 0,
+        expired: monthData ? monthData.expired : 0,
+        noRegistration: monthData && monthData.total === 0 ? 0 : null
+      });
+    }
+    
+    console.log(`Monthly trends data for ${yearValue}:`, result);
+    
+    res.status(200).json({
+      success: true,
+      data: result,
+      year: yearValue
+    });
+    
+  } catch (error) {
+    console.error('Error in getMonthlyVehicleTrends:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching monthly vehicle trends',
       error: error.message
     });
   }

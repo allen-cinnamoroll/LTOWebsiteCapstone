@@ -46,6 +46,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
       let monthNumber = null;
       let yearValue = null;
       
+      // If month is selected (not "All"), convert to number
       if (selectedMonth && selectedMonth !== 'All') {
         const months = [
           'January', 'February', 'March', 'April', 'May', 'June',
@@ -54,9 +55,18 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
         monthNumber = months.indexOf(selectedMonth) + 1;
       }
       
+      // If year is selected (not "All"), use the year value
       if (selectedYear && selectedYear !== 'All') {
         yearValue = selectedYear;
       }
+      
+      // API call scenarios:
+      // 1. monthNumber=2, yearValue=null -> February across all years
+      // 2. monthNumber=null, yearValue=2024 -> All months in 2024
+      // 3. monthNumber=2, yearValue=2024 -> February 2024 only
+      // 4. monthNumber=null, yearValue=null -> All data
+      
+      console.log('Fetching barangay data for', targetMunicipality, 'with:', { monthNumber, yearValue, selectedMonth, selectedYear });
       
       const response = await getBarangayRegistrationTotals(targetMunicipality, monthNumber, yearValue);
       setBarangayData(response.data || []);
@@ -164,7 +174,14 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                   >
                     {municipalitiesList[currentMunicipalityIndex]?.municipality || municipality}
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-1">Barangay Registration Data</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Barangay Registration Data
+                    {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
+                      <span className="ml-2 text-xs">
+                        ({selectedMonth} across all years)
+                      </span>
+                    )}
+                  </p>
                 </div>
                 
                 {/* Navigation Arrows */}

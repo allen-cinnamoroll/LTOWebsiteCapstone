@@ -1,4 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 import { getMunicipalityRegistrationTotals } from '../../../api/registrationAnalytics.js';
 import { getMonthNumber } from '../../../api/registrationAnalytics.js';
 import BarangayModal from './BarangayModal.jsx';
@@ -8,7 +18,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showAllModal, setShowAllModal] = useState(false);
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' for lowest to highest, 'desc' for highest to lowest
+  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' for lowest to highest, 'desc' for highest to lowest
   const [animationComplete, setAnimationComplete] = useState(false);
   const [showBarangayModal, setShowBarangayModal] = useState(false);
   const [selectedMunicipality, setSelectedMunicipality] = useState(null);
@@ -23,16 +33,40 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       let monthNumber = null;
       let yearValue = null;
       
+      // If month is selected (not "All"), convert to number
       if (selectedMonth && selectedMonth !== 'All') {
         monthNumber = getMonthNumber(selectedMonth);
       }
       
+      // If year is selected (not "All"), use the year value
       if (selectedYear && selectedYear !== 'All') {
         yearValue = selectedYear;
       }
       
+      // API call scenarios:
+      // 1. monthNumber=2, yearValue=null -> February across all years
+      // 2. monthNumber=null, yearValue=2024 -> All months in 2024
+      // 3. monthNumber=2, yearValue=2024 -> February 2024 only
+      // 4. monthNumber=null, yearValue=null -> All data
+      
+      console.log('Fetching municipality data with:', { monthNumber, yearValue, selectedMonth, selectedYear });
+      console.log('Title condition check:', { 
+        selectedYear, 
+        selectedMonth, 
+        yearIsAll: selectedYear === 'All', 
+        monthIsNotAll: selectedMonth !== 'All',
+        shouldShowSuffix: selectedYear === 'All' && selectedMonth && selectedMonth !== 'All'
+      });
+      
       const response = await getMunicipalityRegistrationTotals(monthNumber, yearValue);
-      setMunicipalityData(response);
+      console.log('Municipality data response:', response);
+      
+      if (response.success) {
+        setMunicipalityData(response.data);
+      } else {
+        setError('Failed to fetch municipality data');
+        setMunicipalityData([]);
+      }
     } catch (err) {
       console.error('Error fetching municipality data:', err);
       setError('Error loading municipality data');
@@ -41,6 +75,13 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
     }
   };
 
+  // Load initial data when component mounts
+  useEffect(() => {
+    fetchMunicipalityData();
+    setAnimationComplete(false);
+  }, []);
+
+  // Fetch data when month or year changes
   useEffect(() => {
     fetchMunicipalityData();
     setAnimationComplete(false);
@@ -51,6 +92,13 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
     sortOrder === 'asc' ? a.vehicles - b.vehicles : b.vehicles - a.vehicles
   );
   const top5Municipalities = sortedMunicipalities.slice(0, 5);
+  
+  console.log('Municipality data processing:', {
+    rawData: municipalityData,
+    sortedData: sortedMunicipalities,
+    top5: top5Municipalities,
+    hasData: municipalityData.length > 0
+  });
 
   // Trigger animation after data loads
   useEffect(() => {
@@ -59,83 +107,88 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       return () => clearTimeout(timer);
     }
   }, [municipalityData]);
-  const maxValue = Math.max(...municipalityData.map(item => item.vehicles), 0);
 
-  // Calculate bar width percentage with balanced scaling for optimal visibility
-  const getBarWidth = (vehicles) => {
-    if (maxValue === 0) return 0;
-    
-    // Use a hybrid approach: linear for low values, compressed for high values
-    if (vehicles <= 50) {
-      // Linear scaling for values 0-50 to preserve exact differences
-      const percentage = (vehicles / maxValue) * 100;
-      
-      // Only apply minimum height for very small values, and make it proportional
-      if (vehicles === 0) {
-        return 1; // Boston gets minimal height
-      } else if (vehicles <= 10) {
-        return Math.max(percentage, 3); // Small values get 3% minimum
-      } else {
-        return percentage; // Larger values use exact percentage
-      }
-    } else {
-      // Compressed scaling for higher values to prevent dominance
-      const adjustedValue = 50 + Math.sqrt(vehicles - 50) * 10;
-      const adjustedMax = 50 + Math.sqrt(maxValue - 50) * 10;
-      const percentage = (adjustedValue / adjustedMax) * 100;
-      return Math.max(percentage, 2);
-    }
+  // Format data for Recharts
+  const formatChartData = (municipalities) => {
+    return municipalities.map((municipality, index) => ({
+      name: municipality.municipality,
+      vehicles: municipality.vehicles,
+      index: index,
+      totalCount: municipalities.length
+    }));
   };
 
+
   // Get bar color based on registration level and sort order
-  const getBarColor = (vehicles, index, totalCount) => {
-    // Calculate percentage of max value for more meaningful coloring
-    const percentageOfMax = maxValue > 0 ? (vehicles / maxValue) * 100 : 0;
-    
+  const getBarColor = (index, totalCount) => {
     if (sortOrder === 'asc') {
       // Ascending: lowest to highest (red → blue)
       if (index < 5) {
-        if (index === 0) return "bg-gradient-to-t from-red-800 to-red-600 shadow-red-700/40";
-        if (index === 1) return "bg-gradient-to-t from-red-500 to-orange-400 shadow-red-400/20";
-        if (index === 2) return "bg-gradient-to-t from-orange-600 to-orange-400 shadow-orange-500/20";
-        if (index === 3) return "bg-gradient-to-t from-orange-500 to-orange-300 shadow-orange-400/20";
-        return "bg-gradient-to-t from-orange-400 to-yellow-300 shadow-orange-300/20";
+        if (index === 0) return "#dc2626"; // red-600
+        if (index === 1) return "#ea580c"; // orange-600
+        if (index === 2) return "#d97706"; // amber-600
+        if (index === 3) return "#ca8a04"; // yellow-600
+        return "#eab308"; // yellow-500
       }
       if (index >= 5 && index < totalCount - 5) {
-        if (index === 5) return "bg-gradient-to-t from-yellow-600 to-yellow-400 shadow-yellow-500/20";
-        if (index === 6) return "bg-gradient-to-t from-yellow-500 to-yellow-300 shadow-yellow-400/20";
-        return "bg-gradient-to-t from-yellow-400 to-yellow-200 shadow-yellow-300/20";
+        return "#84cc16"; // lime-500
       }
       if (index >= totalCount - 5) {
-        if (index === totalCount - 1) return "bg-gradient-to-t from-blue-800 to-blue-600 shadow-blue-500/20";
-        if (index === totalCount - 2) return "bg-gradient-to-t from-blue-700 to-blue-500 shadow-blue-400/20";
-        if (index === totalCount - 3) return "bg-gradient-to-t from-blue-600 to-blue-400 shadow-blue-300/20";
-        if (index === totalCount - 4) return "bg-gradient-to-t from-blue-500 to-blue-300 shadow-blue-200/20";
-        return "bg-gradient-to-t from-blue-400 to-blue-200 shadow-blue-100/20";
+        if (index === totalCount - 1) return "#1d4ed8"; // blue-700
+        if (index === totalCount - 2) return "#2563eb"; // blue-600
+        if (index === totalCount - 3) return "#3b82f6"; // blue-500
+        if (index === totalCount - 4) return "#60a5fa"; // blue-400
+        return "#93c5fd"; // blue-300
       }
     } else {
       // Descending: highest to lowest (blue → red)
       if (index < 5) {
-        if (index === 0) return "bg-gradient-to-t from-blue-800 to-blue-600 shadow-blue-500/20";
-        if (index === 1) return "bg-gradient-to-t from-blue-700 to-blue-500 shadow-blue-400/20";
-        if (index === 2) return "bg-gradient-to-t from-blue-600 to-blue-400 shadow-blue-300/20";
-        if (index === 3) return "bg-gradient-to-t from-blue-500 to-blue-300 shadow-blue-200/20";
-        return "bg-gradient-to-t from-blue-400 to-blue-200 shadow-blue-100/20";
+        if (index === 0) return "#1d4ed8"; // blue-700
+        if (index === 1) return "#2563eb"; // blue-600
+        if (index === 2) return "#3b82f6"; // blue-500
+        if (index === 3) return "#60a5fa"; // blue-400
+        return "#93c5fd"; // blue-300
       }
       if (index >= 5 && index < totalCount - 5) {
-        if (index === 5) return "bg-gradient-to-t from-yellow-600 to-yellow-400 shadow-yellow-500/20";
-        if (index === 6) return "bg-gradient-to-t from-yellow-500 to-yellow-300 shadow-yellow-400/20";
-        return "bg-gradient-to-t from-yellow-400 to-yellow-200 shadow-yellow-300/20";
+        return "#84cc16"; // lime-500
       }
       if (index >= totalCount - 5) {
-        if (index === totalCount - 1) return "bg-gradient-to-t from-red-700 to-red-500 shadow-red-600/30";
-        if (index === totalCount - 2) return "bg-gradient-to-t from-red-500 to-orange-400 shadow-red-400/20";
-        if (index === totalCount - 3) return "bg-gradient-to-t from-orange-600 to-orange-400 shadow-orange-500/20";
-        if (index === totalCount - 4) return "bg-gradient-to-t from-orange-500 to-orange-300 shadow-orange-400/20";
-        return "bg-gradient-to-t from-orange-400 to-yellow-300 shadow-orange-300/20";
+        if (index === totalCount - 1) return "#dc2626"; // red-600
+        if (index === totalCount - 2) return "#ea580c"; // orange-600
+        if (index === totalCount - 3) return "#d97706"; // amber-600
+        if (index === totalCount - 4) return "#ca8a04"; // yellow-600
+        return "#eab308"; // yellow-500
       }
     }
-    return "bg-gradient-to-t from-blue-700 to-blue-500 shadow-blue-400/20";
+    return "#3b82f6"; // blue-500 default
+  };
+
+  // Enhanced custom tooltip component
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const value = payload[0].value;
+      const percentage = sortedMunicipalities.length > 0 
+        ? ((value / Math.max(...sortedMunicipalities.map(m => m.vehicles))) * 100).toFixed(1)
+        : 0;
+      
+      return (
+        <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+            <div>
+              <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
+              <p className="text-blue-600 dark:text-blue-400 text-xs">
+                <span className="font-semibold text-lg">{value.toLocaleString()}</span> vehicles
+              </p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs">
+                {percentage}% of highest
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   // Format number with commas
@@ -158,8 +211,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   return (
     <>
       {/* Municipality Chart Container */}
-      <div className="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg p-4 w-[600px] h-fit ml-4 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+       <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center">
               <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -168,7 +221,19 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                 <path d="M16 5l3 3-3 3"/>
               </svg>
             </div>
-            <h2 className="text-base font-bold text-foreground">DavOr Vehicle Registration Rankings</h2>
+            <h2 className="text-base font-bold text-foreground">
+              DavOr Vehicle Registration Rankings
+              {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  ({selectedMonth} across all years)
+                </span>
+              )}
+              {selectedMonth === 'All' && selectedYear && selectedYear !== 'All' && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  (All months in {selectedYear})
+                </span>
+              )}
+            </h2>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -194,31 +259,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
           </div>
         </div>
 
-        {/* Chart */}
-        <div className="h-64 flex items-end justify-between gap-2 px-4 relative">
-          {/* Grid Background */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Horizontal Grid Lines */}
-            <div className="absolute inset-0 flex flex-col justify-between">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="w-full border-t border-dotted border-gray-300 dark:border-gray-600 opacity-30"
-                  style={{ height: '1px' }}
-                />
-              ))}
-            </div>
-            {/* Vertical Grid Lines */}
-            <div className="absolute inset-0 flex justify-between px-4">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="h-full border-l border-dotted border-gray-300 dark:border-gray-600 opacity-30"
-                  style={{ width: '1px' }}
-                />
-              ))}
-            </div>
-          </div>
+        {/* Chart Container */}
+        <div className="h-80">
           {loading || parentLoading ? (
             <div className="flex items-center justify-center w-full h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -232,57 +274,64 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
               <p>No data available</p>
             </div>
           ) : (
-            top5Municipalities.map((municipality, index) => {
-              const vehicles = municipality.vehicles;
-              const barHeight = getBarWidth(vehicles);
-              const barColor = getBarColor(vehicles, index, top5Municipalities.length);
-              
-              return (
-                <div 
-                  key={municipality.municipality} 
-                  className="flex flex-col items-center flex-1 group cursor-pointer relative z-10"
-                  onClick={() => handleMunicipalityClick(municipality.municipality)}
-                  title="View Barangays' Total Registration"
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={formatChartData(top5Municipalities)}
+                margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
+                barCategoryGap="10%"
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#6b7280"
+                  fontSize={11}
+                  height={20}
+                  interval={0}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                />
+                <YAxis 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  width={60}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar 
+                  dataKey="vehicles" 
+                  radius={[8, 8, 0, 0]}
+                  onClick={(data) => handleMunicipalityClick(data.name)}
+                  style={{ cursor: 'pointer' }}
+                  maxBarSize={120}
                 >
-                  
-                  {/* Bar */}
-                  <div className="relative w-full flex flex-col justify-end h-48 mb-2">
-                    {/* Hover background highlight */}
-                    <div className="absolute inset-0 bg-gray-200/70 dark:bg-gray-600/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-                    <div
-                      className={`w-full ${barColor} rounded-t-md transition-all duration-700 ease-out relative z-10 border border-white/20 shadow-lg ${
-                        animationComplete 
-                          ? 'animate-in slide-in-from-bottom-4 fade-in duration-700' 
-                          : 'opacity-0'
-                      }`}
-                      style={{ 
-                        height: animationComplete ? `${barHeight}%` : '0%',
-                        transitionDelay: `${index * 100}ms`
-                      }}
-                    >
-                      {/* Value label on top of bar */}
-                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-foreground whitespace-nowrap z-20">
-                        {formatNumber(vehicles)}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Municipality label */}
-                  <div className="text-[10px] text-center text-muted-foreground max-w-[90px] leading-tight h-8 flex items-center justify-center">
-                    {municipality.municipality}
-                  </div>
-                </div>
-              );
-            })
+                  {formatChartData(top5Municipalities).map((entry, index) => {
+                    const originalColor = getBarColor(entry.index, entry.totalCount);
+                    
+                    return (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={originalColor}
+                        stroke={originalColor}
+                        strokeWidth={2}
+                        style={{ 
+                          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))',
+                          transition: 'all 0.3s ease'
+                        }}
+                      />
+                    );
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           )}
         </div>
       </div>
 
       {/* View All Modal */}
       {showAllModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-lg">
-            <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+           <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-2xl dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 flex items-center justify-center">
                   <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -291,7 +340,19 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                     <path d="M16 5l3 3-3 3"/>
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">All Municipalities</h2>
+                <h2 className="text-2xl font-bold text-foreground">
+                  All Municipalities
+                  {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
+                    <span className="text-lg font-normal text-muted-foreground ml-2">
+                      ({selectedMonth} across all years)
+                    </span>
+                  )}
+                  {selectedMonth === 'All' && selectedYear && selectedYear !== 'All' && (
+                    <span className="text-lg font-normal text-muted-foreground ml-2">
+                      (All months in {selectedYear})
+                    </span>
+                  )}
+                </h2>
               </div>
               <button
                 onClick={() => setShowAllModal(false)}
@@ -303,73 +364,63 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
               </button>
             </div>
 
-            {/* All Municipalities Chart */}
-            <div className="h-96 flex items-end justify-between gap-1 px-4 overflow-x-auto relative">
-              {/* Grid Background */}
-              <div className="absolute inset-0 pointer-events-none">
-                {/* Horizontal Grid Lines */}
-                <div className="absolute inset-0 flex flex-col justify-between">
-                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                    <div
-                      key={i}
-                      className="w-full border-t border-dotted border-gray-300 dark:border-gray-600 opacity-30"
-                      style={{ height: '1px' }}
-                    />
-                  ))}
-                </div>
-                {/* Vertical Grid Lines - More lines for the larger chart */}
-                <div className="absolute inset-0 flex justify-between px-4">
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <div
-                      key={i}
-                      className="h-full border-l border-dotted border-gray-300 dark:border-gray-600 opacity-30"
-                      style={{ width: '1px' }}
-                    />
-                  ))}
-                </div>
-              </div>
-              {sortedMunicipalities.map((municipality, index) => {
-                const vehicles = municipality.vehicles;
-                const barHeight = getBarWidth(vehicles);
-                const barColor = getBarColor(vehicles, index, sortedMunicipalities.length);
-                
-                return (
-                  <div 
-                    key={municipality.municipality} 
-                    className="flex flex-col items-center flex-shrink-0 min-w-[60px] group cursor-pointer relative z-10"
-                    onClick={() => handleMunicipalityClick(municipality.municipality)}
-                    title="View Barangays' Total Registration"
+            {/* All Municipalities Chart Container */}
+            <div className="h-[500px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={formatChartData(sortedMunicipalities)}
+                  margin={{ top: 20, right: 10, left: 10, bottom: 60 }}
+                  barCategoryGap="5%"
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#6b7280"
+                    fontSize={9}
+                    height={5}
+                    interval={0}
+                    tick={{ fill: '#6b7280', fontWeight: 500 }}
+                    tickFormatter={(value) => {
+                      if (value.length > 12) {
+                        return value.substring(0, 12) + '...';
+                      }
+                      return value;
+                    }}
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    fontSize={12}
+                    tickFormatter={(value) => value.toLocaleString()}
+                    tick={{ fill: '#6b7280', fontWeight: 500 }}
+                    width={60}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar 
+                    dataKey="vehicles" 
+                    radius={[6, 6, 0, 0]}
+                    onClick={(data) => handleMunicipalityClick(data.name)}
+                    style={{ cursor: 'pointer' }}
+                    maxBarSize={80}
                   >
-                    
-                    {/* Bar */}
-                    <div className="relative w-full flex flex-col justify-end h-80 mb-2">
-                      {/* Hover background highlight */}
-                      <div className="absolute inset-0 bg-gray-200/70 dark:bg-gray-600/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
-                      <div
-                        className={`w-full ${barColor} rounded-t-md transition-all duration-700 ease-out relative z-10 border border-white/20 shadow-lg ${
-                          animationComplete 
-                            ? 'animate-in slide-in-from-bottom-4 fade-in duration-700' 
-                            : 'opacity-0'
-                        }`}
-                        style={{ 
-                          height: animationComplete ? `${barHeight}%` : '0%',
-                          transitionDelay: `${index * 50}ms`
-                        }}
-                      >
-                        {/* Value label on top of bar */}
-                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-foreground whitespace-nowrap z-20">
-                          {formatNumber(vehicles)}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Municipality label */}
-                    <div className="text-xs text-center text-muted-foreground max-w-[60px] leading-tight h-8 flex items-center justify-center">
-                      {municipality.municipality}
-                    </div>
-                  </div>
-                );
-              })}
+                    {formatChartData(sortedMunicipalities).map((entry, index) => {
+                      const originalColor = getBarColor(entry.index, entry.totalCount);
+                      
+                      return (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={originalColor}
+                          stroke={originalColor}
+                          strokeWidth={1.5}
+                          style={{
+                            filter: 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12))',
+                            transition: 'all 0.3s ease'
+                          }}
+                        />
+                      );
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>

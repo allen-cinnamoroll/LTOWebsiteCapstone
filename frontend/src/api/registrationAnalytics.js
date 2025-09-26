@@ -56,6 +56,7 @@ export const getMunicipalityRegistrationTotals = async (month = null, year = nul
     if (year) params.year = year;
     
     const response = await apiClient.get('/dashboard/municipality-registration-totals', { params });
+    // The backend returns the data directly, not wrapped in a data property
     return response.data;
   } catch (error) {
     console.error('Error fetching municipality registration totals:', error);
@@ -74,6 +75,36 @@ export const getBarangayRegistrationTotals = async (municipality, month = null, 
     return response.data;
   } catch (error) {
     console.error('Error fetching barangay registration totals:', error);
+    throw error;
+  }
+};
+
+// Get yearly vehicle registration trends
+export const getYearlyVehicleTrends = async (startYear = null, endYear = null, municipality = null) => {
+  try {
+    const params = {};
+    if (startYear) params.startYear = startYear;
+    if (endYear) params.endYear = endYear;
+    if (municipality) params.municipality = municipality;
+    
+    const response = await apiClient.get('/dashboard/yearly-vehicle-trends', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching yearly vehicle trends:', error);
+    throw error;
+  }
+};
+
+// Get monthly vehicle registration trends
+export const getMonthlyVehicleTrends = async (year, municipality = null) => {
+  try {
+    const params = { year };
+    if (municipality) params.municipality = municipality;
+    
+    const response = await apiClient.get('/dashboard/monthly-vehicle-trends', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching monthly vehicle trends:', error);
     throw error;
   }
 };
