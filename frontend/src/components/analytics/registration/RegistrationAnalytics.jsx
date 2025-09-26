@@ -342,7 +342,7 @@ export function RegistrationAnalytics() {
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
-                <span className="text-green-600 dark:text-green-400 font-medium">
+                <span className="text-pink-600 dark:text-pink-400 font-medium">
                   {loading ? '...' : vehiclesActive} Active
                 </span>
                 <span className="mx-2">•</span>
@@ -352,7 +352,7 @@ export function RegistrationAnalytics() {
               </div>
               <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 flex overflow-hidden shadow-inner">
                 <div 
-                  className="bg-gradient-to-r from-green-400 to-green-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-pink-400 to-pink-600 h-1 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.vehicles?.active || 0) / (analyticsData?.vehicles?.total || 1)) * 100, 100)}%` }}
                 ></div>
                 <div 
@@ -381,7 +381,7 @@ export function RegistrationAnalytics() {
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
-                <span className="text-green-600 dark:text-green-400 font-medium">
+                <span className="text-pink-600 dark:text-pink-400 font-medium">
                   {loading ? '...' : driversWithLicense} With License
                 </span>
                 <span className="mx-2">•</span>
@@ -391,7 +391,7 @@ export function RegistrationAnalytics() {
               </div>
               <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 flex overflow-hidden shadow-inner">
                 <div 
-                  className="bg-gradient-to-r from-green-400 to-green-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-pink-400 to-pink-600 h-1 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.drivers?.withLicense || 0) / (analyticsData?.drivers?.total || 1)) * 100, 100)}%` }}
                 ></div>
                 <div 
@@ -427,7 +427,7 @@ export function RegistrationAnalytics() {
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
-                <span className="text-green-600 dark:text-green-400 font-medium">
+                <span className="text-pink-600 dark:text-pink-400 font-medium">
                   {loading ? '...' : platesPermanent} Permanent
                 </span>
                 <span className="mx-2">•</span>
@@ -437,7 +437,7 @@ export function RegistrationAnalytics() {
               </div>
               <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 flex overflow-hidden shadow-inner">
                 <div 
-                  className="bg-gradient-to-r from-green-400 to-green-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-pink-400 to-pink-600 h-1 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.plateClassification?.permanent || 0) / (analyticsData?.plateClassification?.total || 1)) * 100, 100)}%` }}
                 ></div>
                 <div 
