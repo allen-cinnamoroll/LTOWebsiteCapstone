@@ -234,7 +234,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                 <path d="M16 5l3 3-3 3"/>
               </svg>
             </div>
-            <h2 className="text-base font-bold text-foreground">
+            <h2 className="text-sm font-bold text-foreground">
               DavOr Vehicle Registration Rankings
               {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
                 <span className="text-sm font-normal text-muted-foreground ml-2">

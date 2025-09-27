@@ -166,7 +166,7 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
             </svg>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-            <h2 className="text-base font-bold text-foreground">
+            <h2 className="text-sm font-bold text-foreground">
               Registered Owners by Municipality
             </h2>
             {(selectedYear === 'All' && selectedMonth && selectedMonth !== 'All') && (
