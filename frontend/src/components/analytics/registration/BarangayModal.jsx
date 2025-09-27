@@ -84,13 +84,17 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
     if (currentMunicipalityIndex > 0) {
       setSlideDirection('left');
       setIsTransitioning(true);
+      
+      // Smooth transition with better timing
       setTimeout(() => {
         const newIndex = currentMunicipalityIndex - 1;
         setCurrentMunicipalityIndex(newIndex);
         const newMunicipality = municipalitiesList[newIndex].municipality;
         fetchBarangayData(newMunicipality);
-        setTimeout(() => setIsTransitioning(false), 50);
-      }, 150);
+        
+        // Longer delay for smoother transition
+        setTimeout(() => setIsTransitioning(false), 100);
+      }, 200);
     }
   };
 
@@ -98,13 +102,17 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
     if (currentMunicipalityIndex < municipalitiesList.length - 1) {
       setSlideDirection('right');
       setIsTransitioning(true);
+      
+      // Smooth transition with better timing
       setTimeout(() => {
         const newIndex = currentMunicipalityIndex + 1;
         setCurrentMunicipalityIndex(newIndex);
         const newMunicipality = municipalitiesList[newIndex].municipality;
         fetchBarangayData(newMunicipality);
-        setTimeout(() => setIsTransitioning(false), 50);
-      }, 150);
+        
+        // Longer delay for smoother transition
+        setTimeout(() => setIsTransitioning(false), 100);
+      }, 200);
     }
   };
 
@@ -131,7 +139,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`bg-gradient-to-br from-white via-gray-50 to-gray-100 border border-gray-200/50 rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] dark:!border-[#2A2A3E]/50 dark:!shadow-2xl flex flex-col transition-all duration-500 ease-out transform ${
+      <div className={`bg-gradient-to-br from-white via-gray-50 to-gray-100 border border-gray-200/50 rounded-2xl p-6 w-full max-w-4xl h-[85vh] overflow-hidden shadow-2xl dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] dark:!border-[#2A2A3E]/50 dark:!shadow-2xl flex flex-col transition-all duration-500 ease-out transform ${
         isModalOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
       }`}>
         <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] border-b border-gray-200/50 dark:border-gray-700/30 pb-4 mb-4 flex-shrink-0">
@@ -151,10 +159,10 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                     <button
                       onClick={handlePreviousMunicipality}
                       disabled={currentMunicipalityIndex === 0}
-                      className={`p-1.5 rounded-lg transition-all duration-200 ${
+                      className={`p-2 rounded-xl transition-all duration-300 transform ${
                         currentMunicipalityIndex === 0
-                          ? 'text-gray-400 cursor-not-allowed'
-                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20'
+                          ? 'text-gray-400 cursor-not-allowed scale-95'
+                          : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-110 active:scale-95 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 shadow-sm hover:shadow-md'
                       }`}
                       title="Previous Municipality"
                     >
@@ -167,15 +175,21 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                 
                 <div className="overflow-hidden">
                   <h2 
-                    className={`text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 transition-all duration-300 ease-in-out ${
+                    className={`text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 transition-all duration-500 ease-in-out ${
                       isTransitioning 
-                        ? 'opacity-0 transform translate-x-2' 
-                        : 'opacity-100 transform translate-x-0'
+                        ? slideDirection === 'left' 
+                          ? 'opacity-0 transform translate-x-4 scale-95' 
+                          : 'opacity-0 transform -translate-x-4 scale-95'
+                        : 'opacity-100 transform translate-x-0 scale-100'
                     }`}
                   >
                     {municipalitiesList[currentMunicipalityIndex]?.municipality || municipality}
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className={`text-sm text-muted-foreground mt-1 transition-all duration-500 ease-in-out ${
+                      isTransitioning 
+                        ? 'opacity-0 transform translate-y-2' 
+                        : 'opacity-100 transform translate-y-0'
+                    }`}>
                     Barangay Registration Data
                     {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
                       <span className="ml-2 text-xs">
@@ -190,10 +204,10 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                   <button
                     onClick={handleNextMunicipality}
                     disabled={currentMunicipalityIndex === municipalitiesList.length - 1}
-                    className={`p-1.5 rounded-lg transition-all duration-200 ${
+                    className={`p-2 rounded-xl transition-all duration-300 transform ${
                       currentMunicipalityIndex === municipalitiesList.length - 1
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20'
+                        ? 'text-gray-400 cursor-not-allowed scale-95'
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 hover:scale-110 active:scale-95 dark:text-gray-400 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 shadow-sm hover:shadow-md'
                     }`}
                     title="Next Municipality"
                   >
@@ -259,30 +273,32 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 scrollbar-hide overflow-x-hidden">
+        <div className="overflow-y-auto flex-1 scrollbar-hide overflow-x-hidden min-h-0">
           <div 
-            className={`transition-all duration-300 ease-in-out ${
+            className={`transition-all duration-500 ease-in-out ${
               isTransitioning 
-                ? 'opacity-0 transform translate-x-4' 
-                : 'opacity-100 transform translate-x-0'
+                ? slideDirection === 'left' 
+                  ? 'opacity-0 transform translate-x-6 scale-98' 
+                  : 'opacity-0 transform -translate-x-6 scale-98'
+                : 'opacity-100 transform translate-x-0 scale-100'
             }`}
           >
             {loading ? (
-              <div className="flex items-center justify-center h-32">
+              <div className="flex items-center justify-center min-h-[400px]">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : error ? (
-              <div className="flex items-center justify-center h-32 text-red-500">
+              <div className="flex items-center justify-center min-h-[400px] text-red-500">
                 <p>{error}</p>
               </div>
             ) : barangayData.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-muted-foreground">
+              <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">
                 <p>No barangay data available for {municipalitiesList[currentMunicipalityIndex]?.municipality || municipality}</p>
               </div>
             ) : (
               <div>
                 {/* Barangay Table */}
-                <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/30 overflow-hidden">
+                <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/30 overflow-hidden min-h-[400px]">
                   <table className="w-full">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
                     <tr>

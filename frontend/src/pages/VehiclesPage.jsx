@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import VehiclesTable from "@/components/vehicles/VehiclesTable";
 import VehicleRenewalModal from "@/components/vehicle/VehicleRenewalModal";
+import AddVehicleModal from "@/components/vehicle/AddVehicleModal";
 
 
 const VehiclesPage = () => {
@@ -17,6 +18,7 @@ const VehiclesPage = () => {
   const date = formatDate(Date.now());
   const [submitting, setIsSubmitting] = useState(false);
   const [renewalModalOpen, setRenewalModalOpen] = useState(false);
+  const [addVehicleModalOpen, setAddVehicleModalOpen] = useState(false);
 
   useEffect(() => {
     fetchVehicles();
@@ -53,9 +55,9 @@ const VehiclesPage = () => {
       setLoading(false);
     }
   };
-  //navigate to add vehicle page
+  //open add vehicle modal
   const handleAdd = async () => {
-    navigate(`${location.pathname}/create`);
+    setAddVehicleModalOpen(true);
   };
 
   //navigate to vehicle page
@@ -75,6 +77,11 @@ const VehiclesPage = () => {
 
   const handleVehicleUpdated = () => {
     // Refresh the vehicle list when a vehicle is updated through renewal modal
+    fetchVehicles();
+  };
+
+  const handleVehicleAdded = () => {
+    // Refresh the vehicle list when a new vehicle is added
     fetchVehicles();
   };
 
@@ -103,6 +110,13 @@ const VehiclesPage = () => {
         open={renewalModalOpen} 
         onOpenChange={setRenewalModalOpen}
         onVehicleUpdated={handleVehicleUpdated}
+      />
+
+      {/* Add Vehicle Modal */}
+      <AddVehicleModal
+        open={addVehicleModalOpen}
+        onOpenChange={setAddVehicleModalOpen}
+        onVehicleAdded={handleVehicleAdded}
       />
     </div>
   );

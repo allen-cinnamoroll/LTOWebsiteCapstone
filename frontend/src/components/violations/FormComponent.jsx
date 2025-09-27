@@ -59,7 +59,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form id="violation-form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
         {/* TOP NO. and Violation Type in the same row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField

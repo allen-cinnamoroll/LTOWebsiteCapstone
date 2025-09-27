@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { accidentColumns } from "@/components/table/columns";
 import AccidentTable from "@/components/accidents/AccidentTable";
+import AddAccidentModal from "@/components/accidents/AddAccidentModal";
 
 const AccidentPage = () => {
   const [accidentData, setAccidentData] = useState([]);
@@ -13,6 +14,7 @@ const AccidentPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
+  const [addAccidentModalOpen, setAddAccidentModalOpen] = useState(false);
 
   useEffect(() => {
     fetchAccidents();
@@ -46,7 +48,7 @@ const AccidentPage = () => {
   };
 
   const handleAdd = () => {
-    navigate(`${location.pathname}/create`);
+    setAddAccidentModalOpen(true);
   };
 
   const onRowClick = (data) => {
@@ -56,6 +58,11 @@ const AccidentPage = () => {
 
   const onEdit = (accidentId) => {
     navigate(`/accident/${accidentId}/edit`);
+  };
+
+  const handleAccidentAdded = () => {
+    // Refresh the accident list when a new accident is added
+    fetchAccidents();
   };
 
   return (
@@ -74,6 +81,13 @@ const AccidentPage = () => {
           submitting={submitting}
         />
       </section>
+
+      {/* Add Accident Modal */}
+      <AddAccidentModal
+        open={addAccidentModalOpen}
+        onOpenChange={setAddAccidentModalOpen}
+        onAccidentAdded={handleAccidentAdded}
+      />
     </div>
   );
 };

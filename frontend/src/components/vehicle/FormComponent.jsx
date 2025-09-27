@@ -154,7 +154,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="vehicle-form" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
           <div>
             <Label>Vehicle Information</Label>

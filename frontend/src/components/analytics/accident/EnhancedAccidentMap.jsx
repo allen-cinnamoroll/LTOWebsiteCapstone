@@ -51,6 +51,18 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
     };
   }, []);
 
+  // Function to get correct Mapbox style URL
+  const getMapboxStyle = (styleName) => {
+    const styleMap = {
+      'streets': 'mapbox://styles/mapbox/streets-v12',
+      'satellite': 'mapbox://styles/mapbox/satellite-v9',
+      'outdoors': 'mapbox://styles/mapbox/outdoors-v12',
+      'light': 'mapbox://styles/mapbox/light-v11',
+      'dark': 'mapbox://styles/mapbox/dark-v11'
+    };
+    return styleMap[styleName] || styleMap['streets'];
+  };
+
   useEffect(() => {
     if (!accidents || accidents.length === 0) return;
 
@@ -63,7 +75,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
       try {
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
-          style: `mapbox://styles/mapbox/${mapStyle}-v12`,
+          style: getMapboxStyle(mapStyle),
           center: [125.971907, 6.90543], // Default center for Davao Oriental
           zoom: 9
         });
@@ -101,7 +113,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
     if (map.current && mapLoaded && !isChangingStyle) {
       setIsChangingStyle(true);
       try {
-        map.current.setStyle(`mapbox://styles/mapbox/${mapStyle}-v12`);
+        map.current.setStyle(getMapboxStyle(mapStyle));
         // Re-setup layers after style change
         map.current.once('styledata', () => {
           setupMapLayers();
@@ -220,7 +232,14 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           'heatmap-weight': [
             'interpolate',
             ['linear'],
-            ['get', 'severity'],
+            [
+              'case',
+              ['==', ['get', 'severity'], 'fatal'], 4,
+              ['==', ['get', 'severity'], 'severe'], 3,
+              ['==', ['get', 'severity'], 'moderate'], 2,
+              ['==', ['get', 'severity'], 'minor'], 1,
+              0
+            ],
             0, 0,
             1, 1,
             2, 2,
@@ -339,7 +358,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
             type: 'Feature',
             properties: {
               id: accident.accident_id,
-              severity: accident.severity,
+              severity: accident.severity || 'unknown',
               plateNo: accident.plateNo,
               vehicle_type: accident.vehicle_type,
               municipality: accident.municipality,

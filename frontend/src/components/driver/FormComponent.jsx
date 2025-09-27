@@ -35,7 +35,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
   const navigate = useNavigate();
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="driver-form" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
           <div>
             <Label>Vehicle Information</Label>

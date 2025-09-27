@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { violationColumns } from "@/components/table/columns";
 import ViolationTable from "@/components/violations/ViolationTable";
+import AddViolationModal from "@/components/violations/AddViolationModal";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
@@ -13,6 +14,7 @@ const ViolationPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
+  const [addViolationModalOpen, setAddViolationModalOpen] = useState(false);
 
   useEffect(() => {
     fetchViolations();
@@ -48,7 +50,7 @@ const ViolationPage = () => {
   };
 
   const handleAdd = () => {
-    navigate(`${location.pathname}/create`);
+    setAddViolationModalOpen(true);
   };
 
   const onRowClick = (data) => {
@@ -58,6 +60,11 @@ const ViolationPage = () => {
 
   const onEdit = (violationId) => {
     navigate(`/violation/${violationId}/edit`);
+  };
+
+  const handleViolationAdded = () => {
+    // Refresh the violation list when a new violation is added
+    fetchViolations();
   };
 
   return (
@@ -76,6 +83,13 @@ const ViolationPage = () => {
           submitting={submitting}
         />
       </section>
+
+      {/* Add Violation Modal */}
+      <AddViolationModal
+        open={addViolationModalOpen}
+        onOpenChange={setAddViolationModalOpen}
+        onViolationAdded={handleViolationAdded}
+      />
     </div>
   );
 };

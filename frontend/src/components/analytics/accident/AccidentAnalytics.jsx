@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -65,6 +65,102 @@ import ExportUtilities from './ExportUtilities';
 const COLORS = {
   light: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'],
   dark: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+};
+
+// Animated Number Component
+const AnimatedNumber = ({ value, duration = 2000, className = "" }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      let startTime;
+      const animate = (currentTime) => {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentValue = Math.floor(value * easeOutQuart);
+        
+        setDisplayValue(currentValue);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          setDisplayValue(value);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    }
+  }, [value, duration, isVisible]);
+
+  return (
+    <div ref={ref} className={`${className} transition-all duration-500 ${isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+      {displayValue.toLocaleString()}
+    </div>
+  );
+};
+
+// Animated Progress Bar Component
+const AnimatedProgressBar = ({ percentage, color = "bg-blue-500", delay = 0 }) => {
+  const [width, setWidth] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        setWidth(percentage);
+      }, delay);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, percentage, delay]);
+
+  return (
+    <div ref={ref} className="mt-2 w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+      <div 
+        className={`${color} h-1.5 rounded-full transition-all duration-1000 ease-out`}
+        style={{ width: `${width}%` }}
+      ></div>
+    </div>
+  );
 };
 
 export function AccidentAnalytics() {
@@ -247,7 +343,11 @@ export function AccidentAnalytics() {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading accident analytics...</div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="text-muted-foreground animate-pulse">Loading accident analytics...</div>
+            <div className="text-xs text-muted-foreground">Preparing interactive visualizations</div>
+          </div>
         </div>
       </div>
     );
@@ -269,8 +369,8 @@ export function AccidentAnalytics() {
       <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-              <AlertTriangle className="h-8 w-8 text-red-500" />
+            <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2 animate-in slide-in-from-top-5 fade-in duration-700">
+              <AlertTriangle className="h-8 w-8 text-red-500 animate-pulse" />
               Accident Analytics
             </h2>
           <p className="text-muted-foreground">
@@ -367,7 +467,7 @@ export function AccidentAnalytics() {
 
       {/* Enhanced Summary Cards */}
       {analyticsData && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in slide-in-from-bottom-5 fade-in duration-700">
           <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300">
             <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
@@ -375,21 +475,24 @@ export function AccidentAnalytics() {
               <Car className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-2xl font-bold">{analyticsData.summary.totalAccidents}</div>
+              <AnimatedNumber 
+                value={analyticsData.summary.totalAccidents} 
+                className="text-2xl font-bold"
+                duration={1500}
+              />
               <div className="flex items-center text-xs text-muted-foreground mt-1">
                 {analyticsData.summary.accidentChange >= 0 ? (
-                  <TrendingUp className="h-3 w-3 text-red-500 mr-1" />
+                  <TrendingUp className="h-3 w-3 text-red-500 mr-1 animate-pulse" />
                 ) : (
-                  <TrendingDown className="h-3 w-3 text-green-500 mr-1" />
+                  <TrendingDown className="h-3 w-3 text-green-500 mr-1 animate-pulse" />
                 )}
                 {Math.abs(analyticsData.summary.accidentChange)}% from previous period
               </div>
-              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                <div 
-                  className="bg-blue-500 h-1.5 rounded-full transition-all duration-1000"
-                  style={{ width: `${Math.min((analyticsData.summary.totalAccidents / 100) * 100, 100)}%` }}
-                ></div>
-              </div>
+              <AnimatedProgressBar 
+                percentage={Math.min((analyticsData.summary.totalAccidents / 100) * 100, 100)}
+                color="bg-blue-500"
+                delay={200}
+              />
             </CardContent>
           </Card>
 
@@ -400,21 +503,24 @@ export function AccidentAnalytics() {
               <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-2xl font-bold text-red-600">{analyticsData.summary.fatalities}</div>
+              <AnimatedNumber 
+                value={analyticsData.summary.fatalities} 
+                className="text-2xl font-bold text-red-600"
+                duration={1800}
+              />
               <div className="flex items-center text-xs text-muted-foreground mt-1">
                 {analyticsData.summary.fatalitiesChange >= 0 ? (
-                  <TrendingUp className="h-3 w-3 text-red-500 mr-1" />
+                  <TrendingUp className="h-3 w-3 text-red-500 mr-1 animate-pulse" />
                 ) : (
-                  <TrendingDown className="h-3 w-3 text-green-500 mr-1" />
+                  <TrendingDown className="h-3 w-3 text-green-500 mr-1 animate-pulse" />
                 )}
                 {analyticsData.summary.fatalitiesChange} from previous period
               </div>
-              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                <div 
-                  className="bg-red-500 h-1.5 rounded-full transition-all duration-1000"
-                  style={{ width: `${Math.min((analyticsData.summary.fatalities / 10) * 100, 100)}%` }}
-                ></div>
-              </div>
+              <AnimatedProgressBar 
+                percentage={Math.min((analyticsData.summary.fatalities / 10) * 100, 100)}
+                color="bg-red-500"
+                delay={400}
+              />
             </CardContent>
           </Card>
 
@@ -425,16 +531,19 @@ export function AccidentAnalytics() {
               <MapPin className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-2xl font-bold">{analyticsData.distributions.municipality.length}</div>
+              <AnimatedNumber 
+                value={analyticsData.distributions.municipality.length} 
+                className="text-2xl font-bold"
+                duration={1600}
+              />
               <p className="text-xs text-muted-foreground mt-1">
                 Municipalities with accidents
               </p>
-              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                <div 
-                  className="bg-orange-500 h-1.5 rounded-full transition-all duration-1000"
-                  style={{ width: `${Math.min((analyticsData.distributions.municipality.length / 20) * 100, 100)}%` }}
-                ></div>
-              </div>
+              <AnimatedProgressBar 
+                percentage={Math.min((analyticsData.distributions.municipality.length / 20) * 100, 100)}
+                color="bg-orange-500"
+                delay={600}
+              />
             </CardContent>
           </Card>
 
@@ -445,18 +554,19 @@ export function AccidentAnalytics() {
               <Activity className="h-4 w-4 text-purple-500" />
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-2xl font-bold">
-                {riskData ? `${riskData.riskPredictions.highRiskPercentage}%` : '0%'}
-              </div>
+              <AnimatedNumber 
+                value={riskData ? riskData.riskPredictions.highRiskPercentage : 0} 
+                className="text-2xl font-bold"
+                duration={2000}
+              />
               <p className="text-xs text-muted-foreground mt-1">
                 High risk predictions
               </p>
-              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                <div 
-                  className="bg-purple-500 h-1.5 rounded-full transition-all duration-1000"
-                  style={{ width: `${riskData ? riskData.riskPredictions.highRiskPercentage : 0}%` }}
-                ></div>
-              </div>
+              <AnimatedProgressBar 
+                percentage={riskData ? riskData.riskPredictions.highRiskPercentage : 0}
+                color="bg-purple-500"
+                delay={800}
+              />
             </CardContent>
           </Card>
         </div>
@@ -466,12 +576,12 @@ export function AccidentAnalytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Enhanced Monthly Trends */}
         {analyticsData && analyticsData.trends.monthly.length > 0 && (
-          <Card className="group hover:shadow-lg transition-all duration-300">
+          <Card className="group hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left-5 fade-in duration-700">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-500" />
+                    <Calendar className="h-5 w-5 text-blue-500 animate-pulse" />
                     Accident Trends Over Time
                   </CardTitle>
               <CardDescription>
@@ -517,7 +627,9 @@ export function AccidentAnalytics() {
                     stroke={getColors()[0]} 
                     fill={getColors()[0]} 
                     fillOpacity={0.3}
-                      strokeWidth={3}
+                    strokeWidth={3}
+                    animationDuration={1500}
+                    animationEasing="ease-out"
                   />
                 </AreaChart>
                 )}
@@ -552,6 +664,8 @@ export function AccidentAnalytics() {
                       strokeWidth={3}
                       dot={{ fill: getColors()[0], strokeWidth: 2, r: 4 }}
                       activeDot={{ r: 6, stroke: getColors()[0], strokeWidth: 2 }}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                   </LineChart>
                 )}
@@ -583,6 +697,8 @@ export function AccidentAnalytics() {
                       dataKey="accidents" 
                       fill={getColors()[0]}
                       radius={[4, 4, 0, 0]}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                   </BarChart>
                 )}
@@ -615,6 +731,8 @@ export function AccidentAnalytics() {
                       fill={getColors()[0]}
                       fillOpacity={0.6}
                       radius={[4, 4, 0, 0]}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                     <Line 
                       type="monotone" 
@@ -622,6 +740,8 @@ export function AccidentAnalytics() {
                       stroke={getColors()[1]} 
                       strokeWidth={2}
                       dot={false}
+                      animationDuration={1500}
+                      animationEasing="ease-out"
                     />
                   </ComposedChart>
                 )}
@@ -632,9 +752,12 @@ export function AccidentAnalytics() {
 
         {/* Severity Distribution */}
         {analyticsData && analyticsData.distributions.severity.length > 0 && (
-          <Card>
+          <Card className="animate-in slide-in-from-right-5 fade-in duration-700">
             <CardHeader>
-              <CardTitle>Accident Severity Distribution</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <PieChartIcon className="h-5 w-5 text-orange-500 animate-pulse" />
+                Accident Severity Distribution
+              </CardTitle>
               <CardDescription>
                 Breakdown of accidents by severity level
               </CardDescription>
@@ -651,6 +774,8 @@ export function AccidentAnalytics() {
                     outerRadius={80}
                     fill="currentColor"
                     dataKey="value"
+                    animationDuration={1500}
+                    animationEasing="ease-out"
                   >
                     {formatSeverityData(analyticsData.distributions.severity).map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={getColors()[index % getColors().length]} />
@@ -936,19 +1061,19 @@ export function AccidentAnalytics() {
 
       {/* Advanced Charts Section */}
       {showAdvancedCharts && analyticsData && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in slide-in-from-bottom-5 fade-in duration-700">
           <div className="flex items-center gap-2 mb-4">
-            <Zap className="h-5 w-5 text-yellow-500" />
+            <Zap className="h-5 w-5 text-yellow-500 animate-pulse" />
             <h3 className="text-xl font-semibold">Advanced Analytics</h3>
-            <Badge variant="secondary" className="ml-2">Enhanced Visualizations</Badge>
+            <Badge variant="secondary" className="ml-2 animate-pulse">Enhanced Visualizations</Badge>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Enhanced Hourly Distribution */}
-            <Card className="group hover:shadow-lg transition-all duration-300">
+            <Card className="group hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left-5 fade-in duration-700">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-green-500" />
+                  <Clock className="h-5 w-5 text-green-500 animate-pulse" />
                   Hourly Accident Distribution
                 </CardTitle>
                 <CardDescription>
@@ -1028,10 +1153,10 @@ export function AccidentAnalytics() {
             </Card>
 
             {/* Enhanced Day of Week Distribution */}
-            <Card className="group hover:shadow-lg transition-all duration-300">
+            <Card className="group hover:shadow-lg transition-all duration-300 animate-in slide-in-from-right-5 fade-in duration-700">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-purple-500" />
+                  <Calendar className="h-5 w-5 text-purple-500 animate-pulse" />
                   Day of Week Analysis
                 </CardTitle>
                 <CardDescription>

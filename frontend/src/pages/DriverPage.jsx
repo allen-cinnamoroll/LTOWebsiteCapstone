@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DriversTable from "@/components/drivers/DriversTable";
 import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
+import AddDriverModal from "@/components/driver/AddDriverModal";
 import { toast } from "sonner";
 
 const sexMap = createCategoryMap({
@@ -28,6 +29,7 @@ const DriverPage = () => {
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState("");
+  const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
 
   useEffect(() => {
     fetchDrivers();
@@ -67,7 +69,7 @@ const DriverPage = () => {
   };
 
   const handleAdd = async () => {
-    navigate(`${location.pathname}/create`);
+    setAddDriverModalOpen(true);
   };
 
   const onManage = (data) => {
@@ -126,6 +128,12 @@ const DriverPage = () => {
       error: (error) => error.message || "Failed to update driver",
     });
   };
+
+  const handleDriverAdded = () => {
+    // Refresh the driver list when a new driver is added
+    fetchDrivers();
+  };
+
   return (
     <div className="p-4">
       <header className="text-xl md:text-3xl font-bold mb-5">Drivers</header>
@@ -151,6 +159,13 @@ const DriverPage = () => {
         description={
           "This action cannot be undone. This will deactivate the driver."
         }
+      />
+
+      {/* Add Driver Modal */}
+      <AddDriverModal
+        open={addDriverModalOpen}
+        onOpenChange={setAddDriverModalOpen}
+        onDriverAdded={handleDriverAdded}
       />
     </div>
   );

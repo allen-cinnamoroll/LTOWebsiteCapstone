@@ -47,6 +47,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
@@ -57,6 +58,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 // This is sample data.
 const data = {
   user: {
@@ -114,10 +121,14 @@ const data = {
 export function AppSidebar(props) {
   const location = useLocation();
   const { userData } = useAuth();
+  const { state } = useSidebar();
   
   // State for managing collapsible sections
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isManageAccountOpen, setIsManageAccountOpen] = useState(false);
+  
+  // Check if sidebar is collapsed
+  const isCollapsed = state === "collapsed";
   
   // Handle dropdown state changes - close one when opening another
   const handleAnalyticsChange = (open) => {
@@ -140,14 +151,18 @@ export function AppSidebar(props) {
   
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground">
-                <img src={logo} className="" />
+            <SidebarMenuButton tooltip="LTO WebSystem" className="group-data-[collapsible=icon]:justify-center">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg text-sidebar-primary-foreground group-data-[collapsible=icon]:size-6">
+                <img 
+                  src={logo} 
+                  className="h-7 w-7 object-contain group-data-[collapsible=icon]:h-6 group-data-[collapsible=icon]:w-6" 
+                  alt="LTO Logo"
+                />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-semibold">
                   {"LTO WebSystem"}
                 </span>
@@ -213,45 +228,80 @@ export function AppSidebar(props) {
         <SidebarGroup>
           <SidebarGroupLabel>Analytics</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible asChild className="group/collapsible" open={isAnalyticsOpen} onOpenChange={handleAnalyticsChange}>
+            {isCollapsed ? (
+              // Dropdown menu for collapsed state
               <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip="Analytics">
-                    <PieChart />
-                    <span>Analytics</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton isActive={location.pathname === "/analytics/registration"} asChild>
-                        <Link to="/analytics/registration">
-                          <BookOpen />
-                          <span>Registration</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton isActive={location.pathname === "/analytics/violation"} asChild>
-                        <Link to="/analytics/violation">
-                          <SquareChartGantt />
-                          <span>Violation</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton isActive={location.pathname === "/analytics/accident"} asChild>
-                        <Link to="/analytics/accident">
-                          <SquareActivity />
-                          <span>Accident</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton tooltip="Analytics">
+                      <PieChart />
+                      <span>Analytics</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right" align="start" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/analytics/registration" className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        <span>Registration</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/analytics/violation" className="flex items-center gap-2">
+                        <SquareChartGantt className="h-4 w-4" />
+                        <span>Violation</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/analytics/accident" className="flex items-center gap-2">
+                        <SquareActivity className="h-4 w-4" />
+                        <span>Accident</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </SidebarMenuItem>
-            </Collapsible>
+            ) : (
+              // Collapsible for expanded state
+              <Collapsible asChild className="group/collapsible" open={isAnalyticsOpen} onOpenChange={handleAnalyticsChange}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <PieChart />
+                      <span>Analytics</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/analytics/registration"} asChild>
+                          <Link to="/analytics/registration">
+                            <BookOpen />
+                            <span>Registration</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/analytics/violation"} asChild>
+                          <Link to="/analytics/violation">
+                            <SquareChartGantt />
+                            <span>Violation</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/analytics/accident"} asChild>
+                          <Link to="/analytics/accident">
+                            <SquareActivity />
+                            <span>Accident</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )}
           </SidebarMenu>
         </SidebarGroup>
 
@@ -260,45 +310,80 @@ export function AppSidebar(props) {
           <SidebarGroup>
             <SidebarGroupLabel>Account Management</SidebarGroupLabel>
             <SidebarMenu>
-              <Collapsible asChild className="group/collapsible" open={isManageAccountOpen} onOpenChange={handleManageAccountChange}>
+              {isCollapsed ? (
+                // Dropdown menu for collapsed state
                 <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Manage Account">
-                      <User />
-                      <span>Manage Account</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton isActive={location.pathname === "/account/register"} asChild>
-                        <Link to="/account/register">
-                          <UserPlus />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton tooltip="Manage Account">
+                        <User />
+                        <span>Manage Account</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start" className="w-48">
+                      <DropdownMenuItem asChild>
+                        <Link to="/account/register" className="flex items-center gap-2">
+                          <UserPlus className="h-4 w-4" />
                           <span>Register Account</span>
                         </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton isActive={location.pathname === "/account/update"} asChild>
-                        <Link to="/account/update">
-                          <Edit />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/account/update" className="flex items-center gap-2">
+                          <Edit className="h-4 w-4" />
                           <span>Update Account</span>
                         </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton isActive={location.pathname === "/account/logs"} asChild>
-                        <Link to="/account/logs">
-                          <FileText />
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/account/logs" className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
                           <span>View Account Logs</span>
                         </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                  </CollapsibleContent>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </SidebarMenuItem>
-              </Collapsible>
+              ) : (
+                // Collapsible for expanded state
+                <Collapsible asChild className="group/collapsible" open={isManageAccountOpen} onOpenChange={handleManageAccountChange}>
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton>
+                        <User />
+                        <span>Manage Account</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton isActive={location.pathname === "/account/register"} asChild>
+                            <Link to="/account/register">
+                              <UserPlus />
+                              <span>Register Account</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton isActive={location.pathname === "/account/update"} asChild>
+                            <Link to="/account/update">
+                              <Edit />
+                              <span>Update Account</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton isActive={location.pathname === "/account/logs"} asChild>
+                            <Link to="/account/logs">
+                              <FileText />
+                              <span>View Account Logs</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
             </SidebarMenu>
           </SidebarGroup>
         )}

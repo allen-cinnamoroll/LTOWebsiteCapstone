@@ -1,0 +1,157 @@
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import FormComponent from "./FormComponent";
+import { formatDate } from "@/util/dateFormatter";
+import { toast } from "sonner";
+import { AccidentSchema } from "@/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import apiClient from "@/api/axios";
+import { useAuth } from "@/context/AuthContext";
+import { useForm } from "react-hook-form";
+import { AlertTriangle } from "lucide-react";
+
+const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
+  const [submitting, setIsSubmitting] = useState(false);
+  const { token } = useAuth();
+  const date = formatDate(Date.now());
+
+  const form = useForm({
+    resolver: zodResolver(AccidentSchema),
+    defaultValues: {
+      accident_id: "",
+      plateNo: "",
+      accident_date: undefined,
+      street: "",
+      barangay: "",
+      municipality: "",
+      vehicle_type: "",
+      severity: "",
+      notes: "",
+    },
+  });
+
+  const onSubmit = async (formData) => {
+    setIsSubmitting(true);
+    try {
+      const content = {
+        accident_id: formData.accident_id,
+        plateNo: formData.plateNo,
+        accident_date: formData.accident_date ? formData.accident_date.toISOString() : null,
+        street: formData.street,
+        barangay: formData.barangay,
+        municipality: formData.municipality,
+        vehicle_type: formData.vehicle_type,
+        severity: formData.severity,
+        notes: formData.notes,
+      };
+
+      console.log("Sending accident data:", content);
+
+      const { data } = await apiClient.post("/accident", content, {
+        headers: { Authorization: token },
+      });
+
+      if (data.success) {
+        toast.success("Accident has been added", { description: date });
+
+        // Reset form
+        form.reset({
+          accident_id: "",
+          plateNo: "",
+          accident_date: undefined,
+          street: "",
+          barangay: "",
+          municipality: "",
+          vehicle_type: "",
+          severity: "",
+          notes: "",
+        });
+
+        // Close modal and refresh data
+        onOpenChange(false);
+        if (onAccidentAdded) {
+          onAccidentAdded();
+        }
+      }
+    } catch (error) {
+      const message = error?.response?.data?.message || "Failed to add accident";
+      toast.error(message, {
+        description: date,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOpenChange = (isOpen) => {
+    if (!isOpen && !submitting) {
+      // Reset form when closing modal
+      form.reset({
+        accident_id: "",
+        plateNo: "",
+        accident_date: undefined,
+        street: "",
+        barangay: "",
+        municipality: "",
+        vehicle_type: "",
+        severity: "",
+        notes: "",
+      });
+    }
+    onOpenChange(isOpen);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar]:bg-transparent">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Add New Accident
+          </DialogTitle>
+          <DialogDescription>
+            Fill in the required fields to add a new accident record to the system.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          <FormComponent
+            form={form}
+            onSubmit={onSubmit}
+            submitting={submitting}
+          />
+        </div>
+
+        <DialogFooter className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={submitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="accident-form"
+            disabled={submitting}
+            className="flex items-center gap-2"
+          >
+            {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
+            {submitting ? "Adding..." : "Add Accident"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddAccidentModal;
