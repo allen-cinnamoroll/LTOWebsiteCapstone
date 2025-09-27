@@ -365,7 +365,7 @@ const VehicleTrendChart = () => {
 
   return (
     <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
             <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -374,94 +374,35 @@ const VehicleTrendChart = () => {
               <path d="M16 5l3 3-3 3"/>
             </svg>
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-              <h2 className="text-sm font-bold text-foreground">
-                Vehicle Registration Trends
-              </h2>
-              <span className="text-muted-foreground font-normal" style={{ fontSize: '10px' }}>
-                {viewType === 'year' 
-                  ? (isCustomRange ? `By Year (${customStartYear}-${customEndYear})` : 'By Year (Last 5 Years)')
-                  : `By Month (${selectedYear || 'Select Year'})`
-                }
-              </span>
+          <h2 className="text-sm font-bold text-foreground">
+            Vehicle Registration Trends
+            <span className="text-muted-foreground font-normal ml-2" style={{ fontSize: '10px' }}>
+              {viewType === 'year' 
+                ? (isCustomRange ? `By Year (${customStartYear}-${customEndYear})` : 'By Year (Last 5 Years)')
+                : `By Month (${selectedYear || 'Select Year'})`
+              }
               {selectedMunicipality !== 'All' && (
-                <span className="text-primary font-medium" style={{ fontSize: '10px' }}>
+                <span className="text-primary font-medium">
                   • {selectedMunicipality}
                 </span>
               )}
-            </div>
-          </div>
+            </span>
+          </h2>
         </div>
         
-        {/* Filter Controls */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Filter Icon with Hover Options */}
-          <div className="relative group">
-            <button
-              className="p-2 text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors border border-primary/20 group-hover:scale-110 transition-transform"
-              title="Filter options"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-            </button>
-            
-            {/* Hover Options */}
-            <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              <div className="p-2">
-                <div className="text-xs font-medium text-muted-foreground mb-2 px-2">View Type</div>
-                <button
-                  onClick={() => handleViewTypeChange('year')}
-                  className={`w-full px-3 py-2 text-sm text-left rounded-md transition-colors ${
-                    viewType === 'year' 
-                      ? 'bg-primary text-white' 
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  By Year
-                </button>
-                <button
-                  onClick={() => handleViewTypeChange('month')}
-                  className={`w-full px-3 py-2 text-sm text-left rounded-md transition-colors ${
-                    viewType === 'month' 
-                      ? 'bg-primary text-white' 
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  By Month
-                </button>
-              </div>
-              
-              {viewType === 'year' && (
-                <>
-                  <div className="border-t border-gray-200 dark:border-gray-600"></div>
-                  <div className="p-2">
-                    <div className="text-xs font-medium text-muted-foreground mb-2 px-2">Date Range</div>
-                    <button
-                      onClick={handleFilterClick}
-                      className="w-full px-3 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-                    >
-                      Custom Range
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Municipality Filter Button */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleFilterClick}
+            className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+          >
+            Filter
+          </button>
           <button
             onClick={() => setShowMunicipalityModal(true)}
-            className="p-2 text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors border border-primary/20 group"
-            title="Filter by municipality"
+            className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
           >
-            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            Location
           </button>
-
         </div>
       </div>
 
@@ -554,7 +495,7 @@ const VehicleTrendChart = () => {
          {/* Chart Legend - Positioned at bottom with minimal spacing */}
          {trendData.length > 0 && (
            <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
-             fontSize: isMobile ? '11px' : '10px', 
+             fontSize: isMobile ? '10px' : '12px', 
              fontWeight: '200',
              paddingTop: '0px',
              textAlign: 'center'
