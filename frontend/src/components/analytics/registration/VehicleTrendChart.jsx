@@ -364,7 +364,7 @@ const VehicleTrendChart = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
@@ -465,7 +465,7 @@ const VehicleTrendChart = () => {
 
 
       {/* Chart Container */}
-      <div className="h-80 w-full">
+      <div className="h-80 w-full min-h-[320px] flex-1">
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -479,7 +479,7 @@ const VehicleTrendChart = () => {
             <p>No data available</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={320}>
             <LineChart
               data={trendData}
               margin={{ 

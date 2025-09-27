@@ -449,7 +449,7 @@ export function RegistrationAnalytics() {
           </div>
           
           {/* Charts Row - Municipality Chart and Vehicle Trend Chart */}
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row gap-6 mb-6">
             <div className="flex-1 lg:flex-1">
               <MunicipalityChart 
                 selectedMonth={selectedMonth} 
@@ -463,18 +463,16 @@ export function RegistrationAnalytics() {
           </div>
           
           {/* Owner Municipality Chart - Same width as MunicipalityChart with consistent spacing */}
-          <div className="mt-6">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 lg:flex-1">
-                <OwnerMunicipalityChart 
-                  selectedMonth={selectedMonth} 
-                  selectedYear={selectedYear} 
-                  loading={loading}
-                />
-              </div>
-              <div className="flex-1 lg:flex-1">
-                {/* Empty space to maintain layout balance */}
-              </div>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 lg:flex-1">
+              <OwnerMunicipalityChart 
+                selectedMonth={selectedMonth} 
+                selectedYear={selectedYear} 
+                loading={loading}
+              />
+            </div>
+            <div className="flex-1 lg:flex-1">
+              {/* Empty space to maintain layout balance */}
             </div>
           </div>
         </div>
