@@ -14,6 +14,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Find current municipality index when modal opens
+  //brangays
   useEffect(() => {
     if (isOpen && municipality && municipalitiesList.length > 0) {
       const index = municipalitiesList.findIndex(m => m.municipality === municipality);
