@@ -17,6 +17,19 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [animationComplete, setAnimationComplete] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle responsive design
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch owner municipality data
   const fetchOwnerData = async () => {
@@ -144,32 +157,34 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
-      <div className="flex items-center justify-between mb-2">
+    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
             <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h2 className="text-base font-bold text-foreground">
-            Registered Owners by Municipality
-            {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
-              <span className="text-sm font-normal text-muted-foreground ml-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <h2 className="text-base font-bold text-foreground">
+              Registered Owners by Municipality
+            </h2>
+            {(selectedYear === 'All' && selectedMonth && selectedMonth !== 'All') && (
+              <span className="text-sm font-normal text-muted-foreground">
                 ({selectedMonth} across all years)
               </span>
             )}
-            {selectedMonth === 'All' && selectedYear && selectedYear !== 'All' && (
-              <span className="text-sm font-normal text-muted-foreground ml-2">
+            {(selectedMonth === 'All' && selectedYear && selectedYear !== 'All') && (
+              <span className="text-sm font-normal text-muted-foreground">
                 (All months in {selectedYear})
               </span>
             )}
-          </h2>
+          </div>
         </div>
       </div>
 
       {/* Chart Container */}
-      <div className="h-80">
+      <div className="h-80 w-full">
         {loading || parentLoading ? (
           <div className="flex items-center justify-center w-full h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -186,30 +201,44 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={formatChartData(ownerData)}
-              margin={{ top: 20, right: 50, left: 10, bottom: 20 }}
+              margin={{ 
+                top: 20, 
+                right: isMobile ? 20 : 50, 
+                left: isMobile ? 5 : 10, 
+                bottom: 20 
+              }}
               barCategoryGap="10%"
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
               <XAxis 
                 dataKey="name" 
                 stroke="#6b7280"
-                fontSize={11}
-                height={50}
-                interval={40}
+                fontSize={isMobile ? 9 : 11}
+                height={isMobile ? 60 : 50}
+                interval={isMobile ? 0 : 40}
+                angle={isMobile ? -45 : 0}
+                textAnchor={isMobile ? 'end' : 'middle'}
                 tick={{ fill: '#6b7280', fontWeight: 500 }}
                 tickFormatter={(value) => {
-                  if (value.length > 12) {
-                    return value.substring(0, 12) + '...';
+                  if (isMobile) {
+                    if (value.length > 8) {
+                      return value.substring(0, 8) + '...';
+                    }
+                    return value;
+                  } else {
+                    if (value.length > 12) {
+                      return value.substring(0, 12) + '...';
+                    }
+                    return value;
                   }
-                  return value;
                 }}
               />
               <YAxis 
                 stroke="#6b7280"
-                fontSize={12}
+                fontSize={isMobile ? 10 : 12}
                 tickFormatter={(value) => value.toLocaleString()}
                 tick={{ fill: '#6b7280', fontWeight: 500 }}
-                width={80}
+                width={isMobile ? 60 : 80}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend />} />
@@ -219,7 +248,7 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
                 name="With Driver's License"
                 fill="#10b981"
                 radius={[0, 0, 0, 0]}
-                maxBarSize={120}
+                maxBarSize={isMobile ? 80 : 120}
               />
               <Bar 
                 dataKey="withoutLicense" 
@@ -227,7 +256,7 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
                 name="Without Driver's License"
                 fill="#f97316"
                 radius={[4, 4, 0, 0]}
-                maxBarSize={120}
+                maxBarSize={isMobile ? 80 : 120}
               />
             </BarChart>
           </ResponsiveContainer>

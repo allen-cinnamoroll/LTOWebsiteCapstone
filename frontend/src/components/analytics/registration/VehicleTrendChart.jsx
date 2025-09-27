@@ -13,7 +13,20 @@ import { getYearlyVehicleTrends, getMonthlyVehicleTrends } from '../../../api/re
 
 const VehicleTrendChart = () => {
   const [trendData, setTrendData] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
   
+  // Handle responsive design
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Add custom scrollbar hide styles
   useEffect(() => {
     const style = document.createElement('style');
@@ -351,8 +364,8 @@ const VehicleTrendChart = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-[750px] h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
-      <div className="flex items-center justify-between mb-2">
+    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
             <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -361,7 +374,7 @@ const VehicleTrendChart = () => {
               <path d="M16 5l3 3-3 3"/>
             </svg>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <h2 className="text-base font-bold text-foreground">
               Vehicle Registration Trends
             </h2>
@@ -380,7 +393,7 @@ const VehicleTrendChart = () => {
         </div>
         
         {/* Filter Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Filter Icon with Hover Options */}
           <div className="relative group">
             <button
@@ -452,7 +465,7 @@ const VehicleTrendChart = () => {
 
 
       {/* Chart Container */}
-      <div className="h-80">
+      <div className="h-80 w-full">
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -466,30 +479,38 @@ const VehicleTrendChart = () => {
             <p>No data available</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="105%">
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={trendData}
-              margin={{ top: 20, right: 50, left: 10, bottom: 20 }}
+              margin={{ 
+                top: 20, 
+                right: isMobile ? 20 : 50, 
+                left: isMobile ? 5 : 10, 
+                bottom: 20 
+              }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
               <XAxis 
                 dataKey={viewType === 'year' ? 'year' : 'month'} 
                 stroke="#6b7280"
-                fontSize={12}
+                fontSize={isMobile ? 10 : 12}
                 tick={{ fill: '#6b7280', fontWeight: 500 }}
+                angle={isMobile ? -45 : 0}
+                textAnchor={isMobile ? 'end' : 'middle'}
+                height={isMobile ? 60 : 30}
               />
               <YAxis 
                 stroke="#6b7280"
-                fontSize={12}
+                fontSize={isMobile ? 10 : 12}
                 tickFormatter={(value) => value.toLocaleString()}
                 tick={{ fill: '#6b7280', fontWeight: 500 }}
-                width={80}
+                width={isMobile ? 60 : 80}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend 
                 wrapperStyle={{ 
                   paddingTop: '20px',
-                  fontSize: '12px',
+                  fontSize: isMobile ? '10px' : '12px',
                   fontWeight: '500'
                 }}
               />
