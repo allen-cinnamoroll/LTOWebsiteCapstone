@@ -1,22 +1,18 @@
-name: Deploy to Hostinger VPS
-
+name: Deploy to VPS
 on:
   push:
     branches: [ main ]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Deploy to server
-      uses: appleboy/ssh-action@v0.1.5
-      with:
-        host: ${{ secrets.HOSTINGER_IP }}
-        username: ${{ secrets.HOSTINGER_USER }}
-        key: ${{ secrets.HOSTINGER_SSH_KEY }}
-        script: |
-          cd /var/www/LTOWebsiteCapstone
-          git pull origin main
-          cd frontend && npm run build
-          pm2 restart lto-backend
+      - uses: actions/checkout@v2
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: 72.60.198.244
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/LTOWebsiteCapstone
+            ./auto-deploy.sh

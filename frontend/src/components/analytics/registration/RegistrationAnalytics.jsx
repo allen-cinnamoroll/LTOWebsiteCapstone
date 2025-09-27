@@ -342,7 +342,7 @@ export function RegistrationAnalytics() {
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
-                <span className="text-pink-600 dark:text-pink-400 font-medium">
+                <span className="text-green-600 dark:text-green-400 font-medium">
                   {loading ? '...' : vehiclesActive} Active
                 </span>
                 <span className="mx-2">•</span>
@@ -350,13 +350,13 @@ export function RegistrationAnalytics() {
                   {loading ? '...' : vehiclesExpired} Expired
                 </span>
               </div>
-              <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 flex overflow-hidden shadow-inner">
+              <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-0.5 flex overflow-hidden shadow-inner">
                 <div 
-                  className="bg-gradient-to-r from-pink-400 to-pink-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-green-400 to-green-600 h-0.5 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.vehicles?.active || 0) / (analyticsData?.vehicles?.total || 1)) * 100, 100)}%` }}
                 ></div>
                 <div 
-                  className="bg-gradient-to-r from-red-400 to-red-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-red-400 to-red-600 h-0.5 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.vehicles?.expired || 0) / (analyticsData?.vehicles?.total || 1)) * 100, 100)}%` }}
                 ></div>
               </div>
@@ -381,7 +381,7 @@ export function RegistrationAnalytics() {
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
-                <span className="text-pink-600 dark:text-pink-400 font-medium">
+                <span className="text-green-600 dark:text-green-400 font-medium">
                   {loading ? '...' : driversWithLicense} With License
                 </span>
                 <span className="mx-2">•</span>
@@ -389,13 +389,13 @@ export function RegistrationAnalytics() {
                   {loading ? '...' : driversWithoutLicense} Without License
                 </span>
               </div>
-              <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 flex overflow-hidden shadow-inner">
+              <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-0.5 flex overflow-hidden shadow-inner">
                 <div 
-                  className="bg-gradient-to-r from-pink-400 to-pink-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-green-400 to-green-600 h-0.5 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.drivers?.withLicense || 0) / (analyticsData?.drivers?.total || 1)) * 100, 100)}%` }}
                 ></div>
                 <div 
-                  className="bg-gradient-to-r from-blue-400 to-blue-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-blue-400 to-blue-600 h-0.5 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.drivers?.withoutLicense || 0) / (analyticsData?.drivers?.total || 1)) * 100, 100)}%` }}
                 ></div>
               </div>
@@ -427,7 +427,7 @@ export function RegistrationAnalytics() {
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
-                <span className="text-pink-600 dark:text-pink-400 font-medium">
+                <span className="text-green-600 dark:text-green-400 font-medium">
                   {loading ? '...' : platesPermanent} Permanent
                 </span>
                 <span className="mx-2">•</span>
@@ -435,13 +435,13 @@ export function RegistrationAnalytics() {
                   {loading ? '...' : platesTemporary} Temporary
                 </span>
               </div>
-              <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 flex overflow-hidden shadow-inner">
+              <div className="relative z-10 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-0.5 flex overflow-hidden shadow-inner">
                 <div 
-                  className="bg-gradient-to-r from-pink-400 to-pink-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-green-400 to-green-600 h-0.5 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.plateClassification?.permanent || 0) / (analyticsData?.plateClassification?.total || 1)) * 100, 100)}%` }}
                 ></div>
                 <div 
-                  className="bg-gradient-to-r from-purple-400 to-purple-600 h-1 transition-all duration-1000 ease-out shadow-sm"
+                  className="bg-gradient-to-r from-purple-400 to-purple-600 h-0.5 transition-all duration-1000 ease-out shadow-sm"
                   style={{ width: `${Math.min(((analyticsData?.plateClassification?.temporary || 0) / (analyticsData?.plateClassification?.total || 1)) * 100, 100)}%` }}
                 ></div>
               </div>
