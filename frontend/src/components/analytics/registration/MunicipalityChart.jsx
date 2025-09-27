@@ -22,6 +22,19 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   const [animationComplete, setAnimationComplete] = useState(false);
   const [showBarangayModal, setShowBarangayModal] = useState(false);
   const [selectedMunicipality, setSelectedMunicipality] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle responsive design
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch municipality data
   const fetchMunicipalityData = async () => {
@@ -211,7 +224,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   return (
     <>
       {/* Municipality Chart Container */}
-       <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
+       <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center">
@@ -277,24 +290,31 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
             <ResponsiveContainer width="100%" height="100%" minHeight={320}>
               <BarChart
                 data={formatChartData(top5Municipalities)}
-                margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
+                margin={{ top: 10, right: 10, left: 5, bottom: 20 }}
                 barCategoryGap="10%"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
                 <XAxis 
                   dataKey="name" 
                   stroke="#6b7280"
-                  fontSize={11}
+                  fontSize={9}
                   height={20}
                   interval={0}
                   tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tickFormatter={(value) => {
+                    // Truncate long municipality names to prevent overlap
+                    if (value.length > 12) {
+                      return value.substring(0, 12) + '...';
+                    }
+                    return value;
+                  }}
                 />
                 <YAxis 
                   stroke="#6b7280"
-                  fontSize={12}
+                  fontSize={9}
                   tickFormatter={(value) => value.toLocaleString()}
                   tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  width={60}
+                  width={50}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar 
@@ -323,6 +343,37 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          )}
+          
+          {/* Chart Legend */}
+          {top5Municipalities.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
+              fontSize: isMobile ? '10px' : '12px', 
+              fontWeight: '200',
+              paddingTop: '0px',
+              textAlign: 'center'
+            }}>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-700"></div>
+                <span>High</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span>Medium-high</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span>Medium</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span>Low</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <span>Lowest</span>
+              </div>
+            </div>
           )}
         </div>
       </div>

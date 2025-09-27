@@ -330,7 +330,7 @@ const VehicleTrendChart = () => {
         <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-            <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">Year {label}</p>
+            <p className="font-bold text-gray-900 dark:text-gray-100 text-sm"> {label}</p>
           </div>
           {payload.filter(entry => entry.value !== null).map((entry, index) => {
             // Check if this is a year with no registration data
@@ -364,7 +364,7 @@ const VehicleTrendChart = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-lg dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
+    <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
@@ -374,21 +374,23 @@ const VehicleTrendChart = () => {
               <path d="M16 5l3 3-3 3"/>
             </svg>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-            <h2 className="text-base font-bold text-foreground">
-              Vehicle Registration Trends
-            </h2>
-            <span className="text-sm text-muted-foreground font-normal">
-              {viewType === 'year' 
-                ? (isCustomRange ? `By Year (${customStartYear}-${customEndYear})` : 'By Year (Last 5 Years)')
-                : `By Month (${selectedYear || 'Select Year'})`
-              }
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+              <h2 className="text-sm font-bold text-foreground">
+                Vehicle Registration Trends
+              </h2>
+              <span className="text-muted-foreground font-normal" style={{ fontSize: '10px' }}>
+                {viewType === 'year' 
+                  ? (isCustomRange ? `By Year (${customStartYear}-${customEndYear})` : 'By Year (Last 5 Years)')
+                  : `By Month (${selectedYear || 'Select Year'})`
+                }
+              </span>
               {selectedMunicipality !== 'All' && (
-                <span className="ml-2 text-primary font-medium">
+                <span className="text-primary font-medium" style={{ fontSize: '10px' }}>
                   • {selectedMunicipality}
                 </span>
               )}
-            </span>
+            </div>
           </div>
         </div>
         
@@ -483,10 +485,10 @@ const VehicleTrendChart = () => {
             <LineChart
               data={trendData}
               margin={{ 
-                top: 20, 
-                right: isMobile ? 20 : 50, 
-                left: isMobile ? 5 : 10, 
-                bottom: 20 
+                top: 10, 
+                right: 20, 
+                left: 0, 
+                bottom: 20
               }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
@@ -507,13 +509,6 @@ const VehicleTrendChart = () => {
                 width={isMobile ? 60 : 80}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                wrapperStyle={{ 
-                  paddingTop: '20px',
-                  fontSize: isMobile ? '10px' : '12px',
-                  fontWeight: '500'
-                }}
-              />
               <Line 
                 type="monotone" 
                 dataKey="total" 
@@ -554,6 +549,33 @@ const VehicleTrendChart = () => {
               />
             </LineChart>
           </ResponsiveContainer>
+         )}
+         
+         {/* Chart Legend - Positioned at bottom with minimal spacing */}
+         {trendData.length > 0 && (
+           <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
+             fontSize: isMobile ? '11px' : '10px', 
+             fontWeight: '200',
+             paddingTop: '0px',
+             textAlign: 'center'
+           }}>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span>Total Vehicles</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span>Active Vehicles</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span>Expired Vehicles</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+              <span>No Registration</span>
+            </div>
+          </div>
          )}
        </div>
 

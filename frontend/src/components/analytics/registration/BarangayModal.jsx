@@ -138,13 +138,13 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`bg-gradient-to-br from-white via-gray-50 to-gray-100 border border-gray-200/50 rounded-2xl p-6 w-full max-w-4xl h-[85vh] overflow-hidden shadow-2xl dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] dark:!border-[#2A2A3E]/50 dark:!shadow-2xl flex flex-col transition-all duration-500 ease-out transform ${
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className={`bg-gray-100 border border-gray-200/50 rounded-2xl p-4 sm:p-6 w-full max-w-4xl h-[90vh] sm:h-[85vh] overflow-hidden dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] dark:!border-[#2A2A3E]/50 dark:!shadow-2xl flex flex-col transition-all duration-500 ease-out transform ${
         isModalOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
       }`}>
-        <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] border-b border-gray-200/50 dark:border-gray-700/30 pb-4 mb-4 flex-shrink-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
+        <div className="bg-gray-100 dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] border-b border-gray-200/50 dark:border-gray-700/30 pb-4 mb-4 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M3 3v18h18"/>
@@ -175,7 +175,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                 
                 <div className="overflow-hidden">
                   <h2 
-                    className={`text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 transition-all duration-500 ease-in-out ${
+                    className={`text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400 transition-all duration-500 ease-in-out ${
                       isTransitioning 
                         ? slideDirection === 'left' 
                           ? 'opacity-0 transform translate-x-4 scale-95' 
@@ -298,15 +298,15 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
             ) : (
               <div>
                 {/* Barangay Table */}
-                <div className="bg-white dark:bg-gray-800/50 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/30 overflow-hidden min-h-[400px]">
-                  <table className="w-full">
+                <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden min-h-[400px] overflow-x-auto">
+                  <table className="w-full min-w-[600px]">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
                         Barangay Name
                       </th>
                       <th 
-                        className="px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
+                        className="px-3 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
                         onClick={handleSort}
                       >
                         <div className="flex items-center gap-2">
@@ -348,7 +348,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                             animation: `smoothFadeIn 0.6s ease-out ${index * 0.03}s both`
                           }}
                         >
-                          <td className="px-6 py-5 whitespace-nowrap">
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className={`w-10 h-10 rounded-xl flex items-center justify-center mr-4 shadow-sm ${
                                 hasZeroRegistrations 
@@ -379,7 +379,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap">
+                          <td className="px-3 sm:px-6 py-3 sm:py-5 whitespace-nowrap">
                             <div className={`text-lg font-bold ${
                               hasZeroRegistrations 
                                 ? 'text-red-600 dark:text-red-400' 

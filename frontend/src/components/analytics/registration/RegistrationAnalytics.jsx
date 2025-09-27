@@ -321,7 +321,7 @@ export function RegistrationAnalytics() {
         <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {/* Registered Vehicles Card */}
-            <div className="group relative bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-6 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent hover:border-blue-300 dark:hover:border-blue-600">
+            <div className="group relative bg-gray-100 border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent hover:border-blue-300 dark:hover:border-blue-600">
               {/* Glow effect */}
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               
@@ -363,7 +363,7 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Registered Owners Card */}
-            <div className="group relative bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-6 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent hover:border-green-300 dark:hover:border-green-600">
+            <div className="group relative bg-gray-100 border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent hover:border-green-300 dark:hover:border-green-600">
               {/* Glow effect */}
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               
@@ -402,7 +402,7 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Plate Classification Card */}
-            <div className="group relative bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-6 shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent hover:border-purple-300 dark:hover:border-purple-600">
+            <div className="group relative bg-gray-100 border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent hover:border-purple-300 dark:hover:border-purple-600">
               {/* Glow effect */}
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               
