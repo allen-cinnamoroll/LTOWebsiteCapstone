@@ -13,7 +13,7 @@ const router = express.Router();
 router.use("/driver", driverRoutes);
 router.use("/user", userRoutes);
 router.use("/vehicle", vehicleRoutes);
-router.use("/violation", violationRoutes);
+router.use("/violations", violationRoutes);
 router.use("/accident", accidentRoutes);
 router.use("/auth", authRoutes);
 router.use("/dashboard", dashboardRoutes);

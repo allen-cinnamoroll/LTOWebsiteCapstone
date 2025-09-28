@@ -44,7 +44,7 @@ const EditViolationForm = () => {
   const fetchData = async () => {
     const violationId = params.id;
     try {
-      const { data } = await apiClient.get(`/violation/${violationId}`, {
+      const { data } = await apiClient.get(`/violations/${violationId}`, {
         headers: { Authorization: token },
       });
       if (data?.data) {
@@ -109,7 +109,7 @@ const EditViolationForm = () => {
         content.licenseType = null;
       }
 
-      const { data } = await apiClient.patch(`/violation/${params.id}`, content, {
+      const { data } = await apiClient.patch(`/violations/${params.id}`, content, {
         headers: { Authorization: token },
       });
 

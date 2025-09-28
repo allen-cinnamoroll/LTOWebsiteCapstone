@@ -4,6 +4,8 @@ import {
   getViolations,
   getViolationById,
   updateViolation,
+  getViolationCount,
+  getViolationAnalytics,
   // deleteViolation,
 } from "../controller/violationController.js";
 import { validateViolation, validate } from "../middleware/validator.js";
@@ -16,6 +18,12 @@ violationRouter.post("/", authenticate, express.json(), validateViolation, valid
 
 // Get all violations (Authenticated Users)
 violationRouter.get("/", authenticate, getViolations);
+
+// Get violation count statistics (Authenticated Users)
+violationRouter.get("/count", authenticate, getViolationCount);
+
+// Get comprehensive violation analytics (Authenticated Users)
+violationRouter.get("/analytics", authenticate, getViolationAnalytics);
 
 // Get a single violation by ID (Authenticated Users)
 violationRouter.get("/:id", authenticate, getViolationById);

@@ -24,7 +24,7 @@ const ViolationCard = () => {
 
   const fetchViolation = async () => {
     try {
-      const { data } = await apiClient.get(`/violation/${params.id}`, {
+      const { data } = await apiClient.get(`/violations/${params.id}`, {
         headers: {
           Authorization: token,
         },

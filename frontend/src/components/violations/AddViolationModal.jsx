@@ -65,7 +65,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         content.dateOfApprehension = formData.dateOfApprehension;
       }
 
-      const { data } = await apiClient.post("/violation", content, {
+      const { data } = await apiClient.post("/violations", content, {
         headers: {
           Authorization: token,
         },
