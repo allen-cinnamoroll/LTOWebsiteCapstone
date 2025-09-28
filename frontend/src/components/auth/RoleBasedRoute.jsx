@@ -7,6 +7,10 @@ const RoleBasedRoute = ({ allowedRoles, children }) => {
   const location = useLocation();
   const userRole = userData?.role;
 
+  if (loading) {
+    return <div>Loading...</div>; // or your loading component
+  }
+  
   const roleMapping = {
     employee: "2",
     admin: "1", 
