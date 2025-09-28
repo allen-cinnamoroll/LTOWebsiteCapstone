@@ -3,36 +3,40 @@ const fs = require('fs');
 const path = require('path');
 
 async function importData() {
-  // Use your remote database connection string
   const client = new MongoClient('mongodb://lto_user:jessa_allen_kent@72.60.198.244:27017/lto_website?authSource=lto_website');
   await client.connect();
-  
-  // Use the database from your connection string
+
   const db = client.db('lto_website');
-  const collection = db.collection('accidents');
-  
-  // Read JSON file from the same directory
-  const dataPath = path.join(__dirname, 'accidents_2024_2025_clean.json');
-  const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  
-  // Transform data to convert date strings to Date objects
-  const transformedData = data.map(item => ({
+
+  // =====================
+  // 🚗 Import Accidents
+  // =====================
+  const accidentsCollection = db.collection('accidents');
+  const accidentsPath = path.join(__dirname, 'accidents_2024_2025_clean.json');
+  const accidentsData = JSON.parse(fs.readFileSync(accidentsPath, 'utf8'));
+
+  const transformedAccidents = accidentsData.map(item => ({
     ...item,
     accident_date: new Date(item.accident_date)
   }));
-  
-  // Insert or update data (handle duplicates gracefully)
-  const bulkOps = transformedData.map(item => ({
-    updateOne: {
-      filter: { accident_id: item.accident_id },
-      update: { $set: item },
-      upsert: true
-    }
-  }));
-  
-  await collection.bulkWrite(bulkOps);
-  
-  console.log('Data imported successfully!');
+
+  // Clear collection before re-import
+  await accidentsCollection.deleteMany({});
+  await accidentsCollection.insertMany(transformedAccidents);
+  console.log('✅ Accidents data imported successfully!');
+
+  // =====================
+  // 🚨 Import Violations
+  // =====================
+  const violationsCollection = db.collection('violations');
+  const violationsPath = path.join(__dirname, 'violations_confiscated.json');
+  const violationsData = JSON.parse(fs.readFileSync(violationsPath, 'utf8'));
+
+  // Clear collection before re-import
+  await violationsCollection.deleteMany({});
+  await violationsCollection.insertMany(violationsData);
+  console.log('✅ Violations data imported successfully!');
+
   await client.close();
 }
 

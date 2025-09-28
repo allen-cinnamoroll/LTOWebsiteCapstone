@@ -163,6 +163,221 @@ export const updateViolation = async (req, res) => {
     }
 };
 
+// Get violation count statistics (Authenticated Users)
+export const getViolationCount = async (req, res) => {
+    try {
+        // Get all violations
+        const violations = await ViolationModel.find();
+        
+        // Count total individual violations across all records
+        let totalViolations = 0;
+        violations.forEach(violation => {
+            if (violation.violations && Array.isArray(violation.violations)) {
+                totalViolations += violation.violations.length;
+            }
+        });
+
+        // Count total violation records
+        const totalRecords = violations.length;
+
+        // Count violations by type
+        const violationsByType = {
+            confiscated: 0,
+            alarm: 0,
+            impounded: 0
+        };
+
+        violations.forEach(violation => {
+            if (violation.violationType && violationsByType.hasOwnProperty(violation.violationType)) {
+                violationsByType[violation.violationType]++;
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: {
+                totalViolations, // Total count of individual violations
+                totalRecords,    // Total count of violation records
+                violationsByType // Count by violation type
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Get comprehensive violation analytics
+export const getViolationAnalytics = async (req, res) => {
+    try {
+        const { year } = req.query;
+        
+        // Build filter for year if provided
+        let filter = {};
+        if (year && year !== 'All') {
+            const startDate = new Date(`${year}-01-01`);
+            const endDate = new Date(`${year}-12-31`);
+            filter.dateOfApprehension = {
+                $gte: startDate,
+                $lte: endDate
+            };
+        }
+
+        // Get all violations with filter
+        const violations = await ViolationModel.find(filter);
+        
+        // Count total individual violations across all records
+        let totalViolations = 0;
+        violations.forEach(violation => {
+            if (violation.violations && Array.isArray(violation.violations)) {
+                totalViolations += violation.violations.length;
+            }
+        });
+
+        // Count unique traffic violators (unique plate numbers)
+        const uniquePlates = new Set();
+        violations.forEach(violation => {
+            if (violation.plateNo) {
+                uniquePlates.add(violation.plateNo);
+            }
+        });
+        const totalTrafficViolators = uniquePlates.size;
+
+        // Count recent violations (last 30 days)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const recentViolations = violations.filter(violation => 
+            new Date(violation.dateOfApprehension) >= thirtyDaysAgo
+        ).length;
+
+        // Get most common violations
+        const violationCounts = {};
+        violations.forEach(violation => {
+            if (violation.violations && Array.isArray(violation.violations)) {
+                violation.violations.forEach(violationItem => {
+                    const violationText = violationItem.toString().trim();
+                    if (violationText) {
+                        violationCounts[violationText] = (violationCounts[violationText] || 0) + 1;
+                    }
+                });
+            }
+        });
+
+        const mostCommonViolations = Object.entries(violationCounts)
+            .map(([violation, count]) => ({ _id: violation, count }))
+            .sort((a, b) => b.count - a.count);
+
+        // Get top officers
+        const officerCounts = {};
+        violations.forEach(violation => {
+            if (violation.apprehendingOfficer) {
+                const officer = violation.apprehendingOfficer.trim();
+                if (officer) {
+                    officerCounts[officer] = (officerCounts[officer] || 0) + 1;
+                }
+            }
+        });
+
+        const topOfficers = Object.entries(officerCounts)
+            .map(([officer, count]) => ({ officerName: officer, violationCount: count }))
+            .sort((a, b) => b.violationCount - a.violationCount)
+            .slice(0, 10);
+
+        // Get violations by type
+        const violationsByType = {};
+        violations.forEach(violation => {
+            if (violation.violationType) {
+                violationsByType[violation.violationType] = (violationsByType[violation.violationType] || 0) + 1;
+            }
+        });
+
+        const violationsByTypeArray = Object.entries(violationsByType)
+            .map(([type, count]) => ({ _id: type, count }))
+            .sort((a, b) => b.count - a.count);
+
+        // Get yearly trends
+        const yearlyTrends = {};
+        violations.forEach(violation => {
+            if (violation.dateOfApprehension) {
+                const year = new Date(violation.dateOfApprehension).getFullYear();
+                yearlyTrends[year] = (yearlyTrends[year] || 0) + 1;
+            }
+        });
+
+        const yearlyTrendsArray = Object.entries(yearlyTrends)
+            .map(([year, count]) => ({ _id: { year: parseInt(year) }, count }))
+            .sort((a, b) => a._id.year - b._id.year);
+
+        // Get violation combinations (simplified)
+        const violationCombinations = [];
+        violations.forEach(violation => {
+            if (violation.violations && Array.isArray(violation.violations) && violation.violations.length > 1) {
+                const combination = violation.violations.map(v => v.toString().trim()).filter(v => v);
+                if (combination.length > 1) {
+                    const combinationKey = combination.sort().join(' + ');
+                    const existing = violationCombinations.find(c => c.combination === combinationKey);
+                    if (existing) {
+                        existing.count++;
+                    } else {
+                        violationCombinations.push({
+                            combination: combinationKey,
+                            violations: combination,
+                            count: 1
+                        });
+                    }
+                }
+            }
+        });
+
+        violationCombinations.sort((a, b) => b.count - a.count);
+
+        // Get violation patterns (simplified)
+        const violationPatterns = [
+            {
+                pattern: "Documentation Issues",
+                frequency: mostCommonViolations.filter(v => 
+                    v._id.toLowerCase().includes('license') || 
+                    v._id.toLowerCase().includes('registration')
+                ).length,
+                description: "Violations related to missing or invalid documentation"
+            },
+            {
+                pattern: "Safety Violations",
+                frequency: mostCommonViolations.filter(v => 
+                    v._id.toLowerCase().includes('helmet') || 
+                    v._id.toLowerCase().includes('safety')
+                ).length,
+                description: "Violations related to safety equipment and procedures"
+            },
+            {
+                pattern: "Traffic Violations",
+                frequency: mostCommonViolations.filter(v => 
+                    v._id.toLowerCase().includes('speeding') || 
+                    v._id.toLowerCase().includes('traffic')
+                ).length,
+                description: "Violations related to traffic rules and regulations"
+            }
+        ];
+
+        res.status(200).json({
+            success: true,
+            data: {
+                totalViolations,
+                totalTrafficViolators,
+                recentViolations,
+                mostCommonViolations: mostCommonViolations.slice(0, 50), // Top 50
+                topOfficers,
+                violationsByType: violationsByTypeArray,
+                yearlyTrends: yearlyTrendsArray,
+                violationCombinations: violationCombinations.slice(0, 20), // Top 20 combinations
+                violationPatterns
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching violation analytics:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // Delete a violation by ID (Only Admin or Superadmin)
 export const deleteViolation = async (req, res) => {
     try {

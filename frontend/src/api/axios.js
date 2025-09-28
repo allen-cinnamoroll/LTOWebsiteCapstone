@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
 // Create an Axios instance with custom headers
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

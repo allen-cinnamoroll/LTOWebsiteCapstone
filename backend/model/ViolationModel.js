@@ -38,7 +38,7 @@ const ViolationSchema = new mongoose.Schema(
     // License Type Details (Available for all violation types)
     licenseType: {
       type: String,
-      enum: ["SP", "DL", "CL", "PLATE", "SP RECEIPT", "DL RECEIPT", "REFUSE TO SUR.", "DL TEMPORARY"],
+      enum: ["SP", "DL", "CL", "PLATE", "SP RECEIPT", "DL RECEIPT", "REFUSE TO SUR.", "DL TEMPORARY", "-", ""],
     },
     plateNo: {
       type: String,
