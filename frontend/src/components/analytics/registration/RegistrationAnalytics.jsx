@@ -462,17 +462,17 @@ export function RegistrationAnalytics() {
             </div>
           </div>
           
-          {/* Owner Municipality Chart - Same width as MunicipalityChart with consistent spacing */}
+          {/* Owner Municipality Chart - Positioned below Vehicle Trend Chart */}
           <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex-1 lg:flex-1">
+              {/* Empty space to maintain layout balance */}
+            </div>
             <div className="flex-1 lg:flex-1">
               <OwnerMunicipalityChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
                 loading={loading}
               />
-            </div>
-            <div className="flex-1 lg:flex-1">
-              {/* Empty space to maintain layout balance */}
             </div>
           </div>
         </div>
