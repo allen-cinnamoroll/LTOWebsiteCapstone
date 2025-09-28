@@ -22,7 +22,7 @@ const ViolationPage = () => {
 
   const fetchViolations = async () => {
     try {
-      const { data } = await apiClient.get("/violation", {
+      const { data } = await apiClient.get("/violations", {
         headers: {
           Authorization: token,
         },

@@ -78,7 +78,7 @@ const AddViolationForm = () => {
       }
 
       console.log("Content being sent to API:", content);
-      const { data } = await apiClient.post("/violation", content, {
+      const { data } = await apiClient.post("/violations", content, {
         headers: { Authorization: token },
       });
       console.log("API Response:", data);
