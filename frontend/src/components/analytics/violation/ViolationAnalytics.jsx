@@ -68,7 +68,9 @@ export function ViolationAnalytics() {
     violationsByType: [],
     yearlyTrends: [],
     violationCombinations: [],
-    violationPatterns: []
+    violationPatterns: [],
+    confiscatedItemTypesCount: 0,
+    confiscatedItemTypesArray: []
   };
 
   // Filter yearly trends data based on selected year range

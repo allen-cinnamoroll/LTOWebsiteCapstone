@@ -27,7 +27,7 @@ export function ChartsSection({
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Violations by Type Chart */}
-        <div className="bg-card border border-border rounded-lg p-6">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
           <div className="animate-pulse">
             <div className="h-6 bg-muted rounded mb-4"></div>
             <div className="h-64 bg-muted rounded"></div>
@@ -35,7 +35,7 @@ export function ChartsSection({
         </div>
         
         {/* Yearly Trends Chart */}
-        <div className="bg-card border border-border rounded-lg p-6">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg p-6">
           <div className="animate-pulse">
             <div className="h-6 bg-muted rounded mb-4"></div>
             <div className="h-64 bg-muted rounded"></div>
@@ -59,8 +59,8 @@ export function ChartsSection({
 
   return (
     <div className="space-y-6 mb-8">
-      {/* Advanced Line Chart - Yearly Trends (Full Width) */}
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
+       {/* Advanced Line Chart - Yearly Trends (Full Width) */}
+       <div className="bg-gradient-to-br from-white to-gray-50 dark:from-black dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
         <div className="relative">
           {yearlyTrendsData.length > 0 ? (
             <div className="space-y-6">
@@ -95,7 +95,7 @@ export function ChartsSection({
               
               <div className="flex gap-6">
                 <div className="flex-1">
-                  <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+                   <div className="relative bg-white dark:bg-black rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden">
                     <svg 
                       ref={chartRef}
                       width="100%" 
@@ -545,11 +545,11 @@ export function ChartsSection({
       </div>
 
       {/* KPIs and Violation Distribution Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
         {/* Left Side - Stacked KPIs */}
         <div className="lg:col-span-2 flex flex-col space-y-4 h-full">
-          {/* Total Unique Violations KPI */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black border-2 border-blue-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
+           {/* Total Unique Violations KPI */}
+           <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-black dark:to-black border-2 border-blue-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-indigo-500/20 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-indigo-400/20 rounded-full translate-y-12 -translate-x-12"></div>
@@ -577,8 +577,8 @@ export function ChartsSection({
             </div>
           </div>
 
-          {/* Total Unique Officers KPI */}
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-gray-900 dark:to-black border-2 border-emerald-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
+           {/* Total Unique Officers KPI */}
+           <div className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-black dark:to-black border-2 border-emerald-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-300/20 to-teal-400/20 rounded-full translate-y-12 -translate-x-12"></div>
@@ -605,10 +605,11 @@ export function ChartsSection({
               </div>
             </div>
           </div>
+
         </div>
 
         {/* Right Side - Violation Types Pie Chart */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           <PieChart
             data={violationsByTypeData}
             title="Violation Types Distribution"
@@ -623,7 +624,7 @@ export function ChartsSection({
         <div className="lg:col-span-1">
           <BarChart
             data={displayData?.topOfficers || []}
-            title="Top 5 Apprehending Officers"
+            title="Apprehending Officers"
             type="officers"
             loading={loading}
             totalCount={displayData?.totalOfficers || 0}

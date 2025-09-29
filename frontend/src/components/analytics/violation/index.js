@@ -6,3 +6,4 @@ export { PieChart } from './PieChart';
 export { ViolationRanking } from './ViolationRanking';
 export { ViolationCombinations } from './ViolationCombinations';
 export { LineChartModal } from './LineChartModal';
+export { ConfiscatedItemsChart } from './ConfiscatedItemsChart';
