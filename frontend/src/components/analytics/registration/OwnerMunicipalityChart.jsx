@@ -111,14 +111,14 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
             <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#6366f1' }}></div>
-                <span className="text-indigo-600 dark:text-indigo-400 text-xs">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+                <span className="text-green-600 dark:text-green-400 text-xs">
                   <span className="font-semibold">{withLicense.toLocaleString()}</span> With License
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f43f5e' }}></div>
-                <span className="text-rose-600 dark:text-rose-400 text-xs">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+                <span className="text-blue-600 dark:text-blue-400 text-xs">
                   <span className="font-semibold">{withoutLicense.toLocaleString()}</span> Without License
                 </span>
               </div>
@@ -248,7 +248,7 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
                 dataKey="withLicense" 
                 stackId="owners"
                 name="With Driver's License"
-                fill="#10b981"
+                fill="#22c55e"
                 radius={[0, 0, 0, 0]}
                 maxBarSize={isMobile ? 150 : 200}
               />
@@ -256,7 +256,7 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
                 dataKey="withoutLicense" 
                 stackId="owners"
                 name="Without Driver's License"
-                fill="#ec4899"
+                fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={isMobile ? 150 : 200}
               />
@@ -268,11 +268,11 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
         {ownerData.length > 0 && (
           <div className="flex justify-center gap-6 mt-3">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#10b981' }}></div>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
               <span className="text-xs text-gray-600 dark:text-gray-400">With Driver's License</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ec4899' }}></div>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
               <span className="text-xs text-gray-600 dark:text-gray-400">Without Driver's License</span>
             </div>
           </div>
