@@ -342,11 +342,96 @@ export function AccidentAnalytics() {
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
-        {/* Loading Controls */}
-        <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg">
-          <div className="animate-pulse">
-            <div className="h-6 bg-muted rounded w-32 mb-2"></div>
-            <div className="h-8 bg-muted rounded w-24"></div>
+        {/* Enhanced Header - Always visible */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2 animate-in slide-in-from-top-5 fade-in duration-700">
+                <AlertTriangle className="h-8 w-8 text-red-500 animate-pulse" />
+                Accident Analytics
+              </h2>
+              <p className="text-muted-foreground">
+                Comprehensive analysis of accident data for {getPeriodLabel(timePeriod)}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAdvancedCharts(!showAdvancedCharts)}
+                className="px-3 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-2"
+              >
+                <BarChart3 className="h-4 w-4" />
+                {showAdvancedCharts ? 'Hide Advanced' : 'Show Advanced'}
+              </button>
+              <Select value={timePeriod} onValueChange={setTimePeriod}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select time period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="week">Last Week</SelectItem>
+                  <SelectItem value="month">Last Month</SelectItem>
+                  <SelectItem value="3months">Last 3 Months</SelectItem>
+                  <SelectItem value="6months">Last 6 Months</SelectItem>
+                  <SelectItem value="year">Last Year</SelectItem>
+                  <SelectItem value="alltime">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Enhanced Filter Controls */}
+          <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Filters:</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-muted-foreground">Severity:</label>
+              <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Severities</SelectItem>
+                  <SelectItem value="fatal">Fatal</SelectItem>
+                  <SelectItem value="severe">Severe</SelectItem>
+                  <SelectItem value="moderate">Moderate</SelectItem>
+                  <SelectItem value="minor">Minor</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-muted-foreground">Vehicle Type:</label>
+              <Select value={selectedVehicleType} onValueChange={setSelectedVehicleType}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="car">Car</SelectItem>
+                  <SelectItem value="motorcycle">Motorcycle</SelectItem>
+                  <SelectItem value="truck">Truck</SelectItem>
+                  <SelectItem value="bus">Bus</SelectItem>
+                  <SelectItem value="van">Van</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-muted-foreground">Chart Type:</label>
+              <Select value={chartType} onValueChange={setChartType}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="area">Area Chart</SelectItem>
+                  <SelectItem value="line">Line Chart</SelectItem>
+                  <SelectItem value="bar">Bar Chart</SelectItem>
+                  <SelectItem value="composed">Composed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
