@@ -179,4 +179,14 @@
       transform: translateX(0);
     }
   }
+
+  @keyframes slideInFromLeft {
+    from { 
+      width: 0%; 
+      opacity: 0; 
+    }
+    to { 
+      opacity: 1; 
+    }
+  }
 }

@@ -7,7 +7,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Legend
+  Legend,
+  Area,
+  AreaChart,
+  ComposedChart
 } from 'recharts';
 import { getYearlyVehicleTrends, getMonthlyVehicleTrends } from '../../../api/registrationAnalytics.js';
 
@@ -89,25 +92,39 @@ const VehicleTrendChart = () => {
       const response = await getYearlyVehicleTrends(startYear, endYear, municipalityToUse);
       
       if (response.success) {
-        // Process data to show continuous lines
-        const processedData = response.data.map(item => {
-          if (item.total === 0) {
-            // No registration data - show gray "No Registration" line and keep other lines at 0 for continuity
-            return {
-              ...item,
-              total: 0,
-              active: 0,
-              expired: 0,
-              noRegistration: 0
-            };
-          } else {
-            // Has registration data - show normal lines, hide gray line
-            return {
-              ...item,
-              noRegistration: null
-            };
-          }
-        });
+         // Process data to show continuous lines with smart connections
+         const processedData = response.data.map((item, index, array) => {
+           if (item.total === 0) {
+             // No registration data - show lines at 0, but connect to next data point
+             const nextDataPoint = array.slice(index + 1).find(nextItem => nextItem.total > 0);
+             
+             if (nextDataPoint) {
+               // Connect to next data point with appropriate colors
+               return {
+                 ...item,
+                 total: 0,
+                 active: 0,
+                 expired: 0,
+                 noRegistration: null // Hide gray line when connecting to colored lines
+               };
+             } else {
+               // No future data - show gray line
+               return {
+                 ...item,
+                 total: null,
+                 active: null,
+                 expired: null,
+                 noRegistration: 0
+               };
+             }
+           } else {
+             // Has registration data - show normal lines, hide gray line
+             return {
+               ...item,
+               noRegistration: null
+             };
+           }
+         });
         setTrendData(processedData);
       } else {
         setError('Failed to fetch yearly trend data');
@@ -131,25 +148,39 @@ const VehicleTrendChart = () => {
       const response = await getMonthlyVehicleTrends(year, municipalityToUse);
       
       if (response.success) {
-        // Process monthly data to show continuous lines
-        const processedData = response.data.map(item => {
-          if (item.total === 0) {
-            // No registration data - show gray "No Registration" line and keep other lines at 0 for continuity
-            return {
-              ...item,
-              total: 0,
-              active: 0,
-              expired: 0,
-              noRegistration: 0
-            };
-          } else {
-            // Has registration data - show normal lines, hide gray line
-            return {
-              ...item,
-              noRegistration: null
-            };
-          }
-        });
+         // Process monthly data to show continuous lines with smart connections
+         const processedData = response.data.map((item, index, array) => {
+           if (item.total === 0) {
+             // No registration data - show lines at 0, but connect to next data point
+             const nextDataPoint = array.slice(index + 1).find(nextItem => nextItem.total > 0);
+             
+             if (nextDataPoint) {
+               // Connect to next data point with appropriate colors
+               return {
+                 ...item,
+                 total: 0,
+                 active: 0,
+                 expired: 0,
+                 noRegistration: null // Hide gray line when connecting to colored lines
+               };
+             } else {
+               // No future data - show gray line
+               return {
+                 ...item,
+                 total: null,
+                 active: null,
+                 expired: null,
+                 noRegistration: 0
+               };
+             }
+           } else {
+             // Has registration data - show normal lines, hide gray line
+             return {
+               ...item,
+               noRegistration: null
+             };
+           }
+         });
         setTrendData(processedData);
       } else {
         setError('Failed to fetch monthly trend data');
@@ -324,37 +355,38 @@ const VehicleTrendChart = () => {
   // Custom tooltip component
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      // Filter out null values and noRegistration entries
+      const validEntries = payload.filter(entry => 
+        entry.value !== null && 
+        entry.dataKey !== 'noRegistration' && 
+        (entry.dataKey === 'total' || entry.dataKey === 'active' || entry.dataKey === 'expired')
+      );
+      
+      // Check if this is a no-data year
+      const isNoDataYear = validEntries.every(entry => entry.value === 0);
+      
       return (
-        <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-            <p className="font-bold text-gray-900 dark:text-gray-100 text-sm"> {label}</p>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg">
+          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            {label}
           </div>
-          {payload.filter(entry => entry.value !== null).map((entry, index) => {
-            // Check if this is a year with no registration data
-            const hasNoRegistration = payload.some(p => p.dataKey === 'noRegistration' && p.value === 0);
-            
-            return (
-              <div key={index} className="flex items-center gap-2 mb-1">
+          <div className="space-y-1">
+            {validEntries.map((entry, index) => (
+              <div key={index} className="flex items-center gap-2">
                 <div 
-                  className="w-3 h-3 rounded-full" 
+                  className="w-2 h-2 rounded-full" 
                   style={{ backgroundColor: entry.color }}
                 ></div>
-                <p className="text-sm">
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">
-                    {entry.dataKey === 'total' ? 'Total' : 
-                     entry.dataKey === 'active' ? 'Active' : 
-                     entry.dataKey === 'expired' ? 'Expired' : 'No Registration'}:
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {entry.dataKey === 'total' ? 'Total' : 
+                   entry.dataKey === 'active' ? 'Active' : 'Expired'}: 
+                  <span className="ml-1 font-medium">
+                    {isNoDataYear ? 'No Data' : entry.value.toLocaleString()}
                   </span>
-                  <span className="ml-2 text-blue-600 dark:text-blue-400 font-semibold">
-                    {entry.dataKey === 'noRegistration' ? 'No Data' : 
-                     hasNoRegistration && entry.value === 0 ? 'No Registration' : 
-                     entry.value.toLocaleString()}
-                  </span>
-                </p>
+                </span>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       );
     }
@@ -362,7 +394,7 @@ const VehicleTrendChart = () => {
   };
 
   return (
-    <div className="bg-gray-100 border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent min-h-[400px] flex flex-col">
+    <div className="bg-white border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-gray-800 dark:!border-gray-700 min-h-[400px] flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
@@ -481,7 +513,7 @@ const VehicleTrendChart = () => {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%" minHeight={320}>
-            <LineChart
+            <ComposedChart
               data={trendData}
               margin={{ 
                 top: 10, 
@@ -490,6 +522,32 @@ const VehicleTrendChart = () => {
                 bottom: 20
               }}
             >
+              <defs>
+                <linearGradient id="totalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                  <stop offset="20%" stopColor="#3b82f6" stopOpacity={0.6}/>
+                  <stop offset="40%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                  <stop offset="60%" stopColor="#3b82f6" stopOpacity={0.2}/>
+                  <stop offset="80%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.0}/>
+                </linearGradient>
+                <linearGradient id="activeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity={0.8}/>
+                  <stop offset="20%" stopColor="#10b981" stopOpacity={0.6}/>
+                  <stop offset="40%" stopColor="#10b981" stopOpacity={0.4}/>
+                  <stop offset="60%" stopColor="#10b981" stopOpacity={0.2}/>
+                  <stop offset="80%" stopColor="#10b981" stopOpacity={0.1}/>
+                  <stop offset="100%" stopColor="#10b981" stopOpacity={0.0}/>
+                </linearGradient>
+                <linearGradient id="expiredGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8}/>
+                  <stop offset="20%" stopColor="#ef4444" stopOpacity={0.6}/>
+                  <stop offset="40%" stopColor="#ef4444" stopOpacity={0.4}/>
+                  <stop offset="60%" stopColor="#ef4444" stopOpacity={0.2}/>
+                  <stop offset="80%" stopColor="#ef4444" stopOpacity={0.1}/>
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.0}/>
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
               <XAxis 
                 dataKey={viewType === 'year' ? 'year' : 'month'} 
@@ -508,74 +566,135 @@ const VehicleTrendChart = () => {
                 width={isMobile ? 60 : 80}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Line 
-                type="monotone" 
-                dataKey="total" 
-                stroke="#3b82f6" 
+              {/* Area components for all data with gradient shadows */}
+              <Area
+                type="monotone"
+                dataKey="total"
+                stroke="#3b82f6"
                 strokeWidth={3}
-                dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
+                fill="url(#totalGradient)"
+                fillOpacity={1}
+                connectNulls={true}
+                dot={{ 
+                  fill: 'white', 
+                  stroke: '#3b82f6', 
+                  strokeWidth: 2, 
+                  r: 5,
+                  filter: 'drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3))'
+                }}
+                activeDot={{ 
+                  r: 7, 
+                  fill: 'white',
+                  stroke: '#3b82f6', 
+                  strokeWidth: 2,
+                  filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4))'
+                }}
                 name="Total Vehicles"
               />
-              <Line 
-                type="monotone" 
-                dataKey="active" 
-                stroke="#10b981" 
-                strokeWidth={4}
-                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2 }}
+              <Area
+                type="monotone"
+                dataKey="active"
+                stroke="#10b981"
+                strokeWidth={3}
+                fill="url(#activeGradient)"
+                fillOpacity={1}
+                connectNulls={true}
+                dot={{ 
+                  fill: 'white', 
+                  stroke: '#10b981', 
+                  strokeWidth: 2, 
+                  r: 5,
+                  filter: 'drop-shadow(0 1px 2px rgba(16, 185, 129, 0.3))'
+                }}
+                activeDot={{ 
+                  r: 7, 
+                  fill: 'white',
+                  stroke: '#10b981', 
+                  strokeWidth: 2,
+                  filter: 'drop-shadow(0 2px 4px rgba(16, 185, 129, 0.4))'
+                }}
                 name="Active Vehicles"
               />
-              <Line 
-                type="monotone" 
-                dataKey="expired" 
-                stroke="#ef4444" 
+              <Area
+                type="monotone"
+                dataKey="expired"
+                stroke="#ef4444"
                 strokeWidth={3}
-                dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#ef4444', strokeWidth: 2 }}
+                fill="url(#expiredGradient)"
+                fillOpacity={1}
+                connectNulls={true}
+                dot={{ 
+                  fill: 'white', 
+                  stroke: '#ef4444', 
+                  strokeWidth: 2, 
+                  r: 5,
+                  filter: 'drop-shadow(0 1px 2px rgba(239, 68, 68, 0.3))'
+                }}
+                activeDot={{ 
+                  r: 7, 
+                  fill: 'white',
+                  stroke: '#ef4444', 
+                  strokeWidth: 2,
+                  filter: 'drop-shadow(0 2px 4px rgba(239, 68, 68, 0.4))'
+                }}
                 name="Expired Vehicles"
               />
-              <Line 
-                type="monotone" 
-                dataKey="noRegistration" 
-                stroke="#9ca3af" 
+              <Area
+                type="monotone"
+                dataKey="noRegistration"
+                stroke="#9ca3af"
                 strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={{ fill: '#9ca3af', strokeWidth: 2, r: 3 }}
-                activeDot={{ r: 5, stroke: '#9ca3af', strokeWidth: 2 }}
+                strokeDasharray="3 3"
+                fill="none"
+                connectNulls={true}
+                dot={{ 
+                  fill: '#9ca3af', 
+                  strokeWidth: 1, 
+                  r: 3,
+                  filter: 'drop-shadow(0 1px 2px rgba(156, 163, 175, 0.3))'
+                }}
+                activeDot={{ 
+                  r: 5, 
+                  stroke: '#9ca3af', 
+                  strokeWidth: 1,
+                  filter: 'drop-shadow(0 2px 4px rgba(156, 163, 175, 0.4))'
+                }}
                 name="No Registration"
-                connectNulls={false}
+                hide
               />
-            </LineChart>
+            </ComposedChart>
           </ResponsiveContainer>
          )}
          
-         {/* Chart Legend - Positioned at bottom with minimal spacing */}
-         {trendData.length > 0 && (
-           <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
-             fontSize: isMobile ? '10px' : '12px', 
-             fontWeight: '500',
-             paddingTop: '0px',
-             textAlign: 'center'
-           }}>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span>Total Vehicles</span>
+           {/* Chart Legend - Only show three main legends */}
+           {trendData.length > 0 && (
+             <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
+               fontSize: isMobile ? '10px' : '12px', 
+               fontWeight: '500',
+               paddingTop: '0px',
+               textAlign: 'center'
+             }}>
+              {/* Only show the three main legend items */}
+              {trendData.some(item => item.total !== null) && (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span>Total Vehicles</span>
+                </div>
+              )}
+              {trendData.some(item => item.active !== null) && (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span>Active Vehicles</span>
+                </div>
+              )}
+              {trendData.some(item => item.expired !== null) && (
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span>Expired Vehicles</span>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span>Active Vehicles</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span>Expired Vehicles</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-gray-500"></div>
-              <span>No Registration</span>
-            </div>
-          </div>
-         )}
+           )}
        </div>
 
        {/* Custom Range Modal - Show when custom range modal is open */}
