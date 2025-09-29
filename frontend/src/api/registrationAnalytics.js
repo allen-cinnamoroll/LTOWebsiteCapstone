@@ -124,5 +124,17 @@ export const getOwnerMunicipalityData = async (month = null, year = null) => {
   }
 };
 
-
-
+// Get vehicle classification data
+export const getVehicleClassificationData = async (month = null, year = null) => {
+  try {
+    const params = {};
+    if (month) params.month = month;
+    if (year) params.year = year;
+    
+    const response = await apiClient.get('/dashboard/vehicle-classification-data', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching vehicle classification data:', error);
+    throw error;
+  }
+};

@@ -1764,3 +1764,63 @@ export const getMonthlyVehicleTrends = async (req, res) => {
     });
   }
 };
+
+// Get vehicle classification data
+export const getVehicleClassificationData = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    
+    // Build date filter
+    let dateFilter = {};
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0, 23, 59, 59);
+      dateFilter.dateOfRegistration = { $gte: startDate, $lte: endDate };
+    } else if (year) {
+      const startDate = new Date(year, 0, 1);
+      const endDate = new Date(year, 11, 31, 23, 59, 59);
+      dateFilter.dateOfRegistration = { $gte: startDate, $lte: endDate };
+    }
+    
+    // Get vehicle classification counts
+    const classificationData = await VehicleModel.aggregate([
+      { $match: dateFilter },
+      {
+        $group: {
+          _id: "$classification",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          classification: "$_id",
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
+    
+    // Get total count for percentage calculation
+    const totalCount = classificationData.reduce((sum, item) => sum + item.count, 0);
+    
+    // Format data - classification is already stored as strings in database
+    const formattedData = classificationData.map(item => ({
+      classification: item.classification || "Unknown",
+      count: item.count,
+      percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0
+    }));
+    
+    res.json({
+      success: true,
+      data: formattedData
+    });
+    
+  } catch (error) {
+    console.error('Error fetching vehicle classification data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching vehicle classification data',
+      error: error.message
+    });
+  }
+};

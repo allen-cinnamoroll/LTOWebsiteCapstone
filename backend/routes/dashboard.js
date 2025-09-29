@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals, getYearlyVehicleTrends, getMonthlyVehicleTrends, getOwnerMunicipalityData } from "../controller/dashboardController.js";
+import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals, getYearlyVehicleTrends, getMonthlyVehicleTrends, getOwnerMunicipalityData, getVehicleClassificationData } from "../controller/dashboardController.js";
 
 const dashboardRouter = express.Router();
 
@@ -33,5 +33,8 @@ dashboardRouter.get("/monthly-vehicle-trends", authenticate, getMonthlyVehicleTr
 
 // Get owner data by municipality with license status breakdown (Authenticated Users)
 dashboardRouter.get("/owner-municipality-data", authenticate, getOwnerMunicipalityData);
+
+// Get vehicle classification data (Authenticated Users)
+dashboardRouter.get("/vehicle-classification-data", authenticate, getVehicleClassificationData);
 
 export default dashboardRouter;

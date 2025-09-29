@@ -4,6 +4,7 @@ import { getRegistrationAnalytics, getMonthName, getMonthNumber } from '../../..
 import MunicipalityChart from './MunicipalityChart.jsx';
 import VehicleTrendChart from './VehicleTrendChart.jsx';
 import OwnerMunicipalityChart from './OwnerMunicipalityChart.jsx';
+import VehicleClassificationChart from './VehicleClassificationChart.jsx';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -462,10 +463,14 @@ export function RegistrationAnalytics() {
             </div>
           </div>
           
-          {/* Owner Municipality Chart - Below Vehicle Trend Chart */}
+          {/* Vehicle Classification Chart and Owner Municipality Chart */}
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 lg:flex-1">
-              {/* Empty space to maintain layout balance */}
+              <VehicleClassificationChart 
+                selectedMonth={selectedMonth} 
+                selectedYear={selectedYear} 
+                loading={loading}
+              />
             </div>
             <div className="flex-1 lg:flex-1">
               <OwnerMunicipalityChart 
