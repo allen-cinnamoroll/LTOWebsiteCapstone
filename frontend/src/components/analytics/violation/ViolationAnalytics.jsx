@@ -308,6 +308,7 @@ export function ViolationAnalytics() {
         totalViolations={totalViolations}
         totalTrafficViolators={totalTrafficViolators}
         topOfficer={analyticsData?.topOfficers?.[0]}
+        mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
       {/* Charts Section with Violation Ranking and Combinations */}
