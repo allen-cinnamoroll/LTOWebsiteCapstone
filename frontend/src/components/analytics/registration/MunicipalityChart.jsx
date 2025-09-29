@@ -209,7 +209,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   return (
     <>
       {/* Municipality Chart Container */}
-       <div className="bg-white border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-gray-800 dark:!border-gray-700 min-h-[400px] flex flex-col">
+       <div className="bg-white border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-transparent dark:!border-gray-700 min-h-[400px] flex flex-col">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center">
@@ -371,7 +371,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       {/* View All Modal */}
       {showAllModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-           <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-2xl dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+           <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-2xl dark:!bg-transparent dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 flex items-center justify-center">

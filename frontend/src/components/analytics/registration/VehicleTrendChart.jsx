@@ -394,7 +394,7 @@ const VehicleTrendChart = () => {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-gray-800 dark:!border-gray-700 min-h-[400px] flex flex-col">
+    <div className="bg-white border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-transparent dark:!border-gray-700 min-h-[400px] flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">

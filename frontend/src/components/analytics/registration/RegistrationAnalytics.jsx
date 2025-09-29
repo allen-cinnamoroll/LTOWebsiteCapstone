@@ -5,6 +5,14 @@ import MunicipalityChart from './MunicipalityChart.jsx';
 import VehicleTrendChart from './VehicleTrendChart.jsx';
 import OwnerMunicipalityChart from './OwnerMunicipalityChart.jsx';
 import VehicleClassificationChart from './VehicleClassificationChart.jsx';
+import { PredictiveAnalytics } from './PredictiveAnalytics.jsx';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -38,14 +46,9 @@ const useCounterAnimation = (end, duration = 2000) => {
 export function RegistrationAnalytics() {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
-  const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
-  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  const monthDropdownRef = useRef(null);
-  const yearDropdownRef = useRef(null);
 
   // Counter animations - must be called at top level
   const vehiclesTotal = useCounterAnimation(analyticsData?.vehicles?.total || 0);
@@ -67,31 +70,12 @@ export function RegistrationAnalytics() {
   const years = ['All', ...Array.from({ length: 7 }, (_, i) => (currentYear + i).toString())];
 
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (monthDropdownRef.current && !monthDropdownRef.current.contains(event.target)) {
-        setIsMonthDropdownOpen(false);
-      }
-      if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target)) {
-        setIsYearDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   const handleMonthSelect = (month) => {
     setSelectedMonth(month);
-    setIsMonthDropdownOpen(false);
   };
 
   const handleYearSelect = (year) => {
     setSelectedYear(year);
-    setIsYearDropdownOpen(false);
   };
 
   // Helper function to get display period text
@@ -183,7 +167,7 @@ export function RegistrationAnalytics() {
 
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-gray-900 min-h-screen">
+    <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen">
       <div className="registration-analytics-header">
         <div>
           <h1 className="registration-analytics-title">Registration Analytics</h1>
@@ -204,119 +188,33 @@ export function RegistrationAnalytics() {
         ) : (
           <div className="registration-analytics-controls">
             {/* Month Dropdown */}
-            <div className="registration-analytics-dropdown" ref={monthDropdownRef}>
-              <button
-                className={`registration-analytics-dropdown-button ${!selectedMonth ? 'placeholder' : ''}`}
-                onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
-              >
-                <span>{selectedMonth || 'Month'}</span>
-                <svg
-                  className={`registration-analytics-chevron ${isMonthDropdownOpen ? 'open' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            
-            {isMonthDropdownOpen && (
-              <div 
-                className="registration-analytics-dropdown-content"
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '100%',
-                  marginTop: '8px',
-                  width: '180px',
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                  zIndex: 50,
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}
-              >
+            <Select value={selectedMonth || ''} onValueChange={handleMonthSelect}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent>
                 {months.map((month) => (
-                  <div
-                    key={month}
-                    className="registration-analytics-dropdown-item"
-                    onClick={() => handleMonthSelect(month)}
-                    style={{
-                      padding: '8px 16px',
-                      fontSize: '14px',
-                      color: 'hsl(var(--foreground))',
-                      cursor: 'pointer',
-                      transition: 'background-color 150ms'
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(var(--accent))'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
+                  <SelectItem key={month} value={month}>
                     {month}
-                  </div>
+                  </SelectItem>
                 ))}
-              </div>
-            )}
-          </div>
+              </SelectContent>
+            </Select>
 
-          {/* Year Dropdown */}
-          <div className="registration-analytics-dropdown" ref={yearDropdownRef}>
-            <button
-              className={`registration-analytics-dropdown-button ${!selectedYear ? 'placeholder' : ''}`}
-              onClick={() => setIsYearDropdownOpen(!isYearDropdownOpen)}
-            >
-              <span>{selectedYear || 'Year'}</span>
-              <svg
-                className={`registration-analytics-chevron ${isYearDropdownOpen ? 'open' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {isYearDropdownOpen && (
-              <div 
-                className="registration-analytics-dropdown-content"
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: '100%',
-                  marginTop: '8px',
-                  width: '192px',
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                  zIndex: 50,
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}
-              >
+            {/* Year Dropdown */}
+            <Select value={selectedYear || ''} onValueChange={handleYearSelect}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
                 {years.map((year) => (
-                  <div
-                    key={year}
-                    className="registration-analytics-dropdown-item"
-                    onClick={() => handleYearSelect(year)}
-                    style={{
-                      padding: '8px 16px',
-                      fontSize: '14px',
-                      color: 'hsl(var(--foreground))',
-                      cursor: 'pointer',
-                      transition: 'background-color 150ms'
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(var(--accent))'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
+                  <SelectItem key={year} value={year}>
                     {year}
-                  </div>
+                  </SelectItem>
                 ))}
-              </div>
-            )}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
         )}
       </div>
       
@@ -388,7 +286,7 @@ export function RegistrationAnalytics() {
         <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {/* Registered Vehicles Card */}
-            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-gray-800 dark:!border-gray-700 hover:border-red-300 dark:hover:border-red-600 overflow-hidden">
+            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-transparent dark:!border-gray-700 hover:border-red-300 dark:hover:border-red-600 overflow-hidden">
               {/* Bubble effect */}
               <div className="absolute -top-8 -right-8 w-24 h-24 bg-pink-100 dark:bg-pink-900/30 rounded-full opacity-60"></div>
               <div className="absolute -top-4 -right-4 w-16 h-16 bg-red-200 dark:bg-red-800/40 rounded-full opacity-40"></div>
@@ -442,7 +340,7 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Registered Owners Card */}
-            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-gray-800 dark:!border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 overflow-hidden">
+            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-transparent dark:!border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 overflow-hidden">
               {/* Bubble effect */}
               <div className="absolute -top-8 -right-8 w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full opacity-60"></div>
               <div className="absolute -top-4 -right-4 w-16 h-16 bg-blue-200 dark:bg-blue-800/40 rounded-full opacity-40"></div>
@@ -493,7 +391,7 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Plate Classification Card */}
-            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-gray-800 dark:!border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 overflow-hidden">
+            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-transparent dark:!border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 overflow-hidden">
               {/* Bubble effect */}
               <div className="absolute -top-8 -right-8 w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-full opacity-60"></div>
               <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-200 dark:bg-purple-800/40 rounded-full opacity-40"></div>
@@ -585,6 +483,9 @@ export function RegistrationAnalytics() {
         </div>
       </div>
       )}
+
+      {/* Predictive Analytics Container */}
+      <PredictiveAnalytics />
 
     </div>
   );
