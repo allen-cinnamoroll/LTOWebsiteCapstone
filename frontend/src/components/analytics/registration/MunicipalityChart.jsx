@@ -338,9 +338,9 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
           {top5Municipalities.length > 0 && (
             <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
               fontSize: isMobile ? '10px' : '12px', 
-              fontWeight: '200',
+              fontWeight: '500',
               paddingTop: '0px',
-              paddingBottom: '4px',
+              paddingBottom: '0px',
               textAlign: 'center'
             }}>
               <div className="flex items-center gap-2">
