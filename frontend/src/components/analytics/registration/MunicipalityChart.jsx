@@ -228,25 +228,29 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M3 3v18h18"/>
-                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-                <path d="M16 5l3 3-3 3"/>
+              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
             </div>
-            <h2 className="text-sm font-bold text-foreground">
-              DavOr Vehicle Registration Rankings
-              {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
-                <span className="text-sm font-normal text-muted-foreground ml-2">
-                  ({selectedMonth} across all years)
-                </span>
-              )}
-              {selectedMonth === 'All' && selectedYear && selectedYear !== 'All' && (
-                <span className="text-sm font-normal text-muted-foreground ml-2">
-                  (All months in {selectedYear})
-                </span>
-              )}
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-sm font-bold text-foreground">
+                DavOr Vehicle Registration Rankings
+                {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    ({selectedMonth} across all years)
+                  </span>
+                )}
+                {selectedMonth === 'All' && selectedYear && selectedYear !== 'All' && (
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    (All months in {selectedYear})
+                  </span>
+                )}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Top performing municipalities by vehicle registration volume
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button

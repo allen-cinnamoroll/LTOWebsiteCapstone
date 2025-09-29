@@ -161,14 +161,25 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
-            <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M3 3v18h18"/>
+              <path d="M8 9v8"/>
+              <path d="M8 12v6"/>
+              <path d="M8 15v4"/>
+              <path d="M12 9v4"/>
+              <path d="M12 12v2"/>
+              <path d="M12 15v1"/>
             </svg>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-            <h2 className="text-sm font-bold text-foreground">
-              Registered Owners by Municipality
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-sm font-bold text-foreground">
+                Registered Owners by Municipality
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Vehicle owners with and without driver's licenses by location
+              </p>
+            </div>
             {(selectedYear === 'All' && selectedMonth && selectedMonth !== 'All') && (
               <span className="text-sm font-normal text-muted-foreground">
                 ({selectedMonth} across all years)

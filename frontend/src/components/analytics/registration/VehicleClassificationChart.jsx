@@ -54,6 +54,19 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
       const response = await getVehicleClassificationData(monthNumber, yearValue);
       console.log('Vehicle classification data response:', response);
       
+      // Debug: Log the raw data to check for FOR HRE entries
+      if (response.success && response.data) {
+        console.log('Raw classification data:', response.data);
+        const forHreEntries = response.data.filter(item => 
+          item.classification && item.classification.toUpperCase() === "FOR HRE"
+        );
+        if (forHreEntries.length > 0) {
+          console.warn('Found FOR HRE entries in data:', forHreEntries);
+        } else {
+          console.log('No FOR HRE entries found in data - filtering working correctly');
+        }
+      }
+      
       if (response.success) {
         setClassificationData(response.data);
       } else {
@@ -88,39 +101,78 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
     }
   }, [classificationData]);
 
-  // Format data for Recharts
+  // Format data for Recharts with strict data normalization
   const formatChartData = (data) => {
-    return data.map((item) => ({
+    // Normalize the data and filter out invalid entries
+    const normalizedData = {};
+    
+    data.forEach((item) => {
+      // Skip any "FOR HRE" entries completely (case-insensitive)
+      if (item.classification && item.classification.toUpperCase() === "FOR HRE") {
+        return; // Skip this entry entirely
+      }
+      
+      // Only include valid classifications
+      const validClassifications = ["PRIVATE", "FOR HIRE", "GOVERNMENT"];
+      if (!validClassifications.includes(item.classification)) {
+        return; // Skip invalid classifications
+      }
+      
+      const normalizedName = item.classification;
+      
+      if (normalizedName in normalizedData) {
+        normalizedData[normalizedName].count += item.count;
+      } else {
+        normalizedData[normalizedName] = {
+          classification: normalizedName,
+          count: item.count
+        };
+      }
+    });
+    
+    // Convert back to array and recalculate percentages
+    const totalCount = Object.values(normalizedData).reduce((sum, item) => sum + item.count, 0);
+    
+    return Object.values(normalizedData).map((item) => ({
       name: item.classification,
       value: item.count,
-      percentage: item.percentage
+      percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0
     }));
   };
 
-  // Custom colors for the pie chart
-  const COLORS = ['#3b82f6', '#ef4444', '#f59e0b']; // Blue, Red, Orange
+  // Fixed appealing colors for the pie chart - professional and eye-friendly
+  // These colors are LOCKED and will NEVER change regardless of data order or refresh
+  const COLORS = ['#3b82f6', '#ef4444', '#10b981']; // Blue, Red, Green - consistent and appealing
+  
+  // Color mapping to ensure consistent colors for each classification
+  const getColorForClassification = (classification) => {
+    switch (classification) {
+      case 'PRIVATE':
+        return '#3b82f6'; // Blue
+      case 'FOR HIRE':
+        return '#ef4444'; // Red
+      case 'GOVERNMENT':
+        return '#10b981'; // Green
+      default:
+        return '#6b7280'; // Gray fallback
+    }
+  };
 
-  // Enhanced custom tooltip component
+  // Compact custom tooltip component
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
-        <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
-          <div className="space-y-2">
-            <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{data.name}</p>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.color }}></div>
-                <span className="text-gray-700 dark:text-gray-300 text-xs">
-                  <span className="font-semibold">{data.value.toLocaleString()}</span> vehicles
-                </span>
-              </div>
-              <div className="border-t border-gray-300 dark:border-gray-600 pt-1">
-                <span className="text-gray-700 dark:text-gray-300 text-xs font-semibold">
-                  {data.payload.percentage}% of total
-                </span>
-              </div>
-            </div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: data.color }}
+            ></div>
+            <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{data.name}</span>
+          </div>
+          <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+            {data.value.toLocaleString()} vehicles ({data.payload.percentage}%)
           </div>
         </div>
       );
@@ -128,19 +180,27 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
     return null;
   };
 
-  // Custom legend component
+  // Custom legend component with clean, aligned design
   const CustomLegend = ({ payload }) => {
     return (
-      <div className="flex flex-wrap justify-center gap-4 mt-4">
+      <div className="flex flex-col gap-4">
         {payload.map((entry, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div key={index} className="flex items-center gap-3">
             <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: entry.color }}
+              className="w-4 h-4 rounded-full shadow-sm" 
+              style={{ 
+                backgroundColor: entry.color,
+                border: `2px solid ${entry.color}20`
+              }}
             ></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {entry.value}
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                {entry.value}
+              </span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                {entry.payload?.percentage || 0}%
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -152,14 +212,20 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+              <path d="M12 2v10l8 8"/>
             </svg>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-            <h2 className="text-sm font-bold text-foreground">
-              Vehicle Classification
-            </h2>
+            <div className="flex flex-col">
+              <h2 className="text-sm font-bold text-foreground">
+                Vehicle Classification
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Distribution of vehicles by type (Private, For Hire, Government)
+              </p>
+            </div>
             {(selectedYear === 'All' && selectedMonth && selectedMonth !== 'All') && (
               <span className="text-sm font-normal text-muted-foreground">
                 ({selectedMonth} across all years)
@@ -174,51 +240,87 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
         </div>
       </div>
 
-      {/* Chart Container */}
-      <div className="h-80 w-full min-h-[320px] flex-1">
-        {loading || parentLoading ? (
-          <div className="flex items-center justify-center w-full h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center w-full h-full text-red-500">
-            <p>{error}</p>
-          </div>
-        ) : classificationData.length === 0 ? (
-          <div className="flex items-center justify-center w-full h-full text-muted-foreground">
-            <p>No data available</p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%" minHeight={320}>
-            <PieChart>
-              <Pie
-                data={formatChartData(classificationData)}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percentage }) => `${name} ${percentage}%`}
-                outerRadius={isMobile ? 80 : 100}
-                fill="#8884d8"
-                dataKey="value"
-                animationBegin={0}
-                animationDuration={1000}
-                animationEasing="ease-out"
-              >
-                {formatChartData(classificationData).map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={COLORS[index % COLORS.length]}
-                    stroke="#fff"
-                    strokeWidth={2}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend />} />
-            </PieChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+       {/* Chart Container */}
+       <div className="h-80 w-full min-h-[320px] flex-1 relative flex flex-col">
+         {loading || parentLoading ? (
+           <div className="flex items-center justify-center w-full h-full">
+             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+           </div>
+         ) : error ? (
+           <div className="flex items-center justify-center w-full h-full text-red-500">
+             <p>{error}</p>
+           </div>
+         ) : classificationData.length === 0 ? (
+           <div className="flex items-center justify-center w-full h-full text-muted-foreground">
+             <p>No data available</p>
+           </div>
+         ) : (
+           <div className="flex items-center justify-center h-full">
+             <div className="flex items-center gap-6">
+               {/* Pie Chart */}
+               <div className="flex-shrink-0 animate-fade-in">
+                 <ResponsiveContainer width={isMobile ? 200 : 280} height={isMobile ? 200 : 280}>
+                   <PieChart>
+                     <Pie
+                       data={formatChartData(classificationData)}
+                       cx="50%"
+                       cy="50%"
+                       labelLine={false}
+                       outerRadius={isMobile ? 80 : 100}
+                       innerRadius={isMobile ? 20 : 40}
+                       fill="#8884d8"
+                       dataKey="value"
+                       animationBegin={0}
+                       animationDuration={1800}
+                       animationEasing="ease-out"
+                       stroke="#ffffff"
+                       strokeWidth={2}
+                       startAngle={90}
+                       endAngle={450}
+                     >
+                       {formatChartData(classificationData).map((entry, index) => (
+                         <Cell 
+                           key={`cell-${entry.name}`} 
+                           fill={getColorForClassification(entry.name)}
+                           stroke="#ffffff"
+                           strokeWidth={2}
+                           style={{
+                             filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))',
+                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                             transformOrigin: 'center'
+                           }}
+                           onMouseEnter={(e) => {
+                             e.target.style.filter = 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25)) brightness(1.05)';
+                             e.target.style.transform = 'scale(1.02)';
+                           }}
+                           onMouseLeave={(e) => {
+                             e.target.style.filter = 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))';
+                             e.target.style.transform = 'scale(1)';
+                           }}
+                         />
+                       ))}
+                     </Pie>
+                     <Tooltip 
+                       content={<CustomTooltip />}
+                       position={{ x: 0, y: 0 }}
+                       offset={20}
+                     />
+                   </PieChart>
+                 </ResponsiveContainer>
+               </div>
+               
+               {/* Legend positioned beside the chart */}
+               <div className="flex-shrink-0 animate-slide-in-right">
+                 <CustomLegend payload={formatChartData(classificationData).map((entry) => ({
+                   value: entry.name,
+                   color: getColorForClassification(entry.name),
+                   payload: { percentage: entry.percentage }
+                 }))} />
+               </div>
+             </div>
+           </div>
+         )}
+       </div>
     </div>
   );
 };

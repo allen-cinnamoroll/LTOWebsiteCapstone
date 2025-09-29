@@ -1782,12 +1782,26 @@ export const getVehicleClassificationData = async (req, res) => {
       dateFilter.dateOfRegistration = { $gte: startDate, $lte: endDate };
     }
     
-    // Get vehicle classification counts
+    // Get vehicle classification counts with data normalization
     const classificationData = await VehicleModel.aggregate([
       { $match: dateFilter },
       {
+        $addFields: {
+          normalizedClassification: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$classification", "FOR HIRE"] }, then: "FOR HIRE" },
+                { case: { $eq: ["$classification", "PRIVATE"] }, then: "PRIVATE" },
+                { case: { $eq: ["$classification", "GOVERNMENT"] }, then: "GOVERNMENT" }
+              ],
+              default: "$classification"
+            }
+          }
+        }
+      },
+      {
         $group: {
-          _id: "$classification",
+          _id: "$normalizedClassification",
           count: { $sum: 1 }
         }
       },
@@ -1796,6 +1810,11 @@ export const getVehicleClassificationData = async (req, res) => {
           classification: "$_id",
           count: 1,
           _id: 0
+        }
+      },
+      {
+        $match: {
+          classification: { $in: ["PRIVATE", "FOR HIRE", "GOVERNMENT"] }
         }
       }
     ]);
