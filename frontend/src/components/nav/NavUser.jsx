@@ -33,7 +33,8 @@ import { useAuth } from "@/context/AuthContext";
 
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { logout, userData } = useAuth();
+  const auth = useAuth();
+  const { logout, userData } = auth || {};
 
   const handleLogout = ()=>{
     logout();

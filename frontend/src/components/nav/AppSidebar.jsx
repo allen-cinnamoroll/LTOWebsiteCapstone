@@ -120,7 +120,8 @@ const data = {
 
 export function AppSidebar(props) {
   const location = useLocation();
-  const { userData } = useAuth();
+  const auth = useAuth();
+  const { userData } = auth || {};
   const { state } = useSidebar();
   
   // State for managing collapsible sections

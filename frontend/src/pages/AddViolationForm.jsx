@@ -36,11 +36,6 @@ const AddViolationForm = () => {
   });
 
   const onSubmit = async (formData) => {
-    console.log("=== FORM SUBMISSION DEBUG ===");
-    console.log("Form data:", formData);
-    console.log("Violation type:", formData.violationType);
-    console.log("Violations array:", formData.violations);
-    console.log("Form validation errors:", form.formState.errors);
     setIsSubmitting(true);
     try {
       // Prepare content based on violation type

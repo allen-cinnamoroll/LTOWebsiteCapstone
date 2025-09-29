@@ -4,9 +4,6 @@ import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.j
 // Create a new violation (Only Admin or Superadmin)
 export const createViolation = async (req, res) => {
     try {
-        console.log("=== BACKEND CREATE VIOLATION ===");
-        console.log("Received violation data:", req.body);
-        console.log("Violation type:", req.body.violationType);
         const { topNo, firstName, middleInitial, lastName, suffix, violations, violationType, licenseType, plateNo, dateOfApprehension, apprehendingOfficer, chassisNo, engineNo } = req.body;
 
         // Generate TOP NO. if not provided or empty
@@ -32,10 +29,8 @@ export const createViolation = async (req, res) => {
             chassisNo,
             engineNo
         };
-        console.log("Violation data to save:", violationData);
         const violation = new ViolationModel(violationData);
         const savedViolation = await violation.save();
-        console.log("Saved violation:", savedViolation);
 
         // Log the activity
         if (req.user) {

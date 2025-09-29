@@ -14,7 +14,11 @@ const ProtectedRoutes = ({ allowedRoles }) => {
 
   // Check if the authentication status is still loading
   if (isLoading) {
-    return <div className="h-screen my-auto mx-auto"></div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   // Map allowed roles to their corresponding values in roleMapping
@@ -25,6 +29,7 @@ const ProtectedRoutes = ({ allowedRoles }) => {
     return <Outlet />;
   }
 
+  // If not authenticated, redirect to login
   return <Navigate to="/login" state={{ from: location }} replace />;
 };
 

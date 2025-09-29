@@ -49,10 +49,8 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
         yearValue = selectedYear;
       }
       
-      console.log('Fetching vehicle classification data with:', { monthNumber, yearValue, selectedMonth, selectedYear });
       
       const response = await getVehicleClassificationData(monthNumber, yearValue);
-      console.log('Vehicle classification data response:', response);
       
       // Debug: Log the raw data to check for FOR HRE entries
       if (response.success && response.data) {

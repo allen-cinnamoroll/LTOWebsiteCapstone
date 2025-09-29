@@ -62,17 +62,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       // 3. monthNumber=2, yearValue=2024 -> February 2024 only
       // 4. monthNumber=null, yearValue=null -> All data
       
-      console.log('Fetching municipality data with:', { monthNumber, yearValue, selectedMonth, selectedYear });
-      console.log('Title condition check:', { 
-        selectedYear, 
-        selectedMonth, 
-        yearIsAll: selectedYear === 'All', 
-        monthIsNotAll: selectedMonth !== 'All',
-        shouldShowSuffix: selectedYear === 'All' && selectedMonth && selectedMonth !== 'All'
-      });
       
       const response = await getMunicipalityRegistrationTotals(monthNumber, yearValue);
-      console.log('Municipality data response:', response);
       
       if (response.success) {
         setMunicipalityData(response.data);
@@ -106,12 +97,6 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   );
   const top5Municipalities = sortedMunicipalities.slice(0, 5);
   
-  console.log('Municipality data processing:', {
-    rawData: municipalityData,
-    sortedData: sortedMunicipalities,
-    top5: top5Municipalities,
-    hasData: municipalityData.length > 0
-  });
 
   // Trigger animation after data loads
   useEffect(() => {

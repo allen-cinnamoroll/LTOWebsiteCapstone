@@ -490,14 +490,14 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       
                       {/* Search Results Dropdown */}
                       {(searchResults.length > 0 || showNoResults) && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
                           {searchResults.map((driver) => (
                             <div
                               key={driver._id}
-                              className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0"
                               onClick={() => handleDriverSelect(driver)}
                             >
-                              <div className="font-medium">{driver.ownerRepresentativeName}</div>
+                              <div className="font-medium text-foreground">{driver.ownerRepresentativeName}</div>
                               <div className="text-sm text-muted-foreground">
                                 Birthdate: {driver.birthDate ? new Date(driver.birthDate).toLocaleDateString() : "Not provided"}
                               </div>
@@ -510,13 +510,13 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           {/* Add Driver Option */}
                           {showNoResults && searchResults.length === 0 && (
                             <div
-                              className="p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 bg-blue-25"
+                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 bg-accent/50"
                               onClick={handleAddDriver}
                             >
-                              <div className="font-medium text-blue-600">
+                              <div className="font-medium text-primary">
                                 + Add "{searchTerm}" as new driver
                               </div>
-                              <div className="text-sm text-blue-500">
+                              <div className="text-sm text-muted-foreground">
                                 Click to create a new driver record
                               </div>
                             </div>

@@ -140,18 +140,12 @@ export function ViolationAnalytics() {
         yearValue = year;
       }
       
-      console.log('🔍 Fetching violation analytics with filters:', { year, yearValue });
-      console.log('🔍 Token in localStorage:', localStorage.getItem('token') ? 'Present' : 'Missing');
       
       const response = await getViolationAnalytics({}, yearValue);
       
-      console.log('🔍 API Response:', response);
-      console.log('🔍 Response success:', response?.success);
-      console.log('🔍 Response data:', response?.data);
       
       if (response && response.success) {
         setAnalyticsData(response.data);
-        console.log('Analytics data set:', response.data);
         
         // Check if we have any data for the selected year
         if (year && year !== 'All' && response.data.totalViolations === 0) {

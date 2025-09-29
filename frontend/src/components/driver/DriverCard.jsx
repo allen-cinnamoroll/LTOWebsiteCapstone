@@ -31,7 +31,8 @@ const civilStatusMap = createCategoryMap({
 const DriverCard = () => {
   const params = useParams();
   const [loading, setLoading] = useState(true);
-  const { token } = useAuth();
+  const auth = useAuth();
+  const { token } = auth || {};
   const [driverData, setDriverData] = useState();
   const [showAlert, setShowAlert] = useState(false);
   const [submitting, setIsSubmitting] = useState(false);  

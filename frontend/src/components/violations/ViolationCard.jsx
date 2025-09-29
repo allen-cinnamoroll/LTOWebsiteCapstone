@@ -17,7 +17,8 @@ import { Edit } from "lucide-react";
 const ViolationCard = () => {
   const params = useParams();
   const [loading, setLoading] = useState(true);
-  const { token } = useAuth();
+  const auth = useAuth();
+  const { token } = auth || {};
   const [violationData, setViolationData] = useState();
   const location = useLocation();
   const navigate = useNavigate();
