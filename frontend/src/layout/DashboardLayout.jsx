@@ -1,5 +1,5 @@
 "use client";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import React from "react";
 import Header from "../components/nav/Header";
 import { AppSidebar } from "@/components/nav/AppSidebar";
@@ -23,6 +23,38 @@ import { ArrowLeft } from "lucide-react";
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Function to get page title based on current route
+  const getPageTitle = () => {
+    const path = location.pathname;
+    switch (path) {
+      case '/':
+        return 'Overview';
+      case '/driver':
+        return 'Drivers';
+      case '/vehicle':
+        return 'Vehicles';
+      case '/violation':
+        return 'Violations';
+      case '/accident':
+        return 'Accidents';
+      case '/analytics/registration':
+        return 'Registration Analytics';
+      case '/analytics/violation':
+        return 'Violation Analytics';
+      case '/analytics/accident':
+        return 'Accident Analytics';
+      case '/account/register':
+        return 'Register Account';
+      case '/account/update':
+        return 'Update Account';
+      case '/account/logs':
+        return 'Account Logs';
+      default:
+        return 'Overview';
+    }
+  };
   return (
     <>
       <SidebarProvider>
@@ -35,13 +67,13 @@ const DashboardLayout = () => {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
+                    <BreadcrumbLink href="/">
                       Dashboard
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Overview</BreadcrumbPage>
+                    <BreadcrumbPage>{getPageTitle()}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
