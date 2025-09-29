@@ -140,8 +140,13 @@
   
   /* Header specific background - theme compatible */
   .header-bg-white {
-    background-color: hsl(var(--background)) !important;
-    background: hsl(var(--background)) !important;
+    background-color: white !important;
+    background: white !important;
+  }
+  
+  .dark .header-bg-white {
+    background-color: black !important;
+    background: black !important;
   }
   
   /* Smooth animations for pie chart */

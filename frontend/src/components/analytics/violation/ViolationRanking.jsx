@@ -14,18 +14,18 @@ export function ViolationRanking({
 }) {
   if (loading) {
     return (
-      <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-md p-6">
+      <div className="bg-card border border-border rounded-lg p-6">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+          <div className="h-6 bg-muted rounded mb-4"></div>
           <div className="space-y-3">
             {[...Array(5)].map((_, index) => (
               <div key={index} className="flex items-center space-x-4">
-                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="w-8 h-8 bg-muted rounded"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                  <div className="h-4 bg-muted rounded"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
                 </div>
-                <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="w-16 h-6 bg-muted rounded"></div>
               </div>
             ))}
           </div>

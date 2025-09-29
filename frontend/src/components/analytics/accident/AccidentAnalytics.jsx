@@ -355,82 +355,28 @@ export function AccidentAnalytics() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowAdvancedCharts(!showAdvancedCharts)}
-                className="px-3 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-2"
-              >
-                <BarChart3 className="h-4 w-4" />
-                {showAdvancedCharts ? 'Hide Advanced' : 'Show Advanced'}
-              </button>
-              <Select value={timePeriod} onValueChange={setTimePeriod}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select time period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="week">Last Week</SelectItem>
-                  <SelectItem value="month">Last Month</SelectItem>
-                  <SelectItem value="3months">Last 3 Months</SelectItem>
-                  <SelectItem value="6months">Last 6 Months</SelectItem>
-                  <SelectItem value="year">Last Year</SelectItem>
-                  <SelectItem value="alltime">All Time</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="animate-pulse">
+                <div className="h-8 bg-muted rounded w-32"></div>
+              </div>
+              <div className="animate-pulse">
+                <div className="h-8 bg-muted rounded w-40"></div>
+              </div>
             </div>
           </div>
 
-          {/* Enhanced Filter Controls */}
+          {/* Enhanced Filter Controls - Skeleton Loading */}
           <div className="flex flex-wrap items-center gap-4 p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Filters:</span>
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded w-32 mb-2"></div>
+              <div className="h-8 bg-muted rounded w-24"></div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-muted-foreground">Severity:</label>
-              <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Severities</SelectItem>
-                  <SelectItem value="fatal">Fatal</SelectItem>
-                  <SelectItem value="severe">Severe</SelectItem>
-                  <SelectItem value="moderate">Moderate</SelectItem>
-                  <SelectItem value="minor">Minor</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded w-32 mb-2"></div>
+              <div className="h-8 bg-muted rounded w-24"></div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-muted-foreground">Vehicle Type:</label>
-              <Select value={selectedVehicleType} onValueChange={setSelectedVehicleType}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="car">Car</SelectItem>
-                  <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                  <SelectItem value="truck">Truck</SelectItem>
-                  <SelectItem value="bus">Bus</SelectItem>
-                  <SelectItem value="van">Van</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-muted-foreground">Chart Type:</label>
-              <Select value={chartType} onValueChange={setChartType}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="area">Area Chart</SelectItem>
-                  <SelectItem value="line">Line Chart</SelectItem>
-                  <SelectItem value="bar">Bar Chart</SelectItem>
-                  <SelectItem value="composed">Composed</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded w-32 mb-2"></div>
+              <div className="h-8 bg-muted rounded w-24"></div>
             </div>
           </div>
         </div>

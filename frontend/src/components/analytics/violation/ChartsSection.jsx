@@ -27,18 +27,18 @@ export function ChartsSection({
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Violations by Type Chart */}
-      <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-md p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="animate-pulse">
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-6 bg-muted rounded mb-4"></div>
+            <div className="h-64 bg-muted rounded"></div>
           </div>
         </div>
         
         {/* Yearly Trends Chart */}
-        <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-md p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="animate-pulse">
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-            <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-6 bg-muted rounded mb-4"></div>
+            <div className="h-64 bg-muted rounded"></div>
           </div>
         </div>
       </div>

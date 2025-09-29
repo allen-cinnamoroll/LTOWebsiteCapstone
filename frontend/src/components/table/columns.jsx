@@ -204,8 +204,21 @@ export const driverColumns = (onEdit, onDelete) => [
     cell: ({ row }) => {
       const plateNo = row.getValue("plateNo");
       const plateNoArray = Array.isArray(plateNo) ? plateNo : [plateNo];
-      return <div className="">{plateNoArray.join(", ")}</div>;
+      return (
+        <div className="flex flex-col">
+          {plateNoArray.map((plate, index) => (
+            <div key={index} className="">
+              {plate}
+            </div>
+          ))}
+        </div>
+      );
     },
+  },
+  {
+    accessorKey: "fileNo",
+    header: "File No.",
+    cell: ({ row }) => <div className="">{row.getValue("fileNo") || "N/A"}</div>,
   },
   {
     accessorKey: "ownerRepresentativeName",

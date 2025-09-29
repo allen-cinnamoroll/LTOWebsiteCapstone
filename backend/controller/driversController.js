@@ -270,7 +270,7 @@ export const searchDrivers = async (req, res) => {
 
     const drivers = await DriverModel.find({
       ownerRepresentativeName: { $regex: name.trim(), $options: 'i' }
-    }).select("_id ownerRepresentativeName plateNo birthDate").limit(10);
+    }).select("_id ownerRepresentativeName plateNo fileNo birthDate").limit(10);
 
     res.status(200).json({
       success: true,

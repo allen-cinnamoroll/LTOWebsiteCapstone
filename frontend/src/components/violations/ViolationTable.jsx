@@ -91,9 +91,9 @@ const ViolationTable = ({
           <DataTableViewOptions table={table} />
         </div>
       </div>
-      <div className="rounded-md border flex-1 overflow-hidden">
+      <div className="rounded-md border flex-1 overflow-hidden bg-white dark:bg-black border-gray-400 dark:border-gray-600">
         <Table>
-          <TableHeader className="text-xs md:text-sm bg-muted">
+          <TableHeader className="text-xs md:text-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -107,7 +107,7 @@ const ViolationTable = ({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="text-xs md:text-sm">
+          <TableBody className="text-xs md:text-sm bg-white dark:bg-black">
             {loading ? (
               <TableSkeleton
                 rowCount={5}

@@ -192,23 +192,33 @@ export function RegistrationAnalytics() {
           </p>
         </div>
         
-        <div className="registration-analytics-controls">
-          {/* Month Dropdown */}
-          <div className="registration-analytics-dropdown" ref={monthDropdownRef}>
-            <button
-              className={`registration-analytics-dropdown-button ${!selectedMonth ? 'placeholder' : ''}`}
-              onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
-            >
-              <span>{selectedMonth || 'Month'}</span>
-              <svg
-                className={`registration-analytics-chevron ${isMonthDropdownOpen ? 'open' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {loading ? (
+          <div className="registration-analytics-controls">
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-32"></div>
+            </div>
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-32"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="registration-analytics-controls">
+            {/* Month Dropdown */}
+            <div className="registration-analytics-dropdown" ref={monthDropdownRef}>
+              <button
+                className={`registration-analytics-dropdown-button ${!selectedMonth ? 'placeholder' : ''}`}
+                onClick={() => setIsMonthDropdownOpen(!isMonthDropdownOpen)}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+                <span>{selectedMonth || 'Month'}</span>
+                <svg
+                  className={`registration-analytics-chevron ${isMonthDropdownOpen ? 'open' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             
             {isMonthDropdownOpen && (
               <div 
@@ -307,6 +317,7 @@ export function RegistrationAnalytics() {
             )}
           </div>
         </div>
+        )}
       </div>
       
       

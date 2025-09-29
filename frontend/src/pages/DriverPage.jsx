@@ -47,6 +47,7 @@ const DriverPage = () => {
         return {
           _id: dData._id,
           plateNo: dData.plateNo,
+          fileNo: dData.fileNo,
           ownerRepresentativeName: dData.ownerRepresentativeName,
           fullname: dData.fullname,
           birthDate: dData.birthDate, // Keep as Date object for proper handling in columns
