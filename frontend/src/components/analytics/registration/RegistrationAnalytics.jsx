@@ -317,8 +317,63 @@ export function RegistrationAnalytics() {
         </div>
       )}
 
-      {/* Metrics Section - Individual Cards */}
-      <div className="registration-analytics-fade-in">
+      {/* Loading State */}
+      {loading ? (
+        <div className="space-y-6">
+          {/* Loading Controls */}
+          <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg">
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded w-32 mb-2"></div>
+              <div className="h-8 bg-muted rounded w-24"></div>
+            </div>
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded w-32 mb-2"></div>
+              <div className="h-8 bg-muted rounded w-24"></div>
+            </div>
+          </div>
+
+          {/* Loading Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-6">
+                <div className="animate-pulse">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <div className="h-4 bg-muted rounded w-32 mb-2"></div>
+                      <div className="h-8 bg-muted rounded w-16 mb-2"></div>
+                      <div className="h-3 bg-muted rounded w-24"></div>
+                    </div>
+                    <div className="w-12 h-12 bg-muted rounded"></div>
+                  </div>
+                  <div className="h-1 bg-muted rounded w-full"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Loading Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-card border border-border rounded-lg p-6">
+                <div className="animate-pulse">
+                  <div className="h-6 bg-muted rounded w-48 mb-4"></div>
+                  <div className="h-64 bg-muted rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Loading Additional Chart */}
+          <div className="bg-card border border-border rounded-lg p-6">
+            <div className="animate-pulse">
+              <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+              <div className="h-96 bg-muted rounded"></div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Metrics Section - Individual Cards */
+        <div className="registration-analytics-fade-in">
         <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {/* Registered Vehicles Card */}
@@ -482,7 +537,7 @@ export function RegistrationAnalytics() {
           </div>
         </div>
       </div>
-
+      )}
 
     </div>
   );
