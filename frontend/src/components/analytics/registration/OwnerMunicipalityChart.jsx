@@ -111,14 +111,14 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
             <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
                 <span className="text-green-600 dark:text-green-400 text-xs">
                   <span className="font-semibold">{withLicense.toLocaleString()}</span> With License
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span className="text-orange-600 dark:text-orange-400 text-xs">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+                <span className="text-blue-600 dark:text-blue-400 text-xs">
                   <span className="font-semibold">{withoutLicense.toLocaleString()}</span> Without License
                 </span>
               </div>
@@ -193,7 +193,7 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
       </div>
 
       {/* Chart Container */}
-      <div className="h-80 w-full min-h-[320px] flex-1">
+        <div className="h-80 w-full min-h-[320px] flex-1">
         {loading || parentLoading ? (
           <div className="flex items-center justify-center w-full h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -207,39 +207,33 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
             <p>No data available</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%" minHeight={320}>
+          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
             <BarChart
               data={formatChartData(ownerData)}
               margin={{ 
-                top: 20, 
-                right: isMobile ? 20 : 50, 
+                top: 0, 
+                right: isMobile ? 5 : 10, 
                 left: isMobile ? 5 : 10, 
-                bottom: 20 
+                bottom: isMobile ? 40 : 30 
               }}
-              barCategoryGap="10%"
+              barCategoryGap="3%"
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
               <XAxis 
                 dataKey="name" 
                 stroke="#6b7280"
-                fontSize={isMobile ? 9 : 11}
-                height={isMobile ? 60 : 50}
-                interval={isMobile ? 0 : 40}
-                angle={isMobile ? -45 : 0}
-                textAnchor={isMobile ? 'end' : 'middle'}
+                fontSize={isMobile ? 7 : 9}
+                height={isMobile ? 35 : 25}
+                interval={0}
+                angle={-45}
+                textAnchor="end"
                 tick={{ fill: '#6b7280', fontWeight: 500 }}
                 tickFormatter={(value) => {
-                  if (isMobile) {
-                    if (value.length > 8) {
-                      return value.substring(0, 8) + '...';
-                    }
-                    return value;
-                  } else {
-                    if (value.length > 12) {
-                      return value.substring(0, 12) + '...';
-                    }
-                    return value;
+                  // Truncate long municipality names to prevent overlap
+                  if (value.length > 10) {
+                    return value.substring(0, 10) + '...';
                   }
+                  return value;
                 }}
               />
               <YAxis 
@@ -247,28 +241,41 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
                 fontSize={isMobile ? 10 : 12}
                 tickFormatter={(value) => value.toLocaleString()}
                 tick={{ fill: '#6b7280', fontWeight: 500 }}
-                width={isMobile ? 60 : 80}
+                width={isMobile ? 50 : 70}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend content={<CustomLegend />} />
               <Bar 
                 dataKey="withLicense" 
                 stackId="owners"
                 name="With Driver's License"
-                fill="#10b981"
+                fill="#22c55e"
                 radius={[0, 0, 0, 0]}
-                maxBarSize={isMobile ? 80 : 120}
+                maxBarSize={isMobile ? 150 : 200}
               />
               <Bar 
                 dataKey="withoutLicense" 
                 stackId="owners"
                 name="Without Driver's License"
-                fill="#f97316"
+                fill="#3b82f6"
                 radius={[4, 4, 0, 0]}
-                maxBarSize={isMobile ? 80 : 120}
+                maxBarSize={isMobile ? 150 : 200}
               />
             </BarChart>
           </ResponsiveContainer>
+        )}
+        
+        {/* Legend positioned below the chart */}
+        {ownerData.length > 0 && (
+          <div className="flex justify-center gap-6 mt-3">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+              <span className="text-xs text-gray-600 dark:text-gray-400">With Driver's License</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+              <span className="text-xs text-gray-600 dark:text-gray-400">Without Driver's License</span>
+            </div>
+          </div>
         )}
       </div>
     </div>
