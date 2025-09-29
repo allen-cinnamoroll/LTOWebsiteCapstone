@@ -3,12 +3,12 @@ import React from 'react';
 export function ViolationCombinations({ displayData, loading, getCombinationRecommendation }) {
   if (loading) {
     return (
-        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-md p-6">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
           <div className="space-y-4">
             {[...Array(3)].map((_, index) => (
-              <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div key={index} className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
                 <div className="space-y-2">
                   <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
                   <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
@@ -26,7 +26,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
   const violationPatterns = displayData?.violationPatterns || [];
 
   return (
-        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
         Violation Combinations & Recommendations
       </h3>

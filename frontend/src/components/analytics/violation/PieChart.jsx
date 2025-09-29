@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export function PieChart({ data, title, loading }) {
+  const [hoveredSegment, setHoveredSegment] = useState(null);
+  const [animatedSegments, setAnimatedSegments] = useState([]);
   if (loading) {
     return (
       <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-md p-6">
@@ -68,7 +70,24 @@ export function PieChart({ data, title, loading }) {
     '#8B5CF6'  // Purple
   ];
 
+  const gradients = [
+    'url(#gradient1)',
+    'url(#gradient2)', 
+    'url(#gradient3)',
+    'url(#gradient4)',
+    'url(#gradient5)'
+  ];
+
   const getColor = (index) => colors[index] || '#6B7280';
+  const getGradient = (index) => gradients[index] || colors[index] || '#6B7280';
+
+  // Animation effect for segments
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedSegments(segments);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [segments]);
 
   // Create SVG path for pie segment
   const createArcPath = (startAngle, endAngle, radius = 80) => {
@@ -97,34 +116,93 @@ export function PieChart({ data, title, loading }) {
   };
 
   return (
-    <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></div>
-        {title}
-      </h3>
+    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-green-300/10 to-teal-400/10 rounded-full translate-y-12 -translate-x-12"></div>
+      
+      <div className="relative z-10">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md mr-3">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+            </svg>
+          </div>
+          {title}
+        </h3>
       
       <div className="flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-6">
         {/* Pie Chart SVG */}
         <div className="flex-shrink-0">
-          <svg width="200" height="200" viewBox="0 0 200 200" className="mx-auto">
-            {segments.map((segment, index) => (
+          <svg width="220" height="220" viewBox="0 0 200 200" className="mx-auto drop-shadow-lg">
+            {/* Gradient definitions */}
+            <defs>
+              <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#3B82F6" />
+                <stop offset="100%" stopColor="#1D4ED8" />
+              </linearGradient>
+              <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#10B981" />
+                <stop offset="100%" stopColor="#047857" />
+              </linearGradient>
+              <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#F59E0B" />
+                <stop offset="100%" stopColor="#D97706" />
+              </linearGradient>
+              <linearGradient id="gradient4" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#EF4444" />
+                <stop offset="100%" stopColor="#DC2626" />
+              </linearGradient>
+              <linearGradient id="gradient5" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8B5CF6" />
+                <stop offset="100%" stopColor="#7C3AED" />
+              </linearGradient>
+            </defs>
+            
+            {animatedSegments.map((segment, index) => (
               <path
                 key={index}
                 d={createArcPath(segment.startAngle, segment.endAngle)}
-                fill={getColor(index)}
+                fill={getGradient(index)}
                 stroke="white"
-                strokeWidth="2"
-                className="hover:opacity-80 transition-opacity duration-200"
+                strokeWidth="3"
+                className={`transition-all duration-300 cursor-pointer ${
+                  hoveredSegment === index 
+                    ? 'opacity-90 transform scale-1.05' 
+                    : 'opacity-100 hover:opacity-90'
+                }`}
+                onMouseEnter={() => setHoveredSegment(index)}
+                onMouseLeave={() => setHoveredSegment(null)}
+                style={{
+                  filter: hoveredSegment === index ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' : 'none'
+                }}
               />
             ))}
+            
             {/* Center circle for donut effect */}
             <circle
               cx="100"
               cy="100"
-              r="40"
+              r="45"
               fill="white"
-              className="dark:fill-gray-900"
+              className="dark:fill-black drop-shadow-md"
             />
+            <circle
+              cx="100"
+              cy="100"
+              r="40"
+              fill="url(#centerGradient)"
+              className="drop-shadow-sm"
+            />
+            
+            {/* Center gradient */}
+            <defs>
+              <radialGradient id="centerGradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#F8FAFC" />
+                <stop offset="100%" stopColor="#E2E8F0" />
+              </radialGradient>
+            </defs>
+            
             <text
               x="100"
               y="95"
@@ -137,36 +215,51 @@ export function PieChart({ data, title, loading }) {
               x="100"
               y="110"
               textAnchor="middle"
-              className="text-lg font-bold text-gray-900 dark:text-white"
+              className="text-xl font-black text-gray-900 dark:text-white"
             >
               {total.toLocaleString()}
             </text>
           </svg>
         </div>
 
-        {/* Legend */}
+        {/* Enhanced Legend */}
         <div className="flex-1 space-y-3">
           {segments.map((segment, index) => (
-            <div key={index} className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <div className="flex items-center space-x-3">
-                <div
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: getColor(index) }}
-                ></div>
+            <div 
+              key={index} 
+              className={`flex items-center justify-between p-4 border-2 rounded-xl transition-all duration-300 cursor-pointer ${
+                hoveredSegment === index
+                  ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-lg transform scale-105'
+                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
+              onMouseEnter={() => setHoveredSegment(index)}
+              onMouseLeave={() => setHoveredSegment(null)}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div
+                    className="w-6 h-6 rounded-full shadow-md"
+                    style={{ backgroundColor: getColor(index) }}
+                  ></div>
+                  {hoveredSegment === index && (
+                    <div className="absolute inset-0 w-6 h-6 rounded-full animate-ping opacity-75"
+                         style={{ backgroundColor: getColor(index) }}></div>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                     {segment._id || 'Unknown'}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                     {segment.percentage.toFixed(1)}% of total
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm font-bold text-gray-900 dark:text-white">
+                <div className="text-lg font-black text-gray-900 dark:text-white">
                   {segment.count?.toLocaleString() || 0}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                   violations
                 </div>
               </div>
@@ -176,10 +269,18 @@ export function PieChart({ data, title, loading }) {
       </div>
       
       {top5Data.length < 5 && (
-        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          Only {top5Data.length} violation types available
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+            <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+              Only {top5Data.length} violation types available
+            </span>
+          </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
