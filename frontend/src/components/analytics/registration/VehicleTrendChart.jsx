@@ -48,24 +48,13 @@ const VehicleTrendChart = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [customStartYear, setCustomStartYear] = useState(() => {
-    return localStorage.getItem('vehicleTrendCustomStartYear') || '';
-  });
-  const [customEndYear, setCustomEndYear] = useState(() => {
-    return localStorage.getItem('vehicleTrendCustomEndYear') || '';
-  });
-  const [isCustomRange, setIsCustomRange] = useState(() => {
-    return localStorage.getItem('vehicleTrendIsCustomRange') === 'true';
-  });
-  const [viewType, setViewType] = useState(() => {
-    // Load saved view type from localStorage, default to 'year' if not found
-    return localStorage.getItem('vehicleTrendViewType') || 'year';
-  });
+  const [showCustomRangeModal, setShowCustomRangeModal] = useState(false);
+  const [customStartYear, setCustomStartYear] = useState('');
+  const [customEndYear, setCustomEndYear] = useState('');
+  const [isCustomRange, setIsCustomRange] = useState(false);
+  const [viewType, setViewType] = useState('year');
   const [showMonthModal, setShowMonthModal] = useState(false);
-  const [selectedYear, setSelectedYear] = useState(() => {
-    // Load saved selected year from localStorage
-    return localStorage.getItem('vehicleTrendSelectedYear') || '';
-  });
+  const [selectedYear, setSelectedYear] = useState('');
   const [selectedMunicipality, setSelectedMunicipality] = useState(() => {
     // Load saved municipality from localStorage, default to 'All'
     return localStorage.getItem('vehicleTrendMunicipality') || 'All';
@@ -222,7 +211,7 @@ const VehicleTrendChart = () => {
     if (viewType === 'year') {
       fetchYearlyData(startYear, endYear, selectedMunicipality);
     }
-    setShowFilterModal(false);
+    setShowCustomRangeModal(false);
   };
 
   // Handle reset filter
@@ -240,7 +229,7 @@ const VehicleTrendChart = () => {
     if (viewType === 'year') {
       fetchYearlyData(currentYear - 4, currentYear, selectedMunicipality); // Default 5 years
     }
-    setShowFilterModal(false);
+    setShowCustomRangeModal(false);
   };
 
   // Handle view type change
@@ -255,9 +244,14 @@ const VehicleTrendChart = () => {
       setCustomStartYear('');
       setCustomEndYear('');
       fetchYearlyData(currentYear - 4, currentYear, selectedMunicipality);
+      setShowFilterModal(false);
     } else if (type === 'month') {
       // Open month selection modal
       setShowMonthModal(true);
+      setShowFilterModal(false);
+    } else if (type === 'customRange') {
+      // Just close the dropdown, don't open modal yet
+      setShowFilterModal(false);
     }
   };
 
@@ -290,26 +284,34 @@ const VehicleTrendChart = () => {
     }
   };
 
-  // Load initial data based on saved preferences
+  // Load initial data - always start with default yearly view
   useEffect(() => {
-    const savedViewType = localStorage.getItem('vehicleTrendViewType') || 'year';
-    const savedSelectedYear = localStorage.getItem('vehicleTrendSelectedYear') || '';
-    const savedIsCustomRange = localStorage.getItem('vehicleTrendIsCustomRange') === 'true';
-    const savedStartYear = localStorage.getItem('vehicleTrendCustomStartYear') || '';
-    const savedEndYear = localStorage.getItem('vehicleTrendCustomEndYear') || '';
     const savedMunicipality = localStorage.getItem('vehicleTrendMunicipality') || 'All';
     
-    if (savedViewType === 'month' && savedSelectedYear) {
-      // Load monthly data for saved year
-      fetchMonthlyData(savedSelectedYear, savedMunicipality);
-    } else if (savedViewType === 'year' && savedIsCustomRange && savedStartYear && savedEndYear) {
-      // Load yearly data with saved custom range
-      fetchYearlyData(parseInt(savedStartYear), parseInt(savedEndYear), savedMunicipality);
-    } else {
-      // Load yearly data with default 5-year range
-      fetchYearlyData(currentYear - 4, currentYear, savedMunicipality);
-    }
+    // Always load yearly data with default 5-year range on initial load
+    fetchYearlyData(currentYear - 4, currentYear, savedMunicipality);
+    
+    // Reset any saved preferences to default yearly view
+    localStorage.setItem('vehicleTrendViewType', 'year');
+    localStorage.removeItem('vehicleTrendSelectedYear');
+    localStorage.removeItem('vehicleTrendIsCustomRange');
+    localStorage.removeItem('vehicleTrendCustomStartYear');
+    localStorage.removeItem('vehicleTrendCustomEndYear');
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showFilterModal && !event.target.closest('.filter-dropdown')) {
+        setShowFilterModal(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showFilterModal]);
 
   // Ensure state consistency - if viewType is month but no selectedYear, reset to year
   useEffect(() => {
@@ -368,7 +370,7 @@ const VehicleTrendChart = () => {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
-            <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M3 3v18h18"/>
               <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
               <path d="M16 5l3 3-3 3"/>
@@ -391,17 +393,72 @@ const VehicleTrendChart = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleFilterClick}
-            className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
-          >
-            Filter
-          </button>
+          <div className="relative">
+            <button
+              onClick={handleFilterClick}
+              className="p-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+              title="Filter options"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+            </button>
+            
+            {/* Filter Dropdown */}
+            {showFilterModal && (
+              <div className="filter-dropdown absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div className="p-2">
+                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">View Type</div>
+                  
+                  <button
+                    onClick={() => handleViewTypeChange('year')}
+                    className={`w-full text-left px-2 py-2 text-sm rounded-md transition-colors ${
+                      viewType === 'year' 
+                        ? 'bg-blue-500 text-white' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    By Year
+                  </button>
+                  
+                  <button
+                    onClick={() => handleViewTypeChange('month')}
+                    className={`w-full text-left px-2 py-2 text-sm rounded-md transition-colors ${
+                      viewType === 'month' 
+                        ? 'bg-blue-500 text-white' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    By Month
+                  </button>
+                  
+                  <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                  
+                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 px-2">Date Range</div>
+                  
+                  <button
+                    onClick={() => {
+                      setShowFilterModal(false);
+                      setShowCustomRangeModal(true);
+                    }}
+                    className="w-full text-left px-2 py-2 text-sm rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Custom Range
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          
           <button
             onClick={() => setShowMunicipalityModal(true)}
-            className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
+            className="p-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors"
+            title="Location options"
           >
-            Location
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
           </button>
         </div>
       </div>
@@ -520,22 +577,24 @@ const VehicleTrendChart = () => {
          )}
        </div>
 
-       {/* Filter Modal */}
-       {showFilterModal && (
+       {/* Custom Range Modal - Show when custom range modal is open */}
+       {showCustomRangeModal && (
          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-           <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-6 w-full max-w-md shadow-2xl dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
              <div className="flex items-center justify-between mb-6">
                <div className="flex items-center gap-3">
                  <div className="w-8 h-8 flex items-center justify-center">
-                   <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                   <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                      <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                    </svg>
                  </div>
-                 <h3 className="text-lg font-bold text-foreground">Filter Date Range</h3>
+                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                   Filter Date Range
+                 </h3>
                </div>
                <button
-                 onClick={() => setShowFilterModal(false)}
-                 className="p-2 hover:bg-muted rounded-md transition-colors"
+                 onClick={() => setShowCustomRangeModal(false)}
+                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                >
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -546,7 +605,7 @@ const VehicleTrendChart = () => {
              <div className="space-y-4">
                <div className="grid grid-cols-2 gap-4">
                  <div>
-                   <label className="block text-sm font-medium text-foreground mb-2">Start Year</label>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Year</label>
                    <input
                      type="number"
                      value={customStartYear}
@@ -554,11 +613,11 @@ const VehicleTrendChart = () => {
                      placeholder="e.g., 2020"
                      min="2000"
                      max={currentYear}
-                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                    />
                  </div>
                  <div>
-                   <label className="block text-sm font-medium text-foreground mb-2">End Year</label>
+                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Year</label>
                    <input
                      type="number"
                      value={customEndYear}
@@ -566,7 +625,7 @@ const VehicleTrendChart = () => {
                      placeholder="e.g., 2025"
                      min="2000"
                      max={currentYear}
-                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                    />
                  </div>
                </div>
@@ -580,7 +639,7 @@ const VehicleTrendChart = () => {
                <div className="flex items-center gap-3 pt-4">
                  <button
                    onClick={handleApplyFilter}
-                   className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-md transition-colors"
+                   className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors"
                  >
                    Apply Filter
                  </button>
@@ -592,8 +651,8 @@ const VehicleTrendChart = () => {
                  </button>
                </div>
 
-               <div className="text-xs text-muted-foreground text-center pt-2">
-                 Default range: Last 5 years ({currentYear - 4} - {currentYear})
+               <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
+                 Default range: Last 5 years (2021 - 2025)
                </div>
              </div>
            </div>
@@ -603,19 +662,19 @@ const VehicleTrendChart = () => {
        {/* Month Selection Modal */}
        {showMonthModal && (
          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-           <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-6 w-full max-w-md shadow-2xl dark:!bg-black dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
              <div className="flex items-center justify-between mb-6">
                <div className="flex items-center gap-3">
                  <div className="w-8 h-8 flex items-center justify-center">
-                   <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                   <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                      <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                    </svg>
                  </div>
-                 <h3 className="text-lg font-bold text-foreground">Select Year for Monthly View</h3>
+                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Select Year for Monthly View</h3>
                </div>
                <button
                  onClick={() => setShowMonthModal(false)}
-                 className="p-2 hover:bg-muted rounded-md transition-colors"
+                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                >
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -624,12 +683,12 @@ const VehicleTrendChart = () => {
              </div>
 
              <div className="space-y-4">
-               <p className="text-sm text-muted-foreground">
+               <p className="text-sm text-gray-600 dark:text-gray-400">
                  Enter a year to view monthly vehicle registration trends:
                </p>
                
                <div>
-                 <label className="block text-sm font-medium text-foreground mb-2">Year</label>
+                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Year</label>
                  <input
                    type="number"
                    value={selectedYear}
@@ -637,7 +696,7 @@ const VehicleTrendChart = () => {
                    placeholder="e.g., 2025"
                    min="2000"
                    max={currentYear}
-                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                    onKeyPress={(e) => {
                      if (e.key === 'Enter') {
                        const year = parseInt(selectedYear);
@@ -665,7 +724,7 @@ const VehicleTrendChart = () => {
                        setError(`Please enter a valid year between 2000 and ${currentYear}`);
                      }
                    }}
-                   className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-md transition-colors"
+                   className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors"
                  >
                    Apply
                  </button>
@@ -677,7 +736,7 @@ const VehicleTrendChart = () => {
                  </button>
                </div>
 
-               <div className="text-xs text-muted-foreground text-center pt-2">
+               <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
                  Available years: 2000 - {currentYear}
                </div>
              </div>

@@ -462,7 +462,7 @@ export function RegistrationAnalytics() {
             </div>
           </div>
           
-          {/* Owner Municipality Chart - Positioned below Vehicle Trend Chart */}
+          {/* Owner Municipality Chart - Below Vehicle Trend Chart */}
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 lg:flex-1">
               {/* Empty space to maintain layout balance */}
