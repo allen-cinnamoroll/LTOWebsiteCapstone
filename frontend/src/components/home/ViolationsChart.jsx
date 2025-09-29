@@ -144,8 +144,9 @@ export function ViolationsChart() {
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
         {loading ? (
-          <div className="flex items-center justify-center h-[250px]">
-            <div className="text-muted-foreground">Loading chart data...</div>
+          <div className="animate-pulse">
+            <div className="h-6 bg-muted rounded w-48 mb-4"></div>
+            <div className="h-[250px] bg-muted rounded"></div>
           </div>
         ) : error ? (
           <div className="flex items-center justify-center h-[250px]">

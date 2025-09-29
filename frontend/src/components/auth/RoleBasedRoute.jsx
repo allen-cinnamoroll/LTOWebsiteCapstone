@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 const RoleBasedRoute = ({ allowedRoles, children }) => {
-  const { userData } = useAuth();
+  const { userData, loading } = useAuth();
   const location = useLocation();
   const userRole = userData?.role;
 

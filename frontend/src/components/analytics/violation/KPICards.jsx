@@ -5,7 +5,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 animate-pulse">
+          <div key={index} className="bg-white ~:bg-gray-800 rounded-lg shadow-md p-6 animate-pulse">
             <div className="flex items-center">
               <div className="flex-1">
                 <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
@@ -68,26 +68,22 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
         </div>
       </div>
 
-      {/* Most Common Violation KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-orange-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-full -translate-y-4 translate-x-4"></div>
+      {/* Apprehending Officers KPI */}
+      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 rounded-full -translate-y-4 translate-x-4"></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Most Common</p>
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Apprehending Officers</p>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white truncate mb-1">
-              {displayData?.mostCommonViolations?.[0]?._id || 'N/A'}
-            </p>
-            <p className="text-xs font-medium text-orange-600 dark:text-orange-400">
-              {displayData?.mostCommonViolations?.[0]?.count || 0} occurrences
-            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{displayData?.totalOfficers || 0}</p>
+            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Active officers</p>
           </div>
           <div className="ml-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500/50 to-orange-600/50 rounded-lg flex items-center justify-center shadow-md">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/50 to-emerald-600/50 rounded-lg flex items-center justify-center shadow-md">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
           </div>

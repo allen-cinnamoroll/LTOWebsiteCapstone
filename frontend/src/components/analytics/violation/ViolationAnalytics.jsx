@@ -5,8 +5,7 @@ import {
   ChartsSection, 
   ViolationRanking, 
   ViolationCombinations, 
-  LineChartModal, 
-  FilterControls 
+  LineChartModal
 } from './index';
 
 // Counter animation hook
@@ -47,7 +46,7 @@ export function ViolationAnalytics() {
   
   // Pagination state for violation ranking
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   // Modal and filtering state for line chart
   const [isLineChartModalOpen, setIsLineChartModalOpen] = useState(false);
@@ -140,12 +139,18 @@ export function ViolationAnalytics() {
         yearValue = year;
       }
       
+      console.log('🔍 Fetching violation analytics with filters:', { year, yearValue });
+      console.log('🔍 Token in localStorage:', localStorage.getItem('token') ? 'Present' : 'Missing');
       
       const response = await getViolationAnalytics({}, yearValue);
       
+      console.log('🔍 API Response:', response);
+      console.log('🔍 Response success:', response?.success);
+      console.log('🔍 Response data:', response?.data);
       
       if (response && response.success) {
         setAnalyticsData(response.data);
+        console.log('Analytics data set:', response.data);
         
         // Check if we have any data for the selected year
         if (year && year !== 'All' && response.data.totalViolations === 0) {
@@ -279,16 +284,6 @@ export function ViolationAnalytics() {
           </p>
         </div>
         
-        {/* Filter Controls */}
-        <FilterControls
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
-          isYearDropdownOpen={isYearDropdownOpen}
-          setIsYearDropdownOpen={setIsYearDropdownOpen}
-          years={years}
-          yearDropdownRef={yearDropdownRef}
-          handleYearSelect={handleYearSelect}
-        />
       </div>
       
       {/* Error Message */}
@@ -315,36 +310,21 @@ export function ViolationAnalytics() {
         topOfficer={analyticsData?.topOfficers?.[0]}
       />
 
-      {/* Charts Section */}
+      {/* Charts Section with Violation Ranking and Combinations */}
       <ChartsSection
         displayData={analyticsData}
         loading={loading}
         setIsLineChartModalOpen={setIsLineChartModalOpen}
+        currentViolations={currentViolations}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        totalViolationItems={totalViolationItems}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        handlePrevPage={handlePrevPage}
+        handleNextPage={handleNextPage}
+        getCombinationRecommendation={getCombinationRecommendation}
       />
-
-      {/* Violation Ranking and Recommended Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Top Violation Ranking */}
-        <ViolationRanking
-          displayData={analyticsData}
-          loading={loading}
-          currentViolations={currentViolations}
-          startIndex={startIndex}
-          endIndex={endIndex}
-          totalViolationItems={totalViolationItems}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          handlePrevPage={handlePrevPage}
-          handleNextPage={handleNextPage}
-        />
-
-        {/* Violation Combinations and Recommended Actions */}
-        <ViolationCombinations
-          displayData={analyticsData}
-          loading={loading}
-          getCombinationRecommendation={getCombinationRecommendation}
-        />
-      </div>
 
       {/* Line Chart Modal */}
       <LineChartModal
