@@ -482,7 +482,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-blue-500" />
-            Enhanced Accident Map
+            Accident Map
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -504,7 +504,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           <div>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-blue-500" />
-              Enhanced Accident Map
+              Accident Map
             </CardTitle>
             <CardDescription>
               Interactive map with clustering, heat layers, and advanced filtering

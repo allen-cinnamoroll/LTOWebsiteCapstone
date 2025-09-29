@@ -21,33 +21,55 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = JSON.parse(localStorage.getItem("userData"));
-    if (token) {
+    const initializeAuth = () => {
       try {
-        const decoded = jwtDecode(token);
-        if (isTokenExpired(decoded)) {
-          // Clear expired token without navigation
-          localStorage.removeItem("token");
-          localStorage.removeItem("userData");
+        const token = localStorage.getItem("token");
+        const userDataStr = localStorage.getItem("userData");
+        const userData = userDataStr ? JSON.parse(userDataStr) : null;
+        
+        if (token) {
+          try {
+            const decoded = jwtDecode(token);
+            if (isTokenExpired(decoded)) {
+              // Clear expired token without navigation
+              localStorage.removeItem("token");
+              localStorage.removeItem("userData");
+              setToken(null);
+              setUserData(null);
+              setIsAuthenticated(false);
+            } else {
+              // Token is not expired, use local validation for now
+              // TODO: Add backend validation when the endpoint is available
+              setToken(token);
+              setUserData(userData);
+              setIsAuthenticated(true);
+            }
+          } catch (error) {
+            // Clear invalid token without navigation
+            localStorage.removeItem("token");
+            localStorage.removeItem("userData");
+            setToken(null);
+            setUserData(null);
+            setIsAuthenticated(false);
+          }
+        } else {
+          // No token, user is not authenticated
           setToken(null);
           setUserData(null);
           setIsAuthenticated(false);
-        } else {
-          setToken(token);
-          setUserData(userData);
-          setIsAuthenticated(true);
         }
       } catch (error) {
-        // Clear invalid token without navigation
-        localStorage.removeItem("token");
-        localStorage.removeItem("userData");
+        // Handle any errors during initialization
+        console.error("Auth initialization error:", error);
         setToken(null);
         setUserData(null);
         setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false); // Always set loading to false
       }
-    }
-    setIsLoading(false); // Set loading to false after checking auth state
+    };
+
+    initializeAuth();
   }, []);
 
   const login = (newToken) => {
@@ -220,15 +242,28 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]); // Only depend on token, not isAuthenticated to prevent loops
 
-  // If loading, do not render children yet
+  // If loading, show loading spinner
   if (isLoading) {
-    return <div className="h-screen my-auto mx-auto"></div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
+
+  const contextValue = {
+    token,
+    isAuthenticated,
+    login,
+    logout,
+    updateToken,
+    userData,
+    setUserData
+  };
+
   return (
-    <AuthContext.Provider
-      value={{ token, isAuthenticated, login, logout, updateToken, userData, setUserData }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
       {/* Global OTP Modal */}
       <OTPVerificationModal
@@ -241,4 +276,10 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

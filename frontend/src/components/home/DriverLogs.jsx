@@ -15,7 +15,8 @@ const logTypeMap = createCategoryMap({
 
 const DriverLogs = () => {
   const [logData, setLogData] = useState([]);
-  const { token } = useAuth();
+  const auth = useAuth();
+  const { token } = auth || {};
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

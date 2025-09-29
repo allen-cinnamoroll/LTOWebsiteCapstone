@@ -772,6 +772,7 @@ export function AccidentAnalytics() {
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
+                    innerRadius={40}
                     fill="currentColor"
                     dataKey="value"
                     animationDuration={1500}
@@ -783,10 +784,11 @@ export function AccidentAnalytics() {
                   </Pie>
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                      border: isDarkMode ? '1px solid #4b5563' : '1px solid #e5e7eb',
                       borderRadius: '8px',
-                      color: isDarkMode ? '#f9fafb' : '#111827'
+                      color: isDarkMode ? '#f9fafb' : '#111827',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                     }}
                   />
                 </PieChart>
@@ -1304,10 +1306,11 @@ export function AccidentAnalytics() {
                       />
                       <Tooltip 
                         contentStyle={{
-                          backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                          border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                          backgroundColor: isDarkMode ? '#374151' : '#ffffff',
+                          border: isDarkMode ? '1px solid #4b5563' : '1px solid #e5e7eb',
                           borderRadius: '8px',
-                          color: isDarkMode ? '#f9fafb' : '#111827'
+                          color: isDarkMode ? '#f9fafb' : '#111827',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
                         }}
                       />
                     </RadialBarChart>

@@ -40,7 +40,8 @@ export function DriverChart({ driverId }) {
   const [violations, setViolations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { token } = useAuth();
+  const auth = useAuth();
+  const { token } = auth || {};
 
   // Fetch chart data when time period or driverId changes
   useEffect(() => {

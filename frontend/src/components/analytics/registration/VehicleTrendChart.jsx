@@ -86,9 +86,7 @@ const VehicleTrendChart = () => {
       setError(null);
       
       const municipalityToUse = municipality || selectedMunicipality;
-      console.log('Fetching yearly trend data with:', { startYear, endYear, municipality: municipalityToUse });
       const response = await getYearlyVehicleTrends(startYear, endYear, municipalityToUse);
-      console.log('Yearly trend data response:', response);
       
       if (response.success) {
         // Process data to show continuous lines
@@ -130,9 +128,7 @@ const VehicleTrendChart = () => {
       setError(null);
       
       const municipalityToUse = municipality || selectedMunicipality;
-      console.log('Fetching monthly trend data for year:', year, 'municipality:', municipalityToUse);
       const response = await getMonthlyVehicleTrends(year, municipalityToUse);
-      console.log('Monthly trend data response:', response);
       
       if (response.success) {
         // Process monthly data to show continuous lines

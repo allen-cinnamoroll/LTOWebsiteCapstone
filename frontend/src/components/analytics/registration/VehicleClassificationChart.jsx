@@ -49,10 +49,8 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
         yearValue = selectedYear;
       }
       
-      console.log('Fetching vehicle classification data with:', { monthNumber, yearValue, selectedMonth, selectedYear });
       
       const response = await getVehicleClassificationData(monthNumber, yearValue);
-      console.log('Vehicle classification data response:', response);
       
       if (response.success) {
         setClassificationData(response.data);

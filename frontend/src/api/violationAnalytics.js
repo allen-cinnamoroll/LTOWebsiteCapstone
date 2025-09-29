@@ -43,9 +43,7 @@ export const getViolationAnalytics = async (filters = {}, year = null) => {
     const queryString = params.toString();
     const url = `/violations/analytics${queryString ? `?${queryString}` : ''}`;
     
-    console.log('🔍 Making API call to:', url);
     const response = await apiClient.get(url);
-    console.log('🔍 API response received:', response);
     return response.data;
   } catch (error) {
     console.error('Error fetching violation analytics:', error);

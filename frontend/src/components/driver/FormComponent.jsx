@@ -51,7 +51,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         form.formState.errors.plateNo && "text-red-400"
                       )}
                     >
-                      Plate No. (comma-separated for multiple)
+                      Plate No.
                     </FormLabel>
                     <FormControl>
                       <Input

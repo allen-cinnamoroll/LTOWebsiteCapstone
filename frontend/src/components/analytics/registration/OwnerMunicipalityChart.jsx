@@ -51,10 +51,8 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
         yearValue = selectedYear;
       }
       
-      console.log('Fetching owner municipality data with:', { monthNumber, yearValue, selectedMonth, selectedYear });
       
       const response = await getOwnerMunicipalityData(monthNumber, yearValue);
-      console.log('Owner municipality data response:', response);
       
       if (response.success) {
         setOwnerData(response.data);

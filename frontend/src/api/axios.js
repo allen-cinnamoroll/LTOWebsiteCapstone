@@ -32,10 +32,10 @@ apiClient.interceptors.response.use(
       const isLoginRequest = error.config?.url?.includes('/auth/login');
       
       if (!isLoginRequest) {
-        // Only redirect to login if it's not a login request (token expired on other requests)
+        // Only clear tokens if it's not a login request (token expired on other requests)
         localStorage.removeItem('token');
         localStorage.removeItem('userData');
-        window.location.href = '/login';
+        // Let the AuthContext handle the navigation to prevent state issues
       }
     }
     return Promise.reject(error);

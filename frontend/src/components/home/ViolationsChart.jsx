@@ -28,7 +28,8 @@ export function ViolationsChart() {
   const [chartData, setChartData] = React.useState([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState(null)
-  const { token } = useAuth()
+  const auth = useAuth();
+  const { token } = auth || {};
 
   // Fetch chart data when time period changes
   React.useEffect(() => {
