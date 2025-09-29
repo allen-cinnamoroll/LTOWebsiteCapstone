@@ -138,10 +138,10 @@
     background: hsl(var(--muted-foreground) / 0.5);
   }
   
-  /* Header specific background - always white regardless of theme */
+  /* Header specific background - theme compatible */
   .header-bg-white {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
+    background-color: hsl(var(--background)) !important;
+    background: hsl(var(--background)) !important;
   }
   
   /* Smooth animations for pie chart */

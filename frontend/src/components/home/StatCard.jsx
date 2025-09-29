@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const StatCard = ({ name, icon: Icon, value, color, loading, statuses=[] }) => {
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden rounded-xl"
+      className="bg-card shadow-sm border border-border overflow-hidden rounded-xl"
       //   whileHover={{ y: -5, boxShadow: "0 15px 20px -12px rgba(0, 0, 0, 0.5)" }}
     >
       {loading ? (
