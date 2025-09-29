@@ -6,7 +6,7 @@
   :root {
     --background: 0 0% 92;
     --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 95%;
+    --card: 0 0% 98%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 95%;
     --popover-foreground: 222.2 84% 4.9%;
@@ -29,7 +29,7 @@
     --chart-3: 216 92% 60%;
     --chart-4: 210 98% 78%;
     --chart-5: 212 97% 87%;
-    --sidebar-background: 0 0% 93%;
+    --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -136,6 +136,12 @@
   
   .scrollbar-theme::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Header specific background - always white regardless of theme */
+  .header-bg-white {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
   }
   
   /* Smooth animations for pie chart */
