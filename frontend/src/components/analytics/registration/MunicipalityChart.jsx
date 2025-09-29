@@ -351,6 +351,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
               fontSize: isMobile ? '10px' : '12px', 
               fontWeight: '200',
               paddingTop: '0px',
+              paddingBottom: '4px',
               textAlign: 'center'
             }}>
               <div className="flex items-center gap-2">
