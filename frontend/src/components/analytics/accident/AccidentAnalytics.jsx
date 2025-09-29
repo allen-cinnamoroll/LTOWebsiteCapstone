@@ -341,12 +341,45 @@ export function AccidentAnalytics() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            <div className="text-muted-foreground animate-pulse">Loading accident analytics...</div>
-            <div className="text-xs text-muted-foreground">Preparing interactive visualizations</div>
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Loading Controls */}
+        <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg">
+          <div className="animate-pulse">
+            <div className="h-6 bg-muted rounded w-32 mb-2"></div>
+            <div className="h-8 bg-muted rounded w-24"></div>
+          </div>
+        </div>
+
+        {/* Loading Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-muted rounded w-24 mb-2"></div>
+                <div className="h-8 bg-muted rounded w-16 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-20"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Loading Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[1, 2].map((i) => (
+            <div key={i} className="bg-card border border-border rounded-lg p-6">
+              <div className="animate-pulse">
+                <div className="h-6 bg-muted rounded w-48 mb-4"></div>
+                <div className="h-64 bg-muted rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Loading Map */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="animate-pulse">
+            <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+            <div className="h-96 bg-muted rounded"></div>
           </div>
         </div>
       </div>
