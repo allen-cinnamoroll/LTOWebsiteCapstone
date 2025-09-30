@@ -7,6 +7,7 @@ import {
   ViolationCombinations, 
   LineChartModal
 } from './index';
+import { Shield } from 'lucide-react';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -265,10 +266,11 @@ export function ViolationAnalytics() {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen">
+    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
       <div className="mb-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 animate-in slide-in-from-top-5 fade-in duration-700 flex items-center gap-2">
+            <Shield className="h-8 w-8 text-orange-500 animate-pulse" />
             Violation Analytics
           </h1>
           <p className="text-gray-600 dark:text-gray-400">

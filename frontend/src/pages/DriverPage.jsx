@@ -136,7 +136,7 @@ const DriverPage = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
       <header className="text-xl md:text-3xl font-bold mb-5">Drivers</header>
       <section>
         <DriversTable

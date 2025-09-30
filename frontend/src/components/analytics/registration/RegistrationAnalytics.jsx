@@ -13,6 +13,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { FileText } from 'lucide-react';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -167,10 +168,13 @@ export function RegistrationAnalytics() {
 
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen">
+    <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen rounded-lg">
       <div className="registration-analytics-header">
         <div>
-          <h1 className="registration-analytics-title">Registration Analytics</h1>
+          <h1 className="registration-analytics-title animate-in slide-in-from-top-5 fade-in duration-700 flex items-center gap-2">
+            <FileText className="h-8 w-8 text-blue-500 animate-pulse" />
+            Registration Analytics
+          </h1>
           <p className="registration-analytics-subtitle">
             Vehicle and Owners Registration Analytics for: {getDisplayPeriod(selectedMonth, selectedYear)}
           </p>
@@ -282,7 +286,7 @@ export function RegistrationAnalytics() {
         </div>
       ) : (
         /* Metrics Section - Individual Cards */
-        <div className="registration-analytics-fade-in">
+        <div className="registration-analytics-fade-in animate-in slide-in-from-bottom-5 fade-in duration-700">
         <div className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {/* Registered Vehicles Card */}

@@ -42,7 +42,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen space-y-6 rounded-lg">
       <section className="text-3xl font-bold">Dashboard</section>
       
       {loading ? (

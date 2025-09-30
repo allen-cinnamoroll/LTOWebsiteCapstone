@@ -100,7 +100,7 @@ export default function RegisterAccountPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>

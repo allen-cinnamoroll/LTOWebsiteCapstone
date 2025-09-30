@@ -438,7 +438,7 @@ export function AccidentAnalytics() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen space-y-6 rounded-lg">
         {/* Enhanced Header - Always visible */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -516,7 +516,7 @@ export function AccidentAnalytics() {
 
   if (error) {
   return (
-    <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
         <div className="flex items-center justify-center h-64">
           <div className="text-red-500">{error}</div>
         </div>
@@ -525,7 +525,7 @@ export function AccidentAnalytics() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen space-y-6">
       {/* Enhanced Header */}
       <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
