@@ -62,9 +62,10 @@ import EnhancedAccidentMap from './EnhancedAccidentMap';
 import ExportUtilities from './ExportUtilities';
 
 // Theme-aware colors that work in both light and dark modes
+// Optimized for severity distribution with better contrast
 const COLORS = {
-  light: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'],
-  dark: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+  light: ['#DC2626', '#EA580C', '#059669', '#2563EB'], // Red, Orange, Green, Blue
+  dark: ['#EF4444', '#F97316', '#10B981', '#3B82F6']   // Brighter versions for dark mode
 };
 
 // Animated Number Component
@@ -164,13 +165,11 @@ const AnimatedProgressBar = ({ percentage, color = "bg-blue-500", delay = 0 }) =
 };
 
 export function AccidentAnalytics() {
-  const [timePeriod, setTimePeriod] = useState('6months');
+  const [timePeriod, setTimePeriod] = useState('alltime');
   const [analyticsData, setAnalyticsData] = useState(null);
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSeverity, setSelectedSeverity] = useState('all');
-  const [selectedVehicleType, setSelectedVehicleType] = useState('all');
   const [chartType, setChartType] = useState('area');
   const [showAdvancedCharts, setShowAdvancedCharts] = useState(false);
   const { token } = useAuth();
@@ -212,16 +211,21 @@ export function AccidentAnalytics() {
       setLoading(true);
       setError(null);
       
+      const timestamp = Date.now(); // Add timestamp to bypass cache
+      console.log(`Fetching analytics data for period: ${timePeriod} at ${new Date(timestamp).toISOString()}`);
+      
       const [analyticsResponse, riskResponse] = await Promise.all([
-        apiClient.get(`/accident/analytics/summary?period=${timePeriod}`, {
+        apiClient.get(`/accident/analytics/summary?period=${timePeriod}&_t=${timestamp}`, {
           headers: { Authorization: token }
         }),
-        apiClient.get(`/accident/analytics/risk?period=${timePeriod}`, {
+        apiClient.get(`/accident/analytics/risk?period=${timePeriod}&_t=${timestamp}`, {
           headers: { Authorization: token }
         })
       ]);
 
       if (analyticsResponse.data.success) {
+        console.log('Frontend received analytics data:', analyticsResponse.data.data);
+        console.log('Municipality data:', analyticsResponse.data.data.distributions?.municipality);
         setAnalyticsData(analyticsResponse.data.data);
       }
       
@@ -263,6 +267,93 @@ export function AccidentAnalytics() {
     }));
   };
 
+  // Custom tooltip component for municipality distribution with green accent
+  const MunicipalityTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const municipalityData = formatMunicipalityData(analyticsData.distributions.municipality);
+      const entry = municipalityData.find(item => item.name === data.name);
+      
+      // Get the theme-aware green color (using the third color from the palette)
+      const greenColor = getColors()[2]; // Green color
+      
+      return (
+        <div 
+          className="p-3 rounded-lg shadow-lg border transition-all duration-200 ease-in-out"
+          style={{
+            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+            border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+            color: isDarkMode ? '#f9fafb' : '#111827',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
+          }}
+        >
+          <p className="font-semibold text-sm mb-1">Municipality: {label}</p>
+          <p className="text-sm" style={{ color: greenColor, fontWeight: '600' }}>
+            Accidents: {data.value} accidents
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom tooltip component for severity distribution with dynamic colors
+  const SeverityTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const colors = getColors();
+      const severityData = formatSeverityData(analyticsData.distributions.severity);
+      
+      // Map severity levels to specific colors for consistency
+      const severityColorMap = {
+        'Fatal': colors[0],     // Red
+        'Severe': colors[1],    // Orange  
+        'Minor': colors[2],     // Green
+        'Moderate': colors[3]   // Blue
+      };
+      
+      const segmentColor = severityColorMap[data.name] || colors[0];
+      
+      // Theme-compatible styling
+      const backgroundColor = isDarkMode ? '#1f2937' : '#ffffff';
+      const borderColor = segmentColor;
+      const textColor = segmentColor;
+      
+      // Enhanced shadow for better visibility in both themes
+      const shadowColor = isDarkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.15)';
+      const glowColor = isDarkMode ? `${segmentColor}60` : `${segmentColor}30`;
+      
+      return (
+        <div 
+          className="p-3 rounded-lg shadow-lg border transition-all duration-200 ease-in-out"
+          style={{
+            backgroundColor: backgroundColor,
+            border: `2px solid ${borderColor}`,
+            boxShadow: `${shadowColor} 0 8px 25px, 0 0 0 1px ${glowColor}`,
+            fontWeight: '600',
+            backdropFilter: isDarkMode ? 'blur(8px)' : 'none'
+          }}
+        >
+          <p 
+            style={{ 
+              color: textColor, 
+              margin: 0,
+              fontSize: '14px',
+              fontWeight: '700',
+              textShadow: isDarkMode 
+                ? `0 0 12px ${segmentColor}80, 0 0 4px ${segmentColor}40` 
+                : `0 0 8px ${segmentColor}60, 0 0 2px ${segmentColor}30`,
+              filter: isDarkMode ? 'brightness(1.1)' : 'brightness(1)'
+            }}
+          >
+            {`${data.name} : ${data.value}`}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const formatVehicleTypeData = (vehicleData) => {
     return vehicleData.map(item => ({
       name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
@@ -272,10 +363,16 @@ export function AccidentAnalytics() {
   };
 
   const formatMunicipalityData = (municipalityData) => {
-    return municipalityData.map(item => ({
+    console.log('formatMunicipalityData input:', municipalityData);
+    const formatted = municipalityData.map(item => ({
       name: item._id,
-      accidents: item.count
-    }));
+      accidents: item.count,
+      // Add percentage calculation for better insights
+      percentage: municipalityData.length > 0 ? 
+        ((item.count / municipalityData.reduce((sum, m) => sum + m.count, 0)) * 100).toFixed(1) : 0
+    })).sort((a, b) => b.accidents - a.accidents); // Ensure proper sorting by accident count
+    console.log('formatMunicipalityData output:', formatted);
+    return formatted;
   };
 
   // Enhanced data formatting for advanced visualizations
@@ -446,29 +543,7 @@ export function AccidentAnalytics() {
               analyticsData={analyticsData}
               riskData={riskData}
               timePeriod={timePeriod}
-              selectedSeverity={selectedSeverity}
-              selectedVehicleType={selectedVehicleType}
             />
-            <button
-              onClick={() => setShowAdvancedCharts(!showAdvancedCharts)}
-              className="px-3 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              {showAdvancedCharts ? 'Hide Advanced' : 'Show Advanced'}
-            </button>
-        <Select value={timePeriod} onValueChange={setTimePeriod}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time period" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="week">Last Week</SelectItem>
-            <SelectItem value="month">Last Month</SelectItem>
-            <SelectItem value="3months">Last 3 Months</SelectItem>
-            <SelectItem value="6months">Last 6 Months</SelectItem>
-            <SelectItem value="year">Last Year</SelectItem>
-            <SelectItem value="alltime">All Time</SelectItem>
-          </SelectContent>
-        </Select>
           </div>
         </div>
 
@@ -480,34 +555,33 @@ export function AccidentAnalytics() {
           </div>
           
           <div className="flex items-center gap-2">
-            <label className="text-sm text-muted-foreground">Severity:</label>
-            <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Severities</SelectItem>
-                <SelectItem value="fatal">Fatal</SelectItem>
-                <SelectItem value="severe">Severe</SelectItem>
-                <SelectItem value="moderate">Moderate</SelectItem>
-                <SelectItem value="minor">Minor</SelectItem>
-              </SelectContent>
-            </Select>
+            <label className="text-sm text-muted-foreground">Advanced:</label>
+            <button
+              onClick={() => setShowAdvancedCharts(!showAdvancedCharts)}
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                showAdvancedCharts 
+                  ? 'text-white bg-primary hover:bg-primary/90 dark:text-white dark:bg-primary dark:hover:bg-primary/90' 
+                  : 'text-foreground bg-background border border-border hover:bg-muted dark:text-foreground dark:bg-background dark:border-border dark:hover:bg-muted'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4" />
+              {showAdvancedCharts ? 'Hide Advanced' : 'Show Advanced'}
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm text-muted-foreground">Vehicle Type:</label>
-            <Select value={selectedVehicleType} onValueChange={setSelectedVehicleType}>
+            <label className="text-sm text-muted-foreground">Date:</label>
+            <Select value={timePeriod} onValueChange={setTimePeriod}>
               <SelectTrigger className="w-[140px]">
-                <SelectValue />
+                <SelectValue placeholder="Select time period" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="car">Car</SelectItem>
-                <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                <SelectItem value="truck">Truck</SelectItem>
-                <SelectItem value="bus">Bus</SelectItem>
-                <SelectItem value="van">Van</SelectItem>
+                <SelectItem value="week">Last Week</SelectItem>
+                <SelectItem value="month">Last Month</SelectItem>
+                <SelectItem value="3months">Last 3 Months</SelectItem>
+                <SelectItem value="6months">Last 6 Months</SelectItem>
+                <SelectItem value="year">Last Year</SelectItem>
+                <SelectItem value="alltime">All Time</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -842,19 +916,23 @@ export function AccidentAnalytics() {
                     animationDuration={1500}
                     animationEasing="ease-out"
                   >
-                    {formatSeverityData(analyticsData.distributions.severity).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getColors()[index % getColors().length]} />
-                    ))}
+                    {formatSeverityData(analyticsData.distributions.severity).map((entry, index) => {
+                      const colors = getColors();
+                      const severityColorMap = {
+                        'Fatal': colors[0],     // Red
+                        'Severe': colors[1],    // Orange  
+                        'Minor': colors[2],     // Green
+                        'Moderate': colors[3]   // Blue
+                      };
+                      return (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={severityColorMap[entry.name] || colors[0]} 
+                        />
+                      );
+                    })}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: isDarkMode ? '#374151' : '#ffffff',
-                      border: isDarkMode ? '1px solid #4b5563' : '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      color: isDarkMode ? '#f9fafb' : '#111827',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                    }}
-                  />
+                  <Tooltip content={<SeverityTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -955,9 +1033,19 @@ export function AccidentAnalytics() {
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-orange-500" />
                 Top Municipalities by Accidents
+                {analyticsData?.distributions?.municipality?.some(m => m._id === "Mati") && (
+                  <span className="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-full border border-red-200 dark:border-red-800">
+                    Mati Included
+                  </span>
+                )}
               </CardTitle>
               <CardDescription>
                 Municipalities with highest accident counts and risk analysis
+                {analyticsData?.distributions?.municipality?.some(m => m._id === "Mati") && (
+                  <span className="block text-green-600 dark:text-green-400 text-sm mt-1">
+                    ✅ Mati municipality data has been normalized and included in the analysis
+                  </span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -973,23 +1061,19 @@ export function AccidentAnalytics() {
                     height={80}
                   />
                   <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      color: isDarkMode ? '#f9fafb' : '#111827',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-                    }}
-                    formatter={(value, name) => [`${value} accidents`, 'Count']}
-                    labelFormatter={(label) => `Municipality: ${label}`}
-                  />
+                  <Tooltip content={<MunicipalityTooltip />} />
                   <Bar 
                     dataKey="accidents" 
-                    fill={getColors()[2]}
                     radius={[4, 4, 0, 0]}
                     className="hover:opacity-80 transition-opacity duration-200"
-                  />
+                  >
+                    {formatMunicipalityData(analyticsData.distributions.municipality).map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.name === "Mati" ? "#ef4444" : getColors()[2]}
+                      />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
               
@@ -1002,18 +1086,19 @@ export function AccidentAnalytics() {
                     current.accidents > max.accidents ? current : max
                   );
                   const avgAccidents = total / municipalityData.length;
+                  const matiData = municipalityData.find(m => m.name === "Mati");
                   
                   return (
                     <>
-                      <div className="p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
-                        <div className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                          Highest Risk
+                      <div className={`p-3 rounded-lg ${topMunicipality.name === "Mati" ? "bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-800" : "bg-orange-50 dark:bg-orange-950/20"}`}>
+                        <div className={`text-sm font-medium ${topMunicipality.name === "Mati" ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"}`}>
+                          {topMunicipality.name === "Mati" ? "🏆 Top Municipality" : "Highest Risk"}
                         </div>
-                        <div className="text-lg font-bold text-orange-900 dark:text-orange-100">
+                        <div className={`text-lg font-bold ${topMunicipality.name === "Mati" ? "text-red-900 dark:text-red-100" : "text-orange-900 dark:text-orange-100"}`}>
                           {topMunicipality.name}
                         </div>
-                        <div className="text-xs text-orange-600 dark:text-orange-400">
-                          {topMunicipality.accidents} accidents
+                        <div className={`text-xs ${topMunicipality.name === "Mati" ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400"}`}>
+                          {topMunicipality.accidents} accidents ({topMunicipality.percentage}%)
                         </div>
                       </div>
                       
@@ -1029,15 +1114,15 @@ export function AccidentAnalytics() {
                         </div>
                       </div>
                       
-                      <div className="p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                        <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                          Average
+                      <div className={`p-3 rounded-lg ${matiData ? "bg-red-50 dark:bg-red-950/20" : "bg-purple-50 dark:bg-purple-950/20"}`}>
+                        <div className={`text-sm font-medium ${matiData ? "text-red-700 dark:text-red-300" : "text-purple-700 dark:text-purple-300"}`}>
+                          {matiData ? "Mati Status" : "Average"}
                         </div>
-                        <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                          {avgAccidents.toFixed(1)}
+                        <div className={`text-lg font-bold ${matiData ? "text-red-900 dark:text-red-100" : "text-purple-900 dark:text-purple-100"}`}>
+                          {matiData ? `#${municipalityData.findIndex(m => m.name === "Mati") + 1}` : avgAccidents.toFixed(1)}
                         </div>
-                        <div className="text-xs text-purple-600 dark:text-purple-400">
-                          Accidents per area
+                        <div className={`text-xs ${matiData ? "text-red-600 dark:text-red-400" : "text-purple-600 dark:text-purple-400"}`}>
+                          {matiData ? `${matiData.accidents} accidents` : "Accidents per area"}
                         </div>
                       </div>
                     </>

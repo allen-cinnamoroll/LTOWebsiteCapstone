@@ -332,7 +332,7 @@ export const getAccidentAnalytics = async (req, res) => {
       }
     ]);
 
-    // Get municipality distribution
+    // Get municipality distribution with normalization
     const municipalityDistribution = await AccidentModel.aggregate([
       {
         $match: {
@@ -340,8 +340,22 @@ export const getAccidentAnalytics = async (req, res) => {
         }
       },
       {
+        $addFields: {
+          normalized_municipality: {
+            $cond: {
+              if: { $or: [
+                { $eq: ["$municipality", "Mati"] },
+                { $eq: ["$municipality", "Mati City"] }
+              ]},
+              then: "Mati",
+              else: "$municipality"
+            }
+          }
+        }
+      },
+      {
         $group: {
-          _id: '$municipality',
+          _id: '$normalized_municipality',
           count: { $sum: 1 }
         }
       },
@@ -353,10 +367,36 @@ export const getAccidentAnalytics = async (req, res) => {
       }
     ]);
 
-    // Get all accidents for map (using geocoding based on location)
-    const accidentsWithCoordinates = await AccidentModel.find(
-      startDate ? { accident_date: { $gte: startDate } } : {}
-    ).select('accident_id plateNo severity municipality barangay street accident_date vehicle_type notes');
+    // Get all accidents for map (using geocoding based on location) with normalized municipality
+    const accidentsWithCoordinates = await AccidentModel.aggregate([
+      {
+        $match: startDate ? { accident_date: { $gte: startDate } } : {}
+      },
+      {
+        $addFields: {
+          normalized_municipality: {
+            $cond: {
+              if: { $eq: ["$municipality", "Mati City"] },
+              then: "Mati",
+              else: "$municipality"
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          accident_id: 1,
+          plateNo: 1,
+          severity: 1,
+          municipality: "$normalized_municipality",
+          barangay: 1,
+          street: 1,
+          accident_date: 1,
+          vehicle_type: 1,
+          notes: 1
+        }
+      }
+    ]);
 
     res.json({
       success: true,
@@ -456,12 +496,15 @@ export const getAccidentRiskAnalytics = async (req, res) => {
           break;
       }
 
+      // Normalize municipality name for consistency
+      const normalizedMunicipality = (accident.municipality === "Mati City") ? "Mati" : accident.municipality;
+      
       return {
         accident_id: accident.accident_id,
         riskLevel,
         confidence,
         severity: accident.severity,
-        municipality: accident.municipality,
+        municipality: normalizedMunicipality,
         vehicle_type: accident.vehicle_type
       };
     });

@@ -96,21 +96,20 @@ const DriversTable = ({
           placeholder={"Search Driver..."}
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className={"hidden md:inline md:max-w-sm flex-shrink"}
+          className={"hidden md:inline md:max-w-sm flex-shrink bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
         />
 
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
           <Button
             onClick={onAdd}
-            className={"w-min flex items-center gap-2"}
+            className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}
           >
             <Plus />
             <span className="hidden lg:inline">{"Add Driver"}</span>
           </Button>
           <Button
             onClick={onNavigate}
-            variant="outline"
-            className={"w-min flex items-center gap-2"}
+            className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}
           >
             <Trash />
             <span className="hidden lg:inline">{"Bin"}</span>

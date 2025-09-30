@@ -101,15 +101,15 @@ const VehiclesTable = ({
           placeholder={"Search Vehicle..."}
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className={"hidden h-8 md:inline md:max-w-sm flex-shrink"}
+          className={"hidden h-8 md:inline md:max-w-sm flex-shrink bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
         />
 
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
-          <Button onClick={onAdd} className={"w-min flex items-center gap-2"}>
+          <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}>
             <Plus />
             <span className="hidden lg:inline">{"Add Vehicle"}</span>
           </Button>
-          <Button onClick={onRenewal} variant="outline" className={"w-min flex items-center gap-2"}>
+          <Button onClick={onRenewal} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}>
             <RefreshCw />
             <span className="hidden lg:inline">{"Renewal"}</span>
           </Button>
