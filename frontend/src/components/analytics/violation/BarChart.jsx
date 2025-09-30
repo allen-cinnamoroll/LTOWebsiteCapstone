@@ -21,7 +21,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-black dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
         <div className="animate-pulse">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl"></div>
@@ -52,7 +52,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-black dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +64,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
             <p className="text-sm text-gray-600 dark:text-gray-400">Performance Analytics</p>
           </div>
         </div>
-        <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-16 text-gray-500 dark:text-gray-400 flex-1 flex flex-col justify-center">
           <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg">
             <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -111,7 +111,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
   };
 
   return (
-    <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300">
+    <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg flex items-center justify-center shadow-md">
@@ -125,12 +125,12 @@ export function BarChart({ data, title, type, loading, totalCount }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-gray-500 dark:text-gray-400">Total Officers</div>
+          <div className="text-xs font-bold text-gray-500 dark:text-gray-400">Total Officers</div>
           <div className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">{totalCount || top5Data.length}</div>
         </div>
       </div>
       
-      <div ref={chartRef} className="space-y-3">
+      <div ref={chartRef} className="space-y-3 flex-1">
         {top5Data.map((item, index) => {
           const value = item.count || item.violationCount || 0;
           const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
@@ -152,14 +152,14 @@ export function BarChart({ data, title, type, loading, totalCount }) {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="flex-shrink-0 w-6 h-6 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
-                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{getRankNumber(index)}</span>
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center shadow-md">
+                      <span className="text-sm font-bold text-white">{getRankNumber(index)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
                         {displayName}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                      <p className="text-xs text-purple-600 dark:text-purple-400">
                         {type === 'officers' ? 'Officer' : 'Type'}
                       </p>
                     </div>
@@ -168,7 +168,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
                     <div className="text-sm font-bold text-gray-900 dark:text-white">
                       {value.toLocaleString()}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-xs font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
                       {type === 'officers' ? 'apprehensions' : 'violations'}
                     </div>
                   </div>
@@ -190,9 +190,8 @@ export function BarChart({ data, title, type, loading, totalCount }) {
                   
                 </div>
                 
-                <div className="flex justify-between items-center mt-1 text-xs">
-                  <span className="font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Rank #{index + 1}</span>
-                  <span className="font-semibold text-green-600 dark:text-green-400">
+                <div className="flex justify-end items-center mt-1">
+                  <span className="text-xs text-purple-600 dark:text-purple-400">
                     {((value / top5Data.reduce((sum, item) => sum + (item.count || item.violationCount || 0), 0)) * 100).toFixed(1)}% of total
                   </span>
                 </div>

@@ -30,8 +30,8 @@
 }
 
 .registration-analytics-dropdown-button {
-  @apply flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors duration-200 cursor-pointer;
-  min-width: 120px;
+  @apply flex items-center gap-1 px-2 py-1 bg-card border border-border rounded-lg text-foreground hover:bg-accent transition-colors duration-200 cursor-pointer;
+  min-width: 70px;
 }
 
 .registration-analytics-dropdown-button.placeholder {
@@ -43,7 +43,7 @@
 }
 
 .registration-analytics-dropdown-content {
-  @apply absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50;
+  @apply absolute right-0 mt-2 w-32 bg-card border border-border rounded-lg shadow-lg z-50;
   max-height: 200px;
   overflow-y: auto;
   opacity: 1;
@@ -52,7 +52,7 @@
 }
 
 .registration-analytics-dropdown-item {
-  @apply px-4 py-2 text-sm text-foreground hover:bg-accent cursor-pointer transition-colors duration-150;
+  @apply px-2 py-1 text-xs text-foreground hover:bg-accent cursor-pointer transition-colors duration-150;
 }
 
 .registration-analytics-dropdown-item:first-child {

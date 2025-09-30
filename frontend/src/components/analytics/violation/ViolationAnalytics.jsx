@@ -68,7 +68,9 @@ export function ViolationAnalytics() {
     violationsByType: [],
     yearlyTrends: [],
     violationCombinations: [],
-    violationPatterns: []
+    violationPatterns: [],
+    confiscatedItemTypesCount: 0,
+    confiscatedItemTypesArray: []
   };
 
   // Filter yearly trends data based on selected year range
@@ -308,6 +310,7 @@ export function ViolationAnalytics() {
         totalViolations={totalViolations}
         totalTrafficViolators={totalTrafficViolators}
         topOfficer={analyticsData?.topOfficers?.[0]}
+        mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
       {/* Charts Section with Violation Ranking and Combinations */}

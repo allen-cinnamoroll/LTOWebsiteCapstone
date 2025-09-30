@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 92;
+    --background: 0 0% 95;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 98%;
     --card-foreground: 222.2 84% 4.9%;
@@ -177,6 +177,16 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from { 
+      width: 0%; 
+      opacity: 0; 
+    }
+    to { 
+      opacity: 1; 
     }
   }
 }
