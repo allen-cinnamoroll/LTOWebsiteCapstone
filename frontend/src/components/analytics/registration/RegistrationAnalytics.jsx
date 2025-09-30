@@ -176,7 +176,7 @@ export function RegistrationAnalytics() {
             Registration Analytics
           </h1>
           <p className="registration-analytics-subtitle">
-            Vehicle and Owners Registration Analytics for: {getDisplayPeriod(selectedMonth, selectedYear)}
+            Vehicle and Owners Registration Analytics
           </p>
         </div>
         

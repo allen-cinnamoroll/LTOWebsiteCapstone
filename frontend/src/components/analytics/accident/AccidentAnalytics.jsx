@@ -448,7 +448,7 @@ export function AccidentAnalytics() {
                 Accident Analytics
               </h2>
               <p className="text-muted-foreground">
-                Comprehensive analysis of accident data for {getPeriodLabel(timePeriod)}
+                Comprehensive Analysis of Accident Data
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -535,7 +535,7 @@ export function AccidentAnalytics() {
               Accident Analytics
             </h2>
           <p className="text-muted-foreground">
-            Comprehensive analysis of accident data for {getPeriodLabel(timePeriod)}
+            Comprehensive analysis of accident data
           </p>
         </div>
           <div className="flex items-center gap-2">

@@ -274,7 +274,7 @@ export function ViolationAnalytics() {
             Violation Analytics
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Complete Traffic Violation Analytics Dashboard for: {getDisplayPeriod(selectedYear)}
+            Traffic Violation Analytics Dashboard
             {analyticsData && (
               <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
                 ✓ Live Data
