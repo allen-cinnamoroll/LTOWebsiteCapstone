@@ -2,37 +2,37 @@ export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
   {
     accessorKey: "accident_id",
     header: "Accident ID",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("accident_id")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("accident_id")}</div>,
   },
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "accident_date",
     header: "Date",
-    cell: ({ row }) => <div className="text-gray-700 text-xs">{row.getValue("accident_date")}</div>,
+    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{row.getValue("accident_date")}</div>,
   },
   {
     accessorKey: "street",
     header: "Street",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("street") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("street") || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
   },
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
   },
   {
     accessorKey: "vehicle_type",
     header: "Vehicle Type",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("vehicle_type") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehicle_type") || "N/A"}</div>,
   },
   {
     accessorKey: "severity",
@@ -207,7 +207,7 @@ export const driverColumns = (onEdit, onDelete) => [
       return (
         <div className="flex flex-col">
           {plateNoArray.map((plate, index) => (
-            <div key={index} className="font-medium text-gray-900 text-xs">
+            <div key={index} className="font-medium text-gray-900 dark:text-gray-200 text-xs">
               {plate}
             </div>
           ))}
@@ -218,24 +218,24 @@ export const driverColumns = (onEdit, onDelete) => [
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
   },
   {
     accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={"Owner"} />
     ),
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
   },
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
   },
   {
     accessorKey: "birthDate",
@@ -243,7 +243,7 @@ export const driverColumns = (onEdit, onDelete) => [
     cell: ({ row }) => {
       const birthDate = row.getValue("birthDate");
       if (!birthDate) {
-        return <div className="text-gray-500 text-xs">None</div>;
+        return <div className="text-gray-500 dark:text-gray-400 text-xs">None</div>;
       }
       
       const dateObj = new Date(birthDate);
@@ -251,7 +251,7 @@ export const driverColumns = (onEdit, onDelete) => [
         return <div className="text-red-500 text-xs">Invalid Date</div>;
       }
       
-      return <div className="text-gray-700 text-xs">{dateObj.toLocaleDateString()}</div>;
+      return <div className="text-gray-700 dark:text-gray-200 text-xs">{dateObj.toLocaleDateString()}</div>;
     },
   },
   {
@@ -266,7 +266,7 @@ export const driverColumns = (onEdit, onDelete) => [
             <div>
               <div className="font-semibold text-green-600 text-xs">Yes</div>
               {licenseNumber && (
-                <div className="text-xs text-gray-500 mt-1">{licenseNumber}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{licenseNumber}</div>
               )}
             </div>
           ) : (
@@ -320,7 +320,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
   {
     accessorKey: "topNo",
     header: "TOP NO.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("topNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("topNo")}</div>,
   },
       {
       accessorKey: "firstName",
@@ -333,7 +333,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
         
         // If all name fields are "None" or null (alarm type), display "None"
         if ((firstName === "None" || !firstName) && (middleInitial === "None" || !middleInitial) && (lastName === "None" || !lastName) && (suffix === "None" || !suffix)) {
-          return <div className="text-gray-500 text-xs">None</div>;
+          return <div className="text-gray-500 dark:text-gray-400 text-xs">None</div>;
         }
         
         const parts = [firstName];
@@ -341,7 +341,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
         if (lastName && lastName !== "None") parts.push(lastName);
         if (suffix && suffix !== "None") parts.push(suffix);
         
-        return <div className="font-medium text-gray-900 text-xs">{parts.join(" ")}</div>;
+        return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{parts.join(" ")}</div>;
       },
     },
   {
@@ -350,7 +350,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     cell: ({ row }) => {
       const violations = row.getValue("violations");
       return (
-        <div className="max-w-xs text-xs">
+        <div className="max-w-xs text-xs text-gray-900 dark:text-gray-200">
           {violations && violations.length > 0 && violations[0] !== "None" 
             ? (Array.isArray(violations) ? violations.join(", ") : violations) 
             : "None"}
@@ -399,13 +399,13 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     header: "License Type",
     cell: ({ row }) => {
       const licenseType = row.getValue("licenseType");
-      return <div className="font-medium text-gray-700 text-xs">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
+      return <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
     },
   },
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "dateOfApprehension",
@@ -414,13 +414,13 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     ),
     cell: ({ row }) => {
       const date = row.getValue("dateOfApprehension");
-      return <div className="text-gray-700 text-xs">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
+      return <div className="text-gray-700 dark:text-gray-200 text-xs">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
     },
   },
   {
     accessorKey: "apprehendingOfficer",
     header: "Officer",
-    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("apprehendingOfficer") || "None"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("apprehendingOfficer") || "None"}</div>,
   },
   {
     id: "actions",
@@ -503,22 +503,22 @@ export const vehicleColumns = (onEdit, submitting) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
   },
   {
     accessorKey: "engineNo",
     header: "Engine No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("engineNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("engineNo") || "N/A"}</div>,
   },
   {
     accessorKey: "chassisNo",
     header: "Chassis No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("chassisNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("chassisNo") || "N/A"}</div>,
   },
   {
     accessorKey: "dateOfRenewal",
@@ -526,7 +526,7 @@ export const vehicleColumns = (onEdit, submitting) => [
     cell: ({ row }) => {
       const date = row.getValue("dateOfRenewal");
       return (
-        <div className="font-medium text-gray-900 text-xs">
+        <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">
           {date ? new Date(date).toLocaleDateString() : "Not set"}
         </div>
       );
@@ -535,7 +535,7 @@ export const vehicleColumns = (onEdit, submitting) => [
   {
     accessorKey: "classification",
     header: "Classification",
-    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("classification") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("classification") || "N/A"}</div>,
   },
   {
     accessorKey: "status",

@@ -121,7 +121,7 @@ const VehiclesTable = ({
         </div>
       </div>
 
-      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 min-h-0">
+      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm border-gray-300 dark:border-gray-600 min-h-0">
         <div className="overflow-auto h-full">
           <div className="px-4">
             <Table>
@@ -139,7 +139,7 @@ const VehiclesTable = ({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="text-xs bg-white dark:bg-gray-900">
+              <TableBody className="text-xs">
                 {loading ? (
                   <TableSkeleton
                     rowCount={5}
@@ -151,7 +151,7 @@ const VehiclesTable = ({
                       key={row.id}
                       onClick={() => onRowClick(row.original)}
                       data-state={row.getIsSelected() && "selected"}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
                     >
                       {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="px-3 py-3.5 text-gray-800 dark:text-gray-200 text-left">

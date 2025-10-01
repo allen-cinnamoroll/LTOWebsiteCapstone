@@ -93,7 +93,7 @@ const AccidentTable = ({
           <DataTableViewOptions table={table} />
         </div>
       </div>
-      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 min-h-0">
+      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm border-gray-300 dark:border-gray-600 min-h-0">
         <div className="overflow-auto h-full">
           <div className="px-4">
             <Table>
@@ -111,7 +111,7 @@ const AccidentTable = ({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="text-xs bg-white dark:bg-gray-900">
+              <TableBody className="text-xs">
                 {loading ? (
                   <TableSkeleton
                     rowCount={5}
