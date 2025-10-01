@@ -23,7 +23,6 @@ import {
   Plus,
   Search,
   Settings2,
-  Trash,
 } from "lucide-react";
 
 import TableSkeleton from "@/components/table/TableSkeleton";
@@ -110,13 +109,6 @@ const DriversTable = ({
           >
             <Plus />
             <span className="hidden lg:inline">{"Add Driver"}</span>
-          </Button>
-          <Button
-            onClick={onNavigate}
-            className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}
-          >
-            <Trash />
-            <span className="hidden lg:inline">{"Bin"}</span>
           </Button>
           <DataTableViewOptions table={table}/>
         </div>
