@@ -114,7 +114,7 @@ const DriversTable = ({
         </div>
       </div>
 
-      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm border-gray-300 dark:border-gray-600 min-h-0">
+      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-gray-600 min-h-0">
         <div className="overflow-auto h-full">
           <div className="px-4">
             <Table>
@@ -132,7 +132,7 @@ const DriversTable = ({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="text-xs">
+              <TableBody className="text-xs bg-white dark:bg-transparent">
             {loading ? (
               <TableSkeleton
                 rowCount={5}
