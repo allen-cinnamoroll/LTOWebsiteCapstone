@@ -101,7 +101,7 @@ const ViolationTable = ({
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-2 whitespace-nowrap">
+                      <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-2 whitespace-nowrap text-left">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
@@ -126,7 +126,7 @@ const ViolationTable = ({
                       className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-3 py-3 text-gray-800 dark:text-gray-200">
+                        <TableCell key={cell.id} className="px-3 py-3 text-gray-800 dark:text-gray-200 text-left">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
