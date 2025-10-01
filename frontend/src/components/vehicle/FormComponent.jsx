@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Form,
@@ -32,6 +32,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import AddDriverModal from "@/components/driver/AddDriverModal";
 
 const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }) => {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
   const [isSearching, setIsSearching] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showNoResults, setShowNoResults] = useState(false);
+  const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
+  const searchInputRef = useRef(null);
 
   // Search drivers when search term changes
   useEffect(() => {
@@ -54,6 +57,11 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
             headers: { Authorization: token }
           });
           if (data.success) {
+            // Debug: Log the search results to see what data is being received
+            console.log('Driver search results:', data.data);
+            console.log('First driver address:', data.data[0]?.address);
+            console.log('Municipality:', data.data[0]?.address?.municipality);
+            console.log('Barangay:', data.data[0]?.address?.barangay);
             setSearchResults(data.data);
             // Show "no results" option if no drivers found and search term is long enough
             if (data.data.length === 0 && searchTerm.length >= 3) {
@@ -79,11 +87,27 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
     return () => clearTimeout(timeoutId);
   }, [searchTerm, token]);
 
+  // Auto-scroll to search section when dropdown appears
+  useEffect(() => {
+    if (searchResults.length > 0 || showNoResults) {
+      // Use a small delay to ensure the dropdown has rendered
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100);
+    }
+  }, [searchResults, showNoResults]);
+
   const handleDriverSelect = (driver) => {
     setSelectedDriver(driver);
     form.setValue("driver", driver._id);
     setSearchTerm(driver.ownerRepresentativeName);
     setSearchResults([]);
+    setShowNoResults(false); // Hide "Add new driver" option when driver is selected
   };
 
   const handleClearDriver = () => {
@@ -95,69 +119,56 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
   };
 
   const handleAddDriver = () => {
-    // Store the current vehicle form data and search term in sessionStorage
+    // Get current vehicle form data
     const currentFormData = form.getValues();
-    sessionStorage.setItem('vehicleFormData', JSON.stringify(currentFormData));
-    sessionStorage.setItem('driverSearchTerm', searchTerm);
-    sessionStorage.setItem('returnToVehicleForm', 'true');
     
-    // Navigate to add driver form
-    navigate('/driver/create');
+    // Store vehicle data in sessionStorage to pass to driver form
+    sessionStorage.setItem('vehicleFormData', JSON.stringify({
+      plateNo: currentFormData.plateNo || '',
+      fileNo: currentFormData.fileNo || '',
+      ownerRepresentativeName: currentFormData.ownerRepresentativeName || searchTerm || ''
+    }));
+    
+    // Open the add driver modal
+    setAddDriverModalOpen(true);
   };
 
-  // Restore form data when returning from driver form
-  useEffect(() => {
-    const returnToVehicleForm = sessionStorage.getItem('returnToVehicleForm');
-    if (returnToVehicleForm === 'true') {
-      const savedFormData = sessionStorage.getItem('vehicleFormData');
-      const savedSearchTerm = sessionStorage.getItem('driverSearchTerm');
-      const newDriverId = sessionStorage.getItem('newDriverId');
-      const newDriverName = sessionStorage.getItem('newDriverName');
-      
-      if (savedFormData) {
-        const formData = JSON.parse(savedFormData);
-        // Restore form values
-        Object.keys(formData).forEach(key => {
-          if (formData[key] !== undefined && formData[key] !== null) {
-            form.setValue(key, formData[key]);
-          }
-        });
-      }
-      
-      if (savedSearchTerm) {
-        setSearchTerm(savedSearchTerm);
-      }
-      
-      // If a new driver was created, set it as selected
-      if (newDriverId && newDriverName) {
-        form.setValue('driver', newDriverId);
-        setSearchTerm(newDriverName);
-        setSelectedDriver({
-          _id: newDriverId,
-          ownerRepresentativeName: newDriverName
-        });
-        
-        // Show a message that driver was created but vehicle creation failed
-        toast.info("Driver was created successfully. Please complete the vehicle registration.", {
-          description: "The driver has been added to your system. Fill in the remaining vehicle details and submit."
-        });
-      }
-      
-      // Clear the session storage
-      sessionStorage.removeItem('vehicleFormData');
-      sessionStorage.removeItem('driverSearchTerm');
-      sessionStorage.removeItem('returnToVehicleForm');
-      sessionStorage.removeItem('newDriverId');
-      sessionStorage.removeItem('newDriverName');
-    }
-  }, [form]);
+  const handleDriverAdded = (newDriver) => {
+    // Set the newly created driver as selected
+    setSelectedDriver(newDriver);
+    form.setValue("driver", newDriver._id);
+    setSearchTerm(newDriver.ownerRepresentativeName);
+    setSearchResults([]);
+    setShowNoResults(false); // Hide the "Add new driver" option
+    setAddDriverModalOpen(false);
+    
+    toast.success("Driver added successfully", {
+      description: "The driver has been selected for this vehicle."
+    });
+  };
+
 
   return (
     <Form {...form}>
-      <form id="vehicle-form" onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="space-y-4">
+      <form id="vehicle-form" onSubmit={form.handleSubmit((data) => {
+        // Debug: Log the selectedDriver and form data
+        console.log('Selected driver:', selectedDriver);
+        console.log('Form data:', data);
+        
+        // Include the owner's name in the form data
+        // Try to get the owner name from selectedDriver, searchTerm, or fallback
+        const ownerName = selectedDriver?.ownerRepresentativeName || 
+                         (searchTerm && searchTerm !== '' ? searchTerm : 'Not selected');
+        
+        const formDataWithOwner = {
+          ...data,
+          ownerName: ownerName
+        };
+        console.log('Form data with owner:', formDataWithOwner);
+        onSubmit(formDataWithOwner);
+      })}>
+        <div className="space-y-3">
           <div>
-            <Label>Vehicle Information</Label>
             <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-3">
               <FormField
                 control={form.control}
@@ -166,7 +177,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.plateNo && "text-red-400"
                       )}
                     >
@@ -177,8 +188,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                         {...field}
                         type="text"
                         placeholder="ABC-123"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.plateNo && "border-red-400"
                         )}
                       />
@@ -194,7 +209,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.fileNo && "text-red-400"
                       )}
                     >
@@ -204,8 +219,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.fileNo && "border-red-400"
                         )}
                       />
@@ -221,7 +240,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.engineNo && "text-red-400"
                       )}
                     >
@@ -231,8 +250,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.engineNo && "border-red-400"
                         )}
                       />
@@ -245,7 +268,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
           </div>
 
           <div>
-            <Label>Vehicle Details</Label>
             <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-3">
               <FormField
                 control={form.control}
@@ -254,7 +276,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.chassisNo && "text-red-400"
                       )}
                     >
@@ -264,8 +286,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.chassisNo && "border-red-400"
                         )}
                       />
@@ -281,7 +307,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.make && "text-red-400"
                       )}
                     >
@@ -291,8 +317,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.make && "border-red-400"
                         )}
                       />
@@ -308,7 +338,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.bodyType && "text-red-400"
                       )}
                     >
@@ -318,8 +348,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.bodyType && "border-red-400"
                         )}
                       />
@@ -332,7 +366,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
           </div>
 
           <div>
-            <Label>Vehicle Specifications</Label>
             <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-3">
               <FormField
                 control={form.control}
@@ -341,7 +374,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.color && "text-red-400"
                       )}
                     >
@@ -351,8 +384,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.color && "border-red-400"
                         )}
                       />
@@ -368,7 +405,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                   <FormItem className="lg:col-span-2">
                     <FormLabel
                       className={cn(
-                        "text-muted-foreground",
+                        "text-muted-foreground mb-0",
                         form.formState.errors.classification && "text-red-400"
                       )}
                     >
@@ -381,7 +418,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-muted-foreground",
+                            "text-black dark:text-white",
                             form.formState.errors.classification && "border-red-400"
                           )}
                         >
@@ -391,9 +428,45 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>Classifications</SelectLabel>
-                          <SelectItem value="Private">Private</SelectItem>
-                          <SelectItem value="For Hire">For Hire</SelectItem>
-                          <SelectItem value="Government">Government</SelectItem>
+                          <SelectItem value="Private">PRIVATE</SelectItem>
+                          <SelectItem value="For Hire">FOR HIRE</SelectItem>
+                          <SelectItem value="Government">GOVERNMENT</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-xs text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="vehicleStatusType"
+                render={({ field }) => (
+                  <FormItem className="lg:col-span-2">
+                    <FormLabel
+                      className={cn(
+                        "text-muted-foreground mb-0",
+                        form.formState.errors.vehicleStatusType && "text-red-400"
+                      )}
+                    >
+                      Vehicle Status Type
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          className={cn(
+                            "text-black dark:text-white",
+                            form.formState.errors.vehicleStatusType && "border-red-400"
+                          )}
+                        >
+                          <SelectValue placeholder="Select vehicle status type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Vehicle Status</SelectLabel>
+                          <SelectItem value="New">New Vehicle</SelectItem>
+                          <SelectItem value="Old">Old Vehicle</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -409,11 +482,11 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                     <FormItem className="lg:col-span-2">
                       <FormLabel
                         className={cn(
-                          "text-muted-foreground",
+                          "text-muted-foreground mb-0",
                           form.formState.errors.dateOfRenewal && "text-red-400"
                         )}
                       >
-                        Date of Renewal (Optional)
+                        Date of Renewal
                       </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -421,7 +494,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal text-muted-foreground",
+                                "w-full pl-3 text-left font-normal text-black dark:text-white",
                                 !field.value && "text-muted-foreground",
                                 form.formState.errors.dateOfRenewal && "border-red-400"
                               )}
@@ -452,23 +525,30 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
 
           {/* Driver/Owner Search Section */}
           <div>
-            <Label>Driver/Owner Information (Optional)</Label>
-            <div className="mt-2">
+            <Label>Driver/Owner Information</Label>
+            <div className="mt-1">
               <FormField
                 control={form.control}
                 name="driver"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-muted-foreground">
+                    <FormLabel className="text-muted-foreground mb-0">
                       Search and Select Driver/Owner
                     </FormLabel>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Format: Surname Suffix (Optional), FirstName, Middle Initial
+                    </p>
                     <div className="relative">
                       <div className="flex gap-2">
                         <div className="flex-1 relative">
                           <Input
+                            ref={searchInputRef}
                             placeholder="Type driver/owner name to search..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {
+                              const capitalizedValue = e.target.value.toUpperCase();
+                              setSearchTerm(capitalizedValue);
+                            }}
                             className="pr-10"
                           />
                           {isSearching && (
@@ -490,33 +570,30 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       
                       {/* Search Results Dropdown */}
                       {(searchResults.length > 0 || showNoResults) && (
-                        <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
                           {searchResults.map((driver) => (
                             <div
                               key={driver._id}
-                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0"
+                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 transition-colors"
                               onClick={() => handleDriverSelect(driver)}
                             >
-                              <div className="font-medium text-foreground">{driver.ownerRepresentativeName}</div>
-                              <div className="text-sm text-muted-foreground">
-                                Birthdate: {driver.birthDate ? new Date(driver.birthDate).toLocaleDateString() : "Not provided"}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-sm font-medium text-foreground">{driver.ownerRepresentativeName}</div>
+                              <div className="text-xs text-muted-foreground mt-1">
                                 Current vehicles: {driver.plateNo || "None"}
                               </div>
                             </div>
                           ))}
                           
-                          {/* Add Driver Option */}
-                          {showNoResults && searchResults.length === 0 && (
+                          {/* Add Driver Option - only show when no results and not already selected */}
+                          {showNoResults && searchResults.length === 0 && !selectedDriver && (
                             <div
-                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 bg-accent/50"
+                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 bg-accent/50 transition-colors"
                               onClick={handleAddDriver}
                             >
-                              <div className="font-medium text-primary">
+                              <div className="text-sm font-medium text-primary">
                                 + Add "{searchTerm}" as new driver
                               </div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-xs text-muted-foreground mt-1">
                                 Click to create a new driver record
                               </div>
                             </div>
@@ -526,16 +603,13 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
 
                       {/* Selected Driver Display */}
                       {selectedDriver && (
-                        <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-md">
+                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="font-medium text-green-800">
+                              <div className="text-sm font-medium text-green-800">
                                 Selected: {selectedDriver.ownerRepresentativeName}
                               </div>
-                              <div className="text-sm text-green-600">
-                                Birthdate: {selectedDriver.birthDate ? new Date(selectedDriver.birthDate).toLocaleDateString() : "Not provided"}
-                              </div>
-                              <div className="text-sm text-green-600">
+                              <div className="text-xs text-green-600">
                                 Current vehicles: {selectedDriver.plateNo || "None"}
                               </div>
                             </div>
@@ -544,9 +618,9 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                               variant="ghost"
                               size="sm"
                               onClick={handleClearDriver}
-                              className="text-green-600 hover:text-green-800"
+                              className="text-green-600 hover:text-green-800 h-6 w-6 p-0"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
@@ -560,24 +634,16 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
           </div>
 
 
-          <div className="space-x-2">
-            <Button disabled={submitting} id="submit" className="w-20">
-              {submitting ? (
-                <LoaderCircle className="w-6 h-6 text-primary-foreground mx-auto animate-spin" />
-              ) : (
-                "Submit"
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate(-1)}
-            >
-              Cancel
-            </Button>
-          </div>
+          {/* Removed duplicate buttons - using modal footer buttons instead */}
         </div>
       </form>
+      
+      {/* Add Driver Modal */}
+      <AddDriverModal
+        open={addDriverModalOpen}
+        onOpenChange={setAddDriverModalOpen}
+        onDriverAdded={handleDriverAdded}
+      />
     </Form>
   );
 };

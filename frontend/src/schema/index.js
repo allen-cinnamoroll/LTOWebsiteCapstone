@@ -84,7 +84,12 @@ export const VehicleSchema = z.object({
   classification: z.string().min(1, {
     message: "Classification is required",
   }),
-  dateOfRenewal: z.date().optional(),
+  dateOfRenewal: z.date({
+    required_error: "Date of renewal is required",
+  }),
+  vehicleStatusType: z.enum(["New", "Old"], {
+    required_error: "Vehicle status type is required",
+  }),
   driver: z.string().optional(),
 });
 

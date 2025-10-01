@@ -261,6 +261,9 @@ export const searchDrivers = async (req, res) => {
   try {
     const { name } = req.query;
     
+    console.log('=== SEARCH DRIVERS API CALLED ===');
+    console.log('Search term:', name);
+    
     if (!name || name.trim().length < 2) {
       return res.status(400).json({
         success: false,
@@ -268,15 +271,46 @@ export const searchDrivers = async (req, res) => {
       });
     }
 
+    console.log('Querying database for:', name.trim());
     const drivers = await DriverModel.find({
       ownerRepresentativeName: { $regex: name.trim(), $options: 'i' }
-    }).select("_id ownerRepresentativeName plateNo fileNo birthDate").limit(10);
+    }).lean();
+
+    console.log('Number of drivers found:', drivers.length);
+    console.log('Search drivers result:', JSON.stringify(drivers, null, 2));
+    console.log('First driver address:', drivers[0]?.address);
+    console.log('First driver keys:', Object.keys(drivers[0] || {}));
+    console.log('Address object:', drivers[0]?.address);
+    console.log('Municipality:', drivers[0]?.address?.municipality);
+    console.log('Barangay:', drivers[0]?.address?.barangay);
+    
+    // Additional debug: Check if address field exists in the raw document
+    if (drivers.length > 0) {
+      console.log('Fetching raw driver by ID:', drivers[0]._id);
+      const rawDriver = await DriverModel.findById(drivers[0]._id).lean();
+      console.log('Raw driver from database:', JSON.stringify(rawDriver, null, 2));
+      console.log('Raw driver address:', rawDriver?.address);
+    }
+
+    // Debug: Add address info to response for testing
+    const driversWithDebug = drivers.map(driver => ({
+      ...driver,
+      debug_all_keys: Object.keys(driver),
+      debug_has_address: 'address' in driver,
+      debug_driver_stringified: JSON.stringify(driver, null, 2),
+      // Try to find address in other possible fields
+      debug_municipality_direct: driver.municipality,
+      debug_barangay_direct: driver.barangay,
+      debug_purok: driver.purok,
+      debug_province: driver.province
+    }));
 
     res.status(200).json({
       success: true,
-      data: drivers,
+      data: driversWithDebug,
     });
   } catch (err) {
+    console.error('Error in searchDrivers:', err);
     return res.status(500).json({
       success: false,
       message: err.message,

@@ -21,6 +21,7 @@ import {
   ChevronRight,
   LoaderCircle,
   Plus,
+  Search,
   Settings2,
   Trash,
 } from "lucide-react";
@@ -92,12 +93,15 @@ const DriversTable = ({
         className={`md:flex items-center justify-between  py-4
         `}
       >
-        <Input
-          placeholder={"Search Driver..."}
-          value={globalFilter ?? ""}
-          onChange={(event) => setGlobalFilter(event.target.value)}
-          className={"hidden md:inline md:max-w-sm flex-shrink bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
-        />
+        <div className="relative hidden md:inline md:max-w-sm flex-shrink">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder={"Search Driver..."}
+            value={globalFilter ?? ""}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className={"pl-10 bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
+          />
+        </div>
 
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
           <Button

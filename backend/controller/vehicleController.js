@@ -13,6 +13,11 @@ import { getVehicleStatus, calculateExpirationDate, getExpirationInfo } from "..
 
 export const createVehicle = async (req, res) => {
   const plateNo = req.body.plateNo;
+  
+  // Debug: Log the request body to see what's being received
+  console.log('Vehicle creation request body:', req.body);
+  console.log('vehicleStatusType received:', req.body.vehicleStatusType);
+  
   try {
     // Check if plate number is already taken
     const plateNoTaken = await VehicleModel.findOne({ plateNo });
@@ -24,10 +29,11 @@ export const createVehicle = async (req, res) => {
       });
     }
 
-    // Calculate status based on plate number and date of renewal
+    // Calculate status based on plate number, date of renewal, and vehicle status type
     const dateOfRenewal = req.body.dateOfRenewal || null;
+    const vehicleStatusType = req.body.vehicleStatusType || "Old";
     const plateBasedStatus = getVehicleStatus(plateNo, dateOfRenewal);
-    const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal);
+    const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal, vehicleStatusType);
     
     // Use plate-based status calculation
     const status = plateBasedStatus;
@@ -38,7 +44,9 @@ export const createVehicle = async (req, res) => {
       serialChassisNumber: req.body.chassisNo, // Map chassisNo to serialChassisNumber
       status,
       // Add calculated expiration date if not manually provided
-      dateOfRenewal: dateOfRenewal || expirationDate
+      dateOfRenewal: dateOfRenewal || expirationDate,
+      // Use the processed vehicleStatusType with fallback
+      vehicleStatusType: vehicleStatusType
     };
     
     // Remove the original chassisNo field to avoid confusion
@@ -54,7 +62,46 @@ export const createVehicle = async (req, res) => {
       vehicleData.ownerId = null;
     }
 
-    const vehicle = await VehicleModel.create(vehicleData);
+    // Debug: Log the data being saved to database
+    console.log('Data being saved to database:', vehicleData);
+    console.log('vehicleStatusType in vehicleData:', vehicleData.vehicleStatusType);
+    console.log('Keys in vehicleData:', Object.keys(vehicleData));
+    console.log('vehicleStatusType explicitly set:', vehicleData.vehicleStatusType);
+
+    // Test the schema validation before saving
+    console.log('Testing schema validation with vehicleData:', vehicleData);
+    const testVehicle = new VehicleModel(vehicleData);
+    const validationError = testVehicle.validateSync();
+    if (validationError) {
+      console.error('Schema validation error:', validationError);
+      console.error('Validation error details:', validationError.errors);
+    } else {
+      console.log('Schema validation passed');
+      console.log('Test vehicle vehicleStatusType:', testVehicle.vehicleStatusType);
+    }
+
+    try {
+      const vehicle = await VehicleModel.create(vehicleData);
+      
+      // Debug: Log the created vehicle to see what was actually saved
+      console.log('Vehicle created successfully:', vehicle);
+      console.log('vehicleStatusType in created vehicle:', vehicle.vehicleStatusType);
+      console.log('All fields in created vehicle:', Object.keys(vehicle.toObject()));
+      
+      // Double-check by querying the database directly
+      const savedVehicle = await VehicleModel.findById(vehicle._id);
+      console.log('VehicleStatusType from database query:', savedVehicle?.vehicleStatusType);
+      console.log('Full vehicle from database:', savedVehicle);
+      
+      // Test if the field exists in the raw database document
+      const rawVehicle = await VehicleModel.findById(vehicle._id).lean();
+      console.log('Raw vehicle document from database:', rawVehicle);
+      console.log('vehicleStatusType in raw document:', rawVehicle?.vehicleStatusType);
+    } catch (createError) {
+      console.error('Error creating vehicle:', createError);
+      console.error('Validation errors:', createError.errors);
+      throw createError;
+    }
 
     // Note: With the new structure, we don't need to update driver's plateNo list
     // since vehicles now reference drivers via ownerId, not the other way around
@@ -124,6 +171,7 @@ export const getVehicle = async (req, res) => {
         color: data.color,
         classification: data.classification,
         dateOfRenewal: data.dateOfRenewal,
+        vehicleStatusType:data.vehicleStatusType,
         status: currentStatus, // Use calculated status
         expirationInfo: expirationInfo // Include expiration details
       };
@@ -169,6 +217,7 @@ export const findVehicle = async (req, res) => {
       classification: vehicle.classification,
       dateOfRenewal: vehicle.dateOfRenewal,
       status: currentStatus, // Use calculated status
+      vehicleStatusType: vehicle.vehicleStatusType, // Include vehicleStatusType
       expirationInfo: expirationInfo // Include expiration details
     };
 

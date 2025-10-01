@@ -80,12 +80,13 @@ export const getMonthFromDigit = (lastDigit) => {
 };
 
 /**
- * Calculate the expiration date based on plate number and date of renewal
+ * Calculate the expiration date based on plate number, renewal date, and vehicle status type
  * @param {string} plateNo - The plate number
  * @param {Date|string} dateOfRenewal - The date of renewal (optional)
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {Date|null} - The expiration date
  */
-export const calculateExpirationDate = (plateNo, dateOfRenewal = null) => {
+export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleStatusType = "Old") => {
   const lastTwoDigits = extractLastTwoDigits(plateNo);
   if (!lastTwoDigits || lastTwoDigits.length !== 2) {
     return null;
@@ -116,10 +117,18 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null) => {
   const renewalYear = baseDate.getFullYear();
   const renewalMonth = baseDate.getMonth();
   
-  // Calculate expiration year and month
-  // The vehicle always expires in the next year from the renewal date
-  let expirationYear = renewalYear + 1;
-  let expirationMonth = monthIndex;
+  // Calculate expiration year and month based on vehicle status type
+  let expirationYear, expirationMonth;
+  
+  if (vehicleStatusType === "New") {
+    // New vehicles: initial registration is valid for 2 years
+    expirationYear = renewalYear + 2;
+    expirationMonth = monthIndex;
+  } else {
+    // Old vehicles: registration expires in 1 year
+    expirationYear = renewalYear + 1;
+    expirationMonth = monthIndex;
+  }
   
   // Calculate the end date of the specified week in the expiration month/year
   let weekEndDate;

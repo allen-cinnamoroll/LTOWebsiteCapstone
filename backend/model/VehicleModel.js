@@ -69,6 +69,12 @@
         type: Date,
         required: false,
       },
+      vehicleStatusType: {
+        type: String,
+        enum: ["New", "Old"],
+        required: [true, "vehicleStatusType is required"],
+        default:"Old"
+      },
       status:{
         type: String,
         enum:["0","1"],

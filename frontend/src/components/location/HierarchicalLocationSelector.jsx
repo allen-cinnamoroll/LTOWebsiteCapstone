@@ -49,6 +49,7 @@ const HierarchicalLocationSelector = ({
 
   // Handle municipality selection
   const handleMunicipalityChange = (value) => {
+    console.log('Setting municipality:', value);
     setSelectedMunicipality(value);
     setSelectedBarangay("");
     setSelectedPurok("");
@@ -57,10 +58,27 @@ const HierarchicalLocationSelector = ({
     setPurokSearch(""); // Clear search when municipality changes
     
     // Update form values
-    form.setValue("municipality", value);
-    form.setValue("barangay", "");
-    form.setValue("purok", "");
-    form.setValue("province", davaoOrientalData.region);
+    console.log('=== SETTING MUNICIPALITY ===');
+    console.log('Setting municipality to:', value);
+    form.setValue("municipality", value, { shouldValidate: true, shouldDirty: true });
+    form.setValue("barangay", "", { shouldValidate: true, shouldDirty: true });
+    form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+    form.setValue("province", davaoOrientalData.region, { shouldValidate: true, shouldDirty: true });
+    
+    console.log('Form values after municipality change:', {
+      municipality: form.getValues("municipality"),
+      barangay: form.getValues("barangay"),
+      province: form.getValues("province")
+    });
+    
+    // Double check immediately after setting
+    setTimeout(() => {
+      console.log('Form values after 100ms delay:', {
+        municipality: form.getValues("municipality"),
+        barangay: form.getValues("barangay"),
+        province: form.getValues("province")
+      });
+    }, 100);
     
     if (onLocationChange) {
       onLocationChange({
@@ -74,14 +92,32 @@ const HierarchicalLocationSelector = ({
 
   // Handle barangay selection
   const handleBarangayChange = (value) => {
+    console.log('Setting barangay:', value);
     setSelectedBarangay(value);
     setSelectedPurok("");
     setBarangaySearch(""); // Clear search when barangay is selected
     setPurokSearch(""); // Clear search when barangay changes
     
     // Update form values
-    form.setValue("barangay", value);
-    form.setValue("purok", "");
+    console.log('=== SETTING BARANGAY ===');
+    console.log('Setting barangay to:', value);
+    form.setValue("barangay", value, { shouldValidate: true, shouldDirty: true });
+    form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+    
+    console.log('Form values after barangay change:', {
+      municipality: form.getValues("municipality"),
+      barangay: form.getValues("barangay"),
+      province: form.getValues("province")
+    });
+    
+    // Double check immediately after setting
+    setTimeout(() => {
+      console.log('Form values after barangay 100ms delay:', {
+        municipality: form.getValues("municipality"),
+        barangay: form.getValues("barangay"),
+        province: form.getValues("province")
+      });
+    }, 100);
     
     if (onLocationChange) {
       onLocationChange({
@@ -99,7 +135,7 @@ const HierarchicalLocationSelector = ({
     setPurokSearch(""); // Clear search when purok is selected
     
     // Update form values
-    form.setValue("purok", value);
+    form.setValue("purok", value, { shouldValidate: true, shouldDirty: true });
     
     if (onLocationChange) {
       onLocationChange({
@@ -113,8 +149,17 @@ const HierarchicalLocationSelector = ({
 
   // Initialize region value on component mount
   useEffect(() => {
-    form.setValue("province", davaoOrientalData.region);
+    console.log('Initializing province:', davaoOrientalData.region);
+    form.setValue("province", davaoOrientalData.region, { shouldValidate: true, shouldDirty: true });
+    console.log('Form values after province initialization:', {
+      municipality: form.getValues("municipality"),
+      barangay: form.getValues("barangay"),
+      province: form.getValues("province")
+    });
   }, [form]);
+
+  // Remove the complex watch effect - it was causing issues
+  // We'll handle form synchronization differently
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -133,13 +178,13 @@ const HierarchicalLocationSelector = ({
   }, [municipalitySearch, barangaySearch, purokSearch]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Province - Fixed */}
-      <div>
-        <label className="text-sm font-medium text-muted-foreground">
+      <div className="space-y-0">
+        <label className="text-xs font-medium text-muted-foreground mb-0">
           Province
         </label>
-        <div className="mt-1 p-3 bg-muted rounded-md border">
+        <div className="mt-0 p-3 bg-muted rounded-md border">
           <span className="text-sm font-medium">{davaoOrientalData.region}</span>
         </div>
       </div>
@@ -147,25 +192,25 @@ const HierarchicalLocationSelector = ({
       {/* First Row: Municipality, Barangay, and Purok */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Municipality Selection */}
-        <div>
-          <label className="text-sm font-medium text-muted-foreground">
+        <div className="space-y-0">
+          <label className="text-xs font-medium text-muted-foreground mb-0">
             Municipality
           </label>
-          <div className="relative">
+          <div className="relative mt-0">
             <Input
               type="text"
               placeholder="Type to search municipality..."
               value={selectedMunicipality || municipalitySearch}
               onChange={(e) => {
-                const value = e.target.value;
+                const value = e.target.value.toUpperCase();
                 setMunicipalitySearch(value);
                 if (selectedMunicipality && value !== selectedMunicipality) {
                   setSelectedMunicipality("");
                   setSelectedBarangay("");
                   setSelectedPurok("");
-                  form.setValue("municipality", "");
-                  form.setValue("barangay", "");
-                  form.setValue("purok", "");
+                  form.setValue("municipality", "", { shouldValidate: true, shouldDirty: true });
+                  form.setValue("barangay", "", { shouldValidate: true, shouldDirty: true });
+                  form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
                 }
               }}
               className={cn(
@@ -201,22 +246,22 @@ const HierarchicalLocationSelector = ({
         </div>
 
         {/* Barangay Selection */}
-        <div>
-          <label className="text-sm font-medium text-muted-foreground">
+        <div className="space-y-0">
+          <label className="text-xs font-medium text-muted-foreground mb-0">
             Barangay
           </label>
-          <div className="relative">
+          <div className="relative mt-0">
             <Input
               type="text"
               placeholder={selectedMunicipality ? "Type to search barangay..." : "Select municipality first"}
               value={selectedBarangay || barangaySearch}
               onChange={(e) => {
-                const value = e.target.value;
+                const value = e.target.value.toUpperCase();
                 setBarangaySearch(value);
                 if (selectedBarangay && value !== selectedBarangay) {
                   setSelectedBarangay("");
-                  form.setValue("barangay", "");
-                  form.setValue("purok", "");
+                  form.setValue("barangay", "", { shouldValidate: true, shouldDirty: true });
+                  form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
                 }
               }}
               disabled={!selectedMunicipality}
@@ -254,21 +299,21 @@ const HierarchicalLocationSelector = ({
         </div>
 
         {/* Purok Selection */}
-        <div>
-          <label className="text-sm font-medium text-muted-foreground">
+        <div className="space-y-0">
+          <label className="text-xs font-medium text-muted-foreground mb-0">
             Purok
           </label>
-          <div className="relative">
+          <div className="relative mt-0">
             <Input
               type="text"
               placeholder={selectedBarangay ? "Type to search purok..." : "Select barangay first"}
               value={selectedPurok || purokSearch}
               onChange={(e) => {
-                const value = e.target.value;
+                const value = e.target.value.toUpperCase();
                 setPurokSearch(value);
                 if (selectedPurok && value !== selectedPurok) {
                   setSelectedPurok("");
-                  form.setValue("purok", "");
+                  form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
                 }
               }}
               disabled={!selectedBarangay}

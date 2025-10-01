@@ -31,26 +31,26 @@ import DatePicker from "../calendar/DatePicker";
 import HierarchicalLocationSelector from "../location/HierarchicalLocationSelector";
 import { useNavigate } from "react-router-dom";
 
-const FormComponent = ({ onSubmit, form, submitting }) => {
+const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
   const navigate = useNavigate();
   return (
     <Form {...form}>
       <form id="driver-form" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="space-y-4">
           <div>
-            <Label>Vehicle Information</Label>
+            <Label className="text-sm font-medium">Vehicle Information</Label>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-3">
               <FormField
                 control={form.control}
                 name="plateNo"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.plateNo && "text-red-400"
-                      )}
-                    >
+                  <FormItem className="space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.plateNo && "text-red-400"
+                        )}
+                      >
                       Plate No.
                     </FormLabel>
                     <FormControl>
@@ -60,13 +60,13 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         placeholder="ABC-123, DEF-456"
                         value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
                         onChange={(e) => {
-                          const value = e.target.value;
+                          const value = e.target.value.toUpperCase();
                           // Convert comma-separated string to array
                           const plateArray = value.split(",").map(plate => plate.trim()).filter(plate => plate.length > 0);
                           field.onChange(plateArray.length > 0 ? plateArray : value);
                         }}
                         className={cn(
-                          "border border-input focus:ring-0",
+                          "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.plateNo && "border-red-400"
                         )}
                       />
@@ -79,21 +79,25 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                 control={form.control}
                 name="fileNo"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.fileNo && "text-red-400"
-                      )}
-                    >
-                      File No. (Optional)
+                  <FormItem className="space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.fileNo && "text-red-400"
+                        )}
+                      >
+                      File No.
                     </FormLabel>
-                    <FormControl>
+                    <FormControl className="mt-0">
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "border border-input focus:ring-0",
+                          "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.fileNo && "border-red-400"
                         )}
                       />
@@ -106,21 +110,25 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                 control={form.control}
                 name="ownerRepresentativeName"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.ownerRepresentativeName && "text-red-400"
-                      )}
-                    >
-                      Owner/Representative Name
+                  <FormItem className="space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.ownerRepresentativeName && "text-red-400"
+                        )}
+                      >
+                      Owner's Name
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "border border-input focus:ring-0",
+                          "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.ownerRepresentativeName && "border-red-400"
                         )}
                       />
@@ -132,20 +140,18 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
             </div>
           </div>
           <div>
-            <Label>Personal Information</Label>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-9 gap-x-3">
               <FormField
                 control={form.control}
                 name="birthDate"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.birthDate && "text-red-400"
-                      )}
-                    >
+                  <FormItem className="lg:col-span-3 space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.birthDate && "text-red-400"
+                        )}
+                      >
                       Birthday (Optional)
                     </FormLabel>
                     <Popover>
@@ -192,13 +198,13 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                 control={form.control}
                 name="contactNumber"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.contactNumber && "text-red-400"
-                      )}
-                    >
+                  <FormItem className="lg:col-span-3 space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.contactNumber && "text-red-400"
+                        )}
+                      >
                       Contact Number (Optional)
                     </FormLabel>
                     <FormControl>
@@ -206,7 +212,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         {...field}
                         type="tel"
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.contactNumber && "border-red-400"
                         )}
                       />
@@ -219,13 +225,13 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                 control={form.control}
                 name="emailAddress"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.emailAddress && "text-red-400"
-                      )}
-                    >
+                  <FormItem className="lg:col-span-3 space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.emailAddress && "text-red-400"
+                        )}
+                      >
                       Email Address (Optional)
                     </FormLabel>
                     <FormControl>
@@ -233,7 +239,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                         {...field}
                         type="email"
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.emailAddress && "border-red-400"
                         )}
                       />
@@ -245,7 +251,6 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
             </div>
           </div>
           <div>
-            <Label>Address</Label>
             <div className="mt-4">
               <HierarchicalLocationSelector 
                 form={form}
@@ -257,19 +262,18 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
             </div>
           </div>
           <div>
-            <Label>Driver's License Information</Label>
             <div className="grid md:grid-cols-2 lg:grid-cols-9 gap-x-3">
               <FormField
                 control={form.control}
                 name="hasDriversLicense"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.hasDriversLicense && "text-red-400"
-                      )}
-                    >
+                  <FormItem className="lg:col-span-3 space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs",
+                          form.formState.errors.hasDriversLicense && "text-red-400"
+                        )}
+                      >
                       Do you have Driver's License?
                     </FormLabel>
                     <Select
@@ -279,7 +283,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-muted-foreground",
+                            "text-black dark:text-white",
                             form.formState.errors.hasDriversLicense && "border-red-400"
                           )}
                         >
@@ -301,21 +305,25 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
                 control={form.control}
                 name="driversLicenseNumber"
                 render={({ field }) => (
-                  <FormItem className="lg:col-span-3">
-                    <FormLabel
-                      className={cn(
-                        "text-muted-foreground",
-                        form.formState.errors.driversLicenseNumber && "text-red-400"
-                      )}
-                    >
+                  <FormItem className="lg:col-span-3 space-y-0">
+                      <FormLabel
+                        className={cn(
+                          "text-muted-foreground text-xs mb-0",
+                          form.formState.errors.driversLicenseNumber && "text-red-400"
+                        )}
+                      >
                       Driver's License Number
                     </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
+                        onChange={(e) => {
+                          const capitalizedValue = e.target.value.toUpperCase();
+                          field.onChange(capitalizedValue);
+                        }}
                         className={cn(
-                          "text-muted-foreground",
+                          "text-black dark:text-white",
                           form.formState.errors.driversLicenseNumber && "border-red-400"
                         )}
                       />
@@ -327,22 +335,7 @@ const FormComponent = ({ onSubmit, form, submitting }) => {
               <div className="lg:col-span-6"></div>
             </div>
           </div>
-          <div className="space-x-2">
-            <Button disabled={submitting} id="submit" className="w-20">
-              {submitting ? (
-                <LoaderCircle className="w-6 h-6 text-primary-foreground mx-auto animate-spin" />
-              ) : (
-                "Submit"
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate(-1)}
-            >
-              Cancel
-            </Button>
-          </div>
+          {/* Buttons removed - using modal footer buttons instead */}
         </div>
       </form>
     </Form>
