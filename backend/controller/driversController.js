@@ -92,7 +92,7 @@ export const createDriver = async (req, res) => {
 
 export const getDrivers = async (req, res) => {
   try {
-    const drivers = await DriverModel.find().select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate isActive").sort({createdAt:-1})
+    const drivers = await DriverModel.find().select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive").sort({createdAt:-1})
 
     // Return drivers without status and dateOfRenewal calculations
     const driversWithCalculatedStatus = drivers.map(driver => driver.toObject());
