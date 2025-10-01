@@ -22,26 +22,6 @@ export function DataTablePagination({ table }) {
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div> */}
       <div className="flex items-center space-x-4 lg:space-x-5">
-        <div className="flex items-center space-x-2">
-          <p className="text-xs font-medium">Rows per page</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger className="h-7 w-[60px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
         <div className="flex w-[100px] items-center justify-center text-xs font-medium">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}

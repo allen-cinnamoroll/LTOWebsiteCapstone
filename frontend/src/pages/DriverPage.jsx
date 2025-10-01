@@ -51,8 +51,8 @@ const DriverPage = () => {
           ownerRepresentativeName: dData.ownerRepresentativeName,
           fullname: dData.fullname,
           birthDate: dData.birthDate, // Keep as Date object for proper handling in columns
-          contactNumber: dData.contactNumber,
-          emailAddress: dData.emailAddress,
+          municipality: dData.address?.municipality || dData.municipality,
+          barangay: dData.address?.barangay || dData.barangay,
           hasDriversLicense: dData.hasDriversLicense,
           driversLicenseNumber: dData.driversLicenseNumber,
           isActive: dData.isActive,
@@ -136,21 +136,23 @@ const DriverPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
-      <header className="text-xl md:text-3xl font-bold mb-5">Drivers</header>
-      <section>
-        <DriversTable
-          data={driverData}
-          filters={["fullname", "plateNo", "ownerRepresentativeName"]}
-          tableColumn={driverColumns}
-          onAdd={handleAdd}
-          loading={loading}
-          onRowClick={onManage}
-          onEdit={onEdit}
-          onDelete={handleDeactivate}
-          onNavigate={handleNavigate}
-        />
-      </section>
+    <div className="h-full flex flex-col">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex-1 flex flex-col min-h-0">
+        <header className="text-xl md:text-3xl font-bold mb-4 flex-shrink-0">Drivers</header>
+        <div className="flex-1 flex flex-col min-h-0">
+          <DriversTable
+            data={driverData}
+            filters={["fullname", "plateNo", "ownerRepresentativeName", "municipality", "barangay"]}
+            tableColumn={driverColumns}
+            onAdd={handleAdd}
+            loading={loading}
+            onRowClick={onManage}
+            onEdit={onEdit}
+            onDelete={handleDeactivate}
+            onNavigate={handleNavigate}
+          />
+        </div>
+      </div>
       <ConfirmationDIalog
         open={showAlert}
         onOpenChange={setShowAlert}

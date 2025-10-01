@@ -88,22 +88,24 @@ const VehiclesPage = () => {
 
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
-      <header className="text-xl md:text-3xl font-bold mb-5">Vehicles</header>
-      <section>
-        {/* Call vehicle table component */}
-        <VehiclesTable
-          data={vehicleData}
-          filters={["plateNo", "fileNo", "engineNo", "chassisNo", "make", "bodyType", "color", "classification", "status"]}
-          tableColumn={vehicleColumns}
-          onAdd={handleAdd}
-          loading={loading}
-          onRowClick={onRowClick}
-          onEdit={onEdit}
-          onRenewal={handleRenewal}
-          submitting={submitting}
-        />
-      </section>
+    <div className="h-full flex flex-col">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex-1 flex flex-col min-h-0">
+        <header className="text-xl md:text-3xl font-bold mb-4 flex-shrink-0">Vehicles</header>
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Call vehicle table component */}
+          <VehiclesTable
+            data={vehicleData}
+            filters={["plateNo", "fileNo", "engineNo", "chassisNo", "classification", "status"]}
+            tableColumn={vehicleColumns}
+            onAdd={handleAdd}
+            loading={loading}
+            onRowClick={onRowClick}
+            onEdit={onEdit}
+            onRenewal={handleRenewal}
+            submitting={submitting}
+          />
+        </div>
+      </div>
 
       {/* Renewal Modal */}
       <VehicleRenewalModal 

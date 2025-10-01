@@ -56,7 +56,7 @@ const VehiclesTable = ({
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10, // Default rows per page
+    pageSize: 8, // 8 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   // Define the columns where you want to apply the global filter
@@ -92,10 +92,10 @@ const VehiclesTable = ({
     },
   });
   return (
-    <>
+    <div className="h-full flex flex-col">
       <Label className="font-semibold">{title}</Label>
       <div
-        className={`md:flex items-center justify-between  py-4
+        className={`md:flex items-center justify-between py-3 flex-shrink-0
         `}
       >
         <div className="relative hidden md:inline md:max-w-sm flex-shrink">
@@ -121,67 +121,72 @@ const VehiclesTable = ({
         </div>
       </div>
 
-      <div className="rounded-md border flex-1 overflow-hidden bg-white dark:bg-black border-gray-400 dark:border-gray-600">
-        <Table>
-          <TableHeader className="text-xs md:text-sm">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </TableHead>
+      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 min-h-0">
+        <div className="overflow-auto h-full">
+          <div className="px-4">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b-2 border-gray-300 dark:border-gray-600">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
+                    {headerGroup.headers.map((header) => (
+                       <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-4 whitespace-nowrap text-left">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody className="text-xs md:text-sm bg-white dark:bg-black">
-            {loading ? (
-              <TableSkeleton
-                rowCount={5}
-                cellCount={table.getAllColumns().length}
-              />
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  onClick={() => onRowClick(row.original)}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+              </TableHeader>
+              <TableBody className="text-xs bg-white dark:bg-gray-900">
+                {loading ? (
+                  <TableSkeleton
+                    rowCount={5}
+                    cellCount={table.getAllColumns().length}
+                  />
+                ) : table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      onClick={() => onRowClick(row.original)}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="px-3 py-3.5 text-gray-800 dark:text-gray-200 text-left">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell
+                      colSpan={table.getVisibleLeafColumns().length || 5}
+                      className="h-32 text-center text-muted-foreground"
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <p className="text-sm text-gray-600">No results found</p>
+                        <p className="text-xs text-gray-400">
+                          Try adjusting your filters or add new data.
+                        </p>
+                      </div>
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow className="hover:bg-transparent">
-                <TableCell
-                  colSpan={table.getVisibleLeafColumns().length || 5}
-                  className="h-32 text-center text-muted-foreground"
-                >
-                  <div className="flex flex-col items-center justify-center">
-                    <p className="text-sm text-gray-600">No results found</p>
-                    <p className="text-xs text-gray-400">
-                      Try adjusting your filters or add new data.
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
-      <div className="mt-4">
+      <div className="mt-3 flex-shrink-0">
         <DataTablePagination table={table} />
       </div>
-    </>
+    </div>
   );
 };
 

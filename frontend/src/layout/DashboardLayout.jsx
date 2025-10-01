@@ -82,7 +82,7 @@ const DashboardLayout = () => {
               <ModeToggle />
             </div>
           </header>
-          <main className="md:p-4 ">
+          <main className="md:p-4 h-full flex flex-col overflow-hidden">
             <Outlet />
           </main>
         </SidebarInset>

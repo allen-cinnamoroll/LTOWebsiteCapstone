@@ -68,21 +68,23 @@ const ViolationPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
-      <header className="text-xl md:text-3xl font-bold mb-5">Violations</header>
-      <section>
-        <ViolationTable
-          data={violationData}
-          filters={["topNo", "firstName", "lastName", "violations", "violationType", "licenseType", "plateNo", "dateOfApprehension", "apprehendingOfficer"]}
-          tableColumn={violationColumns}
-          onAdd={handleAdd}
-          loading={loading}
-          onRowClick={onRowClick}
-          onEdit={onEdit}
-          onUpdateStatus={() => {}}
-          submitting={submitting}
-        />
-      </section>
+    <div className="h-full flex flex-col">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex-1 flex flex-col min-h-0">
+        <header className="text-xl md:text-3xl font-bold mb-4 flex-shrink-0">Violations</header>
+        <div className="flex-1 flex flex-col min-h-0">
+          <ViolationTable
+            data={violationData}
+            filters={["topNo", "firstName", "lastName", "violations", "violationType", "licenseType", "plateNo", "dateOfApprehension", "apprehendingOfficer"]}
+            tableColumn={violationColumns}
+            onAdd={handleAdd}
+            loading={loading}
+            onRowClick={onRowClick}
+            onEdit={onEdit}
+            onUpdateStatus={() => {}}
+            submitting={submitting}
+          />
+        </div>
+      </div>
 
       {/* Add Violation Modal */}
       <AddViolationModal

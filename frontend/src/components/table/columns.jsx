@@ -2,37 +2,37 @@ export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
   {
     accessorKey: "accident_id",
     header: "Accident ID",
-    cell: ({ row }) => <div className="">{row.getValue("accident_id")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("accident_id")}</div>,
   },
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "accident_date",
     header: "Date",
-    cell: ({ row }) => <div className="">{row.getValue("accident_date")}</div>,
+    cell: ({ row }) => <div className="text-gray-700 text-xs">{row.getValue("accident_date")}</div>,
   },
   {
     accessorKey: "street",
     header: "Street",
-    cell: ({ row }) => <div className="">{row.getValue("street")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("street") || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="">{row.getValue("barangay")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("barangay") || "N/A"}</div>,
   },
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="">{row.getValue("municipality")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("municipality") || "N/A"}</div>,
   },
   {
     accessorKey: "vehicle_type",
     header: "Vehicle Type",
-    cell: ({ row }) => <div className="">{row.getValue("vehicle_type")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("vehicle_type") || "N/A"}</div>,
   },
   {
     accessorKey: "severity",
@@ -69,12 +69,12 @@ export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
               <DotsHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-24">
+            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit}>
+            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
+              <Edit className="h-3 w-3 mr-2" />
               Edit
-              <Edit />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -207,7 +207,7 @@ export const driverColumns = (onEdit, onDelete) => [
       return (
         <div className="flex flex-col">
           {plateNoArray.map((plate, index) => (
-            <div key={index} className="">
+            <div key={index} className="font-medium text-gray-900 text-xs">
               {plate}
             </div>
           ))}
@@ -218,14 +218,41 @@ export const driverColumns = (onEdit, onDelete) => [
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="">{row.getValue("fileNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
   },
   {
     accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={"Owner/Representative Name"} />
+      <DataTableColumnHeader column={column} title={"Owner"} />
     ),
-    cell: ({ row }) => <div className="">{row.getValue("ownerRepresentativeName")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
+  },
+  {
+    accessorKey: "municipality",
+    header: "Municipality",
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "barangay",
+    header: "Barangay",
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "birthDate",
+    header: "Birthdate",
+    cell: ({ row }) => {
+      const birthDate = row.getValue("birthDate");
+      if (!birthDate) {
+        return <div className="text-gray-500 text-xs">None</div>;
+      }
+      
+      const dateObj = new Date(birthDate);
+      if (isNaN(dateObj.getTime())) {
+        return <div className="text-red-500 text-xs">Invalid Date</div>;
+      }
+      
+      return <div className="text-gray-700 text-xs">{dateObj.toLocaleDateString()}</div>;
+    },
   },
   {
     accessorKey: "hasDriversLicense",
@@ -237,49 +264,16 @@ export const driverColumns = (onEdit, onDelete) => [
         <div className="">
           {hasLicense ? (
             <div>
-              <div className="font-semibold text-green-600">Yes</div>
+              <div className="font-semibold text-green-600 text-xs">Yes</div>
               {licenseNumber && (
-                <div className="text-xs text-muted-foreground">{licenseNumber}</div>
+                <div className="text-xs text-gray-500 mt-1">{licenseNumber}</div>
               )}
             </div>
           ) : (
-            <div className="font-semibold text-red-600">No</div>
+            <div className="font-semibold text-red-600 text-xs">No</div>
           )}
         </div>
       );
-    },
-  },
-  {
-    accessorKey: "birthDate",
-    header: "Birthday",
-    cell: ({ row }) => {
-      const birthDate = row.getValue("birthDate");
-      if (!birthDate) {
-        return <div className="">None</div>;
-      }
-      
-      const dateObj = new Date(birthDate);
-      if (isNaN(dateObj.getTime())) {
-        return <div className="">Invalid Date</div>;
-      }
-      
-      return <div className="">{dateObj.toLocaleDateString()}</div>;
-    },
-  },
-  {
-    accessorKey: "contactNumber",
-    header: "Contact Number",
-    cell: ({ row }) => {
-      const contactNumber = row.getValue("contactNumber");
-      return <div className="">{contactNumber || "None"}</div>;
-    },
-  },
-  {
-    accessorKey: "emailAddress",
-    header: "Email Address",
-    cell: ({ row }) => {
-      const emailAddress = row.getValue("emailAddress");
-      return <div className="">{emailAddress || "None"}</div>;
     },
   },
   {
@@ -304,16 +298,17 @@ export const driverColumns = (onEdit, onDelete) => [
               <DotsHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="text-xs" align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent className="text-xs w-28" align="end">
+            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit}>
-              Edit <Edit />
+            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
+              <Edit className="h-3 w-3 mr-2" />
+              Edit
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={handleDelete}>
+            <DropdownMenuItem onClick={handleDelete} className="text-xs py-1">
+              <Trash className="h-3 w-3 mr-2" />
               Deactivate
-              <Trash />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -325,7 +320,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
   {
     accessorKey: "topNo",
     header: "TOP NO.",
-    cell: ({ row }) => <div className="font-medium">{row.getValue("topNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("topNo")}</div>,
   },
       {
       accessorKey: "firstName",
@@ -338,7 +333,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
         
         // If all name fields are "None" or null (alarm type), display "None"
         if ((firstName === "None" || !firstName) && (middleInitial === "None" || !middleInitial) && (lastName === "None" || !lastName) && (suffix === "None" || !suffix)) {
-          return <div className="">None</div>;
+          return <div className="text-gray-500 text-xs">None</div>;
         }
         
         const parts = [firstName];
@@ -346,7 +341,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
         if (lastName && lastName !== "None") parts.push(lastName);
         if (suffix && suffix !== "None") parts.push(suffix);
         
-        return <div className="">{parts.join(" ")}</div>;
+        return <div className="font-medium text-gray-900 text-xs">{parts.join(" ")}</div>;
       },
     },
   {
@@ -355,7 +350,7 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     cell: ({ row }) => {
       const violations = row.getValue("violations");
       return (
-        <div className="max-w-xs">
+        <div className="max-w-xs text-xs">
           {violations && violations.length > 0 && violations[0] !== "None" 
             ? (Array.isArray(violations) ? violations.join(", ") : violations) 
             : "None"}
@@ -404,13 +399,13 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     header: "License Type",
     cell: ({ row }) => {
       const licenseType = row.getValue("licenseType");
-      return <div className="">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
+      return <div className="font-medium text-gray-700 text-xs">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
     },
   },
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "dateOfApprehension",
@@ -419,13 +414,13 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     ),
     cell: ({ row }) => {
       const date = row.getValue("dateOfApprehension");
-      return <div className="">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
+      return <div className="text-gray-700 text-xs">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
     },
   },
   {
     accessorKey: "apprehendingOfficer",
     header: "Officer",
-    cell: ({ row }) => <div className="">{row.getValue("apprehendingOfficer") || "None"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 text-xs">{row.getValue("apprehendingOfficer") || "None"}</div>,
   },
   {
     id: "actions",
@@ -444,12 +439,12 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
               <DotsHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-24">
+            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit}>
+            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
+              <Edit className="h-3 w-3 mr-2" />
               Edit
-              <Edit />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -508,42 +503,22 @@ export const vehicleColumns = (onEdit, submitting) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("plateNo")}</div>,
   },
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="">{row.getValue("fileNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
   },
   {
     accessorKey: "engineNo",
     header: "Engine No.",
-    cell: ({ row }) => <div className="">{row.getValue("engineNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("engineNo") || "N/A"}</div>,
   },
   {
     accessorKey: "chassisNo",
     header: "Chassis No.",
-    cell: ({ row }) => <div className="">{row.getValue("chassisNo")}</div>,
-  },
-  {
-    accessorKey: "make",
-    header: "Make",
-    cell: ({ row }) => <div className="">{row.getValue("make")}</div>,
-  },
-  {
-    accessorKey: "bodyType",
-    header: "Body Type",
-    cell: ({ row }) => <div className="">{row.getValue("bodyType")}</div>,
-  },
-  {
-    accessorKey: "color",
-    header: "Color",
-    cell: ({ row }) => <div className="">{row.getValue("color")}</div>,
-  },
-  {
-    accessorKey: "classification",
-    header: "Classification",
-    cell: ({ row }) => <div className="">{row.getValue("classification")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("chassisNo") || "N/A"}</div>,
   },
   {
     accessorKey: "dateOfRenewal",
@@ -551,11 +526,16 @@ export const vehicleColumns = (onEdit, submitting) => [
     cell: ({ row }) => {
       const date = row.getValue("dateOfRenewal");
       return (
-        <div className="">
+        <div className="font-medium text-gray-900 text-xs">
           {date ? new Date(date).toLocaleDateString() : "Not set"}
         </div>
       );
     },
+  },
+  {
+    accessorKey: "classification",
+    header: "Classification",
+    cell: ({ row }) => <div className="font-medium text-gray-900 text-xs">{row.getValue("classification") || "N/A"}</div>,
   },
   {
     accessorKey: "status",
@@ -569,11 +549,11 @@ export const vehicleColumns = (onEdit, submitting) => [
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 px-2 py-1 rounded-sm">
             {isActive ? (
-              <CheckCircle2Icon className="h-4 w-4 text-green-600" />
+              <CheckCircle2Icon className="h-3 w-3 text-green-600" />
             ) : (
-              <CircleAlert className="h-4 w-4 text-red-600" />
+              <CircleAlert className="h-3 w-3 text-red-600" />
             )}
-            <span className={`text-sm font-medium ${
+            <span className={`text-xs font-medium ${
               isActive ? "text-green-700" : "text-red-700"
             }`}>
               {isActive ? "Active" : "Expired"}
@@ -609,12 +589,12 @@ export const vehicleColumns = (onEdit, submitting) => [
               <DotsHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-24">
+            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit}>
+            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
+              <Edit className="h-3 w-3 mr-2" />
               Edit
-              <Edit />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
