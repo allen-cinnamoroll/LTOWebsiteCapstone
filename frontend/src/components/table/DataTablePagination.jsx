@@ -29,12 +29,12 @@ export function DataTablePagination({ table }) {
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            className="hidden h-7 w-7 rounded-sm  p-0 lg:flex"
+            className="hidden h-7 w-7 rounded-sm p-0 lg:flex"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to first page</span>
-            <ChevronsLeft />
+            <ChevronsLeft className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
@@ -43,7 +43,7 @@ export function DataTablePagination({ table }) {
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to previous page</span>
-            <ChevronLeft />
+            <ChevronLeft className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
@@ -52,7 +52,7 @@ export function DataTablePagination({ table }) {
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to next page</span>
-            <ChevronRight />
+            <ChevronRight className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
@@ -61,7 +61,7 @@ export function DataTablePagination({ table }) {
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to last page</span>
-            <ChevronsRight />
+            <ChevronsRight className="w-4 h-4" />
           </Button>
         </div>
       </div>
