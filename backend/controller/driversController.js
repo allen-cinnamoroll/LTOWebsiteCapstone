@@ -95,34 +95,12 @@ export const getDrivers = async (req, res) => {
   try {
     const drivers = await DriverModel.find().select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive").sort({createdAt:-1})
 
-    // Aggregate plate numbers from vehicles for each driver
-    const driversWithAggregatedPlates = await Promise.all(
-      drivers.map(async (driver) => {
-        const driverObj = driver.toObject();
-        
-        // Find all vehicles associated with this driver
-        const vehicles = await VehicleModel.find({ driver: driver._id }).select('plateNo fileNo');
-        
-        // Extract plate numbers and file numbers from vehicles
-        const vehiclePlates = vehicles.map(vehicle => vehicle.plateNo);
-        const vehicleFileNos = vehicles.map(vehicle => vehicle.fileNo);
-        
-        // Combine driver's existing plates with vehicle plates (remove duplicates)
-        const allPlates = [...new Set([...driverObj.plateNo, ...vehiclePlates])];
-        const allFileNos = [...new Set([...driverObj.fileNo ? [driverObj.fileNo] : [], ...vehicleFileNos])];
-        
-        return {
-          ...driverObj,
-          plateNo: allPlates,
-          fileNo: allFileNos.length > 0 ? allFileNos[0] : driverObj.fileNo, // Use first file number as primary
-          vehicleCount: vehicles.length // Add vehicle count for reference
-        };
-      })
-    );
+    // Return drivers with their plateNo arrays (now kept in sync with vehicles)
+    const driversWithCalculatedStatus = drivers.map(driver => driver.toObject());
 
     res.status(200).json({
       success: true,
-      data: driversWithAggregatedPlates,
+      data: driversWithCalculatedStatus,
     });
   } catch (err) {
     return res.status(500).json({
@@ -144,29 +122,11 @@ export const findDriver = async (req, res) => {
       });
     }
 
-    const driverObj = driver.toObject();
-    
-    // Find all vehicles associated with this driver
-    const vehicles = await VehicleModel.find({ driver: driver._id }).select('plateNo fileNo');
-    
-    // Extract plate numbers and file numbers from vehicles
-    const vehiclePlates = vehicles.map(vehicle => vehicle.plateNo);
-    const vehicleFileNos = vehicles.map(vehicle => vehicle.fileNo);
-    
-    // Combine driver's existing plates with vehicle plates (remove duplicates)
-    const allPlates = [...new Set([...driverObj.plateNo, ...vehiclePlates])];
-    const allFileNos = [...new Set([...driverObj.fileNo ? [driverObj.fileNo] : [], ...vehicleFileNos])];
-    
-    const driverWithAggregatedPlates = {
-      ...driverObj,
-      plateNo: allPlates,
-      fileNo: allFileNos.length > 0 ? allFileNos[0] : driverObj.fileNo, // Use first file number as primary
-      vehicleCount: vehicles.length // Add vehicle count for reference
-    };
+    const driverWithCalculatedStatus = driver.toObject();
 
     res.status(200).json({
       success: true,
-      data: driverWithAggregatedPlates,
+      data: driverWithCalculatedStatus,
     });
   } catch (err) {
     return res.status(500).json({

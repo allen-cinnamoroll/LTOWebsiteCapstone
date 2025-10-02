@@ -103,8 +103,23 @@ export const createVehicle = async (req, res) => {
       throw createError;
     }
 
-    // Note: With the new structure, we don't need to update driver's plateNo list
-    // since vehicles now reference drivers via ownerId, not the other way around
+    // Update driver's plateNo array with the new vehicle's plate number
+    if (vehicleData.driver) {
+      try {
+        const driver = await DriverModel.findById(vehicleData.driver);
+        if (driver) {
+          // Add the new plate number to driver's plateNo array if not already present
+          if (!driver.plateNo.includes(plateNo)) {
+            driver.plateNo.push(plateNo);
+            await driver.save();
+            console.log(`Updated driver ${driver._id} with new plate: ${plateNo}`);
+          }
+        }
+      } catch (driverUpdateError) {
+        console.error('Error updating driver plateNo array:', driverUpdateError);
+        // Don't fail the vehicle creation if driver update fails
+      }
+    }
 
     // Sync driver status if renewal date is provided
     if (req.body.dateOfRenewal) {
@@ -330,6 +345,59 @@ export const updateVehicle = async (req, res) => {
         });
       }
 
+      // Handle driver plate number synchronization
+      const oldDriverId = currentVehicle.driver;
+      const newDriverId = updateData.driver;
+      const oldPlateNo = currentVehicle.plateNo;
+      const newPlateNo = updateData.plateNo;
+
+      // If driver changed, update both old and new drivers
+      if (oldDriverId !== newDriverId) {
+        // Remove plate from old driver
+        if (oldDriverId) {
+          try {
+            const oldDriver = await DriverModel.findById(oldDriverId);
+            if (oldDriver) {
+              oldDriver.plateNo = oldDriver.plateNo.filter(plate => plate !== oldPlateNo);
+              await oldDriver.save();
+              console.log(`Removed plate ${oldPlateNo} from old driver ${oldDriver._id}`);
+            }
+          } catch (error) {
+            console.error('Error updating old driver:', error);
+          }
+        }
+
+        // Add plate to new driver
+        if (newDriverId) {
+          try {
+            const newDriver = await DriverModel.findById(newDriverId);
+            if (newDriver && !newDriver.plateNo.includes(newPlateNo)) {
+              newDriver.plateNo.push(newPlateNo);
+              await newDriver.save();
+              console.log(`Added plate ${newPlateNo} to new driver ${newDriver._id}`);
+            }
+          } catch (error) {
+            console.error('Error updating new driver:', error);
+          }
+        }
+      } else if (oldPlateNo !== newPlateNo && newDriverId) {
+        // Same driver but plate number changed
+        try {
+          const driver = await DriverModel.findById(newDriverId);
+          if (driver) {
+            // Remove old plate and add new plate
+            driver.plateNo = driver.plateNo.filter(plate => plate !== oldPlateNo);
+            if (!driver.plateNo.includes(newPlateNo)) {
+              driver.plateNo.push(newPlateNo);
+            }
+            await driver.save();
+            console.log(`Updated driver ${driver._id}: removed ${oldPlateNo}, added ${newPlateNo}`);
+          }
+        } catch (error) {
+          console.error('Error updating driver plate change:', error);
+        }
+      }
+
       // Log the activity
       if (req.user) {
         // Fetch full user details from database since JWT only contains userId, role, email
@@ -407,6 +475,22 @@ export const deleteVehicle = async (req, res) => {
         success: false,
         message: "Vehicle not found",
       });
+    }
+
+    // Update driver's plateNo array to remove the deleted vehicle's plate number
+    if (vehicle.driver) {
+      try {
+        const driver = await DriverModel.findById(vehicle.driver);
+        if (driver) {
+          // Remove the plate number from driver's plateNo array
+          driver.plateNo = driver.plateNo.filter(plate => plate !== vehicle.plateNo);
+          await driver.save();
+          console.log(`Removed plate ${vehicle.plateNo} from driver ${driver._id}`);
+        }
+      } catch (driverUpdateError) {
+        console.error('Error updating driver plateNo array:', driverUpdateError);
+        // Don't fail the vehicle deletion if driver update fails
+      }
     }
 
     // Log the activity before deleting
