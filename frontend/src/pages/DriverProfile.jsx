@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { DriverChart } from "@/components/driver/DriverChart";
-import { ArrowLeft, User } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import DriverModal from "@/components/driver/DriverModal";
 import apiClient from "@/api/axios";
@@ -50,34 +47,15 @@ const DriverProfile = () => {
 
   return (
     <>
-      <div className="px-4 pt-4 md:px-0 md:pt-0 md:mb-4">
-        <Button
-          variant="outline"
-          className="shadow-none"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft /> Back
-        </Button>
-      </div>
-      
-      <div className="p-4 md:p-0">
-        <div className="text-center py-12">
-          <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">Driver Profile</h2>
-          <p className="text-gray-500 mb-6">Click the button below to view driver information</p>
-          <Button 
-            onClick={() => setModalOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            <User className="h-4 w-4 mr-2" />
-            View Driver Information
-          </Button>
-        </div>
-      </div>
-
       <DriverModal 
         open={modalOpen} 
-        onOpenChange={setModalOpen} 
+        onOpenChange={(open) => {
+          setModalOpen(open);
+          if (!open) {
+            // When modal is closed, navigate back to drivers table
+            navigate('/driver');
+          }
+        }} 
         driverData={driverData}
       />
     </>

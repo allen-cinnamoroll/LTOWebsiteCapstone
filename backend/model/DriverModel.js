@@ -75,7 +75,22 @@ const driverSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref:'Users',
       default: null
-    }
+    },
+    vehicles: [{
+      vehicleId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicles',
+        required: true
+      },
+      plateNumber: {
+        type: String,
+        required: true
+      },
+      fileNumber: {
+        type: String,
+        required: true
+      }
+    }]
   },
   {
     timestamps: true,

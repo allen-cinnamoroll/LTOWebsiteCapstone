@@ -9,16 +9,24 @@ import {
 } from "../util/vehicleStatusChecker.js";
 import { updateDriverStatusByVehicleRenewal } from "../util/driverStatusChecker.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
-import { getVehicleStatus, calculateExpirationDate, getExpirationInfo } from "../util/plateStatusCalculator.js";
+import { getVehicleStatus, getVehicleStatusDescription, calculateExpirationDate, getExpirationInfo } from "../util/plateStatusCalculator.js";
 
 export const createVehicle = async (req, res) => {
-  const plateNo = req.body.plateNo;
+  const { plateNo, fileNo, driverId } = req.body;
   
   // Debug: Log the request body to see what's being received
   console.log('Vehicle creation request body:', req.body);
   console.log('vehicleStatusType received:', req.body.vehicleStatusType);
   
   try {
+    // Validate required fields
+    if (!plateNo || !fileNo || !driverId) {
+      return res.status(400).json({
+        success: false,
+        message: "plateNo, fileNo, and driverId are required",
+      });
+    }
+
     // Check if plate number is already taken
     const plateNoTaken = await VehicleModel.findOne({ plateNo });
 
@@ -26,6 +34,15 @@ export const createVehicle = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Vehicle already registered",
+      });
+    }
+
+    // Check if driver exists
+    const driver = await DriverModel.findById(driverId);
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        message: "Driver not found",
       });
     }
 
@@ -43,6 +60,7 @@ export const createVehicle = async (req, res) => {
       ...req.body,
       serialChassisNumber: req.body.chassisNo, // Map chassisNo to serialChassisNumber
       status,
+      driverId, // Add the driverId reference
       // Add calculated expiration date if not manually provided
       dateOfRenewal: dateOfRenewal || expirationDate,
       // Use the processed vehicleStatusType with fallback
@@ -103,22 +121,25 @@ export const createVehicle = async (req, res) => {
       throw createError;
     }
 
-    // Update driver's plateNo array with the new vehicle's plate number
-    if (vehicleData.driver) {
-      try {
-        const driver = await DriverModel.findById(vehicleData.driver);
-        if (driver) {
-          // Add the new plate number to driver's plateNo array if not already present
-          if (!driver.plateNo.includes(plateNo)) {
-            driver.plateNo.push(plateNo);
-            await driver.save();
-            console.log(`Updated driver ${driver._id} with new plate: ${plateNo}`);
+    // Update driver's vehicles array with the new vehicle
+    try {
+      await DriverModel.findByIdAndUpdate(
+        driverId,
+        {
+          $push: {
+            vehicles: {
+              vehicleId: vehicle._id,
+              plateNumber: plateNo,
+              fileNumber: fileNo
+            }
           }
-        }
-      } catch (driverUpdateError) {
-        console.error('Error updating driver plateNo array:', driverUpdateError);
-        // Don't fail the vehicle creation if driver update fails
-      }
+        },
+        { new: true }
+      );
+      console.log(`Updated driver ${driverId} with new vehicle: ${plateNo}`);
+    } catch (driverUpdateError) {
+      console.error('Error updating driver vehicles array:', driverUpdateError);
+      // Don't fail the vehicle creation if driver update fails
     }
 
     // Sync driver status if renewal date is provided
@@ -633,7 +654,7 @@ export const getVehicleByFileNumber = async (req, res) => {
     }
 
     // Calculate current status based on plate number and date of renewal
-    const currentStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+    const currentStatus = getVehicleStatusDescription(vehicle.plateNo, vehicle.dateOfRenewal);
     const expirationInfo = getExpirationInfo(vehicle.plateNo, vehicle.dateOfRenewal);
     
     const vehicleDetails = {
@@ -647,7 +668,7 @@ export const getVehicleByFileNumber = async (req, res) => {
       color: vehicle.color,
       classification: vehicle.classification,
       dateOfRenewal: vehicle.dateOfRenewal,
-      status: currentStatus, // Use calculated status
+      status: currentStatus, // Use human-readable status description
       vehicleStatusType: vehicle.vehicleStatusType,
       expirationInfo: expirationInfo // Include expiration details
     };

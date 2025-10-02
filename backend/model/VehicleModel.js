@@ -80,10 +80,10 @@
         enum:["0","1"],
         default:"1"
       },
-      driver: {
+      driverId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Drivers',
-        required: false
+        required: [true, "driverId is required"]
       }
     },
     {
