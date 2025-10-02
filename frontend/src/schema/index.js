@@ -90,7 +90,9 @@ export const VehicleSchema = z.object({
   vehicleStatusType: z.enum(["New", "Old"], {
     required_error: "Vehicle status type is required",
   }),
-  driver: z.string().optional(),
+  driver: z.string().min(1, {
+    message: "Driver selection is required",
+  }),
 });
 
 export const AccidentSchema = z.object({

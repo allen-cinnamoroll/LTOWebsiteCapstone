@@ -73,7 +73,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
         color: formData.color,
         classification: formData.classification,
         vehicleStatusType: formData.vehicleStatusType,
-        driver: formData.driver
+        driverId: formData.driver // Map driver to driverId
       };
 
       // Only include dateOfRenewal if it has a value
@@ -84,6 +84,9 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
       // Debug: Log the content being sent to API
       console.log('Content being sent to API:', content);
       console.log('vehicleStatusType in content:', content.vehicleStatusType);
+      console.log('driverId in content:', content.driverId);
+      console.log('plateNo in content:', content.plateNo);
+      console.log('fileNo in content:', content.fileNo);
 
       const { data } = await apiClient.post("/vehicle", content, {
         headers: {
