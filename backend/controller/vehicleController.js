@@ -617,3 +617,50 @@ export const getVehicleOwnerByPlate = async (req, res) => {
     });
   }
 };
+
+// Get vehicle by file number
+export const getVehicleByFileNumber = async (req, res) => {
+  const { fileNo } = req.params;
+  
+  try {
+    const vehicle = await VehicleModel.findOne({ fileNo });
+    
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+
+    // Calculate current status based on plate number and date of renewal
+    const currentStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+    const expirationInfo = getExpirationInfo(vehicle.plateNo, vehicle.dateOfRenewal);
+    
+    const vehicleDetails = {
+      _id: vehicle._id,
+      plateNo: vehicle.plateNo,
+      fileNo: vehicle.fileNo,
+      engineNo: vehicle.engineNo,
+      chassisNo: vehicle.serialChassisNumber, // Map serialChassisNumber back to chassisNo
+      make: vehicle.make,
+      bodyType: vehicle.bodyType,
+      color: vehicle.color,
+      classification: vehicle.classification,
+      dateOfRenewal: vehicle.dateOfRenewal,
+      status: currentStatus, // Use calculated status
+      vehicleStatusType: vehicle.vehicleStatusType,
+      expirationInfo: expirationInfo // Include expiration details
+    };
+
+    res.status(200).json({
+      success: true,
+      data: vehicleDetails,
+    });
+  } catch (err) {
+    console.error("Get vehicle by file number error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
