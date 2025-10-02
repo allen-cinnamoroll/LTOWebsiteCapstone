@@ -1,4 +1,5 @@
 import DriverModel from "../model/DriverModel.js";
+import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
@@ -94,12 +95,34 @@ export const getDrivers = async (req, res) => {
   try {
     const drivers = await DriverModel.find().select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive").sort({createdAt:-1})
 
-    // Return drivers without status and dateOfRenewal calculations
-    const driversWithCalculatedStatus = drivers.map(driver => driver.toObject());
+    // Aggregate plate numbers from vehicles for each driver
+    const driversWithAggregatedPlates = await Promise.all(
+      drivers.map(async (driver) => {
+        const driverObj = driver.toObject();
+        
+        // Find all vehicles associated with this driver
+        const vehicles = await VehicleModel.find({ driver: driver._id }).select('plateNo fileNo');
+        
+        // Extract plate numbers and file numbers from vehicles
+        const vehiclePlates = vehicles.map(vehicle => vehicle.plateNo);
+        const vehicleFileNos = vehicles.map(vehicle => vehicle.fileNo);
+        
+        // Combine driver's existing plates with vehicle plates (remove duplicates)
+        const allPlates = [...new Set([...driverObj.plateNo, ...vehiclePlates])];
+        const allFileNos = [...new Set([...driverObj.fileNo ? [driverObj.fileNo] : [], ...vehicleFileNos])];
+        
+        return {
+          ...driverObj,
+          plateNo: allPlates,
+          fileNo: allFileNos.length > 0 ? allFileNos[0] : driverObj.fileNo, // Use first file number as primary
+          vehicleCount: vehicles.length // Add vehicle count for reference
+        };
+      })
+    );
 
     res.status(200).json({
       success: true,
-      data: driversWithCalculatedStatus,
+      data: driversWithAggregatedPlates,
     });
   } catch (err) {
     return res.status(500).json({
@@ -121,11 +144,29 @@ export const findDriver = async (req, res) => {
       });
     }
 
-    const driverWithCalculatedStatus = driver.toObject();
+    const driverObj = driver.toObject();
+    
+    // Find all vehicles associated with this driver
+    const vehicles = await VehicleModel.find({ driver: driver._id }).select('plateNo fileNo');
+    
+    // Extract plate numbers and file numbers from vehicles
+    const vehiclePlates = vehicles.map(vehicle => vehicle.plateNo);
+    const vehicleFileNos = vehicles.map(vehicle => vehicle.fileNo);
+    
+    // Combine driver's existing plates with vehicle plates (remove duplicates)
+    const allPlates = [...new Set([...driverObj.plateNo, ...vehiclePlates])];
+    const allFileNos = [...new Set([...driverObj.fileNo ? [driverObj.fileNo] : [], ...vehicleFileNos])];
+    
+    const driverWithAggregatedPlates = {
+      ...driverObj,
+      plateNo: allPlates,
+      fileNo: allFileNos.length > 0 ? allFileNos[0] : driverObj.fileNo, // Use first file number as primary
+      vehicleCount: vehicles.length // Add vehicle count for reference
+    };
 
     res.status(200).json({
       success: true,
-      data: driverWithCalculatedStatus,
+      data: driverWithAggregatedPlates,
     });
   } catch (err) {
     return res.status(500).json({
@@ -276,38 +317,9 @@ export const searchDrivers = async (req, res) => {
       ownerRepresentativeName: { $regex: name.trim(), $options: 'i' }
     }).lean();
 
-    console.log('Number of drivers found:', drivers.length);
-    console.log('Search drivers result:', JSON.stringify(drivers, null, 2));
-    console.log('First driver address:', drivers[0]?.address);
-    console.log('First driver keys:', Object.keys(drivers[0] || {}));
-    console.log('Address object:', drivers[0]?.address);
-    console.log('Municipality:', drivers[0]?.address?.municipality);
-    console.log('Barangay:', drivers[0]?.address?.barangay);
-    
-    // Additional debug: Check if address field exists in the raw document
-    if (drivers.length > 0) {
-      console.log('Fetching raw driver by ID:', drivers[0]._id);
-      const rawDriver = await DriverModel.findById(drivers[0]._id).lean();
-      console.log('Raw driver from database:', JSON.stringify(rawDriver, null, 2));
-      console.log('Raw driver address:', rawDriver?.address);
-    }
-
-    // Debug: Add address info to response for testing
-    const driversWithDebug = drivers.map(driver => ({
-      ...driver,
-      debug_all_keys: Object.keys(driver),
-      debug_has_address: 'address' in driver,
-      debug_driver_stringified: JSON.stringify(driver, null, 2),
-      // Try to find address in other possible fields
-      debug_municipality_direct: driver.municipality,
-      debug_barangay_direct: driver.barangay,
-      debug_purok: driver.purok,
-      debug_province: driver.province
-    }));
-
     res.status(200).json({
       success: true,
-      data: driversWithDebug,
+      data: drivers,
     });
   } catch (err) {
     console.error('Error in searchDrivers:', err);

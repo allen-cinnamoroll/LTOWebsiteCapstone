@@ -104,6 +104,7 @@ import {
 } from "lucide-react";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { Badge } from "../ui/badge";
+import PlateNumberDisplay from "@/components/drivers/PlateNumberDisplay";
 import apiClient from "@/api/axios";
 
 
@@ -199,33 +200,24 @@ export const deactivatedDriverColumns = (onAction) => [
 
 export const driverColumns = (onEdit, onDelete) => [
   {
+    accessorKey: "ownerRepresentativeName",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={"Owner"} />
+    ),
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
+  },
+  {
     accessorKey: "plateNo",
     header: "Plate No.",
     cell: ({ row }) => {
       const plateNo = row.getValue("plateNo");
-      const plateNoArray = Array.isArray(plateNo) ? plateNo : [plateNo];
-      return (
-        <div className="flex flex-col">
-          {plateNoArray.map((plate, index) => (
-            <div key={index} className="font-medium text-gray-900 dark:text-gray-200 text-xs">
-              {plate}
-            </div>
-          ))}
-        </div>
-      );
+      return <PlateNumberDisplay plateNumbers={plateNo} maxVisible={2} />;
     },
   },
   {
     accessorKey: "fileNo",
     header: "File No.",
     cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
-  },
-  {
-    accessorKey: "ownerRepresentativeName",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={"Owner"} />
-    ),
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
   },
   {
     accessorKey: "municipality",
