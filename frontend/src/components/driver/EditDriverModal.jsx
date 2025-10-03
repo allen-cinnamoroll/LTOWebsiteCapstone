@@ -190,6 +190,9 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
           onDriverUpdated(data.data);
         }
         onOpenChange(false);
+        
+        // Navigate to drivers page after successful update
+        navigate('/driver');
       }
     } catch (error) {
       console.log(error);

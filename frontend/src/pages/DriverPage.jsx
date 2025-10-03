@@ -168,9 +168,6 @@ const DriverPage = () => {
     // Close the edit modal
     setEditDriverModalOpen(false);
     
-    // Ensure we stay on the drivers page
-    navigate('/driver');
-    
     // Show success message
     toast.success("Driver updated successfully", {
       description: "The driver information has been updated in the table."
