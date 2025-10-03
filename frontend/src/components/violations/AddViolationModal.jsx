@@ -153,12 +153,13 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
           />
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <DialogFooter className="flex justify-start gap-3 pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={() => handleOpenChange(false)}
             disabled={submitting}
+            className="min-w-[100px]"
           >
             Cancel
           </Button>
@@ -166,7 +167,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
             type="submit"
             form="violation-form"
             disabled={submitting}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 min-w-[120px] bg-black hover:bg-gray-800 text-white"
           >
             {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
             {submitting ? "Adding..." : "Add Violation"}

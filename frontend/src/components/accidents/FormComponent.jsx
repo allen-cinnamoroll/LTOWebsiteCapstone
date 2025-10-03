@@ -209,14 +209,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
         />
 
 
-        <div className="space-x-2">
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit"}
-          </Button>
-          <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
-        </div>
+        {/* Removed duplicate buttons - using modal footer buttons instead */}
       </form>
     </Form>
   );

@@ -1033,19 +1033,9 @@ export function AccidentAnalytics() {
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-orange-500" />
                 Top Municipalities by Accidents
-                {analyticsData?.distributions?.municipality?.some(m => m._id === "Mati") && (
-                  <span className="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-full border border-red-200 dark:border-red-800">
-                    Mati Included
-                  </span>
-                )}
               </CardTitle>
               <CardDescription>
                 Municipalities with highest accident counts and risk analysis
-                {analyticsData?.distributions?.municipality?.some(m => m._id === "Mati") && (
-                  <span className="block text-green-600 dark:text-green-400 text-sm mt-1">
-                    ✅ Mati municipality data has been normalized and included in the analysis
-                  </span>
-                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1070,7 +1060,7 @@ export function AccidentAnalytics() {
                     {formatMunicipalityData(analyticsData.distributions.municipality).map((entry, index) => (
                       <Cell 
                         key={`cell-${index}`} 
-                        fill={entry.name === "Mati" ? "#ef4444" : getColors()[2]}
+                        fill={getColors()[2]}
                       />
                     ))}
                   </Bar>
@@ -1090,14 +1080,14 @@ export function AccidentAnalytics() {
                   
                   return (
                     <>
-                      <div className={`p-3 rounded-lg ${topMunicipality.name === "Mati" ? "bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-800" : "bg-orange-50 dark:bg-orange-950/20"}`}>
-                        <div className={`text-sm font-medium ${topMunicipality.name === "Mati" ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"}`}>
-                          {topMunicipality.name === "Mati" ? "🏆 Top Municipality" : "Highest Risk"}
+                      <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                        <div className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                          Highest Risk
                         </div>
-                        <div className={`text-lg font-bold ${topMunicipality.name === "Mati" ? "text-red-900 dark:text-red-100" : "text-orange-900 dark:text-orange-100"}`}>
+                        <div className="text-lg font-bold text-orange-900 dark:text-orange-100">
                           {topMunicipality.name}
                         </div>
-                        <div className={`text-xs ${topMunicipality.name === "Mati" ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400"}`}>
+                        <div className="text-xs text-orange-600 dark:text-orange-400">
                           {topMunicipality.accidents} accidents ({topMunicipality.percentage}%)
                         </div>
                       </div>
@@ -1114,15 +1104,15 @@ export function AccidentAnalytics() {
                         </div>
                       </div>
                       
-                      <div className={`p-3 rounded-lg ${matiData ? "bg-red-50 dark:bg-red-950/20" : "bg-purple-50 dark:bg-purple-950/20"}`}>
-                        <div className={`text-sm font-medium ${matiData ? "text-red-700 dark:text-red-300" : "text-purple-700 dark:text-purple-300"}`}>
-                          {matiData ? "Mati Status" : "Average"}
+                      <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20">
+                        <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                          Average
                         </div>
-                        <div className={`text-lg font-bold ${matiData ? "text-red-900 dark:text-red-100" : "text-purple-900 dark:text-purple-100"}`}>
-                          {matiData ? `#${municipalityData.findIndex(m => m.name === "Mati") + 1}` : avgAccidents.toFixed(1)}
+                        <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                          {avgAccidents.toFixed(1)}
                         </div>
-                        <div className={`text-xs ${matiData ? "text-red-600 dark:text-red-400" : "text-purple-600 dark:text-purple-400"}`}>
-                          {matiData ? `${matiData.accidents} accidents` : "Accidents per area"}
+                        <div className="text-xs text-purple-600 dark:text-purple-400">
+                          Accidents per area
                         </div>
                       </div>
                     </>
