@@ -156,15 +156,15 @@ const VehicleModal = ({ open, onOpenChange, fileNumber }) => {
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      {vehicleData.status === "1" ? (
+                      {(vehicleData.status === "1" || vehicleData.status === 1) ? (
                         <CheckCircle className="h-4 w-4 text-green-500" />
                       ) : (
                         <XCircle className="h-4 w-4 text-red-500" />
                       )}
                       <div>
                         <p className="text-xs text-gray-600">Status</p>
-                        <Badge variant={vehicleData.status === "1" ? "default" : "destructive"}>
-                          {vehicleData.status === "1" ? "Active" : "Inactive"}
+                        <Badge variant={(vehicleData.status === "1" || vehicleData.status === 1) ? "default" : "destructive"}>
+                          {(vehicleData.status === "1" || vehicleData.status === 1) ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                     </div>
