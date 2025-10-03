@@ -162,6 +162,8 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
       // Show confirmation modal instead of submitting directly
       setConfirmationData(currentFormValues);
       setShowConfirmation(true);
+      // Close the main dialog to prevent nested modals
+      onOpenChange(false);
   };
 
   const handleConfirmSubmission = async () => {
@@ -317,7 +319,13 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
       </Dialog>
       
       {/* Confirmation Modal */}
-      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+      <Dialog open={showConfirmation} onOpenChange={(isOpen) => {
+        setShowConfirmation(isOpen);
+        if (!isOpen) {
+          // If confirmation is closed, also close the main dialog
+          onOpenChange(false);
+        }
+      }}>
         <DialogContent className="max-w-lg border border-gray-200">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -407,13 +415,15 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
             variant="outline"
             onClick={() => {
               setShowConfirmation(false);
+              // Reopen the main dialog to allow editing
+              onOpenChange(true);
               // Clear any validation errors when cancelling
               form.clearErrors();
             }}
             disabled={submitting}
             className="min-w-[100px] bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            Back to Edit
           </Button>
           <Button
             onClick={handleConfirmSubmission}

@@ -334,23 +334,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
         </div>
 
 
-        <div className="space-x-2">
-          <Button 
-            type="submit" 
-            disabled={submitting}
-            onClick={() => {
-              console.log("=== SUBMIT BUTTON CLICKED ===");
-              console.log("Form state:", form.formState);
-              console.log("Form errors:", form.formState.errors);
-              console.log("Form values:", form.getValues());
-            }}
-          >
-            {submitting ? "Submitting..." : "Submit"}
-          </Button>
-          <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
-        </div>
+        {/* Removed duplicate buttons - using modal footer buttons instead */}
       </form>
     </Form>
   );
