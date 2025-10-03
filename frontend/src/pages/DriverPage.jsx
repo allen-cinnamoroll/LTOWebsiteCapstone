@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DriversTable from "@/components/drivers/DriversTable";
 import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
 import AddDriverModal from "@/components/driver/AddDriverModal";
+import VehicleModal from "@/components/vehicle/VehicleModal";
 import { toast } from "sonner";
 
 const sexMap = createCategoryMap({
@@ -30,6 +31,8 @@ const DriverPage = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState("");
   const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
+  const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
+  const [selectedFileNumber, setSelectedFileNumber] = useState("");
 
   useEffect(() => {
     fetchDrivers();
@@ -44,10 +47,15 @@ const DriverPage = () => {
       });
 
       const driverData = data.data.map((dData) => {
+        // Extract plate numbers and file numbers from vehicleIds array
+        const plateNumbers = dData.vehicleIds?.map(vehicle => vehicle.plateNo).filter(Boolean) || [];
+        const fileNumbers = dData.vehicleIds?.map(vehicle => vehicle.fileNo).filter(Boolean) || [];
+        
         return {
           _id: dData._id,
-          plateNo: dData.plateNo,
-          fileNo: dData.fileNo,
+          plateNo: plateNumbers, // Now an array of plate numbers
+          fileNo: fileNumbers, // Now an array of file numbers
+          vehicleIds: dData.vehicleIds || [], // Keep the full vehicle objects
           ownerRepresentativeName: dData.ownerRepresentativeName,
           fullname: dData.fullname,
           birthDate: dData.birthDate, // Keep as Date object for proper handling in columns
@@ -97,6 +105,11 @@ const DriverPage = () => {
 
   const cancelDelete = () => {
     setShowAlert(false); // Close the alert dialog without deleting
+  };
+
+  const handleFileNumberClick = (fileNumber) => {
+    setSelectedFileNumber(fileNumber);
+    setVehicleModalOpen(true);
   };
 
   const onDelete = async (data) => {
@@ -150,6 +163,7 @@ const DriverPage = () => {
             onEdit={onEdit}
             onDelete={handleDeactivate}
             onNavigate={handleNavigate}
+            onFileNumberClick={handleFileNumberClick}
           />
         </div>
       </div>
@@ -169,6 +183,13 @@ const DriverPage = () => {
         open={addDriverModalOpen}
         onOpenChange={setAddDriverModalOpen}
         onDriverAdded={handleDriverAdded}
+      />
+
+      {/* Vehicle Modal */}
+      <VehicleModal
+        open={vehicleModalOpen}
+        onOpenChange={setVehicleModalOpen}
+        fileNumber={selectedFileNumber}
       />
     </div>
   );

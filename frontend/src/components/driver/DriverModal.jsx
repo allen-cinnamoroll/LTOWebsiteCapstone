@@ -17,7 +17,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Edit, User, MapPin, Phone, Mail, Calendar, Car, FileText, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
-const DriverModal = ({ open, onOpenChange, driverData }) => {
+const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick }) => {
   const params = useParams();
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [vehicleData, setVehicleData] = useState(null);
@@ -31,24 +31,29 @@ const DriverModal = ({ open, onOpenChange, driverData }) => {
   const handleFileNumberClick = async (fileNo) => {
     if (!fileNo) return;
     
-    setLoadingVehicle(true);
-    setVehicleModalOpen(true);
-    
-    try {
-      const { data } = await apiClient.get(`/vehicle/file/${fileNo}`, {
-        headers: {
-          Authorization: token,
-        },
-      });
+    if (onFileNumberClick) {
+      onFileNumberClick(fileNo);
+    } else {
+      // Fallback to the original behavior if no external handler is provided
+      setLoadingVehicle(true);
+      setVehicleModalOpen(true);
       
-      if (data.success) {
-        setVehicleData(data.data);
+      try {
+        const { data } = await apiClient.get(`/vehicle/file/${fileNo}`, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        
+        if (data.success) {
+          setVehicleData(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching vehicle data:", error);
+        toast.error("Failed to fetch vehicle information");
+      } finally {
+        setLoadingVehicle(false);
       }
-    } catch (error) {
-      console.error("Error fetching vehicle data:", error);
-      toast.error("Failed to fetch vehicle information");
-    } finally {
-      setLoadingVehicle(false);
     }
   };
 
@@ -81,20 +86,26 @@ const DriverModal = ({ open, onOpenChange, driverData }) => {
                     <div className="flex items-center gap-3">
                       <FileText className="h-4 w-4 text-gray-500" />
                       <div>
-                        <p className="text-xs text-gray-600">File Number</p>
-                        <button
-                          onClick={() => handleFileNumberClick(driverData.fileNo)}
-                          className="text-blue-600 hover:text-blue-800 font-medium text-sm cursor-pointer hover:underline"
-                        >
-                          {driverData.fileNo || "N/A"}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Car className="h-4 w-4 text-gray-500" />
-                      <div>
-                        <p className="text-xs text-gray-600">Plate Number</p>
-                        <p className="font-medium text-sm">{driverData.plateNo || "N/A"}</p>
+                        <p className="text-xs text-gray-600">File Numbers</p>
+                        <div className="flex flex-wrap gap-1">
+                          {driverData.vehicleIds && driverData.vehicleIds.length > 0 ? (
+                            driverData.vehicleIds.map((vehicle, index) => (
+                              <React.Fragment key={index}>
+                                <button
+                                  onClick={() => handleFileNumberClick(vehicle.fileNo)}
+                                  className="text-blue-600 hover:text-blue-800 font-medium text-sm cursor-pointer hover:underline"
+                                >
+                                  {vehicle.fileNo}
+                                </button>
+                                {index < driverData.vehicleIds.length - 1 && (
+                                  <span className="text-gray-500 text-sm">, </span>
+                                )}
+                              </React.Fragment>
+                            ))
+                          ) : (
+                            <span className="text-gray-500 text-sm">N/A</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">

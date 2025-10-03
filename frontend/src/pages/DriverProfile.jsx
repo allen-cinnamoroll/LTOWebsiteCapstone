@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import DriverModal from "@/components/driver/DriverModal";
+import VehicleModal from "@/components/vehicle/VehicleModal";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,6 +12,8 @@ const DriverProfile = () => {
   const [driverData, setDriverData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
+  const [selectedFileNumber, setSelectedFileNumber] = useState("");
   const { token } = useAuth();
 
   useEffect(() => {
@@ -45,6 +48,11 @@ const DriverProfile = () => {
     );
   }
 
+  const handleFileNumberClick = (fileNumber) => {
+    setSelectedFileNumber(fileNumber);
+    setVehicleModalOpen(true);
+  };
+
   return (
     <>
       <DriverModal 
@@ -57,6 +65,13 @@ const DriverProfile = () => {
           }
         }} 
         driverData={driverData}
+        onFileNumberClick={handleFileNumberClick}
+      />
+      
+      <VehicleModal
+        open={vehicleModalOpen}
+        onOpenChange={setVehicleModalOpen}
+        fileNumber={selectedFileNumber}
       />
     </>
   );

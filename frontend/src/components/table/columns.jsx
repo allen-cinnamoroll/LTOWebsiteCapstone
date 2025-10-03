@@ -105,6 +105,7 @@ import {
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { Badge } from "../ui/badge";
 import PlateNumberDisplay from "@/components/drivers/PlateNumberDisplay";
+import FileNumberDisplay from "@/components/drivers/FileNumberDisplay";
 import apiClient from "@/api/axios";
 
 
@@ -198,7 +199,7 @@ export const deactivatedDriverColumns = (onAction) => [
   },
 ];
 
-export const driverColumns = (onEdit, onDelete) => [
+export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
   {
     accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
@@ -217,7 +218,10 @@ export const driverColumns = (onEdit, onDelete) => [
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
+    cell: ({ row }) => {
+      const fileNumbers = row.getValue("fileNo");
+      return <FileNumberDisplay fileNumbers={fileNumbers} onFileNumberClick={onFileNumberClick} />;
+    },
   },
   {
     accessorKey: "municipality",
