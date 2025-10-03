@@ -678,7 +678,7 @@ export const getVehicleByFileNumber = async (req, res) => {
     }
 
     // Calculate current status based on plate number and date of renewal
-    const currentStatus = getVehicleStatusDescription(vehicle.plateNo, vehicle.dateOfRenewal);
+    const currentStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
     const expirationInfo = getExpirationInfo(vehicle.plateNo, vehicle.dateOfRenewal);
     
     const vehicleDetails = {
@@ -692,7 +692,7 @@ export const getVehicleByFileNumber = async (req, res) => {
       color: vehicle.color,
       classification: vehicle.classification,
       dateOfRenewal: vehicle.dateOfRenewal,
-      status: currentStatus, // Use human-readable status description
+      status: currentStatus, // Use numeric status ("1" or "0")
       vehicleStatusType: vehicle.vehicleStatusType,
       expirationInfo: expirationInfo // Include expiration details
     };
