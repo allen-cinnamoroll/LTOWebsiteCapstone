@@ -101,8 +101,9 @@ export const createVehicle = async (req, res) => {
       console.log('Test vehicle vehicleStatusType:', testVehicle.vehicleStatusType);
     }
 
+    let vehicle;
     try {
-      const vehicle = await VehicleModel.create(vehicleData);
+      vehicle = await VehicleModel.create(vehicleData);
       
       // Debug: Log the created vehicle to see what was actually saved
       console.log('Vehicle created successfully:', vehicle);
@@ -132,6 +133,16 @@ export const createVehicle = async (req, res) => {
       const driverBeforeUpdate = await DriverModel.findById(driverId);
       console.log(`Driver before update - vehicleIds: ${driverBeforeUpdate?.vehicleIds?.length || 0}`);
       
+      // Ensure vehicleIds array exists and is initialized
+      if (!driverBeforeUpdate.vehicleIds) {
+        console.log(`Initializing vehicleIds array for driver ${driverId}`);
+        await DriverModel.findByIdAndUpdate(
+          driverId,
+          { $set: { vehicleIds: [] } }
+        );
+      }
+      
+      // Add the vehicle ID to the array
       const updatedDriver = await DriverModel.findByIdAndUpdate(
         driverId,
         {
@@ -695,6 +706,80 @@ export const getVehicleByFileNumber = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: err.message,
+    });
+  }
+};
+
+// Safe endpoint to fix driver-vehicle relationships
+export const fixDriverVehicleRelationships = async (req, res) => {
+  try {
+    console.log("Starting driver-vehicle relationship fix...");
+    
+    // Get all vehicles with driverId
+    const vehicles = await VehicleModel.find({ driverId: { $exists: true, $ne: null } });
+    console.log(`Found ${vehicles.length} vehicles with driver references`);
+
+    let fixedCount = 0;
+    let errorCount = 0;
+
+    for (const vehicle of vehicles) {
+      try {
+        console.log(`Processing vehicle: ${vehicle.plateNo} (${vehicle._id})`);
+        
+        // Find the driver
+        const driver = await DriverModel.findById(vehicle.driverId);
+        if (!driver) {
+          console.log(`  Driver not found for vehicle ${vehicle.plateNo}`);
+          errorCount++;
+          continue;
+        }
+
+        // Initialize vehicleIds array if it doesn't exist
+        if (!driver.vehicleIds) {
+          await DriverModel.findByIdAndUpdate(
+            driver._id,
+            { $set: { vehicleIds: [] } }
+          );
+          console.log(`  Initialized vehicleIds array for driver ${driver.ownerRepresentativeName}`);
+        }
+
+        // Check if vehicle ID is already in the array
+        const vehicleIdExists = driver.vehicleIds.some(id => id.toString() === vehicle._id.toString());
+        
+        if (!vehicleIdExists) {
+          // Add vehicle ID to driver's vehicleIds array
+          await DriverModel.findByIdAndUpdate(
+            driver._id,
+            {
+              $push: {
+                vehicleIds: vehicle._id
+              }
+            }
+          );
+          console.log(`  Added vehicle ${vehicle._id} to driver's vehicleIds array`);
+          fixedCount++;
+        } else {
+          console.log(`  Vehicle ${vehicle._id} already in driver's vehicleIds array`);
+        }
+      } catch (vehicleError) {
+        console.error(`Error processing vehicle ${vehicle.plateNo}:`, vehicleError.message);
+        errorCount++;
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Driver-vehicle relationship fix completed",
+      fixedCount,
+      errorCount,
+      totalVehicles: vehicles.length
+    });
+    
+  } catch (error) {
+    console.error("Fix failed:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
