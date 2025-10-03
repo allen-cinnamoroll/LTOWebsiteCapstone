@@ -28,6 +28,21 @@ const DashboardLayout = () => {
   // Function to get page title based on current route
   const getPageTitle = () => {
     const path = location.pathname;
+    
+    // Handle dynamic routes with patterns
+    if (path.includes('/driver/') && path.includes('/edit')) {
+      return 'Edit Driver';
+    }
+    if (path.includes('/vehicle/') && path.includes('/edit')) {
+      return 'Edit Vehicle';
+    }
+    if (path.includes('/violation/') && path.includes('/edit')) {
+      return 'Edit Violation';
+    }
+    if (path.includes('/accident/') && path.includes('/edit')) {
+      return 'Edit Accident';
+    }
+    
     switch (path) {
       case '/':
         return 'Overview';

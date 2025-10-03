@@ -53,6 +53,11 @@ const DriverProfile = () => {
     setVehicleModalOpen(true);
   };
 
+  const handleDriverUpdated = (updatedDriver) => {
+    // Update the driver data with the updated information
+    setDriverData(updatedDriver);
+  };
+
   return (
     <>
       <DriverModal 
@@ -66,6 +71,7 @@ const DriverProfile = () => {
         }} 
         driverData={driverData}
         onFileNumberClick={handleFileNumberClick}
+        onDriverUpdated={handleDriverUpdated}
       />
       
       <VehicleModal

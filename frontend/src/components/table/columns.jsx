@@ -208,20 +208,19 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
     cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
   },
   {
-    accessorKey: "plateNo",
-    header: "Plate No.",
-    cell: ({ row }) => {
-      const plateNo = row.getValue("plateNo");
-      return <PlateNumberDisplay plateNumbers={plateNo} maxVisible={2} />;
-    },
+    accessorKey: "vehicleCount",
+    header: "No. of Vehicles",
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehicleCount") || 0}</div>,
   },
   {
-    accessorKey: "fileNo",
-    header: "File No.",
-    cell: ({ row }) => {
-      const fileNumbers = row.getValue("fileNo");
-      return <FileNumberDisplay fileNumbers={fileNumbers} onFileNumberClick={onFileNumberClick} />;
-    },
+    accessorKey: "emailAddress",
+    header: "Email Address",
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("emailAddress") || "N/A"}</div>,
+  },
+  {
+    accessorKey: "province",
+    header: "Province",
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("province") || "N/A"}</div>,
   },
   {
     accessorKey: "municipality",
@@ -274,6 +273,7 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
   },
   {
     id: "actions",
+    header: "Action",
     enableHiding: false,
     cell: ({ row }) => {
       const driver = row.original;
@@ -282,32 +282,15 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
         onEdit(driver._id);
       };
 
-      const handleDelete = (e) => {
-        e.stopPropagation();
-        onDelete(driver._id);
-      };
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-5 w-5 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="text-xs w-28" align="end">
-            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
-              <Edit className="h-3 w-3 mr-2" />
-              Edit
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={handleDelete} className="text-xs py-1">
-              <Trash className="h-3 w-3 mr-2" />
-              Deactivate
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={handleEdit}
+          className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
       );
     },
   },

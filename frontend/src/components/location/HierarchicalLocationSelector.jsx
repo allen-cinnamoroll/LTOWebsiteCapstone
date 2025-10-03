@@ -12,6 +12,7 @@ import { davaoOrientalData } from "@/data/region11Data";
 
 const HierarchicalLocationSelector = ({ 
   form, 
+  isEditMode = false,
   onLocationChange 
 }) => {
   const [selectedMunicipality, setSelectedMunicipality] = useState("");
@@ -158,6 +159,29 @@ const HierarchicalLocationSelector = ({
     });
   }, [form]);
 
+  // Initialize component state with existing form values (for edit mode)
+  useEffect(() => {
+    const currentMunicipality = form.getValues("municipality");
+    const currentBarangay = form.getValues("barangay");
+    const currentPurok = form.getValues("purok");
+    
+    console.log('=== INITIALIZING LOCATION SELECTOR ===');
+    console.log('Current form values:', { currentMunicipality, currentBarangay, currentPurok });
+    
+    if (currentMunicipality && currentMunicipality !== selectedMunicipality) {
+      console.log('Setting municipality to:', currentMunicipality);
+      setSelectedMunicipality(currentMunicipality);
+    }
+    if (currentBarangay && currentBarangay !== selectedBarangay) {
+      console.log('Setting barangay to:', currentBarangay);
+      setSelectedBarangay(currentBarangay);
+    }
+    if (currentPurok && currentPurok !== selectedPurok) {
+      console.log('Setting purok to:', currentPurok);
+      setSelectedPurok(currentPurok);
+    }
+  }, [form.watch("municipality"), form.watch("barangay"), form.watch("purok")]);
+
   // Remove the complex watch effect - it was causing issues
   // We'll handle form synchronization differently
 
@@ -199,6 +223,7 @@ const HierarchicalLocationSelector = ({
           <div className="relative mt-0">
             <Input
               type="text"
+              autoFocus={false}
               placeholder="Type to search municipality..."
               value={selectedMunicipality || municipalitySearch}
               onChange={(e) => {
@@ -215,7 +240,8 @@ const HierarchicalLocationSelector = ({
               }}
               className={cn(
                 "mt-1",
-                form.formState.errors.municipality && "border-red-400"
+                form.formState.errors.municipality && "border-red-400",
+                isEditMode && "text-[8px]"
               )}
             />
             {municipalitySearch && (
@@ -253,6 +279,7 @@ const HierarchicalLocationSelector = ({
           <div className="relative mt-0">
             <Input
               type="text"
+              autoFocus={false}
               placeholder={selectedMunicipality ? "Type to search barangay..." : "Select municipality first"}
               value={selectedBarangay || barangaySearch}
               onChange={(e) => {
@@ -268,7 +295,8 @@ const HierarchicalLocationSelector = ({
               className={cn(
                 "mt-1",
                 !selectedMunicipality && "opacity-50 cursor-not-allowed",
-                form.formState.errors.barangay && "border-red-400"
+                form.formState.errors.barangay && "border-red-400",
+                isEditMode && "text-[8px]"
               )}
             />
             {selectedMunicipality && barangaySearch && (
@@ -306,6 +334,7 @@ const HierarchicalLocationSelector = ({
           <div className="relative mt-0">
             <Input
               type="text"
+              autoFocus={false}
               placeholder={selectedBarangay ? "Type to search purok..." : "Select barangay first"}
               value={selectedPurok || purokSearch}
               onChange={(e) => {
@@ -320,7 +349,8 @@ const HierarchicalLocationSelector = ({
               className={cn(
                 "mt-1",
                 !selectedBarangay && "opacity-50 cursor-not-allowed",
-                form.formState.errors.purok && "border-red-400"
+                form.formState.errors.purok && "border-red-400",
+                isEditMode && "text-[8px]"
               )}
             />
             {selectedBarangay && purokSearch && (

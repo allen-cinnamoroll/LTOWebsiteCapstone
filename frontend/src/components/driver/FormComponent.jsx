@@ -31,7 +31,7 @@ import DatePicker from "../calendar/DatePicker";
 import HierarchicalLocationSelector from "../location/HierarchicalLocationSelector";
 import { useNavigate } from "react-router-dom";
 
-const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
+const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = false }) => {
   const navigate = useNavigate();
   return (
     <Form {...form}>
@@ -57,17 +57,22 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                       <Input
                         {...field}
                         type="text"
+                        autoFocus={false}
                         placeholder="ABC-123, DEF-456"
                         value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
                         onChange={(e) => {
-                          const value = e.target.value.toUpperCase();
-                          // Convert comma-separated string to array
-                          const plateArray = value.split(",").map(plate => plate.trim()).filter(plate => plate.length > 0);
-                          field.onChange(plateArray.length > 0 ? plateArray : value);
+                          if (!isEditMode) {
+                            const value = e.target.value.toUpperCase();
+                            // Convert comma-separated string to array
+                            const plateArray = value.split(",").map(plate => plate.trim()).filter(plate => plate.length > 0);
+                            field.onChange(plateArray.length > 0 ? plateArray : value);
+                          }
                         }}
+                        disabled={isEditMode}
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
-                          form.formState.errors.plateNo && "border-red-400"
+                          form.formState.errors.plateNo && "border-red-400",
+                          isEditMode && "bg-gray-100 cursor-not-allowed text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -92,13 +97,18 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                       <Input
                         {...field}
                         type="text"
+                        autoFocus={false}
                         onChange={(e) => {
-                          const capitalizedValue = e.target.value.toUpperCase();
-                          field.onChange(capitalizedValue);
+                          if (!isEditMode) {
+                            const capitalizedValue = e.target.value.toUpperCase();
+                            field.onChange(capitalizedValue);
+                          }
                         }}
+                        disabled={isEditMode}
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
-                          form.formState.errors.fileNo && "border-red-400"
+                          form.formState.errors.fileNo && "border-red-400",
+                          isEditMode && "bg-gray-100 cursor-not-allowed text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -123,13 +133,15 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                       <Input
                         {...field}
                         type="text"
+                        autoFocus={false}
                         onChange={(e) => {
                           const capitalizedValue = e.target.value.toUpperCase();
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
-                          form.formState.errors.ownerRepresentativeName && "border-red-400"
+                          form.formState.errors.ownerRepresentativeName && "border-red-400",
+                          isEditMode && "text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -211,9 +223,11 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                       <Input
                         {...field}
                         type="tel"
+                        autoFocus={false}
                         className={cn(
                           "text-black dark:text-white",
-                          form.formState.errors.contactNumber && "border-red-400"
+                          form.formState.errors.contactNumber && "border-red-400",
+                          isEditMode && "text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -238,9 +252,11 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                       <Input
                         {...field}
                         type="email"
+                        autoFocus={false}
                         className={cn(
                           "text-black dark:text-white",
-                          form.formState.errors.emailAddress && "border-red-400"
+                          form.formState.errors.emailAddress && "border-red-400",
+                          isEditMode && "text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -254,6 +270,7 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
             <div className="mt-4">
               <HierarchicalLocationSelector 
                 form={form}
+                isEditMode={isEditMode}
                 onLocationChange={(location) => {
                   // Optional: Handle location changes if needed
                   console.log("Location changed:", location);
@@ -284,7 +301,8 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                         <SelectTrigger
                           className={cn(
                             "text-black dark:text-white",
-                            form.formState.errors.hasDriversLicense && "border-red-400"
+                            form.formState.errors.hasDriversLicense && "border-red-400",
+                            isEditMode && "text-[8px]"
                           )}
                         >
                           <SelectValue placeholder="Choose option" />
@@ -318,13 +336,15 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel }) => {
                       <Input
                         {...field}
                         type="text"
+                        autoFocus={false}
                         onChange={(e) => {
                           const capitalizedValue = e.target.value.toUpperCase();
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
                           "text-black dark:text-white",
-                          form.formState.errors.driversLicenseNumber && "border-red-400"
+                          form.formState.errors.driversLicenseNumber && "border-red-400",
+                          isEditMode && "text-[8px]"
                         )}
                       />
                     </FormControl>

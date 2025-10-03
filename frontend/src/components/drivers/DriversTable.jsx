@@ -48,7 +48,9 @@ const DriversTable = ({
 }) => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
-  const [columnVisibility, setColumnVisibility] = React.useState({});
+  const [columnVisibility, setColumnVisibility] = React.useState({
+    emailAddress: false, // Hide email address column by default
+  });
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 8, // 8 rows per page

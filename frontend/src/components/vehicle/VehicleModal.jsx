@@ -95,7 +95,7 @@ const VehicleModal = ({ open, onOpenChange, fileNumber }) => {
                       <Building className="h-4 w-4 text-gray-500" />
                       <div>
                         <p className="text-xs text-gray-600">Chassis Number</p>
-                        <p className="font-medium text-sm">{vehicleData.serialChassisNumber || "N/A"}</p>
+                        <p className="font-medium text-sm">{vehicleData.chassisNo || "N/A"}</p>
                       </div>
                     </div>
                   </div>

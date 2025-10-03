@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DriversTable from "@/components/drivers/DriversTable";
 import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
 import AddDriverModal from "@/components/driver/AddDriverModal";
+import EditDriverModal from "@/components/driver/EditDriverModal";
 import VehicleModal from "@/components/vehicle/VehicleModal";
 import { toast } from "sonner";
 
@@ -29,8 +30,9 @@ const DriverPage = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState("");
+  const [selectedDriver, setSelectedDriver] = useState(null);
   const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
+  const [editDriverModalOpen, setEditDriverModalOpen] = useState(false);
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [selectedFileNumber, setSelectedFileNumber] = useState("");
 
@@ -56,9 +58,12 @@ const DriverPage = () => {
           plateNo: plateNumbers, // Now an array of plate numbers
           fileNo: fileNumbers, // Now an array of file numbers
           vehicleIds: dData.vehicleIds || [], // Keep the full vehicle objects
+          vehicleCount: dData.vehicleIds?.length || 0, // Count of vehicles
           ownerRepresentativeName: dData.ownerRepresentativeName,
           fullname: dData.fullname,
           birthDate: dData.birthDate, // Keep as Date object for proper handling in columns
+          emailAddress: dData.emailAddress,
+          province: dData.address?.province || dData.province,
           municipality: dData.address?.municipality || dData.municipality,
           barangay: dData.address?.barangay || dData.barangay,
           hasDriversLicense: dData.hasDriversLicense,
@@ -86,7 +91,11 @@ const DriverPage = () => {
   };
 
   const onEdit = (driverId) => {
-    navigate(`/driver/${driverId}/edit`);
+    const driver = driverData.find(d => d._id === driverId);
+    if (driver) {
+      setSelectedDriver(driver);
+      setEditDriverModalOpen(true);
+    }
   };
 
   const handleNavigate = () => {
@@ -148,6 +157,26 @@ const DriverPage = () => {
     fetchDrivers();
   };
 
+  const handleDriverUpdated = (updatedDriver) => {
+    // Update the driver data with the updated information
+    setDriverData(prevData => 
+      prevData.map(driver => 
+        driver._id === updatedDriver._id ? updatedDriver : driver
+      )
+    );
+    
+    // Close the edit modal
+    setEditDriverModalOpen(false);
+    
+    // Ensure we stay on the drivers page
+    navigate('/driver');
+    
+    // Show success message
+    toast.success("Driver updated successfully", {
+      description: "The driver information has been updated in the table."
+    });
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="bg-white dark:bg-transparent rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex-1 flex flex-col min-h-0">
@@ -183,6 +212,14 @@ const DriverPage = () => {
         open={addDriverModalOpen}
         onOpenChange={setAddDriverModalOpen}
         onDriverAdded={handleDriverAdded}
+      />
+
+      {/* Edit Driver Modal */}
+      <EditDriverModal
+        open={editDriverModalOpen}
+        onOpenChange={setEditDriverModalOpen}
+        driverData={selectedDriver}
+        onDriverUpdated={handleDriverUpdated}
       />
 
       {/* Vehicle Modal */}
