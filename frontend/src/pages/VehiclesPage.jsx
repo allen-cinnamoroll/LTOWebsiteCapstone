@@ -41,7 +41,7 @@ const VehiclesPage = () => {
           plateNo: dData.plateNo,
           fileNo: dData.fileNo,
           engineNo: dData.engineNo,
-          chassisNo: dData.chassisNo,
+          chassisNo: dData.serialChassisNumber,
           make: dData.make,
           bodyType: dData.bodyType,
           color: dData.color,
