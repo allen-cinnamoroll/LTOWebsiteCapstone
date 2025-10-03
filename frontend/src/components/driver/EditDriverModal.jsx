@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showNoChanges, setShowNoChanges] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
   const { token } = useAuth();
   const date = formatDate(Date.now());
@@ -94,11 +95,56 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
     }
   }, [open, driverData, form]);
 
+  // Function to check if there are any changes
+  const checkForChanges = (currentFormValues) => {
+    if (!driverData) return false;
+    
+    const originalData = {
+      ownerRepresentativeName: driverData.ownerRepresentativeName || "",
+      purok: driverData.address?.purok || "",
+      barangay: driverData.address?.barangay || "",
+      municipality: driverData.address?.municipality || "",
+      province: driverData.address?.province || "Davao Oriental",
+      contactNumber: driverData.contactNumber || "",
+      emailAddress: driverData.emailAddress || "",
+      hasDriversLicense: driverData.hasDriversLicense || false,
+      driversLicenseNumber: driverData.driversLicenseNumber || "",
+      birthDate: driverData.birthDate ? new Date(driverData.birthDate) : undefined,
+    };
+
+    // Compare each field
+    for (const key in originalData) {
+      if (key === 'birthDate') {
+        const originalDate = originalData[key];
+        const currentDate = currentFormValues[key];
+        if (originalDate && currentDate) {
+          if (originalDate.getTime() !== currentDate.getTime()) return true;
+        } else if (originalDate !== currentDate) {
+          return true;
+        }
+      } else if (originalData[key] !== currentFormValues[key]) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+
   const onSubmit = async (formData) => {
     // Get the current form values directly
     const currentFormValues = form.getValues();
     console.log('=== EDIT DRIVER FORM SUBMISSION DEBUG ===');
     console.log('Form values at submission:', currentFormValues);
+    
+    // Check if there are any changes
+    const hasChanges = checkForChanges(currentFormValues);
+    
+    if (!hasChanges) {
+      // No changes detected, show "No Changes" modal
+      setShowNoChanges(true);
+      onOpenChange(false);
+      return;
+    }
     
     // Manual validation for required fields
     const errors = [];
@@ -233,7 +279,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar]:bg-transparent">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar]:bg-transparent animate-in fade-in-0 zoom-in-95 duration-300">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" />
@@ -276,7 +322,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
           onOpenChange(false);
         }
       }}>
-        <DialogContent className="max-w-lg border border-gray-200">
+        <DialogContent className="max-w-lg border border-gray-200 animate-in fade-in-0 zoom-in-95 duration-300">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
@@ -382,6 +428,52 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
           >
             {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
             {submitting ? "Updating..." : "Confirm & Update Driver"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    
+    {/* No Changes Modal */}
+    <Dialog open={showNoChanges} onOpenChange={(isOpen) => {
+      setShowNoChanges(isOpen);
+      if (!isOpen) {
+        // If no changes modal is closed, also close the main dialog
+        onOpenChange(false);
+      }
+    }}>
+      <DialogContent className="max-w-md border border-gray-200 animate-in fade-in-0 zoom-in-95 duration-300">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Edit className="h-5 w-5" />
+            No Changes Detected
+          </DialogTitle>
+          <DialogDescription>
+            No changes were made to the driver information. Would you like to continue editing?
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="flex justify-end gap-3 pt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setShowNoChanges(false);
+              // Navigate to drivers table
+              navigate('/driver');
+            }}
+            className="min-w-[100px] bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => {
+              setShowNoChanges(false);
+              // Reopen the main dialog to allow editing
+              onOpenChange(true);
+            }}
+            className="flex items-center gap-2 min-w-[100px] bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Yes
           </Button>
         </DialogFooter>
       </DialogContent>

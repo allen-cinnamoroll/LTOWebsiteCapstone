@@ -49,7 +49,7 @@ const VehicleModal = ({ open, onOpenChange, fileNumber }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Car className="h-5 w-5 text-blue-600" />

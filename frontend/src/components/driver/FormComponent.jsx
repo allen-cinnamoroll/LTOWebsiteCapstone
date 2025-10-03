@@ -302,16 +302,16 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                           className={cn(
                             "text-black dark:text-white",
                             form.formState.errors.hasDriversLicense && "border-red-400",
-                            isEditMode && "text-[8px]"
+                            isEditMode && "text-xs"
                           )}
                         >
-                          <SelectValue placeholder="Choose option" />
+                          <SelectValue placeholder="Choose option" className={isEditMode ? "text-xs" : ""} />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className={isEditMode ? "text-xs" : ""}>
                         <SelectGroup>
-                          <SelectItem value="true">Yes</SelectItem>
-                          <SelectItem value="false">No</SelectItem>
+                          <SelectItem value="true" className={isEditMode ? "text-xs" : ""}>Yes</SelectItem>
+                          <SelectItem value="false" className={isEditMode ? "text-xs" : ""}>No</SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>

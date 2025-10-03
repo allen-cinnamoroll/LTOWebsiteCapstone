@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import VehiclesTable from "@/components/vehicles/VehiclesTable";
 import VehicleRenewalModal from "@/components/vehicle/VehicleRenewalModal";
 import AddVehicleModal from "@/components/vehicle/AddVehicleModal";
+import VehicleDetailsModal from "@/components/vehicle/VehicleDetailsModal";
 
 
 const VehiclesPage = () => {
@@ -19,6 +20,8 @@ const VehiclesPage = () => {
   const [submitting, setIsSubmitting] = useState(false);
   const [renewalModalOpen, setRenewalModalOpen] = useState(false);
   const [addVehicleModalOpen, setAddVehicleModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   useEffect(() => {
     fetchVehicles();
@@ -60,11 +63,10 @@ const VehiclesPage = () => {
     setAddVehicleModalOpen(true);
   };
 
-  //navigate to vehicle page
+  //open vehicle details modal
   const onRowClick = (data) => {
-    const vehicleId = data._id;
-
-    navigate(`/vehicle/${vehicleId}`);
+    setSelectedVehicle(data);
+    setDetailsModalOpen(true);
   };
 
   const onEdit = (vehicleId) => {
@@ -119,6 +121,13 @@ const VehiclesPage = () => {
         open={addVehicleModalOpen}
         onOpenChange={setAddVehicleModalOpen}
         onVehicleAdded={handleVehicleAdded}
+      />
+
+      {/* Vehicle Details Modal */}
+      <VehicleDetailsModal
+        open={detailsModalOpen}
+        onOpenChange={setDetailsModalOpen}
+        vehicleData={selectedVehicle}
       />
     </div>
   );

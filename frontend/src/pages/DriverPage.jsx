@@ -7,7 +7,6 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DriversTable from "@/components/drivers/DriversTable";
 import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
-import AddDriverModal from "@/components/driver/AddDriverModal";
 import EditDriverModal from "@/components/driver/EditDriverModal";
 import VehicleModal from "@/components/vehicle/VehicleModal";
 import { toast } from "sonner";
@@ -31,7 +30,6 @@ const DriverPage = () => {
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
-  const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
   const [editDriverModalOpen, setEditDriverModalOpen] = useState(false);
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [selectedFileNumber, setSelectedFileNumber] = useState("");
@@ -62,10 +60,13 @@ const DriverPage = () => {
           ownerRepresentativeName: dData.ownerRepresentativeName,
           fullname: dData.fullname,
           birthDate: dData.birthDate, // Keep as Date object for proper handling in columns
+          contactNumber: dData.contactNumber, // Add contact number
           emailAddress: dData.emailAddress,
+          address: dData.address || {}, // Keep the full address object
           province: dData.address?.province || dData.province,
           municipality: dData.address?.municipality || dData.municipality,
           barangay: dData.address?.barangay || dData.barangay,
+          purok: dData.address?.purok, // Add purok field
           hasDriversLicense: dData.hasDriversLicense,
           driversLicenseNumber: dData.driversLicenseNumber,
           isActive: dData.isActive,
@@ -82,9 +83,6 @@ const DriverPage = () => {
     }
   };
 
-  const handleAdd = async () => {
-    setAddDriverModalOpen(true);
-  };
 
   const onManage = (data) => {
     navigate(`/driver/${data._id}`);
@@ -152,10 +150,6 @@ const DriverPage = () => {
     });
   };
 
-  const handleDriverAdded = () => {
-    // Refresh the driver list when a new driver is added
-    fetchDrivers();
-  };
 
   const handleDriverUpdated = (updatedDriver) => {
     // Update the driver data with the updated information
@@ -183,7 +177,6 @@ const DriverPage = () => {
             data={driverData}
             filters={["fullname", "plateNo", "ownerRepresentativeName", "municipality", "barangay"]}
             tableColumn={driverColumns}
-            onAdd={handleAdd}
             loading={loading}
             onRowClick={onManage}
             onEdit={onEdit}
@@ -204,12 +197,6 @@ const DriverPage = () => {
         }
       />
 
-      {/* Add Driver Modal */}
-      <AddDriverModal
-        open={addDriverModalOpen}
-        onOpenChange={setAddDriverModalOpen}
-        onDriverAdded={handleDriverAdded}
-      />
 
       {/* Edit Driver Modal */}
       <EditDriverModal
