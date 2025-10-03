@@ -38,13 +38,16 @@ export const createVehicle = async (req, res) => {
     }
 
     // Check if driver exists
+    console.log(`Looking for driver with ID: ${driverId}`);
     const driver = await DriverModel.findById(driverId);
     if (!driver) {
+      console.error(`Driver with ID ${driverId} not found`);
       return res.status(404).json({
         success: false,
         message: "Driver not found",
       });
     }
+    console.log(`Found driver: ${driver.ownerRepresentativeName} (${driver._id})`);
 
     // Calculate status based on plate number, date of renewal, and vehicle status type
     const dateOfRenewal = req.body.dateOfRenewal || null;
@@ -123,7 +126,13 @@ export const createVehicle = async (req, res) => {
 
     // Update driver's vehicleIds array with the new vehicle ID
     try {
-      await DriverModel.findByIdAndUpdate(
+      console.log(`Attempting to update driver ${driverId} with vehicle ID: ${vehicle._id}`);
+      
+      // First, check if driver exists and get current state
+      const driverBeforeUpdate = await DriverModel.findById(driverId);
+      console.log(`Driver before update - vehicleIds: ${driverBeforeUpdate?.vehicleIds?.length || 0}`);
+      
+      const updatedDriver = await DriverModel.findByIdAndUpdate(
         driverId,
         {
           $push: {
@@ -132,9 +141,17 @@ export const createVehicle = async (req, res) => {
         },
         { new: true }
       );
-      console.log(`Updated driver ${driverId} with new vehicle ID: ${vehicle._id}`);
+      
+      if (updatedDriver) {
+        console.log(`Successfully updated driver ${driverId} with vehicle ID: ${vehicle._id}`);
+        console.log(`Driver now has ${updatedDriver.vehicleIds.length} vehicles`);
+        console.log(`Vehicle IDs: ${updatedDriver.vehicleIds.map(id => id.toString())}`);
+      } else {
+        console.error(`Driver with ID ${driverId} not found for update`);
+      }
     } catch (driverUpdateError) {
       console.error('Error updating driver vehicleIds array:', driverUpdateError);
+      console.error('Error details:', driverUpdateError.message);
       // Don't fail the vehicle creation if driver update fails
     }
 

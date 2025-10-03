@@ -85,6 +85,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
       console.log('Content being sent to API:', content);
       console.log('vehicleStatusType in content:', content.vehicleStatusType);
       console.log('driverId in content:', content.driverId);
+      console.log('driverId type:', typeof content.driverId);
       console.log('plateNo in content:', content.plateNo);
       console.log('fileNo in content:', content.fileNo);
 

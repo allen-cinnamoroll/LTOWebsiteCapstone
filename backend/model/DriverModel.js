@@ -62,10 +62,13 @@ const driverSchema = new mongoose.Schema(
       ref:'Users',
       default: null
     },
-    vehicleIds: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Vehicles'
-    }]
+    vehicleIds: {
+      type: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicles'
+      }],
+      default: []
+    }
   },
   {
     timestamps: true,
