@@ -30,10 +30,8 @@ export const createDriver = async (req, res) => {
 
     const driverData = { ...req.body };
     
-    // Convert plateNo to array if it's a string
-    if (driverData.plateNo && typeof driverData.plateNo === 'string') {
-      driverData.plateNo = driverData.plateNo.split(',').map(plate => plate.trim()).filter(plate => plate.length > 0);
-    }
+    // Initialize vehicleIds array
+    driverData.vehicleIds = [];
     
     // Clean up optional fields - convert empty strings and undefined to null
     if (!driverData.contactNumber || driverData.contactNumber === '' || driverData.contactNumber === undefined) {
@@ -41,9 +39,6 @@ export const createDriver = async (req, res) => {
     }
     if (!driverData.emailAddress || driverData.emailAddress === '' || driverData.emailAddress === undefined) {
       driverData.emailAddress = null;
-    }
-    if (!driverData.fileNo || driverData.fileNo === '' || driverData.fileNo === undefined) {
-      driverData.fileNo = null;
     }
     if (!driverData.birthDate || driverData.birthDate === '' || driverData.birthDate === undefined) {
       driverData.birthDate = null;
@@ -93,14 +88,22 @@ export const createDriver = async (req, res) => {
 
 export const getDrivers = async (req, res) => {
   try {
-    const drivers = await DriverModel.find().select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive").sort({createdAt:-1})
+    const drivers = await DriverModel.find()
+      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds")
+      .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
+      .sort({createdAt:-1})
 
-    // Return drivers with their plateNo arrays (now kept in sync with vehicles)
-    const driversWithCalculatedStatus = drivers.map(driver => driver.toObject());
+    // Return drivers with their vehicle information
+    const driversWithVehicles = drivers.map(driver => {
+      const driverObj = driver.toObject();
+      // Add vehicle count for quick reference
+      driverObj.vehicleCount = driverObj.vehicleIds ? driverObj.vehicleIds.length : 0;
+      return driverObj;
+    });
 
     res.status(200).json({
       success: true,
-      data: driversWithCalculatedStatus,
+      data: driversWithVehicles,
     });
   } catch (err) {
     return res.status(500).json({
@@ -113,7 +116,9 @@ export const getDrivers = async (req, res) => {
 export const findDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
-    const driver = await DriverModel.findById(driverId).select("fullname plateNo fileNo ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive");
+    const driver = await DriverModel.findById(driverId)
+      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds")
+      .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal');
 
     if (!driver) {
       return res.status(404).json({

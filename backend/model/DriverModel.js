@@ -17,20 +17,6 @@ const addressSchema = new mongoose.Schema({
 
 const driverSchema = new mongoose.Schema(
   {
-    plateNo: {
-      type: [String],
-      required: [true, "plateNo is required"],
-      validate: {
-        validator: function(v) {
-          return Array.isArray(v) && v.length > 0;
-        },
-        message: "At least one plate number is required"
-      }
-    },
-    fileNo: {
-      type: String,
-      required: false,
-    },
     ownerRepresentativeName: {
       type: String,
       required: [true, "ownerRepresentativeName is required"],
@@ -76,20 +62,9 @@ const driverSchema = new mongoose.Schema(
       ref:'Users',
       default: null
     },
-    vehicles: [{
-      vehicleId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Vehicles',
-        required: true
-      },
-      plateNumber: {
-        type: String,
-        required: true
-      },
-      fileNumber: {
-        type: String,
-        required: true
-      }
+    vehicleIds: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Vehicles'
     }]
   },
   {
