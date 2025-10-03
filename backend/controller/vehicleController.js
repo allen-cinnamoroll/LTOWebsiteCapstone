@@ -121,24 +121,20 @@ export const createVehicle = async (req, res) => {
       throw createError;
     }
 
-    // Update driver's vehicles array with the new vehicle
+    // Update driver's vehicleIds array with the new vehicle ID
     try {
       await DriverModel.findByIdAndUpdate(
         driverId,
         {
           $push: {
-            vehicles: {
-              vehicleId: vehicle._id,
-              plateNumber: plateNo,
-              fileNumber: fileNo
-            }
+            vehicleIds: vehicle._id
           }
         },
         { new: true }
       );
-      console.log(`Updated driver ${driverId} with new vehicle: ${plateNo}`);
+      console.log(`Updated driver ${driverId} with new vehicle ID: ${vehicle._id}`);
     } catch (driverUpdateError) {
-      console.error('Error updating driver vehicles array:', driverUpdateError);
+      console.error('Error updating driver vehicleIds array:', driverUpdateError);
       // Don't fail the vehicle creation if driver update fails
     }
 
