@@ -17,7 +17,7 @@ export const getDashboardStats = async (req, res) => {
     let expiredVehicles = 0;
     
     allVehicles.forEach(vehicle => {
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       if (status === "1") {
         activeVehicles++;
       } else {
@@ -352,7 +352,7 @@ export const getRegistrationAnalytics = async (req, res) => {
     let expiredVehicles = 0;
     
     allVehicles.forEach(vehicle => {
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       if (status === "1") {
         activeVehicles++;
       } else {
@@ -1579,7 +1579,7 @@ export const getYearlyVehicleTrends = async (req, res) => {
       yearlyData[renewalYear].total++;
       
       // Use the same getVehicleStatus function as the main analytics
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       if (status === "1") {
         yearlyData[renewalYear].active++;
       } else {
@@ -1724,7 +1724,7 @@ export const getMonthlyVehicleTrends = async (req, res) => {
       monthlyData[renewalMonth].total++;
       
       // Use the same getVehicleStatus function as the main analytics
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       if (status === "1") {
         monthlyData[renewalMonth].active++;
       } else {

@@ -118,7 +118,7 @@ export const getVehicle = async (req, res) => {
 
     // Add calculated status for each vehicle
     const vehiclesWithStatus = vehicles.map((vehicle) => {
-      const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       return {
         ...vehicle.toObject(),
         calculatedStatus,
@@ -162,7 +162,7 @@ export const findVehicle = async (req, res) => {
     }
 
     // Add calculated status
-    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
 
     res.json({
       success: true,
@@ -261,7 +261,7 @@ export const checkVehiclesExpiration = async (req, res) => {
     const expiredVehicles = [];
 
     for (const vehicle of vehicles) {
-      const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal);
+      const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       if (calculatedStatus === "0") {
         // Update vehicle status to expired
         await VehicleModel.findByIdAndUpdate(vehicle._id, { status: "0" });

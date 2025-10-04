@@ -309,7 +309,7 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
               type="submit"
               form="driver-form"
               disabled={submitting}
-              className="flex items-center gap-2 min-w-[120px] bg-black hover:bg-gray-800 text-white"
+              className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
             >
               {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
               {submitting ? "Adding..." : "Add Driver"}

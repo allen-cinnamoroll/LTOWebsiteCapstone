@@ -11,7 +11,7 @@ import { getVehicleStatus, getExpirationInfo } from "./plateStatusCalculator.js"
  */
 export const checkDriverExpirationStatus = (plateNo, renewalDate) => {
   // Use plate-based status calculation for consistency with vehicle status
-  const status = getVehicleStatus(plateNo, renewalDate);
+  const status = getVehicleStatus(plateNo, renewalDate, "Old");
   console.log(`Driver expiration check for plate ${plateNo}: ${renewalDate ? new Date(renewalDate).toDateString() : 'No date'} = ${status === "0" ? 'EXPIRED' : 'ACTIVE'}`);
   
   return status; // "0" = expired, "1" = active
@@ -108,7 +108,7 @@ export const checkAllDriversExpiration = async () => {
       
       // Use plate-based status calculation for consistency
       const firstPlate = driverPlates[0];
-      const correctStatus = getVehicleStatus(firstPlate, vehicle.dateOfRenewal);
+      const correctStatus = getVehicleStatus(firstPlate, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
       const currentStatus = driver.status;
       
       // Update status if it doesn't match the plate-based calculation

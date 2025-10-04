@@ -89,6 +89,7 @@ export const getMonthFromDigit = (lastDigit) => {
 export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleStatusType = "Old") => {
   const lastTwoDigits = extractLastTwoDigits(plateNo);
   if (!lastTwoDigits || lastTwoDigits.length !== 2) {
+    console.log(`Invalid plate number format: ${plateNo}`);
     return null;
   }
   
@@ -99,14 +100,17 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
   const monthIndex = getMonthFromDigit(lastDigit);
   
   if (!week || monthIndex === null) {
+    console.log(`Invalid week or month calculation for plate ${plateNo}: week=${week}, monthIndex=${monthIndex}`);
     return null;
   }
   
   // If date of renewal is provided, use it as the base date
   let baseDate;
   if (dateOfRenewal) {
+    // Handle both Date objects and ISO strings properly
     baseDate = new Date(dateOfRenewal);
     if (isNaN(baseDate.getTime())) {
+      console.log(`Invalid renewal date: ${dateOfRenewal}`);
       return null;
     }
   } else {
@@ -151,6 +155,7 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
       weekEndDate = new Date(expirationYear, expirationMonth + 1, 0);
       break;
     default:
+      console.log(`Invalid week calculation: ${week}`);
       return null;
   }
   
@@ -158,6 +163,9 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
   const expirationDate = new Date(weekEndDate);
   expirationDate.setDate(expirationDate.getDate() + 1);
   expirationDate.setHours(0, 0, 0, 0);
+  
+  // Debug logging
+  console.log(`Plate: ${plateNo}, Renewal: ${baseDate.toISOString()}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}`);
   
   return expirationDate;
 };
@@ -171,21 +179,39 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
 export const isVehicleExpired = (plateNo, dateOfRenewal = null) => {
   const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal);
   if (!expirationDate) {
+    console.log(`Could not calculate expiration date for plate ${plateNo}`);
     return false; // If we can't calculate, assume active
   }
   
   const now = new Date();
-  return now >= expirationDate;
+  const isExpired = now >= expirationDate;
+  
+  console.log(`Status check for plate ${plateNo}: Current=${now.toISOString()}, Expiration=${expirationDate.toISOString()}, Expired=${isExpired}`);
+  
+  return isExpired;
 };
 
 /**
  * Get vehicle status based on plate number and date of renewal
  * @param {string} plateNo - The plate number
  * @param {Date|string} dateOfRenewal - The date of renewal (optional)
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {string} - "1" for active, "0" for expired
  */
-export const getVehicleStatus = (plateNo, dateOfRenewal = null) => {
-  return isVehicleExpired(plateNo, dateOfRenewal) ? "0" : "1";
+export const getVehicleStatus = (plateNo, dateOfRenewal = null, vehicleStatusType = "Old") => {
+  const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal, vehicleStatusType);
+  if (!expirationDate) {
+    console.log(`Could not calculate expiration date for plate ${plateNo}, assuming active`);
+    return "1"; // If we can't calculate, assume active
+  }
+  
+  const now = new Date();
+  const isExpired = now >= expirationDate;
+  const status = isExpired ? "0" : "1";
+  
+  console.log(`Final status for plate ${plateNo}: ${status} (${isExpired ? 'EXPIRED' : 'ACTIVE'})`);
+  
+  return status;
 };
 
 /**
