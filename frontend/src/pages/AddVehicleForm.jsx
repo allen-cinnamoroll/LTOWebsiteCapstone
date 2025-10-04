@@ -45,12 +45,12 @@ const AddVehicleForm = () => {
         plateNo: formData.plateNo,
         fileNo: formData.fileNo,
         engineNo: formData.engineNo,
-        chassisNo: formData.chassisNo,
+        serialChassisNumber: formData.chassisNo, // Map chassisNo to serialChassisNumber
         make: formData.make,
         bodyType: formData.bodyType,
         color: formData.color,
         classification: formData.classification,
-        driver: formData.driver
+        driverId: formData.driver // Map driver to driverId
       };
 
       // Only include dateOfRenewal if it has a value

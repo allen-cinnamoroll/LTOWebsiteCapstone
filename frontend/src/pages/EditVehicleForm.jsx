@@ -88,7 +88,7 @@ const EditVehicleForm = () => {
         plateNo: formData.plateNo,
         fileNo: formData.fileNo,
         engineNo: formData.engineNo, // Use engineNo directly
-        chassisNo: formData.chassisNo, // Use chassisNo directly
+        serialChassisNumber: formData.chassisNo, // Map chassisNo to serialChassisNumber
         make: formData.make,
         bodyType: formData.bodyType,
         color: formData.color,
