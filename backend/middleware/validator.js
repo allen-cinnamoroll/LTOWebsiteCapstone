@@ -55,7 +55,7 @@ export const vehicleRegistrationRules = () =>[
   body("plateNo").notEmpty().withMessage("plateNo is required"),
   body("fileNo").notEmpty().withMessage("fileNo is required"),
   body("engineNo").notEmpty().withMessage("engineNo is required"),
-  body("chassisNo").notEmpty().withMessage("chassisNo is required"),
+  body("serialChassisNumber").notEmpty().withMessage("serialChassisNumber is required"),
   body("make").notEmpty().withMessage("make is required"),
   body("bodyType").notEmpty().withMessage("bodyType is required"),
   body("color").notEmpty().withMessage("color is required"),
