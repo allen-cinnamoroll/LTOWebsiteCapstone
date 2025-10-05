@@ -1,19 +1,155 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
+// Animated Number Component
+const AnimatedNumber = ({ value, duration = 2000, className = "" }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      let startTime;
+      const animate = (currentTime) => {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentValue = Math.floor(value * easeOutQuart);
+        
+        setDisplayValue(currentValue);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          setDisplayValue(value);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    }
+  }, [value, duration, isVisible]);
+
+  return (
+    <div ref={ref} className={`${className} transition-all duration-500 ${isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+      {displayValue.toLocaleString()}
+    </div>
+  );
+};
+
+// Animated Progress Bar Component
+const AnimatedProgressBar = ({ percentage, color = "bg-blue-500", delay = 0 }) => {
+  const [width, setWidth] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      setTimeout(() => {
+        setWidth(percentage);
+      }, delay);
+    }
+  }, [isVisible, percentage, delay]);
+
+  return (
+    <div ref={ref} className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
+      <div 
+        className={`h-full ${color} rounded-full shadow-sm transition-all duration-1000 ease-out`}
+        style={{ width: `${width}%` }}
+      />
+    </div>
+  );
+};
 
 export function KPICards({ displayData, loading, totalViolations, totalTrafficViolators, topOfficer, mostCommonViolation }) {
+  // Check if dark mode is active
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hasDarkClass = document.documentElement.classList.contains('dark');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      console.log('Initial dark mode check:', { hasDarkClass, prefersDark, result: hasDarkClass || prefersDark });
+      return hasDarkClass || prefersDark;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const checkDarkMode = () => {
+      const hasDarkClass = document.documentElement.classList.contains('dark');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const darkMode = hasDarkClass || prefersDark;
+      console.log('Dark mode check:', { hasDarkClass, prefersDark, result: darkMode });
+      setIsDarkMode(darkMode);
+    };
+
+    // Check initially
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, index) => (
-          <div key={index} className="bg-card border border-border rounded-xl p-6 animate-pulse">
+           <div key={index} className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl p-6 animate-pulse`}>
             <div className="flex items-center">
               <div className="flex-1">
-                <div className="h-4 bg-muted rounded mb-2"></div>
-                <div className="h-8 bg-muted rounded mb-1"></div>
-                <div className="h-3 bg-muted rounded"></div>
+                <div className={`h-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-2`}></div>
+                <div className={`h-8 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-1`}></div>
+                <div className={`h-3 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded`}></div>
               </div>
               <div className="ml-4">
-                <div className="w-12 h-12 bg-muted rounded-full"></div>
+                <div className={`w-12 h-12 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full`}></div>
               </div>
             </div>
           </div>
@@ -25,20 +161,25 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-in slide-in-from-bottom-5 fade-in duration-700">
       {/* Total Violations KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300"></div>
+       <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group`}>
+        <div className={`absolute top-0 right-0 w-20 h-20 ${isDarkMode ? 'bg-gradient-to-br from-blue-500/30 to-blue-600/15' : 'bg-gradient-to-br from-blue-500/10 to-blue-600/5'} rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300`}></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
               <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Violations</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{totalViolations.toLocaleString()}</p>
+            <AnimatedNumber 
+              value={totalViolations} 
+              className="text-2xl font-bold text-gray-900 dark:text-white mb-1"
+              duration={1500}
+            />
             <p className="text-xs font-medium text-blue-600 dark:text-blue-400">All time recorded violations</p>
-            {/* Progress Bar */}
-            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-sm transition-all duration-500" style={{ width: '85%' }}></div>
-            </div>
+            <AnimatedProgressBar 
+              percentage={100}
+              color="bg-gradient-to-r from-blue-500 to-blue-600"
+              delay={200}
+            />
           </div>
           <div className="ml-3">
             <div className="w-10 h-10 flex items-center justify-center">
@@ -51,20 +192,25 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
       </div>
 
       {/* Total Traffic Violators KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300"></div>
+       <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group`}>
+        <div className={`absolute top-0 right-0 w-20 h-20 ${isDarkMode ? 'bg-gradient-to-br from-green-500/30 to-green-600/15' : 'bg-gradient-to-br from-green-500/10 to-green-600/5'} rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300`}></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Traffic Violators</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{totalTrafficViolators.toLocaleString()}</p>
+            <AnimatedNumber 
+              value={totalTrafficViolators} 
+              className="text-2xl font-bold text-gray-900 dark:text-white mb-1"
+              duration={1800}
+            />
             <p className="text-xs font-medium text-green-600 dark:text-green-400">People</p>
-            {/* Progress Bar */}
-            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-sm transition-all duration-500" style={{ width: '70%' }}></div>
-            </div>
+            <AnimatedProgressBar 
+              percentage={100}
+              color="bg-gradient-to-r from-green-500 to-green-600"
+              delay={400}
+            />
           </div>
           <div className="ml-3">
             <div className="w-10 h-10 flex items-center justify-center">
@@ -77,8 +223,8 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
       </div>
 
       {/* Most Common Violation KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-500/10 to-red-600/5 rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300"></div>
+       <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group`}>
+        <div className={`absolute top-0 right-0 w-20 h-20 ${isDarkMode ? 'bg-gradient-to-br from-red-500/30 to-red-600/15' : 'bg-gradient-to-br from-red-500/10 to-red-600/5'} rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300`}></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
@@ -89,12 +235,17 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
               {mostCommonViolation?._id || 'N/A'}
             </p>
             <p className="text-xs font-medium text-red-600 dark:text-red-400">
-              {mostCommonViolation?.count || 0} occurrences
+              <AnimatedNumber 
+                value={mostCommonViolation?.count || 0} 
+                className="inline"
+                duration={1600}
+              />{" "}occurrences
             </p>
-            {/* Progress Bar */}
-            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-red-500 to-red-600 rounded-full shadow-sm transition-all duration-500" style={{ width: '60%' }}></div>
-            </div>
+            <AnimatedProgressBar 
+              percentage={Math.min(((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100, 100)}
+              color="bg-gradient-to-r from-red-500 to-red-600"
+              delay={600}
+            />
           </div>
           <div className="ml-3">
             <div className="w-10 h-10 flex items-center justify-center">
@@ -107,8 +258,8 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
       </div>
 
       {/* Top Officer KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-purple-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-full -translate-y-4 translate-x-4"></div>
+       <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-purple-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group`}>
+        <div className={`absolute top-0 right-0 w-20 h-20 ${isDarkMode ? 'bg-gradient-to-br from-purple-500/30 to-purple-600/15' : 'bg-gradient-to-br from-purple-500/10 to-purple-600/5'} rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300`}></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
@@ -119,12 +270,17 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
               {topOfficer?.officerName || 'N/A'}
             </p>
             <p className="text-xs font-medium text-purple-600 dark:text-purple-400">
-              {topOfficer?.violationCount || 0} apprehensions
+              <AnimatedNumber 
+                value={topOfficer?.count || topOfficer?.violationCount || 0} 
+                className="inline"
+                duration={2000}
+              />{" "}apprehensions
             </p>
-            {/* Progress Bar */}
-            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full shadow-sm transition-all duration-500" style={{ width: '75%' }}></div>
-            </div>
+            <AnimatedProgressBar 
+              percentage={Math.min(((topOfficer?.count || topOfficer?.violationCount || 0) / ((topOfficer?.count || topOfficer?.violationCount || 0) + ((topOfficer?.count || topOfficer?.violationCount || 0) * 0.8))) * 100, 100)}
+              color="bg-gradient-to-r from-purple-500 to-purple-600"
+              delay={800}
+            />
           </div>
           <div className="ml-3">
             <div className="w-10 h-10 flex items-center justify-center">

@@ -18,6 +18,43 @@ export function ChartsSection({
   handleNextPage,
   getCombinationRecommendation
 }) {
+  // Check if dark mode is active
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') || 
+             window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const checkDarkMode = () => {
+      const darkMode = document.documentElement.classList.contains('dark') || 
+                       window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(darkMode);
+    };
+
+    // Check initially
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
@@ -463,8 +500,8 @@ export function ChartsSection({
                 {/* Summary Statistics - Right Side */}
                 <div className="w-60 space-y-4">
                   {/* Years Covered Card - Timeline Design */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-blue-500/10 dark:bg-blue-400/10 rounded-full -translate-y-4 translate-x-4"></div>
+                  <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-blue-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                    <div className={`absolute top-0 right-0 w-12 h-12 ${isDarkMode ? 'bg-blue-500/30 dark:bg-blue-400/30' : 'bg-blue-500/10 dark:bg-blue-400/10'} rounded-full -translate-y-4 translate-x-4`}></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></div>
@@ -485,8 +522,8 @@ export function ChartsSection({
                   </div>
 
                   {/* Total Violations Card - Alert Badge Design */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 w-10 h-10 bg-red-500/10 dark:bg-red-400/10 rounded-full -translate-y-3 translate-x-3"></div>
+                  <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-red-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                    <div className={`absolute top-0 right-0 w-10 h-10 ${isDarkMode ? 'bg-red-500/30 dark:bg-red-400/30' : 'bg-red-500/10 dark:bg-red-400/10'} rounded-full -translate-y-3 translate-x-3`}></div>
                     <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
@@ -507,8 +544,8 @@ export function ChartsSection({
                   </div>
 
                   {/* Average per Year Card - Analytics Design */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-green-500/10 dark:bg-green-400/10 rounded-full -translate-y-4 translate-x-4"></div>
+                  <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-green-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                    <div className={`absolute top-0 right-0 w-12 h-12 ${isDarkMode ? 'bg-green-500/30 dark:bg-green-400/30' : 'bg-green-500/10 dark:bg-green-400/10'} rounded-full -translate-y-4 translate-x-4`}></div>
                     <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
@@ -544,72 +581,11 @@ export function ChartsSection({
         </div>
       </div>
 
-      {/* KPIs and Violation Distribution Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        {/* Left Side - Stacked KPIs */}
-        <div className="lg:col-span-2 flex flex-col space-y-4 h-full">
-           {/* Total Unique Violations KPI */}
-           <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-black dark:to-black border-2 border-blue-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-indigo-500/20 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-indigo-400/20 rounded-full translate-y-12 -translate-x-12"></div>
-            
-            <div className="flex items-center justify-between h-full relative z-10">
-              <div className="flex items-center space-x-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg ring-4 ring-blue-200/50 dark:ring-blue-800/50">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100">Traffic Violations</h3>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Distinct kinds of violation</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent drop-shadow-sm">
-                  {displayData?.mostCommonViolations?.length || 0}
-                </div>
-                <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
-                  Types
-                </div>
-              </div>
-            </div>
-          </div>
-
-           {/* Total Unique Officers KPI */}
-           <div className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-black dark:to-black border-2 border-emerald-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-300/20 to-teal-400/20 rounded-full translate-y-12 -translate-x-12"></div>
-            
-            <div className="flex items-center justify-between h-full relative z-10">
-              <div className="flex items-center space-x-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg ring-4 ring-emerald-200/50 dark:ring-emerald-800/50">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-emerald-900 dark:text-emerald-100">Apprehending Officers</h3>
-                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Active officers</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent drop-shadow-sm">
-                  {displayData?.totalOfficers || 0}
-                </div>
-                <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                  Officers
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Side - Violation Types Pie Chart */}
-        <div className="lg:col-span-2">
+      {/* Pie Chart and Apprehending Officers Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+         {/* Left Side - Violation Types Pie Chart */}
+         <div className="lg:col-span-1 flex">
+           <div className="w-full" style={{ minHeight: '400px' }}>
           <PieChart
             data={violationsByTypeData}
             title="Violation Types Distribution"
@@ -618,10 +594,9 @@ export function ChartsSection({
         </div>
       </div>
 
-      {/* Officer Ranking and Violation Ranking Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Top 5 Officers Bar Chart */}
-        <div className="lg:col-span-1">
+         {/* Right Side - Apprehending Officers Bar Chart */}
+         <div className="lg:col-span-1 flex">
+           <div className="w-full" style={{ minHeight: '400px' }}>
           <BarChart
             data={displayData?.topOfficers || []}
             title="Apprehending Officers"
@@ -629,8 +604,12 @@ export function ChartsSection({
             loading={loading}
             totalCount={displayData?.totalOfficers || 0}
           />
+           </div>
+         </div>
         </div>
 
+      {/* Violation Ranking Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
         {/* Top Violation Ranking */}
         <div className="lg:col-span-1">
           <ViolationRanking
