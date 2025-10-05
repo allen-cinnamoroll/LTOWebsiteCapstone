@@ -13,6 +13,11 @@ export function LineChartModal({
   const [showTooltip, setShowTooltip] = useState(false);
   const chartRef = useRef(null);
 
+  // Check if dark mode is active
+  const isDarkMode = typeof window !== 'undefined' && 
+                     (document.documentElement.classList.contains('dark') || 
+                      window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   if (!isLineChartModalOpen) return null;
 
   const yearRanges = [
@@ -461,8 +466,8 @@ export function LineChartModal({
                   {/* Summary Statistics - Right Side */}
                   <div className="w-56 space-y-2">
                     {/* Timeline Card */}
-                    <div className="relative overflow-hidden bg-white border-2 border-blue-200 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                      <div className="absolute top-0 right-0 w-8 h-8 bg-blue-500/10 dark:bg-blue-400/10 rounded-full -translate-y-1 translate-x-1"></div>
+                    <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border-2 border-gray-600' : 'bg-white border-2 border-blue-200'} rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                      <div className={`absolute top-0 right-0 w-8 h-8 ${isDarkMode ? 'bg-blue-500/30 dark:bg-blue-400/30' : 'bg-blue-500/10 dark:bg-blue-400/10'} rounded-full -translate-y-1 translate-x-1`}></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
                           <div className="w-1 h-1 bg-blue-500 rounded-full mr-1 animate-pulse"></div>
@@ -478,8 +483,8 @@ export function LineChartModal({
                     </div>
                     
                     {/* Critical Card */}
-                    <div className="relative overflow-hidden bg-white border-2 border-red-200 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                      <div className="absolute top-0 right-0 w-8 h-8 bg-red-500/10 dark:bg-red-400/10 rounded-full -translate-y-1 translate-x-1"></div>
+                    <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border-2 border-gray-600' : 'bg-white border-2 border-red-200'} rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                      <div className={`absolute top-0 right-0 w-8 h-8 ${isDarkMode ? 'bg-red-500/30 dark:bg-red-400/30' : 'bg-red-500/10 dark:bg-red-400/10'} rounded-full -translate-y-1 translate-x-1`}></div>
                       <div className="absolute top-1 right-1 w-1 h-1 bg-red-500 rounded-full animate-ping"></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
@@ -496,8 +501,8 @@ export function LineChartModal({
                     </div>
                     
                     {/* Analytics Card */}
-                    <div className="relative overflow-hidden bg-white border-2 border-green-200 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                      <div className="absolute top-0 right-0 w-8 h-8 bg-green-500/10 dark:bg-green-400/10 rounded-full -translate-y-1 translate-x-1"></div>
+                    <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border-2 border-gray-600' : 'bg-white border-2 border-green-200'} rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                      <div className={`absolute top-0 right-0 w-8 h-8 ${isDarkMode ? 'bg-green-500/30 dark:bg-green-400/30' : 'bg-green-500/10 dark:bg-green-400/10'} rounded-full -translate-y-1 translate-x-1`}></div>
                       <div className="absolute top-1 right-1 w-1 h-1 bg-green-400 rounded-full animate-bounce"></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
