@@ -6,17 +6,12 @@ export function BarChart({ data, title, type, loading, totalCount }) {
   const chartRef = useRef(null);
 
   useEffect(() => {
-    // Trigger bar animations on mount
-    const timer = setTimeout(() => {
-      const bars = {};
-      data?.slice(0, 5).forEach((_, index) => {
-        setTimeout(() => {
-          setAnimatedBars(prev => ({ ...prev, [index]: true }));
-        }, index * 200);
-      });
-    }, 100);
-    
-    return () => clearTimeout(timer);
+    // Set bars to be visible immediately without animation
+    const bars = {};
+    data?.slice(0, 5).forEach((_, index) => {
+      bars[index] = true;
+    });
+    setAnimatedBars(bars);
   }, [data]);
 
   if (loading) {
@@ -130,79 +125,124 @@ export function BarChart({ data, title, type, loading, totalCount }) {
         </div>
       </div>
       
-      <div ref={chartRef} className="space-y-3 flex-1">
-        {top5Data.map((item, index) => {
-          const value = item.count || item.violationCount || 0;
-          const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
-          const displayName = type === 'officers' 
-            ? (item.officerName || 'Unknown Officer')
-            : (item._id || 'Unknown Item');
-          const isHovered = hoveredIndex === index;
-          const isAnimated = animatedBars[index];
-          
-          return (
-            <div 
-              key={index} 
-              className={`relative p-3 border rounded-lg transition-all duration-300 ${getRankBgColor(index)} ${
-                isHovered ? 'shadow-lg border-blue-300 dark:border-blue-600' : 'shadow-sm'
-              }`}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center shadow-md">
-                      <span className="text-sm font-bold text-white">{getRankNumber(index)}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
-                        {displayName}
-                      </p>
-                      <p className="text-xs text-purple-600 dark:text-purple-400">
-                        {type === 'officers' ? 'Officer' : 'Type'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right ml-2">
-                    <div className="text-sm font-bold text-gray-900 dark:text-white">
-                      {value.toLocaleString()}
-                    </div>
-                    <div className="text-xs font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                      {type === 'officers' ? 'apprehensions' : 'violations'}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="relative">
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 border border-gray-300 dark:border-gray-600 shadow-inner">
-                    <div
-                      className={`h-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 transition-all duration-1000 ease-out ${
-                        isAnimated ? 'animate-pulse' : ''
-                      }`}
-                      style={{ 
-                        width: isAnimated ? `${percentage}%` : '0%',
-                        transitionDelay: `${index * 200}ms`
-                      }}
-                    >
-                    </div>
-                  </div>
-                  
-                </div>
-                
-                <div className="flex justify-end items-center mt-1">
-                  <span className="text-xs text-purple-600 dark:text-purple-400">
-                    {((value / top5Data.reduce((sum, item) => sum + (item.count || item.violationCount || 0), 0)) * 100).toFixed(1)}% of total
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+       {/* Chart with Axes */}
+       <div ref={chartRef} className="flex-1 relative" style={{ minHeight: '350px' }}>
+         {/* Y-Axis (Number of Apprehensions) */}
+         <div className="absolute left-0 top-0 bottom-12 w-16 flex flex-col justify-between py-4">
+           <div className="flex flex-col space-y-2 justify-between h-full">
+             {[100, 75, 50, 25, 0].map((tick) => {
+               const value = Math.round((tick / 100) * maxValue);
+               return (
+                 <div key={tick} className="text-xs font-medium text-gray-700 dark:text-gray-300 text-right pr-2">
+                   {value}
+                 </div>
+               );
+             })}
+           </div>
+         </div>
+
+         {/* X-Axis (Officer Names) */}
+         <div className="absolute bottom-0 left-16 right-0 h-12 flex items-end justify-between px-4">
+           <div className="flex justify-between w-full">
+             {top5Data.map((item, index) => {
+               const displayName = type === 'officers' 
+                 ? (item.officerName || 'Unknown Officer')
+                 : (item._id || 'Unknown Item');
+               const words = displayName.split(' ');
+               return (
+                 <div key={index} className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                   <div className="flex flex-col items-center">
+                     {words.map((word, wordIndex) => (
+                       <div key={wordIndex}>{word}</div>
+                     ))}
+                   </div>
+                 </div>
+               );
+             })}
+           </div>
+         </div>
+
+         {/* Grid Lines */}
+         <div className="absolute left-16 right-0 top-0 bottom-12">
+           {[0, 25, 50, 75, 100].map((tick, index) => (
+             <div
+               key={tick}
+               className="absolute w-full border-t border-gray-200 dark:border-gray-700"
+               style={{ bottom: `${tick}%` }}
+             />
+           ))}
+         </div>
+
+         {/* Chart Area */}
+         <div className="absolute left-16 right-0 top-0 bottom-12 flex items-end justify-between px-4 py-4">
+           {top5Data.map((item, index) => {
+             const value = item.count || item.violationCount || 0;
+             const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+             const displayName = type === 'officers' 
+               ? (item.officerName || 'Unknown Officer')
+               : (item._id || 'Unknown Item');
+             const isHovered = hoveredIndex === index;
+             const isAnimated = animatedBars[index];
+             
+             // Calculate bar height based on percentage
+             const barHeight = isAnimated ? Math.max((percentage / 100) * 200, 20) : 20;
+             
+             return (
+               <div 
+                 key={index} 
+                 className="flex flex-col items-center"
+                 onMouseEnter={() => setHoveredIndex(index)}
+                 onMouseLeave={() => setHoveredIndex(null)}
+                 style={{ flex: 1 }}
+               >
+                 {/* Bar */}
+                 <div className="relative flex flex-col items-center">
+                   <div
+                     className="w-12 bg-gradient-to-t from-violet-600 via-purple-500 to-pink-500 rounded-t-lg shadow-lg flex items-end justify-center relative"
+                     style={{ 
+                       height: `${barHeight}px`,
+                       minHeight: '20px'
+                     }}
+                   >
+                     {/* Rank number at bottom of the bar */}
+                     <div className="mb-1">
+                       <span className="text-xs font-bold text-white">{index + 1}</span>
+                     </div>
+                   </div>
+                   
+                   {/* Detailed popup on hover */}
+                   {isHovered && (
+                     <div className="absolute -top-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-3 shadow-lg z-10 min-w-[180px]">
+                       <div className="text-center">
+                         <div className="text-xs font-bold text-gray-900 dark:text-white mb-1">
+                           {displayName}
+                         </div>
+                         <div className="flex items-center justify-center space-x-1 mb-1">
+                           <div className="text-sm font-bold text-violet-600 dark:text-violet-400">
+                             {value.toLocaleString()}
+                           </div>
+                           <div className="text-xs text-gray-600 dark:text-gray-400">
+                             {type === 'officers' ? 'apprehensions' : 'violations'}
+                           </div>
+                         </div>
+                         <div className="text-xs text-purple-600 dark:text-purple-400">
+                           {percentage.toFixed(1)}% of max
+                         </div>
+                         <div className="text-xs text-pink-600 dark:text-pink-400">
+                           {((value / top5Data.reduce((sum, item) => sum + (item.count || item.violationCount || 0), 0)) * 100).toFixed(1)}% of total
+                         </div>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               </div>
+             );
+           })}
+         </div>
+       </div>
       
       {top5Data.length < 5 && (
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full">
             <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
             <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
