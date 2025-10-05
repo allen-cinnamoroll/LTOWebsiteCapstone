@@ -33,18 +33,18 @@ export function LineChartModal({
 
   const maxValue = getMaxValue();
 
-  // Define color palette for different points
+  // Define gradient palette matching the image: purple/violet to blue to cyan
   const colorPalette = [
-    '#ef4444', // Red
-    '#f97316', // Orange  
-    '#eab308', // Yellow
-    '#22c55e', // Green
-    '#06b6d4', // Cyan
-    '#3b82f6', // Blue
-    '#8b5cf6', // Purple
-    '#ec4899', // Pink
-    '#84cc16', // Lime
-    '#f59e0b', // Amber
+    '#8b5cf6', // Purple/violet (2020)
+    '#8b5cf6', // Purple/violet (2021)
+    '#3b82f6', // Medium blue (2022)
+    '#2563eb', // Bright blue (2023)
+    '#06b6d4', // Light cyan blue (2024)
+    '#06b6d4', // Light cyan blue (2025)
+    '#8b5cf6', // Purple/violet
+    '#3b82f6', // Medium blue
+    '#2563eb', // Bright blue
+    '#06b6d4', // Light cyan blue
   ];
 
   return (
@@ -196,19 +196,17 @@ export function LineChartModal({
                           {/* Background gradient definitions */}
                           <defs>
                             <linearGradient id="modalAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2"/>
-                              <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.1"/>
+                              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.2"/>
+                              <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.1"/>
                               <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.05"/>
                             </linearGradient>
                             <linearGradient id="modalLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#ef4444"/>
-                              <stop offset="14%" stopColor="#f97316"/>
-                              <stop offset="28%" stopColor="#eab308"/>
-                              <stop offset="42%" stopColor="#22c55e"/>
-                              <stop offset="57%" stopColor="#06b6d4"/>
-                              <stop offset="71%" stopColor="#3b82f6"/>
-                              <stop offset="85%" stopColor="#8b5cf6"/>
-                              <stop offset="100%" stopColor="#ec4899"/>
+                              <stop offset="0%" stopColor="#8b5cf6"/>
+                              <stop offset="20%" stopColor="#8b5cf6"/>
+                              <stop offset="40%" stopColor="#3b82f6"/>
+                              <stop offset="60%" stopColor="#2563eb"/>
+                              <stop offset="80%" stopColor="#06b6d4"/>
+                              <stop offset="100%" stopColor="#06b6d4"/>
                             </linearGradient>
                             <filter id="modalGlow">
                               <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
@@ -258,7 +256,7 @@ export function LineChartModal({
                             <animate attributeName="stroke-dasharray" values="0,2000;2000,0" dur="3s" repeatCount="1"/>
                           </path>
                           
-                          {/* Interactive data points with different colors */}
+                          {/* Interactive data points with clean design */}
                           {points.map((point, index) => {
                             const isHovered = hoveredPoint === index;
                             return (
@@ -327,60 +325,22 @@ export function LineChartModal({
                                   style={{ cursor: 'pointer' }}
                                 />
                                 
-                                {/* Outer ring with point color */}
+                                {/* Main point with clean design - solid circle with matching border */}
                                 <circle
                                   cx={point.x}
                                   cy={point.y}
-                                  r={isHovered ? 16 : 12}
-                                  fill="none"
+                                  r={isHovered ? 7 : 6}
+                                  fill={point.color}
                                   stroke={point.color}
-                                  strokeWidth={isHovered ? 4 : 3}
-                                  opacity={isHovered ? 0.4 : 0.6}
-                                >
-                                  <animate 
-                                    attributeName="r" 
-                                    values={isHovered ? "12;16;12" : "12"} 
-                                    dur={isHovered ? "1.5s" : "0s"} 
-                                    repeatCount={isHovered ? "indefinite" : "1"}
-                                  />
-                                </circle>
-                                
-                                {/* Main point with unique color */}
-                                <circle
-                                  cx={point.x}
-                                  cy={point.y}
-                                  r={isHovered ? 10 : 8}
-                                  fill={point.color}
-                                  stroke="white"
-                                  strokeWidth={4}
-                                  className="drop-shadow-xl"
-                                >
-                                  <animate 
-                                    attributeName="r" 
-                                    values="8;10;8" 
-                                    dur="2.5s" 
-                                    begin={`${index * 0.2}s`}
-                                    repeatCount="1"
-                                  />
-                                </circle>
-                                
-                                {/* Inner glow with point color */}
-                                <circle
-                                  cx={point.x}
-                                  cy={point.y}
-                                  r={isHovered ? 5 : 4}
-                                  fill={point.color}
-                                  opacity="0.9"
-                                  filter="url(#modalGlow)"
+                                  strokeWidth={2}
                                 />
                                 
-                                {/* Color indicator dot */}
+                                {/* Inner white dot for clean look */}
                                 <circle
-                                  cx={point.x + 2}
-                                  cy={point.y - 2}
-                                  r={3}
+                                  cx={point.x}
+                                  cy={point.y}
+                                  r={isHovered ? 3 : 2.5}
                                   fill="white"
-                                  opacity="0.8"
                                 />
                               </g>
                             );
@@ -501,7 +461,7 @@ export function LineChartModal({
                   {/* Summary Statistics - Right Side */}
                   <div className="w-56 space-y-2">
                     {/* Timeline Card */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="relative overflow-hidden bg-white border-2 border-blue-200 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                       <div className="absolute top-0 right-0 w-8 h-8 bg-blue-500/10 dark:bg-blue-400/10 rounded-full -translate-y-1 translate-x-1"></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
@@ -518,7 +478,7 @@ export function LineChartModal({
                     </div>
                     
                     {/* Critical Card */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 border-2 border-red-200 dark:border-red-700 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="relative overflow-hidden bg-white border-2 border-red-200 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                       <div className="absolute top-0 right-0 w-8 h-8 bg-red-500/10 dark:bg-red-400/10 rounded-full -translate-y-1 translate-x-1"></div>
                       <div className="absolute top-1 right-1 w-1 h-1 bg-red-500 rounded-full animate-ping"></div>
                       <div className="relative z-10">
@@ -536,7 +496,7 @@ export function LineChartModal({
                     </div>
                     
                     {/* Analytics Card */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="relative overflow-hidden bg-white border-2 border-green-200 rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                       <div className="absolute top-0 right-0 w-8 h-8 bg-green-500/10 dark:bg-green-400/10 rounded-full -translate-y-1 translate-x-1"></div>
                       <div className="absolute top-1 right-1 w-1 h-1 bg-green-400 rounded-full animate-bounce"></div>
                       <div className="relative z-10">

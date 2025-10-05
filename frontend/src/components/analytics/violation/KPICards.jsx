@@ -25,7 +25,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-in slide-in-from-bottom-5 fade-in duration-700">
       {/* Total Violations KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300"></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
@@ -51,7 +51,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
       </div>
 
       {/* Total Traffic Violators KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-green-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300"></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
@@ -77,7 +77,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
       </div>
 
       {/* Most Common Violation KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-red-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-500/10 to-red-600/5 rounded-full -translate-y-4 translate-x-4 group-hover:scale-110 transition-transform duration-300"></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
@@ -107,7 +107,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
       </div>
 
       {/* Top Officer KPI */}
-      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-purple-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-4 hover:shadow-xl hover:shadow-purple-500/30 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden">
         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-500/10 to-purple-600/5 rounded-full -translate-y-4 translate-x-4"></div>
         <div className="flex items-center justify-between">
           <div className="flex-1">
