@@ -62,6 +62,13 @@ export const createVehicle = async (req, res) => {
 
     await vehicle.save();
 
+    // Update driver's vehicleIds array
+    await DriverModel.findByIdAndUpdate(
+      driverId,
+      { $push: { vehicleIds: vehicle._id } },
+      { new: true }
+    );
+
     // Populate driver information
     await vehicle.populate("driverId", "fullname ownerRepresentativeName");
 

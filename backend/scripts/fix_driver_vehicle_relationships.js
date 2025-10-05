@@ -1,84 +1,79 @@
-import mongoose from "mongoose";
-import DriverModel from "../model/DriverModel.js";
-import VehicleModel from "../model/VehicleModel.js";
-import { config } from "dotenv";
+/**
+ * Script to fix driver-vehicle relationships
+ * This script will populate the driver's vehicleIds array based on existing vehicles
+ */
 
-// Load environment variables
-config();
+import mongoose from 'mongoose';
+import DriverModel from '../model/DriverModel.js';
+import VehicleModel from '../model/VehicleModel.js';
 
-const fixDriverVehicleRelationships = async () => {
+// Connect to MongoDB
+const connectDB = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("Connected to MongoDB");
-
-    // Get all vehicles with driverId
-    const vehicles = await VehicleModel.find({ driverId: { $exists: true, $ne: null } });
-    console.log(`Found ${vehicles.length} vehicles with driver references`);
-
-    for (const vehicle of vehicles) {
-      console.log(`\nProcessing vehicle: ${vehicle.plateNo} (${vehicle._id})`);
-      
-      // Find the driver
-      const driver = await DriverModel.findById(vehicle.driverId);
-      if (!driver) {
-        console.log(`  Driver not found for vehicle ${vehicle.plateNo}`);
-        continue;
-      }
-
-      console.log(`  Driver: ${driver.ownerRepresentativeName} (${driver._id})`);
-
-      // Initialize vehicleIds array if it doesn't exist
-      if (!driver.vehicleIds) {
-        driver.vehicleIds = [];
-      }
-
-      // Check if vehicle ID is already in the array
-      const vehicleIdExists = driver.vehicleIds.some(id => id.toString() === vehicle._id.toString());
-      
-      if (!vehicleIdExists) {
-        // Add vehicle ID to driver's vehicleIds array
-        await DriverModel.findByIdAndUpdate(
-          driver._id,
-          {
-            $push: {
-              vehicleIds: vehicle._id
-            }
-          }
-        );
-        console.log(`  Added vehicle ${vehicle._id} to driver's vehicleIds array`);
-      } else {
-        console.log(`  Vehicle ${vehicle._id} already in driver's vehicleIds array`);
-      }
-    }
-
-    // Verify the relationships
-    console.log("\nVerifying relationships...");
-    const driversWithVehicles = await DriverModel.find({ vehicleIds: { $exists: true, $ne: [] } })
-      .populate('vehicleIds', 'plateNo fileNo');
-    
-    for (const driver of driversWithVehicles) {
-      console.log(`\nDriver: ${driver.ownerRepresentativeName}`);
-      console.log(`  Vehicle count: ${driver.vehicleIds.length}`);
-      
-      for (const vehicle of driver.vehicleIds) {
-        console.log(`    - ${vehicle.plateNo} (${vehicle.fileNo})`);
-      }
-    }
-
-    console.log("\nRelationship fix completed successfully!");
-    
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/lto_database');
+    console.log('Connected to MongoDB');
   } catch (error) {
-    console.error("Fix failed:", error);
-  } finally {
-    await mongoose.disconnect();
-    console.log("Disconnected from MongoDB");
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
   }
 };
 
-// Run fix if this script is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  fixDriverVehicleRelationships();
-}
+const fixDriverVehicleRelationships = async () => {
+  try {
+    console.log('Starting driver-vehicle relationship fix...');
+    
+    // Get all drivers
+    const drivers = await DriverModel.find({});
+    console.log(`Found ${drivers.length} drivers`);
+    
+    // Get all vehicles
+    const vehicles = await VehicleModel.find({});
+    console.log(`Found ${vehicles.length} vehicles`);
+    
+    // Create a map of driverId to vehicles
+    const driverVehicleMap = {};
+    vehicles.forEach(vehicle => {
+      if (vehicle.driverId) {
+        if (!driverVehicleMap[vehicle.driverId.toString()]) {
+          driverVehicleMap[vehicle.driverId.toString()] = [];
+        }
+        driverVehicleMap[vehicle.driverId.toString()].push(vehicle._id);
+      }
+    });
+    
+    console.log('Driver-vehicle mapping created');
+    
+    // Update each driver's vehicleIds array
+    let updatedCount = 0;
+    for (const driver of drivers) {
+      const driverId = driver._id.toString();
+      const vehicleIds = driverVehicleMap[driverId] || [];
+      
+      // Update the driver's vehicleIds array
+      await DriverModel.findByIdAndUpdate(
+        driver._id,
+        { $set: { vehicleIds: vehicleIds } },
+        { new: true }
+      );
+      
+      if (vehicleIds.length > 0) {
+        console.log(`Updated driver ${driver.ownerRepresentativeName} with ${vehicleIds.length} vehicles`);
+        updatedCount++;
+      }
+    }
+    
+    console.log(`Fixed relationships for ${updatedCount} drivers`);
+    console.log('Driver-vehicle relationship fix completed successfully!');
+    
+  } catch (error) {
+    console.error('Error fixing driver-vehicle relationships:', error);
+  } finally {
+    await mongoose.disconnect();
+    console.log('Disconnected from MongoDB');
+  }
+};
 
-export default fixDriverVehicleRelationships;
+// Run the script
+connectDB().then(() => {
+  fixDriverVehicleRelationships();
+});
