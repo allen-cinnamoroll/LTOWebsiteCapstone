@@ -48,6 +48,8 @@ const VehiclesPage = () => {
           classification: dData.classification,
           dateOfRenewal: dData.dateOfRenewal,
           status: dData.status,
+          driverId: dData.driverId, // Include driverId for owner information
+          vehicleStatusType: dData.vehicleStatusType, // Include vehicleStatusType
         };
       });
 
