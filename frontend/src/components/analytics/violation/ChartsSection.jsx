@@ -463,7 +463,7 @@ export function ChartsSection({
                 {/* Summary Statistics - Right Side */}
                 <div className="w-60 space-y-4">
                   {/* Years Covered Card - Timeline Design */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="relative overflow-hidden bg-white border border-blue-200 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                     <div className="absolute top-0 right-0 w-12 h-12 bg-blue-500/10 dark:bg-blue-400/10 rounded-full -translate-y-4 translate-x-4"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
@@ -485,7 +485,7 @@ export function ChartsSection({
                   </div>
 
                   {/* Total Violations Card - Alert Badge Design */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="relative overflow-hidden bg-white border border-red-200 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                     <div className="absolute top-0 right-0 w-10 h-10 bg-red-500/10 dark:bg-red-400/10 rounded-full -translate-y-3 translate-x-3"></div>
                     <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></div>
                     <div className="relative z-10">
@@ -507,7 +507,7 @@ export function ChartsSection({
                   </div>
 
                   {/* Average per Year Card - Analytics Design */}
-                  <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="relative overflow-hidden bg-white border border-green-200 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                     <div className="absolute top-0 right-0 w-12 h-12 bg-green-500/10 dark:bg-green-400/10 rounded-full -translate-y-4 translate-x-4"></div>
                     <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce"></div>
                     <div className="relative z-10">
@@ -549,7 +549,7 @@ export function ChartsSection({
         {/* Left Side - Stacked KPIs */}
         <div className="lg:col-span-2 flex flex-col space-y-4 h-full">
            {/* Total Unique Violations KPI */}
-           <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-black dark:to-black border-2 border-blue-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
+           <div className="bg-white border-2 border-blue-200 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-indigo-500/20 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-300/20 to-indigo-400/20 rounded-full translate-y-12 -translate-x-12"></div>
@@ -578,7 +578,7 @@ export function ChartsSection({
           </div>
 
            {/* Total Unique Officers KPI */}
-           <div className="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-black dark:to-black border-2 border-emerald-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
+           <div className="bg-white border-2 border-emerald-200 rounded-xl shadow-xl p-6 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex-1 relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-300/20 to-teal-400/20 rounded-full translate-y-12 -translate-x-12"></div>
