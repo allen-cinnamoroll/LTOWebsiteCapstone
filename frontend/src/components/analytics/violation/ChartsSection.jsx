@@ -18,6 +18,43 @@ export function ChartsSection({
   handleNextPage,
   getCombinationRecommendation
 }) {
+  // Check if dark mode is active
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark') || 
+             window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const checkDarkMode = () => {
+      const darkMode = document.documentElement.classList.contains('dark') || 
+                       window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDarkMode(darkMode);
+    };
+
+    // Check initially
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
@@ -463,8 +500,8 @@ export function ChartsSection({
                 {/* Summary Statistics - Right Side */}
                 <div className="w-60 space-y-4">
                   {/* Years Covered Card - Timeline Design */}
-                  <div className="relative overflow-hidden bg-white border border-blue-200 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-blue-500/10 dark:bg-blue-400/10 rounded-full -translate-y-4 translate-x-4"></div>
+                  <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-blue-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                    <div className={`absolute top-0 right-0 w-12 h-12 ${isDarkMode ? 'bg-blue-500/30 dark:bg-blue-400/30' : 'bg-blue-500/10 dark:bg-blue-400/10'} rounded-full -translate-y-4 translate-x-4`}></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></div>
@@ -485,8 +522,8 @@ export function ChartsSection({
                   </div>
 
                   {/* Total Violations Card - Alert Badge Design */}
-                  <div className="relative overflow-hidden bg-white border border-red-200 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 w-10 h-10 bg-red-500/10 dark:bg-red-400/10 rounded-full -translate-y-3 translate-x-3"></div>
+                  <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-red-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                    <div className={`absolute top-0 right-0 w-10 h-10 ${isDarkMode ? 'bg-red-500/30 dark:bg-red-400/30' : 'bg-red-500/10 dark:bg-red-400/10'} rounded-full -translate-y-3 translate-x-3`}></div>
                     <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
@@ -507,8 +544,8 @@ export function ChartsSection({
                   </div>
 
                   {/* Average per Year Card - Analytics Design */}
-                  <div className="relative overflow-hidden bg-white border border-green-200 p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="absolute top-0 right-0 w-12 h-12 bg-green-500/10 dark:bg-green-400/10 rounded-full -translate-y-4 translate-x-4"></div>
+                  <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-green-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
+                    <div className={`absolute top-0 right-0 w-12 h-12 ${isDarkMode ? 'bg-green-500/30 dark:bg-green-400/30' : 'bg-green-500/10 dark:bg-green-400/10'} rounded-full -translate-y-4 translate-x-4`}></div>
                     <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
@@ -546,17 +583,20 @@ export function ChartsSection({
 
       {/* Pie Chart and Apprehending Officers Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Left Side - Violation Types Pie Chart */}
-        <div className="lg:col-span-1">
+         {/* Left Side - Violation Types Pie Chart */}
+         <div className="lg:col-span-1 flex">
+           <div className="w-full" style={{ minHeight: '400px' }}>
           <PieChart
             data={violationsByTypeData}
             title="Violation Types Distribution"
             loading={loading}
           />
         </div>
+      </div>
 
-        {/* Right Side - Apprehending Officers Bar Chart */}
-        <div className="lg:col-span-1">
+         {/* Right Side - Apprehending Officers Bar Chart */}
+         <div className="lg:col-span-1 flex">
+           <div className="w-full" style={{ minHeight: '400px' }}>
           <BarChart
             data={displayData?.topOfficers || []}
             title="Apprehending Officers"
@@ -564,8 +604,9 @@ export function ChartsSection({
             loading={loading}
             totalCount={displayData?.totalOfficers || 0}
           />
+           </div>
+         </div>
         </div>
-      </div>
 
       {/* Violation Ranking Row */}
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
