@@ -312,9 +312,15 @@ export const getVehicleOwnerByPlate = async (req, res) => {
       });
     }
 
+    // Add calculated status
+    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+
     res.json({
       success: true,
-      data: vehicle,
+      data: {
+        ...vehicle.toObject(),
+        calculatedStatus,
+      },
     });
   } catch (error) {
     console.error("Error fetching vehicle owner:", error);
@@ -343,9 +349,15 @@ export const getVehicleByFileNumber = async (req, res) => {
       });
     }
 
+    // Add calculated status
+    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+
     res.json({
       success: true,
-      data: vehicle,
+      data: {
+        ...vehicle.toObject(),
+        calculatedStatus,
+      },
     });
   } catch (error) {
     console.error("Error fetching vehicle by file number:", error);
