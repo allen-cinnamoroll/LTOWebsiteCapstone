@@ -67,6 +67,9 @@ const VehiclesPage = () => {
 
   //open vehicle details modal
   const onRowClick = (data) => {
+    console.log('=== VEHICLE ROW CLICKED ===');
+    console.log('Vehicle data:', data);
+    console.log('DriverId:', data?.driverId);
     setSelectedVehicle(data);
     setDetailsModalOpen(true);
   };

@@ -1,41 +1,31 @@
 import VehicleModel from "../model/VehicleModel.js";
+import { getVehicleStatus } from "./plateStatusCalculator.js";
 
 /**
- * Check if a vehicle's renewal date has passed and update status accordingly
- * @param {Date} renewalDate - The vehicle's renewal date
+ * Check if a vehicle's status based on plate number logic
+ * @param {string} plateNo - The vehicle's plate number
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {string} - "0" for expired, "1" for active
  */
-export const checkVehicleExpirationStatus = (renewalDate) => {
-  const currentDate = new Date();
-  const renewalDateObj = new Date(renewalDate);
-  
-  // Reset time to compare only dates
-  currentDate.setHours(0, 0, 0, 0);
-  renewalDateObj.setHours(0, 0, 0, 0);
-  
-  const isExpired = renewalDateObj < currentDate;
-  console.log(`Vehicle expiration check: ${renewalDateObj.toDateString()} vs ${currentDate.toDateString()} = ${isExpired ? 'EXPIRED' : 'ACTIVE'}`);
-  
-  return isExpired ? "0" : "1"; // "0" = expired, "1" = active
+export const checkVehicleExpirationStatus = (plateNo, vehicleStatusType = "Old") => {
+  return getVehicleStatus(plateNo, null, vehicleStatusType);
 };
 
 /**
- * Update vehicle status based on renewal date
+ * Update vehicle status based on plate number logic
  * @param {string} vehicleId - The vehicle ID
- * @param {Date} renewalDate - The new renewal date
+ * @param {string} plateNo - The vehicle's plate number
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {Promise<Object>} - Updated vehicle object
  */
-export const updateVehicleStatusByExpiration = async (vehicleId, renewalDate) => {
+export const updateVehicleStatusByExpiration = async (vehicleId, plateNo, vehicleStatusType = "Old") => {
   try {
-    const newStatus = checkVehicleExpirationStatus(renewalDate);
-    console.log(`Updating vehicle ${vehicleId} status to: ${newStatus === "0" ? "EXPIRED" : "ACTIVE"}`);
+    const newStatus = checkVehicleExpirationStatus(plateNo, vehicleStatusType);
+    console.log(`Updating vehicle ${vehicleId} (${plateNo}) status to: ${newStatus === "0" ? "EXPIRED" : "ACTIVE"}`);
     
     const updatedVehicle = await VehicleModel.findByIdAndUpdate(
       vehicleId,
-      { 
-        status: newStatus,
-        dateOfRenewal: renewalDate 
-      },
+      { status: newStatus },
       { new: true }
     );
     
@@ -48,37 +38,33 @@ export const updateVehicleStatusByExpiration = async (vehicleId, renewalDate) =>
 };
 
 /**
- * Check and update all vehicles' status based on their renewal dates
+ * Check and update all vehicles' status based on plate number logic
  * This can be called periodically or manually
  */
 export const checkAllVehiclesExpiration = async () => {
   try {
     const vehicles = await VehicleModel.find();
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    
     let updatedCount = 0;
     
     for (const vehicle of vehicles) {
-      // Skip vehicles without renewal date
-      if (!vehicle.dateOfRenewal) {
+      // Skip vehicles without plate number
+      if (!vehicle.plateNo) {
+        console.log(`Skipping vehicle ${vehicle._id} - no plate number`);
         continue;
       }
       
-      const renewalDate = new Date(vehicle.dateOfRenewal);
-      renewalDate.setHours(0, 0, 0, 0);
+      // Calculate correct status based on plate number and vehicle status type
+      const correctStatus = getVehicleStatus(vehicle.plateNo, null, vehicle.vehicleStatusType || "Old");
+      const currentStatus = vehicle.status;
       
-      const shouldBeExpired = renewalDate < currentDate;
-      const isCurrentlyExpired = vehicle.status === "0";
-      
-      // Update status if it doesn't match the renewal date
-      if (shouldBeExpired !== isCurrentlyExpired) {
+      // Update status if it doesn't match the plate-based calculation
+      if (correctStatus !== currentStatus) {
         await VehicleModel.findByIdAndUpdate(
           vehicle._id,
-          { status: shouldBeExpired ? "0" : "1" }
+          { status: correctStatus }
         );
         updatedCount++;
-        console.log(`Updated vehicle ${vehicle._id} status to: ${shouldBeExpired ? "EXPIRED" : "ACTIVE"}`);
+        console.log(`Updated vehicle ${vehicle._id} (${vehicle.plateNo}) status from ${currentStatus} to ${correctStatus} (${correctStatus === "0" ? "EXPIRED" : "ACTIVE"})`);
       }
     }
     

@@ -46,6 +46,9 @@ export const createVehicle = async (req, res) => {
       });
     }
 
+    // Calculate initial status based on plate number
+    const initialStatus = getVehicleStatus(plateNo, dateOfRenewal, vehicleStatusType);
+
     const vehicle = new VehicleModel({
       fileNo,
       plateNo,
@@ -58,6 +61,7 @@ export const createVehicle = async (req, res) => {
       dateOfRenewal,
       vehicleStatusType,
       driverId,
+      status: initialStatus, // Set status based on plate number logic
     });
 
     await vehicle.save();
@@ -123,14 +127,27 @@ export const getVehicle = async (req, res) => {
 
     const total = await VehicleModel.countDocuments(query);
 
-    // Add calculated status for each vehicle
-    const vehiclesWithStatus = vehicles.map((vehicle) => {
+    // Add calculated status for each vehicle and update database status if needed
+    const vehiclesWithStatus = await Promise.all(vehicles.map(async (vehicle) => {
       const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
-      return {
+      
+      // Update database status if it doesn't match calculated status
+      if (vehicle.status !== calculatedStatus) {
+        await VehicleModel.findByIdAndUpdate(vehicle._id, { status: calculatedStatus });
+        console.log(`Updated vehicle ${vehicle.plateNo} status from ${vehicle.status} to ${calculatedStatus}`);
+      }
+      
+      const vehicleData = {
         ...vehicle.toObject(),
+        status: calculatedStatus, // Use calculated status instead of database status
         calculatedStatus,
       };
-    });
+      
+      // Debug logging
+      console.log(`Vehicle ${vehicle.plateNo} - Status: ${calculatedStatus} (${calculatedStatus === "1" ? "ACTIVE" : "EXPIRED"})`);
+      
+      return vehicleData;
+    }));
 
     res.json({
       success: true,
@@ -199,6 +216,15 @@ export const updateVehicle = async (req, res) => {
     delete updateData.createdAt;
     delete updateData.updatedAt;
 
+    // Get the current vehicle to check if plate number or vehicle status type changed
+    const currentVehicle = await VehicleModel.findById(id);
+    if (!currentVehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+
     const vehicle = await VehicleModel.findByIdAndUpdate(
       id,
       updateData,
@@ -210,6 +236,19 @@ export const updateVehicle = async (req, res) => {
         success: false,
         message: "Vehicle not found",
       });
+    }
+
+    // Recalculate status if plate number or vehicle status type changed
+    const plateChanged = currentVehicle.plateNo !== vehicle.plateNo;
+    const statusTypeChanged = currentVehicle.vehicleStatusType !== vehicle.vehicleStatusType;
+    
+    if (plateChanged || statusTypeChanged) {
+      const newStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+      if (vehicle.status !== newStatus) {
+        await VehicleModel.findByIdAndUpdate(id, { status: newStatus });
+        vehicle.status = newStatus;
+        console.log(`Updated vehicle ${vehicle.plateNo} status to ${newStatus} due to plate/status type change`);
+      }
     }
 
     res.json({

@@ -104,34 +104,28 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
     return null;
   }
   
-  // If date of renewal is provided, use it as the base date
-  let baseDate;
-  if (dateOfRenewal) {
-    // Handle both Date objects and ISO strings properly
-    baseDate = new Date(dateOfRenewal);
-    if (isNaN(baseDate.getTime())) {
-      console.log(`Invalid renewal date: ${dateOfRenewal}`);
-      return null;
-    }
-  } else {
-    // If no date of renewal, use current date
-    baseDate = new Date();
-  }
-  
-  const renewalYear = baseDate.getFullYear();
-  const renewalMonth = baseDate.getMonth();
+  // Get current year for expiration calculation
+  const currentYear = new Date().getFullYear();
   
   // Calculate expiration year and month based on vehicle status type
   let expirationYear, expirationMonth;
   
   if (vehicleStatusType === "New") {
-    // New vehicles: initial registration is valid for 2 years
-    expirationYear = renewalYear + 2;
+    // New vehicles: initial registration is valid for 3 years
+    // Use the plate-based month for expiration, but 3 years from current year
+    expirationYear = currentYear + 3;
     expirationMonth = monthIndex;
   } else {
-    // Old vehicles: registration expires in 1 year
-    expirationYear = renewalYear + 1;
+    // Old vehicles: registration expires yearly based on plate number
+    // Use the plate-based month for expiration in current or next year
+    expirationYear = currentYear;
     expirationMonth = monthIndex;
+    
+    // If the plate-based month has already passed this year, use next year
+    const currentMonth = new Date().getMonth();
+    if (currentMonth > monthIndex) {
+      expirationYear = currentYear + 1;
+    }
   }
   
   // Calculate the end date of the specified week in the expiration month/year
@@ -165,7 +159,7 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
   expirationDate.setHours(0, 0, 0, 0);
   
   // Debug logging
-  console.log(`Plate: ${plateNo}, Renewal: ${baseDate.toISOString()}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}`);
+  console.log(`Plate: ${plateNo}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}, Year: ${expirationYear}, Month: ${expirationMonth}`);
   
   return expirationDate;
 };

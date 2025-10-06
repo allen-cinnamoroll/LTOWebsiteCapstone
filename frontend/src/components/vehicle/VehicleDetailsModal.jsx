@@ -24,18 +24,28 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   }, [open, vehicleData]);
 
   const fetchOwnerData = async () => {
-    if (!vehicleData?.driverId) return;
+    console.log('=== FETCHING OWNER DATA ===');
+    console.log('vehicleData:', vehicleData);
+    console.log('driverId:', vehicleData?.driverId);
+    
+    if (!vehicleData?.driverId) {
+      console.log('No driverId found, skipping fetch');
+      return;
+    }
     
     setLoading(true);
     try {
+      console.log(`Fetching driver data for ID: ${vehicleData.driverId}`);
       const { data } = await apiClient.get(`/driver/${vehicleData.driverId}`, {
         headers: {
           Authorization: token,
         },
       });
+      console.log('Driver data received:', data);
       setOwnerData(data.data);
     } catch (error) {
       console.error("Error fetching owner data:", error);
+      console.error("Error response:", error.response?.data);
     } finally {
       setLoading(false);
     }
