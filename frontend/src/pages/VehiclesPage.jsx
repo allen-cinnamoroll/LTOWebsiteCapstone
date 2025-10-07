@@ -36,6 +36,17 @@ const VehiclesPage = () => {
       });
 
       const vehicleData = data.data.map((dData) => {
+        console.log('Processing vehicle data:', dData.plateNo, 'DriverId:', dData.driverId);
+        console.log('DriverId type:', typeof dData.driverId);
+        console.log('DriverId is object:', typeof dData.driverId === 'object');
+        
+        // Handle both populated and non-populated driverId
+        const driverId = typeof dData.driverId === 'object' && dData.driverId?._id 
+          ? dData.driverId._id 
+          : dData.driverId;
+          
+        console.log('Final driverId:', driverId);
+        
         return {
           _id: dData._id,
           plateNo: dData.plateNo,
@@ -48,7 +59,7 @@ const VehiclesPage = () => {
           classification: dData.classification,
           dateOfRenewal: dData.dateOfRenewal,
           status: dData.status,
-          driverId: dData.driverId, // Include driverId for owner information
+          driverId: driverId, // Use the extracted driverId
           vehicleStatusType: dData.vehicleStatusType, // Include vehicleStatusType
         };
       });

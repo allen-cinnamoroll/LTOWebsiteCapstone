@@ -120,7 +120,7 @@ export const getVehicle = async (req, res) => {
     }
 
     const vehicles = await VehicleModel.find(query)
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber")
+      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -141,10 +141,15 @@ export const getVehicle = async (req, res) => {
         ...vehicle.toObject(),
         status: calculatedStatus, // Use calculated status instead of database status
         calculatedStatus,
+        // Ensure driverId is the actual ID string, not the populated object
+        driverId: typeof vehicle.driverId === 'object' && vehicle.driverId?._id 
+          ? vehicle.driverId._id 
+          : vehicle.driverId,
       };
       
       // Debug logging
       console.log(`Vehicle ${vehicle.plateNo} - Status: ${calculatedStatus} (${calculatedStatus === "1" ? "ACTIVE" : "EXPIRED"})`);
+      console.log(`Vehicle ${vehicle.plateNo} - DriverId: ${vehicleData.driverId}`);
       
       return vehicleData;
     }));
