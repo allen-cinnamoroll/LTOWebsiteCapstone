@@ -64,6 +64,12 @@ export function LineChartModal({
               </svg>
             </div>
             <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Violation Trends Analysis
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Historical violation data and trends
+              </p>
             </div>
           </div>
           <button
