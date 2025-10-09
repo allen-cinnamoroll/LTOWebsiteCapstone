@@ -20,11 +20,11 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                     <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
                     <div className="flex-1 space-y-2">
                       <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
                     </div>
-                  </div>
                 </div>
-              ))}
+              </div>
+            ))}
             </div>
           </div>
         </div>
@@ -73,17 +73,17 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
   return (
     <div className="bg-white dark:bg-black border-2 border-blue-200 dark:border-blue-800 rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-800 px-6 py-4 border-b-2 border-blue-300 dark:border-blue-700">
+      <div className="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-800 px-4 py-3 border-b-2 border-blue-300 dark:border-blue-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 Violation Analysis
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+      </h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Combinations & Recommended Actions
               </p>
             </div>
@@ -116,13 +116,13 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        {violationCombinations.length > 0 || violationPatterns.length > 0 ? (
-          <div className="space-y-4">
+      <div className="p-4">
+      {violationCombinations.length > 0 || violationPatterns.length > 0 ? (
+        <div className="space-y-2">
             {activeTab === 'combinations' && (
               <>
                  {/* Table Header */}
-                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-4 border-2 border-blue-300 dark:border-blue-700">
+                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-3 border-2 border-blue-300 dark:border-blue-700">
                   <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                     <div className="col-span-1">#</div>
                     <div className="col-span-4">Violation Types</div>
@@ -134,13 +134,13 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                  {/* Table Rows */}
                  {currentCombinations.map((combination, index) => {
-                  const violations = combination.violations || [];
-                  const count = combination.count || 0;
-                  const recommendation = getCombinationRecommendation(violations);
+            const violations = combination.violations || [];
+            const count = combination.count || 0;
+            const recommendation = getCombinationRecommendation(violations);
                   const globalIndex = startIndex + index + 1;
 
-                  return (
-                     <div key={index} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+            return (
+                     <div key={index} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-3 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
                       <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Index */}
                         <div className="col-span-1">
@@ -154,15 +154,15 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                         {/* Violation Types */}
                         <div className="col-span-4">
                           <div className="flex flex-wrap gap-1">
-                            {violations.map((violation, vIndex) => (
-                              <span
-                                key={vIndex}
+                      {violations.map((violation, vIndex) => (
+                        <span
+                          key={vIndex}
                                 className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-800"
-                              >
-                                {violation}
-                              </span>
-                            ))}
-                          </div>
+                        >
+                          {violation}
+                        </span>
+                      ))}
+                    </div>
                         </div>
 
                         {/* Occurrences */}
@@ -182,8 +182,8 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                             <span>
                               {count >= 50 ? 'High' : count >= 20 ? 'Medium' : 'Low'}
                             </span>
-                          </div>
-                        </div>
+                  </div>
+                </div>
 
                         {/* Recommended Action */}
                         <div className="col-span-3">
@@ -192,21 +192,21 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                               Action Required:
                             </p>
                             <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-                              {recommendation}
-                            </p>
+                    {recommendation}
+                  </p>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                </div>
+              </div>
+            );
+          })}
               </>
             )}
 
             {activeTab === 'patterns' && (
               <>
                  {/* Patterns Table Header */}
-                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-4 border-2 border-blue-300 dark:border-blue-700">
+                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-3 border-2 border-blue-300 dark:border-blue-700">
                   <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                     <div className="col-span-1">#</div>
                     <div className="col-span-4">Pattern Name</div>
@@ -218,13 +218,13 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                  {/* Patterns Table Rows */}
                  {currentPatterns.map((pattern, index) => {
-                  const patternName = pattern.pattern || 'Unknown Pattern';
-                  const frequency = pattern.frequency || 0;
-                  const description = pattern.description || 'No description available';
+            const patternName = pattern.pattern || 'Unknown Pattern';
+            const frequency = pattern.frequency || 0;
+            const description = pattern.description || 'No description available';
                   const globalIndex = startIndex + index + 1;
 
-                  return (
-                     <div key={`pattern-${index}`} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+            return (
+                     <div key={`pattern-${index}`} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-3 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
                       <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Index */}
                         <div className="col-span-1">
@@ -238,11 +238,11 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                         {/* Pattern Name */}
                         <div className="col-span-4">
                           <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                            {patternName}
-                          </h4>
+                      {patternName}
+                    </h4>
                           <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                            {description}
-                          </p>
+                      {description}
+                    </p>
                         </div>
 
                         {/* Frequency */}
@@ -265,30 +265,30 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                             <span>
                               {frequency >= 30 ? 'Active' : frequency >= 15 ? 'Moderate' : 'Low'}
                             </span>
-                          </div>
-                        </div>
+                  </div>
+                </div>
 
                         {/* Analysis */}
                         <div className="col-span-3">
                           <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-3">
                             <p className="text-xs text-indigo-800 dark:text-indigo-300 font-medium mb-1">
-                              Pattern Analysis:
-                            </p>
+                    Pattern Analysis:
+                  </p>
                             <p className="text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed">
                               Recurring violation behaviors requiring targeted enforcement strategies.
-                            </p>
+                  </p>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                </div>
+              </div>
+            );
+          })}
               </>
             )}
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center pt-4 space-x-4">
+              <div className="flex justify-center items-center pt-3 space-x-4">
                 <button
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
@@ -322,23 +322,23 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                 >
                   <span>Next</span>
                   <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
           <div className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
               <Shield className="w-10 h-10 text-gray-400" />
-            </div>
+          </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No Data Available
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
               No violation combination data found for the selected period.
             </p>
-          </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );

@@ -227,23 +227,114 @@ export function LineChartModal({
                             </filter>
                           </defs>
                           
-                          {/* Animated grid lines */}
-                          {[0, 0.5, 1].map((ratio, index) => {
+                          {/* Y-axis */}
+                          <line
+                            x1={padding}
+                            y1={padding}
+                            x2={padding}
+                            y2={padding + chartHeight}
+                            stroke="#6b7280"
+                            strokeWidth={2}
+                          />
+                          
+                          {/* X-axis */}
+                          <line
+                            x1={padding}
+                            y1={padding + chartHeight}
+                            x2={padding + chartWidth}
+                            y2={padding + chartHeight}
+                            stroke="#6b7280"
+                            strokeWidth={2}
+                          />
+                          
+                          {/* Y-axis labels */}
+                          {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
+                            const y = padding + chartHeight - (ratio * chartHeight);
+                            const value = Math.round(adjustedMinCount + (ratio * adjustedCountRange));
+                            return (
+                              <g key={`y-label-${index}`}>
+                                <line
+                                  x1={padding - 5}
+                                  y1={y}
+                                  x2={padding}
+                                  y2={y}
+                                  stroke="#6b7280"
+                                  strokeWidth={1}
+                                />
+                                <text
+                                  x={padding - 15}
+                                  y={y + 5}
+                                  textAnchor="end"
+                                  fontSize="12"
+                                  fill="#9ca3af"
+                                  fontFamily="system-ui, -apple-system, sans-serif"
+                                >
+                                  {value}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          
+                          {/* X-axis labels */}
+                          {years.map((year, index) => {
+                            const x = padding + ((year - minYear) / yearRange) * chartWidth;
+                            return (
+                              <g key={`x-label-${index}`}>
+                                <line
+                                  x1={x}
+                                  y1={padding + chartHeight}
+                                  x2={x}
+                                  y2={padding + chartHeight + 5}
+                                  stroke="#6b7280"
+                                  strokeWidth={1}
+                                />
+                                <text
+                                  x={x}
+                                  y={padding + chartHeight + 20}
+                                  textAnchor="middle"
+                                  fontSize="12"
+                                  fill="#9ca3af"
+                                  fontFamily="system-ui, -apple-system, sans-serif"
+                                >
+                                  {year}
+                                </text>
+                              </g>
+                            );
+                          })}
+                          
+                          {/* Grid lines */}
+                          {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
                             const y = padding + chartHeight - (ratio * chartHeight);
                             return (
                               <line
-                                key={index}
+                                key={`grid-h-${index}`}
                                 x1={padding}
                                 y1={y}
                                 x2={padding + chartWidth}
                                 y2={y}
-                                stroke="#e5e7eb"
+                                stroke="#374151"
                                 strokeWidth={1}
-                                strokeDasharray="3,3"
-                                opacity="0.5"
-                              >
-                                <animate attributeName="opacity" values="0;0.5;0" dur="3s" begin={`${index * 0.3}s`} repeatCount="1"/>
-                              </line>
+                                strokeDasharray="2,2"
+                                opacity="0.4"
+                              />
+                            );
+                          })}
+                          
+                          {/* Vertical grid lines */}
+                          {years.map((year, index) => {
+                            const x = padding + ((year - minYear) / yearRange) * chartWidth;
+                            return (
+                              <line
+                                key={`grid-v-${index}`}
+                                x1={x}
+                                y1={padding}
+                                x2={x}
+                                y2={padding + chartHeight}
+                                stroke="#374151"
+                                strokeWidth={1}
+                                strokeDasharray="2,2"
+                                opacity="0.4"
+                              />
                             );
                           })}
                           
@@ -356,54 +447,7 @@ export function LineChartModal({
                             );
                           })}
                           
-                          {/* Enhanced X-axis labels */}
-                          {points.map((point, index) => (
-                            <g key={point.year}>
-                              <text
-                                x={point.x}
-                                y={padding + chartHeight + 30}
-                                textAnchor="middle"
-                                className="text-sm font-bold fill-gray-700 dark:fill-gray-200"
-                              >
-                                {point.year}
-                              </text>
-                              <line
-                                x1={point.x}
-                                y1={padding + chartHeight}
-                                x2={point.x}
-                                y2={padding + chartHeight + 8}
-                                stroke={point.color}
-                                strokeWidth={2}
-                              />
-                            </g>
-                          ))}
                           
-                          {/* Enhanced Y-axis labels */}
-                          {[0, 0.5, 1].map((ratio, index) => {
-                            const y = padding + chartHeight - (ratio * chartHeight);
-                            const value = Math.round(adjustedMinCount + (adjustedCountRange * ratio));
-                            return (
-                              <g key={index}>
-                              <text
-                                  x={padding - 20}
-                                y={y + 4}
-                                textAnchor="end"
-                                  className="text-sm font-semibold fill-gray-700 dark:fill-gray-200"
-                              >
-                                {value.toLocaleString()}
-                              </text>
-                                <line
-                                  x1={padding - 8}
-                                  y1={y}
-                                  x2={padding}
-                                  y2={y}
-                                  stroke="#6b7280"
-                                  strokeWidth={2}
-                                  opacity="0.6"
-                                />
-                              </g>
-                            );
-                          })}
                           
                           
                           {/* Y-axis label */}
