@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { AlertTriangle, FileText, TrendingUp, Users, Clock, Shield } from 'lucide-react';
+import { AlertTriangle, FileText, TrendingUp, Users, Clock, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function ViolationCombinations({ displayData, loading, getCombinationRecommendation }) {
   const [activeTab, setActiveTab] = useState('combinations');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   if (loading) {
     return (
@@ -33,10 +35,33 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
   const violationCombinations = displayData?.violationCombinations || [];
   const violationPatterns = displayData?.violationPatterns || [];
 
+  // Pagination logic
+  const totalItems = activeTab === 'combinations' ? violationCombinations.length : violationPatterns.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  
+  const currentCombinations = violationCombinations.slice(startIndex, endIndex);
+  const currentPatterns = violationPatterns.slice(startIndex, endIndex);
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
+  // Reset page when switching tabs
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
   const getSeverityColor = (count) => {
-    if (count >= 50) return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
-    if (count >= 20) return 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400';
-    return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400';
+    if (count >= 50) return 'text-white bg-red-500 shadow-lg shadow-red-500/30 border-2 border-red-400';
+    if (count >= 20) return 'text-white bg-orange-500 shadow-lg shadow-orange-500/30 border-2 border-orange-400';
+    return 'text-white bg-yellow-500 shadow-lg shadow-yellow-500/30 border-2 border-yellow-400';
   };
 
   const getSeverityIcon = (count) => {
@@ -46,7 +71,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
   };
 
   return (
-    <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-white dark:bg-black border-2 border-blue-200 dark:border-blue-800 rounded-xl shadow-lg overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-800 px-6 py-4 border-b-2 border-blue-300 dark:border-blue-700">
         <div className="flex items-center justify-between">
@@ -64,28 +89,28 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
             </div>
           </div>
           <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
-            <button
-              onClick={() => setActiveTab('combinations')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'combinations'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <FileText className="w-4 h-4 inline mr-1" />
-              Combinations
-            </button>
-            <button
-              onClick={() => setActiveTab('patterns')}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'patterns'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4 inline mr-1" />
-              Patterns
-            </button>
+             <button
+               onClick={() => handleTabChange('combinations')}
+               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                 activeTab === 'combinations'
+                   ? 'bg-blue-500 text-white shadow-sm'
+                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+               }`}
+             >
+               <FileText className="w-4 h-4 inline mr-1" />
+               Combinations
+             </button>
+             <button
+               onClick={() => handleTabChange('patterns')}
+               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                 activeTab === 'patterns'
+                   ? 'bg-blue-500 text-white shadow-sm'
+                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+               }`}
+             >
+               <TrendingUp className="w-4 h-4 inline mr-1" />
+               Patterns
+             </button>
           </div>
         </div>
       </div>
@@ -107,11 +132,12 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                   </div>
                 </div>
 
-                {/* Table Rows */}
-                {violationCombinations.slice(0, 8).map((combination, index) => {
+                 {/* Table Rows */}
+                 {currentCombinations.map((combination, index) => {
                   const violations = combination.violations || [];
                   const count = combination.count || 0;
                   const recommendation = getCombinationRecommendation(violations);
+                  const globalIndex = startIndex + index + 1;
 
                   return (
                      <div key={index} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
@@ -120,7 +146,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                         <div className="col-span-1">
                           <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                             <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
-                              {index + 1}
+                              {globalIndex}
                             </span>
                           </div>
                         </div>
@@ -141,17 +167,17 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                         {/* Occurrences */}
                         <div className="col-span-2">
-                          <div className="flex items-center space-x-2">
-                            <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                            <span className="font-semibold text-gray-900 dark:text-white">
-                              {count.toLocaleString()}
-                            </span>
-                          </div>
+                           <div className="flex items-center space-x-2">
+                             <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2.5} />
+                             <span className="font-semibold text-gray-900 dark:text-white">
+                               {count.toLocaleString()}
+                             </span>
+                           </div>
                         </div>
 
                         {/* Severity */}
                         <div className="col-span-2">
-                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getSeverityColor(count)}`}>
+                           <div className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-bold ${getSeverityColor(count)} transform hover:scale-105 transition-all duration-200`}>
                             {getSeverityIcon(count)}
                             <span>
                               {count >= 50 ? 'High' : count >= 20 ? 'Medium' : 'Low'}
@@ -190,11 +216,12 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                   </div>
                 </div>
 
-                {/* Patterns Table Rows */}
-                {violationPatterns.slice(0, 5).map((pattern, index) => {
+                 {/* Patterns Table Rows */}
+                 {currentPatterns.map((pattern, index) => {
                   const patternName = pattern.pattern || 'Unknown Pattern';
                   const frequency = pattern.frequency || 0;
                   const description = pattern.description || 'No description available';
+                  const globalIndex = startIndex + index + 1;
 
                   return (
                      <div key={`pattern-${index}`} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
@@ -203,7 +230,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                         <div className="col-span-1">
                           <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                             <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
-                              {index + 1}
+                              {globalIndex}
                             </span>
                           </div>
                         </div>
@@ -259,15 +286,42 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
               </>
             )}
 
-            {/* Show More Button */}
-            {((activeTab === 'combinations' && violationCombinations.length > 8) || 
-              (activeTab === 'patterns' && violationPatterns.length > 5)) && (
-              <div className="text-center pt-4">
-                <button className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-sm">
-                  <span className="text-sm font-medium">View All {activeTab === 'combinations' ? 'Combinations' : 'Patterns'}</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center pt-4 space-x-4">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    currentPage === 1
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm'
+                  }`}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+                
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-500">
+                    ({totalItems} total items)
+                  </span>
+                </div>
+                
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    currentPage === totalPages
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600 shadow-sm'
+                  }`}
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             )}
