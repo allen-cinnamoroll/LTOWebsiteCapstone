@@ -1,21 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { AlertTriangle, FileText, TrendingUp, Users, Clock, Shield } from 'lucide-react';
 
 export function ViolationCombinations({ displayData, loading, getCombinationRecommendation }) {
+  const [activeTab, setActiveTab] = useState('combinations');
+
   if (loading) {
     return (
-        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg p-6">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, index) => (
-              <div key={index} className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
+          <div className="overflow-hidden">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded h-8 mb-4"></div>
+            <div className="space-y-3">
+              {[...Array(5)].map((_, index) => (
+                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -25,103 +33,259 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
   const violationCombinations = displayData?.violationCombinations || [];
   const violationPatterns = displayData?.violationPatterns || [];
 
+  const getSeverityColor = (count) => {
+    if (count >= 50) return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
+    if (count >= 20) return 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400';
+    return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400';
+  };
+
+  const getSeverityIcon = (count) => {
+    if (count >= 50) return <AlertTriangle className="w-4 h-4" />;
+    if (count >= 20) return <TrendingUp className="w-4 h-4" />;
+    return <Clock className="w-4 h-4" />;
+  };
+
   return (
-        <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Violation Combinations & Recommendations
-      </h3>
-      
-      {violationCombinations.length > 0 || violationPatterns.length > 0 ? (
-        <div className="space-y-4">
-          {/* Violation Combinations */}
-          {violationCombinations.slice(0, 5).map((combination, index) => {
-            const violations = combination.violations || [];
-            const count = combination.count || 0;
-            const recommendation = getCombinationRecommendation(violations);
-
-            return (
-              <div key={index} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {violations.map((violation, vIndex) => (
-                        <span
-                          key={vIndex}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400"
-                        >
-                          {violation}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {count} occurrence{count !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-yellow-400 rounded-r">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-300 font-medium">
-                    Recommended Action:
-                  </p>
-                  <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                    {recommendation}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Violation Patterns */}
-          {violationPatterns.slice(0, 3).map((pattern, index) => {
-            const patternName = pattern.pattern || 'Unknown Pattern';
-            const frequency = pattern.frequency || 0;
-            const description = pattern.description || 'No description available';
-
-            return (
-              <div key={`pattern-${index}`} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                      {patternName}
-                    </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                      {description}
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Frequency: {frequency} cases
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-400 rounded-r">
-                  <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">
-                    Pattern Analysis:
-                  </p>
-                  <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
-                    This pattern indicates recurring violation behaviors that may require targeted enforcement strategies.
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Show more button if there are more combinations */}
-          {(violationCombinations.length > 5 || violationPatterns.length > 3) && (
-            <div className="text-center pt-4">
-              <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
-                View All Combinations →
-              </button>
+    <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl shadow-lg overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-800 px-6 py-4 border-b-2 border-blue-300 dark:border-blue-700">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Shield className="w-5 h-5 text-white" />
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Violation Analysis
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Combinations & Recommended Actions
+              </p>
+            </div>
           </div>
-          <p>No violation combination data available</p>
+          <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
+            <button
+              onClick={() => setActiveTab('combinations')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'combinations'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              <FileText className="w-4 h-4 inline mr-1" />
+              Combinations
+            </button>
+            <button
+              onClick={() => setActiveTab('patterns')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+                activeTab === 'patterns'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4 inline mr-1" />
+              Patterns
+            </button>
+          </div>
         </div>
-      )}
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        {violationCombinations.length > 0 || violationPatterns.length > 0 ? (
+          <div className="space-y-4">
+            {activeTab === 'combinations' && (
+              <>
+                 {/* Table Header */}
+                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-4 border-2 border-blue-300 dark:border-blue-700">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                    <div className="col-span-1">#</div>
+                    <div className="col-span-4">Violation Types</div>
+                    <div className="col-span-2">Occurrences</div>
+                    <div className="col-span-2">Severity</div>
+                    <div className="col-span-3">Recommended Action</div>
+                  </div>
+                </div>
+
+                {/* Table Rows */}
+                {violationCombinations.slice(0, 8).map((combination, index) => {
+                  const violations = combination.violations || [];
+                  const count = combination.count || 0;
+                  const recommendation = getCombinationRecommendation(violations);
+
+                  return (
+                     <div key={index} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* Index */}
+                        <div className="col-span-1">
+                          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
+                              {index + 1}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Violation Types */}
+                        <div className="col-span-4">
+                          <div className="flex flex-wrap gap-1">
+                            {violations.map((violation, vIndex) => (
+                              <span
+                                key={vIndex}
+                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-800"
+                              >
+                                {violation}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Occurrences */}
+                        <div className="col-span-2">
+                          <div className="flex items-center space-x-2">
+                            <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {count.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Severity */}
+                        <div className="col-span-2">
+                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${getSeverityColor(count)}`}>
+                            {getSeverityIcon(count)}
+                            <span>
+                              {count >= 50 ? 'High' : count >= 20 ? 'Medium' : 'Low'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Recommended Action */}
+                        <div className="col-span-3">
+                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                            <p className="text-xs text-blue-800 dark:text-blue-300 font-medium mb-1">
+                              Action Required:
+                            </p>
+                            <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                              {recommendation}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+
+            {activeTab === 'patterns' && (
+              <>
+                 {/* Patterns Table Header */}
+                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-4 border-2 border-blue-300 dark:border-blue-700">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                    <div className="col-span-1">#</div>
+                    <div className="col-span-4">Pattern Name</div>
+                    <div className="col-span-2">Frequency</div>
+                    <div className="col-span-2">Status</div>
+                    <div className="col-span-3">Analysis</div>
+                  </div>
+                </div>
+
+                {/* Patterns Table Rows */}
+                {violationPatterns.slice(0, 5).map((pattern, index) => {
+                  const patternName = pattern.pattern || 'Unknown Pattern';
+                  const frequency = pattern.frequency || 0;
+                  const description = pattern.description || 'No description available';
+
+                  return (
+                     <div key={`pattern-${index}`} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-4 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* Index */}
+                        <div className="col-span-1">
+                          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
+                              {index + 1}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Pattern Name */}
+                        <div className="col-span-4">
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                            {patternName}
+                          </h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            {description}
+                          </p>
+                        </div>
+
+                        {/* Frequency */}
+                        <div className="col-span-2">
+                          <div className="flex items-center space-x-2">
+                            <TrendingUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {frequency.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Status */}
+                        <div className="col-span-2">
+                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${
+                            frequency >= 30 ? 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400' :
+                            frequency >= 15 ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                            'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400'
+                          }`}>
+                            <span>
+                              {frequency >= 30 ? 'Active' : frequency >= 15 ? 'Moderate' : 'Low'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Analysis */}
+                        <div className="col-span-3">
+                          <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-3">
+                            <p className="text-xs text-indigo-800 dark:text-indigo-300 font-medium mb-1">
+                              Pattern Analysis:
+                            </p>
+                            <p className="text-xs text-indigo-700 dark:text-indigo-400 leading-relaxed">
+                              Recurring violation behaviors requiring targeted enforcement strategies.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+
+            {/* Show More Button */}
+            {((activeTab === 'combinations' && violationCombinations.length > 8) || 
+              (activeTab === 'patterns' && violationPatterns.length > 5)) && (
+              <div className="text-center pt-4">
+                <button className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-sm">
+                  <span className="text-sm font-medium">View All {activeTab === 'combinations' ? 'Combinations' : 'Patterns'}</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+              <Shield className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              No Data Available
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              No violation combination data found for the selected period.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
