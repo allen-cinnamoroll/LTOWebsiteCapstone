@@ -129,7 +129,6 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Violations</p>
             </div>
             <AnimatedNumber 
@@ -160,7 +159,6 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Traffic Violators</p>
             </div>
             <AnimatedNumber 
@@ -191,7 +189,6 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Most Common Violation</p>
             </div>
             <p className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate" title={mostCommonViolation?._id || 'N/A'}>
@@ -226,7 +223,6 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Top Officer</p>
             </div>
             <p className="text-lg font-bold text-gray-900 dark:text-white truncate mb-1">

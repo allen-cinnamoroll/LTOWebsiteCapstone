@@ -81,7 +81,6 @@ export function LineChartModal({
           {/* Enhanced Year Range Selector */}
           <div className="mb-4">
             <div className="flex items-center space-x-3 mb-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               <label className="text-sm font-semibold text-gray-900 dark:text-white">
                 Select Analysis Period:
             </label>
@@ -470,7 +469,6 @@ export function LineChartModal({
                       <div className={`absolute top-0 right-0 w-8 h-8 ${isDarkMode ? 'bg-blue-500/30 dark:bg-blue-400/30' : 'bg-blue-500/10 dark:bg-blue-400/10'} rounded-full -translate-y-1 translate-x-1`}></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
-                          <div className="w-1 h-1 bg-blue-500 rounded-full mr-1 animate-pulse"></div>
                           <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">Timeline</div>
                         </div>
                         <div className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-0.5">
@@ -485,10 +483,8 @@ export function LineChartModal({
                     {/* Critical Card */}
                     <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border-2 border-gray-600' : 'bg-white border-2 border-red-200'} rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
                       <div className={`absolute top-0 right-0 w-8 h-8 ${isDarkMode ? 'bg-red-500/30 dark:bg-red-400/30' : 'bg-red-500/10 dark:bg-red-400/10'} rounded-full -translate-y-1 translate-x-1`}></div>
-                      <div className="absolute top-1 right-1 w-1 h-1 bg-red-500 rounded-full animate-ping"></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
-                          <div className="w-1 h-1 bg-red-500 rounded-full mr-1"></div>
                           <div className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">Critical</div>
                         </div>
                         <div className="text-lg font-bold text-red-900 dark:text-red-100 mb-0.5">
@@ -503,10 +499,8 @@ export function LineChartModal({
                     {/* Analytics Card */}
                     <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border-2 border-gray-600' : 'bg-white border-2 border-green-200'} rounded-lg p-2 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
                       <div className={`absolute top-0 right-0 w-8 h-8 ${isDarkMode ? 'bg-green-500/30 dark:bg-green-400/30' : 'bg-green-500/10 dark:bg-green-400/10'} rounded-full -translate-y-1 translate-x-1`}></div>
-                      <div className="absolute top-1 right-1 w-1 h-1 bg-green-400 rounded-full animate-bounce"></div>
                       <div className="relative z-10">
                         <div className="flex items-center mb-0.5">
-                          <div className="w-1 h-1 bg-green-500 rounded-full mr-1"></div>
                           <div className="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">Analytics</div>
                         </div>
                         <div className="text-lg font-bold text-green-900 dark:text-green-100 mb-0.5">

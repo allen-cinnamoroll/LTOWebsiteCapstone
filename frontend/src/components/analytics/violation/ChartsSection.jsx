@@ -478,7 +478,6 @@ export function ChartsSection({
                     <div className={`absolute top-0 right-0 w-12 h-12 ${isDarkMode ? 'bg-blue-500/30 dark:bg-blue-400/30' : 'bg-blue-500/10 dark:bg-blue-400/10'} rounded-full -translate-y-4 translate-x-4`}></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></div>
                         <div className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">Timeline</div>
                       </div>
                       <div className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-0.5">
@@ -498,10 +497,8 @@ export function ChartsSection({
                   {/* Total Violations Card - Alert Badge Design */}
                   <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-red-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
                     <div className={`absolute top-0 right-0 w-10 h-10 ${isDarkMode ? 'bg-red-500/30 dark:bg-red-400/30' : 'bg-red-500/10 dark:bg-red-400/10'} rounded-full -translate-y-3 translate-x-3`}></div>
-                    <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
-                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></div>
                         <div className="text-xs font-medium text-red-700 dark:text-red-300 uppercase tracking-wide">Critical</div>
                       </div>
                       <div className="text-xl font-bold text-red-900 dark:text-red-100 mb-0.5">
@@ -520,10 +517,8 @@ export function ChartsSection({
                   {/* Average per Year Card - Analytics Design */}
                   <div className={`relative overflow-hidden ${isDarkMode ? 'bg-black border border-gray-600' : 'bg-white border border-green-200'} p-2 rounded-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
                     <div className={`absolute top-0 right-0 w-12 h-12 ${isDarkMode ? 'bg-green-500/30 dark:bg-green-400/30' : 'bg-green-500/10 dark:bg-green-400/10'} rounded-full -translate-y-4 translate-x-4`}></div>
-                    <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-green-400 rounded-full animate-bounce"></div>
                     <div className="relative z-10">
                       <div className="flex items-center mb-0.5">
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></div>
                         <div className="text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">Analytics</div>
                       </div>
                       <div className="text-xl font-bold text-green-900 dark:text-green-100 mb-0.5">
