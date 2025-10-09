@@ -3,6 +3,7 @@ import { BarChart } from './BarChart';
 import { PieChart } from './PieChart';
 import { ViolationRanking } from './ViolationRanking';
 import { ViolationCombinations } from './ViolationCombinations';
+import { useTheme } from '@/components/theme/theme-provider';
 
 export function ChartsSection({ 
   displayData, 
@@ -18,43 +19,9 @@ export function ChartsSection({
   handleNextPage,
   getCombinationRecommendation
 }) {
-  // Check if dark mode is active
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return document.documentElement.classList.contains('dark') || 
-             window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const checkDarkMode = () => {
-      const darkMode = document.documentElement.classList.contains('dark') || 
-                       window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(darkMode);
-    };
-
-    // Check initially
-    checkDarkMode();
-
-    // Listen for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', checkDarkMode);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener('change', checkDarkMode);
-    };
-  }, []);
+  // Use the theme context
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
@@ -204,6 +171,13 @@ export function ChartsSection({
                   
                   return (
                     <g>
+                      {/* Background rectangle */}
+                      <rect 
+                        width="100%" 
+                        height="100%" 
+                        fill={isDarkMode ? "#000000" : "#ffffff"}
+                        className="transition-colors duration-300"
+                      />
                       {/* Background gradient */}
                       <defs>
                         <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">

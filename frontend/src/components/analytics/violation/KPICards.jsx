@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTheme } from '@/components/theme/theme-provider';
 
 // Animated Number Component
 const AnimatedNumber = ({ value, duration = 2000, className = "" }) => {
@@ -96,47 +97,9 @@ const AnimatedProgressBar = ({ percentage, color = "bg-blue-500", delay = 0 }) =
 };
 
 export function KPICards({ displayData, loading, totalViolations, totalTrafficViolators, topOfficer, mostCommonViolation }) {
-  // Check if dark mode is active
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const hasDarkClass = document.documentElement.classList.contains('dark');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      console.log('Initial dark mode check:', { hasDarkClass, prefersDark, result: hasDarkClass || prefersDark });
-      return hasDarkClass || prefersDark;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const checkDarkMode = () => {
-      const hasDarkClass = document.documentElement.classList.contains('dark');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const darkMode = hasDarkClass || prefersDark;
-      console.log('Dark mode check:', { hasDarkClass, prefersDark, result: darkMode });
-      setIsDarkMode(darkMode);
-    };
-
-    // Check initially
-    checkDarkMode();
-
-    // Listen for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', checkDarkMode);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener('change', checkDarkMode);
-    };
-  }, []);
+  // Use the theme context
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
