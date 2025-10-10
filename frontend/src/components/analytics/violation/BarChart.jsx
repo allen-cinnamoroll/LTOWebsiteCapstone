@@ -95,7 +95,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
             </svg>
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Performance Analytics</p>
           </div>
         </div>
@@ -122,7 +122,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">{title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Performance Rankings</p>
           </div>
         </div>

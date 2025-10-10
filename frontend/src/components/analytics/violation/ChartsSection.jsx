@@ -76,7 +76,7 @@ export function ChartsSection({
                     </svg>
                   </div>
                   <div>
-                    <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white">
                       Violation Trends Analysis
                 </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -595,9 +595,9 @@ export function ChartsSection({
       </div>
 
       {/* Pie Chart and Apprehending Officers Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-5">
          {/* Left Side - Violation Types Pie Chart */}
-         <div className="lg:col-span-1 flex">
+         <div className="lg:col-span-2 flex">
            <div className="w-full" style={{ minHeight: '400px' }}>
           <PieChart
             data={violationsByTypeData}
@@ -608,7 +608,7 @@ export function ChartsSection({
       </div>
 
          {/* Right Side - Apprehending Officers Bar Chart */}
-         <div className="lg:col-span-1 flex">
+         <div className="lg:col-span-3 flex">
            <div className="w-full" style={{ minHeight: '400px' }}>
           <BarChart
             data={displayData?.topOfficers || []}

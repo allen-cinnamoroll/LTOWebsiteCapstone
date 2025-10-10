@@ -117,12 +117,9 @@ export function PieChart({ data, title, loading }) {
 
   return (
     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 relative overflow-hidden h-full flex flex-col" style={{ minHeight: '400px' }}>
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full -translate-y-16 translate-x-16"></div>
-      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-green-300/10 to-teal-400/10 rounded-full translate-y-12 -translate-x-12"></div>
       
       <div className="relative z-10">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-6 flex items-center">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md mr-3">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -131,7 +128,7 @@ export function PieChart({ data, title, loading }) {
           {title}
         </h3>
       
-      <div className="flex flex-col lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-6">
+      <div className="flex flex-col lg:flex-row items-start space-y-5 lg:space-y-0 lg:space-x-1">
         {/* Pie Chart SVG */}
         <div className="flex-shrink-0">
           <svg width="220" height="220" viewBox="0 0 200 200" className="mx-auto drop-shadow-lg">
@@ -205,7 +202,7 @@ export function PieChart({ data, title, loading }) {
             
             <text
               x="100"
-              y="95"
+              y="93"
               textAnchor="middle"
               className="text-sm font-semibold text-gray-700 dark:text-gray-300"
             >
@@ -213,7 +210,7 @@ export function PieChart({ data, title, loading }) {
             </text>
             <text
               x="100"
-              y="110"
+              y="118"
               textAnchor="middle"
               className="text-xl font-black text-gray-900 dark:text-white"
             >
@@ -223,11 +220,11 @@ export function PieChart({ data, title, loading }) {
         </div>
 
         {/* Enhanced Legend */}
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-3 min-w-0">
           {segments.map((segment, index) => (
             <div 
               key={index} 
-              className={`flex items-center justify-between p-4 border-2 rounded-xl transition-all duration-300 cursor-pointer ${
+              className={`flex items-center justify-between py-1 px-2 border-2 rounded-lg transition-all duration-300 cursor-pointer ${
                 hoveredSegment === index
                   ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-lg transform scale-105'
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -235,32 +232,32 @@ export function PieChart({ data, title, loading }) {
               onMouseEnter={() => setHoveredSegment(index)}
               onMouseLeave={() => setHoveredSegment(null)}
             >
-              <div className="flex items-center space-x-4">
-                <div className="relative">
+              <div className="flex items-center space-x-1 min-w-0 flex-1">
+                <div className="relative flex-shrink-0">
                   <div
-                    className="w-6 h-6 rounded-full shadow-md"
+                    className="w-4 h-4 rounded-full shadow-md"
                     style={{ backgroundColor: getColor(index) }}
                   ></div>
                   {hoveredSegment === index && (
-                    <div className="absolute inset-0 w-6 h-6 rounded-full animate-ping opacity-75"
+                    <div className="absolute inset-0 w-4 h-4 rounded-full animate-ping opacity-75"
                          style={{ backgroundColor: getColor(index) }}></div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-gray-900 dark:text-white break-words">
                     {segment._id || 'Unknown'}
                   </p>
-                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 break-words" style={{ fontSize: '0.65rem' }}>
                     {segment.percentage.toFixed(1)}% of total
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-lg font-black text-gray-900 dark:text-white">
+                <div className="text-right flex-shrink-0 ml-1">
+                <div className="text-xs font-black text-gray-900 dark:text-white">
                   {segment.count?.toLocaleString() || 0}
                 </div>
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  violations
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400" style={{ fontSize: '0.65rem' }}>
+                  violation{segment.count !== 1 ? 's' : ''}
                 </div>
               </div>
             </div>

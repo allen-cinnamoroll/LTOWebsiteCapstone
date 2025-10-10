@@ -80,7 +80,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 Violation Analysis
       </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400">
