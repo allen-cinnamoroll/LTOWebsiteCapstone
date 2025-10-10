@@ -87,7 +87,7 @@ const AnimatedProgressBar = ({ percentage, color = "bg-blue-500", delay = 0 }) =
   }, [isVisible, percentage, delay]);
 
   return (
-    <div ref={ref} className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1 overflow-hidden">
+    <div ref={ref} className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-0.5 overflow-hidden">
       <div 
         className={`h-full ${color} rounded-full shadow-sm transition-all duration-1000 ease-out`}
         style={{ width: `${width}%` }}

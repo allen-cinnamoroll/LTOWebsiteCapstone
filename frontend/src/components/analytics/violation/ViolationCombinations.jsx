@@ -177,7 +177,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                         {/* Severity */}
                         <div className="col-span-2">
-                           <div className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-full text-xs font-bold ${getSeverityColor(count)} transform hover:scale-105 transition-all duration-200`}>
+                           <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-bold ${getSeverityColor(count)} transform hover:scale-105 transition-all duration-200`}>
                             {getSeverityIcon(count)}
                             <span>
                               {count >= 50 ? 'High' : count >= 20 ? 'Medium' : 'Low'}
@@ -257,7 +257,7 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                         {/* Status */}
                         <div className="col-span-2">
-                          <div className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${
+                          <div className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                             frequency >= 30 ? 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400' :
                             frequency >= 15 ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400' :
                             'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400'
