@@ -6,7 +6,8 @@ import {
   ViolationRanking, 
   ViolationCombinations, 
   LineChartModal,
-  MonthlyViolationMonitoring
+  MonthlyViolationMonitoring,
+  MonthlyViolationMonitoringModal
 } from './index';
 import { Shield, Calendar, BarChart3, AlertTriangle, Scale, FileText, Car, Badge, FileCheck } from 'lucide-react';
 
@@ -354,62 +355,13 @@ export function ViolationAnalytics() {
       />
 
       {/* Monthly Violation Monitoring Modal */}
-      {isMonthlyMonitoringOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Monthly Violation Monitoring
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Track violations by month and analyze trends
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsMonthlyMonitoringOpen(false)}
-                className="w-10 h-10 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
-              >
-                <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="text-center py-12">
-                <div className="w-20 h-20 mx-auto mb-6 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                  <BarChart3 className="w-10 h-10 text-blue-600 dark:text-blue-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  Monthly Monitoring Dashboard
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  This feature will display monthly violation trends, patterns, and analytics.
-                </p>
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={() => setIsMonthlyMonitoringOpen(false)}
-                    className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    Close
-                  </button>
-                  <button
-                    onClick={() => setIsMonthlyMonitoringOpen(false)}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300"
-                  >
-                    Coming Soon
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {isMonthlyMonitoringOpen && <MonthlyViolationMonitoringModal
+        isOpen={isMonthlyMonitoringOpen}
+        onClose={() => setIsMonthlyMonitoringOpen(false)}
+        analyticsData={analyticsData}
+        loading={loading}
+        selectedYear={selectedYear}
+      />}
 
     </div>
   );
