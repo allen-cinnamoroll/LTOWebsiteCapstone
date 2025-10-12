@@ -6,6 +6,7 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
   const [internalSelectedYear, setInternalSelectedYear] = useState(selectedYear || 'All');
+  const [chartType, setChartType] = useState('line'); // 'line' or 'bar'
   const chartRef = useRef(null);
 
   // Update internal year when prop changes
@@ -108,8 +109,31 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
             </div>
           </div>
           
-          {/* Year Selector Dropdown and Close Button */}
+          {/* Chart Type Selector, Year Selector and Close Button */}
           <div className="flex items-center space-x-3">
+            {/* Chart Type Toggle */}
+            <div className="relative">
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                Chart Type
+              </label>
+              <select
+                value={chartType}
+                onChange={(e) => setChartType(e.target.value)}
+                className="px-3 py-2 pr-8 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-300 dark:hover:border-blue-500 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                style={{ minWidth: '110px' }}
+              >
+                <option value="line">📈 Line Chart</option>
+                <option value="bar">📊 Bar Chart</option>
+              </select>
+              {/* Custom dropdown arrow */}
+              <div className="absolute right-2 top-8 pointer-events-none">
+                <svg className="w-3 h-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Year Selector */}
             <div className="relative">
               <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">
                 Year
@@ -143,10 +167,10 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 overflow-y-auto max-h-[calc(80vh-100px)]">
+         {/* Body */}
+        <div className="p-4 overflow-hidden">
           {loading ? (
-            <div className="flex items-center justify-center h-96">
+            <div className="flex items-center justify-center h-64">
               <div className="relative">
                 <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -154,17 +178,17 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                 </div>
               </div>
             </div>
-          ) : monthlyData.length > 0 && totalViolations > 0 ? (
-            <div className="space-y-6">
+           ) : monthlyData.length > 0 && totalViolations > 0 ? (
+            <div>
               {/* Chart Container */}
-              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-xl">
-                <div className="flex gap-6">
+              <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-lg">
+                <div className="flex gap-4">
                   {/* Line Chart */}
-                  <div className="flex-1 relative bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+                  <div className="flex-1 relative bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <svg
                       ref={chartRef}
                       width="100%"
-                      height="400"
+                      height="350"
                       className="relative"
                       onMouseLeave={() => {
                         setShowTooltip(false);
@@ -172,9 +196,9 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                       }}
                     >
                       {(() => {
-                        const width = 800;
-                        const height = 400;
-                        const padding = 80;
+                        const width = 900;
+                        const height = 350;
+                        const padding = 60;
                         const chartWidth = width - (padding * 2);
                         const chartHeight = height - (padding * 2);
 
@@ -237,6 +261,11 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                                 <stop offset="75%" stopColor="#06b6d4"/>
                                 <stop offset="100%" stopColor="#10b981"/>
                               </linearGradient>
+                              <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#8b5cf6"/>
+                                <stop offset="70%" stopColor="#a855f7"/>
+                                <stop offset="100%" stopColor="#ec4899"/>
+                              </linearGradient>
                               <filter id="monthlyGlow">
                                 <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                                 <feMerge>
@@ -283,12 +312,13 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                                     opacity="0.3"
                                   />
                                   <text
-                                    x={padding - 10}
-                                    y={y + 5}
+                                    x={padding - 8}
+                                    y={y + 4}
                                     textAnchor="end"
                                     fontSize="12"
-                                    fill="#9ca3af"
+                                    fill="#374151"
                                     fontFamily="system-ui"
+                                    fontWeight="600"
                                   >
                                     {value}
                                   </text>
@@ -311,11 +341,12 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                                   />
                                   <text
                                     x={x}
-                                    y={padding + chartHeight + 20}
+                                    y={padding + chartHeight + 18}
                                     textAnchor="middle"
-                                    fontSize="11"
-                                    fill="#9ca3af"
+                                    fontSize="12"
+                                    fill="#374151"
                                     fontFamily="system-ui"
+                                    fontWeight="600"
                                   >
                                     {item.month}
                                   </text>
@@ -323,82 +354,163 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                               );
                             })}
 
-                            {/* Area fill */}
-                            <path
-                              d={areaPath}
-                              fill="url(#monthlyAreaGradient)"
-                            />
+                            {chartType === 'line' ? (
+                              <>
+                                {/* Area fill for line chart */}
+                                <path
+                                  d={areaPath}
+                                  fill="url(#monthlyAreaGradient)"
+                                />
 
-                            {/* Main line */}
-                            <path
-                              d={linePath}
-                              fill="none"
-                              stroke="url(#monthlyLineGradient)"
-                              strokeWidth={4}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              filter="url(#monthlyGlow)"
-                            />
+                                {/* Main line */}
+                                <path
+                                  d={linePath}
+                                  fill="none"
+                                  stroke="url(#monthlyLineGradient)"
+                                  strokeWidth={4}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  filter="url(#monthlyGlow)"
+                                />
 
-                            {/* Data points */}
-                            {points.map((point, index) => {
-                              const isHovered = hoveredPoint === index;
-                              return (
-                                <g key={`point-${index}`}>
-                                  {/* Hover area */}
-                                  <circle
-                                    cx={point.x}
-                                    cy={point.y}
-                                    r={20}
-                                    fill="transparent"
-                                    onMouseEnter={(e) => {
-                                      setHoveredPoint(index);
-                                      setShowTooltip(true);
-                                      const rect = chartRef.current.getBoundingClientRect();
-                                      const x = e.clientX - rect.left;
-                                      const y = e.clientY - rect.top + 30;
-                                      setTooltipPosition({ x, y });
-                                    }}
-                                    onMouseMove={(e) => {
-                                      const rect = chartRef.current.getBoundingClientRect();
-                                      const x = e.clientX - rect.left;
-                                      const y = e.clientY - rect.top + 30;
-                                      setTooltipPosition({ x, y });
-                                    }}
-                                    style={{ cursor: 'pointer' }}
-                                  />
+                                {/* Data points */}
+                                {points.map((point, index) => {
+                                  const isHovered = hoveredPoint === index;
+                                  return (
+                                    <g key={`point-${index}`}>
+                                      {/* Hover area */}
+                                      <circle
+                                        cx={point.x}
+                                        cy={point.y}
+                                        r={20}
+                                        fill="transparent"
+                                        onMouseEnter={(e) => {
+                                          setHoveredPoint(index);
+                                          setShowTooltip(true);
+                                          const rect = chartRef.current.getBoundingClientRect();
+                                          const x = e.clientX - rect.left;
+                                          const y = e.clientY - rect.top + 30;
+                                          setTooltipPosition({ x, y });
+                                        }}
+                                        onMouseMove={(e) => {
+                                          const rect = chartRef.current.getBoundingClientRect();
+                                          const x = e.clientX - rect.left;
+                                          const y = e.clientY - rect.top + 30;
+                                          setTooltipPosition({ x, y });
+                                        }}
+                                        style={{ cursor: 'pointer' }}
+                                      />
 
-                                  {/* Main point */}
-                                  <circle
-                                    cx={point.x}
-                                    cy={point.y}
-                                    r={isHovered ? 7 : 5}
-                                    fill={point.color}
-                                    stroke="white"
-                                    strokeWidth={2}
-                                  />
+                                      {/* Main point */}
+                                      <circle
+                                        cx={point.x}
+                                        cy={point.y}
+                                        r={isHovered ? 7 : 5}
+                                        fill={point.color}
+                                        stroke="white"
+                                        strokeWidth={2}
+                                      />
 
-                                  {/* Inner dot */}
-                                  <circle
-                                    cx={point.x}
-                                    cy={point.y}
-                                    r={isHovered ? 3 : 2}
-                                    fill="white"
-                                  />
-                                </g>
-                              );
-                            })}
+                                      {/* Inner dot */}
+                                      <circle
+                                        cx={point.x}
+                                        cy={point.y}
+                                        r={isHovered ? 3 : 2}
+                                        fill="white"
+                                      />
+                                    </g>
+                                  );
+                                })}
+                              </>
+                            ) : (
+                              /* Bar Chart */
+                              points.map((point, index) => {
+                                const totalBars = monthlyData.length;
+                                const availableWidth = chartWidth - (totalBars - 1) * 8; // 8px gap between bars
+                                const barWidth = availableWidth / totalBars;
+                                const barHeight = point.count / adjustedCountRange * chartHeight;
+                                const barX = padding + (index * (barWidth + 8));
+                                const barY = padding + chartHeight - barHeight;
+                                const isHovered = hoveredPoint === index;
+
+                                return (
+                                  <g key={`bar-${index}`}>
+                                    {/* Hover area */}
+                                    <rect
+                                      x={barX - 5}
+                                      y={padding}
+                                      width={barWidth + 10}
+                                      height={chartHeight}
+                                      fill="transparent"
+                                      onMouseEnter={(e) => {
+                                        setHoveredPoint(index);
+                                        setShowTooltip(true);
+                                        const rect = chartRef.current.getBoundingClientRect();
+                                        const x = e.clientX - rect.left;
+                                        const y = e.clientY - rect.top + 30;
+                                        setTooltipPosition({ x, y });
+                                      }}
+                                      onMouseMove={(e) => {
+                                        const rect = chartRef.current.getBoundingClientRect();
+                                        const x = e.clientX - rect.left;
+                                        const y = e.clientY - rect.top + 30;
+                                        setTooltipPosition({ x, y });
+                                      }}
+                                      style={{ cursor: 'pointer' }}
+                                    />
+
+                                    {/* Main Bar with gradient */}
+                                    <rect
+                                      x={barX}
+                                      y={barY}
+                                      width={barWidth}
+                                      height={barHeight}
+                                      fill={isHovered ? "#8b5cf6" : "url(#barGradient)"}
+                                      stroke="none"
+                                      rx={4}
+                                      ry={4}
+                                      style={{
+                                        filter: isHovered ? 'drop-shadow(0 6px 12px rgba(139, 92, 246, 0.4))' : 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2))',
+                                        transition: 'all 0.3s ease'
+                                      }}
+                                    />
+
+                                    {/* Top highlight for 3D effect */}
+                                    <rect
+                                      x={barX + 1}
+                                      y={barY + 1}
+                                      width={barWidth - 2}
+                                      height={Math.max(8, barHeight * 0.06)}
+                                      fill="rgba(255, 255, 255, 0.4)"
+                                      rx={3}
+                                      ry={3}
+                                    />
+
+                                    {/* Bottom shadow */}
+                                    <rect
+                                      x={barX + 1}
+                                      y={barY + barHeight - 3}
+                                      width={barWidth - 2}
+                                      height={2}
+                                      fill="rgba(0, 0, 0, 0.1)"
+                                      rx={1}
+                                      ry={1}
+                                    />
+                                  </g>
+                                );
+                              })
+                            )}
 
                             {/* Y-axis label */}
                             <text
-                              x={padding - 50}
+                              x={padding - 40}
                               y={height / 2}
                               textAnchor="middle"
-                              transform={`rotate(-90, ${padding - 50}, ${height / 2})`}
+                              transform={`rotate(-90, ${padding - 40}, ${height / 2})`}
                               fontSize="13"
                               fill="#6b7280"
                               fontFamily="system-ui"
-                              fontWeight="600"
+                              fontWeight="500"
                             >
                               Number of Violations
                             </text>
@@ -406,12 +518,12 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                             {/* X-axis label */}
                             <text
                               x={width / 2}
-                              y={height - 20}
+                              y={height - 15}
                               textAnchor="middle"
                               fontSize="13"
                               fill="#6b7280"
                               fontFamily="system-ui"
-                              fontWeight="600"
+                              fontWeight="500"
                             >
                               Month
                             </text>
@@ -458,59 +570,59 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
                   </div>
 
                   {/* Statistics Panel */}
-                  <div className="w-64 space-y-3">
+                  <div className="w-52 space-y-2">
                     {/* Total Violations Card */}
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-2 border-blue-200 dark:border-blue-700 rounded-xl p-4 shadow-md hover:shadow-lg transition-all">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">Total</span>
-                        <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">Total</span>
+                        <TrendingUp className="w-3 h-3 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                      <div className="text-xl font-bold text-blue-900 dark:text-blue-100">
                         {totalViolations.toLocaleString()}
                       </div>
-                      <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                      <div className="text-[10px] text-blue-600 dark:text-blue-400">
                         Violations this period
                       </div>
                     </div>
 
                     {/* Average Card */}
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border-2 border-purple-200 dark:border-purple-700 rounded-xl p-4 shadow-md hover:shadow-lg transition-all">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">Average</span>
-                        <BarChart3 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border-2 border-purple-200 dark:border-purple-700 rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">Average</span>
+                        <BarChart3 className="w-3 h-3 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                      <div className="text-xl font-bold text-purple-900 dark:text-purple-100">
                         {avgViolations.toLocaleString()}
                       </div>
-                      <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                      <div className="text-[10px] text-purple-600 dark:text-purple-400">
                         Per month
                       </div>
                     </div>
 
                     {/* Peak Month Card */}
-                    <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-2 border-red-200 dark:border-red-700 rounded-xl p-4 shadow-md hover:shadow-lg transition-all">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">Peak Month</span>
-                        <TrendingUp className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-2 border-red-200 dark:border-red-700 rounded-lg p-2.5 shadow-md hover:shadow-lg transition-all">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">Peak Month</span>
+                        <TrendingUp className="w-3 h-3 text-red-600 dark:text-red-400" />
                       </div>
-                      <div className="text-2xl font-bold text-red-900 dark:text-red-100">
+                      <div className="text-xl font-bold text-red-900 dark:text-red-100">
                         {peakMonth.month}
                       </div>
-                      <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                      <div className="text-[10px] text-red-600 dark:text-red-400">
                         {peakMonth.count.toLocaleString()} violations
                       </div>
                     </div>
 
                     {/* Info Card */}
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-2 border-amber-200 dark:border-amber-700 rounded-xl p-4 shadow-md">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-2 border-amber-200 dark:border-amber-700 rounded-lg p-2 shadow-md">
+                      <div className="flex items-center space-x-1 mb-1">
+                        <svg className="w-3 h-3 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Note</span>
+                        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Note</span>
                       </div>
-                      <div className="text-xs text-amber-700 dark:text-amber-300">
-                        Monthly data is estimated based on yearly trends. For accurate monthly statistics, please ensure violations have proper date information.
+                      <div className="text-[10px] text-amber-700 dark:text-amber-300 leading-snug">
+                        Monthly data is estimated based on yearly trends.
                       </div>
                     </div>
                   </div>
@@ -518,15 +630,15 @@ export function MonthlyViolationMonitoringModal({ isOpen, onClose, analyticsData
               </div>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <Calendar className="w-10 h-10 text-gray-400" />
+            <div className="text-center py-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                <Calendar className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 No Monthly Data Available
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                There is no violation data available for the selected period. Please try selecting a different year or ensure violations have proper date information.
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                There is no violation data available for the selected period. Please try selecting a different year.
               </p>
               <button
                 onClick={onClose}
