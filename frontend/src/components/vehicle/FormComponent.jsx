@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LoaderCircle, CalendarIcon, Search, X } from "lucide-react";
+import { LoaderCircle, CalendarIcon, Search, X, Edit3 } from "lucide-react";
 import { format } from "date-fns";
 import {
   Popover,
@@ -34,7 +34,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import AddDriverModal from "@/components/driver/AddDriverModal";
 
-const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }) => {
+const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, isEditMode = false, readOnlyFields = [], prePopulatedOwner = "" }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useAuth();
@@ -44,12 +44,20 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showNoResults, setShowNoResults] = useState(false);
   const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
+  const [isOwnerEditable, setIsOwnerEditable] = useState(false);
   const searchInputRef = useRef(null);
+
+  // Set pre-populated owner name in edit mode
+  useEffect(() => {
+    if (isEditMode && prePopulatedOwner) {
+      setSearchTerm(prePopulatedOwner);
+    }
+  }, [isEditMode, prePopulatedOwner]);
 
   // Search drivers when search term changes
   useEffect(() => {
     const searchDrivers = async () => {
-      if (searchTerm.length >= 2) {
+      if (searchTerm.length >= 2 && isOwnerEditable) {
         setIsSearching(true);
         setShowNoResults(false);
         try {
@@ -85,7 +93,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
 
     const timeoutId = setTimeout(searchDrivers, 300); // Debounce search
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, token]);
+  }, [searchTerm, token, isOwnerEditable]);
 
   // Auto-scroll to search section when dropdown appears
   useEffect(() => {
@@ -108,6 +116,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
     setSearchTerm(driver.ownerRepresentativeName);
     setSearchResults([]);
     setShowNoResults(false); // Hide "Add new driver" option when driver is selected
+    setIsOwnerEditable(false); // Return to read-only state after selection
   };
 
   const handleClearDriver = () => {
@@ -116,6 +125,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
     setSearchTerm("");
     setSearchResults([]);
     setShowNoResults(false);
+    setIsOwnerEditable(false);
   };
 
   const handleAddDriver = () => {
@@ -141,6 +151,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
     setSearchResults([]);
     setShowNoResults(false); // Hide the "Add new driver" option
     setAddDriverModalOpen(false);
+    setIsOwnerEditable(false); // Return to read-only state after selection
     
     toast.success("Driver added successfully", {
       description: "The driver has been selected for this vehicle."
@@ -193,7 +204,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
-                          "text-black dark:text-white",
+                          "text-black dark:text-white text-sm",
                           form.formState.errors.plateNo && "border-red-400"
                         )}
                       />
@@ -219,13 +230,17 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <Input
                         {...field}
                         type="text"
+                        readOnly={isEditMode && readOnlyFields.includes('fileNo')}
                         onChange={(e) => {
-                          const capitalizedValue = e.target.value.toUpperCase();
-                          field.onChange(capitalizedValue);
+                          if (!(isEditMode && readOnlyFields.includes('fileNo'))) {
+                            const capitalizedValue = e.target.value.toUpperCase();
+                            field.onChange(capitalizedValue);
+                          }
                         }}
                         className={cn(
-                          "text-black dark:text-white",
-                          form.formState.errors.fileNo && "border-red-400"
+                          "text-black dark:text-white text-sm",
+                          form.formState.errors.fileNo && "border-red-400",
+                          isEditMode && readOnlyFields.includes('fileNo') && "bg-gray-200 text-gray-600 cursor-not-allowed border-gray-300"
                         )}
                       />
                     </FormControl>
@@ -255,7 +270,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
-                          "text-black dark:text-white",
+                          "text-black dark:text-white text-sm",
                           form.formState.errors.engineNo && "border-red-400"
                         )}
                       />
@@ -291,7 +306,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
-                          "text-black dark:text-white",
+                          "text-black dark:text-white text-sm",
                           form.formState.errors.chassisNo && "border-red-400"
                         )}
                       />
@@ -322,7 +337,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
-                          "text-black dark:text-white",
+                          "text-black dark:text-white text-sm",
                           form.formState.errors.make && "border-red-400"
                         )}
                       />
@@ -353,7 +368,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
-                          "text-black dark:text-white",
+                          "text-black dark:text-white text-sm",
                           form.formState.errors.bodyType && "border-red-400"
                         )}
                       />
@@ -389,7 +404,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
-                          "text-black dark:text-white",
+                          "text-black dark:text-white text-sm",
                           form.formState.errors.color && "border-red-400"
                         )}
                       />
@@ -418,7 +433,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-black dark:text-white",
+                            "text-black dark:text-white text-sm",
                             form.formState.errors.classification && "border-red-400"
                           )}
                         >
@@ -455,7 +470,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-black dark:text-white",
+                            "text-black dark:text-white text-sm",
                             form.formState.errors.vehicleStatusType && "border-red-400"
                           )}
                         >
@@ -488,33 +503,41 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       >
                         Date of Renewal
                       </FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
+                      {isEditMode && readOnlyFields.includes('dateOfRenewal') ? (
+                        <Input
+                          value={field.value ? format(field.value, "PPP") : "Not set"}
+                          readOnly
+                          className="bg-gray-200 text-gray-600 cursor-not-allowed border-gray-300 text-sm"
+                        />
+                      ) : (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal text-black dark:text-white",
+                                "w-full pl-3 text-left font-normal text-black dark:text-white text-sm",
                                 !field.value && "text-muted-foreground",
                                 form.formState.errors.dateOfRenewal && "border-red-400"
                               )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <DatePicker
-                            fieldValue={field.value}
-                            dateValue={field.onChange}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <DatePicker
+                              fieldValue={field.value}
+                              dateValue={field.onChange}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      )}
                       <FormMessage className="text-xs text-red-400" />
                     </FormItem>
                   )}
@@ -549,14 +572,27 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                               const capitalizedValue = e.target.value.toUpperCase();
                               setSearchTerm(capitalizedValue);
                             }}
-                            className="pr-10"
+                            className={cn(
+                              "pr-10 text-sm",
+                              isEditMode && !isOwnerEditable && "bg-gray-200"
+                            )}
+                            readOnly={isEditMode && !isOwnerEditable}
                           />
                           {isSearching && (
                             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                               <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
                             </div>
                           )}
-                          {!isSearching && searchTerm && (
+                          {!isSearching && isEditMode && !isOwnerEditable && (
+                            <button
+                              type="button"
+                              onClick={() => setIsOwnerEditable(true)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-800"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </button>
+                          )}
+                          {!isSearching && searchTerm && isOwnerEditable && (
                             <button
                               type="button"
                               onClick={handleClearDriver}
@@ -569,7 +605,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       </div>
                       
                       {/* Search Results Dropdown */}
-                      {(searchResults.length > 0 || showNoResults) && (
+                      {(searchResults.length > 0 || showNoResults) && isOwnerEditable && (
                         <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
                           {searchResults.map((driver) => (
                             <div
@@ -602,7 +638,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                       )}
 
                       {/* Selected Driver Display */}
-                      {selectedDriver && (
+                      {selectedDriver && !isOwnerEditable && (
                         <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
                           <div className="flex items-center justify-between">
                             <div>
@@ -613,15 +649,26 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false }
                                 Current vehicles: {selectedDriver.plateNo || "None"}
                               </div>
                             </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleClearDriver}
-                              className="text-green-600 hover:text-green-800 h-6 w-6 p-0"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsOwnerEditable(true)}
+                                className="text-blue-600 hover:text-blue-800 h-6 w-6 p-0"
+                              >
+                                <Edit3 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleClearDriver}
+                                className="text-green-600 hover:text-green-800 h-6 w-6 p-0"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}

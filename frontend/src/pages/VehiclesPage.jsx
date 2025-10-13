@@ -8,6 +8,7 @@ import VehiclesTable from "@/components/vehicles/VehiclesTable";
 import VehicleRenewalModal from "@/components/vehicle/VehicleRenewalModal";
 import AddVehicleModal from "@/components/vehicle/AddVehicleModal";
 import VehicleDetailsModal from "@/components/vehicle/VehicleDetailsModal";
+import EditVehicleModal from "@/components/vehicle/EditVehicleModal";
 
 
 const VehiclesPage = () => {
@@ -21,7 +22,9 @@ const VehiclesPage = () => {
   const [renewalModalOpen, setRenewalModalOpen] = useState(false);
   const [addVehicleModalOpen, setAddVehicleModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [editVehicleModalOpen, setEditVehicleModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [editingVehicleId, setEditingVehicleId] = useState(null);
 
   useEffect(() => {
     fetchVehicles();
@@ -86,7 +89,8 @@ const VehiclesPage = () => {
   };
 
   const onEdit = (vehicleId) => {
-    navigate(`/vehicle/${vehicleId}/edit`);
+    setEditingVehicleId(vehicleId);
+    setEditVehicleModalOpen(true);
   };
 
   const handleRenewal = () => {
@@ -144,6 +148,14 @@ const VehiclesPage = () => {
         open={detailsModalOpen}
         onOpenChange={setDetailsModalOpen}
         vehicleData={selectedVehicle}
+      />
+
+      {/* Edit Vehicle Modal */}
+      <EditVehicleModal
+        open={editVehicleModalOpen}
+        onOpenChange={setEditVehicleModalOpen}
+        vehicleId={editingVehicleId}
+        onVehicleUpdated={handleVehicleUpdated}
       />
     </div>
   );
