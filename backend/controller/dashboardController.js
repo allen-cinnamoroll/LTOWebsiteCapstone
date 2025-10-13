@@ -1776,11 +1776,11 @@ export const getVehicleClassificationData = async (req, res) => {
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0, 23, 59, 59);
       dateFilter.dateOfRenewal = { $gte: startDate, $lte: endDate, $ne: null };
-    } else if (year) {
+    } else if (year && !month) {
       const startDate = new Date(year, 0, 1);
       const endDate = new Date(year, 11, 31, 23, 59, 59);
       dateFilter.dateOfRenewal = { $gte: startDate, $lte: endDate, $ne: null };
-    } else if (month) {
+    } else if (month && !year) {
       dateFilter = {
         $expr: {
           $and: [
@@ -1790,10 +1790,13 @@ export const getVehicleClassificationData = async (req, res) => {
         }
       };
     }
+    // If no month and no year provided, show all data (no date filter)
+    
+    console.log('Vehicle classification endpoint - Date filter:', JSON.stringify(dateFilter, null, 2));
     
     // Get vehicle classification counts with data normalization
     const classificationData = await VehicleModel.aggregate([
-      { $match: dateFilter },
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
       {
         $addFields: {
           normalizedClassification: {
@@ -1821,12 +1824,11 @@ export const getVehicleClassificationData = async (req, res) => {
           _id: 0
         }
       },
-      {
-        $match: {
-          classification: { $in: ["PRIVATE", "FOR HIRE", "GOVERNMENT"] }
-        }
-      }
+      // Remove strict classification matching to show all data
     ]);
+    
+    console.log('Vehicle classification endpoint - Raw data found:', classificationData.length);
+    console.log('Sample classification data:', classificationData.slice(0, 3));
     
     // Get total count for percentage calculation
     const totalCount = classificationData.reduce((sum, item) => sum + item.count, 0);
@@ -1837,6 +1839,8 @@ export const getVehicleClassificationData = async (req, res) => {
       count: item.count,
       percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0
     }));
+    
+    console.log('Vehicle classification endpoint - Formatted data:', formattedData);
     
     res.json({
       success: true,
