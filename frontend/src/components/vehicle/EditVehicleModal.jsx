@@ -17,11 +17,14 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { Car } from "lucide-react";
+import NoChangesModal from "./NoChangesModal";
 
 const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [vehicleData, setVehicleData] = useState({});
+  const [originalData, setOriginalData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [noChangesModalOpen, setNoChangesModalOpen] = useState(false);
   const { token } = useAuth();
   const date = formatDate(Date.now());
 
@@ -83,6 +86,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
           ownerName: data.data?.driverId?.ownerRepresentativeName || "",
         };
         setVehicleData(vData);
+        setOriginalData(vData);
       }
     } catch (error) {
       console.log(error);
@@ -94,7 +98,42 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
     }
   };
 
+  // Function to check if there are any changes
+  const hasChanges = (formData) => {
+    const currentData = {
+      plateNo: formData.plateNo,
+      engineNo: formData.engineNo,
+      chassisNo: formData.chassisNo,
+      make: formData.make,
+      bodyType: formData.bodyType,
+      color: formData.color,
+      classification: formData.classification,
+      vehicleStatusType: formData.vehicleStatusType,
+      driver: formData.driver,
+    };
+
+    const original = {
+      plateNo: originalData.plateNo,
+      engineNo: originalData.engineNo,
+      chassisNo: originalData.chassisNo,
+      make: originalData.make,
+      bodyType: originalData.bodyType,
+      color: originalData.color,
+      classification: originalData.classification,
+      vehicleStatusType: originalData.vehicleStatusType,
+      driver: originalData.driver,
+    };
+
+    return JSON.stringify(currentData) !== JSON.stringify(original);
+  };
+
   const onSubmit = async (formData) => {
+    // Check if there are any changes
+    if (!hasChanges(formData)) {
+      setNoChangesModalOpen(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const content = {
@@ -159,6 +198,17 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
     onOpenChange(isOpen);
   };
 
+  const handleNoChangesContinue = () => {
+    // If 'Yes' is clicked, close only the NoChangesModal, keep EditVehicleModal open
+    setNoChangesModalOpen(false);
+  };
+
+  const handleNoChangesCancel = () => {
+    // If 'No' is clicked, close both NoChangesModal and EditVehicleModal
+    setNoChangesModalOpen(false);
+    onOpenChange(false);
+  };
+
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -181,52 +231,62 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2">
-            <Car className="h-5 w-5" />
-            Edit Vehicle
-          </DialogTitle>
-          <DialogDescription>
-            Fill in the required fields to edit vehicle information.
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Car className="h-5 w-5" />
+              Edit Vehicle
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the required fields to edit vehicle information.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-1 py-2">
-          <FormComponent
-            form={form}
-            onSubmit={onSubmit}
-            submitting={submitting}
-            hideDateOfRenewal={false}
-            isEditMode={true}
-            readOnlyFields={['fileNo', 'dateOfRenewal']}
-            prePopulatedOwner={vehicleData.ownerName}
-          />
-        </div>
+          <div className="flex-1 overflow-y-auto px-1 py-2">
+            <FormComponent
+              form={form}
+              onSubmit={onSubmit}
+              submitting={submitting}
+              hideDateOfRenewal={false}
+              isEditMode={true}
+              readOnlyFields={['fileNo', 'dateOfRenewal']}
+              prePopulatedOwner={vehicleData.ownerName}
+            />
+          </div>
 
-        <DialogFooter className="flex-shrink-0 flex justify-start gap-3 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={submitting}
-            className="min-w-[100px]"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="vehicle-form"
-            disabled={submitting}
-            className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-          >
-            {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-            {submitting ? "Updating..." : "Update Vehicle"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="flex-shrink-0 flex justify-start gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={submitting}
+              className="min-w-[100px]"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="vehicle-form"
+              disabled={submitting}
+              className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            >
+              {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
+              {submitting ? "Updating..." : "Update Vehicle"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* No Changes Modal */}
+      <NoChangesModal
+        open={noChangesModalOpen}
+        onOpenChange={setNoChangesModalOpen}
+        onContinue={handleNoChangesContinue}
+        onCancel={handleNoChangesCancel}
+      />
+    </>
   );
 };
 

@@ -428,7 +428,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger
@@ -466,7 +466,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                     >
                       Vehicle Status Type
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger
                           className={cn(
