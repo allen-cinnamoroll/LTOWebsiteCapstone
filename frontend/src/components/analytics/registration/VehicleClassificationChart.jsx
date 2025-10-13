@@ -101,22 +101,24 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
 
   // Format data for Recharts with strict data normalization
   const formatChartData = (data) => {
+    console.log('formatChartData - Input data:', data);
     // Normalize the data and filter out invalid entries
     const normalizedData = {};
     
     data.forEach((item) => {
+      console.log('Processing item:', item);
       // Skip any "FOR HRE" entries completely (case-insensitive)
       if (item.classification && item.classification.toUpperCase() === "FOR HRE") {
         return; // Skip this entry entirely
       }
       
-      // Only include valid classifications
+      // Only include valid classifications (case-insensitive)
       const validClassifications = ["PRIVATE", "FOR HIRE", "GOVERNMENT"];
-      if (!validClassifications.includes(item.classification)) {
+      if (!validClassifications.includes(item.classification.toUpperCase())) {
         return; // Skip invalid classifications
       }
       
-      const normalizedName = item.classification;
+      const normalizedName = item.classification.toUpperCase();
       
       if (normalizedName in normalizedData) {
         normalizedData[normalizedName].count += item.count;
@@ -131,11 +133,14 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
     // Convert back to array and recalculate percentages
     const totalCount = Object.values(normalizedData).reduce((sum, item) => sum + item.count, 0);
     
-    return Object.values(normalizedData).map((item) => ({
+    const result = Object.values(normalizedData).map((item) => ({
       name: item.classification,
       value: item.count,
       percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0
     }));
+    
+    console.log('formatChartData - Final result:', result);
+    return result;
   };
 
   // Fixed appealing colors for the pie chart - professional and eye-friendly
