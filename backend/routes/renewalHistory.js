@@ -8,52 +8,7 @@ import {
   bulkCreateRenewalHistory
 } from "../controller/renewalHistoryController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { validateRequest } from "../middleware/validator.js";
-
 const router = express.Router();
-
-// Validation schemas
-const createRenewalHistorySchema = {
-  body: {
-    vehicleId: {
-      type: "string",
-      required: true,
-      message: "Vehicle ID is required"
-    },
-    renewalDate: {
-      type: "string",
-      required: true,
-      message: "Renewal date is required"
-    },
-    notes: {
-      type: "string",
-      required: false,
-      maxLength: 500,
-      message: "Notes cannot exceed 500 characters"
-    }
-  }
-};
-
-const updateRenewalHistorySchema = {
-  body: {
-    notes: {
-      type: "string",
-      required: false,
-      maxLength: 500,
-      message: "Notes cannot exceed 500 characters"
-    }
-  }
-};
-
-const bulkCreateSchema = {
-  body: {
-    vehicleIds: {
-      type: "array",
-      required: true,
-      message: "Vehicle IDs array is required"
-    }
-  }
-};
 
 // Apply authentication middleware to all routes
 router.use(authenticate);
@@ -77,14 +32,14 @@ router.get("/vehicle/:vehicleId/statistics", getRenewalStatistics);
  * @desc Create a new renewal history record
  * @access Private
  */
-router.post("/", validateRequest(createRenewalHistorySchema), createRenewalHistory);
+router.post("/", express.json(), createRenewalHistory);
 
 /**
  * @route PUT /api/renewal-history/:id
  * @desc Update a renewal history record
  * @access Private
  */
-router.put("/:id", validateRequest(updateRenewalHistorySchema), updateRenewalHistory);
+router.put("/:id", express.json(), updateRenewalHistory);
 
 /**
  * @route DELETE /api/renewal-history/:id
@@ -98,6 +53,6 @@ router.delete("/:id", deleteRenewalHistory);
  * @desc Bulk create renewal history records (for migration)
  * @access Private
  */
-router.post("/bulk-create", validateRequest(bulkCreateSchema), bulkCreateRenewalHistory);
+router.post("/bulk-create", express.json(), bulkCreateRenewalHistory);
 
 export default router;

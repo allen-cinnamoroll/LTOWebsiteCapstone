@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import VehicleModel from "../model/VehicleModel.js";
 import RenewalHistoryModel from "../model/RenewalHistoryModel.js";
 import { createRenewalStatusRecord } from "../util/renewalStatusCalculator.js";
-import { logger } from "../util/logger.js";
+// import { logger } from "../util/logger.js";
 
 // Database connection
 const connectDB = async () => {
@@ -85,11 +85,11 @@ const migrateRenewalHistory = async () => {
       });
     }
     
-    logger.info(`Renewal history migration completed: ${successCount} created, ${skipCount} skipped, ${errorCount} errors`);
+    console.log(`Renewal history migration completed: ${successCount} created, ${skipCount} skipped, ${errorCount} errors`);
     
   } catch (error) {
     console.error("Migration failed:", error);
-    logger.error("Renewal history migration failed:", error);
+    console.error("Renewal history migration failed:", error);
     process.exit(1);
   }
 };
