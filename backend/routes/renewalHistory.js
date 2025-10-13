@@ -7,7 +7,7 @@ import {
   deleteRenewalHistory,
   bulkCreateRenewalHistory
 } from "../controller/renewalHistoryController.js";
-import { authenticateToken } from "../middleware/authMiddleware.js";
+import { authenticate } from "../middleware/authMiddleware.js";
 import { validateRequest } from "../middleware/validator.js";
 
 const router = express.Router();
@@ -56,7 +56,7 @@ const bulkCreateSchema = {
 };
 
 // Apply authentication middleware to all routes
-router.use(authenticateToken);
+router.use(authenticate);
 
 /**
  * @route GET /api/renewal-history/vehicle/:vehicleId

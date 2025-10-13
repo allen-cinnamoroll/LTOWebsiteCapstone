@@ -1,7 +1,7 @@
 import RenewalHistoryModel from "../model/RenewalHistoryModel.js";
 import VehicleModel from "../model/VehicleModel.js";
 import { createRenewalStatusRecord, validateRenewalData } from "../util/renewalStatusCalculator.js";
-import { logger } from "../util/logger.js";
+// import { logger } from "../util/logger.js";
 
 /**
  * Get renewal history for a specific vehicle
@@ -65,7 +65,7 @@ export const getVehicleRenewalHistory = async (req, res) => {
     const hasNextPage = pageNum < totalPages;
     const hasPrevPage = pageNum > 1;
 
-    logger.info(`Retrieved renewal history for vehicle ${vehicleId}: ${history.length} records`);
+    console.log(`Retrieved renewal history for vehicle ${vehicleId}: ${history.length} records`);
 
     res.json({
       success: true,
@@ -83,7 +83,7 @@ export const getVehicleRenewalHistory = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Error fetching vehicle renewal history:", error);
+    console.error("Error fetching vehicle renewal history:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error while fetching renewal history",
@@ -162,7 +162,7 @@ export const createRenewalHistory = async (req, res) => {
     // Populate the record for response
     await renewalRecord.populate('processedBy', 'fullname email');
 
-    logger.info(`Created renewal history record for vehicle ${vehicleId}: ${renewalStatusData.status}`);
+    console.log(`Created renewal history record for vehicle ${vehicleId}: ${renewalStatusData.status}`);
 
     res.status(201).json({
       success: true,
@@ -171,7 +171,7 @@ export const createRenewalHistory = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Error creating renewal history:", error);
+    console.error("Error creating renewal history:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error while creating renewal history",
@@ -224,7 +224,7 @@ export const getRenewalStatistics = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Error fetching renewal statistics:", error);
+    console.error("Error fetching renewal statistics:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error while fetching renewal statistics",
@@ -269,7 +269,7 @@ export const updateRenewalHistory = async (req, res) => {
       { new: true, runValidators: true }
     ).populate('processedBy', 'fullname email');
 
-    logger.info(`Updated renewal history record ${id}`);
+    console.log(`Updated renewal history record ${id}`);
 
     res.json({
       success: true,
@@ -278,7 +278,7 @@ export const updateRenewalHistory = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Error updating renewal history:", error);
+    console.error("Error updating renewal history:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error while updating renewal history",
@@ -312,7 +312,7 @@ export const deleteRenewalHistory = async (req, res) => {
 
     await RenewalHistoryModel.findByIdAndDelete(id);
 
-    logger.info(`Deleted renewal history record ${id}`);
+    console.log(`Deleted renewal history record ${id}`);
 
     res.json({
       success: true,
@@ -320,7 +320,7 @@ export const deleteRenewalHistory = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Error deleting renewal history:", error);
+    console.error("Error deleting renewal history:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error while deleting renewal history",
@@ -399,7 +399,7 @@ export const bulkCreateRenewalHistory = async (req, res) => {
       }
     }
 
-    logger.info(`Bulk renewal history creation completed: ${results.length} processed, ${errors.length} errors`);
+    console.log(`Bulk renewal history creation completed: ${results.length} processed, ${errors.length} errors`);
 
     res.json({
       success: true,
@@ -413,7 +413,7 @@ export const bulkCreateRenewalHistory = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("Error in bulk renewal history creation:", error);
+    console.error("Error in bulk renewal history creation:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error during bulk renewal history creation",

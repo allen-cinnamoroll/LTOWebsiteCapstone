@@ -3,7 +3,7 @@ import DriverModel from "../model/DriverModel.js";
 import RenewalHistoryModel from "../model/RenewalHistoryModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
 import { createRenewalStatusRecord } from "../util/renewalStatusCalculator.js";
-import { logger } from "../util/logger.js";
+// import { logger } from "../util/logger.js";
 
 // Create a new vehicle
 export const createVehicle = async (req, res) => {
@@ -277,11 +277,11 @@ export const updateVehicle = async (req, res) => {
           const renewalRecord = new RenewalHistoryModel(renewalStatusData);
           await renewalRecord.save();
           
-          logger.info(`Created renewal history record for vehicle ${vehicle.plateNo}: ${renewalStatusData.status}`);
+          console.log(`Created renewal history record for vehicle ${vehicle.plateNo}: ${renewalStatusData.status}`);
         }
       } catch (renewalError) {
         // Log error but don't fail the vehicle update
-        logger.error("Error creating renewal history record:", renewalError);
+        console.error("Error creating renewal history record:", renewalError);
         console.error("Error creating renewal history record:", renewalError);
       }
     }
