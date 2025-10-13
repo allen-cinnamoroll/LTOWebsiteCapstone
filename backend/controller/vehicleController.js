@@ -1,6 +1,9 @@
 import VehicleModel from "../model/VehicleModel.js";
 import DriverModel from "../model/DriverModel.js";
+import RenewalHistoryModel from "../model/RenewalHistoryModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
+import { createRenewalStatusRecord } from "../util/renewalStatusCalculator.js";
+import { logger } from "../util/logger.js";
 
 // Create a new vehicle
 export const createVehicle = async (req, res) => {
@@ -253,6 +256,33 @@ export const updateVehicle = async (req, res) => {
         await VehicleModel.findByIdAndUpdate(id, { status: newStatus });
         vehicle.status = newStatus;
         console.log(`Updated vehicle ${vehicle.plateNo} status to ${newStatus} due to plate/status type change`);
+      }
+    }
+
+    // Create renewal history record if renewal date was updated
+    const renewalDateChanged = currentVehicle.dateOfRenewal?.getTime() !== vehicle.dateOfRenewal?.getTime();
+    if (renewalDateChanged && vehicle.dateOfRenewal) {
+      try {
+        // Check if renewal record already exists for this date
+        const existingRecord = await RenewalHistoryModel.findOne({
+          vehicleId: vehicle._id,
+          renewalDate: new Date(vehicle.dateOfRenewal)
+        });
+
+        if (!existingRecord) {
+          // Create renewal status record
+          const renewalStatusData = createRenewalStatusRecord(vehicle, vehicle.dateOfRenewal, req.user?.id);
+          
+          // Create renewal history record
+          const renewalRecord = new RenewalHistoryModel(renewalStatusData);
+          await renewalRecord.save();
+          
+          logger.info(`Created renewal history record for vehicle ${vehicle.plateNo}: ${renewalStatusData.status}`);
+        }
+      } catch (renewalError) {
+        // Log error but don't fail the vehicle update
+        logger.error("Error creating renewal history record:", renewalError);
+        console.error("Error creating renewal history record:", renewalError);
       }
     }
 

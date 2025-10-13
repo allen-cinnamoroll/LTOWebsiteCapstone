@@ -7,19 +7,27 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, Loader2 } from "lucide-react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   const [activeTab, setActiveTab] = useState("vehicle");
   const [ownerData, setOwnerData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [renewalHistory, setRenewalHistory] = useState([]);
+  const [renewalLoading, setRenewalLoading] = useState(false);
+  const [renewalError, setRenewalError] = useState(null);
   const { token } = useAuth();
 
   useEffect(() => {
     if (open && vehicleData?.driverId) {
       fetchOwnerData();
+    }
+    if (open && vehicleData?._id) {
+      fetchRenewalHistory();
     }
   }, [open, vehicleData]);
 
@@ -54,6 +62,39 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     }
   };
 
+  const fetchRenewalHistory = async () => {
+    if (!vehicleData?._id) {
+      console.log('No vehicle ID found, skipping renewal history fetch');
+      return;
+    }
+
+    setRenewalLoading(true);
+    setRenewalError(null);
+    
+    try {
+      console.log(`Fetching renewal history for vehicle ID: ${vehicleData._id}`);
+      const { data } = await apiClient.get(`/renewal-history/vehicle/${vehicleData._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      
+      if (data.success) {
+        setRenewalHistory(data.data.history || []);
+        console.log('Renewal history received:', data.data.history);
+      } else {
+        setRenewalError(data.message || "Failed to fetch renewal history");
+      }
+    } catch (error) {
+      console.error("Error fetching renewal history:", error);
+      const errorMessage = error.response?.data?.message || "Failed to fetch renewal history";
+      setRenewalError(errorMessage);
+      toast.error("Failed to load renewal history");
+    } finally {
+      setRenewalLoading(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "Not set";
     return new Date(dateString).toLocaleDateString();
@@ -84,6 +125,37 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
           {isActive ? "Active" : "Expired"}
         </span>
       </div>
+    );
+  };
+
+  const getRenewalStatusBadge = (status) => {
+    let badgeColor, icon;
+    
+    switch (status) {
+      case "Early Renewal":
+        badgeColor = "bg-blue-100 text-blue-800 border-blue-200";
+        icon = <Calendar className="h-3 w-3" />;
+        break;
+      case "On-Time Renewal":
+        badgeColor = "bg-green-100 text-green-800 border-green-200";
+        icon = <CheckCircle2Icon className="h-3 w-3" />;
+        break;
+      case "Late Renewal":
+        badgeColor = "bg-red-100 text-red-800 border-red-200";
+        icon = <AlertCircle className="h-3 w-3" />;
+        break;
+      default:
+        badgeColor = "bg-gray-100 text-gray-800 border-gray-200";
+        icon = <CircleAlert className="h-3 w-3" />;
+    }
+
+    return (
+      <Badge variant="outline" className={`text-xs font-medium ${badgeColor}`}>
+        <div className="flex items-center gap-1">
+          {icon}
+          {status}
+        </div>
+      </Badge>
     );
   };
 
@@ -263,12 +335,99 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     );
   };
 
-  const RenewalInformationTab = () => (
-    <div className="text-center py-8">
-      <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-      <p className="text-sm text-gray-500 dark:text-gray-400">Renewal information will be implemented later</p>
-    </div>
-  );
+  const RenewalInformationTab = () => {
+    if (renewalLoading) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Loading renewal history...</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (renewalError) {
+      return (
+        <div className="text-center py-8">
+          <AlertCircle className="h-8 w-8 text-red-400 mx-auto mb-3" />
+          <p className="text-sm text-red-600 dark:text-red-400 mb-2">Failed to load renewal history</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{renewalError}</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchRenewalHistory}
+            className="text-xs"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Retry
+          </Button>
+        </div>
+      );
+    }
+
+    if (!renewalHistory || renewalHistory.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">No renewal history found</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">Renewal records will appear here when the vehicle is renewed</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Renewal History ({renewalHistory.length} records)
+          </h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={fetchRenewalHistory}
+            className="text-xs"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Refresh
+          </Button>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50 dark:bg-gray-700">
+                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Date
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Status
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                  Processed By
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {renewalHistory.map((record, index) => (
+                <TableRow key={record._id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <TableCell className="text-xs text-gray-900 dark:text-gray-100">
+                    {formatDate(record.renewalDate)}
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    {getRenewalStatusBadge(record.status)}
+                  </TableCell>
+                  <TableCell className="text-xs text-gray-600 dark:text-gray-400">
+                    {record.processedBy?.fullname || "System"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  };
 
   const tabs = [
     { id: "vehicle", label: "Vehicle Information", icon: Car },
