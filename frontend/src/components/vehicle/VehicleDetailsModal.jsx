@@ -7,19 +7,24 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck } from "lucide-react";
+import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, CheckCircle, Clock as ClockIcon } from "lucide-react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 
 const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   const [activeTab, setActiveTab] = useState("vehicle");
   const [ownerData, setOwnerData] = useState(null);
+  const [renewalHistory, setRenewalHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [renewalLoading, setRenewalLoading] = useState(false);
   const { token } = useAuth();
 
   useEffect(() => {
     if (open && vehicleData?.driverId) {
       fetchOwnerData();
+    }
+    if (open && vehicleData?._id) {
+      fetchRenewalHistory();
     }
   }, [open, vehicleData]);
 
@@ -54,9 +59,60 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     }
   };
 
+  const fetchRenewalHistory = async () => {
+    if (!vehicleData?._id) {
+      console.log('No vehicle ID found, skipping renewal history fetch');
+      return;
+    }
+    
+    setRenewalLoading(true);
+    try {
+      console.log(`Fetching renewal history for vehicle ID: ${vehicleData._id}`);
+      const { data } = await apiClient.get(`/vehicle-renewal-history/vehicle/${vehicleData._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      console.log('Renewal history received:', data);
+      setRenewalHistory(data.data || []);
+    } catch (error) {
+      console.error("Error fetching renewal history:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+    } finally {
+      setRenewalLoading(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "Not set";
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Early Renewal":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "On-Time Renewal":
+        return <ClockIcon className="h-4 w-4 text-blue-500" />;
+      case "Late Renewal":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <CircleAlert className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Early Renewal":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "On-Time Renewal":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "Late Renewal":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
   };
 
   const formatBirthDate = (dateString) => {
@@ -263,12 +319,83 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     );
   };
 
-  const RenewalInformationTab = () => (
-    <div className="text-center py-8">
-      <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-      <p className="text-sm text-gray-500 dark:text-gray-400">Renewal information will be implemented later</p>
-    </div>
-  );
+  const RenewalInformationTab = () => {
+    if (renewalLoading) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
+
+    if (!renewalHistory || renewalHistory.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">No renewal history available</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Renewal History
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Due Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {renewalHistory.map((renewal, index) => (
+                  <tr key={renewal._id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                      {formatDate(renewal.renewalDate)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(renewal.status)}
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${getStatusColor(renewal.status)}`}
+                        >
+                          {renewal.status}
+                        </Badge>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                      {renewal.renewalType}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                      {formatDate(renewal.dueDate)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const tabs = [
     { id: "vehicle", label: "Vehicle Information", icon: Car },

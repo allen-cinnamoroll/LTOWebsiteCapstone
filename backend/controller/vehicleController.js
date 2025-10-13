@@ -1,5 +1,6 @@
 import VehicleModel from "../model/VehicleModel.js";
 import DriverModel from "../model/DriverModel.js";
+import VehicleRenewalHistoryModel from "../model/VehicleRenewalHistoryModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
 
 // Create a new vehicle
@@ -241,6 +242,27 @@ export const updateVehicle = async (req, res) => {
         success: false,
         message: "Vehicle not found",
       });
+    }
+
+    // Check if renewal date was updated
+    const renewalDateChanged = currentVehicle.dateOfRenewal?.getTime() !== vehicle.dateOfRenewal?.getTime();
+    
+    // Create renewal history record if renewal date was updated
+    if (renewalDateChanged && vehicle.dateOfRenewal) {
+      try {
+        await VehicleRenewalHistoryModel.createRenewalRecord(
+          vehicle._id,
+          vehicle.plateNo,
+          vehicle.dateOfRenewal,
+          vehicle.vehicleStatusType,
+          req.user?.id || req.user?.username || 'System', // Use user info if available
+          'Vehicle renewal updated'
+        );
+        console.log(`Created renewal history record for vehicle ${vehicle.plateNo}`);
+      } catch (error) {
+        console.error('Error creating renewal history record:', error);
+        // Don't fail the vehicle update if renewal history creation fails
+      }
     }
 
     // Recalculate status if plate number or vehicle status type changed
