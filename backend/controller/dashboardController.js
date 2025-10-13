@@ -483,7 +483,7 @@ export const getMunicipalityAnalytics = async (req, res) => {
       {
         $lookup: {
           from: 'drivers',
-          localField: 'driver',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -753,7 +753,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
       {
         $lookup: {
           from: 'drivers',
-          localField: 'driver',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1210,7 +1210,7 @@ export const getOwnerMunicipalityData = async (req, res) => {
       {
         $lookup: {
           from: 'drivers',
-          localField: 'driver',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1404,7 +1404,7 @@ export const getBarangayRegistrationTotals = async (req, res) => {
       {
         $lookup: {
           from: 'drivers',
-          localField: 'driver',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1512,7 +1512,7 @@ export const getYearlyVehicleTrends = async (req, res) => {
       {
         $lookup: {
           from: 'drivers',
-          localField: 'driver',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1657,7 +1657,7 @@ export const getMonthlyVehicleTrends = async (req, res) => {
       {
         $lookup: {
           from: 'drivers',
-          localField: 'driver',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1775,11 +1775,20 @@ export const getVehicleClassificationData = async (req, res) => {
     if (month && year) {
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0, 23, 59, 59);
-      dateFilter.dateOfRegistration = { $gte: startDate, $lte: endDate };
+      dateFilter.dateOfRenewal = { $gte: startDate, $lte: endDate, $ne: null };
     } else if (year) {
       const startDate = new Date(year, 0, 1);
       const endDate = new Date(year, 11, 31, 23, 59, 59);
-      dateFilter.dateOfRegistration = { $gte: startDate, $lte: endDate };
+      dateFilter.dateOfRenewal = { $gte: startDate, $lte: endDate, $ne: null };
+    } else if (month) {
+      dateFilter = {
+        $expr: {
+          $and: [
+            { $eq: [{ $month: "$dateOfRenewal" }, month] },
+            { $ne: ["$dateOfRenewal", null] }
+          ]
+        }
+      };
     }
     
     // Get vehicle classification counts with data normalization
