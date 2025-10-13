@@ -84,11 +84,7 @@
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Drivers',
         required: [true, "driverId is required"]
-      },
-      renewalHistory: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'RenewalHistory'
-      }]
+      }
     },
     {
       timestamps: true,

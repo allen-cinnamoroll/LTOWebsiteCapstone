@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck } from "lucide-react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
-import RenewalHistoryTab from "./RenewalHistoryTab";
 
 const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   const [activeTab, setActiveTab] = useState("vehicle");
@@ -265,10 +264,10 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   };
 
   const RenewalInformationTab = () => (
-    <RenewalHistoryTab 
-      vehicleId={vehicleData?._id} 
-      plateNo={vehicleData?.plateNo} 
-    />
+    <div className="text-center py-8">
+      <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-3" />
+      <p className="text-sm text-gray-500 dark:text-gray-400">Renewal information will be implemented later</p>
+    </div>
   );
 
   const tabs = [

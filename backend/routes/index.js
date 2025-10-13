@@ -7,7 +7,6 @@ import accidentRoutes from "./accident.js";
 import authRoutes from "./auth.js";
 import logRoutes from "./logs.js";
 import dashboardRoutes from "./dashboard.js";
-import renewalHistoryRoutes from "./renewalHistory.js";
 
 const router = express.Router();
 
@@ -18,7 +17,6 @@ router.use("/violations", violationRoutes);
 router.use("/accident", accidentRoutes);
 router.use("/auth", authRoutes);
 router.use("/dashboard", dashboardRoutes);
-router.use("/renewal-history", renewalHistoryRoutes);
 //log routes for admin and driver
 router.use("/logs", logRoutes);
 
