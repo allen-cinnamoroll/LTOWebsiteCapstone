@@ -61,8 +61,8 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       console.log('File numbers:', fileNumbers);
       
       const formData = {
-        plateNo: plateNumbers,
-        fileNo: fileNumbers.join(", "),
+        plateNo: plateNumbers.length > 0 ? plateNumbers : "",
+        fileNo: fileNumbers.length > 0 ? fileNumbers.join(", ") : "",
         ownerRepresentativeName: driverData.ownerRepresentativeName || "",
         purok: driverData.address?.purok || "",
         barangay: driverData.address?.barangay || "",
@@ -81,6 +81,12 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       // Also set values individually to ensure they're set
       setTimeout(() => {
         console.log('Form values after reset:', form.getValues());
+        if (formData.plateNo) {
+          form.setValue("plateNo", formData.plateNo, { shouldValidate: true, shouldDirty: true });
+        }
+        if (formData.fileNo) {
+          form.setValue("fileNo", formData.fileNo, { shouldValidate: true, shouldDirty: true });
+        }
         if (formData.municipality) {
           form.setValue("municipality", formData.municipality, { shouldValidate: true, shouldDirty: true });
         }

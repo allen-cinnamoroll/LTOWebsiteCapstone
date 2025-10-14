@@ -100,6 +100,7 @@ import {
   CopyMinus,
   Edit,
   Plus,
+  RefreshCw,
   Trash,
 } from "lucide-react";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
@@ -553,6 +554,7 @@ export const vehicleColumns = (onEdit, submitting) => [
   },
   {
     id: "actions",
+    header: "Actions",
     enableHiding: false,
     cell: ({ row }) => {
       const vehicle = row.original;
@@ -561,22 +563,22 @@ export const vehicleColumns = (onEdit, submitting) => [
         onEdit(vehicle._id);
       };
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-5 w-5 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
+        <div className="flex items-center gap-1">
+          <div className="relative group">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleEdit}
+              className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-100 hover:text-gray-700"
+              disabled={submitting}
+            >
+              <Edit className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-24">
-            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
-              <Edit className="h-3 w-3 mr-2" />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
               Edit
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </div>
+          </div>
+        </div>
       );
     },
   },

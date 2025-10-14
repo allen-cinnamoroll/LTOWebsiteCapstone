@@ -123,7 +123,6 @@ const VehiclesPage = () => {
             loading={loading}
             onRowClick={onRowClick}
             onEdit={onEdit}
-            onRenewal={handleRenewal}
             submitting={submitting}
           />
         </div>

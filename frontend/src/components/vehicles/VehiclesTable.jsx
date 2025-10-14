@@ -48,7 +48,6 @@ const VehiclesTable = ({
   onRowClick,
   onAdd,
   onEdit,
-  onRenewal,
   submitting
 }) => {
   const [sorting, setSorting] = React.useState([]);
@@ -113,17 +112,13 @@ const VehiclesTable = ({
             <Plus />
             <span className="hidden lg:inline">{"Add Vehicle"}</span>
           </Button>
-          <Button onClick={onRenewal} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}>
-            <RefreshCw />
-            <span className="hidden lg:inline">{"Renewal"}</span>
-          </Button>
           <DataTableViewOptions table={table} />
         </div>
       </div>
 
-      <div className="rounded-lg border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-gray-600 min-h-0">
+      <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-gray-600 min-h-0">
         <div className="overflow-auto h-full">
-          <div className="px-4">
+          <div className="px-0">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b-2 border-gray-300 dark:border-gray-600">
                 {table.getHeaderGroups().map((headerGroup) => (
