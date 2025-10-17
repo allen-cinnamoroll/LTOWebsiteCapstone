@@ -97,7 +97,7 @@ export const createVehicle = async (req, res) => {
 // Get all vehicles
 export const getVehicle = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, status, classification } = req.query;
+    const { page = 1, limit = 100, search, status, classification } = req.query;
     const skip = (page - 1) * limit;
 
     let query = {};

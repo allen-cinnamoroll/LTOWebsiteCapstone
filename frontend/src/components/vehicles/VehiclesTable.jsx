@@ -32,6 +32,7 @@ import {
   Settings2,
   Trash,
   RefreshCw,
+  X,
 } from "lucide-react";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import { Label } from "@/components/ui/label";
@@ -55,7 +56,7 @@ const VehiclesTable = ({
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 8, // 8 rows per page
+    pageSize: 9, // 9 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   // Define the columns where you want to apply the global filter
@@ -103,8 +104,16 @@ const VehiclesTable = ({
             placeholder={"Search Vehicle..."}
             value={globalFilter ?? ""}
             onChange={(event) => setGlobalFilter(event.target.value)}
-            className={"pl-10 bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
+            className={"pl-10 pr-10 bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
           />
+          {globalFilter && (
+            <button
+              onClick={() => setGlobalFilter("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
@@ -124,7 +133,7 @@ const VehiclesTable = ({
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
                     {headerGroup.headers.map((header) => (
-                       <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-4 whitespace-nowrap text-left">
+                      <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-2 whitespace-nowrap text-left">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
@@ -146,10 +155,10 @@ const VehiclesTable = ({
                       key={row.id}
                       onClick={() => onRowClick(row.original)}
                       data-state={row.getIsSelected() && "selected"}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
                     >
                       {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id} className="px-3 py-3.5 text-gray-800 dark:text-gray-200 text-left">
+                        <TableCell key={cell.id} className="px-3 py-2 text-gray-800 dark:text-gray-200 text-left">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()

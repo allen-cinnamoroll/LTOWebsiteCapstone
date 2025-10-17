@@ -32,7 +32,7 @@ const VehiclesPage = () => {
 
   const fetchVehicles = async () => {
     try {
-      const { data } = await apiClient.get("/vehicle", {
+      const { data } = await apiClient.get("/vehicle?limit=500", {
         headers: {
           Authorization: token,
         },
