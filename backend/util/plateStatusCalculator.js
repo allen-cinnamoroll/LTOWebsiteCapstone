@@ -104,27 +104,45 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
     return null;
   }
   
-  // Get current year for expiration calculation
-  const currentYear = new Date().getFullYear();
+  // Determine the base year for expiration calculation
+  let baseYear;
+  
+  if (dateOfRenewal) {
+    // If renewal date is provided, use the renewal year as base
+    const renewalDate = new Date(dateOfRenewal);
+    baseYear = renewalDate.getFullYear();
+  } else {
+    // If no renewal date, use current year
+    baseYear = new Date().getFullYear();
+  }
   
   // Calculate expiration year and month based on vehicle status type
   let expirationYear, expirationMonth;
   
   if (vehicleStatusType === "New") {
     // New vehicles: initial registration is valid for 3 years
-    // Use the plate-based month for expiration, but 3 years from current year
-    expirationYear = currentYear + 3;
+    // Use the plate-based month for expiration, but 3 years from base year
+    expirationYear = baseYear + 3;
     expirationMonth = monthIndex;
   } else {
     // Old vehicles: registration expires yearly based on plate number
-    // Use the plate-based month for expiration in current or next year
-    expirationYear = currentYear;
+    // Use the plate-based month for expiration in base year or next year
+    expirationYear = baseYear;
     expirationMonth = monthIndex;
     
-    // If the plate-based month has already passed this year, use next year
-    const currentMonth = new Date().getMonth();
-    if (currentMonth > monthIndex) {
-      expirationYear = currentYear + 1;
+    // If the plate-based month has already passed in the base year, use next year
+    if (dateOfRenewal) {
+      const renewalDate = new Date(dateOfRenewal);
+      const renewalMonth = renewalDate.getMonth();
+      if (renewalMonth > monthIndex) {
+        expirationYear = baseYear + 1;
+      }
+    } else {
+      // If no renewal date, use current month logic
+      const currentMonth = new Date().getMonth();
+      if (currentMonth > monthIndex) {
+        expirationYear = baseYear + 1;
+      }
     }
   }
   
@@ -156,10 +174,10 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
   // Set expiration to midnight of the next day after the week ends
   const expirationDate = new Date(weekEndDate);
   expirationDate.setDate(expirationDate.getDate() + 1);
-  expirationDate.setHours(0, 0, 0, 0);
+  expirationDate.setUTCHours(0, 0, 0, 0);
   
   // Debug logging
-  console.log(`Plate: ${plateNo}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}, Year: ${expirationYear}, Month: ${expirationMonth}`);
+  console.log(`Plate: ${plateNo}, Renewal: ${dateOfRenewal}, Base Year: ${baseYear}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}, Year: ${expirationYear}, Month: ${expirationMonth}`);
   
   return expirationDate;
 };
@@ -178,9 +196,11 @@ export const isVehicleExpired = (plateNo, dateOfRenewal = null) => {
   }
   
   const now = new Date();
-  const isExpired = now >= expirationDate;
+  // Set current time to UTC midnight for fair comparison
+  const nowUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isExpired = nowUTC >= expirationDate;
   
-  console.log(`Status check for plate ${plateNo}: Current=${now.toISOString()}, Expiration=${expirationDate.toISOString()}, Expired=${isExpired}`);
+  console.log(`Status check for plate ${plateNo}: Current=${nowUTC.toISOString()}, Expiration=${expirationDate.toISOString()}, Expired=${isExpired}`);
   
   return isExpired;
 };
@@ -200,7 +220,9 @@ export const getVehicleStatus = (plateNo, dateOfRenewal = null, vehicleStatusTyp
   }
   
   const now = new Date();
-  const isExpired = now >= expirationDate;
+  // Set current time to UTC midnight for fair comparison
+  const nowUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const isExpired = nowUTC >= expirationDate;
   const status = isExpired ? "0" : "1";
   
   console.log(`Final status for plate ${plateNo}: ${status} (${isExpired ? 'EXPIRED' : 'ACTIVE'})`);
