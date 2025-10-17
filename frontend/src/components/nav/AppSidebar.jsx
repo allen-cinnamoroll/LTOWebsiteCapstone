@@ -1,5 +1,5 @@
 "use client";
-import logo from "@/assets/lto.svg";
+import logo from "@/assets/lto_logo.png";
 import React, { useState } from "react";
 import {
   AudioWaveform,

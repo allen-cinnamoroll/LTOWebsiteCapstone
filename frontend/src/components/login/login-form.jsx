@@ -1,25 +1,24 @@
-import { GalleryVerticalEnd, EyeOff, Eye, LoaderCircle } from "lucide-react";
-import { useState, useLayoutEffect } from "react";
+import { User, Lock, EyeOff, Eye, LoaderCircle } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { LoginSchema } from "@/schema";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import ltoLogo from "@/assets/lto_logo.png";
 
 export function LoginForm({ className, ...props }) {
   const [showPass, setShowPass] = useState(false);
@@ -97,69 +96,71 @@ export function LoginForm({ className, ...props }) {
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Form {...form}>
-        <form 
-          key="login-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit(onSubmit)(e);
-          }}
-        >
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col  gap-2">
-              <div
-                className="flex flex-col items-center gap-2 font-medium"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-md">
-                  <GalleryVerticalEnd className="size-6" />
-                </div>
+    <div className={cn("w-full max-w-md", className)} {...props}>
+      {/* Login Form Container */}
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <Form {...form}>
+          <form 
+            key="login-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit(onSubmit)(e);
+            }}
+          >
+            <div className="flex flex-col gap-4">
+              {/* Logo */}
+              <div className="flex justify-center mb-3">
+                <img src={ltoLogo} alt="LTO Logo" className="h-28 w-28" />
               </div>
-              <h1 className="text-xl font-bold">Login</h1>
-              <div className="text-start text-sm">
-                Fill in the form to get started.{" "}
+              
+              {/* Title */}
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-[#1e3a8a] mb-1">LTO SYSTEM</h1>
+                <p className="text-sm text-gray-600">Land Transportation Management System</p>
               </div>
-            </div>
-            <div className="flex flex-col gap-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="grid gap-2">
-                      <FormLabel>Email</FormLabel>
+              
+              {/* Form Fields */}
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          placeholder="m@example.com"
-                          autoComplete="current-email"
-                          className={cn(
-                            "border border-input focus:ring-0",
-                            form.formState.errors.email && "border-red-500"
-                          )}
-                        />
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                          <Input
+                            {...field}
+                            type="text"
+                            placeholder="EMAIL"
+                            autoComplete="current-email"
+                            className={cn(
+                              "pl-10 h-11 border-gray-300 focus:ring-0 focus:border-[#1e3a8a] rounded-md",
+                              form.formState.errors.email && "border-red-500"
+                            )}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="grid gap-2">
-                      <FormLabel>Password</FormLabel>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
                       <FormControl>
-                        <div className="relative w-full ">
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                           <Input
                             {...field}
                             type={showPass ? "text" : "password"}
+                            placeholder="PASSWORD"
                             autoComplete="current-password"
                             className={cn(
-                              "border border-input focus:ring-0",
+                              "pl-10 pr-10 h-11 border-gray-300 focus:ring-0 focus:border-[#1e3a8a] rounded-md",
                               form.formState.errors.password && "border-red-500"
                             )}
                           />
@@ -167,45 +168,58 @@ export function LoginForm({ className, ...props }) {
                             type="button"
                             size="icon"
                             variant="ghost"
-                            className="absolute right-0 top-0 h-full w-min px-3 py-2 hover:bg-transparent"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 hover:bg-transparent"
                             onClick={tooglePasswordVisibility}
                             aria-label={
                               showPass ? "Hide Password" : "Show Password"
                             }
                           >
                             {showPass ? (
-                              <Eye className="text-gray-500 size-4" />
+                              <Eye className="text-gray-400 h-4 w-4" />
                             ) : (
-                              <EyeOff className="text-gray-500 size-4" />
+                              <EyeOff className="text-gray-400 h-4 w-4" />
                             )}
                           </Button>
                         </div>
                       </FormControl>
                       <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-              <Button type="submit" disabled={submitting} id="submit" className="w-full">
+              {/* Remember Username and Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="remember" />
+                  <label htmlFor="remember" className="text-sm text-gray-600">
+                    Remember Username
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  className="text-sm text-[#1e3a8a] hover:underline"
+                >
+                  Forgot Password
+                </button>
+              </div>
+
+              {/* Login Button */}
+              <Button 
+                type="submit" 
+                disabled={submitting} 
+                className="w-full h-12 bg-[#1e3a8a] hover:bg-[#1e40af] text-white font-semibold rounded-md"
+              >
                 {submitting ? (
-                  <LoaderCircle className="w-6 h-6 text-primary-foreground mx-auto animate-spin" />
+                  <LoaderCircle className="w-5 h-5 text-white mx-auto animate-spin" />
                 ) : (
-                  "Login" 
+                  "LOGIN"
                 )}
               </Button>
             </div>
-            <div className="relative text-end text-sm ">
-              <button
-                type="button"
-                className="relative z-10 bg-background px-2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Forgot your password?
-              </button>
-            </div>
-          </div>
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }
