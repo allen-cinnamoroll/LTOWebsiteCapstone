@@ -10,39 +10,36 @@ dotenv.config();
 
 const fixDatabaseIndexes = async (db) => {
   try {
-    console.log('🔧 Fixing database indexes...');
+    console.log('🔧 Setting up database indexes...');
     
     // Get the drivers collection
     const driversCollection = db.collection('drivers');
     
-    // Drop the problematic index on driversLicenseNumber
-    try {
-      await driversCollection.dropIndex('driversLicenseNumber_1');
-      console.log('✅ Dropped driversLicenseNumber_1 index');
-    } catch (error) {
-      if (error.code === 27) {
-        console.log('ℹ️  driversLicenseNumber_1 index does not exist');
-      } else {
-        console.log('⚠️  Error dropping driversLicenseNumber_1 index:', error.message);
-      }
-    }
+    // Drop existing problematic indexes
+    const indexesToDrop = [
+      'driversLicenseNumber_1',
+      'licenseNo_1', 
+      'driversLicenseNumber_sparse_unique',
+      'plateNo_1'
+    ];
     
-    // Drop the problematic index on licenseNo
-    try {
-      await driversCollection.dropIndex('licenseNo_1');
-      console.log('✅ Dropped licenseNo_1 index');
-    } catch (error) {
-      if (error.code === 27) {
-        console.log('ℹ️  licenseNo_1 index does not exist');
-      } else {
-        console.log('⚠️  Error dropping licenseNo_1 index:', error.message);
+    for (const indexName of indexesToDrop) {
+      try {
+        await driversCollection.dropIndex(indexName);
+        console.log(`✅ Dropped ${indexName} index`);
+      } catch (error) {
+        if (error.code === 27) {
+          console.log(`ℹ️  ${indexName} index does not exist`);
+        } else {
+          console.log(`⚠️  Error dropping ${indexName} index:`, error.message);
+        }
       }
     }
     
     // Get the vehicles collection
     const vehiclesCollection = db.collection('vehicles');
     
-    // Drop the unique index on plateNo for vehicles
+    // Drop existing problematic indexes on vehicles
     try {
       await vehiclesCollection.dropIndex('plateNo_1');
       console.log('✅ Dropped plateNo_1 unique index from vehicles');
@@ -54,40 +51,43 @@ const fixDatabaseIndexes = async (db) => {
       }
     }
     
-    // Drop the sparse unique index if it exists
-    try {
-      await driversCollection.dropIndex('driversLicenseNumber_sparse_unique');
-      console.log('✅ Dropped driversLicenseNumber_sparse_unique index');
-    } catch (error) {
-      if (error.code === 27) {
-        console.log('ℹ️  driversLicenseNumber_sparse_unique index does not exist');
-      } else {
-        console.log('⚠️  Error dropping driversLicenseNumber_sparse_unique index:', error.message);
-      }
-    }
-    
-    // Create a regular (non-unique) index on driversLicenseNumber for performance
+    // Create performance indexes
     try {
       await driversCollection.createIndex(
         { driversLicenseNumber: 1 }, 
         { 
-          name: 'driversLicenseNumber_index'
+          name: 'driversLicenseNumber_index',
+          sparse: true
         }
       );
-      console.log('✅ Created regular index on driversLicenseNumber (non-unique)');
+      console.log('✅ Created sparse index on driversLicenseNumber');
     } catch (error) {
-      console.log('⚠️  Error creating regular index:', error.message);
+      console.log('⚠️  Error creating driversLicenseNumber index:', error.message);
     }
     
-    console.log('✅ Database indexes fixed!');
+    try {
+      await vehiclesCollection.createIndex({ plateNo: 1 });
+      console.log('✅ Created index on plateNo');
+    } catch (error) {
+      console.log('⚠️  Error creating plateNo index:', error.message);
+    }
+    
+    try {
+      await vehiclesCollection.createIndex({ driverId: 1 });
+      console.log('✅ Created index on driverId');
+    } catch (error) {
+      console.log('⚠️  Error creating driverId index:', error.message);
+    }
+    
+    console.log('✅ Database indexes configured!');
   } catch (error) {
-    console.error('Failed to fix database indexes:', error);
+    console.error('Failed to configure database indexes:', error);
   }
 };
 
-const importAnyJson = async (jsonFilePath) => {
+const importRestructuredData = async (customDriversFile = null, customVehiclesFile = null) => {
   try {
-    // Connect to MongoDB using the same environment variables as import_restructured_data.js
+    // Connect to MongoDB using the provided environment variables
     const { NODE_ENV, DATABASE } = process.env;
     
     if (!DATABASE) {
@@ -98,7 +98,7 @@ const importAnyJson = async (jsonFilePath) => {
 
     // Use the database connection string directly from .env
     const DB_URI = DATABASE;
-
+    
     console.log('Connecting to MongoDB...');
     await mongoose.connect(DB_URI);
     console.log(`✅ Connected to MongoDB (${NODE_ENV || 'production'} environment)`);
@@ -107,16 +107,22 @@ const importAnyJson = async (jsonFilePath) => {
     const db = mongoose.connection.db;
     await fixDatabaseIndexes(db);
 
-    // Check if file exists
-    if (!fs.existsSync(jsonFilePath)) {
-      console.error(`File not found: ${jsonFilePath}`);
+    // Read the JSON files - use custom paths if provided, otherwise use default restructured paths
+    const driversFilePath = customDriversFile || path.join(process.cwd(), 'json', 'restructured', 'drivers_collection.json');
+    const vehiclesFilePath = customVehiclesFile || path.join(process.cwd(), 'json', 'restructured', 'vehicles_collection.json');
+    
+    if (!fs.existsSync(driversFilePath) || !fs.existsSync(vehiclesFilePath)) {
+      console.error('❌ Restructured JSON files not found!');
+      console.error('Expected files:');
+      console.error(`- ${driversFilePath}`);
+      console.error(`- ${vehiclesFilePath}`);
       process.exit(1);
     }
-
-    // Read the JSON file
-    const jsonData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
     
-    console.log(`📊 Found ${jsonData.length} records to import from ${path.basename(jsonFilePath)}`);
+    const driversData = JSON.parse(fs.readFileSync(driversFilePath, 'utf8'));
+    const vehiclesData = JSON.parse(fs.readFileSync(vehiclesFilePath, 'utf8'));
+    
+    console.log(`📊 Found ${driversData.length} drivers and ${vehiclesData.length} vehicles to import`);
 
     // Clear existing data (optional - remove this if you want to keep existing data)
     console.log('🧹 Clearing existing data...');
@@ -124,60 +130,51 @@ const importAnyJson = async (jsonFilePath) => {
     await VehicleModel.deleteMany({});
     console.log('✅ Existing data cleared');
 
-    // Step 1: Import Drivers first
+    // Step 1: Import Drivers
     console.log('👥 Importing drivers...');
     const driverMap = new Map();
     let driverSuccessCount = 0;
     let driverErrorCount = 0;
 
-    for (let i = 0; i < jsonData.length; i++) {
-      const record = jsonData[i];
-      
+    for (const driverRecord of driversData) {
       try {
-        // Validate required fields
-        if (!record.ownerRepresentativeName) {
-          console.log(`Skipping record ${i + 1}: Missing ownerRepresentativeName`);
-          driverErrorCount++;
-          continue;
-        }
-
-        // Transform the data to match the DriverModel schema (same as import_restructured_data.js)
-        const driverData = {
-          ownerRepresentativeName: record.ownerRepresentativeName,
-          address: {
-            purok: record.address_purok || '',
-            barangay: record.address_barangay || '',
-            municipality: record.address_municipality || '',
-            province: record.address_province || '',
-            region: record.address_region || ''
-          },
-          contactNumber: record.contactNumber ? record.contactNumber.toString() : null,
-          emailAddress: record.emailAddress || null,
-          hasDriversLicense: record.hasDriversLicense === "YES" && !!record.driversLicenseNumber,
-          driversLicenseNumber: (record.hasDriversLicense === "YES" && record.driversLicenseNumber) ? record.driversLicenseNumber : null,
-          birthDate: (() => {
-            if (!record.birthDate) return null;
-            try {
-              const date = new Date(record.birthDate);
-              return isNaN(date.getTime()) ? null : date;
-            } catch (error) {
-              return null;
-            }
-          })(),
-          isActive: true,
-          vehicleIds: [] // Will be populated after vehicles are imported
-        };
+         // Transform the data to match the DriverModel schema
+         const driverData = {
+           ownerRepresentativeName: driverRecord.fullName,
+           address: {
+             purok: driverRecord.address.purok || '',
+             barangay: driverRecord.address.barangay || '',
+             municipality: driverRecord.address.municipality || '',
+             province: driverRecord.address.province || '',
+             region: driverRecord.address.region || ''
+           },
+           contactNumber: driverRecord.contactNumber ? driverRecord.contactNumber.toString() : null,
+           emailAddress: driverRecord.emailAddress || null,
+           hasDriversLicense: driverRecord.hasDriversLicense === "YES" && !!driverRecord.driversLicenseNumber,
+           driversLicenseNumber: (driverRecord.hasDriversLicense === "YES" && driverRecord.driversLicenseNumber) ? driverRecord.driversLicenseNumber : null,
+           birthDate: (() => {
+             if (!driverRecord.birthDate) return null;
+             try {
+               const date = new Date(driverRecord.birthDate);
+               return isNaN(date.getTime()) ? null : date;
+             } catch (error) {
+               return null;
+             }
+           })(),
+           isActive: true,
+           vehicleIds: [] // Will be populated after vehicles are imported
+         };
 
         // Create driver document
         const driver = await DriverModel.create(driverData);
-        driverMap.set(record.ownerRepresentativeName, driver._id);
+        driverMap.set(driverRecord._id, driver._id);
         driverSuccessCount++;
         
         if (driverSuccessCount % 50 === 0) {
-          console.log(`  Processed ${driverSuccessCount}/${jsonData.length} drivers...`);
+          console.log(`  Processed ${driverSuccessCount}/${driversData.length} drivers...`);
         }
       } catch (error) {
-        console.error(`❌ Error creating driver ${record.ownerRepresentativeName}:`, error.message);
+        console.error(`❌ Error creating driver ${driverRecord.fullName}:`, error.message);
         driverErrorCount++;
       }
     }
@@ -190,48 +187,39 @@ const importAnyJson = async (jsonFilePath) => {
     let vehicleErrorCount = 0;
     const driverVehicleMap = new Map(); // Track vehicles per driver
 
-    for (let i = 0; i < jsonData.length; i++) {
-      const record = jsonData[i];
-      
+    for (const vehicleRecord of vehiclesData) {
       try {
-        // Validate required fields
-        if (!record.plateNo || !record.ownerRepresentativeName) {
-          console.log(`Skipping record ${i + 1}: Missing plateNo or ownerRepresentativeName`);
-          vehicleErrorCount++;
-          continue;
-        }
-
         // Get the corresponding driver ID
-        const driverId = driverMap.get(record.ownerRepresentativeName);
+        const driverId = driverMap.get(vehicleRecord.ownerId);
         if (!driverId) {
-          console.error(`❌ Driver not found for vehicle ${record.plateNo} (owner: ${record.ownerRepresentativeName})`);
+          console.error(`❌ Driver not found for vehicle ${vehicleRecord.plateNo} (ownerId: ${vehicleRecord.ownerId})`);
           vehicleErrorCount++;
           continue;
         }
 
-        // Transform the data to match the VehicleModel schema (same as import_restructured_data.js)
-        const vehicleData = {
-          fileNo: record.fileNo,
-          plateNo: record.plateNo,
-          engineNo: record.engineNo,
-          serialChassisNumber: record.serialChassisNumber,
-          make: record.make || '',
-          bodyType: record.bodyType || '',
-          color: record.color || '',
-          classification: record.classification || '',
-          dateOfRenewal: (() => {
-            if (!record.dateOfRenewal) return null;
-            try {
-              const date = new Date(record.dateOfRenewal);
-              return isNaN(date.getTime()) ? null : date;
-            } catch (error) {
-              return null;
-            }
-          })(),
-          vehicleStatusType: "Old", // Default to Old as per schema
-          status: "1", // Default to active
-          driverId: driverId
-        };
+         // Transform the data to match the VehicleModel schema
+         const vehicleData = {
+           fileNo: vehicleRecord.fileNo,
+           plateNo: vehicleRecord.plateNo,
+           engineNo: vehicleRecord.engineNo,
+           serialChassisNumber: vehicleRecord.serialChassisNumber,
+           make: vehicleRecord.make || '',
+           bodyType: vehicleRecord.bodyType || '',
+           color: vehicleRecord.color || '',
+           classification: vehicleRecord.classification || '',
+           dateOfRenewal: (() => {
+             if (!vehicleRecord.dateOfRenewal) return null;
+             try {
+               const date = new Date(vehicleRecord.dateOfRenewal);
+               return isNaN(date.getTime()) ? null : date;
+             } catch (error) {
+               return null;
+             }
+           })(),
+           vehicleStatusType: "Old", // Default to Old as per schema
+           status: "1", // Default to active
+           driverId: driverId
+         };
 
         // Create vehicle document
         const vehicle = await VehicleModel.create(vehicleData);
@@ -244,10 +232,10 @@ const importAnyJson = async (jsonFilePath) => {
         driverVehicleMap.get(driverId).push(vehicle._id);
         
         if (vehicleSuccessCount % 50 === 0) {
-          console.log(`  Processed ${vehicleSuccessCount}/${jsonData.length} vehicles...`);
+          console.log(`  Processed ${vehicleSuccessCount}/${vehiclesData.length} vehicles...`);
         }
       } catch (error) {
-        console.error(`❌ Error creating vehicle ${record.plateNo}:`, error.message);
+        console.error(`❌ Error creating vehicle ${vehicleRecord.plateNo}:`, error.message);
         vehicleErrorCount++;
       }
     }
@@ -330,14 +318,28 @@ const importAnyJson = async (jsonFilePath) => {
   }
 };
 
-// Get file path from command line arguments
-const jsonFilePath = process.argv[2];
+// Run import if this file is executed directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
+                     process.argv[1] && process.argv[1].endsWith('import_restructured_data.js');
 
-if (!jsonFilePath) {
-  console.log('Usage: node import_any_json.js <path-to-json-file>');
-  console.log('Example: node import_any_json.js json/another_file.json');
-  process.exit(1);
+if (isMainModule) {
+  // Check for command line arguments
+  const args = process.argv.slice(2);
+  let customDriversFile = null;
+  let customVehiclesFile = null;
+  
+  if (args.length > 0) {
+    customDriversFile = args[0];
+    console.log(`📁 Using custom drivers file: ${customDriversFile}`);
+  }
+  
+  if (args.length > 1) {
+    customVehiclesFile = args[1];
+    console.log(`📁 Using custom vehicles file: ${customVehiclesFile}`);
+  }
+  
+  importRestructuredData(customDriversFile, customVehiclesFile);
 }
 
-// Run import
-importAnyJson(jsonFilePath);
+export default importRestructuredData;
+

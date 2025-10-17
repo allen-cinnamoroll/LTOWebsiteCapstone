@@ -571,6 +571,16 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                             onChange={(e) => {
                               const capitalizedValue = e.target.value.toUpperCase();
                               setSearchTerm(capitalizedValue);
+                              // Automatically make the field editable when user starts typing
+                              if (!isOwnerEditable) {
+                                setIsOwnerEditable(true);
+                              }
+                            }}
+                            onFocus={() => {
+                              // Make the field editable when focused
+                              if (!isOwnerEditable) {
+                                setIsOwnerEditable(true);
+                              }
                             }}
                             className={cn(
                               "pr-10 text-sm",

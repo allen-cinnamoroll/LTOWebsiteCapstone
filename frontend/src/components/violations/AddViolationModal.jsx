@@ -134,8 +134,8 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar]:bg-transparent">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
             Add New Violation
@@ -145,7 +145,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="flex-1 overflow-y-auto px-1 py-2">
           <FormComponent
             form={form}
             onSubmit={onSubmit}
@@ -153,7 +153,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
           />
         </div>
 
-        <DialogFooter className="flex justify-start gap-3 pt-6">
+        <DialogFooter className="flex-shrink-0 flex justify-start gap-3 pt-4 border-t">
           <Button
             type="button"
             variant="outline"

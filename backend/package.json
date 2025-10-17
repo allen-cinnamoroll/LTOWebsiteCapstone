@@ -6,7 +6,12 @@
     "scripts": {
         "build": "npm install",
         "start": "node server",
-        "dev": "node --watch server"
+        "dev": "node --watch server",
+        "fix-indexes": "node scripts/fix_database_indexes.js",
+        "import-robust": "node scripts/import_robust.js",
+        "import-any": "node scripts/import_any_json.js",
+        "import-restructured": "node scripts/import_restructured_data.js",
+        "verify": "node scripts/verify_relationships.js"
     },
     "keywords": [],
     "author": "",

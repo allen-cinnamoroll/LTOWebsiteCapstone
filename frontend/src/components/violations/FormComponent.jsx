@@ -59,31 +59,18 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
   return (
     <Form {...form}>
-      <form id="violation-form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        {/* TOP NO. and Violation Type in the same row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="topNo"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>TOP NO.</FormLabel>
-              <FormControl>
-                <Input placeholder="TOP-0001" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form id="violation-form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+        {/* Violation Type, TOP NO., and Apprehending Officer in the same row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="violationType"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Violation Type</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Violation Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-xs">
                       <SelectValue placeholder="Select violation type" />
                     </SelectTrigger>
                   </FormControl>
@@ -93,7 +80,41 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                     <SelectItem value="impounded">Impounded</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="topNo"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">TOP NO.</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="TOP-0001" 
+                    {...field} 
+                    className="text-xs"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="apprehendingOfficer"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Apprehending Officer</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Officer Name" 
+                    {...field} 
+                    className="text-xs"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -101,19 +122,23 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
         {/* All Fields Available for All Violation Types */}
         {/* Apprehension Details Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Apprehension Details</h3>
+        <div className="space-y-0">
+          <h6 className="text-sm font-semibold">Violater's Details</h6>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <FormField
               control={form.control}
               name="firstName"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">First Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <Input 
+                      placeholder="John" 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -121,12 +146,17 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               control={form.control}
               name="middleInitial"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Middle Initial</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Middle Initial</FormLabel>
                   <FormControl>
-                    <Input placeholder="D" maxLength={1} {...field} />
+                    <Input 
+                      placeholder="D" 
+                      maxLength={1} 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -134,12 +164,16 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               control={form.control}
               name="lastName"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Last Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <Input 
+                      placeholder="Doe" 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -147,12 +181,16 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               control={form.control}
               name="suffix"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Suffix</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Suffix</FormLabel>
                   <FormControl>
-                    <Input placeholder="Jr." {...field} />
+                    <Input 
+                      placeholder="Jr." 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -161,14 +199,15 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
         {/* Violations Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Violations</h3>
-          <div className="space-y-2">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-600">Violation/s</label>
             {violations.map((violation, index) => (
               <div key={index} className="flex gap-2">
                 <Input
                   placeholder={`Violation ${index + 1}`}
                   value={violation}
                   onChange={(e) => updateViolation(index, e.target.value)}
+                  className="text-xs"
                 />
                 {violations.length > 1 && (
                   <Button
@@ -186,7 +225,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               type="button"
               variant="outline"
               onClick={addViolation}
-              className="w-full"
+              className="w-full text-xs"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Violation
@@ -196,17 +235,16 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
         {/* License Type Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">License Type</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="licenseType"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>License Type</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">License Type</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs">
                         <SelectValue placeholder="Select license type" />
                       </SelectTrigger>
                     </FormControl>
@@ -221,7 +259,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                       <SelectItem value="dl tempor">DL Tempor</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -231,18 +269,21 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
         {/* Vehicle Details Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Vehicle Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="plateNo"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Plate No.</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Plate No.</FormLabel>
                   <FormControl>
-                    <Input placeholder="ABC-1234" {...field} />
+                    <Input 
+                      placeholder="ABC-1234" 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -250,12 +291,16 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               control={form.control}
               name="chassisNo"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Chassis No. (Optional)</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Chassis No. (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Chassis Number" {...field} />
+                    <Input 
+                      placeholder="Chassis Number" 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -263,12 +308,16 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               control={form.control}
               name="engineNo"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Engine No. (Optional)</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Engine No. (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Engine Number" {...field} />
+                    <Input 
+                      placeholder="Engine Number" 
+                      {...field} 
+                      className="text-xs"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
@@ -277,14 +326,13 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
 
         {/* Apprehension Information Section */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Apprehension Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="dateOfApprehension"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date of Apprehension</FormLabel>
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">Date of Apprehension</FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -292,7 +340,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
+                              "w-full pl-3 text-left font-normal text-xs",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -312,19 +360,6 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                         />
                       </PopoverContent>
                     </Popover>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="apprehendingOfficer"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Apprehending Officer</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Officer Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

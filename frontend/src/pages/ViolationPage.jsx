@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { violationColumns } from "@/components/table/columns";
 import ViolationTable from "@/components/violations/ViolationTable";
 import AddViolationModal from "@/components/violations/AddViolationModal";
+import ViolationDetailsModal from "@/components/violations/ViolationDetailsModal";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
@@ -15,6 +16,8 @@ const ViolationPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
   const [addViolationModalOpen, setAddViolationModalOpen] = useState(false);
+  const [violationDetailsModalOpen, setViolationDetailsModalOpen] = useState(false);
+  const [selectedViolation, setSelectedViolation] = useState(null);
 
   useEffect(() => {
     fetchViolations();
@@ -27,6 +30,15 @@ const ViolationPage = () => {
           Authorization: token,
         },
       });
+      
+      // Debug: Log the first violation to see what fields are available
+      if (data.data && data.data.length > 0) {
+        console.log("Sample violation data from API:", data.data[0]);
+        console.log("Available fields:", Object.keys(data.data[0]));
+        console.log("CreatedAt:", data.data[0].createdAt);
+        console.log("UpdatedAt:", data.data[0].updatedAt);
+      }
+      
       const violationData = data.data.map((vData) => ({
         _id: vData._id,
         topNo: vData.topNo || "N/A",
@@ -40,6 +52,8 @@ const ViolationPage = () => {
         plateNo: vData.plateNo || "N/A",
         dateOfApprehension: vData.dateOfApprehension,
         apprehendingOfficer: vData.apprehendingOfficer || "N/A",
+        createdAt: vData.createdAt,
+        updatedAt: vData.updatedAt,
       }));
       setViolationData(violationData);
     } catch (error) {
@@ -54,8 +68,8 @@ const ViolationPage = () => {
   };
 
   const onRowClick = (data) => {
-    const violationId = data._id;
-    navigate(`/violation/${violationId}`);
+    setSelectedViolation(data);
+    setViolationDetailsModalOpen(true);
   };
 
   const onEdit = (violationId) => {
@@ -91,6 +105,13 @@ const ViolationPage = () => {
         open={addViolationModalOpen}
         onOpenChange={setAddViolationModalOpen}
         onViolationAdded={handleViolationAdded}
+      />
+
+      {/* Violation Details Modal */}
+      <ViolationDetailsModal
+        open={violationDetailsModalOpen}
+        onOpenChange={setViolationDetailsModalOpen}
+        violationData={selectedViolation}
       />
     </div>
   );

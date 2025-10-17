@@ -4,34 +4,12 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const fixDatabaseIndexes = async () => {
+const fixDatabaseIndexes = async (db) => {
   try {
-    // Connect to MongoDB
-    const { NODE_ENV, DATABASE, DATABASE_LOCAL, DB_PASSWORD } = process.env;
-    
-    if (!NODE_ENV || (!DATABASE_LOCAL && !DATABASE)) {
-      console.error("Missing required environment variables for database connection.");
-      process.exit(1);
-    }
-
-    const DB_URI = NODE_ENV === "production" 
-      ? DATABASE.replace("<PASSWORD>", DB_PASSWORD)
-      : DATABASE_LOCAL;
-
-    await mongoose.connect(DB_URI);
-    console.log(`Connected to MongoDB (${NODE_ENV} environment)`);
-
-    const db = mongoose.connection.db;
+    console.log('🔧 Fixing database indexes...');
     
     // Get the drivers collection
     const driversCollection = db.collection('drivers');
-    
-    // List all indexes
-    console.log('Current indexes on drivers collection:');
-    const indexes = await driversCollection.indexes();
-    indexes.forEach(index => {
-      console.log(`- ${index.name}: ${JSON.stringify(index.key)}`);
-    });
     
     // Drop the problematic index on driversLicenseNumber
     try {
@@ -89,7 +67,8 @@ const fixDatabaseIndexes = async () => {
       await driversCollection.createIndex(
         { driversLicenseNumber: 1 }, 
         { 
-          name: 'driversLicenseNumber_index'
+          name: 'driversLicenseNumber_index',
+          sparse: true
         }
       );
       console.log('✅ Created regular index on driversLicenseNumber (non-unique)');
@@ -97,30 +76,59 @@ const fixDatabaseIndexes = async () => {
       console.log('⚠️  Error creating regular index:', error.message);
     }
     
-    // List indexes again to confirm
-    console.log('\nUpdated indexes on drivers collection:');
-    const updatedIndexes = await driversCollection.indexes();
-    updatedIndexes.forEach(index => {
-      console.log(`- ${index.name}: ${JSON.stringify(index.key)}`);
-    });
+    // Create performance indexes
+    try {
+      await vehiclesCollection.createIndex({ plateNo: 1 });
+      console.log('✅ Created index on plateNo');
+    } catch (error) {
+      console.log('⚠️  Error creating plateNo index:', error.message);
+    }
     
-    console.log('\n✅ Database indexes fixed!');
-    console.log('Now you can run the import script without duplicate key errors.');
-
+    try {
+      await vehiclesCollection.createIndex({ driverId: 1 });
+      console.log('✅ Created index on driverId');
+    } catch (error) {
+      console.log('⚠️  Error creating driverId index:', error.message);
+    }
+    
+    console.log('✅ Database indexes fixed!');
   } catch (error) {
     console.error('Failed to fix database indexes:', error);
+  }
+};
+
+const main = async () => {
+  try {
+    // Connect to MongoDB using the same environment variables as other scripts
+    const { NODE_ENV, DATABASE } = process.env;
+    
+    if (!DATABASE) {
+      console.error("Missing required environment variables for database connection.");
+      console.error("Please ensure DATABASE is set in your .env file.");
+      process.exit(1);
+    }
+
+    // Use the database connection string directly from .env
+    const DB_URI = DATABASE;
+
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(DB_URI);
+    console.log(`✅ Connected to MongoDB (${NODE_ENV || 'production'} environment)`);
+
+    // Fix database indexes
+    const db = mongoose.connection.db;
+    await fixDatabaseIndexes(db);
+
+    console.log('✅ Database indexes setup completed!');
+
+  } catch (error) {
+    console.error('❌ Failed to fix database indexes:', error);
+    process.exit(1);
   } finally {
     await mongoose.disconnect();
-    console.log('Disconnected from MongoDB');
+    console.log('🔌 Disconnected from MongoDB');
   }
 };
 
 // Run if this file is executed directly
-const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
-                     process.argv[1] && process.argv[1].endsWith('fix_database_indexes.js');
-
-if (isMainModule) {
-  fixDatabaseIndexes();
-}
-
-export default fixDatabaseIndexes;
+main();

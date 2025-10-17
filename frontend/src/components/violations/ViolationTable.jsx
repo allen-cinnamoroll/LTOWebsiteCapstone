@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import { Label } from "@/components/ui/label";
 import { Button } from "../ui/button";
@@ -78,6 +78,7 @@ const ViolationTable = ({
       <Label className="font-semibold">{title}</Label>
       <div className={`md:flex items-center justify-between py-3 flex-shrink-0`}>
         <div className="relative hidden md:inline md:max-w-sm flex-shrink">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder={"Search Violation..."}
             value={globalFilter ?? ""}

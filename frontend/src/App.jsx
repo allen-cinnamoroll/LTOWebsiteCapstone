@@ -19,7 +19,6 @@ import ViolationPage from "./pages/ViolationPage";
 import AccidentPage from "./pages/AccidentPage";
 import AccidentProfile from "./pages/AccidentProfile";
 import EditAccidentForm from "./pages/EditAccidentForm";
-import ViolationProfile from "./pages/ViolationProfile";
 import EditViolationForm from "./pages/EditViolationForm";
 import RegistrationAnalyticsPage from "./pages/RegistrationAnalyticsPage";
 import ViolationAnalyticsPage from "./pages/ViolationAnalyticsPage";
@@ -68,7 +67,6 @@ function App() {
 
             {/* Violation routes - accessible to all authenticated users */}
             <Route path="violation" element={<ViolationPage />} />
-            <Route path="violation/:id" element={<ViolationProfile />} />
             <Route path="violation/:id/edit" element={<EditViolationForm />} />
 
             {/* Accident routes - accessible to all authenticated users */}
