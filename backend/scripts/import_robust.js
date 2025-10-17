@@ -87,17 +87,17 @@ const fixDatabaseIndexes = async (db) => {
 
 const importRobust = async () => {
   try {
-    // Connect to MongoDB
-    const { NODE_ENV, DATABASE, DATABASE_LOCAL, DB_PASSWORD } = process.env;
+    // Connect to MongoDB using the same environment variables as other scripts
+    const { NODE_ENV, DATABASE } = process.env;
     
-    if (!NODE_ENV || (!DATABASE_LOCAL && !DATABASE)) {
+    if (!DATABASE) {
       console.error("Missing required environment variables for database connection.");
+      console.error("Please ensure DATABASE is set in your .env file.");
       process.exit(1);
     }
 
-    const DB_URI = NODE_ENV === "production" 
-      ? DATABASE.replace("<PASSWORD>", DB_PASSWORD)
-      : DATABASE_LOCAL;
+    // Use the database connection string directly from .env
+    const DB_URI = DATABASE;
 
     await mongoose.connect(DB_URI);
     console.log(`Connected to MongoDB (${NODE_ENV} environment)`);

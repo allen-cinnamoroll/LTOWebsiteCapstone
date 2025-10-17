@@ -11,6 +11,7 @@
         "import-robust": "node scripts/import_robust.js",
         "import-any": "node scripts/import_any_json.js",
         "import-restructured": "node scripts/import_restructured_data.js",
+        "import-production": "node scripts/import_production.js",
         "verify": "node scripts/verify_relationships.js"
     },
     "keywords": [],

@@ -4,19 +4,16 @@ import { startVehicleExpirationWatcher } from "../util/statusWatcher.js";
 
 dotenv.config();
 
-const { NODE_ENV, DATABASE, DATABASE_LOCAL, DB_PASSWORD } = process.env;
+const { NODE_ENV, DATABASE } = process.env;
 
-if (!NODE_ENV || (!DATABASE_LOCAL && !DATABASE)) {
+if (!DATABASE) {
   console.error(
     "Missing required environment variables for database connection."
   );
   process.exit(1);
 }
 
-const DB_URI =
-  NODE_ENV === "production"
-    ? DATABASE.replace("<PASSWORD>", DB_PASSWORD)
-    : DATABASE_LOCAL;
+const DB_URI = DATABASE;
 
 mongoose
   .connect(DB_URI)
