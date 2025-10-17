@@ -104,45 +104,50 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
     return null;
   }
   
-  // Determine the base year for expiration calculation
-  let baseYear;
-  
+  // Parse renewal date if provided
+  let renewalDate = null;
   if (dateOfRenewal) {
-    // If renewal date is provided, use the renewal year as base
-    const renewalDate = new Date(dateOfRenewal);
-    baseYear = renewalDate.getFullYear();
-  } else {
-    // If no renewal date, use current year
-    baseYear = new Date().getFullYear();
+    renewalDate = new Date(dateOfRenewal);
+    if (isNaN(renewalDate.getTime())) {
+      console.log(`Invalid renewal date: ${dateOfRenewal}`);
+      renewalDate = null;
+    }
   }
   
-  // Calculate expiration year and month based on vehicle status type
+  // Get current date
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  
+  // Calculate expiration year and month based on renewal logic
   let expirationYear, expirationMonth;
   
   if (vehicleStatusType === "New") {
-    // New vehicles: initial registration is valid for 3 years
-    // Use the plate-based month for expiration, but 3 years from base year
-    expirationYear = baseYear + 3;
-    expirationMonth = monthIndex;
+    // New vehicles: initial registration is valid for 3 years from renewal date
+    if (renewalDate) {
+      expirationYear = renewalDate.getFullYear() + 3;
+      expirationMonth = monthIndex;
+    } else {
+      // If no renewal date, use current year + 3
+      expirationYear = currentYear + 3;
+      expirationMonth = monthIndex;
+    }
   } else {
     // Old vehicles: registration expires yearly based on plate number
-    // Use the plate-based month for expiration in base year or next year
-    expirationYear = baseYear;
-    expirationMonth = monthIndex;
-    
-    // If the plate-based month has already passed in the base year, use next year
-    if (dateOfRenewal) {
-      const renewalDate = new Date(dateOfRenewal);
-      const renewalMonth = renewalDate.getMonth();
-      if (renewalMonth > monthIndex) {
-        expirationYear = baseYear + 1;
+    if (renewalDate) {
+      // If renewed within current year, expires next year
+      const renewalYear = renewalDate.getFullYear();
+      if (renewalYear === currentYear) {
+        expirationYear = currentYear + 1;
+        expirationMonth = monthIndex;
+      } else {
+        // If renewed in previous year, check if it's past the renewal period
+        expirationYear = currentYear;
+        expirationMonth = monthIndex;
       }
     } else {
-      // If no renewal date, use current month logic
-      const currentMonth = new Date().getMonth();
-      if (currentMonth > monthIndex) {
-        expirationYear = baseYear + 1;
-      }
+      // If no renewal date, use current year
+      expirationYear = currentYear;
+      expirationMonth = monthIndex;
     }
   }
   
@@ -174,10 +179,10 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
   // Set expiration to midnight of the next day after the week ends
   const expirationDate = new Date(weekEndDate);
   expirationDate.setDate(expirationDate.getDate() + 1);
-  expirationDate.setUTCHours(0, 0, 0, 0);
+  expirationDate.setHours(0, 0, 0, 0);
   
   // Debug logging
-  console.log(`Plate: ${plateNo}, Renewal: ${dateOfRenewal}, Base Year: ${baseYear}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}, Year: ${expirationYear}, Month: ${expirationMonth}`);
+  console.log(`Plate: ${plateNo}, Renewal: ${renewalDate ? renewalDate.toISOString() : 'None'}, Expiration: ${expirationDate.toISOString()}, Status: ${vehicleStatusType}, Year: ${expirationYear}, Month: ${expirationMonth}`);
   
   return expirationDate;
 };
@@ -186,21 +191,20 @@ export const calculateExpirationDate = (plateNo, dateOfRenewal = null, vehicleSt
  * Check if a vehicle is expired based on plate number and date of renewal
  * @param {string} plateNo - The plate number
  * @param {Date|string} dateOfRenewal - The date of renewal (optional)
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {boolean} - True if expired, false if active
  */
-export const isVehicleExpired = (plateNo, dateOfRenewal = null) => {
-  const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal);
+export const isVehicleExpired = (plateNo, dateOfRenewal = null, vehicleStatusType = "Old") => {
+  const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal, vehicleStatusType);
   if (!expirationDate) {
     console.log(`Could not calculate expiration date for plate ${plateNo}`);
     return false; // If we can't calculate, assume active
   }
   
   const now = new Date();
-  // Set current time to UTC midnight for fair comparison
-  const nowUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const isExpired = nowUTC >= expirationDate;
+  const isExpired = now >= expirationDate;
   
-  console.log(`Status check for plate ${plateNo}: Current=${nowUTC.toISOString()}, Expiration=${expirationDate.toISOString()}, Expired=${isExpired}`);
+  console.log(`Status check for plate ${plateNo}: Current=${now.toISOString()}, Expiration=${expirationDate.toISOString()}, Expired=${isExpired}`);
   
   return isExpired;
 };
@@ -220,9 +224,7 @@ export const getVehicleStatus = (plateNo, dateOfRenewal = null, vehicleStatusTyp
   }
   
   const now = new Date();
-  // Set current time to UTC midnight for fair comparison
-  const nowUTC = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const isExpired = nowUTC >= expirationDate;
+  const isExpired = now >= expirationDate;
   const status = isExpired ? "0" : "1";
   
   console.log(`Final status for plate ${plateNo}: ${status} (${isExpired ? 'EXPIRED' : 'ACTIVE'})`);
@@ -234,19 +236,21 @@ export const getVehicleStatus = (plateNo, dateOfRenewal = null, vehicleStatusTyp
  * Get human-readable status description
  * @param {string} plateNo - The plate number
  * @param {Date|string} dateOfRenewal - The date of renewal (optional)
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {string} - "Active" or "Expired"
  */
-export const getVehicleStatusDescription = (plateNo, dateOfRenewal = null) => {
-  return isVehicleExpired(plateNo, dateOfRenewal) ? "Expired" : "Active";
+export const getVehicleStatusDescription = (plateNo, dateOfRenewal = null, vehicleStatusType = "Old") => {
+  return isVehicleExpired(plateNo, dateOfRenewal, vehicleStatusType) ? "Expired" : "Active";
 };
 
 /**
  * Get expiration information for a plate number
  * @param {string} plateNo - The plate number
  * @param {Date|string} dateOfRenewal - The date of renewal (optional)
+ * @param {string} vehicleStatusType - The vehicle status type ("New" or "Old")
  * @returns {object|null} - Object with expiration details
  */
-export const getExpirationInfo = (plateNo, dateOfRenewal = null) => {
+export const getExpirationInfo = (plateNo, dateOfRenewal = null, vehicleStatusType = "Old") => {
   const lastTwoDigits = extractLastTwoDigits(plateNo);
   if (!lastTwoDigits || lastTwoDigits.length !== 2) {
     return null;
@@ -267,14 +271,14 @@ export const getExpirationInfo = (plateNo, dateOfRenewal = null) => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   
-  const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal);
+  const expirationDate = calculateExpirationDate(plateNo, dateOfRenewal, vehicleStatusType);
   
   return {
     lastTwoDigits,
     week,
     month: monthNames[monthIndex],
     expirationDate,
-    isExpired: isVehicleExpired(plateNo, dateOfRenewal),
-    status: getVehicleStatus(plateNo, dateOfRenewal)
+    isExpired: isVehicleExpired(plateNo, dateOfRenewal, vehicleStatusType),
+    status: getVehicleStatus(plateNo, dateOfRenewal, vehicleStatusType)
   };
 };
