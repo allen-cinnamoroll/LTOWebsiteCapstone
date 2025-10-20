@@ -21,7 +21,7 @@ const NoChangesModal = ({ open, onOpenChange, onContinue, onCancel }) => {
         </DialogHeader>
         
         <div className="py-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             No changes were made to the vehicle information. Would you like to continue editing?
           </p>
         </div>
@@ -31,7 +31,7 @@ const NoChangesModal = ({ open, onOpenChange, onContinue, onCancel }) => {
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="min-w-[80px]"
+            className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             No
           </Button>

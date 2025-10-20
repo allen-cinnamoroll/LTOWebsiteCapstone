@@ -280,7 +280,8 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
                <Button
                  onClick={() => {
                    onOpenChange(false);
-                   navigate(`/violation/${violationData?._id}/edit`);
+                   // Trigger edit modal instead of navigation
+                   window.dispatchEvent(new CustomEvent('editViolation', { detail: violationData?._id }));
                  }}
                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 text-sm font-semibold"
                >

@@ -43,6 +43,11 @@ const DashboardLayout = () => {
       return 'Edit Accident';
     }
     
+    // Handle driver profile pages (e.g., /driver/123) - return null to hide breadcrumb
+    if (path.match(/^\/driver\/[a-zA-Z0-9]+$/)) {
+      return null;
+    }
+    
     switch (path) {
       case '/':
         return 'Overview';
@@ -79,19 +84,21 @@ const DashboardLayout = () => {
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
-              <Breadcrumb>
-                <BreadcrumbList>
-                  <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="/">
-                      Dashboard
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="hidden md:block" />
-                  <BreadcrumbItem>
-                    <BreadcrumbPage>{getPageTitle()}</BreadcrumbPage>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+              {getPageTitle() && (
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem className="hidden md:block">
+                      <BreadcrumbLink href="/">
+                        Dashboard
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{getPageTitle()}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              )}
             </div>
             <div className="px-4 md:px-8">
               <ModeToggle />

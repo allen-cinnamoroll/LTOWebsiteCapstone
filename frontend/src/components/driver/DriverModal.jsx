@@ -95,21 +95,28 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                       <p className="text-xs text-gray-500">File Numbers</p>
                     </div>
                     <div className="ml-6 mt-1">
-                      <div className="grid grid-cols-3 gap-1 max-w-xs">
-                        {driverData.vehicleIds && driverData.vehicleIds.length > 0 ? (
-                          driverData.vehicleIds.map((vehicle, index) => (
-                            <button
-                              key={index}
-                              onClick={() => handleFileNumberClick(vehicle.fileNo)}
-                              className="text-blue-600 hover:text-blue-800 text-xs font-medium cursor-pointer hover:underline text-left"
-                            >
-                              {vehicle.fileNo}
-                            </button>
-                          ))
-                        ) : (
-                          <span className="text-gray-400 text-xs">N/A</span>
-                        )}
-                      </div>
+                      {driverData.vehicleIds && driverData.vehicleIds.length > 0 ? (
+                        <div className="space-y-2">
+                          {driverData.vehicleIds.map((vehicle, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleFileNumberClick(vehicle.fileNo)}
+                                className="text-blue-600 hover:text-blue-800 text-xs font-medium cursor-pointer hover:underline text-left break-all bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded border border-blue-200 transition-colors duration-200"
+                                title={`Click to view vehicle details for ${vehicle.fileNo}`}
+                              >
+                                {vehicle.fileNo}
+                              </button>
+                              {vehicle.plateNo && (
+                                <span className="text-xs text-gray-500">
+                                  ({vehicle.plateNo})
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-xs">N/A</span>
+                      )}
                     </div>
                   </div>
 

@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LoaderCircle, CalendarIcon, Search, X, Edit3 } from "lucide-react";
+import { LoaderCircle, CalendarIcon, Search, X, Edit3, Eye } from "lucide-react";
 import { format } from "date-fns";
 import {
   Popover,
@@ -33,6 +33,7 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import AddDriverModal from "@/components/driver/AddDriverModal";
+import OwnerDetailsModal from "./OwnerDetailsModal";
 
 const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, isEditMode = false, readOnlyFields = [], prePopulatedOwner = "" }) => {
   const navigate = useNavigate();
@@ -45,14 +46,23 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   const [showNoResults, setShowNoResults] = useState(false);
   const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
   const [isOwnerEditable, setIsOwnerEditable] = useState(false);
+  const [ownerDetailsModalOpen, setOwnerDetailsModalOpen] = useState(false);
+  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
   const searchInputRef = useRef(null);
 
   // Set pre-populated owner name in edit mode
   useEffect(() => {
-    if (isEditMode && prePopulatedOwner) {
+    if (isEditMode && prePopulatedOwner && prePopulatedOwner.trim() !== '') {
       setSearchTerm(prePopulatedOwner);
+      // If we have a pre-populated owner, set it as selected driver
+      if (prePopulatedOwner && prePopulatedOwner !== 'Not selected') {
+        setSelectedDriver({
+          _id: form.getValues('driver') || '',
+          ownerRepresentativeName: prePopulatedOwner
+        });
+      }
     }
-  }, [isEditMode, prePopulatedOwner]);
+  }, [isEditMode, prePopulatedOwner, form]);
 
   // Search drivers when search term changes
   useEffect(() => {
@@ -119,6 +129,11 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     setIsOwnerEditable(false); // Return to read-only state after selection
   };
 
+  const handleViewOwner = (driver) => {
+    setSelectedOwnerId(driver._id);
+    setOwnerDetailsModalOpen(true);
+  };
+
   const handleClearDriver = () => {
     setSelectedDriver(null);
     form.setValue("driver", null);
@@ -166,13 +181,26 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
         console.log('Selected driver:', selectedDriver);
         console.log('Form data:', data);
         
+        // Handle driver field properly for edit mode
+        let driverId = data.driver;
+        if (isEditMode && !isOwnerEditable && !selectedDriver) {
+          // If in edit mode and driver field is not editable, keep the original driver
+          driverId = data.driver || form.getValues('driver');
+        } else if (selectedDriver) {
+          // If a new driver is selected, use their ID
+          driverId = selectedDriver._id;
+        } else if (isEditMode && prePopulatedOwner && prePopulatedOwner !== 'No driver assigned') {
+          // If we have a pre-populated owner, preserve the existing driver ID
+          driverId = form.getValues('driver') || data.driver;
+        }
+        
         // Include the owner's name in the form data
-        // Try to get the owner name from selectedDriver, searchTerm, or fallback
         const ownerName = selectedDriver?.ownerRepresentativeName || 
-                         (searchTerm && searchTerm !== '' ? searchTerm : 'Not selected');
+                         (searchTerm && searchTerm !== '' ? searchTerm : prePopulatedOwner || 'Not selected');
         
         const formDataWithOwner = {
           ...data,
+          driver: driverId,
           ownerName: ownerName
         };
         console.log('Form data with owner:', formDataWithOwner);
@@ -240,7 +268,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         className={cn(
                           "text-black dark:text-white text-sm",
                           form.formState.errors.fileNo && "border-red-400",
-                          isEditMode && readOnlyFields.includes('fileNo') && "bg-gray-200 text-gray-600 cursor-not-allowed border-gray-300"
+                          isEditMode && readOnlyFields.includes('fileNo') && "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
                         )}
                       />
                     </FormControl>
@@ -507,7 +535,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         <Input
                           value={field.value ? format(field.value, "PPP") : "Not set"}
                           readOnly
-                          className="bg-gray-200 text-gray-600 cursor-not-allowed border-gray-300 text-sm"
+                          className="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600 text-sm"
                         />
                       ) : (
                         <Popover>
@@ -584,7 +612,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                             }}
                             className={cn(
                               "pr-10 text-sm",
-                              isEditMode && !isOwnerEditable && "bg-gray-200"
+                              isEditMode && !isOwnerEditable && "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
                             )}
                             readOnly={isEditMode && !isOwnerEditable}
                           />
@@ -620,13 +648,29 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                           {searchResults.map((driver) => (
                             <div
                               key={driver._id}
-                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 transition-colors"
-                              onClick={() => handleDriverSelect(driver)}
+                              className="p-3 hover:bg-accent border-b border-border last:border-b-0 transition-colors flex items-center justify-between"
                             >
-                              <div className="text-sm font-medium text-foreground">{driver.ownerRepresentativeName}</div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                Current vehicles: {driver.plateNo || "None"}
+                              <div 
+                                className="flex-1 cursor-pointer"
+                                onClick={() => handleDriverSelect(driver)}
+                              >
+                                <div className="text-sm font-medium text-foreground">{driver.ownerRepresentativeName}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Current vehicles: {driver.plateNo || "None"}
+                                </div>
                               </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewOwner(driver);
+                                }}
+                                className="ml-2 h-6 w-6 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
                             </div>
                           ))}
                           
@@ -700,6 +744,13 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
         open={addDriverModalOpen}
         onOpenChange={setAddDriverModalOpen}
         onDriverAdded={handleDriverAdded}
+      />
+      
+      {/* Owner Details Modal */}
+      <OwnerDetailsModal
+        open={ownerDetailsModalOpen}
+        onOpenChange={setOwnerDetailsModalOpen}
+        ownerId={selectedOwnerId}
       />
     </Form>
   );

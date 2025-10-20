@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import FormComponent from "./FormComponent";
 import { formatDate } from "@/util/dateFormatter";
 import { toast } from "sonner";
-import { VehicleSchema } from "@/schema";
+import { EditVehicleSchema } from "@/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
@@ -29,7 +29,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
   const date = formatDate(Date.now());
 
   const form = useForm({
-    resolver: zodResolver(VehicleSchema),
+    resolver: zodResolver(EditVehicleSchema),
     defaultValues: {
       plateNo: "",
       fileNo: "",
@@ -71,19 +71,37 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
         },
       });
       if (data) {
+        // Debug: Log the classification value from database
+        console.log('Classification from database:', data.data?.classification);
+        console.log('Full vehicle data:', data.data);
+        
+        // Map database classification values to form values
+        const mapClassification = (dbValue) => {
+          if (!dbValue) return undefined;
+          const mapping = {
+            'PRIVATE': 'Private',
+            'FOR HIRE': 'For Hire', 
+            'GOVERNMENT': 'Government',
+            'Private': 'Private',
+            'For Hire': 'For Hire',
+            'Government': 'Government'
+          };
+          return mapping[dbValue] || dbValue;
+        };
+        
         const vData = {
-          plateNo: data.data?.plateNo,
-          fileNo: data.data?.fileNo,
-          engineNo: data.data?.engineNo,
-          chassisNo: data.data?.serialChassisNumber,
-          make: data.data?.make,
-          bodyType: data.data?.bodyType,
-          color: data.data?.color,
-          classification: data.data?.classification,
-          vehicleStatusType: data.data?.vehicleStatusType,
+          plateNo: data.data?.plateNo || "",
+          fileNo: data.data?.fileNo || "",
+          engineNo: data.data?.engineNo || "",
+          chassisNo: data.data?.serialChassisNumber || "",
+          make: data.data?.make || "",
+          bodyType: data.data?.bodyType || "",
+          color: data.data?.color || "",
+          classification: mapClassification(data.data?.classification),
+          vehicleStatusType: data.data?.vehicleStatusType || "Old",
           dateOfRenewal: data.data?.dateOfRenewal ? new Date(data.data.dateOfRenewal) : undefined,
           driver: data.data?.driverId?._id || "",
-          ownerName: data.data?.driverId?.ownerRepresentativeName || "",
+          ownerName: data.data?.driverId?.ownerRepresentativeName || "No driver assigned",
         };
         setVehicleData(vData);
         setOriginalData(vData);
@@ -146,7 +164,8 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
         color: formData.color,
         classification: formData.classification,
         vehicleStatusType: formData.vehicleStatusType,
-        driverId: formData.driver,
+        // Only include driverId if it's provided and different from original
+        ...(formData.driver && formData.driver !== originalData.driver && { driverId: formData.driver }),
       };
 
       const { data } = await apiClient.patch(`/vehicle/${vehicleId}`, content, {

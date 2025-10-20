@@ -12,7 +12,10 @@
         "import-any": "node scripts/import_any_json.js",
         "import-restructured": "node scripts/import_restructured_data.js",
         "import-production": "node scripts/import_production.js",
-        "verify": "node scripts/verify_relationships.js"
+        "verify": "node scripts/verify_relationships.js",
+        "fix-duplicates": "node scripts/fix_duplicate_drivers.js",
+        "find-orphaned": "node scripts/find_orphaned_drivers.js",
+        "show-multiple": "node scripts/show_multiple_vehicles.js"
     },
     "keywords": [],
     "author": "",

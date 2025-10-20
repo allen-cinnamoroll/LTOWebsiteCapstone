@@ -118,11 +118,8 @@ const importAnyJson = async (jsonFilePath) => {
     
     console.log(`📊 Found ${jsonData.length} records to import from ${path.basename(jsonFilePath)}`);
 
-    // Clear existing data (optional - remove this if you want to keep existing data)
-    console.log('🧹 Clearing existing data...');
-    await DriverModel.deleteMany({});
-    await VehicleModel.deleteMany({});
-    console.log('✅ Existing data cleared');
+    // Keep existing data - no clearing
+    console.log('📋 Preserving existing data - importing new records only');
 
     // Step 1: Import Drivers first
     console.log('👥 Importing drivers...');
@@ -168,10 +165,24 @@ const importAnyJson = async (jsonFilePath) => {
           vehicleIds: [] // Will be populated after vehicles are imported
         };
 
-        // Create driver document
-        const driver = await DriverModel.create(driverData);
-        driverMap.set(record.ownerRepresentativeName, driver._id);
-        driverSuccessCount++;
+        // Create driver document with duplicate handling
+        try {
+          const driver = await DriverModel.create(driverData);
+          driverMap.set(record.ownerRepresentativeName, driver._id);
+          driverSuccessCount++;
+        } catch (error) {
+          if (error.code === 11000) {
+            // Duplicate key error - find existing driver
+            console.log(`⚠️  Driver already exists: ${record.ownerRepresentativeName}`);
+            const existingDriver = await DriverModel.findOne({ ownerRepresentativeName: record.ownerRepresentativeName });
+            if (existingDriver) {
+              driverMap.set(record.ownerRepresentativeName, existingDriver._id);
+              driverSuccessCount++;
+            }
+          } else {
+            throw error; // Re-throw other errors
+          }
+        }
         
         if (driverSuccessCount % 50 === 0) {
           console.log(`  Processed ${driverSuccessCount}/${jsonData.length} drivers...`);
@@ -233,15 +244,26 @@ const importAnyJson = async (jsonFilePath) => {
           driverId: driverId
         };
 
-        // Create vehicle document
-        const vehicle = await VehicleModel.create(vehicleData);
-        vehicleSuccessCount++;
-        
-        // Track vehicles per driver for updating driver records
-        if (!driverVehicleMap.has(driverId)) {
-          driverVehicleMap.set(driverId, []);
+        // Create vehicle document with duplicate handling
+        try {
+          const vehicle = await VehicleModel.create(vehicleData);
+          vehicleSuccessCount++;
+          
+          // Track vehicles per driver for updating driver records
+          if (!driverVehicleMap.has(driverId)) {
+            driverVehicleMap.set(driverId, []);
+          }
+          driverVehicleMap.get(driverId).push(vehicle._id);
+        } catch (error) {
+          if (error.code === 11000) {
+            // Duplicate key error - skip this vehicle
+            console.log(`⚠️  Skipping duplicate vehicle: ${record.plateNo}`);
+            vehicleErrorCount++;
+            continue;
+          } else {
+            throw error; // Re-throw other errors
+          }
         }
-        driverVehicleMap.get(driverId).push(vehicle._id);
         
         if (vehicleSuccessCount % 50 === 0) {
           console.log(`  Processed ${vehicleSuccessCount}/${jsonData.length} vehicles...`);

@@ -72,7 +72,7 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.plateNo && "border-red-400",
-                          isEditMode && "bg-gray-100 cursor-not-allowed text-[8px]"
+                          isEditMode && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-[8px] text-gray-600 dark:text-gray-300"
                         )}
                       />
                     </FormControl>
@@ -108,7 +108,7 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.fileNo && "border-red-400",
-                          isEditMode && "bg-gray-100 cursor-not-allowed text-[8px]"
+                          isEditMode && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-[8px] text-gray-600 dark:text-gray-300"
                         )}
                       />
                     </FormControl>

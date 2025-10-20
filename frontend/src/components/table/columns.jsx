@@ -206,12 +206,18 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={"Owner"} />
     ),
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("ownerRepresentativeName")}</div>,
+    cell: ({ row }) => (
+      <div className="font-medium text-gray-900 dark:text-gray-200 text-xs max-w-sm break-words whitespace-normal leading-tight">
+        {row.getValue("ownerRepresentativeName")}
+      </div>
+    ),
+    size: 300, // Set explicit width for Owner column
   },
   {
     accessorKey: "vehicleCount",
     header: "No. of Vehicles",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehicleCount") || 0}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs text-center">{row.getValue("vehicleCount") || 0}</div>,
+    size: 80, // Set smaller width for No. of Vehicles column
   },
   {
     accessorKey: "emailAddress",
