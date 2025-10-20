@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DriversTable from "@/components/drivers/DriversTable";
 import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
 import EditDriverModal from "@/components/driver/EditDriverModal";
+import DriverModal from "@/components/driver/DriverModal";
 import VehicleModal from "@/components/vehicle/VehicleModal";
 import { toast } from "sonner";
 
@@ -31,6 +32,7 @@ const DriverPage = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [editDriverModalOpen, setEditDriverModalOpen] = useState(false);
+  const [driverProfileModalOpen, setDriverProfileModalOpen] = useState(false);
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [selectedFileNumber, setSelectedFileNumber] = useState("");
 
@@ -85,7 +87,8 @@ const DriverPage = () => {
 
 
   const onManage = (data) => {
-    navigate(`/driver/${data._id}`);
+    setSelectedDriver(data);
+    setDriverProfileModalOpen(true);
   };
 
   const onEdit = (driverId) => {
@@ -117,6 +120,23 @@ const DriverPage = () => {
   const handleFileNumberClick = (fileNumber) => {
     setSelectedFileNumber(fileNumber);
     setVehicleModalOpen(true);
+  };
+
+  const handleDriverUpdated = (updatedDriver) => {
+    // Update the driver data with the updated information
+    setDriverData(prevData => 
+      prevData.map(driver => 
+        driver._id === updatedDriver._id ? updatedDriver : driver
+      )
+    );
+    
+    // Close the profile modal
+    setDriverProfileModalOpen(false);
+    
+    // Show success message
+    toast.success("Driver updated successfully", {
+      description: "The driver information has been updated in the table."
+    });
   };
 
   const onDelete = async (data) => {
@@ -151,22 +171,6 @@ const DriverPage = () => {
   };
 
 
-  const handleDriverUpdated = (updatedDriver) => {
-    // Update the driver data with the updated information
-    setDriverData(prevData => 
-      prevData.map(driver => 
-        driver._id === updatedDriver._id ? updatedDriver : driver
-      )
-    );
-    
-    // Close the edit modal
-    setEditDriverModalOpen(false);
-    
-    // Show success message
-    toast.success("Driver updated successfully", {
-      description: "The driver information has been updated in the table."
-    });
-  };
 
   return (
     <div className="h-full flex flex-col">
@@ -197,6 +201,15 @@ const DriverPage = () => {
         }
       />
 
+
+      {/* Driver Profile Modal */}
+      <DriverModal
+        open={driverProfileModalOpen}
+        onOpenChange={setDriverProfileModalOpen}
+        driverData={selectedDriver}
+        onFileNumberClick={handleFileNumberClick}
+        onDriverUpdated={handleDriverUpdated}
+      />
 
       {/* Edit Driver Modal */}
       <EditDriverModal

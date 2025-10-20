@@ -95,6 +95,40 @@ export const VehicleSchema = z.object({
   }),
 });
 
+export const EditVehicleSchema = z.object({
+  plateNo: z.string().min(1, {
+    message: "Plate number is required",
+  }),
+  fileNo: z.string().min(1, {
+    message: "File number is required",
+  }),
+  engineNo: z.string().min(1, {
+    message: "Engine number is required",
+  }),
+  chassisNo: z.string().min(1, {
+    message: "Chassis number is required",
+  }),
+  make: z.string().min(1, {
+    message: "Make is required",
+  }),
+  bodyType: z.string().min(1, {
+    message: "Body type is required",
+  }),
+  color: z.string().min(1, {
+    message: "Color is required",
+  }),
+  classification: z.string().min(1, {
+    message: "Classification is required",
+  }),
+  dateOfRenewal: z.date({
+    required_error: "Date of renewal is required",
+  }),
+  vehicleStatusType: z.enum(["New", "Old"], {
+    required_error: "Vehicle status type is required",
+  }),
+  driver: z.string().optional().or(z.null()), // Make driver optional for edit mode and allow null
+});
+
 export const AccidentSchema = z.object({
   accident_id: z.string().optional(),
   plateNo: z.string().min(1, { message: "Plate number is required" }),
@@ -122,8 +156,8 @@ export const ViolationCreateSchema = z.object({
   chassisNo: z.string().optional().nullable(),
   engineNo: z.string().optional().nullable(),
 }).refine((data) => {
-  // Validate middleInitial length only if it has a value and is not null
-  if (data.middleInitial && data.middleInitial !== null && data.middleInitial.trim() !== '') {
+  // Validate middleInitial length only if it has a value, is not null, and is not "null" string
+  if (data.middleInitial && data.middleInitial !== null && data.middleInitial !== "null" && data.middleInitial.trim() !== '') {
     if (data.middleInitial.length > 1) {
       return false;
     }
@@ -133,14 +167,14 @@ export const ViolationCreateSchema = z.object({
   message: "Middle initial must be 1 character",
   path: ["middleInitial"]
 }).refine((data) => {
-  // Validate licenseType enum only if it has a value and is not null
-  if (data.licenseType && data.licenseType !== null && data.licenseType.trim() !== '') {
-    if (!["SP", "DL", "CL", "plate", "sp receipt", "dl receipt", "refuse to sur.", "dl tempor"].includes(data.licenseType)) {
+  // Validate licenseType enum only if it has a value, is not null, and is not "null" string
+  if (data.licenseType && data.licenseType !== null && data.licenseType !== "null" && data.licenseType.trim() !== '') {
+    if (!["SP", "DL", "CL", "PLATE", "SP RECEIPT", "DL RECEIPT", "REFUSE TO SUR.", "DL TEMPORARY", "-", "null"].includes(data.licenseType)) {
       return false;
     }
   }
   return true;
 }, {
-  message: "License type must be SP, DL, CL, plate, sp receipt, dl receipt, refuse to sur., or dl tempor",
+  message: "License type must be a valid option",
   path: ["licenseType"]
 });

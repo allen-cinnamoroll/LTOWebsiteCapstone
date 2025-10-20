@@ -65,8 +65,8 @@ const DriverProfile = () => {
         onOpenChange={(open) => {
           setModalOpen(open);
           if (!open) {
-            // When modal is closed, navigate back to drivers table
-            navigate('/driver');
+            // When modal is closed, go back to previous page to preserve current state
+            navigate(-1);
           }
         }} 
         driverData={driverData}

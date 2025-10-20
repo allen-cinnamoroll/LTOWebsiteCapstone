@@ -31,7 +31,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
       middleInitial: "",
       lastName: "",
       suffix: "",
-      violations: [],
+      violations: [""],
       violationType: "confiscated",
       licenseType: undefined,
       plateNo: "",
@@ -83,7 +83,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
           middleInitial: "",
           lastName: "",
           suffix: "",
-          violations: [],
+          violations: [""],
           violationType: "confiscated",
           licenseType: undefined,
           plateNo: "",
@@ -119,7 +119,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         middleInitial: "",
         lastName: "",
         suffix: "",
-        violations: [],
+        violations: [""],
         violationType: "confiscated",
         licenseType: undefined,
         plateNo: "",
@@ -150,6 +150,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
             form={form}
             onSubmit={onSubmit}
             submitting={submitting}
+            isEditMode={false}
           />
         </div>
 

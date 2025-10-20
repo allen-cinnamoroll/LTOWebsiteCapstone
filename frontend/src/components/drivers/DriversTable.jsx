@@ -52,6 +52,7 @@ const DriversTable = ({
   const [columnVisibility, setColumnVisibility] = React.useState({
     emailAddress: false, // Hide email address column by default
   });
+  const [columnSizing, setColumnSizing] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 8, // 8 rows per page
@@ -71,6 +72,7 @@ const DriversTable = ({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: setColumnSizing,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, columnIds, filterValue) => {
       // This function will filter across multiple columns
@@ -86,8 +88,11 @@ const DriversTable = ({
       sorting,
       columnFilters,
       columnVisibility,
+      columnSizing,
       globalFilter,
     },
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
   });
   return (
     <div className="h-full flex flex-col">
@@ -134,7 +139,11 @@ const DriversTable = ({
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
                     {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-2 whitespace-nowrap text-left">
+                      <TableHead 
+                        key={header.id} 
+                        className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-2 whitespace-nowrap text-left"
+                        style={{ width: header.getSize() }}
+                      >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
@@ -159,7 +168,11 @@ const DriversTable = ({
                   className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-3 py-2 text-gray-800 dark:text-gray-200 text-left">
+                        <TableCell 
+                          key={cell.id} 
+                          className="px-3 py-2 text-gray-800 dark:text-gray-200 text-left max-w-0"
+                          style={{ width: cell.column.getSize() }}
+                        >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

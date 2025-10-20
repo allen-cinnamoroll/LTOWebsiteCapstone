@@ -148,6 +148,9 @@ const VehicleTrendChart = () => {
       const response = await getMonthlyVehicleTrends(year, municipalityToUse);
       
       if (response.success) {
+         // Debug: Log the raw data to see the structure
+         console.log('Raw monthly data:', response.data);
+         
          // Process monthly data to show continuous lines with smart connections
          const processedData = response.data.map((item, index, array) => {
            if (item.total === 0) {
@@ -181,6 +184,9 @@ const VehicleTrendChart = () => {
              };
            }
          });
+        
+        // Debug: Log the processed data to see if month field is preserved
+        console.log('Processed monthly data:', processedData);
         setTrendData(processedData);
       } else {
         setError('Failed to fetch monthly trend data');
@@ -557,6 +563,10 @@ const VehicleTrendChart = () => {
                 angle={isMobile ? -45 : 0}
                 textAnchor={isMobile ? 'end' : 'middle'}
                 height={isMobile ? 60 : 30}
+                tickFormatter={(value) => {
+                  console.log('X-axis tick value:', value, 'viewType:', viewType);
+                  return value;
+                }}
               />
               <YAxis 
                 stroke="#6b7280"

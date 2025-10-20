@@ -349,7 +349,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
                   <div className="col-span-3">{Array.isArray(confirmationData.plateNo) ? confirmationData.plateNo.join(', ') : confirmationData.plateNo}</div>
                   
                   <div className="font-medium text-gray-600">File No:</div>
-                  <div className="col-span-3">{confirmationData.fileNo || 'Not provided'}</div>
+                  <div className="col-span-3 break-all text-xs">{confirmationData.fileNo || 'Not provided'}</div>
                   
                   <div className="font-medium text-gray-600">Owner:</div>
                   <div className="col-span-3">{confirmationData.ownerRepresentativeName}</div>

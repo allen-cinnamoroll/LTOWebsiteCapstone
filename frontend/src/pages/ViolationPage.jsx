@@ -7,6 +7,7 @@ import { violationColumns } from "@/components/table/columns";
 import ViolationTable from "@/components/violations/ViolationTable";
 import AddViolationModal from "@/components/violations/AddViolationModal";
 import ViolationDetailsModal from "@/components/violations/ViolationDetailsModal";
+import EditViolationModal from "@/components/violations/EditViolationModal";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
@@ -17,10 +18,25 @@ const ViolationPage = () => {
   const [submitting, setIsSubmitting] = useState(false);
   const [addViolationModalOpen, setAddViolationModalOpen] = useState(false);
   const [violationDetailsModalOpen, setViolationDetailsModalOpen] = useState(false);
+  const [editViolationModalOpen, setEditViolationModalOpen] = useState(false);
   const [selectedViolation, setSelectedViolation] = useState(null);
+  const [selectedViolationId, setSelectedViolationId] = useState(null);
 
   useEffect(() => {
     fetchViolations();
+  }, []);
+
+  // Listen for edit violation events from details modal
+  useEffect(() => {
+    const handleEditViolation = (event) => {
+      setSelectedViolationId(event.detail);
+      setEditViolationModalOpen(true);
+    };
+
+    window.addEventListener('editViolation', handleEditViolation);
+    return () => {
+      window.removeEventListener('editViolation', handleEditViolation);
+    };
   }, []);
 
   const fetchViolations = async () => {
@@ -73,11 +89,17 @@ const ViolationPage = () => {
   };
 
   const onEdit = (violationId) => {
-    navigate(`/violation/${violationId}/edit`);
+    setSelectedViolationId(violationId);
+    setEditViolationModalOpen(true);
   };
 
   const handleViolationAdded = () => {
     // Refresh the violation list when a new violation is added
+    fetchViolations();
+  };
+
+  const handleViolationUpdated = () => {
+    // Refresh the violation list when a violation is updated
     fetchViolations();
   };
 
@@ -112,6 +134,14 @@ const ViolationPage = () => {
         open={violationDetailsModalOpen}
         onOpenChange={setViolationDetailsModalOpen}
         violationData={selectedViolation}
+      />
+
+      {/* Edit Violation Modal */}
+      <EditViolationModal
+        open={editViolationModalOpen}
+        onOpenChange={setEditViolationModalOpen}
+        violationId={selectedViolationId}
+        onViolationUpdated={handleViolationUpdated}
       />
     </div>
   );
