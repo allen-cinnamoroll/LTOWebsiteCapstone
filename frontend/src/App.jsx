@@ -26,6 +26,8 @@ import AccidentAnalyticsPage from "./pages/AccidentAnalyticsPage";
 import RegisterAccountPage from "./pages/RegisterAccountPage";
 import UpdateAccountPage from "./pages/UpdateAccountPage";
 import ViewAccountLogsPage from "./pages/ViewAccountLogsPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/404" element={<PageNotFound/>} />
         
         {/* Protected routes */}

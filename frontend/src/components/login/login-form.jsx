@@ -1,5 +1,5 @@
 import { User, Lock, EyeOff, Eye, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ export function LoginForm({ className, ...props }) {
   const [showPass, setShowPass] = useState(false);
   const [submitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -37,16 +38,32 @@ export function LoginForm({ className, ...props }) {
   const form = useForm({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: "",
+      email: localStorage.getItem("rememberedEmail") || "",
       password: "",
     },
   });
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setRememberMe(true);
+      form.setValue("email", rememberedEmail);
+    }
+  }, [form]);
 
   const onSubmit = async (formData) => {
     
     try {
       setIsSubmitting(true);
       setErrorMessage(null); // Clear any previous error messages
+      
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", formData.email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
       
       const { data } = await apiClient.post("/auth/login", formData);
       if (data) {
@@ -98,7 +115,7 @@ export function LoginForm({ className, ...props }) {
   return (
     <div className={cn("w-full max-w-md", className)} {...props}>
       {/* Login Form Container */}
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="bg-white text-gray-900 rounded-lg shadow-lg p-8">
         <Form {...form}>
           <form 
             key="login-form"
@@ -135,7 +152,7 @@ export function LoginForm({ className, ...props }) {
                             placeholder="EMAIL"
                             autoComplete="current-email"
                             className={cn(
-                              "pl-10 h-11 border-gray-300 focus:ring-0 focus:border-[#1e3a8a] rounded-md",
+                              "pl-10 h-11 border-gray-300 focus:ring-0 focus:border-[#1e3a8a] rounded-md bg-white text-gray-900 placeholder:text-gray-500",
                               form.formState.errors.email && "border-red-500"
                             )}
                           />
@@ -160,7 +177,7 @@ export function LoginForm({ className, ...props }) {
                             placeholder="PASSWORD"
                             autoComplete="current-password"
                             className={cn(
-                              "pl-10 pr-10 h-11 border-gray-300 focus:ring-0 focus:border-[#1e3a8a] rounded-md",
+                              "pl-10 pr-10 h-11 border-gray-300 focus:ring-0 focus:border-[#1e3a8a] rounded-md bg-white text-gray-900 placeholder:text-gray-500",
                               form.formState.errors.password && "border-red-500"
                             )}
                           />
@@ -191,13 +208,19 @@ export function LoginForm({ className, ...props }) {
               {/* Remember Username and Forgot Password */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" />
+                  <Checkbox 
+                    id="remember" 
+                    checked={rememberMe}
+                    onCheckedChange={setRememberMe}
+                    className="border-gray-300 data-[state=checked]:bg-[#1e3a8a] data-[state=checked]:border-[#1e3a8a]" 
+                  />
                   <label htmlFor="remember" className="text-sm text-gray-600">
                     Remember Username
                   </label>
                 </div>
                 <button
                   type="button"
+                  onClick={() => navigate("/forgot-password")}
                   className="text-sm text-[#1e3a8a] hover:underline"
                 >
                   Forgot Password

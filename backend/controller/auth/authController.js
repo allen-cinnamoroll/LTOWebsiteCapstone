@@ -2,7 +2,7 @@ import DriverModel from "../../model/DriverModel.js";
 import UserModel from "../../model/UserModel.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { sendOTPEmail } from "../../util/emailService.js";
+import { sendOTPEmail, sendPasswordResetOTP } from "../../util/emailService.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../../util/userLogger.js";
 
 dotenv.config();
@@ -540,6 +540,195 @@ export const resetOTPStatus = async (req, res) => {
       });
     }
   } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Check if user exists
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Email not found in our system",
+      });
+    }
+
+    // Generate password reset OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+    user.passwordResetOTP = otp;
+    user.passwordResetOTPExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP expires in 10 minutes
+    await user.save();
+
+    // Send password reset OTP via email
+    const emailSent = await sendPasswordResetOTP(user.email, otp);
+    
+    if (!emailSent) {
+      // Log failed password reset OTP send
+      await logUserActivity({
+        userId: user._id,
+        userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+        email: user.email,
+        role: user.role,
+        logType: "password_reset_otp_sent",
+        ipAddress: getClientIP(req),
+        userAgent: getUserAgent(req),
+        status: "failed",
+        details: "Failed to send password reset OTP email"
+      });
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send password reset email. Please try again.",
+      });
+    }
+
+    // Log successful password reset OTP send
+    await logUserActivity({
+      userId: user._id,
+      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+      email: user.email,
+      role: user.role,
+      logType: "password_reset_otp_sent",
+      ipAddress: getClientIP(req),
+      userAgent: getUserAgent(req),
+      status: "success",
+      details: "Password reset OTP sent to email",
+      actorId: user._id,
+      actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+      actorEmail: user.email,
+      actorRole: user.role
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset OTP has been sent to your email",
+      email: user.email,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+export const verifyPasswordResetOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.passwordResetOTP !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    if (user.passwordResetOTPExpiresAt < new Date()) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP has expired",
+      });
+    }
+
+    // Generate a temporary token for password reset
+    const resetToken = jwt.sign(
+      {
+        userId: user._id,
+        email: user.email,
+        purpose: "password_reset"
+      },
+      ACCESS_KEY,
+      { expiresIn: "15m" } // Token expires in 15 minutes
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      resetToken,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { resetToken, newPassword } = req.body;
+
+  try {
+    // Verify the reset token
+    const decoded = jwt.verify(resetToken, ACCESS_KEY);
+    
+    if (decoded.purpose !== "password_reset") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid reset token",
+      });
+    }
+
+    const user = await UserModel.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.passwordResetOTP = undefined;
+    user.passwordResetOTPExpiresAt = undefined;
+    await user.save();
+
+    // Log successful password reset
+    await logUserActivity({
+      userId: user._id,
+      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+      email: user.email,
+      role: user.role,
+      logType: "password_reset",
+      ipAddress: getClientIP(req),
+      userAgent: getUserAgent(req),
+      status: "success",
+      details: "Password reset successfully",
+      actorId: user._id,
+      actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
+      actorEmail: user.email,
+      actorRole: user.role
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+    
     return res.status(500).json({
       success: false,
       message: err.message,

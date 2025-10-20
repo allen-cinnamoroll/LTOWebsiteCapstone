@@ -1,6 +1,6 @@
 import express from "express";
 import { registrationValidationRules, validate } from "../middleware/validator.js";
-import { login, register, verifyOTP, logout, resetOTPStatus } from "../controller/auth/authController.js";
+import { login, register, verifyOTP, logout, resetOTPStatus, forgotPassword, verifyPasswordResetOTP, resetPassword } from "../controller/auth/authController.js";
 import { authenticate } from "../middleware/authMiddleware.js";
 
 const authRouter = express.Router();
@@ -22,5 +22,10 @@ authRouter.get("/validate-token", authenticate, (req, res) => {
 });
 authRouter.post("/logout", authenticate, logout);
 authRouter.post("/reset-otp-status", authenticate, resetOTPStatus);
+
+// Forgot password routes
+authRouter.post("/forgot-password", express.json(), forgotPassword);
+authRouter.post("/verify-password-reset-otp", express.json(), verifyPasswordResetOTP);
+authRouter.post("/reset-password", express.json(), resetPassword);
 
 export default authRouter;
