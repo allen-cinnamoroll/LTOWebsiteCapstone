@@ -90,6 +90,11 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
+      avatar: decoded.avatar ? (() => {
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        return `${backendURL}/${decoded.avatar}`;
+      })() : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };
@@ -121,6 +126,11 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
+      avatar: decoded.avatar ? (() => {
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        return `${backendURL}/${decoded.avatar}`;
+      })() : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };

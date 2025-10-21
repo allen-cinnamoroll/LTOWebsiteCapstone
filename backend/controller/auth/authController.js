@@ -116,6 +116,7 @@ export const login = async (req, res) => {
           firstName: user.firstName,
           middleName: user.middleName,
           lastName: user.lastName,
+          avatar: user.avatar,
           isPasswordChange: user.isPasswordChange,
           isOtpVerified: user.isOtpVerified
         },
@@ -217,6 +218,7 @@ export const login = async (req, res) => {
           firstName: user.firstName,
           middleName: user.middleName,
           lastName: user.lastName,
+          avatar: user.avatar,
           isPasswordChange: user.isPasswordChange,
           isOtpVerified: false // User needs OTP verification
         },
@@ -272,6 +274,7 @@ export const login = async (req, res) => {
           firstName: user.firstName,
           middleName: user.middleName,
           lastName: user.lastName,
+          avatar: user.avatar,
           isPasswordChange: user.isPasswordChange,
           isOtpVerified: true // User is already verified
         },
@@ -349,6 +352,7 @@ export const verifyOTP = async (req, res) => {
         firstName: user.firstName,
         middleName: user.middleName,
         lastName: user.lastName,
+        avatar: user.avatar,
         isPasswordChange: user.isPasswordChange,
         isOtpVerified: true // Use true since we just updated it
       },
@@ -456,6 +460,7 @@ export const refreshAccessToken = async (req, res, next) => {
           firstName: currentUser.firstName,
           middleName: currentUser.middleName,
           lastName: currentUser.lastName,
+          avatar: currentUser.avatar,
           isPasswordChange: currentUser.isPasswordChange,
           isOtpVerified: currentUser.isOtpVerified
         },

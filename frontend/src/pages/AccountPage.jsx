@@ -18,11 +18,13 @@ import {
   X
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import apiClient from '@/api/axios';
 
 const AccountPage = () => {
-  const { userData } = useAuth();
+  const { userData, setUserData } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editData, setEditData] = useState({
     firstName: '',
     middleName: '',
@@ -68,17 +70,75 @@ const AccountPage = () => {
     setPreviewAvatar(userData?.avatar || '');
   };
 
-  const handleSave = () => {
-    // Here you would typically make an API call to update the user data
-    console.log('Saving user data:', editData);
-    // For now, we'll just simulate saving
-    setIsEditing(false);
-    // You could update the userData in context here
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('firstName', editData.firstName);
+      formData.append('middleName', editData.middleName);
+      formData.append('lastName', editData.lastName);
+      formData.append('email', editData.email);
+      
+      // Add avatar file if it's a new file (not just a preview from existing)
+      if (previewAvatar && previewAvatar !== userData?.avatar && previewAvatar.startsWith('data:')) {
+        // Convert data URL to file
+        const response = await fetch(previewAvatar);
+        const blob = await response.blob();
+        const file = new File([blob], 'avatar.jpg', { type: blob.type });
+        formData.append('avatar', file);
+      }
+
+      // Make API call to update profile
+      const response = await apiClient.put('/account/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        // Update user data in context
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        
+        setUserData(prev => ({
+          ...prev,
+          ...response.data.user,
+          // Update avatar URL to include the full path
+          avatar: response.data.user.avatar ? `${backendURL}/${response.data.user.avatar}` : prev.avatar
+        }));
+        
+        setIsEditing(false);
+        // Show success message (you could add a toast notification here)
+        console.log('Profile updated successfully');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // Show error message (you could add a toast notification here)
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAvatarChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
       // Create a preview URL for the selected image
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -124,9 +184,9 @@ const AccountPage = () => {
             </Button>
           ) : (
             <>
-              <Button onClick={handleSave} className="gap-2">
+              <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
                 <Save className="h-4 w-4" />
-                Save Changes
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button onClick={handleCancel} variant="outline" className="gap-2">
                 <X className="h-4 w-4" />
@@ -155,7 +215,14 @@ const AccountPage = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={previewAvatar || userData?.avatar} alt={editData.email || userData?.email} />
+                  <AvatarImage 
+                    src={previewAvatar || (userData?.avatar?.startsWith('http') ? userData.avatar : (() => {
+                      const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+                      const backendURL = baseURL.replace('/api', '');
+                      return userData?.avatar ? `${backendURL}/${userData.avatar}` : '';
+                    })())} 
+                    alt={editData.email || userData?.email} 
+                  />
                   <AvatarFallback className="text-lg font-bold">
                     {(editData.firstName || userData?.firstName || editData.email || userData?.email)?.charAt(0)?.toUpperCase() || 'U'}
                   </AvatarFallback>
