@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/api/axios';
+import { toast } from 'sonner';
 
 const AccountPage = () => {
   const { userData, setUserData } = useAuth();
@@ -109,14 +110,26 @@ const AccountPage = () => {
           avatar: response.data.user.avatar ? `${backendURL}/${response.data.user.avatar}` : prev.avatar
         }));
         
+        // Update localStorage with fresh user data
+        const updatedUserData = {
+          ...response.data.user,
+          avatar: response.data.user.avatar ? `${backendURL}/${response.data.user.avatar}` : ''
+        };
+        localStorage.setItem("userData", JSON.stringify(updatedUserData));
+        
         setIsEditing(false);
-        // Show success message (you could add a toast notification here)
-        console.log('Profile updated successfully');
+        // Show success toast notification
+        toast.success("Profile updated successfully!", {
+          description: new Date().toLocaleString(),
+        });
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      // Show error message (you could add a toast notification here)
-      alert('Failed to update profile. Please try again.');
+      // Show error toast notification
+      const errorMessage = error.response?.data?.message || 'Failed to update profile. Please try again.';
+      toast.error(errorMessage, {
+        description: new Date().toLocaleString(),
+      });
     } finally {
       setIsSaving(false);
     }
@@ -128,14 +141,18 @@ const AccountPage = () => {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        toast.error('Please select a valid image file (JPEG, PNG, GIF, or WebP)', {
+          description: new Date().toLocaleString(),
+        });
         return;
       }
 
       // Validate file size (5MB limit)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        alert('File size must be less than 5MB');
+        toast.error('File size must be less than 5MB', {
+          description: new Date().toLocaleString(),
+        });
         return;
       }
 
