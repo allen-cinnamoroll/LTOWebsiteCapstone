@@ -132,3 +132,5 @@ const fixDuplicateDrivers = async () => {
 
 // Run the script
 fixDuplicateDrivers();
+
+
