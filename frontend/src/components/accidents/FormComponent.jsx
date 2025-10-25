@@ -23,12 +23,12 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="accident_id"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Accident ID</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Accident ID</FormLabel>
                 <FormControl>
-                  <Input placeholder="ACC-0001" {...field} />
+                  <Input placeholder="ACC-0001" {...field} className="text-xs" />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -40,12 +40,12 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="plateNo"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plate No.</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Plate No.</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter vehicle plate number" {...field} />
+                  <Input placeholder="Enter vehicle plate number" {...field} className="text-xs" />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -53,8 +53,8 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="accident_date"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Accident Date</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Accident Date</FormLabel>
                 <FormControl>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -62,7 +62,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full text-left font-normal justify-start",
+                            "w-full text-left font-normal text-xs justify-start",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -85,7 +85,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                     </PopoverContent>
                   </Popover>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -97,12 +97,12 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="street"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Street</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Street</FormLabel>
                 <FormControl>
-                  <Input placeholder="Street" {...field} />
+                  <Input placeholder="Street" {...field} className="text-xs" />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -110,12 +110,12 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="barangay"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Barangay</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Barangay</FormLabel>
                 <FormControl>
-                  <Input placeholder="Barangay" {...field} />
+                  <Input placeholder="Barangay" {...field} className="text-xs" />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -123,12 +123,12 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="municipality"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Municipality</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Municipality</FormLabel>
                 <FormControl>
-                  <Input placeholder="Municipality" {...field} />
+                  <Input placeholder="Municipality" {...field} className="text-xs" />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -140,11 +140,11 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="vehicle_type"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Vehicle Type</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Vehicle Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-xs">
                       <SelectValue placeholder="Select vehicle type" />
                     </SelectTrigger>
                   </FormControl>
@@ -159,7 +159,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -167,11 +167,11 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
             control={form.control}
             name="severity"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Severity</FormLabel>
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Severity</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="text-xs">
                       <SelectValue placeholder="Select severity" />
                     </SelectTrigger>
                   </FormControl>
@@ -182,7 +182,7 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
                     <SelectItem value="fatal">Fatal</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormMessage />
+                <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
           />
@@ -193,17 +193,17 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
           control={form.control}
           name="notes"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
+            <FormItem className="space-y-0">
+              <FormLabel className="text-xs text-gray-600">Notes</FormLabel>
               <FormControl>
                 <Textarea 
                   placeholder="Enter additional notes about the accident..." 
-                  className="resize-none"
+                  className="resize-none text-xs"
                   rows={3}
                   {...field} 
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs text-red-400" />
             </FormItem>
           )}
         />
