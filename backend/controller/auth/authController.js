@@ -113,6 +113,10 @@ export const login = async (req, res) => {
           userId: user._id,
           role: user.role,
           email: user.email,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
+          avatar: user.avatar,
           isPasswordChange: user.isPasswordChange,
           isOtpVerified: user.isOtpVerified
         },
@@ -211,6 +215,10 @@ export const login = async (req, res) => {
           userId: user._id,
           role: user.role,
           email: user.email,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
+          avatar: user.avatar,
           isPasswordChange: user.isPasswordChange,
           isOtpVerified: false // User needs OTP verification
         },
@@ -263,6 +271,10 @@ export const login = async (req, res) => {
           userId: user._id,
           role: user.role,
           email: user.email,
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
+          avatar: user.avatar,
           isPasswordChange: user.isPasswordChange,
           isOtpVerified: true // User is already verified
         },
@@ -337,6 +349,10 @@ export const verifyOTP = async (req, res) => {
         userId: user._id,
         role: user.role,
         email: user.email,
+        firstName: user.firstName,
+        middleName: user.middleName,
+        lastName: user.lastName,
+        avatar: user.avatar,
         isPasswordChange: user.isPasswordChange,
         isOtpVerified: true // Use true since we just updated it
       },
@@ -439,9 +455,12 @@ export const refreshAccessToken = async (req, res, next) => {
       const newAccessToken = jwt.sign(
         {
           userId: currentUser._id,
-          username: currentUser.username,
           role: currentUser.role,
           email: currentUser.email,
+          firstName: currentUser.firstName,
+          middleName: currentUser.middleName,
+          lastName: currentUser.lastName,
+          avatar: currentUser.avatar,
           isPasswordChange: currentUser.isPasswordChange,
           isOtpVerified: currentUser.isOtpVerified
         },

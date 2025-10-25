@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import OTPVerificationModal from "@/components/otp/OTPVerificationModal";
 import apiClient from "@/api/axios";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
@@ -87,6 +87,14 @@ export const AuthProvider = ({ children }) => {
       userId: decoded.userId,
       role: decoded.role,
       email: decoded.email,
+      firstName: decoded.firstName,
+      middleName: decoded.middleName,
+      lastName: decoded.lastName,
+      avatar: decoded.avatar ? (() => {
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        return `${backendURL}/${decoded.avatar}`;
+      })() : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };
@@ -115,6 +123,14 @@ export const AuthProvider = ({ children }) => {
       userId: decoded.userId,
       role: decoded.role,
       email: decoded.email,
+      firstName: decoded.firstName,
+      middleName: decoded.middleName,
+      lastName: decoded.lastName,
+      avatar: decoded.avatar ? (() => {
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        return `${backendURL}/${decoded.avatar}`;
+      })() : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };
@@ -278,7 +294,7 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

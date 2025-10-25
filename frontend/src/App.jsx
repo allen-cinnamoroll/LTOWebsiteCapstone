@@ -28,6 +28,7 @@ import UpdateAccountPage from "./pages/UpdateAccountPage";
 import ViewAccountLogsPage from "./pages/ViewAccountLogsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import AccountPage from "./pages/AccountPage";
 
 function App() {
   return (
@@ -52,6 +53,10 @@ function App() {
           <Route element={<DashboardLayout />}>
             {/* Dashboard - accessible to all authenticated users */}
             <Route index element={<HomePage />} />
+            <Route path="dashboard" element={<HomePage />} />
+
+            {/* Account - accessible to all authenticated users */}
+            <Route path="account" element={<AccountPage />} />
 
             {/* Analytics - accessible to all authenticated users */}
             <Route path="analytics/registration" element={<RegistrationAnalyticsPage />} />

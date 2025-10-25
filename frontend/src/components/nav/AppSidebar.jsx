@@ -182,8 +182,8 @@ export function AppSidebar(props) {
           <SidebarMenu className="">
             {/* Dashboard - accessible to all authenticated users */}
             <SidebarMenuItem >
-              <SidebarMenuButton isActive={location.pathname === "/"} asChild>
-                <Link to="/">
+              <SidebarMenuButton isActive={location.pathname === "/dashboard" || location.pathname === "/"} asChild>
+                <Link to="/dashboard">
                   <SquareTerminal />
                   <span>Dashboard</span>
                 </Link>
