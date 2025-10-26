@@ -6,6 +6,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { accidentColumns } from "@/components/table/columns";
 import AccidentTable from "@/components/accidents/AccidentTable";
 import AddAccidentModal from "@/components/accidents/AddAccidentModal";
+import AccidentDetailsModal from "@/components/accidents/AccidentDetailsModal";
+import EditAccidentModal from "@/components/accidents/EditAccidentModal";
 
 const AccidentPage = () => {
   const [accidentData, setAccidentData] = useState([]);
@@ -15,9 +17,26 @@ const AccidentPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
   const [addAccidentModalOpen, setAddAccidentModalOpen] = useState(false);
+  const [accidentDetailsModalOpen, setAccidentDetailsModalOpen] = useState(false);
+  const [editAccidentModalOpen, setEditAccidentModalOpen] = useState(false);
+  const [selectedAccident, setSelectedAccident] = useState(null);
+  const [selectedAccidentId, setSelectedAccidentId] = useState(null);
 
   useEffect(() => {
     fetchAccidents();
+  }, []);
+
+  // Listen for edit accident events from details modal
+  useEffect(() => {
+    const handleEditAccident = (event) => {
+      setSelectedAccidentId(event.detail);
+      setEditAccidentModalOpen(true);
+    };
+
+    window.addEventListener('editAccident', handleEditAccident);
+    return () => {
+      window.removeEventListener('editAccident', handleEditAccident);
+    };
   }, []);
 
   const fetchAccidents = async () => {
@@ -52,12 +71,13 @@ const AccidentPage = () => {
   };
 
   const onRowClick = (data) => {
-    const accidentId = data._id;
-    navigate(`/accident/${accidentId}`);
+    setSelectedAccident(data);
+    setAccidentDetailsModalOpen(true);
   };
 
   const onEdit = (accidentId) => {
-    navigate(`/accident/${accidentId}/edit`);
+    setSelectedAccidentId(accidentId);
+    setEditAccidentModalOpen(true);
   };
 
   const handleAccidentAdded = () => {
@@ -89,6 +109,22 @@ const AccidentPage = () => {
         open={addAccidentModalOpen}
         onOpenChange={setAddAccidentModalOpen}
         onAccidentAdded={handleAccidentAdded}
+      />
+
+      {/* Accident Details Modal */}
+      <AccidentDetailsModal
+        open={accidentDetailsModalOpen}
+        onOpenChange={setAccidentDetailsModalOpen}
+        accidentData={selectedAccident}
+        onEdit={onEdit}
+      />
+
+      {/* Edit Accident Modal */}
+      <EditAccidentModal
+        open={editAccidentModalOpen}
+        onOpenChange={setEditAccidentModalOpen}
+        accidentId={selectedAccidentId}
+        onAccidentUpdated={handleAccidentAdded}
       />
     </div>
   );

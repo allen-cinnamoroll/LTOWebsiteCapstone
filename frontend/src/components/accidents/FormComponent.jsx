@@ -11,7 +11,7 @@ import DatePicker from "@/components/calendar/DatePicker";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
-const FormComponent = ({ form, onSubmit, submitting }) => {
+const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const navigate = useNavigate();
 
   return (
@@ -26,7 +26,15 @@ const FormComponent = ({ form, onSubmit, submitting }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Accident ID</FormLabel>
                 <FormControl>
-                  <Input placeholder="ACC-0001" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="ACC-0001" 
+                    {...field} 
+                    className={cn(
+                      "text-xs",
+                      isEditMode && "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
+                    )}
+                    readOnly={isEditMode}
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>

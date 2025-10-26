@@ -17,7 +17,6 @@ import VehicleProfile from "./pages/VehicleProfile";
 import EditVehicleForm from "./pages/EditVehicleForm";
 import ViolationPage from "./pages/ViolationPage";
 import AccidentPage from "./pages/AccidentPage";
-import AccidentProfile from "./pages/AccidentProfile";
 import EditAccidentForm from "./pages/EditAccidentForm";
 import EditViolationForm from "./pages/EditViolationForm";
 import RegistrationAnalyticsPage from "./pages/RegistrationAnalyticsPage";
@@ -80,7 +79,6 @@ function App() {
 
             {/* Accident routes - accessible to all authenticated users */}
             <Route path="accident" element={<AccidentPage />} />
-            <Route path="accident/:id" element={<AccidentProfile />} />
             <Route path="accident/:id/edit" element={<EditAccidentForm />} />
 
             {/* Account management routes - for admin and superadmin */}
