@@ -48,7 +48,31 @@ export const createDriver = async (req, res) => {
     
     // // Attach the generated user account ID to the request body
     // req.body.userAccount = accCreated._id;
-    const newDriver = await DriverModel.create(driverData);
+    
+    // Add user tracking fields with SuperAdmin fallback
+    console.log('=== DRIVER CREATION DEBUG ===');
+    console.log('req.user:', req.user);
+    console.log('req.user type:', typeof req.user);
+    if (req.user) {
+      console.log('req.user keys:', Object.keys(req.user));
+      console.log('req.user.firstName:', req.user.firstName);
+      console.log('req.user.lastName:', req.user.lastName);
+      console.log('req.user.userId:', req.user.userId);
+    }
+    console.log('=== END DEBUG ===');
+    
+    const userName = req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin';
+    const userId = req.user ? req.user.userId : null;
+    
+    const userTrackingData = {
+      ...driverData,
+      createdBy: userId,
+      updatedBy: userId,
+      createdByName: userName,
+      updatedByName: userName
+    };
+    
+    const newDriver = await DriverModel.create(userTrackingData);
 
     // Log the activity
     if (req.user) {
@@ -166,7 +190,17 @@ export const updateDriver = async (req, res) => {
     }
     
     
-    const driver = await DriverModel.findByIdAndUpdate(driverId, updateData);
+    // Add user tracking for update with SuperAdmin fallback
+    const userName = req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin';
+    const userId = req.user ? req.user.userId : null;
+    
+    const updateDataWithUser = {
+      ...updateData,
+      updatedBy: userId,
+      updatedByName: userName
+    };
+    
+    const driver = await DriverModel.findByIdAndUpdate(driverId, updateDataWithUser);
 
     if (!driver) {
       return res.status(404).json({

@@ -49,6 +49,11 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
 
   // Populate form with driver data when modal opens
   useEffect(() => {
+    console.log('=== EDIT MODAL USEEFFECT ===');
+    console.log('Modal open:', open);
+    console.log('Driver data:', driverData);
+    console.log('Driver data _id:', driverData?._id);
+    
     if (open && driverData) {
       // Extract plate numbers and file numbers from vehicleIds
       const plateNumbers = driverData.vehicleIds?.map(vehicle => vehicle.plateNo).filter(Boolean) || [];
@@ -204,6 +209,23 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
     setShowConfirmation(false);
     
     try {
+      // Validate required data before proceeding
+      if (!driverData || !driverData._id) {
+        console.error('Invalid driver data:', driverData);
+        toast.error("Invalid driver data", {
+          description: "Driver information is missing or invalid."
+        });
+        return;
+      }
+
+      if (!confirmationData) {
+        console.error('No confirmation data available');
+        toast.error("No data to update", {
+          description: "Please try editing the driver again."
+        });
+        return;
+      }
+
       const currentFormValues = confirmationData;
       
       const content = {
@@ -228,6 +250,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       console.log('=== SENDING TO SERVER ===');
       console.log('Content being sent:', content);
       console.log('Address object:', content.address);
+      console.log('Driver ID:', driverData._id);
       console.log('=== END SERVER DATA ===');
 
       const { data } = await apiClient.patch(`/driver/${driverData._id}`, content, {
@@ -237,18 +260,54 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       });
 
       if (data.success) {
-        // Close modal and refresh data
+        console.log('Server response:', data);
+        console.log('Driver data before update:', driverData);
+        
+        // Since the server doesn't return the updated driver data,
+        // we need to fetch it or use the original driver data with updates
         if (onDriverUpdated) {
-          onDriverUpdated(data.data);
+          // Create updated driver data by merging the form data with original driver data
+          const updatedDriver = {
+            ...driverData, // Start with original driver data
+            ownerRepresentativeName: confirmationData.ownerRepresentativeName,
+            address: {
+              purok: confirmationData.purok,
+              barangay: confirmationData.barangay,
+              municipality: confirmationData.municipality,
+              province: confirmationData.province,
+            },
+            contactNumber: confirmationData.contactNumber,
+            emailAddress: confirmationData.emailAddress,
+            hasDriversLicense: confirmationData.hasDriversLicense,
+            driversLicenseNumber: confirmationData.driversLicenseNumber,
+            birthDate: confirmationData.birthDate,
+          };
+          
+          console.log('Updated driver data being passed:', updatedDriver);
+          onDriverUpdated(updatedDriver);
         }
         onOpenChange(false);
+        
+        // Show success message
+        toast.success("Driver updated successfully", {
+          description: "The driver information has been updated."
+        });
         
         // Navigate to drivers page after successful update
         navigate('/driver');
       }
     } catch (error) {
-      console.log(error);
-      const message = error.response?.data?.message || "Failed to update driver";
+      console.error('Error updating driver:', error);
+      console.error('Error response:', error.response);
+      console.error('Error response data:', error.response?.data);
+      
+      let message = "Failed to update driver";
+      if (error.response?.data?.message) {
+        message = error.response.data.message;
+      } else if (error.message) {
+        message = error.message;
+      }
+      
       toast.error(message, {
         description: date,
       });

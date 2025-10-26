@@ -68,6 +68,25 @@ const driverSchema = new mongoose.Schema(
         ref: 'Vehicles'
       }],
       default: []
+    },
+    // User tracking fields
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      default: null
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      default: null
+    },
+    createdByName: {
+      type: String,
+      default: 'SuperAdmin'
+    },
+    updatedByName: {
+      type: String,
+      default: 'SuperAdmin'
     }
   },
   {

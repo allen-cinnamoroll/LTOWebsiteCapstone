@@ -96,7 +96,7 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
 
       console.log("Updating accident data:", content);
 
-      const { data } = await apiClient.put(`/accident/${accidentId}`, content, {
+      const { data } = await apiClient.patch(`/accident/${accidentId}`, content, {
         headers: { Authorization: token },
       });
 

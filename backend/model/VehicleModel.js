@@ -84,6 +84,25 @@
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Drivers',
         required: [true, "driverId is required"]
+      },
+      // User tracking fields
+      createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+        default: null
+      },
+      updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+        default: null
+      },
+      createdByName: {
+        type: String,
+        default: 'SuperAdmin'
+      },
+      updatedByName: {
+        type: String,
+        default: 'SuperAdmin'
       }
     },
     {

@@ -52,6 +52,18 @@ export const createVehicle = async (req, res) => {
     // Calculate initial status based on plate number
     const initialStatus = getVehicleStatus(plateNo, dateOfRenewal, vehicleStatusType);
 
+    // Debug user tracking
+    console.log('=== VEHICLE CREATION DEBUG ===');
+    console.log('req.user:', req.user);
+    console.log('req.user type:', typeof req.user);
+    if (req.user) {
+      console.log('req.user keys:', Object.keys(req.user));
+      console.log('req.user.firstName:', req.user.firstName);
+      console.log('req.user.lastName:', req.user.lastName);
+      console.log('req.user.userId:', req.user.userId);
+    }
+    console.log('=== END DEBUG ===');
+
     const vehicle = new VehicleModel({
       fileNo,
       plateNo,
@@ -65,6 +77,11 @@ export const createVehicle = async (req, res) => {
       vehicleStatusType,
       driverId,
       status: initialStatus, // Set status based on plate number logic
+      // Add user tracking fields with SuperAdmin fallback
+      createdBy: req.user ? req.user.userId : null,
+      updatedBy: req.user ? req.user.userId : null,
+      createdByName: req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin',
+      updatedByName: req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin'
     });
 
     await vehicle.save();
@@ -233,9 +250,19 @@ export const updateVehicle = async (req, res) => {
       });
     }
 
+    // Add user tracking for update with SuperAdmin fallback
+    const userName = req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin';
+    const userId = req.user ? req.user.userId : null;
+    
+    const updateDataWithUser = {
+      ...updateData,
+      updatedBy: userId,
+      updatedByName: userName
+    };
+    
     const vehicle = await VehicleModel.findByIdAndUpdate(
       id,
-      updateData,
+      updateDataWithUser,
       { new: true, runValidators: true }
     ).populate("driverId", "fullname ownerRepresentativeName contactNumber");
 
@@ -307,9 +334,17 @@ export const updateVehicleStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    // Add user tracking for status update with SuperAdmin fallback
+    const userName = req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin';
+    const userId = req.user ? req.user.userId : null;
+    
     const vehicle = await VehicleModel.findByIdAndUpdate(
       id,
-      { status },
+      { 
+        status,
+        updatedBy: userId,
+        updatedByName: userName
+      },
       { new: true }
     ).populate("driverId", "fullname ownerRepresentativeName");
 

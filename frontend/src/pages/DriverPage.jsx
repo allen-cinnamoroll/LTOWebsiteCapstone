@@ -92,10 +92,21 @@ const DriverPage = () => {
   };
 
   const onEdit = (driverId) => {
+    console.log('=== ONEDIT FUNCTION ===');
+    console.log('Driver ID:', driverId);
+    console.log('Driver data array:', driverData);
+    
     const driver = driverData.find(d => d._id === driverId);
+    console.log('Found driver:', driver);
+    
     if (driver) {
       setSelectedDriver(driver);
       setEditDriverModalOpen(true);
+    } else {
+      console.error('Driver not found with ID:', driverId);
+      toast.error("Driver not found", {
+        description: "The selected driver could not be found."
+      });
     }
   };
 
@@ -123,11 +134,33 @@ const DriverPage = () => {
   };
 
   const handleDriverUpdated = (updatedDriver) => {
+    // Ensure updatedDriver has the required structure
+    if (!updatedDriver || !updatedDriver._id) {
+      console.error('Invalid updated driver data:', updatedDriver);
+      toast.error("Failed to update driver data", {
+        description: "The updated driver information is invalid."
+      });
+      return;
+    }
+
     // Update the driver data with the updated information
     setDriverData(prevData => 
-      prevData.map(driver => 
-        driver._id === updatedDriver._id ? updatedDriver : driver
-      )
+      prevData.map(driver => {
+        if (driver._id === updatedDriver._id) {
+          // Merge the updated data with the existing driver data structure
+          return {
+            ...driver,
+            ...updatedDriver,
+            // Ensure vehicleIds array is preserved
+            vehicleIds: updatedDriver.vehicleIds || driver.vehicleIds || [],
+            // Recalculate plate numbers and file numbers
+            plateNo: updatedDriver.vehicleIds?.map(vehicle => vehicle.plateNo).filter(Boolean) || driver.plateNo || [],
+            fileNo: updatedDriver.vehicleIds?.map(vehicle => vehicle.fileNo).filter(Boolean) || driver.fileNo || [],
+            vehicleCount: updatedDriver.vehicleIds?.length || driver.vehicleCount || 0,
+          };
+        }
+        return driver;
+      })
     );
     
     // Close the profile modal
