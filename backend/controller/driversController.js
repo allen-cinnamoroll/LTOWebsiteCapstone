@@ -67,9 +67,9 @@ export const createDriver = async (req, res) => {
     const userTrackingData = {
       ...driverData,
       createdBy: userId,
-      updatedBy: userId,
+      updatedBy: null, // Only set when actually updated
       createdByName: userName,
-      updatedByName: userName
+      updatedByName: null // Only set when actually updated
     };
     
     const newDriver = await DriverModel.create(userTrackingData);

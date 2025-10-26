@@ -79,9 +79,9 @@ export const createVehicle = async (req, res) => {
       status: initialStatus, // Set status based on plate number logic
       // Add user tracking fields with SuperAdmin fallback
       createdBy: req.user ? req.user.userId : null,
-      updatedBy: req.user ? req.user.userId : null,
+      updatedBy: null, // Only set when actually updated
       createdByName: req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin',
-      updatedByName: req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin'
+      updatedByName: null // Only set when actually updated
     });
 
     await vehicle.save();

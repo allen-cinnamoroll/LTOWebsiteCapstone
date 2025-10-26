@@ -102,7 +102,7 @@
       },
       updatedByName: {
         type: String,
-        default: 'SuperAdmin'
+        default: null // Only set when actually updated
       }
     },
     {

@@ -86,7 +86,7 @@ const driverSchema = new mongoose.Schema(
     },
     updatedByName: {
       type: String,
-      default: 'SuperAdmin'
+      default: null // Only set when actually updated
     }
   },
   {
