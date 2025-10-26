@@ -79,14 +79,6 @@ const driverSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Users',
       default: null
-    },
-    createdByName: {
-      type: String,
-      default: 'SuperAdmin'
-    },
-    updatedByName: {
-      type: String,
-      default: null // Only set when actually updated
     }
   },
   {

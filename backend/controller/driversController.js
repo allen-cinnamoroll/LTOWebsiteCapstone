@@ -67,9 +67,7 @@ export const createDriver = async (req, res) => {
     const userTrackingData = {
       ...driverData,
       createdBy: userId,
-      updatedBy: null, // Only set when actually updated
-      createdByName: userName,
-      updatedByName: null // Only set when actually updated
+      updatedBy: null // Only set when actually updated
     };
     
     const newDriver = await DriverModel.create(userTrackingData);
@@ -113,15 +111,29 @@ export const createDriver = async (req, res) => {
 export const getDrivers = async (req, res) => {
   try {
     const drivers = await DriverModel.find()
-      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds")
+      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
+      .populate('createdBy', 'firstName lastName')
+      .populate('updatedBy', 'firstName lastName')
       .sort({createdAt:-1})
 
-    // Return drivers with their vehicle information
+    // Return drivers with their vehicle information and user tracking
     const driversWithVehicles = drivers.map(driver => {
       const driverObj = driver.toObject();
       // Add vehicle count for quick reference
       driverObj.vehicleCount = driverObj.vehicleIds ? driverObj.vehicleIds.length : 0;
+      
+      // Add user tracking with populated names
+      driverObj.createdBy = driverObj.createdBy ? {
+        _id: driverObj.createdBy._id,
+        name: `${driverObj.createdBy.firstName} ${driverObj.createdBy.lastName}`.trim()
+      } : null;
+      
+      driverObj.updatedBy = driverObj.updatedBy ? {
+        _id: driverObj.updatedBy._id,
+        name: `${driverObj.updatedBy.firstName} ${driverObj.updatedBy.lastName}`.trim()
+      } : null;
+      
       return driverObj;
     });
 
@@ -190,14 +202,12 @@ export const updateDriver = async (req, res) => {
     }
     
     
-    // Add user tracking for update with SuperAdmin fallback
-    const userName = req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin';
+    // Add user tracking for update
     const userId = req.user ? req.user.userId : null;
     
     const updateDataWithUser = {
       ...updateData,
-      updatedBy: userId,
-      updatedByName: userName
+      updatedBy: userId
     };
     
     const driver = await DriverModel.findByIdAndUpdate(driverId, updateDataWithUser);
