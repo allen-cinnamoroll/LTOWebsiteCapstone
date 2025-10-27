@@ -51,11 +51,6 @@ const renewalHistorySchema = new mongoose.Schema(
       }
     }],
     // Additional metadata for debugging and tracking
-    plateNumber: {
-      type: String,
-      required: false,
-      index: true
-    },
     scheduledWeekStart: {
       type: Date,
       required: false
@@ -79,7 +74,6 @@ const renewalHistorySchema = new mongoose.Schema(
 // Indexes for better query performance
 renewalHistorySchema.index({ vehicleId: 1, renewalDate: -1 });
 renewalHistorySchema.index({ status: 1, renewalDate: -1 });
-renewalHistorySchema.index({ plateNumber: 1, renewalDate: -1 });
 
 // Virtual for formatted renewal date
 renewalHistorySchema.virtual('formattedRenewalDate').get(function() {
@@ -144,7 +138,6 @@ renewalHistorySchema.statics.createRenewalRecord = async function(vehicleData, r
     const renewalRecord = new this({
       vehicleId: vehicleData._id,
       renewalDate: new Date(renewalDate),
-      plateNumber: vehicleData.plateNo,
       processedBy: processedBy
     });
 
@@ -201,23 +194,86 @@ renewalHistorySchema.statics.getRenewalStatistics = async function(vehicleId) {
   }
 };
 
+// Helper function to determine renewal status based on plate number
+const getRenewalStatus = (plateNumber, renewalDate) => {
+  try {
+    // Extract the last digit from plate number
+    const lastDigit = plateNumber.slice(-1);
+    const digit = parseInt(lastDigit);
+    
+    // If last digit is 0, renewal month is October (month 9, 0-indexed)
+    // If last digit is 1-9, renewal month is that digit (0-indexed)
+    const dueMonth = digit === 0 ? 9 : digit - 1; // Convert to 0-indexed months
+    
+    const renewalDateObj = new Date(renewalDate);
+    const renewalYear = renewalDateObj.getFullYear();
+    const renewalMonth = renewalDateObj.getMonth(); // 0-indexed
+    
+    console.log('=== RENEWAL STATUS CALCULATION ===');
+    console.log('Plate number:', plateNumber);
+    console.log('Last digit:', lastDigit);
+    console.log('Due month (0-indexed):', dueMonth);
+    console.log('Due month name:', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dueMonth]);
+    console.log('Renewal date:', renewalDate);
+    console.log('Renewal year:', renewalYear);
+    console.log('Renewal month (0-indexed):', renewalMonth);
+    console.log('Renewal month name:', ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][renewalMonth]);
+    
+    // Determine status
+    let status;
+    if (renewalMonth < dueMonth) {
+      status = "Early Renewal";
+    } else if (renewalMonth === dueMonth) {
+      status = "On-Time Renewal";
+    } else {
+      status = "Late Renewal";
+    }
+    
+    console.log('Calculated status:', status);
+    console.log('=== END RENEWAL STATUS CALCULATION ===');
+    
+    return status;
+  } catch (error) {
+    console.error('Error calculating renewal status:', error);
+    return "On-Time Renewal"; // Default fallback
+  }
+};
+
 // Static method to add renewal date to history
 renewalHistorySchema.statics.addRenewalDateToHistory = async function(vehicleId, renewalDate, updatedBy = null) {
   try {
+    console.log('=== addRenewalDateToHistory DEBUG ===');
+    console.log('Input parameters:', { vehicleId, renewalDate, updatedBy });
+    
     if (!vehicleId || !renewalDate) {
       throw new Error("Vehicle ID and renewal date are required");
     }
 
+    // Import VehicleModel to get plate number
+    const VehicleModel = mongoose.model('Vehicle');
+    
+    // Get vehicle data to extract plate number
+    const vehicle = await VehicleModel.findById(vehicleId);
+    if (!vehicle) {
+      throw new Error("Vehicle not found");
+    }
+    
+    console.log('Vehicle found:', { plateNo: vehicle.plateNo, _id: vehicle._id });
+    
+    // Calculate renewal status based on plate number
+    const calculatedStatus = getRenewalStatus(vehicle.plateNo, renewalDate);
+
     // Find or create renewal history record for this vehicle
     let renewalHistory = await this.findOne({ vehicleId });
+    console.log('Existing renewal history found:', renewalHistory ? 'Yes' : 'No');
     
     if (!renewalHistory) {
+      console.log('Creating new renewal history record...');
       // Create new renewal history record
       renewalHistory = new this({
         vehicleId,
         renewalDate: new Date(renewalDate),
-        status: "On-Time Renewal", // Default status, can be calculated later
-        plateNumber: "", // Will be populated from vehicle data
+        status: calculatedStatus, // Use calculated status instead of hardcoded
         dateOfRenewalHistory: []
       });
     }
@@ -226,8 +282,12 @@ renewalHistorySchema.statics.addRenewalDateToHistory = async function(vehicleId,
     const existingDate = renewalHistory.dateOfRenewalHistory.find(
       entry => entry.date.getTime() === new Date(renewalDate).getTime()
     );
+    
+    console.log('Existing date in history:', existingDate ? 'Yes' : 'No');
+    console.log('Current dateOfRenewalHistory length:', renewalHistory.dateOfRenewalHistory.length);
 
     if (!existingDate) {
+      console.log('Adding new renewal date to history...');
       // Add new renewal date to history
       renewalHistory.dateOfRenewalHistory.push({
         date: new Date(renewalDate),
@@ -238,15 +298,22 @@ renewalHistorySchema.statics.addRenewalDateToHistory = async function(vehicleId,
       // Update the main renewal date to the latest one
       renewalHistory.renewalDate = new Date(renewalDate);
       
+      // Update the status based on the new renewal date
+      renewalHistory.status = calculatedStatus;
+      
       await renewalHistory.save();
-      console.log(`Added renewal date ${renewalDate} to history for vehicle ${vehicleId}`);
+      console.log('Renewal history saved successfully');
+      console.log('New dateOfRenewalHistory length:', renewalHistory.dateOfRenewalHistory.length);
+      console.log(`Added renewal date ${renewalDate} to history for vehicle ${vehicleId} with status: ${calculatedStatus}`);
     } else {
       console.log(`Renewal date ${renewalDate} already exists in history for vehicle ${vehicleId}`);
     }
 
+    console.log('=== END addRenewalDateToHistory DEBUG ===');
     return renewalHistory;
   } catch (error) {
     console.error("Error adding renewal date to history:", error);
+    console.error("Error stack:", error.stack);
     throw error;
   }
 };

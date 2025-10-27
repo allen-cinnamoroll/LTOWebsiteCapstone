@@ -309,21 +309,35 @@ export const updateVehicle = async (req, res) => {
 
     // Create renewal history record if renewal date was updated
     const renewalDateChanged = currentVehicle.dateOfRenewal?.getTime() !== vehicle.dateOfRenewal?.getTime();
+    
+    console.log('=== RENEWAL DATE CHANGE DEBUG ===');
+    console.log('Vehicle ID:', vehicle._id);
+    console.log('Current renewal date:', currentVehicle.dateOfRenewal);
+    console.log('New renewal date:', vehicle.dateOfRenewal);
+    console.log('Renewal date changed:', renewalDateChanged);
+    console.log('User ID:', req.user?.userId || req.user?.id);
+    
     if (renewalDateChanged && vehicle.dateOfRenewal) {
       try {
+        console.log('Attempting to add renewal date to history...');
         // Add renewal date to history using the new method
-        await RenewalHistoryModel.addRenewalDateToHistory(
+        const result = await RenewalHistoryModel.addRenewalDateToHistory(
           vehicle._id, 
           vehicle.dateOfRenewal, 
           req.user?.userId || req.user?.id
         );
         
+        console.log('Renewal history result:', result);
         console.log(`Added renewal date ${vehicle.dateOfRenewal} to history for vehicle ${vehicle.plateNo}`);
       } catch (renewalError) {
         // Log error but don't fail the vehicle update
         console.error("Error adding renewal date to history:", renewalError);
+        console.error("Error stack:", renewalError.stack);
       }
+    } else {
+      console.log('Skipping renewal history update - no date change or missing date');
     }
+    console.log('=== END RENEWAL DATE CHANGE DEBUG ===');
 
     res.json({
       success: true,

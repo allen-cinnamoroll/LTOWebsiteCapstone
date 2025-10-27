@@ -93,7 +93,8 @@ const VehiclesPage = () => {
     setEditVehicleModalOpen(true);
   };
 
-  const handleRenewal = () => {
+  const onRenew = (vehicle) => {
+    setSelectedVehicle(vehicle);
     setRenewalModalOpen(true);
   };
 
@@ -123,6 +124,7 @@ const VehiclesPage = () => {
             loading={loading}
             onRowClick={onRowClick}
             onEdit={onEdit}
+            onRenew={onRenew}
             submitting={submitting}
           />
         </div>
@@ -132,6 +134,7 @@ const VehiclesPage = () => {
       <VehicleRenewalModal 
         open={renewalModalOpen} 
         onOpenChange={setRenewalModalOpen}
+        vehicleData={selectedVehicle}
         onVehicleUpdated={handleVehicleUpdated}
       />
 

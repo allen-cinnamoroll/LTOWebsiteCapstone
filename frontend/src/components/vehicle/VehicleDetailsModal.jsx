@@ -379,9 +379,14 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Renewal History ({renewalHistory.length} records)
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Renewal History ({renewalHistory.length} {renewalHistory.length === 1 ? 'record' : 'records'})
+            </h3>
+            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+              {vehicleData?.plateNo}
+            </span>
+          </div>
           <Button 
             variant="outline" 
             size="sm" 

@@ -485,7 +485,7 @@ export const logs = () => [
   },
 ];
 
-export const vehicleColumns = (onEdit, submitting) => [
+export const vehicleColumns = (onEdit, onRenew, submitting) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
@@ -568,6 +568,10 @@ export const vehicleColumns = (onEdit, submitting) => [
         e.stopPropagation();
         onEdit(vehicle._id);
       };
+      const handleRenew = (e) => {
+        e.stopPropagation();
+        onRenew(vehicle);
+      };
       return (
         <div className="flex items-center gap-1">
           <div className="relative group">
@@ -582,6 +586,20 @@ export const vehicleColumns = (onEdit, submitting) => [
             </Button>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
               Edit
+            </div>
+          </div>
+          <div className="relative group">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleRenew}
+              className="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+              disabled={submitting}
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+              Renew
             </div>
           </div>
         </div>
