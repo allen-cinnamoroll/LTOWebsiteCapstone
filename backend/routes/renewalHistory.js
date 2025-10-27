@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getVehicleRenewalHistory,
+  getVehicleRenewalHistoryWithDates,
   createRenewalHistory,
   getRenewalStatistics,
   updateRenewalHistory,
@@ -19,6 +20,13 @@ router.use(authenticate);
  * @access Private
  */
 router.get("/vehicle/:vehicleId", getVehicleRenewalHistory);
+
+/**
+ * @route GET /api/renewal-history/vehicle/:vehicleId/dates
+ * @desc Get renewal history with dateOfRenewalHistory array for a specific vehicle
+ * @access Private
+ */
+router.get("/vehicle/:vehicleId/dates", getVehicleRenewalHistoryWithDates);
 
 /**
  * @route GET /api/renewal-history/vehicle/:vehicleId/statistics

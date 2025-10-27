@@ -91,6 +91,20 @@ export const createVehicle = async (req, res) => {
       { new: true }
     );
 
+    // Add initial renewal date to history if provided
+    if (dateOfRenewal) {
+      try {
+        await RenewalHistoryModel.addRenewalDateToHistory(
+          vehicle._id, 
+          dateOfRenewal, 
+          req.user?.userId || req.user?.id
+        );
+        console.log(`Added initial renewal date ${dateOfRenewal} to history for vehicle ${plateNo}`);
+      } catch (renewalError) {
+        console.error("Error adding initial renewal date to history:", renewalError);
+      }
+    }
+
     // Populate driver information
     await vehicle.populate("driverId", "fullname ownerRepresentativeName");
 
@@ -297,26 +311,17 @@ export const updateVehicle = async (req, res) => {
     const renewalDateChanged = currentVehicle.dateOfRenewal?.getTime() !== vehicle.dateOfRenewal?.getTime();
     if (renewalDateChanged && vehicle.dateOfRenewal) {
       try {
-        // Check if renewal record already exists for this date
-        const existingRecord = await RenewalHistoryModel.findOne({
-          vehicleId: vehicle._id,
-          renewalDate: new Date(vehicle.dateOfRenewal)
-        });
-
-        if (!existingRecord) {
-          // Create renewal status record
-          const renewalStatusData = createRenewalStatusRecord(vehicle, vehicle.dateOfRenewal, req.user?.id);
-          
-          // Create renewal history record
-          const renewalRecord = new RenewalHistoryModel(renewalStatusData);
-          await renewalRecord.save();
-          
-          console.log(`Created renewal history record for vehicle ${vehicle.plateNo}: ${renewalStatusData.status}`);
-        }
+        // Add renewal date to history using the new method
+        await RenewalHistoryModel.addRenewalDateToHistory(
+          vehicle._id, 
+          vehicle.dateOfRenewal, 
+          req.user?.userId || req.user?.id
+        );
+        
+        console.log(`Added renewal date ${vehicle.dateOfRenewal} to history for vehicle ${vehicle.plateNo}`);
       } catch (renewalError) {
         // Log error but don't fail the vehicle update
-        console.error("Error creating renewal history record:", renewalError);
-        console.error("Error creating renewal history record:", renewalError);
+        console.error("Error adding renewal date to history:", renewalError);
       }
     }
 

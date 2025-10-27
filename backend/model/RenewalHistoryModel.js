@@ -34,11 +34,22 @@ const renewalHistorySchema = new mongoose.Schema(
       ref: 'Users',
       required: false // Optional for system-generated renewals
     },
-    notes: {
-      type: String,
-      maxlength: 500,
-      required: false
-    },
+    // Array to store all renewal dates for this vehicle
+    dateOfRenewalHistory: [{
+      date: {
+        type: Date,
+        required: true
+      },
+      updatedAt: {
+        type: Date,
+        default: Date.now
+      },
+      updatedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Users',
+        required: false
+      }
+    }],
     // Additional metadata for debugging and tracking
     plateNumber: {
       type: String,
@@ -99,12 +110,6 @@ renewalHistorySchema.pre('save', function(next) {
       return next(error);
     }
 
-    // Validate notes length
-    if (this.notes && this.notes.length > 500) {
-      const error = new Error("Notes cannot exceed 500 characters");
-      error.name = 'ValidationError';
-      return next(error);
-    }
 
     next();
   } catch (error) {
@@ -192,6 +197,74 @@ renewalHistorySchema.statics.getRenewalStatistics = async function(vehicleId) {
     return stats;
   } catch (error) {
     console.error("Error fetching renewal statistics:", error);
+    throw error;
+  }
+};
+
+// Static method to add renewal date to history
+renewalHistorySchema.statics.addRenewalDateToHistory = async function(vehicleId, renewalDate, updatedBy = null) {
+  try {
+    if (!vehicleId || !renewalDate) {
+      throw new Error("Vehicle ID and renewal date are required");
+    }
+
+    // Find or create renewal history record for this vehicle
+    let renewalHistory = await this.findOne({ vehicleId });
+    
+    if (!renewalHistory) {
+      // Create new renewal history record
+      renewalHistory = new this({
+        vehicleId,
+        renewalDate: new Date(renewalDate),
+        status: "On-Time Renewal", // Default status, can be calculated later
+        plateNumber: "", // Will be populated from vehicle data
+        dateOfRenewalHistory: []
+      });
+    }
+
+    // Check if this renewal date already exists in history
+    const existingDate = renewalHistory.dateOfRenewalHistory.find(
+      entry => entry.date.getTime() === new Date(renewalDate).getTime()
+    );
+
+    if (!existingDate) {
+      // Add new renewal date to history
+      renewalHistory.dateOfRenewalHistory.push({
+        date: new Date(renewalDate),
+        updatedAt: new Date(),
+        updatedBy: updatedBy
+      });
+
+      // Update the main renewal date to the latest one
+      renewalHistory.renewalDate = new Date(renewalDate);
+      
+      await renewalHistory.save();
+      console.log(`Added renewal date ${renewalDate} to history for vehicle ${vehicleId}`);
+    } else {
+      console.log(`Renewal date ${renewalDate} already exists in history for vehicle ${vehicleId}`);
+    }
+
+    return renewalHistory;
+  } catch (error) {
+    console.error("Error adding renewal date to history:", error);
+    throw error;
+  }
+};
+
+// Static method to get renewal history with dateOfRenewalHistory
+renewalHistorySchema.statics.getVehicleRenewalHistoryWithDates = async function(vehicleId) {
+  try {
+    if (!vehicleId) {
+      throw new Error("Vehicle ID is required");
+    }
+
+    const history = await this.findOne({ vehicleId })
+      .populate('processedBy', 'fullname email')
+      .lean();
+
+    return history;
+  } catch (error) {
+    console.error("Error fetching renewal history with dates:", error);
     throw error;
   }
 };

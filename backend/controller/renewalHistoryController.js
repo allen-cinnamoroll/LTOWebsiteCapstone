@@ -4,6 +4,79 @@ import { createRenewalStatusRecord, validateRenewalData } from "../util/renewalS
 // import { logger } from "../util/logger.js";
 
 /**
+ * Get renewal history with dateOfRenewalHistory for a specific vehicle
+ */
+export const getVehicleRenewalHistoryWithDates = async (req, res) => {
+  try {
+    const { vehicleId } = req.params;
+
+    // Validate vehicle ID
+    if (!vehicleId) {
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle ID is required"
+      });
+    }
+
+    // Check if vehicle exists
+    const vehicle = await VehicleModel.findById(vehicleId);
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found"
+      });
+    }
+
+    // Get renewal history with dateOfRenewalHistory
+    const renewalHistory = await RenewalHistoryModel.getVehicleRenewalHistoryWithDates(vehicleId);
+
+    if (!renewalHistory) {
+      return res.json({
+        success: true,
+        data: {
+          vehicleId,
+          plateNumber: vehicle.plateNo,
+          fileNumber: vehicle.fileNo,
+          currentRenewalDate: vehicle.dateOfRenewal,
+          renewalHistory: null,
+          dateOfRenewalHistory: [],
+          message: "No renewal history found for this vehicle"
+        }
+      });
+    }
+
+    // Populate updatedBy information for each date in history
+    const populatedHistory = await RenewalHistoryModel.findById(renewalHistory._id)
+      .populate('dateOfRenewalHistory.updatedBy', 'fullname email')
+      .populate('processedBy', 'fullname email')
+      .lean();
+
+    console.log(`Retrieved renewal history with dates for vehicle ${vehicleId}`);
+
+    res.json({
+      success: true,
+      data: {
+        vehicleId,
+        plateNumber: vehicle.plateNo,
+        fileNumber: vehicle.fileNo,
+        currentRenewalDate: vehicle.dateOfRenewal,
+        renewalHistory: populatedHistory,
+        dateOfRenewalHistory: populatedHistory?.dateOfRenewalHistory || [],
+        totalRenewalDates: populatedHistory?.dateOfRenewalHistory?.length || 0
+      }
+    });
+
+  } catch (error) {
+    console.error("Error fetching vehicle renewal history with dates:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching renewal history with dates",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
  * Get renewal history for a specific vehicle
  */
 export const getVehicleRenewalHistory = async (req, res) => {
@@ -97,7 +170,7 @@ export const getVehicleRenewalHistory = async (req, res) => {
  */
 export const createRenewalHistory = async (req, res) => {
   try {
-    const { vehicleId, renewalDate, notes } = req.body;
+    const { vehicleId, renewalDate } = req.body;
     const processedBy = req.user?.id; // From auth middleware
 
     // Validate required fields
@@ -153,8 +226,7 @@ export const createRenewalHistory = async (req, res) => {
 
     // Create new renewal history record
     const renewalRecord = new RenewalHistoryModel({
-      ...renewalStatusData,
-      notes: notes || null
+      ...renewalStatusData
     });
 
     await renewalRecord.save();
@@ -239,7 +311,6 @@ export const getRenewalStatistics = async (req, res) => {
 export const updateRenewalHistory = async (req, res) => {
   try {
     const { id } = req.params;
-    const { notes } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -257,17 +328,10 @@ export const updateRenewalHistory = async (req, res) => {
       });
     }
 
-    // Update only allowed fields
-    const updateData = {};
-    if (notes !== undefined) {
-      updateData.notes = notes;
-    }
-
-    const updatedRecord = await RenewalHistoryModel.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate('processedBy', 'fullname email');
+    // No fields to update for renewal history records
+    // This endpoint is kept for API consistency but doesn't modify anything
+    const updatedRecord = await RenewalHistoryModel.findById(id)
+      .populate('processedBy', 'fullname email');
 
     console.log(`Updated renewal history record ${id}`);
 
