@@ -17,8 +17,8 @@ export function ViolationMonitoring({ analyticsData }) {
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [selectedYear, setSelectedYear] = useState('All Time'); // Default to All Time
-  const [yearlyStartYear, setYearlyStartYear] = useState(2021); // Default 2021 -> 2025
-  const [yearlyChartType, setYearlyChartType] = useState('bar'); // 'bar' | 'line'
+  const [yearlyStartYear, setYearlyStartYear] = useState(2020); // Default 2020 -> 2025
+  const [yearlyChartType, setYearlyChartType] = useState('line'); // 'bar' | 'line'
   const exportMenuRef = useRef(null);
   
   // Get current year and month
@@ -26,7 +26,7 @@ export function ViolationMonitoring({ analyticsData }) {
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const currentMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const minYear = 2000;
-  const maxYear = 2025; // Cap as requested
+  const maxYear = 2030;
 
   // Close export menu when clicking outside
   useEffect(() => {
@@ -51,12 +51,9 @@ export function ViolationMonitoring({ analyticsData }) {
     return years.sort((a, b) => b - a); // Most recent first
   };
 
-  // Valid 5-year window start years (e.g., 2000..2021 for 2000-2004 ... 2021-2025)
+  // Valid 5-year period ranges: 2000-2005, 2005-2010, 2010-2015, 2015-2020, 2020-2025, 2025-2030
   const getFiveYearStartYears = () => {
-    const lastValidStart = Math.min(maxYear, currentYear) - 4;
-    const starts = [];
-    for (let y = minYear; y <= lastValidStart; y++) starts.push(y);
-    return starts;
+    return [2000, 2005, 2010, 2015, 2020, 2025];
   };
 
   // Generate monitoring data based on actual monthly trends from backend
@@ -199,41 +196,106 @@ export function ViolationMonitoring({ analyticsData }) {
 
   const monitoringData = generateMonitoringData();
   
-  // Compute KPI values
+  // Compute KPI values based on view mode
   const computeKPIs = () => {
-    if (!monitoringData) {
+    if (viewMode === 'monthly') {
+      // Monthly view KPIs
+      if (!monitoringData) {
+        return {
+          totalViolations: 0,
+          topMonth: { month: 'N/A', value: 0 },
+          peakMonth: 'N/A',
+          peakValue: 0,
+          avgPerMonth: 0,
+          peakYear: null,
+          avgPerYear: null
+        };
+      }
+
+      // Total Violations (Year)
+      const totalViolations = Math.round(monitoringData.yearlyTotal);
+      
+      // Top Month - find month with highest violations
+      const topMonth = Object.entries(monitoringData.monthly).reduce((max, [month, value]) => 
+        value > max.value ? { month, value } : max, 
+        { month: 'Jan', value: 0 }
+      );
+      
+      // Peak Month (same as top month)
+      const peakMonth = topMonth.month;
+      const peakValue = topMonth.value;
+      
+      // Average per month
+      const avgPerMonth = Math.round(totalViolations / 12);
+      
       return {
-        totalViolations: 0,
+        totalViolations,
+        topMonth,
+        peakMonth,
+        peakValue,
+        avgPerMonth,
+        peakYear: null,
+        avgPerYear: null
+      };
+    } else {
+      // Yearly view KPIs - based on the 5-year period data (e.g., 2000-2005 means 2000,2001,2002,2003,2004,2005)
+      const start = yearlyStartYear;
+      const end = start + 5; // Inclusive end year (e.g., 2000-2005 includes both 2000 and 2005)
+      const yearlyData = (analyticsData?.yearlyTrends || [])
+        .filter(item => {
+          const year = item._id?.year || 0;
+          return year >= start && year <= end;
+        })
+        .sort((a, b) => (a._id?.year || 0) - (b._id?.year || 0))
+        .map(item => ({
+          year: item._id?.year,
+          violations: item.count || 0
+        }));
+
+      // Ensure we have data for all years in the range even if some are missing
+      const filledData = [];
+      for (let y = start; y <= end; y++) {
+        const found = yearlyData.find(d => d.year === y);
+        filledData.push({ year: y, violations: found ? found.violations : 0 });
+      }
+
+      if (filledData.length === 0) {
+        return {
+          totalViolations: 0,
+          topMonth: { month: 'N/A', value: 0 },
+          peakMonth: null,
+          peakValue: 0,
+          avgPerMonth: null,
+          peakYear: 'N/A',
+          avgPerYear: 0
+        };
+      }
+
+      // Total violations across the 5-year window
+      const totalViolations = filledData.reduce((sum, item) => sum + (item.violations || 0), 0);
+      
+      // Peak Year - find year with highest violations
+      const peakYearData = filledData.reduce((max, item) => 
+        (item.violations || 0) > (max.violations || 0) ? item : max, 
+        filledData[0] || { year: 'N/A', violations: 0 }
+      );
+      
+      const peakYear = peakYearData.year || 'N/A';
+      const peakValue = peakYearData.violations || 0;
+      
+      // Average per year across the 5-year window
+      const avgPerYear = Math.round(totalViolations / filledData.length);
+      
+      return {
+        totalViolations,
         topMonth: { month: 'N/A', value: 0 },
-        peakMonth: 'N/A',
-        peakValue: 0,
-        avgPerMonth: 0
+        peakMonth: null,
+        peakValue,
+        avgPerMonth: null,
+        peakYear,
+        avgPerYear
       };
     }
-
-    // Total Violations (Year)
-    const totalViolations = Math.round(monitoringData.yearlyTotal);
-    
-    // Top Month - find month with highest violations
-    const topMonth = Object.entries(monitoringData.monthly).reduce((max, [month, value]) => 
-      value > max.value ? { month, value } : max, 
-      { month: 'Jan', value: 0 }
-    );
-    
-    // Peak Month (same as top month)
-    const peakMonth = topMonth.month;
-    const peakValue = topMonth.value;
-    
-    // Average per month
-    const avgPerMonth = Math.round(totalViolations / 12);
-    
-    return {
-      totalViolations,
-      topMonth,
-      peakMonth,
-      peakValue,
-      avgPerMonth
-    };
   };
 
   const kpis = computeKPIs();
@@ -251,9 +313,9 @@ export function ViolationMonitoring({ analyticsData }) {
         year: selectedYear
       }));
     } else {
-      // Yearly data limited to selected 5-year window
+      // Yearly data limited to selected 5-year period (e.g., 2000-2005 includes 2000 through 2005)
       const start = yearlyStartYear;
-      const end = start + 4;
+      const end = start + 5; // Inclusive end year
       const yearlyData = (analyticsData?.yearlyTrends || [])
         .filter(item => {
           const year = item._id?.year || 0;
@@ -265,7 +327,7 @@ export function ViolationMonitoring({ analyticsData }) {
           violations: item.count || 0
         }));
 
-      // Ensure we render all 5 years even if some are missing in data
+      // Ensure we render all years in the period even if some are missing in data
       const filled = [];
       for (let y = start; y <= end; y++) {
         const found = yearlyData.find(d => d.year === y);
@@ -394,10 +456,11 @@ export function ViolationMonitoring({ analyticsData }) {
       {/* Header */}
       <div className="p-6 border-b border-red-200/50 dark:border-red-700/50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <svg className="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center">
+              <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Warning badge icon - appropriate for violation monitoring */}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
             <div>
@@ -409,7 +472,7 @@ export function ViolationMonitoring({ analyticsData }) {
                 <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">
                   {viewMode === 'monthly' 
                     ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
-                    : `Monitoring ${yearlyStartYear}–${yearlyStartYear + 4}`
+                    : `Monitoring ${yearlyStartYear}-${yearlyStartYear + 5}`
                   }
                 </div>
               </div>
@@ -535,7 +598,7 @@ export function ViolationMonitoring({ analyticsData }) {
                               style={{ minWidth: '160px' }}
                             >
                               {getFiveYearStartYears().map((start) => (
-                                <option key={start} value={start}>{`${start} – ${start + 4}`}</option>
+                                <option key={start} value={start}>{`${start}-${start + 5}`}</option>
                               ))}
                             </select>
                             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -744,11 +807,14 @@ export function ViolationMonitoring({ analyticsData }) {
                 {kpis.totalViolations.toLocaleString()}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`}
+                {viewMode === 'monthly' 
+                  ? (selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`)
+                  : `${yearlyStartYear}-${yearlyStartYear + 5}`
+                }
               </div>
             </div>
 
-            {/* Peak Month */}
+            {/* Peak Month/Year */}
             <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
@@ -756,17 +822,19 @@ export function ViolationMonitoring({ analyticsData }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Peak Month</span>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {viewMode === 'monthly' ? 'Peak Month' : 'Peak Year'}
+                </span>
               </div>
               <div className="text-lg font-bold text-gray-900 dark:text-white truncate w-full">
-                {kpis.peakMonth}
+                {viewMode === 'monthly' ? kpis.peakMonth : kpis.peakYear}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {kpis.peakValue.toLocaleString()} violations
               </div>
             </div>
 
-            {/* Average per Month */}
+            {/* Average per Month/Year */}
             <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center">
@@ -774,12 +842,19 @@ export function ViolationMonitoring({ analyticsData }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Average/Month</span>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  {viewMode === 'monthly' ? 'Average/Month' : 'Average/Year'}
+                </span>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {kpis.avgPerMonth.toLocaleString()}
+                {viewMode === 'monthly' 
+                  ? kpis.avgPerMonth.toLocaleString() 
+                  : kpis.avgPerYear.toLocaleString()
+                }
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Per month average</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {viewMode === 'monthly' ? 'Per month average' : 'Per year average'}
+              </div>
             </div>
           </div>
         </div>
