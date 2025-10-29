@@ -17,12 +17,16 @@ export function ViolationMonitoring({ analyticsData }) {
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [selectedYear, setSelectedYear] = useState('All Time'); // Default to All Time
+  const [yearlyStartYear, setYearlyStartYear] = useState(2021); // Default 2021 -> 2025
+  const [yearlyChartType, setYearlyChartType] = useState('bar'); // 'bar' | 'line'
   const exportMenuRef = useRef(null);
   
   // Get current year and month
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const currentMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const minYear = 2000;
+  const maxYear = 2025; // Cap as requested
 
   // Close export menu when clicking outside
   useEffect(() => {
@@ -45,6 +49,14 @@ export function ViolationMonitoring({ analyticsData }) {
       years.push(year);
     }
     return years.sort((a, b) => b - a); // Most recent first
+  };
+
+  // Valid 5-year window start years (e.g., 2000..2021 for 2000-2004 ... 2021-2025)
+  const getFiveYearStartYears = () => {
+    const lastValidStart = Math.min(maxYear, currentYear) - 4;
+    const starts = [];
+    for (let y = minYear; y <= lastValidStart; y++) starts.push(y);
+    return starts;
   };
 
   // Generate monitoring data based on actual monthly trends from backend
@@ -239,11 +251,13 @@ export function ViolationMonitoring({ analyticsData }) {
         year: selectedYear
       }));
     } else {
-      // Yearly bar chart data - show historical data
-      const yearlyData = analyticsData?.yearlyTrends
+      // Yearly data limited to selected 5-year window
+      const start = yearlyStartYear;
+      const end = start + 4;
+      const yearlyData = (analyticsData?.yearlyTrends || [])
         .filter(item => {
           const year = item._id?.year || 0;
-          return year >= 2020 && year <= currentYear;
+          return year >= start && year <= end;
         })
         .sort((a, b) => (a._id?.year || 0) - (b._id?.year || 0))
         .map(item => ({
@@ -251,7 +265,13 @@ export function ViolationMonitoring({ analyticsData }) {
           violations: item.count || 0
         }));
 
-      return yearlyData;
+      // Ensure we render all 5 years even if some are missing in data
+      const filled = [];
+      for (let y = start; y <= end; y++) {
+        const found = yearlyData.find(d => d.year === y);
+        filled.push({ year: y, violations: found ? found.violations : 0 });
+      }
+      return filled;
     }
   };
 
@@ -389,7 +409,7 @@ export function ViolationMonitoring({ analyticsData }) {
                 <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">
                   {viewMode === 'monthly' 
                     ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
-                    : `Monitoring ${currentYear}`
+                    : `Monitoring ${yearlyStartYear}–${yearlyStartYear + 4}`
                   }
                 </div>
               </div>
@@ -399,19 +419,65 @@ export function ViolationMonitoring({ analyticsData }) {
       </div>
 
       {/* Main Content - Responsive layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-full">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 h-full">
         {/* Left: Charts area */}
-        <div className="xl:col-span-2 p-2 sm:p-4">
+        <div className="xl:col-span-3 p-2 sm:p-4">
           <div className="space-y-4 sm:space-y-6">
             {/* Charts Area */}
             <div className="relative bg-gradient-to-br from-orange-50/80 via-red-50/60 to-pink-50/40 dark:from-orange-900/20 dark:via-red-900/20 dark:to-pink-900/20 backdrop-blur-sm rounded-xl p-3 sm:p-6 border border-orange-200/30 dark:border-orange-700/30 shadow-lg overflow-hidden">
-              <div className="absolute inset-0 opacity-5">
-                <svg className="w-full h-full" viewBox="0 0 400 300" fill="none">
-                  <path d="M0,200 L50,150 L100,180 L150,120 L200,160 L250,100 L300,140 L350,80 L400,120 L400,300 L0,300 Z" fill="#DC2626" />
-                  <path d="M0,250 Q100,220 200,250 T400,250 L400,300 L0,300 Z" fill="#EA580C" />
-                  <circle cx="80" cy="80" r="15" fill="#EF4444" />
-                  <circle cx="320" cy="60" r="12" fill="#F97316" />
-                  <circle cx="150" cy="200" r="10" fill="#EC4899" />
+              <div className="absolute inset-0 opacity-5 flex items-center justify-center">
+                <svg className="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Center: Main Violation Badge/Icon */}
+                  <g transform="translate(200, 150)">
+                    {/* Shield/Badge shape for violations */}
+                    <path d="M-40,-50 Q-40,-60 -30,-60 L30,-60 Q40,-60 40,-50 L40,10 Q40,20 30,20 L20,30 Q10,40 0,40 Q-10,40 -20,30 L-30,20 Q-40,20 -40,10 Z" fill="#DC2626" />
+                    {/* Exclamation mark inside */}
+                    <circle cx="0" cy="-15" r="4" fill="#FFF" />
+                    <rect x="-2" y="-8" width="4" height="20" rx="2" fill="#FFF" />
+                    <circle cx="0" cy="12" r="2" fill="#FFF" />
+                  </g>
+                  
+                  {/* Top left: Warning Triangle */}
+                  <g transform="translate(80, 80)">
+                    <path d="M0,-25 L25,25 L-25,25 Z" fill="#EF4444" />
+                    <path d="M0,-15 L12,15 L-12,15 Z" fill="#FFF" />
+                    <path d="M0,-10 L0,5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="0" cy="8" r="1.5" fill="#EF4444" />
+                  </g>
+                  
+                  {/* Top right: Stop Sign */}
+                  <g transform="translate(320, 80)">
+                    <path d="M-15,-25 L15,-25 L25,0 L15,25 L-15,25 L-25,0 Z" fill="#DC2626" />
+                    <text x="0" y="5" textAnchor="middle" fill="#FFF" fontSize="14" fontWeight="bold">STOP</text>
+                  </g>
+                  
+                  {/* Bottom left: Traffic Ticket/Notice */}
+                  <g transform="translate(60, 200)">
+                    <rect x="-25" y="-15" width="50" height="30" rx="3" fill="#FBBF24" stroke="#DC2626" strokeWidth="2" />
+                    <rect x="-20" y="-10" width="40" height="3" fill="#DC2626" />
+                    <path d="M-10,5 L10,5" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M-10,10 L5,10" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
+                    <circle cx="15" cy="-10" r="3" fill="#DC2626" />
+                  </g>
+                  
+                  {/* Bottom right: Speed Limit Sign */}
+                  <g transform="translate(340, 200)">
+                    <circle cx="0" cy="0" r="20" fill="#FFF" stroke="#DC2626" strokeWidth="3" />
+                    <text x="0" y="8" textAnchor="middle" fill="#DC2626" fontSize="16" fontWeight="bold">60</text>
+                    <path d="M-15,-15 L-10,-10 M15,-15 L10,-10" stroke="#DC2626" strokeWidth="1.5" />
+                  </g>
+                  
+                  {/* Center left: Warning Exclamation */}
+                  <g transform="translate(120, 140)">
+                    <circle cx="0" cy="0" r="15" fill="#EF4444" />
+                    <text x="0" y="6" textAnchor="middle" fill="#FFF" fontSize="18" fontWeight="bold">!</text>
+                  </g>
+                  
+                  {/* Center right: Prohibition Sign */}
+                  <g transform="translate(280, 140)">
+                    <circle cx="0" cy="0" r="18" fill="#F97316" />
+                    <path d="M-12,-12 L12,12 M12,-12 L-12,12" stroke="#FFF" strokeWidth="3" strokeLinecap="round" />
+                  </g>
                 </svg>
               </div>
               
@@ -422,6 +488,8 @@ export function ViolationMonitoring({ analyticsData }) {
                 
                 {/* Controls */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3" style={{ pointerEvents: 'auto' }}>
+                  {/* Filters on the left: Year filter for monthly OR yearly filters for yearly view */}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   {/* Year Filter - Only show in monthly view */}
                   {viewMode === 'monthly' && (
                     <div className="flex items-center gap-2 relative">
@@ -451,7 +519,63 @@ export function ViolationMonitoring({ analyticsData }) {
                       </div>
                     </div>
                   )}
-                  {/* Toggle: Monthly/Yearly */}
+
+                    {/* Yearly controls: 5-year window and chart type - on the left side */}
+                    {viewMode === 'yearly' && (
+                      <>
+                        <div className="flex items-center gap-2 relative">
+                          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+                            Years:
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={yearlyStartYear}
+                              onChange={(e) => setYearlyStartYear(parseInt(e.target.value))}
+                              className="px-3 pr-8 py-1.5 text-xs font-medium bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white hover:border-red-300 dark:hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                              style={{ minWidth: '160px' }}
+                            >
+                              {getFiveYearStartYears().map((start) => (
+                                <option key={start} value={start}>{`${start} – ${start + 4}`}</option>
+                              ))}
+                            </select>
+                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                              <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">Chart:</span>
+                          <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setYearlyChartType('bar'); }}
+                              className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative ${
+                                yearlyChartType === 'bar' ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                              }`}
+                              type="button"
+                              style={{ pointerEvents: 'auto' }}
+                            >
+                              Bar
+                            </button>
+                            <button
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setYearlyChartType('line'); }}
+                              className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative ${
+                                yearlyChartType === 'line' ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                              }`}
+                              type="button"
+                              style={{ pointerEvents: 'auto' }}
+                            >
+                              Line
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Toggle: Monthly/Yearly - in the middle */}
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">View:</span>
                     <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
@@ -567,14 +691,35 @@ export function ViolationMonitoring({ analyticsData }) {
                       />
                     </LineChart>
                   ) : (
+                    yearlyChartType === 'bar' ? (
                     <BarChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
-                      <XAxis dataKey="year" stroke="#E15759" fontSize={10} fontWeight="500" tick={{ fill: '#E15759' }} />
-                      <YAxis stroke="#E15759" fontSize={13} fontWeight="500" tick={{ fill: '#E15759' }} tickFormatter={(value) => value.toLocaleString()} />
+                        <XAxis dataKey="year" stroke="#E15759" fontSize={10} fontWeight={"500"} tick={{ fill: '#E15759' }} />
+                        <YAxis stroke="#E15759" fontSize={13} fontWeight={"500"} tick={{ fill: '#E15759' }} tickFormatter={(value) => value.toLocaleString()} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F28E2B', fillOpacity: 0.1 }} />
                       <Legend wrapperStyle={{ fontSize: '11px', fontWeight: '500', color: '#E15759', paddingTop: '10px' }} />
                       <Bar dataKey="violations" name="Violations" fill="#E15759" />
                     </BarChart>
+                    ) : (
+                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
+                        <XAxis dataKey="year" stroke="#E15759" fontSize={10} fontWeight={"500"} tick={{ fill: '#E15759' }} />
+                        <YAxis stroke="#E15759" fontSize={13} fontWeight={"500"} tick={{ fill: '#E15759' }} tickFormatter={(value) => value.toLocaleString()} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                        <Legend wrapperStyle={{ fontSize: '11px', fontWeight: '500', color: '#E15759', paddingTop: '10px' }} />
+                        <Line
+                          type="monotone"
+                          dataKey="violations"
+                          stroke="#E15759"
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          dot={{ r: 5, fill: '#E15759', stroke: '#fff', strokeWidth: 2 }}
+                          activeDot={{ r: 8, fill: '#E15759', stroke: '#fff', strokeWidth: 3, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                          name="Violations"
+                        />
+                      </LineChart>
+                    )
                   )}
                 </ResponsiveContainer>
               </div>
