@@ -7,4 +7,4 @@ export { ViolationRanking } from './ViolationRanking';
 export { ViolationCombinations } from './ViolationCombinations';
 export { LineChartModal } from './LineChartModal';
 export { ConfiscatedItemsChart } from './ConfiscatedItemsChart';
-export { ViolationMonitoring } from './PredictiveAnalytics';
+export { ViolationMonitoring } from './ViolationMonitoring';

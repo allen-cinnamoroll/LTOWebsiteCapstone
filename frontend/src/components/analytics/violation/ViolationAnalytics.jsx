@@ -7,7 +7,7 @@ import {
   ViolationCombinations, 
   LineChartModal
 } from './index';
-import { ViolationMonitoring } from './PredictiveAnalytics.jsx';
+import { ViolationMonitoring } from './ViolationMonitoring.jsx';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
