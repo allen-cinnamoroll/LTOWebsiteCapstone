@@ -71,16 +71,14 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
   };
 
   return (
-    <div className="bg-white dark:bg-black border-2 border-blue-200 dark:border-blue-800 rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-800 px-4 py-3 border-b-2 border-blue-300 dark:border-blue-700">
+      <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
+            <Shield className="w-6 h-6 text-blue-600 dark:text-blue-300" />
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                 Violation Analysis
       </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -88,12 +86,12 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
+          <div className="flex items-center space-x-1">
              <button
                onClick={() => handleTabChange('combinations')}
-               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                  activeTab === 'combinations'
-                   ? 'bg-blue-500 text-white shadow-sm'
+                   ? 'bg-blue-500 text-white'
                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                }`}
              >
@@ -102,9 +100,9 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
              </button>
              <button
                onClick={() => handleTabChange('patterns')}
-               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                  activeTab === 'patterns'
-                   ? 'bg-blue-500 text-white shadow-sm'
+                   ? 'bg-blue-500 text-white'
                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                }`}
              >
@@ -122,8 +120,8 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
             {activeTab === 'combinations' && (
               <>
                  {/* Table Header */}
-                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-3 border-2 border-blue-300 dark:border-blue-700">
-                  <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 border border-blue-200 dark:border-blue-800 shadow-sm">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wide">
                     <div className="col-span-1">#</div>
                     <div className="col-span-4">Violation Types</div>
                     <div className="col-span-2">Occurrences</div>
@@ -140,12 +138,12 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                   const globalIndex = startIndex + index + 1;
 
             return (
-                     <div key={index} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-3 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+                     <div key={index} className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-md p-3 hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
                       <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Index */}
                         <div className="col-span-1">
-                          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
+                          <div className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-flex items-center justify-center">
+                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                               {globalIndex}
                             </span>
                           </div>
@@ -153,11 +151,11 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                         {/* Violation Types */}
                         <div className="col-span-4">
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1.5">
                       {violations.map((violation, vIndex) => (
                         <span
                           key={vIndex}
-                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-800"
+                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20"
                         >
                           {violation}
                         </span>
@@ -177,24 +175,21 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                         {/* Severity */}
                         <div className="col-span-2">
-                           <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-bold ${getSeverityColor(count)} transform hover:scale-105 transition-all duration-200`}>
-                            {getSeverityIcon(count)}
-                            <span>
-                              {count >= 50 ? 'High' : count >= 20 ? 'Medium' : 'Low'}
-                            </span>
+                           <div className="inline-flex items-center gap-2">
+                             <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                               count >= 50 ? 'bg-red-500' : count >= 20 ? 'bg-orange-500' : 'bg-yellow-500'
+                             }`} />
+                             <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                               {count >= 50 ? 'High' : count >= 20 ? 'Medium' : 'Low'}
+                             </span>
                   </div>
                 </div>
 
                         {/* Recommended Action */}
                         <div className="col-span-3">
-                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                            <p className="text-xs text-blue-800 dark:text-blue-300 font-medium mb-1">
-                              Action Required:
-                            </p>
-                            <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                          <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
                     {recommendation}
                   </p>
-                          </div>
                         </div>
                 </div>
               </div>
@@ -206,8 +201,8 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
             {activeTab === 'patterns' && (
               <>
                  {/* Patterns Table Header */}
-                 <div className="bg-blue-100 dark:bg-blue-800/30 rounded-lg p-3 border-2 border-blue-300 dark:border-blue-700">
-                  <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                <div className="bg-blue-50 dark:bg-blue-900/30 rounded-md p-3 border border-blue-200 dark:border-blue-800 shadow-sm">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wide">
                     <div className="col-span-1">#</div>
                     <div className="col-span-4">Pattern Name</div>
                     <div className="col-span-2">Frequency</div>
@@ -224,12 +219,12 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
                   const globalIndex = startIndex + index + 1;
 
             return (
-                     <div key={`pattern-${index}`} className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-3 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200">
+                     <div key={`pattern-${index}`} className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-md p-3 hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
                       <div className="grid grid-cols-12 gap-4 items-center">
                         {/* Index */}
                         <div className="col-span-1">
-                          <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold text-gray-600 dark:text-gray-300">
+                          <div className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full inline-flex items-center justify-center">
+                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                               {globalIndex}
                             </span>
                           </div>
@@ -257,12 +252,13 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
 
                         {/* Status */}
                         <div className="col-span-2">
-                          <div className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                            frequency >= 30 ? 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400' :
-                            frequency >= 15 ? 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                            'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400'
-                          }`}>
-                            <span>
+                          <div className="inline-flex items-center gap-2">
+                            <span className={`inline-block w-2.5 h-2.5 rounded-full ${
+                              frequency >= 30 ? 'bg-green-500' :
+                              frequency >= 15 ? 'bg-yellow-500' :
+                              'bg-gray-400'
+                            }`} />
+                            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
                               {frequency >= 30 ? 'Active' : frequency >= 15 ? 'Moderate' : 'Low'}
                             </span>
                   </div>
@@ -328,9 +324,9 @@ export function ViolationCombinations({ displayData, loading, getCombinationReco
         </div>
       ) : (
           <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+            <div className="mx-auto mb-4">
               <Shield className="w-10 h-10 text-gray-400" />
-          </div>
+            </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               No Data Available
             </h3>
