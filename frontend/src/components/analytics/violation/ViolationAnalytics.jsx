@@ -5,11 +5,9 @@ import {
   ChartsSection, 
   ViolationRanking, 
   ViolationCombinations, 
-  LineChartModal,
-  MonthlyViolationMonitoring,
-  MonthlyViolationMonitoringModal
+  LineChartModal
 } from './index';
-import { Shield, Calendar, BarChart3, AlertTriangle, Scale, FileText, Car, Badge, FileCheck } from 'lucide-react';
+import { ViolationMonitoring } from './PredictiveAnalytics.jsx';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -54,9 +52,6 @@ export function ViolationAnalytics() {
   // Modal and filtering state for line chart
   const [isLineChartModalOpen, setIsLineChartModalOpen] = useState(false);
   const [selectedYearRange, setSelectedYearRange] = useState('2020-2023');
-  
-  // Modal state for monthly violation monitoring
-  const [isMonthlyMonitoringOpen, setIsMonthlyMonitoringOpen] = useState(false);
 
   const yearDropdownRef = useRef(null);
 
@@ -292,13 +287,6 @@ export function ViolationAnalytics() {
               )}
             </p>
           </div>
-          
-          {/* Monthly Violation Monitoring Button */}
-          <div className="mt-2">
-            <MonthlyViolationMonitoring 
-              onOpen={() => setIsMonthlyMonitoringOpen(true)} 
-            />
-          </div>
         </div>
         
       </div>
@@ -328,6 +316,11 @@ export function ViolationAnalytics() {
         mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
+      {/* Violation Monitoring */}
+      <div className="mb-8">
+        <ViolationMonitoring analyticsData={analyticsData} />
+      </div>
+
       {/* Charts Section with Violation Ranking and Combinations */}
       <ChartsSection
         displayData={analyticsData}
@@ -353,15 +346,6 @@ export function ViolationAnalytics() {
         filteredYearlyData={filteredYearlyData}
         loading={loading}
       />
-
-      {/* Monthly Violation Monitoring Modal */}
-      {isMonthlyMonitoringOpen && <MonthlyViolationMonitoringModal
-        isOpen={isMonthlyMonitoringOpen}
-        onClose={() => setIsMonthlyMonitoringOpen(false)}
-        analyticsData={analyticsData}
-        loading={loading}
-        selectedYear={selectedYear}
-      />}
 
     </div>
   );
