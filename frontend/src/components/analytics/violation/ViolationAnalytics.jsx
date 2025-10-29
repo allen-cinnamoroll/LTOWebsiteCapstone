@@ -4,8 +4,7 @@ import {
   KPICards, 
   ChartsSection, 
   ViolationRanking, 
-  ViolationCombinations, 
-  LineChartModal
+  ViolationCombinations
 } from './index';
 import { ViolationMonitoring } from './ViolationMonitoring.jsx';
 
@@ -49,10 +48,6 @@ export function ViolationAnalytics() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Modal and filtering state for line chart
-  const [isLineChartModalOpen, setIsLineChartModalOpen] = useState(false);
-  const [selectedYearRange, setSelectedYearRange] = useState('2020-2023');
-
   const yearDropdownRef = useRef(null);
 
   const currentYear = new Date().getFullYear();
@@ -73,25 +68,6 @@ export function ViolationAnalytics() {
     confiscatedItemTypesCount: 0,
     confiscatedItemTypesArray: []
   };
-
-  // Filter yearly trends data based on selected year range
-  const getFilteredYearlyData = () => {
-    if (!analyticsData?.yearlyTrends) return [];
-    
-    // Handle single year case (e.g., "2025")
-    if (!selectedYearRange.includes('-')) {
-      const year = parseInt(selectedYearRange);
-      return analyticsData.yearlyTrends.filter(item => item._id?.year === year);
-    }
-    
-    // Handle year range case (e.g., "2020-2025")
-    const [startYear, endYear] = selectedYearRange.split('-').map(Number);
-    return analyticsData.yearlyTrends.filter(item => 
-      item._id?.year >= startYear && item._id?.year <= endYear
-    );
-  };
-
-  const filteredYearlyData = getFilteredYearlyData();
 
   // Counter animations - use the data directly from analyticsData
   const totalViolations = useCounterAnimation(analyticsData?.totalViolations || 0);
@@ -325,7 +301,6 @@ export function ViolationAnalytics() {
       <ChartsSection
         displayData={analyticsData}
         loading={loading}
-        setIsLineChartModalOpen={setIsLineChartModalOpen}
         currentViolations={currentViolations}
         startIndex={startIndex}
         endIndex={endIndex}
@@ -335,16 +310,6 @@ export function ViolationAnalytics() {
         handlePrevPage={handlePrevPage}
         handleNextPage={handleNextPage}
         getCombinationRecommendation={getCombinationRecommendation}
-      />
-
-      {/* Line Chart Modal */}
-      <LineChartModal
-        isLineChartModalOpen={isLineChartModalOpen}
-        setIsLineChartModalOpen={setIsLineChartModalOpen}
-        selectedYearRange={selectedYearRange}
-        setSelectedYearRange={setSelectedYearRange}
-        filteredYearlyData={filteredYearlyData}
-        loading={loading}
       />
 
     </div>

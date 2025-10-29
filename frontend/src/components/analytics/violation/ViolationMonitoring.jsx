@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   LineChart,
   Line,
+  Area,
   BarChart,
   Bar,
   XAxis,
@@ -200,39 +201,39 @@ export function ViolationMonitoring({ analyticsData }) {
   const computeKPIs = () => {
     if (viewMode === 'monthly') {
       // Monthly view KPIs
-      if (!monitoringData) {
-        return {
-          totalViolations: 0,
-          topMonth: { month: 'N/A', value: 0 },
-          peakMonth: 'N/A',
-          peakValue: 0,
+    if (!monitoringData) {
+      return {
+        totalViolations: 0,
+        topMonth: { month: 'N/A', value: 0 },
+        peakMonth: 'N/A',
+        peakValue: 0,
           avgPerMonth: 0,
           peakYear: null,
           avgPerYear: null
-        };
-      }
+      };
+    }
 
-      // Total Violations (Year)
-      const totalViolations = Math.round(monitoringData.yearlyTotal);
-      
-      // Top Month - find month with highest violations
-      const topMonth = Object.entries(monitoringData.monthly).reduce((max, [month, value]) => 
-        value > max.value ? { month, value } : max, 
-        { month: 'Jan', value: 0 }
-      );
-      
-      // Peak Month (same as top month)
-      const peakMonth = topMonth.month;
-      const peakValue = topMonth.value;
-      
-      // Average per month
-      const avgPerMonth = Math.round(totalViolations / 12);
-      
-      return {
-        totalViolations,
-        topMonth,
-        peakMonth,
-        peakValue,
+    // Total Violations (Year)
+    const totalViolations = Math.round(monitoringData.yearlyTotal);
+    
+    // Top Month - find month with highest violations
+    const topMonth = Object.entries(monitoringData.monthly).reduce((max, [month, value]) => 
+      value > max.value ? { month, value } : max, 
+      { month: 'Jan', value: 0 }
+    );
+    
+    // Peak Month (same as top month)
+    const peakMonth = topMonth.month;
+    const peakValue = topMonth.value;
+    
+    // Average per month
+    const avgPerMonth = Math.round(totalViolations / 12);
+    
+    return {
+      totalViolations,
+      topMonth,
+      peakMonth,
+      peakValue,
         avgPerMonth,
         peakYear: null,
         avgPerYear: null
@@ -452,7 +453,7 @@ export function ViolationMonitoring({ analyticsData }) {
   }
 
   return (
-    <div className="mt-8 bg-gradient-to-br from-red-50 to-orange-100 dark:from-red-900/20 dark:to-orange-900/30 border border-red-200 dark:border-red-800 rounded-xl shadow-lg">
+    <div className="mt-8 bg-gradient-to-br from-red-50/50 to-orange-100/60 dark:from-red-900/10 dark:to-orange-900/15 border border-red-200/70 dark:border-red-800/60 rounded-xl shadow-lg">
       {/* Header */}
       <div className="p-6 border-b border-red-200/50 dark:border-red-700/50">
         <div className="flex items-center justify-between">
@@ -487,7 +488,7 @@ export function ViolationMonitoring({ analyticsData }) {
         <div className="xl:col-span-3 p-2 sm:p-4">
           <div className="space-y-4 sm:space-y-6">
             {/* Charts Area */}
-            <div className="relative bg-gradient-to-br from-orange-50/80 via-red-50/60 to-pink-50/40 dark:from-orange-900/20 dark:via-red-900/20 dark:to-pink-900/20 backdrop-blur-sm rounded-xl p-3 sm:p-6 border border-orange-200/30 dark:border-orange-700/30 shadow-lg overflow-hidden">
+            <div className="relative bg-gradient-to-br from-orange-50/30 via-red-50/20 to-pink-50/10 dark:from-orange-900/10 dark:via-red-900/10 dark:to-pink-900/10 backdrop-blur-sm rounded-xl p-3 sm:p-6 border border-orange-200/20 dark:border-orange-700/20 shadow-lg overflow-hidden">
               <div className="absolute inset-0 opacity-5 flex items-center justify-center">
                 <svg className="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* Center: Main Violation Badge/Icon */}
@@ -736,11 +737,24 @@ export function ViolationMonitoring({ analyticsData }) {
                 <ResponsiveContainer width="100%" height="100%">
                   {viewMode === 'monthly' ? (
                     <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <defs>
+                        <linearGradient id="colorViolationsMonthly" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
                       <XAxis dataKey="month" stroke="#E15759" fontSize={10} fontWeight="500" tick={{ fill: '#E15759' }} />
                       <YAxis stroke="#E15759" fontSize={10} fontWeight="500" tick={{ fill: '#E15759' }} tickFormatter={(value) => value.toLocaleString()} />
                       <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
                       <Legend wrapperStyle={{ fontSize: '11px', fontWeight: '500', color: '#E15759', paddingTop: '10px' }} />
+                      <Area
+                        type="monotone"
+                        dataKey="violations"
+                        stroke="none"
+                        fill="url(#colorViolationsMonthly)"
+                        fillOpacity={1}
+                      />
                       <Line
                         type="monotone"
                         dataKey="violations"
@@ -765,11 +779,24 @@ export function ViolationMonitoring({ analyticsData }) {
                     </BarChart>
                     ) : (
                       <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <defs>
+                          <linearGradient id="colorViolationsYearly" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
                         <XAxis dataKey="year" stroke="#E15759" fontSize={10} fontWeight={"500"} tick={{ fill: '#E15759' }} />
                         <YAxis stroke="#E15759" fontSize={13} fontWeight={"500"} tick={{ fill: '#E15759' }} tickFormatter={(value) => value.toLocaleString()} />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
                         <Legend wrapperStyle={{ fontSize: '11px', fontWeight: '500', color: '#E15759', paddingTop: '10px' }} />
+                        <Area
+                          type="monotone"
+                          dataKey="violations"
+                          stroke="none"
+                          fill="url(#colorViolationsYearly)"
+                          fillOpacity={1}
+                        />
                         <Line
                           type="monotone"
                           dataKey="violations"
