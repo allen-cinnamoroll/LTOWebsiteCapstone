@@ -37,7 +37,7 @@ export function ViolationRanking({
   return (
     <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-800 rounded-lg shadow-md p-6">
       <div className="flex items-center space-x-3 mb-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-900 to-violet-600 rounded-lg flex items-center justify-center shadow-md">
+        <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center shadow-md">
           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
           </svg>
@@ -52,7 +52,7 @@ export function ViolationRanking({
           {currentViolations.map((violation, index) => {
             const rank = startIndex + index + 1;
             const getRankColor = (rank) => {
-              return 'bg-gradient-to-br from-blue-900 to-violet-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300';
+              return 'bg-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300';
             };
 
             const getRankNumber = (rank) => {
@@ -60,21 +60,21 @@ export function ViolationRanking({
             };
 
             return (
-              <div key={violation._id || index} className="flex items-center space-x-4 p-3 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 group">
+              <div key={violation._id || index} className="flex items-center space-x-4 p-3 border-2 border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 hover:border-red-300 dark:hover:border-red-600 hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 group">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankColor(rank)}`}>
                   {getRankNumber(rank)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors duration-300">
                     {violation._id || 'Unknown Violation'}
                   </p>
-                  <p className="text-xs bg-gradient-to-r from-blue-900 to-violet-600 bg-clip-text text-transparent font-medium group-hover:from-blue-700 group-hover:to-violet-500 transition-all duration-300">
+                  <p className="text-xs text-red-600 font-medium group-hover:text-red-700 transition-all duration-300">
                     {violation.count || 0} occurrences
                   </p>
                   {/* Progress Bar */}
                   <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full shadow-sm transition-all duration-500 group-hover:shadow-md"
+                      className="h-full bg-red-600 rounded-full shadow-sm transition-all duration-500 group-hover:shadow-md"
                       style={{ 
                         width: `${Math.min((violation.count || 0) / Math.max(...currentViolations.map(v => v.count || 0)) * 100, 100)}%` 
                       }}
@@ -82,10 +82,10 @@ export function ViolationRanking({
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300">
+                  <div className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors duration-300">
                     {violation.count || 0}
                   </div>
-                  <div className="text-xs bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent font-medium group-hover:from-violet-500 group-hover:to-purple-500 transition-all duration-300">
+                  <div className="text-xs text-red-600 font-medium group-hover:text-red-700 transition-all duration-300">
                     violations
                   </div>
                 </div>
@@ -119,7 +119,7 @@ export function ViolationRanking({
                 <button
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-900 to-violet-600 hover:from-blue-800 hover:to-violet-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md transition-all duration-200 flex items-center space-x-1"
+                  className="px-3 py-1.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md transition-all duration-200 flex items-center space-x-1"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -129,7 +129,7 @@ export function ViolationRanking({
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-900 to-violet-600 hover:from-blue-800 hover:to-violet-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md transition-all duration-200 flex items-center space-x-1"
+                  className="px-3 py-1.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg shadow-md transition-all duration-200 flex items-center space-x-1"
                 >
                   <span>Next</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

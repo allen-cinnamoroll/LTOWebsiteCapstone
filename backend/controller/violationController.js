@@ -167,8 +167,15 @@ export const getViolationCount = async (req, res) => {
         // Count total individual violations across all records
         let totalViolations = 0;
         violations.forEach(violation => {
-            if (violation.violations && Array.isArray(violation.violations)) {
-                totalViolations += violation.violations.length;
+            if (violation.violations) {
+                if (Array.isArray(violation.violations)) {
+                    // Count each violation in the array
+                    totalViolations += violation.violations.length;
+                } else if (typeof violation.violations === 'string') {
+                    // Split comma-separated string and count each violation
+                    const violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                    totalViolations += violationsArray.length;
+                }
             }
         });
 
@@ -223,8 +230,15 @@ export const getViolationAnalytics = async (req, res) => {
         // Count total individual violations across all records
         let totalViolations = 0;
         violations.forEach(violation => {
-            if (violation.violations && Array.isArray(violation.violations)) {
-                totalViolations += violation.violations.length;
+            if (violation.violations) {
+                if (Array.isArray(violation.violations)) {
+                    // Count each violation in the array
+                    totalViolations += violation.violations.length;
+                } else if (typeof violation.violations === 'string') {
+                    // Split comma-separated string and count each violation
+                    const violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                    totalViolations += violationsArray.length;
+                }
             }
         });
 
@@ -237,18 +251,34 @@ export const getViolationAnalytics = async (req, res) => {
         });
         const totalTrafficViolators = uniquePlates.size;
 
-        // Count recent violations (last 30 days)
+        // Count recent violations (last 30 days) - count actual violations, not just records
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentViolations = violations.filter(violation => 
-            new Date(violation.dateOfApprehension) >= thirtyDaysAgo
-        ).length;
+        const recentViolationsCount = violations.reduce((count, violation) => {
+            if (new Date(violation.dateOfApprehension) >= thirtyDaysAgo && violation.violations) {
+                if (Array.isArray(violation.violations)) {
+                    return count + violation.violations.length;
+                } else if (typeof violation.violations === 'string') {
+                    const violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                    return count + violationsArray.length;
+                }
+            }
+            return count;
+        }, 0);
 
         // Get most common violations
         const violationCounts = {};
         violations.forEach(violation => {
-            if (violation.violations && Array.isArray(violation.violations)) {
-                violation.violations.forEach(violationItem => {
+            if (violation.violations) {
+                let violationsArray = [];
+                
+                if (Array.isArray(violation.violations)) {
+                    violationsArray = violation.violations;
+                } else if (typeof violation.violations === 'string') {
+                    violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                }
+                
+                violationsArray.forEach(violationItem => {
                     const violationText = violationItem.toString().trim();
                     if (violationText) {
                         violationCounts[violationText] = (violationCounts[violationText] || 0) + 1;
@@ -289,12 +319,20 @@ export const getViolationAnalytics = async (req, res) => {
             .map(([type, count]) => ({ _id: type, count }))
             .sort((a, b) => b.count - a.count);
 
-        // Get yearly trends
+        // Get yearly trends - count actual violations from the violations array or comma-separated string
         const yearlyTrends = {};
         violations.forEach(violation => {
-            if (violation.dateOfApprehension) {
+            if (violation.dateOfApprehension && violation.violations) {
                 const year = new Date(violation.dateOfApprehension).getFullYear();
-                yearlyTrends[year] = (yearlyTrends[year] || 0) + 1;
+                // Count actual violations - handle both array and string format
+                let violationCount = 0;
+                if (Array.isArray(violation.violations)) {
+                    violationCount = violation.violations.length;
+                } else if (typeof violation.violations === 'string') {
+                    const violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                    violationCount = violationsArray.length;
+                }
+                yearlyTrends[year] = (yearlyTrends[year] || 0) + violationCount;
             }
         });
 
@@ -302,22 +340,69 @@ export const getViolationAnalytics = async (req, res) => {
             .map(([year, count]) => ({ _id: { year: parseInt(year) }, count }))
             .sort((a, b) => a._id.year - b._id.year);
 
+        // Get monthly trends - count actual violations from the violations array or comma-separated string
+        const monthlyTrends = [];
+        violations.forEach(violation => {
+            if (violation.dateOfApprehension && violation.violations) {
+                const year = new Date(violation.dateOfApprehension).getFullYear();
+                const month = new Date(violation.dateOfApprehension).getMonth() + 1; // 1-12
+                
+                // Count violations - handle both array and string format
+                let violationCount = 0;
+                if (Array.isArray(violation.violations)) {
+                    violationCount = violation.violations.length;
+                } else if (typeof violation.violations === 'string') {
+                    const violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                    violationCount = violationsArray.length;
+                }
+                
+                if (violationCount > 0) {
+                    // Find existing entry or create new
+                    const existingIndex = monthlyTrends.findIndex(t => t._id.year === year && t._id.month === month);
+                    if (existingIndex >= 0) {
+                        monthlyTrends[existingIndex].count += violationCount;
+                    } else {
+                        monthlyTrends.push({
+                            _id: { year, month },
+                            count: violationCount
+                        });
+                    }
+                }
+            }
+        });
+        
+        // Sort monthly trends by year and month
+        monthlyTrends.sort((a, b) => {
+            if (a._id.year !== b._id.year) return a._id.year - b._id.year;
+            return a._id.month - b._id.month;
+        });
+
         // Get violation combinations (simplified)
         const violationCombinations = [];
         violations.forEach(violation => {
-            if (violation.violations && Array.isArray(violation.violations) && violation.violations.length > 1) {
-                const combination = violation.violations.map(v => v.toString().trim()).filter(v => v);
-                if (combination.length > 1) {
-                    const combinationKey = combination.sort().join(' + ');
-                    const existing = violationCombinations.find(c => c.combination === combinationKey);
-                    if (existing) {
-                        existing.count++;
-                    } else {
-                        violationCombinations.push({
-                            combination: combinationKey,
-                            violations: combination,
-                            count: 1
-                        });
+            if (violation.violations) {
+                let violationsArray = [];
+                
+                if (Array.isArray(violation.violations)) {
+                    violationsArray = violation.violations;
+                } else if (typeof violation.violations === 'string') {
+                    violationsArray = violation.violations.split(',').map(v => v.trim()).filter(v => v);
+                }
+                
+                if (violationsArray.length > 1) {
+                    const combination = violationsArray.map(v => v.toString().trim()).filter(v => v);
+                    if (combination.length > 1) {
+                        const combinationKey = combination.sort().join(' + ');
+                        const existing = violationCombinations.find(c => c.combination === combinationKey);
+                        if (existing) {
+                            existing.count++;
+                        } else {
+                            violationCombinations.push({
+                                combination: combinationKey,
+                                violations: combination,
+                                count: 1
+                            });
+                        }
                     }
                 }
             }
@@ -408,11 +493,12 @@ export const getViolationAnalytics = async (req, res) => {
             data: {
                 totalViolations,
                 totalTrafficViolators,
-                recentViolations,
+                recentViolations: recentViolationsCount,
                 mostCommonViolations: mostCommonViolations.slice(0, 50), // Top 50
                 topOfficers,
                 violationsByType: violationsByTypeArray,
                 yearlyTrends: yearlyTrendsArray,
+                monthlyTrends: monthlyTrends,
                 violationCombinations: violationCombinations.slice(0, 20), // Top 20 combinations
                 violationPatterns,
                 confiscatedItemTypesCount,

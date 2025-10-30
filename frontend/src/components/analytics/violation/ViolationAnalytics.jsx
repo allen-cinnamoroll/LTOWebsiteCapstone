@@ -4,12 +4,9 @@ import {
   KPICards, 
   ChartsSection, 
   ViolationRanking, 
-  ViolationCombinations, 
-  LineChartModal,
-  MonthlyViolationMonitoring,
-  MonthlyViolationMonitoringModal
+  ViolationCombinations
 } from './index';
-import { Shield, Calendar, BarChart3, AlertTriangle, Scale, FileText, Car, Badge, FileCheck } from 'lucide-react';
+import { ViolationMonitoring } from './ViolationMonitoring.jsx';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -51,13 +48,6 @@ export function ViolationAnalytics() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Modal and filtering state for line chart
-  const [isLineChartModalOpen, setIsLineChartModalOpen] = useState(false);
-  const [selectedYearRange, setSelectedYearRange] = useState('2020-2023');
-  
-  // Modal state for monthly violation monitoring
-  const [isMonthlyMonitoringOpen, setIsMonthlyMonitoringOpen] = useState(false);
-
   const yearDropdownRef = useRef(null);
 
   const currentYear = new Date().getFullYear();
@@ -78,25 +68,6 @@ export function ViolationAnalytics() {
     confiscatedItemTypesCount: 0,
     confiscatedItemTypesArray: []
   };
-
-  // Filter yearly trends data based on selected year range
-  const getFilteredYearlyData = () => {
-    if (!analyticsData?.yearlyTrends) return [];
-    
-    // Handle single year case (e.g., "2025")
-    if (!selectedYearRange.includes('-')) {
-      const year = parseInt(selectedYearRange);
-      return analyticsData.yearlyTrends.filter(item => item._id?.year === year);
-    }
-    
-    // Handle year range case (e.g., "2020-2025")
-    const [startYear, endYear] = selectedYearRange.split('-').map(Number);
-    return analyticsData.yearlyTrends.filter(item => 
-      item._id?.year >= startYear && item._id?.year <= endYear
-    );
-  };
-
-  const filteredYearlyData = getFilteredYearlyData();
 
   // Counter animations - use the data directly from analyticsData
   const totalViolations = useCounterAnimation(analyticsData?.totalViolations || 0);
@@ -292,13 +263,6 @@ export function ViolationAnalytics() {
               )}
             </p>
           </div>
-          
-          {/* Monthly Violation Monitoring Button */}
-          <div className="mt-2">
-            <MonthlyViolationMonitoring 
-              onOpen={() => setIsMonthlyMonitoringOpen(true)} 
-            />
-          </div>
         </div>
         
       </div>
@@ -328,11 +292,15 @@ export function ViolationAnalytics() {
         mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
+      {/* Violation Monitoring */}
+      <div className="mb-8">
+        <ViolationMonitoring analyticsData={analyticsData} />
+      </div>
+
       {/* Charts Section with Violation Ranking and Combinations */}
       <ChartsSection
         displayData={analyticsData}
         loading={loading}
-        setIsLineChartModalOpen={setIsLineChartModalOpen}
         currentViolations={currentViolations}
         startIndex={startIndex}
         endIndex={endIndex}
@@ -343,25 +311,6 @@ export function ViolationAnalytics() {
         handleNextPage={handleNextPage}
         getCombinationRecommendation={getCombinationRecommendation}
       />
-
-      {/* Line Chart Modal */}
-      <LineChartModal
-        isLineChartModalOpen={isLineChartModalOpen}
-        setIsLineChartModalOpen={setIsLineChartModalOpen}
-        selectedYearRange={selectedYearRange}
-        setSelectedYearRange={setSelectedYearRange}
-        filteredYearlyData={filteredYearlyData}
-        loading={loading}
-      />
-
-      {/* Monthly Violation Monitoring Modal */}
-      {isMonthlyMonitoringOpen && <MonthlyViolationMonitoringModal
-        isOpen={isMonthlyMonitoringOpen}
-        onClose={() => setIsMonthlyMonitoringOpen(false)}
-        analyticsData={analyticsData}
-        loading={loading}
-        selectedYear={selectedYear}
-      />}
 
     </div>
   );

@@ -5,7 +5,5 @@ export { BarChart } from './BarChart';
 export { PieChart } from './PieChart';
 export { ViolationRanking } from './ViolationRanking';
 export { ViolationCombinations } from './ViolationCombinations';
-export { LineChartModal } from './LineChartModal';
 export { ConfiscatedItemsChart } from './ConfiscatedItemsChart';
-export { MonthlyViolationMonitoring } from './MonthlyViolationMonitoring';
-export { MonthlyViolationMonitoringModal } from './MonthlyViolationMonitoringModal';
+export { ViolationMonitoring } from './ViolationMonitoring';
