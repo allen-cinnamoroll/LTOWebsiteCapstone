@@ -223,7 +223,31 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
             <CalendarIcon className="h-3 w-3" />
             Date of Renewal
           </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatDate(vehicleData?.dateOfRenewal)}</p>
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
+            {(() => {
+              const dates = vehicleData?.dateOfRenewal;
+              if (!dates || (Array.isArray(dates) && dates.length === 0)) {
+                return "Not set";
+              }
+              
+              // Handle both single date and array of dates
+              const dateArray = Array.isArray(dates) ? dates : [dates];
+              const latestDate = dateArray[dateArray.length - 1]; // Get the most recent date
+              
+              return latestDate ? formatDate(latestDate) : "Not set";
+            })()}
+          </p>
+          {(() => {
+            const dates = vehicleData?.dateOfRenewal;
+            if (dates && Array.isArray(dates) && dates.length > 1) {
+              return (
+                <p className="text-xs text-gray-500 dark:text-gray-400 ml-4 mt-1">
+                  ({dates.length} renewals)
+                </p>
+              );
+            }
+            return null;
+          })()}
         </div>
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
@@ -379,14 +403,9 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Renewal History ({renewalHistory.length} {renewalHistory.length === 1 ? 'record' : 'records'})
-            </h3>
-            <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-              {vehicleData?.plateNo}
-            </span>
-          </div>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Renewal History ({renewalHistory.length} records)
+          </h3>
           <Button 
             variant="outline" 
             size="sm" 
@@ -503,3 +522,5 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
 };
 
 export default VehicleDetailsModal;
+
+

@@ -66,8 +66,9 @@
         type: String,
       },
       dateOfRenewal: {
-        type: Date,
+        type: [Date],
         required: false,
+        default: [],
       },
       vehicleStatusType: {
         type: String,

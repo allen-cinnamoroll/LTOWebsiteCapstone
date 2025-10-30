@@ -20,11 +20,13 @@ const VehiclesPage = () => {
   const date = formatDate(Date.now());
   const [submitting, setIsSubmitting] = useState(false);
   const [renewalModalOpen, setRenewalModalOpen] = useState(false);
+  const [tableRenewalModalOpen, setTableRenewalModalOpen] = useState(false);
   const [addVehicleModalOpen, setAddVehicleModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [editVehicleModalOpen, setEditVehicleModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicleId, setEditingVehicleId] = useState(null);
+  const [renewingVehicle, setRenewingVehicle] = useState(null);
 
   useEffect(() => {
     fetchVehicles();
@@ -94,7 +96,11 @@ const VehiclesPage = () => {
   };
 
   const onRenew = (vehicle) => {
-    setSelectedVehicle(vehicle);
+    setRenewingVehicle(vehicle);
+    setTableRenewalModalOpen(true);
+  };
+
+  const handleRenewal = () => {
     setRenewalModalOpen(true);
   };
 
@@ -134,7 +140,14 @@ const VehiclesPage = () => {
       <VehicleRenewalModal 
         open={renewalModalOpen} 
         onOpenChange={setRenewalModalOpen}
-        vehicleData={selectedVehicle}
+        onVehicleUpdated={handleVehicleUpdated}
+      />
+
+      {/* Table Renewal Modal */}
+      <VehicleRenewalModal 
+        open={tableRenewalModalOpen} 
+        onOpenChange={setTableRenewalModalOpen}
+        vehicleData={renewingVehicle}
         onVehicleUpdated={handleVehicleUpdated}
       />
 

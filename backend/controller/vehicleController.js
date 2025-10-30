@@ -1,8 +1,6 @@
 import VehicleModel from "../model/VehicleModel.js";
 import DriverModel from "../model/DriverModel.js";
-import RenewalHistoryModel from "../model/RenewalHistoryModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
-import { createRenewalStatusRecord } from "../util/renewalStatusCalculator.js";
 // import { logger } from "../util/logger.js";
 
 // Create a new vehicle
@@ -49,8 +47,12 @@ export const createVehicle = async (req, res) => {
       });
     }
 
-    // Calculate initial status based on plate number
-    const initialStatus = getVehicleStatus(plateNo, dateOfRenewal, vehicleStatusType);
+    // Handle dateOfRenewal as array - convert single date to array if needed
+    const renewalDates = dateOfRenewal ? (Array.isArray(dateOfRenewal) ? dateOfRenewal : [dateOfRenewal]) : [];
+    
+    // Calculate initial status based on plate number and latest renewal date
+    const latestRenewalDate = renewalDates.length > 0 ? renewalDates[renewalDates.length - 1] : null;
+    const initialStatus = getVehicleStatus(plateNo, latestRenewalDate, vehicleStatusType);
 
     // Debug user tracking
     console.log('=== VEHICLE CREATION DEBUG ===');
@@ -73,7 +75,7 @@ export const createVehicle = async (req, res) => {
       bodyType,
       color,
       classification,
-      dateOfRenewal,
+      dateOfRenewal: renewalDates,
       vehicleStatusType,
       driverId,
       status: initialStatus, // Set status based on plate number logic
@@ -91,19 +93,6 @@ export const createVehicle = async (req, res) => {
       { new: true }
     );
 
-    // Add initial renewal date to history if provided
-    if (dateOfRenewal) {
-      try {
-        await RenewalHistoryModel.addRenewalDateToHistory(
-          vehicle._id, 
-          dateOfRenewal, 
-          req.user?.userId || req.user?.id
-        );
-        console.log(`Added initial renewal date ${dateOfRenewal} to history for vehicle ${plateNo}`);
-      } catch (renewalError) {
-        console.error("Error adding initial renewal date to history:", renewalError);
-      }
-    }
 
     // Populate driver information
     await vehicle.populate("driverId", "fullname ownerRepresentativeName");
@@ -163,7 +152,13 @@ export const getVehicle = async (req, res) => {
 
     // Add calculated status for each vehicle and update database status if needed
     const vehiclesWithStatus = await Promise.all(vehicles.map(async (vehicle) => {
-      const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+      // Handle dateOfRenewal as array - get the latest renewal date
+      const renewalDates = vehicle.dateOfRenewal || [];
+      const latestRenewalDate = Array.isArray(renewalDates) && renewalDates.length > 0 
+        ? renewalDates[renewalDates.length - 1] 
+        : renewalDates;
+      
+      const calculatedStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
       
       // Update database status if it doesn't match calculated status
       if (vehicle.status !== calculatedStatus) {
@@ -234,7 +229,12 @@ export const findVehicle = async (req, res) => {
     }
 
     // Add calculated status
-    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+    const renewalDates = vehicle.dateOfRenewal || [];
+    const latestRenewalDate = Array.isArray(renewalDates) && renewalDates.length > 0 
+      ? renewalDates[renewalDates.length - 1] 
+      : renewalDates;
+    
+    const calculatedStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
 
     res.json({
       success: true,
@@ -259,6 +259,13 @@ export const updateVehicle = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
+    console.log('=== VEHICLE UPDATE DEBUG ===');
+    console.log('Vehicle ID:', id);
+    console.log('Update data:', updateData);
+    console.log('dateOfRenewal type:', typeof updateData.dateOfRenewal);
+    console.log('dateOfRenewal value:', updateData.dateOfRenewal);
+    console.log('Is array:', Array.isArray(updateData.dateOfRenewal));
+
     // Remove fields that shouldn't be updated directly
     delete updateData._id;
     delete updateData.createdAt;
@@ -271,6 +278,32 @@ export const updateVehicle = async (req, res) => {
         success: false,
         message: "Vehicle not found",
       });
+    }
+
+    console.log('Current vehicle dateOfRenewal:', currentVehicle.dateOfRenewal);
+    console.log('Current vehicle dateOfRenewal type:', typeof currentVehicle.dateOfRenewal);
+    console.log('Current vehicle dateOfRenewal is array:', Array.isArray(currentVehicle.dateOfRenewal));
+
+    // Handle migration: if current dateOfRenewal is not an array, convert it
+    if (updateData.dateOfRenewal && Array.isArray(updateData.dateOfRenewal) && !Array.isArray(currentVehicle.dateOfRenewal)) {
+      console.log('Converting single dateOfRenewal to array format for migration...');
+      const existingDate = currentVehicle.dateOfRenewal;
+      const existingDates = existingDate ? [existingDate] : [];
+      
+      // Merge existing dates with new dates, avoiding duplicates
+      const newDates = [...existingDates];
+      updateData.dateOfRenewal.forEach(newDate => {
+        const dateStr = new Date(newDate).toISOString();
+        const exists = newDates.some(existingDate => 
+          new Date(existingDate).toISOString() === dateStr
+        );
+        if (!exists) {
+          newDates.push(newDate);
+        }
+      });
+      
+      updateData.dateOfRenewal = newDates;
+      console.log('Migrated dateOfRenewal to array:', updateData.dateOfRenewal);
     }
 
     // Add user tracking for update
@@ -299,7 +332,13 @@ export const updateVehicle = async (req, res) => {
     const statusTypeChanged = currentVehicle.vehicleStatusType !== vehicle.vehicleStatusType;
     
     if (plateChanged || statusTypeChanged) {
-      const newStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+      // Handle dateOfRenewal as array - get the latest renewal date
+      const renewalDates = vehicle.dateOfRenewal || [];
+      const latestRenewalDate = Array.isArray(renewalDates) && renewalDates.length > 0 
+        ? renewalDates[renewalDates.length - 1] 
+        : renewalDates;
+      
+      const newStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
       if (vehicle.status !== newStatus) {
         await VehicleModel.findByIdAndUpdate(id, { status: newStatus });
         vehicle.status = newStatus;
@@ -307,37 +346,6 @@ export const updateVehicle = async (req, res) => {
       }
     }
 
-    // Create renewal history record if renewal date was updated
-    const renewalDateChanged = currentVehicle.dateOfRenewal?.getTime() !== vehicle.dateOfRenewal?.getTime();
-    
-    console.log('=== RENEWAL DATE CHANGE DEBUG ===');
-    console.log('Vehicle ID:', vehicle._id);
-    console.log('Current renewal date:', currentVehicle.dateOfRenewal);
-    console.log('New renewal date:', vehicle.dateOfRenewal);
-    console.log('Renewal date changed:', renewalDateChanged);
-    console.log('User ID:', req.user?.userId || req.user?.id);
-    
-    if (renewalDateChanged && vehicle.dateOfRenewal) {
-      try {
-        console.log('Attempting to add renewal date to history...');
-        // Add renewal date to history using the new method
-        const result = await RenewalHistoryModel.addRenewalDateToHistory(
-          vehicle._id, 
-          vehicle.dateOfRenewal, 
-          req.user?.userId || req.user?.id
-        );
-        
-        console.log('Renewal history result:', result);
-        console.log(`Added renewal date ${vehicle.dateOfRenewal} to history for vehicle ${vehicle.plateNo}`);
-      } catch (renewalError) {
-        // Log error but don't fail the vehicle update
-        console.error("Error adding renewal date to history:", renewalError);
-        console.error("Error stack:", renewalError.stack);
-      }
-    } else {
-      console.log('Skipping renewal history update - no date change or missing date');
-    }
-    console.log('=== END RENEWAL DATE CHANGE DEBUG ===');
 
     res.json({
       success: true,
@@ -346,6 +354,29 @@ export const updateVehicle = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating vehicle:", error);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    
+    // Handle specific validation errors
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: "Validation error",
+        error: error.message,
+        details: error.errors
+      });
+    }
+    
+    // Handle cast errors
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data format",
+        error: error.message
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -401,7 +432,13 @@ export const checkVehiclesExpiration = async (req, res) => {
     const expiredVehicles = [];
 
     for (const vehicle of vehicles) {
-      const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+      // Handle dateOfRenewal as array - get the latest renewal date
+      const renewalDates = vehicle.dateOfRenewal || [];
+      const latestRenewalDate = Array.isArray(renewalDates) && renewalDates.length > 0 
+        ? renewalDates[renewalDates.length - 1] 
+        : renewalDates;
+      
+      const calculatedStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
       if (calculatedStatus === "0") {
         // Update vehicle status to expired
         await VehicleModel.findByIdAndUpdate(vehicle._id, { status: "0" });
@@ -446,7 +483,12 @@ export const getVehicleOwnerByPlate = async (req, res) => {
     }
 
     // Add calculated status
-    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+    const renewalDates = vehicle.dateOfRenewal || [];
+    const latestRenewalDate = Array.isArray(renewalDates) && renewalDates.length > 0 
+      ? renewalDates[renewalDates.length - 1] 
+      : renewalDates;
+    
+    const calculatedStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
 
     res.json({
       success: true,
@@ -483,7 +525,12 @@ export const getVehicleByFileNumber = async (req, res) => {
     }
 
     // Add calculated status
-    const calculatedStatus = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+    const renewalDates = vehicle.dateOfRenewal || [];
+    const latestRenewalDate = Array.isArray(renewalDates) && renewalDates.length > 0 
+      ? renewalDates[renewalDates.length - 1] 
+      : renewalDates;
+    
+    const calculatedStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
 
     res.json({
       success: true,

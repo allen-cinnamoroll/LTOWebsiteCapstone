@@ -510,10 +510,23 @@ export const vehicleColumns = (onEdit, onRenew, submitting) => [
     accessorKey: "dateOfRenewal",
     header: "Date of Renewal",
     cell: ({ row }) => {
-      const date = row.getValue("dateOfRenewal");
+      const dates = row.getValue("dateOfRenewal");
+      if (!dates || (Array.isArray(dates) && dates.length === 0)) {
+        return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">Not set</div>;
+      }
+      
+      // Handle both single date and array of dates
+      const dateArray = Array.isArray(dates) ? dates : [dates];
+      const latestDate = dateArray[dateArray.length - 1]; // Get the most recent date
+      
       return (
         <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">
-          {date ? new Date(date).toLocaleDateString() : "Not set"}
+          {latestDate ? new Date(latestDate).toLocaleDateString() : "Not set"}
+          {dateArray.length > 1 && (
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              ({dateArray.length} renewals)
+            </div>
+          )}
         </div>
       );
     },
