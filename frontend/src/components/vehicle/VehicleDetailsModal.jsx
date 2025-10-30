@@ -20,6 +20,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   const [renewalHistory, setRenewalHistory] = useState([]);
   const [renewalLoading, setRenewalLoading] = useState(false);
   const [renewalError, setRenewalError] = useState(null);
+  const [userNameCache, setUserNameCache] = useState({});
   const { token } = useAuth();
 
   useEffect(() => {
@@ -77,6 +78,30 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
         }))
         .sort((a, b) => new Date(b.renewalDate) - new Date(a.renewalDate));
       setRenewalHistory(history);
+      // Resolve processedBy names
+      const ids = Array.from(new Set(
+        history
+          .map(h => (typeof h.processedBy === 'string' ? h.processedBy : (h.processedBy?._id || null)))
+          .filter(Boolean)
+      ));
+      const unknownIds = ids.filter(id => !(id in userNameCache));
+      if (unknownIds.length) {
+        const results = await Promise.allSettled(
+          unknownIds.map(async (id) => {
+            try {
+              const { data } = await apiClient.get(`/user/${id}`, { headers: { Authorization: token } });
+              const user = data?.data || {};
+              const fullName = user.fullname || `${user.firstName || ''} ${user.lastName || ''}`.trim() || id;
+              return { id, name: fullName };
+            } catch (e) {
+              return { id, name: id };
+            }
+          })
+        );
+        const newMap = { ...userNameCache };
+        results.forEach(r => { if (r.status === 'fulfilled') newMap[r.value.id] = r.value.name; });
+        setUserNameCache(newMap);
+      }
     } catch (e) {
       console.error('Error deriving renewal history from vehicle data:', e);
       setRenewalError('Failed to derive renewal history');
@@ -87,7 +112,11 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not set";
-    return new Date(dateString).toLocaleDateString();
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch {
+      return String(dateString);
+    }
   };
 
   const formatBirthDate = (dateString) => {
@@ -432,7 +461,14 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
                     {getRenewalStatusBadge(record.status)}
                   </TableCell>
                   <TableCell className="text-xs text-gray-600 dark:text-gray-400">
-                    {record.processedBy ? (typeof record.processedBy === 'object' && record.processedBy.fullname ? record.processedBy.fullname : String(record.processedBy)) : "System"}
+                    {(() => {
+                      if (!record.processedBy) return "System";
+                      if (typeof record.processedBy === 'object') {
+                        return record.processedBy.fullname || `${record.processedBy.firstName || ''} ${record.processedBy.lastName || ''}`.trim() || 'System';
+                      }
+                      const id = record.processedBy;
+                      return userNameCache[id] || id;
+                    })()}
                   </TableCell>
                 </TableRow>
               ))}

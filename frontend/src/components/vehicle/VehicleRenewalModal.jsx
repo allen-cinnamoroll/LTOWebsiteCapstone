@@ -127,10 +127,10 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
         toast.success("Vehicle Renewed Successfully", {
           description: `Renewal date added for ${vehicleData.plateNo}`,
         });
-        
-        // Notify parent component to refresh the vehicle list
-        if (onVehicleUpdated) {
-          onVehicleUpdated();
+            
+            // Notify parent component to refresh the vehicle list
+            if (onVehicleUpdated) {
+              onVehicleUpdated();
         }
       } else {
         setError(data.message || "Failed to update renewal date");
@@ -197,7 +197,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
                 <RefreshCw className="h-5 w-5" />
                 Vehicle Renewal
-              </DialogTitle>
+          </DialogTitle>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Update renewal date for vehicle registration
               </p>
@@ -208,24 +208,24 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             </div>
           </div>
         </DialogHeader>
-        
+
         <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
           {/* Vehicle Information */}
           <div className="space-y-4 mb-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Car className="h-4 w-4" />
-                    Vehicle Information
-                  </span>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Car className="h-4 w-4" />
+                      Vehicle Information
+                    </span>
                   <Badge className={getStatusColor(vehicleData.status)}>
                     {getStatusText(vehicleData.status)}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4">
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
                     <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                       <Hash className="h-3 w-3" />
@@ -363,40 +363,40 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
               </Card>
             )}
 
-            {/* Update Renewal Date Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
+              {/* Update Renewal Date Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
                   Add New Renewal Date
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-600">New Renewal Date</Label>
-                  <div className="mt-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !newRenewalDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {newRenewalDate ? formatDate(newRenewalDate) : "Pick a date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <DatePicker
-                          fieldValue={newRenewalDate}
-                          dateValue={setNewRenewalDate}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">New Renewal Date</Label>
+                    <div className="mt-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !newRenewalDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {newRenewalDate ? formatDate(newRenewalDate) : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <DatePicker
+                            fieldValue={newRenewalDate}
+                            dateValue={setNewRenewalDate}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
-                </div>
                 
                 {error && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -409,24 +409,24 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                     <p className="text-sm text-green-600">Renewal date added successfully!</p>
                   </div>
                 )}
-                
-                <div className="flex justify-end">
-                  <Button 
-                    onClick={handleUpdateRenewalDate}
-                    disabled={updating || !newRenewalDate}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    {updating ? (
-                      <LoaderCircle className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4" />
-                    )}
+                  
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleUpdateRenewalDate}
+                      disabled={updating || !newRenewalDate}
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {updating ? (
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4" />
+                      )}
                     {updating ? "Adding Renewal..." : "Add Renewal Date"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
         </div>
 
         <DialogFooter className="flex-shrink-0">
