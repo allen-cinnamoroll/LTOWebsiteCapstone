@@ -8,12 +8,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, Loader2, Edit } from "lucide-react";
+import EditVehicleModal from "./EditVehicleModal";
+import VehicleRenewalModal from "./VehicleRenewalModal";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
-const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
+const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated }) => {
   const [activeTab, setActiveTab] = useState("vehicle");
   const [ownerData, setOwnerData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -21,6 +23,8 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   const [renewalLoading, setRenewalLoading] = useState(false);
   const [renewalError, setRenewalError] = useState(null);
   const [userNameCache, setUserNameCache] = useState({});
+  const [editOpen, setEditOpen] = useState(false);
+  const [renewOpen, setRenewOpen] = useState(false);
   const { token } = useAuth();
 
   useEffect(() => {
@@ -61,6 +65,41 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Prefetch names for createdBy / updatedBy so they render nicely in Vehicle tab
+  useEffect(() => {
+    if (!open || !vehicleData) return;
+    const ids = [vehicleData.createdBy, vehicleData.updatedBy]
+      .map(u => (typeof u === 'object' ? u?._id : u))
+      .filter(Boolean);
+    const unknownIds = ids.filter(id => !(id in userNameCache));
+    if (!unknownIds.length) return;
+    (async () => {
+      try {
+        const results = await Promise.allSettled(
+          unknownIds.map(async (id) => {
+            try {
+              const { data } = await apiClient.get(`/user/${id}`, { headers: { Authorization: token } });
+              const user = data?.data || {};
+              const fullName = user.fullname || `${user.firstName || ''} ${user.lastName || ''}`.trim() || id;
+              return { id, name: fullName };
+            } catch {
+              return { id, name: id };
+            }
+          })
+        );
+        const newMap = { ...userNameCache };
+        results.forEach(r => { if (r.status === 'fulfilled') newMap[r.value.id] = r.value.name; });
+        setUserNameCache(newMap);
+      } catch {}
+    })();
+  }, [open, vehicleData]);
+
+  const buildFullName = (user) => {
+    if (!user) return '';
+    const full = user.fullname || `${user.firstName || ''} ${user.middleName || ''} ${user.lastName || ''}`.replace(/\s+/g, ' ').trim();
+    return full;
   };
 
   // Determine scheduled month from plate last digit
@@ -285,28 +324,13 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.classification || "N/A"}</p>
         </div>
+        {/* Vehicle Status Type moved next to Status */}
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <CalendarIcon className="h-3 w-3" />
-            Date of Renewal
+            <Clock className="h-3 w-3" />
+            Vehicle Status Type
           </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
-            {(() => {
-              const latest = getLatestRenewalDate(vehicleData?.dateOfRenewal);
-              return latest ? latest.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not set';
-            })()}
-          </p>
-          {(() => {
-            const dates = vehicleData?.dateOfRenewal;
-            if (dates && Array.isArray(dates) && dates.length > 1) {
-              return (
-                <p className="text-xs text-gray-500 dark:text-gray-400 ml-4 mt-1">
-                  ({dates.length} renewals)
-                </p>
-              );
-            }
-            return null;
-          })()}
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.vehicleStatusType || "N/A"}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
@@ -317,12 +341,48 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
             {getStatusBadge(vehicleData?.status)}
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+      </div>
+      {/* Creator / Updater info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Vehicle Status Type
+            <UserCheck className="h-3 w-3" />
+            Created By
           </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.vehicleStatusType || "N/A"}</p>
+          <div className="ml-4 flex items-center gap-2 text-xs">
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
+              {(() => {
+                const u = vehicleData?.createdBy;
+                if (!u) return 'Unknown';
+                if (typeof u === 'object') return buildFullName(u) || 'Unknown';
+                return userNameCache[u] || u;
+              })()}
+            </span>
+            <span className="text-gray-500 dark:text-gray-400">•</span>
+            <span className="text-gray-500 dark:text-gray-400">
+              {vehicleData?.createdAt ? formatDate(vehicleData.createdAt) : 'Unknown'}
+            </span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+            <Edit className="h-3 w-3" />
+            Last Updated By
+          </label>
+          <div className="ml-4 flex items-center gap-2 text-xs">
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
+              {(() => {
+                const u = vehicleData?.updatedBy;
+                if (!u) return 'Not yet updated';
+                if (typeof u === 'object') return buildFullName(u) || 'Not yet updated';
+                return userNameCache[u] || u;
+              })()}
+            </span>
+            <span className="text-gray-500 dark:text-gray-400">•</span>
+            <span className="text-gray-500 dark:text-gray-400">
+              {vehicleData?.updatedAt && vehicleData?.updatedBy ? formatDate(vehicleData.updatedAt) : 'Not yet updated'}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -382,14 +442,14 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
           </label>
           <div className="ml-4">
             {ownerData?.hasDriversLicense ? (
-              <div>
+              <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
                   Yes
                 </Badge>
                 {ownerData?.driversLicenseNumber && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    License No: {ownerData.driversLicenseNumber}
-                  </p>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                    {ownerData.driversLicenseNumber}
+                  </span>
                 )}
               </div>
             ) : (
@@ -538,6 +598,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   ];
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="max-w-2xl h-[80vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col"
@@ -594,8 +655,44 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
             {activeTab === "renewal" && <RenewalInformationTab />}
           </div>
         </div>
+
+        {/* Footer actions */}
+        <div className="mt-3 flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditOpen(true)}
+            className="text-xs"
+          >
+            <Edit className="h-3 w-3 mr-1" />
+            Edit Vehicle
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setRenewOpen(true)}
+            className="text-xs bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Renew Vehicle
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
+    {/* Action Modals */}
+    <EditVehicleModal
+      open={editOpen}
+      onOpenChange={setEditOpen}
+      vehicleId={vehicleData?._id}
+      onVehicleUpdated={onVehicleUpdated}
+    />
+    <VehicleRenewalModal
+      open={renewOpen}
+      onOpenChange={setRenewOpen}
+      vehicleData={vehicleData}
+      onVehicleUpdated={onVehicleUpdated}
+    />
+    </>
   );
 };
 
