@@ -53,10 +53,10 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     if (open && vehicleData) {
       // Set the current renewal date as the initial value for the date picker
       const currentDates = vehicleData.dateOfRenewal;
-      const latestDate = Array.isArray(currentDates) && currentDates.length > 0 
-        ? currentDates[currentDates.length - 1] 
+      const latestRaw = Array.isArray(currentDates) && currentDates.length > 0 
+        ? currentDates[currentDates.length - 1]
         : currentDates;
-      
+      const latestDate = latestRaw && typeof latestRaw === 'object' && latestRaw.date ? latestRaw.date : latestRaw;
       setNewRenewalDate(latestDate ? new Date(latestDate) : new Date());
       setUpdateSuccess(false);
       setError("");
@@ -108,7 +108,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       // Build updated array using existing entries, append new one; backend will normalize and attach processedBy
       const currentDates = vehicleData.dateOfRenewal || [];
       const datesArray = Array.isArray(currentDates) ? currentDates : [currentDates].filter(Boolean);
-      const updatedDates = [...datesArray, newRenewalDate.toISOString()];
+      const normalized = datesArray.map(d => (d && typeof d === 'object' && d.date ? d.date : d)).filter(Boolean);
+      const updatedDates = [...normalized, newRenewalDate.toISOString()];
 
       const { data } = await apiClient.patch(
         `/vehicle/${vehicleData._id}`,
@@ -178,7 +179,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     }
     
     const dateArray = Array.isArray(dates) ? dates : [dates];
-    return dateArray.map(date => new Date(date).toLocaleDateString()).join(", ");
+    return dateArray
+      .map(entry => new Date(entry?.date || entry).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }))
+      .join(", ");
   };
 
   if (!vehicleData) return null;

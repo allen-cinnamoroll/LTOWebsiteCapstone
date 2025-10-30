@@ -26,6 +26,22 @@ export const findUser = async (req, res) => {
   }
 };
 
+// Get user by id (basic public fields for display)
+export const getUserById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await UserModel.findById(userId).select("firstName middleName lastName email username role avatar");
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    // Compose fullname for convenience
+    const fullname = `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim();
+    res.status(200).json({ success: true, data: { ...user.toObject(), fullname } });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Get all users (for admin/superadmin)
 export const getAllUsers = async (req, res) => {
   try {

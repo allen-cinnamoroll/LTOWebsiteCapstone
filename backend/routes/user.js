@@ -1,5 +1,5 @@
 import express from "express";
-import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs } from "../controller/userController.js";
+import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById } from "../controller/userController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
 
 const userRouter = express.Router();
@@ -9,6 +9,9 @@ userRouter.get("/profile", authenticate, findUser);
 
 // Get all users (admin and superadmin only)
 userRouter.get("/all", authenticate, authorizeRole("admin", "superadmin"), getAllUsers);
+
+// Get user by id (basic info)
+userRouter.get("/:userId", authenticate, getUserById);
 
 // Update user (admin and superadmin only)
 userRouter.put("/:userId", authenticate, authorizeRole("admin", "superadmin"), updateUser);
