@@ -62,6 +62,17 @@ const ViolationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    // User tracking fields
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      default: null
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Users',
+      default: null
+    },
   },
   {
     timestamps: true,

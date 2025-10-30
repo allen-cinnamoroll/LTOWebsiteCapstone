@@ -29,7 +29,11 @@ export const createViolation = async (req, res) => {
             chassisNo,
             engineNo
         };
-        const violation = new ViolationModel(violationData);
+        const violation = new ViolationModel({
+            ...violationData,
+            createdBy: req.user ? req.user.userId : null,
+            updatedBy: null
+        });
         const savedViolation = await violation.save();
 
         // Log the activity
@@ -68,10 +72,25 @@ export const createViolation = async (req, res) => {
 // Get all violations (Authenticated Users)
 export const getViolations = async (req, res) => {
     try {
-        const violations = await ViolationModel.find().sort({ createdAt: -1 });
+        const violations = await ViolationModel.find()
+            .populate('createdBy', 'firstName lastName')
+            .populate('updatedBy', 'firstName lastName')
+            .sort({ createdAt: -1 });
 
-        // Return violations as-is without transformation
-        const transformedViolations = violations.map(violation => violation.toObject());
+        const transformedViolations = violations.map((violation) => {
+            const v = violation.toObject();
+            return {
+                ...v,
+                createdBy: v.createdBy ? {
+                    _id: v.createdBy._id,
+                    name: `${v.createdBy.firstName} ${v.createdBy.lastName}`.trim()
+                } : null,
+                updatedBy: v.updatedBy ? {
+                    _id: v.updatedBy._id,
+                    name: `${v.updatedBy.firstName} ${v.updatedBy.lastName}`.trim()
+                } : null,
+            };
+        });
 
         res.status(200).json({
             success: true,
@@ -85,18 +104,31 @@ export const getViolations = async (req, res) => {
 // Get a single violation by ID (Authenticated Users)
 export const getViolationById = async (req, res) => {
     try {
-        const violation = await ViolationModel.findById(req.params.id);
+        const violation = await ViolationModel.findById(req.params.id)
+            .populate('createdBy', 'firstName lastName')
+            .populate('updatedBy', 'firstName lastName');
 
         if (!violation) {
             return res.status(404).json({ success: false, message: "Violation not found" });
         }
 
-        // Return violation as-is without transformation
-        const violationObj = violation.toObject();
+        // Return violation with formatted createdBy/updatedBy
+        const v = violation.toObject();
+        const formatted = {
+            ...v,
+            createdBy: v.createdBy ? {
+                _id: v.createdBy._id,
+                name: `${v.createdBy.firstName} ${v.createdBy.lastName}`.trim()
+            } : null,
+            updatedBy: v.updatedBy ? {
+                _id: v.updatedBy._id,
+                name: `${v.updatedBy.firstName} ${v.updatedBy.lastName}`.trim()
+            } : null,
+        };
 
         res.status(200).json({
             success: true,
-            data: violationObj
+            data: formatted
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -117,6 +149,11 @@ export const updateViolation = async (req, res) => {
         // Set violationType field based on violationType - no field clearing
         if (violationType) {
             updateData.violationType = violationType;
+        }
+
+        // set updater
+        if (req.user && req.user.userId) {
+            updateData.updatedBy = req.user.userId;
         }
 
         const violation = await ViolationModel.findByIdAndUpdate(

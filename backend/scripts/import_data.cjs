@@ -34,7 +34,15 @@ async function importData() {
 
   // Clear collection before re-import
   await violationsCollection.deleteMany({});
-  await violationsCollection.insertMany(violationsData);
+  const now = new Date();
+  const transformedViolations = violationsData.map(item => ({
+    ...item,
+    createdAt: item.createdAt ? new Date(item.createdAt) : now,
+    updatedAt: item.updatedAt ? new Date(item.updatedAt) : now,
+    createdBy: item.createdBy || null,
+    updatedBy: item.updatedBy || null,
+  }));
+  await violationsCollection.insertMany(transformedViolations);
   console.log('✅ Violations data imported successfully!');
 
   await client.close();
