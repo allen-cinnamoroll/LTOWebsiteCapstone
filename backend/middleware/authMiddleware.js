@@ -6,15 +6,17 @@ dotenv.config();
 
 // JWT authentication middleware
 export const authenticate = (req, res, next) => {
-  const token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
   // console.log(req.headers)
-  if (!token) {
+  if (!authHeader) {
     return res
       .status(401)
       .json({ success: false, message: "Access token required" });
   }
 
   try {
+    // Support both raw token and "Bearer <token>"
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded; // Attach user information to the request object
     next();

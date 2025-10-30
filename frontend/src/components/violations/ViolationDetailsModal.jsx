@@ -60,6 +60,18 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
     });
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   const getViolationTypeBadge = (type) => {
     let badgeColor, icon;
     
@@ -265,17 +277,28 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
             {activeTab === "violations" && <DriverViolationsTab />}
           </div>
 
-           {/* Footer with Edit Button */}
+           {/* Footer with metadata and Edit Button */}
            <div className="flex-shrink-0 pt-4 border-t border-gray-200 dark:border-gray-700">
-             <div className="flex justify-between items-center">
-               <div className="text-xs text-gray-500 dark:text-gray-400">
-                 {violationData?.updatedAt ? (
-                   <>Last updated: {formatDate(violationData.updatedAt)}</>
-                 ) : violationData?.createdAt ? (
-                   <>Created: {formatDate(violationData.createdAt)}</>
-                 ) : (
-                   <>Record details • TOP #{violationData?.topNo || "N/A"}</>
-                 )}
+             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+               <div className="flex-1">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-[10px] text-gray-600 dark:text-gray-400">
+                   <div>
+                     <span className="font-semibold">Created By:</span>
+                     <span className="ml-1">{violationData?.createdBy?.name || "Unknown"}</span>
+                   </div>
+                   <div>
+                     <span className="font-semibold">Last Made:</span>
+                     <span className="ml-1">{formatDateTime(violationData?.createdAt)}</span>
+                   </div>
+                   <div>
+                     <span className="font-semibold">Updated By:</span>
+                     <span className="ml-1">{violationData?.updatedBy?.name || (violationData?.createdBy?.name || "Unknown")}</span>
+                   </div>
+                   <div>
+                     <span className="font-semibold">Last Updated:</span>
+                     <span className="ml-1">{formatDateTime(violationData?.updatedAt || violationData?.createdAt)}</span>
+                   </div>
+                 </div>
                </div>
                <Button
                  onClick={() => {
@@ -283,7 +306,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
                    // Trigger edit modal instead of navigation
                    window.dispatchEvent(new CustomEvent('editViolation', { detail: violationData?._id }));
                  }}
-                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 text-sm font-semibold"
+                 className="mt-2 sm:mt-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 text-sm font-semibold"
                >
                  <Edit className="h-4 w-4 mr-2" />
                  Edit Violation

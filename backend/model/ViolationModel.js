@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import UserModel from "./UserModel.js";
 
 const ViolationSchema = new mongoose.Schema(
   {
@@ -80,6 +81,59 @@ const ViolationSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Cache superadmin id to avoid repeated lookups
+let cachedSuperadminId = null;
+
+async function getSuperadminId() {
+  if (cachedSuperadminId) return cachedSuperadminId;
+  const superadmin = await UserModel.findOne({ role: "0" }).select("_id");
+  cachedSuperadminId = superadmin ? superadmin._id : null;
+  return cachedSuperadminId;
+}
+
+// Ensure createdBy/updatedBy default to superadmin if missing on create
+ViolationSchema.pre("save", async function (next) {
+  try {
+    if (!this.createdBy) {
+      const superadminId = await getSuperadminId();
+      if (superadminId) this.createdBy = superadminId;
+    }
+    // On create, set updatedBy to the same actor as createdBy when available
+    if (!this.updatedBy) {
+      if (this.createdBy) {
+        this.updatedBy = this.createdBy;
+      } else {
+        const superadminId = await getSuperadminId();
+        if (superadminId) this.updatedBy = superadminId;
+      }
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Ensure updatedBy defaults to superadmin on update operations if not provided
+ViolationSchema.pre("findOneAndUpdate", async function (next) {
+  try {
+    const update = this.getUpdate() || {};
+    // If updatedBy is not being explicitly set, default it to superadmin
+    if (update.updatedBy == null) {
+      const superadminId = await getSuperadminId();
+      if (superadminId) {
+        // Use $set to avoid overwriting entire document
+        this.setUpdate({
+          ...update,
+          $set: { ...(update.$set || {}), updatedBy: superadminId }
+        });
+      }
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 const ViolationModel = mongoose.model("Violations", ViolationSchema);
 
