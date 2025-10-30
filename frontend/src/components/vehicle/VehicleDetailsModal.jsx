@@ -63,6 +63,40 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     }
   };
 
+  // Determine scheduled month from plate last digit
+  const getScheduledMonthFromPlate = (plateNo) => {
+    if (!plateNo || typeof plateNo !== 'string') return null;
+    const digits = plateNo.match(/\d/g) || [];
+    if (!digits.length) return null;
+    const lastDigit = digits[digits.length - 1];
+    const map = {
+      '1': 0, // January
+      '2': 1, // February
+      '3': 2, // March
+      '4': 3, // April
+      '5': 4, // May
+      '6': 5, // June
+      '7': 6, // July
+      '8': 7, // August
+      '9': 8, // September
+      '0': 9  // October
+    };
+    return map[lastDigit] ?? null;
+  };
+
+  const determineRenewalStatus = (plateNo, renewalDate) => {
+    try {
+      const scheduledMonth = getScheduledMonthFromPlate(plateNo);
+      if (scheduledMonth === null) return 'On-Time Renewal';
+      const month = new Date(renewalDate).getMonth();
+      if (month === scheduledMonth) return 'On-Time Renewal';
+      if (month < scheduledMonth) return 'Early Renewal';
+      return 'Late Renewal';
+    } catch {
+      return 'On-Time Renewal';
+    }
+  };
+
   const fetchRenewalHistory = async () => {
     // Derive renewal history locally from vehicleData.dateOfRenewal
     if (!vehicleData) return;
@@ -75,6 +109,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
         .map((entry) => ({
           renewalDate: entry?.date || entry,
           processedBy: entry?.processedBy || null,
+          status: determineRenewalStatus(vehicleData.plateNo, entry?.date || entry)
         }))
         .sort((a, b) => new Date(b.renewalDate) - new Date(a.renewalDate));
       setRenewalHistory(history);

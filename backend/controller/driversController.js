@@ -50,20 +50,15 @@ export const createDriver = async (req, res) => {
     // req.body.userAccount = accCreated._id;
     
     // Add user tracking fields with SuperAdmin fallback
-    console.log('=== DRIVER CREATION DEBUG ===');
-    console.log('req.user:', req.user);
-    console.log('req.user type:', typeof req.user);
-    if (req.user) {
-      console.log('req.user keys:', Object.keys(req.user));
-      console.log('req.user.firstName:', req.user.firstName);
-      console.log('req.user.lastName:', req.user.lastName);
-      console.log('req.user.userId:', req.user.userId);
+    let userId;
+    if (req.user && req.user.userId) {
+      userId = req.user.userId;
+    } else {
+      // Find a superadmin
+      const superadmin = await UserModel.findOne({ role: "0" }).select("_id");
+      userId = superadmin ? superadmin._id : null;
     }
-    console.log('=== END DEBUG ===');
-    
-    const userName = req.user ? `${req.user.firstName} ${req.user.lastName}`.trim() : 'SuperAdmin';
-    const userId = req.user ? req.user.userId : null;
-    
+
     const userTrackingData = {
       ...driverData,
       createdBy: userId,

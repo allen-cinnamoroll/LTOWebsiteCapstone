@@ -1,4 +1,5 @@
 import VehicleModel from "../model/VehicleModel.js";
+import UserModel from "../model/UserModel.js";
 import DriverModel from "../model/DriverModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
 // import { logger } from "../util/logger.js";
@@ -47,11 +48,22 @@ export const createVehicle = async (req, res) => {
       });
     }
 
+    // Resolve default actor (superadmin) when no authenticated user
+    const getDefaultActorId = async () => {
+      try {
+        const admin = await UserModel.findOne({ role: "0" }).select("_id");
+        return admin?._id || null;
+      } catch {
+        return null;
+      }
+    };
+
     // Normalize dateOfRenewal to array of subdocs {date, processedBy}
     const renewalDatesRaw = dateOfRenewal ? (Array.isArray(dateOfRenewal) ? dateOfRenewal : [dateOfRenewal]) : [];
+    const defaultActor = req.user ? req.user.userId : await getDefaultActorId();
     const normalizedRenewals = renewalDatesRaw.map((item) => {
       const dateValue = (item && item.date) ? item.date : item;
-      return { date: new Date(dateValue), processedBy: req.user ? req.user.userId : null };
+      return { date: new Date(dateValue), processedBy: defaultActor };
     });
     
     // Calculate initial status based on plate number and latest renewal date
@@ -84,7 +96,7 @@ export const createVehicle = async (req, res) => {
       driverId,
       status: initialStatus, // Set status based on plate number logic
       // Add user tracking fields
-      createdBy: req.user ? req.user.userId : null,
+      createdBy: req.user ? req.user.userId : defaultActor,
       updatedBy: null // Only set when actually updated
     });
 
@@ -299,6 +311,15 @@ export const updateVehicle = async (req, res) => {
         ? currentVehicle.dateOfRenewal.map((it) => new Date(it?.date || it).toISOString())
         : (currentVehicle.dateOfRenewal ? [new Date(currentVehicle.dateOfRenewal).toISOString()] : []);
 
+      // Determine default actor
+      let defaultActorId = req.user ? req.user.userId : null;
+      if (!defaultActorId) {
+        try {
+          const admin = await UserModel.findOne({ role: "0" }).select("_id");
+          defaultActorId = admin?._id || null;
+        } catch {}
+      }
+
       const normalized = incoming.map((it) => {
         const d = new Date(it?.date || it);
         const iso = d.toISOString();
@@ -306,9 +327,9 @@ export const updateVehicle = async (req, res) => {
         const idx = existing.indexOf(iso);
         if (idx !== -1 && Array.isArray(currentVehicle.dateOfRenewal)) {
           const match = currentVehicle.dateOfRenewal[idx];
-          return { date: d, processedBy: match?.processedBy || (req.user ? req.user.userId : null) };
+          return { date: d, processedBy: match?.processedBy || defaultActorId };
         }
-        return { date: d, processedBy: req.user ? req.user.userId : null };
+        return { date: d, processedBy: defaultActorId };
       });
 
       updateData.dateOfRenewal = normalized;

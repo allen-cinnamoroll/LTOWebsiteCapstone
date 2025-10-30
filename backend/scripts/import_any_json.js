@@ -231,13 +231,21 @@ const importAnyJson = async (jsonFilePath) => {
           color: record.color || '',
           classification: record.classification || '',
           dateOfRenewal: (() => {
-            if (!record.dateOfRenewal) return null;
-            try {
-              const date = new Date(record.dateOfRenewal);
-              return isNaN(date.getTime()) ? null : date;
-            } catch (error) {
-              return null;
+            const SUPERADMIN_ID = "67be680af8b3d2cab591c4a6"; // <--- set your real superadmin ObjectId here
+            const val = record.dateOfRenewal;
+            if (!val) return [];
+            if (Array.isArray(val)) {
+              return val.filter(d => d).map(d =>
+                (typeof d === 'object' && d.date) ? d : { date: d, processedBy: SUPERADMIN_ID }
+              );
             }
+            if (typeof val === 'string') {
+              return [{ date: val, processedBy: SUPERADMIN_ID }];
+            }
+            if (typeof val === 'object' && val.date) {
+              return [val];
+            }
+            return [];
           })(),
           vehicleStatusType: "Old", // Default to Old as per schema
           status: "1", // Default to active

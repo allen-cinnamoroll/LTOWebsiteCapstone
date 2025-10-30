@@ -12,18 +12,8 @@ export const getDashboardStats = async (req, res) => {
     
     // Get all vehicles to calculate proper active/expired status based on plate number and renewal date
     // This ensures accurate status calculation instead of relying on potentially outdated database status
-    const allVehicles = await VehicleModel.find({}, 'plateNo dateOfRenewal');
-    let activeVehicles = 0;
-    let expiredVehicles = 0;
-    
-    allVehicles.forEach(vehicle => {
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
-      if (status === "1") {
-        activeVehicles++;
-      } else {
-        expiredVehicles++;
-      }
-    });
+    const activeVehicles = await VehicleModel.countDocuments({ status: "1" });
+    const expiredVehicles = await VehicleModel.countDocuments({ status: "0" });
 
     // Get driver statistics (no active/expired status for drivers - drivers don't have expiration status)
     const totalDrivers = await DriverModel.countDocuments();
