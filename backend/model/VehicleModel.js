@@ -65,8 +65,12 @@
       classification: {
         type: String,
       },
+      // Each renewal entry stores the date and (optionally) who processed it
       dateOfRenewal: {
-        type: [Date],
+        type: [new mongoose.Schema({
+          date: { type: Date, required: true },
+          processedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', default: null }
+        }, { _id: false })],
         required: false,
         default: [],
       },

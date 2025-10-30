@@ -63,33 +63,23 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   };
 
   const fetchRenewalHistory = async () => {
-    if (!vehicleData?._id) {
-      console.log('No vehicle ID found, skipping renewal history fetch');
-      return;
-    }
-
+    // Derive renewal history locally from vehicleData.dateOfRenewal
+    if (!vehicleData) return;
     setRenewalLoading(true);
     setRenewalError(null);
-    
     try {
-      console.log(`Fetching renewal history for vehicle ID: ${vehicleData._id}`);
-      const { data } = await apiClient.get(`/renewal-history/vehicle/${vehicleData._id}`, {
-        headers: {
-          Authorization: token,
-        },
-      });
-      
-      if (data.success) {
-        setRenewalHistory(data.data.history || []);
-        console.log('Renewal history received:', data.data.history);
-      } else {
-        setRenewalError(data.message || "Failed to fetch renewal history");
-      }
-    } catch (error) {
-      console.error("Error fetching renewal history:", error);
-      const errorMessage = error.response?.data?.message || "Failed to fetch renewal history";
-      setRenewalError(errorMessage);
-      toast.error("Failed to load renewal history");
+      const dates = vehicleData.dateOfRenewal;
+      const dateArray = Array.isArray(dates) ? dates : (dates ? [dates] : []);
+      const history = dateArray
+        .map((entry) => ({
+          renewalDate: entry?.date || entry,
+          processedBy: entry?.processedBy || null,
+        }))
+        .sort((a, b) => new Date(b.renewalDate) - new Date(a.renewalDate));
+      setRenewalHistory(history);
+    } catch (e) {
+      console.error('Error deriving renewal history from vehicle data:', e);
+      setRenewalError('Failed to derive renewal history');
     } finally {
       setRenewalLoading(false);
     }
@@ -442,7 +432,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
                     {getRenewalStatusBadge(record.status)}
                   </TableCell>
                   <TableCell className="text-xs text-gray-600 dark:text-gray-400">
-                    {record.processedBy?.fullname || "System"}
+                    {record.processedBy ? (typeof record.processedBy === 'object' && record.processedBy.fullname ? record.processedBy.fullname : String(record.processedBy)) : "System"}
                   </TableCell>
                 </TableRow>
               ))}

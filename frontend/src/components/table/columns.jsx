@@ -514,11 +514,11 @@ export const vehicleColumns = (onEdit, onRenew, submitting) => [
       if (!dates || (Array.isArray(dates) && dates.length === 0)) {
         return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">Not set</div>;
       }
-      
-      // Handle both single date and array of dates
+
       const dateArray = Array.isArray(dates) ? dates : [dates];
-      const latestDate = dateArray[dateArray.length - 1]; // Get the most recent date
-      
+      const latest = dateArray[dateArray.length - 1];
+      const latestDate = latest?.date || latest;
+
       return (
         <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">
           {latestDate ? new Date(latestDate).toLocaleDateString() : "Not set"}

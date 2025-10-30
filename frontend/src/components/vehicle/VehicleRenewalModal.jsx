@@ -105,11 +105,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     setError("");
 
     try {
-      // Get current dates array
+      // Build updated array using existing entries, append new one; backend will normalize and attach processedBy
       const currentDates = vehicleData.dateOfRenewal || [];
       const datesArray = Array.isArray(currentDates) ? currentDates : [currentDates].filter(Boolean);
-      
-      // Add new renewal date to the array
       const updatedDates = [...datesArray, newRenewalDate.toISOString()];
 
       const { data } = await apiClient.patch(
