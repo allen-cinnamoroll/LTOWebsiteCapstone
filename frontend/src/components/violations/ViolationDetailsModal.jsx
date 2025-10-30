@@ -60,6 +60,18 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
     });
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   const getViolationTypeBadge = (type) => {
     let badgeColor, icon;
     
@@ -276,7 +288,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
                    </div>
                    <div>
                      <span className="font-semibold">Last Made:</span>
-                     <span className="ml-1">{formatDate(violationData?.createdAt)}</span>
+                     <span className="ml-1">{formatDateTime(violationData?.createdAt)}</span>
                    </div>
                    <div>
                      <span className="font-semibold">Updated By:</span>
@@ -284,7 +296,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
                    </div>
                    <div>
                      <span className="font-semibold">Last Updated:</span>
-                     <span className="ml-1">{formatDate(violationData?.updatedAt || violationData?.createdAt)}</span>
+                     <span className="ml-1">{formatDateTime(violationData?.updatedAt || violationData?.createdAt)}</span>
                    </div>
                  </div>
                </div>
