@@ -109,6 +109,23 @@
     }
   );
 
+  // Ensure createdBy defaults to superadmin when not provided
+  vehicleSchema.pre("save", async function (next) {
+    try {
+      if (!this.createdBy) {
+        const User = mongoose.model("Users");
+        const superadmin = await User.findOne({ role: "0" }).select("_id");
+        if (superadmin) {
+          this.createdBy = superadmin._id;
+        }
+      }
+      next();
+    } catch (err) {
+      // Do not block save on lookup failure; proceed without setting createdBy
+      next();
+    }
+  });
+
   const VehicleModel = mongoose.model("Vehicles", vehicleSchema);
 
   export default VehicleModel;

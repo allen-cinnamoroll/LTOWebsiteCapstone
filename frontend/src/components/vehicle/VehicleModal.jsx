@@ -47,6 +47,19 @@ const VehicleModal = ({ open, onOpenChange, fileNumber }) => {
     }
   };
 
+  // Normalize renewal entries and get the latest valid date
+  const getLatestRenewalDate = (dates) => {
+    if (!dates) return null;
+    const toDate = (val) => {
+      const raw = (val && typeof val === 'object' && 'date' in val) ? val.date : val;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? null : d;
+    };
+    const arr = Array.isArray(dates) ? dates : [dates];
+    const valid = arr.map(toDate).filter(Boolean).sort((a, b) => b.getTime() - a.getTime());
+    return valid.length ? valid[0] : null;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300">
@@ -140,9 +153,10 @@ const VehicleModal = ({ open, onOpenChange, fileNumber }) => {
                       <div>
                         <p className="text-xs text-gray-600">Date of Renewal</p>
                         <p className="font-medium text-sm">
-                          {vehicleData.dateOfRenewal 
-                            ? formatSimpleDate(vehicleData.dateOfRenewal) 
-                            : "N/A"}
+                          {(() => {
+                            const latest = getLatestRenewalDate(vehicleData.dateOfRenewal);
+                            return latest ? latest.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+                          })()}
                         </p>
                       </div>
                     </div>

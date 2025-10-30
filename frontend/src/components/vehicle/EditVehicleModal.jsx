@@ -89,6 +89,24 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
           return mapping[dbValue] || dbValue;
         };
         
+        // Safely resolve the latest valid renewal date from possible formats (array/object/string)
+        const resolveLatestRenewalDate = (input) => {
+          if (!input) return undefined;
+          const toDate = (val) => {
+            const raw = (val && typeof val === 'object' && 'date' in val) ? val.date : val;
+            const d = new Date(raw);
+            return isNaN(d.getTime()) ? null : d;
+          };
+          if (Array.isArray(input)) {
+            const dates = input
+              .map(toDate)
+              .filter(Boolean)
+              .sort((a, b) => b.getTime() - a.getTime());
+            return dates.length ? dates[0] : undefined;
+          }
+          return toDate(input) || undefined;
+        };
+
         const vData = {
           plateNo: data.data?.plateNo || "",
           fileNo: data.data?.fileNo || "",
@@ -99,7 +117,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
           color: data.data?.color || "",
           classification: mapClassification(data.data?.classification),
           vehicleStatusType: data.data?.vehicleStatusType || "Old",
-          dateOfRenewal: data.data?.dateOfRenewal ? new Date(data.data.dateOfRenewal) : undefined,
+          dateOfRenewal: resolveLatestRenewalDate(data.data?.dateOfRenewal),
           driver: data.data?.driverId?._id || "",
           ownerName: data.data?.driverId?.ownerRepresentativeName || "No driver assigned",
         };

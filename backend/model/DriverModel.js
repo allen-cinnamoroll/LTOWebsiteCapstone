@@ -88,6 +88,23 @@ const driverSchema = new mongoose.Schema(
   }
 );
 
+// Ensure createdBy defaults to superadmin when not provided
+driverSchema.pre("save", async function (next) {
+  try {
+    if (!this.createdBy) {
+      const User = mongoose.model("Users");
+      const superadmin = await User.findOne({ role: "0" }).select("_id");
+      if (superadmin) {
+        this.createdBy = superadmin._id;
+      }
+    }
+    next();
+  } catch (err) {
+    // Do not block save on lookup failure; proceed without setting createdBy
+    next();
+  }
+});
+
 // Virtual for full name
 driverSchema.virtual("fullname").get(function () {
   return this.ownerRepresentativeName;

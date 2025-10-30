@@ -59,6 +59,19 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
     }
   };
 
+  // Normalize renewal entries and get the latest valid date
+  const getLatestRenewalDate = (dates) => {
+    if (!dates) return null;
+    const toDate = (val) => {
+      const raw = (val && typeof val === 'object' && 'date' in val) ? val.date : val;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? null : d;
+    };
+    const arr = Array.isArray(dates) ? dates : [dates];
+    const valid = arr.map(toDate).filter(Boolean).sort((a, b) => b.getTime() - a.getTime());
+    return valid.length ? valid[0] : null;
+  };
+
   if (!driverData) return null;
 
   return (
@@ -304,9 +317,10 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                     <div>
                       <p className="text-xs text-gray-600">Date of Renewal</p>
                       <p className="font-medium text-sm">
-                        {vehicleData.dateOfRenewal 
-                          ? formatSimpleDate(vehicleData.dateOfRenewal) 
-                          : "N/A"}
+                        {(() => {
+                          const latest = getLatestRenewalDate(vehicleData.dateOfRenewal);
+                          return latest ? latest.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+                        })()}
                       </p>
                     </div>
                     <div>

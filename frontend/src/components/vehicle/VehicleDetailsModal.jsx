@@ -154,6 +154,19 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
     }
   };
 
+  // Get latest valid renewal date from array/single/object entries
+  const getLatestRenewalDate = (dates) => {
+    if (!dates) return null;
+    const toDate = (val) => {
+      const raw = (val && typeof val === 'object' && 'date' in val) ? val.date : val;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? null : d;
+    };
+    const arr = Array.isArray(dates) ? dates : [dates];
+    const valid = arr.map(toDate).filter(Boolean).sort((a, b) => b.getTime() - a.getTime());
+    return valid.length ? valid[0] : null;
+  };
+
   const formatBirthDate = (dateString) => {
     if (!dateString) return "Not set";
     const date = new Date(dateString);
@@ -279,16 +292,8 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
             {(() => {
-              const dates = vehicleData?.dateOfRenewal;
-              if (!dates || (Array.isArray(dates) && dates.length === 0)) {
-                return "Not set";
-              }
-              
-              // Handle both single date and array of dates
-              const dateArray = Array.isArray(dates) ? dates : [dates];
-              const latestDate = dateArray[dateArray.length - 1]; // Get the most recent date
-              
-              return latestDate ? formatDate(latestDate) : "Not set";
+              const latest = getLatestRenewalDate(vehicleData?.dateOfRenewal);
+              return latest ? latest.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Not set';
             })()}
           </p>
           {(() => {
@@ -458,7 +463,17 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Renewal History ({renewalHistory.length} records)
+            {(() => {
+              const count = renewalHistory.length || 0;
+              const label = count === 1 ? "record" : "records";
+              const plate = vehicleData?.plateNo || "N/A";
+              return (
+                <>
+                  {`Renewal History (${count} ${label}) • Plate: `}
+                  <span className="font-normal">{plate}</span>
+                </>
+              );
+            })()}
           </h3>
           <Button 
             variant="outline" 
@@ -471,17 +486,17 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
           </Button>
         </div>
         
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-h-[50vh] overflow-y-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50 dark:bg-gray-700">
-                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              <TableRow className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
+                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300 text-center">
                   Date
                 </TableHead>
-                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300 text-center">
                   Status
                 </TableHead>
-                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                <TableHead className="text-xs font-semibold text-gray-700 dark:text-gray-300 text-center">
                   Processed By
                 </TableHead>
               </TableRow>
@@ -489,13 +504,15 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
             <TableBody>
               {renewalHistory.map((record, index) => (
                 <TableRow key={record._id || index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <TableCell className="text-xs text-gray-900 dark:text-gray-100">
+                  <TableCell className="text-xs text-gray-900 dark:text-gray-100 text-center">
                     {formatDate(record.renewalDate)}
                   </TableCell>
-                  <TableCell className="text-xs">
-                    {getRenewalStatusBadge(record.status)}
+                  <TableCell className="text-xs text-center">
+                    <div className="flex justify-center">
+                      {getRenewalStatusBadge(record.status)}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-xs text-gray-600 dark:text-gray-400">
+                  <TableCell className="text-xs text-gray-600 dark:text-gray-400 text-center">
                     {(() => {
                       if (!record.processedBy) return "System";
                       if (typeof record.processedBy === 'object') {
@@ -523,7 +540,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-2xl max-h-[80vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col"
+        className="max-w-2xl h-[80vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
