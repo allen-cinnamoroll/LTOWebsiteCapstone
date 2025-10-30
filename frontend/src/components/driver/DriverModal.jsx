@@ -157,7 +157,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                   <User className="h-3 w-3" />
                   <span>Personal Information</span>
                 </button>
-                <button
+                              <button
                   onClick={() => setActiveTab("vehicles")}
                   className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium px-3 py-2 rounded-md transition-all duration-200 ${
                     activeTab === "vehicles"
@@ -167,9 +167,9 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                 >
                   <List className="h-3 w-3" />
                   <span>Assigned Vehicles</span>
-                </button>
-              </div>
-            </div>
+                              </button>
+                    </div>
+                  </div>
 
             {activeTab === "personal" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 flex-1">
@@ -183,8 +183,8 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">
                     {Array.isArray(driverData.vehicleIds) ? driverData.vehicleIds.length : 0}
-                  </p>
-                </div>
+                    </p>
+                  </div>
 
                 {/* Owner/Representative */}
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
@@ -193,7 +193,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                     Owner
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{driverData.ownerRepresentativeName || "N/A"}</p>
-                </div>
+                    </div>
 
                 {/* Date of Birth */}
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
@@ -202,7 +202,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                     Date of Birth
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{driverData.birthDate ? formatSimpleDate(driverData.birthDate) : "None"}</p>
-                </div>
+                  </div>
 
                 {/* Contact Number */}
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
@@ -211,7 +211,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                     Contact Number
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{driverData.contactNumber || "None"}</p>
-                </div>
+                    </div>
 
                 {/* Email */}
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
@@ -220,7 +220,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                     Email Address
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4 truncate">{driverData.emailAddress || "None"}</p>
-                </div>
+                  </div>
 
                 {/* Created By */}
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
@@ -236,7 +236,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                         if (typeof u === 'object') return u.fullname || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown';
                         return userNameCache[u] || u;
                       })()}
-                    </span>
+                        </span>
                     <span className="text-gray-500">•</span>
                     <span className="text-gray-500">{formatDisplayDate(driverData?.createdAt)}</span>
                   </div>
@@ -266,28 +266,28 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                     Purok
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{displayOrNotIndicated(driverData.address?.purok)}</p>
-                </div>
+                    </div>
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
                   <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     Barangay
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{displayOrNotIndicated(driverData.address?.barangay)}</p>
-                </div>
+                  </div>
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
                   <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     Municipality
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{displayOrNotIndicated(driverData.address?.municipality)}</p>
-                </div>
+                    </div>
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">
                   <label className="text-[10px] font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     Province
                   </label>
                   <p className="text-xs font-semibold text-gray-900 ml-4">{displayOrNotIndicated(driverData.address?.province)}</p>
-                </div>
+                  </div>
 
                 {/* Last Updated By */}
                 <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300">

@@ -48,6 +48,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [ownerData, setOwnerData] = useState(null);
   const [loadingOwner, setLoadingOwner] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const { token } = useAuth();
 
   useEffect(() => {
@@ -94,7 +96,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
 
   const handleUpdateRenewalDate = async () => {
     if (!vehicleData || !newRenewalDate) {
-      setError("Please select a renewal date");
+      setErrorMessage("Please select a renewal date");
+      setErrorModalOpen(true);
       return;
     }
 
@@ -109,12 +112,12 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
     };
     if (latestDate && isSameDay(newRenewalDate, latestDate)) {
-      setError("The selected date matches the current renewal date. Please choose a different date.");
+      setErrorMessage("The selected date matches the current renewal date. Please choose a different date.");
+      setErrorModalOpen(true);
       return;
     }
 
     setUpdating(true);
-    setError("");
 
     try {
       // Build updated array using existing entries, append new one; backend will normalize and attach processedBy
@@ -144,14 +147,16 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
               onVehicleUpdated();
         }
       } else {
-        setError(data.message || "Failed to update renewal date");
+        setErrorMessage(data.message || "Failed to update renewal date");
+        setErrorModalOpen(true);
       }
     } catch (err) {
       console.error("Error updating renewal date:", err);
-      setError(
+      setErrorMessage(
         err.response?.data?.message || 
         "Failed to update renewal date"
       );
+      setErrorModalOpen(true);
     } finally {
       setUpdating(false);
     }
@@ -338,12 +343,6 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                     </div>
                   </div>
                 
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-sm text-red-600">{error}</p>
-                  </div>
-                )}
-
                 {updateSuccess && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                     <p className="text-sm text-green-600">Vehicle renewed successfully!</p>
@@ -365,7 +364,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                           return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
                         };
                         if (latestDate && isSameDay(newRenewalDate, latestDate)) {
-                          setError("The selected date matches the current renewal date. Please choose a different date.");
+                          setErrorMessage("The selected date matches the current renewal date. Please choose a different date.");
+                          setErrorModalOpen(true);
                           return;
                         }
                         setConfirmOpen(true);
@@ -411,6 +411,31 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
         <DialogFooter className="flex justify-end gap-3">
           <Button variant="outline" onClick={() => setConfirmOpen(false)} className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">No</Button>
           <Button onClick={async () => { setConfirmOpen(false); await handleUpdateRenewalDate(); }} className="min-w-[80px] bg-blue-600 hover:bg-blue-700 text-white">Yes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    {/* Error Modal */}
+    <Dialog open={errorModalOpen} onOpenChange={setErrorModalOpen}>
+      <DialogContent className="max-w-md bg-white border border-gray-200 animate-in fade-in-0 zoom-in-95 duration-300">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <CircleAlert className="h-5 w-5 text-red-600" />
+            Error
+          </DialogTitle>
+        </DialogHeader>
+        <div className="pt-2 pb-3">
+          <p className="text-gray-600 dark:text-gray-300">
+            {errorMessage}
+          </p>
+        </div>
+        <DialogFooter className="flex justify-end gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => setErrorModalOpen(false)} 
+            className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            OK
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
