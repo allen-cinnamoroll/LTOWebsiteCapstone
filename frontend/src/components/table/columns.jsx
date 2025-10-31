@@ -361,14 +361,14 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
             return "Unknown";
         }
       };
-                      const getTypeColor = (violationType) => {
+                const getTypeColor = (violationType) => {
                   switch (violationType) {
                     case "confiscated":
-                      return "bg-blue-100 text-blue-800";
+                      return "bg-red-100 text-red-800"; // Confiscated should be red
                     case "alarm":
-                      return "bg-red-100 text-red-800";
+                      return "bg-yellow-100 text-yellow-800"; // Alarm should be yellow
                     case "impounded":
-                      return "bg-orange-100 text-orange-800";
+                      return "bg-orange-100 text-orange-800"; // Impounded remains orange
                     default:
                       return "bg-gray-100 text-gray-800";
                   }
