@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Search, X } from "lucide-react";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "../ui/button";
 import { DataTableViewOptions } from "../table/DataTableViewOptions";
 import { DataTablePagination } from "../table/DataTablePagination";
@@ -43,6 +44,7 @@ const ViolationTable = ({
     pageSize: 8, // 8 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [typeFilter, setTypeFilter] = React.useState("all");
   const filterColumns = filters;
 
   const table = useReactTable({
@@ -73,6 +75,17 @@ const ViolationTable = ({
       globalFilter,
     },
   });
+
+  // Apply violation type filter to the table when selection changes
+  React.useEffect(() => {
+    const column = table.getColumn("violationType");
+    if (!column) return;
+    if (typeFilter === "all") {
+      column.setFilterValue("");
+    } else {
+      column.setFilterValue(typeFilter);
+    }
+  }, [typeFilter, table]);
   return (
     <div className="h-full flex flex-col">
       <Label className="font-semibold">{title}</Label>
@@ -95,6 +108,20 @@ const ViolationTable = ({
           )}
         </div>
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
+          {/* Violation Type Filter */}
+          <div className="w-36">
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="bg-white border-gray-300 dark:bg-black dark:border-gray-600 text-xs h-9">
+                <SelectValue placeholder="Filter Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="confiscated">Confiscated</SelectItem>
+                <SelectItem value="impounded">Impounded</SelectItem>
+                <SelectItem value="alarm">Alarm</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}>
             <Plus />
             <span className="hidden lg:inline">{"Add Violation"}</span>

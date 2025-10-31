@@ -25,6 +25,13 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
     defaultValue: "confiscated"
   });
 
+  // In add mode, when violation type is not 'confiscated', clear license type
+  useEffect(() => {
+    if (!isEditMode && violationType !== "confiscated") {
+      form.setValue("licenseType", undefined, { shouldValidate: true, shouldDirty: true });
+    }
+  }, [violationType, isEditMode, form]);
+
   // Watch form violations and sync with local state
   const formViolations = useWatch({
     control: form.control,
@@ -303,7 +310,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
           </div>
         ) : null}
 
-        {/* License Type Section - Always show in add mode, conditional in edit mode */}
+        {/* License Type Section - In add mode always show; disabled unless 'confiscated'. In edit mode only when 'confiscated'. */}
         {!isEditMode || violationType === "confiscated" ? (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -315,7 +322,10 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                   <FormLabel className="text-xs text-gray-600">License Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
-                      <SelectTrigger className="text-xs">
+                      <SelectTrigger
+                        disabled={!isEditMode && violationType !== "confiscated"}
+                        className={`text-xs ${(!isEditMode && violationType !== "confiscated") ? "bg-gray-100 text-gray-400 cursor-not-allowed" : ""}`}
+                      >
                         <SelectValue placeholder={field.value === "null" ? "null" : "Select license type"} />
                       </SelectTrigger>
                     </FormControl>
