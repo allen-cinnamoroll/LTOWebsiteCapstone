@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getViolationAnalytics, getMonthName, getMonthNumber } from '../../../api/violationAnalytics.js';
+import { getViolationAnalytics, getMonthName, getMonthNumber, getViolationCount } from '../../../api/violationAnalytics.js';
 import { 
   KPICards, 
   ChartsSection, 
@@ -43,6 +43,7 @@ export function ViolationAnalytics() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [totalTrafficViolatorsOverride, setTotalTrafficViolatorsOverride] = useState(null);
   
   // Pagination state for violation ranking
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,7 +72,9 @@ export function ViolationAnalytics() {
 
   // Counter animations - use the data directly from analyticsData
   const totalViolations = useCounterAnimation(analyticsData?.totalViolations || 0);
-  const totalTrafficViolators = useCounterAnimation(analyticsData?.totalTrafficViolators || 0);
+  const totalTrafficViolators = useCounterAnimation(
+    (totalTrafficViolatorsOverride ?? analyticsData?.totalTrafficViolators) || 0
+  );
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -122,6 +125,20 @@ export function ViolationAnalytics() {
       console.log('🔍 Token in localStorage:', localStorage.getItem('token') ? 'Present' : 'Missing');
       
       const response = await getViolationAnalytics({}, yearValue);
+
+      // Also fetch total records count to reflect "Traffic Violators" as total records
+      try {
+        const countResp = await getViolationCount();
+        const totalRecords = countResp?.data?.totalRecords;
+        if (typeof totalRecords === 'number') {
+          setTotalTrafficViolatorsOverride(totalRecords);
+        } else {
+          setTotalTrafficViolatorsOverride(null);
+        }
+      } catch (e) {
+        // Non-critical if this fails; fall back to analytics-provided value
+        setTotalTrafficViolatorsOverride(null);
+      }
       
       console.log('🔍 API Response:', response);
       console.log('🔍 Response success:', response?.success);
