@@ -240,6 +240,22 @@ EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
 ```
 
+**Create uploads directory with proper permissions:**
+
+```bash
+# Create uploads directory structure
+mkdir -p uploads/avatars
+
+# Set proper ownership (replace 'lto' with your server user)
+sudo chown -R lto:lto uploads
+
+# Set proper permissions
+chmod -R 755 uploads
+
+# Verify directory was created
+ls -la uploads/
+```
+
 ### Frontend Setup
 
 ```bash
@@ -300,11 +316,22 @@ server {
     listen 80;
     #server_name your-domain.com www.your-domain.com;
 
+    # Increase file upload size limit to 10MB (to accommodate 5MB avatar files + overhead)
+    client_max_body_size 10M;
+
     # Frontend (React app)
     location / {
         root /var/www/LTOWebsiteCapstone/frontend/dist;
         index index.html;
         try_files $uri $uri/ /index.html;
+    }
+
+    # Serve uploaded files (avatars, etc.)
+    location /uploads {
+        alias /var/www/LTOWebsiteCapstone/backend/uploads;
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
     }
 
     # Backend API
@@ -318,6 +345,12 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        
+        # Important: Allow large file uploads through the proxy
+        client_max_body_size 10M;
+        proxy_read_timeout 300;
+        proxy_connect_timeout 300;
+        proxy_send_timeout 300;
     }
 
     # Security headers
