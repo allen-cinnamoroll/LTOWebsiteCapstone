@@ -3,6 +3,149 @@ import DriverModel from "../model/DriverModel.js";
 import ViolationModel from "../model/ViolationModel.js";
 import AccidentModel from "../model/AccidentModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
+import { getLatestRenewalDate } from "../util/vehicleHelpers.js";
+
+/**
+ * Helper function to build date filter for dateOfRenewal array field
+ * Since dateOfRenewal is an array of {date: Date, processedBy: ObjectId},
+ * we need to check if any date in the array falls within the specified range
+ */
+const buildDateOfRenewalFilter = (month, year) => {
+  if (!month && !year) {
+    return {}; // No filter
+  }
+
+  if (month && year) {
+    // Both month and year provided - filter by specific month/year
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59);
+    
+    return {
+      $expr: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: { $ifNull: ["$dateOfRenewal", []] },
+                as: "renewal",
+                cond: {
+                  $and: [
+                    {
+                      $gte: [
+                        {
+                          $cond: {
+                            if: { $ne: ["$$renewal.date", null] },
+                            then: "$$renewal.date",
+                            else: "$$renewal"
+                          }
+                        },
+                        startDate
+                      ]
+                    },
+                    {
+                      $lte: [
+                        {
+                          $cond: {
+                            if: { $ne: ["$$renewal.date", null] },
+                            then: "$$renewal.date",
+                            else: "$$renewal"
+                          }
+                        },
+                        endDate
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          0
+        ]
+      }
+    };
+  } else if (year && !month) {
+    // Only year provided - filter by entire year
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31, 23, 59, 59);
+    
+    return {
+      $expr: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: { $ifNull: ["$dateOfRenewal", []] },
+                as: "renewal",
+                cond: {
+                  $and: [
+                    {
+                      $gte: [
+                        {
+                          $cond: {
+                            if: { $ne: ["$$renewal.date", null] },
+                            then: "$$renewal.date",
+                            else: "$$renewal"
+                          }
+                        },
+                        startDate
+                      ]
+                    },
+                    {
+                      $lte: [
+                        {
+                          $cond: {
+                            if: { $ne: ["$$renewal.date", null] },
+                            then: "$$renewal.date",
+                            else: "$$renewal"
+                          }
+                        },
+                        endDate
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          0
+        ]
+      }
+    };
+  } else if (month && !year) {
+    // Only month provided - filter by that month across all years
+    return {
+      $expr: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: { $ifNull: ["$dateOfRenewal", []] },
+                as: "renewal",
+                cond: {
+                  $eq: [
+                    {
+                      $month: {
+                        $cond: {
+                          if: { $ne: ["$$renewal.date", null] },
+                          then: "$$renewal.date",
+                          else: "$$renewal"
+                        }
+                      }
+                    },
+                    month
+                  ]
+                }
+              }
+            }
+          },
+          0
+        ]
+      }
+    };
+  }
+  
+  return {};
+};
 
 // Get dashboard statistics
 export const getDashboardStats = async (req, res) => {
@@ -286,102 +429,128 @@ export const getChartData = async (req, res) => {
 export const getRegistrationAnalytics = async (req, res) => {
   try {
     const { month, year } = req.query;
+    const monthNum = month ? parseInt(month) : null;
+    const yearNum = year ? parseInt(year) : null;
     
-    // Create date filter based on month and year
-    let dateFilter = {};
-    if (month && year) {
-      // Both month and year provided - filter by specific month/year
-      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
-      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-      console.log(`Filtering by month ${month}, year ${year}`);
-      console.log(`Date range: ${startDate} to ${endDate}`);
-    } else if (year && !month) {
-      // Only year provided - filter by entire year
-      const startDate = new Date(year, 0, 1); // January 1st
-      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-      console.log(`Filtering by year ${year}`);
-      console.log(`Date range: ${startDate} to ${endDate}`);
-    } else if (month && !year) {
-      // Only month provided - filter by that month across all years using aggregation
-      dateFilter = {
-        $expr: {
-          $and: [
-            { $eq: [{ $month: "$dateOfRenewal" }, month] },
-            { $ne: ["$dateOfRenewal", null] }
-          ]
-        }
-      };
-      console.log(`Filtering by month ${month} across all years`);
-    } else {
-      console.log('No date filter applied - showing all data');
-    }
-    // If neither month nor year provided, dateFilter remains empty (shows all data)
-
-    // Get vehicle statistics
-    const totalVehicles = await VehicleModel.countDocuments(dateFilter);
-    console.log(`Total vehicles found: ${totalVehicles}`);
+    // Build date filter using helper function
+    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
+    
+    console.log(`Filtering by month ${monthNum}, year ${yearNum}`);
     console.log(`Date filter applied:`, JSON.stringify(dateFilter, null, 2));
+
+    // Use aggregation to count vehicles with date filter
+    const vehicleCountPipeline = [
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          active: {
+            $sum: { $cond: [{ $eq: ["$status", "1"] }, 1, 0] }
+          },
+          expired: {
+            $sum: { $cond: [{ $eq: ["$status", "0"] }, 1, 0] }
+          }
+        }
+      }
+    ];
     
-    // Get active/expired counts based on the status field in the database
-    const activeVehicles = await VehicleModel.countDocuments({
-      ...dateFilter,
-      status: "1"
-    });
+    const vehicleCounts = await VehicleModel.aggregate(vehicleCountPipeline);
+    const counts = vehicleCounts[0] || { total: 0, active: 0, expired: 0 };
     
-    const expiredVehicles = await VehicleModel.countDocuments({
-      ...dateFilter,
-      status: "0"
-    });
+    const totalVehicles = counts.total;
+    const activeVehicles = counts.active;
+    const expiredVehicles = counts.expired;
     
+    console.log(`Total vehicles found: ${totalVehicles}`);
     console.log(`Active vehicles: ${activeVehicles}, Expired vehicles: ${expiredVehicles}`);
 
     // Get driver statistics based on vehicle renewal dates
-    let totalDrivers = 0;
-    let driversWithLicense = 0;
-    let driversWithoutLicense = 0;
-    
-    if (Object.keys(dateFilter).length > 0) {
-      // If we have a date filter, find drivers whose vehicles match the date criteria
-      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'driver').distinct('driver');
-      const validDriverIds = vehiclesInDateRange.filter(id => id !== null);
-      
-      if (validDriverIds.length > 0) {
-        totalDrivers = await DriverModel.countDocuments({ _id: { $in: validDriverIds } });
-        driversWithLicense = await DriverModel.countDocuments({ 
-          _id: { $in: validDriverIds },
-          hasDriversLicense: true 
-        });
-        driversWithoutLicense = totalDrivers - driversWithLicense;
+    const driverStatsPipeline = [
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
+      {
+        $lookup: {
+          from: 'drivers',
+          localField: 'driverId',
+          foreignField: '_id',
+          as: 'driverInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$driverInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $match: {
+          driverInfo: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalDrivers: { $addToSet: '$driverInfo._id' },
+          driversWithLicense: {
+            $addToSet: {
+              $cond: [
+                { $eq: ['$driverInfo.hasDriversLicense', true] },
+                '$driverInfo._id',
+                null
+              ]
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          totalDrivers: { $size: { $filter: { input: '$totalDrivers', cond: { $ne: ['$$this', null] } } } },
+          driversWithLicense: {
+            $size: {
+              $filter: {
+                input: '$driversWithLicense',
+                cond: { $ne: ['$$this', null] }
+              }
+            }
+          }
+        }
       }
-    } else {
-      // No date filter - get all drivers
-      totalDrivers = await DriverModel.countDocuments();
-      driversWithLicense = await DriverModel.countDocuments({ hasDriversLicense: true });
-      driversWithoutLicense = totalDrivers - driversWithLicense;
-    }
+    ];
+    
+    const driverStats = await VehicleModel.aggregate(driverStatsPipeline);
+    const driverCounts = driverStats[0] || { totalDrivers: 0, driversWithLicense: 0 };
+    
+    const totalDrivers = driverCounts.totalDrivers;
+    const driversWithLicense = driverCounts.driversWithLicense;
+    const driversWithoutLicense = totalDrivers - driversWithLicense;
 
     // Get plate number classification
     // Temporary plates: no letters (only numbers)
     // Permanent plates: contains letters
-    const temporaryPlates = await VehicleModel.countDocuments({
-      ...dateFilter,
-      plateNo: { $regex: /^[0-9]+$/ } // Only numbers (temporary)
-    });
-    const permanentPlates = totalVehicles - temporaryPlates;
+    const plateClassificationPipeline = [
+      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
+      {
+        $group: {
+          _id: null,
+          temporary: {
+            $sum: {
+              $cond: [
+                { $regexMatch: { input: '$plateNo', regex: /^[0-9]+$/ } },
+                1,
+                0
+              ]
+            }
+          },
+          total: { $sum: 1 }
+        }
+      }
+    ];
+    
+    const plateStats = await VehicleModel.aggregate(plateClassificationPipeline);
+    const plateCounts = plateStats[0] || { temporary: 0, total: 0 };
+    
+    const temporaryPlates = plateCounts.temporary;
+    const permanentPlates = plateCounts.total - temporaryPlates;
 
     res.status(200).json({
       success: true,
@@ -421,43 +590,11 @@ export const getRegistrationAnalytics = async (req, res) => {
 export const getMunicipalityAnalytics = async (req, res) => {
   try {
     const { month, year } = req.query;
+    const monthNum = month ? parseInt(month) : null;
+    const yearNum = year ? parseInt(year) : null;
     
-    // Create date filter based on month and year
-    let dateFilter = {};
-    if (month && year) {
-      // Both month and year provided - filter by specific month/year
-      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
-      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (year && !month) {
-      // Only year provided - filter by entire year
-      const startDate = new Date(year, 0, 1); // January 1st
-      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (month && !year) {
-      // Only month provided - filter by that month across all years using aggregation
-      dateFilter = {
-        $expr: {
-          $and: [
-            { $eq: [{ $month: "$dateOfRenewal" }, month] },
-            { $ne: ["$dateOfRenewal", null] }
-          ]
-        }
-      };
-    }
-    // If neither month nor year provided, dateFilter remains empty (shows all data)
+    // Build date filter using helper function
+    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Define the municipalities of Davao Oriental
     const davaoOrientalMunicipalities = [
@@ -692,43 +829,11 @@ export const getMunicipalityAnalytics = async (req, res) => {
 export const getMunicipalityRegistrationTotals = async (req, res) => {
   try {
     const { month, year } = req.query;
+    const monthNum = month ? parseInt(month) : null;
+    const yearNum = year ? parseInt(year) : null;
     
-    // Create date filter based on month and year
-    let dateFilter = {};
-    if (month && year) {
-      // Both month and year provided - filter by specific month/year
-      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
-      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (year && !month) {
-      // Only year provided - filter by entire year
-      const startDate = new Date(year, 0, 1); // January 1st
-      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (month && !year) {
-      // Only month provided - filter by that month across all years using aggregation
-      dateFilter = {
-        $expr: {
-          $and: [
-            { $eq: [{ $month: "$dateOfRenewal" }, month] },
-            { $ne: ["$dateOfRenewal", null] }
-          ]
-        }
-      };
-    }
-    // If neither month nor year provided, dateFilter remains empty (shows all data)
+    // Build date filter using helper function
+    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Define the municipalities of Davao Oriental
     const davaoOrientalMunicipalities = [
@@ -1149,43 +1254,11 @@ export const getDriverChartData = async (req, res) => {
 export const getOwnerMunicipalityData = async (req, res) => {
   try {
     const { month, year } = req.query;
+    const monthNum = month ? parseInt(month) : null;
+    const yearNum = year ? parseInt(year) : null;
     
-    // Create date filter based on month and year
-    let dateFilter = {};
-    if (month && year) {
-      // Both month and year provided - filter by specific month/year
-      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
-      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (year && !month) {
-      // Only year provided - filter by entire year
-      const startDate = new Date(year, 0, 1); // January 1st
-      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (month && !year) {
-      // Only month provided - filter by that month across all years using aggregation
-      dateFilter = {
-        $expr: {
-          $and: [
-            { $eq: [{ $month: "$dateOfRenewal" }, month] },
-            { $ne: ["$dateOfRenewal", null] }
-          ]
-        }
-      };
-    }
-    // If neither month nor year provided, dateFilter remains empty (shows all data)
+    // Build date filter using helper function
+    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Define the municipalities of Davao Oriental
     const davaoOrientalMunicipalities = [
@@ -1350,42 +1423,10 @@ export const getBarangayRegistrationTotals = async (req, res) => {
     // Get all barangays for the specified municipality
     const allBarangays = davaoOrientalBarangays[municipalityKey] || [];
     
-    // Create date filter based on month and year
-    let dateFilter = {};
-    if (month && year) {
-      // Both month and year provided - filter by specific month/year
-      const startDate = new Date(year, month - 1, 1); // month is 0-indexed
-      const endDate = new Date(year, month, 0, 23, 59, 59); // Last day of the month
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (year && !month) {
-      // Only year provided - filter by entire year
-      const startDate = new Date(year, 0, 1); // January 1st
-      const endDate = new Date(year, 11, 31, 23, 59, 59); // December 31st
-      dateFilter = {
-        dateOfRenewal: {
-          $gte: startDate,
-          $lte: endDate,
-          $ne: null // Exclude vehicles with null dateOfRenewal
-        }
-      };
-    } else if (month && !year) {
-      // Only month provided - filter by that month across all years using aggregation
-      dateFilter = {
-        $expr: {
-          $and: [
-            { $eq: [{ $month: "$dateOfRenewal" }, month] },
-            { $ne: ["$dateOfRenewal", null] }
-          ]
-        }
-      };
-    }
-    // If neither month nor year provided, dateFilter remains empty (shows all data)
+    // Build date filter using helper function
+    const monthNum = month ? parseInt(month) : null;
+    const yearNum = year ? parseInt(year) : null;
+    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Get vehicle data grouped by barangay for the specified municipality
     const vehicleAggregation = [
@@ -1488,13 +1529,14 @@ export const getYearlyVehicleTrends = async (req, res) => {
     console.log(`Fetching yearly trends from ${defaultStartYear} to ${defaultEndYear}, municipality: ${municipality || 'All'}`);
     
     // Build aggregation pipeline to get vehicles with municipality data
+    // Get all vehicles with dateOfRenewal set (don't restrict by year here, we'll filter later)
     const aggregationPipeline = [
       {
         $match: {
           dateOfRenewal: {
+            $exists: true,
             $ne: null,
-            $gte: new Date(defaultStartYear, 0, 1),
-            $lte: new Date(defaultEndYear, 11, 31, 23, 59, 59)
+            $not: { $size: 0 } // Ensure array is not empty
           }
         }
       },
@@ -1555,24 +1597,34 @@ export const getYearlyVehicleTrends = async (req, res) => {
     const yearlyData = {};
     
     vehicles.forEach(vehicle => {
-      const renewalYear = new Date(vehicle.dateOfRenewal).getFullYear();
+      // Extract the latest renewal date from the array
+      const renewalDate = getLatestRenewalDate(vehicle.dateOfRenewal);
       
-      if (!yearlyData[renewalYear]) {
-        yearlyData[renewalYear] = {
-          total: 0,
-          active: 0,
-          expired: 0
-        };
-      }
+      if (!renewalDate) return; // Skip vehicles without valid renewal date
       
-      yearlyData[renewalYear].total++;
+      const renewalYear = new Date(renewalDate).getFullYear();
       
-      // Use the same getVehicleStatus function as the main analytics
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
-      if (status === "1") {
-        yearlyData[renewalYear].active++;
-      } else {
-        yearlyData[renewalYear].expired++;
+      // Only include vehicles whose renewal year is within the requested range
+      if (renewalYear >= defaultStartYear && renewalYear <= defaultEndYear) {
+        if (!yearlyData[renewalYear]) {
+          yearlyData[renewalYear] = {
+            total: 0,
+            active: 0,
+            expired: 0
+          };
+        }
+        
+        yearlyData[renewalYear].total++;
+        
+        // Use the same getVehicleStatus function as the main analytics
+        // Extract latest renewal date for status calculation
+        const latestDate = getLatestRenewalDate(vehicle.dateOfRenewal);
+        const status = getVehicleStatus(vehicle.plateNo, latestDate, vehicle.vehicleStatusType || "Old");
+        if (status === "1") {
+          yearlyData[renewalYear].active++;
+        } else {
+          yearlyData[renewalYear].expired++;
+        }
       }
     });
     
@@ -1637,9 +1689,9 @@ export const getMonthlyVehicleTrends = async (req, res) => {
       {
         $match: {
           dateOfRenewal: {
+            $exists: true,
             $ne: null,
-            $gte: new Date(yearValue, 0, 1),
-            $lte: new Date(yearValue, 11, 31, 23, 59, 59)
+            $not: { $size: 0 } // Ensure array is not empty
           }
         }
       },
@@ -1700,7 +1752,16 @@ export const getMonthlyVehicleTrends = async (req, res) => {
     const monthlyData = {};
     
     vehicles.forEach(vehicle => {
-      const renewalMonth = new Date(vehicle.dateOfRenewal).getMonth(); // 0-11
+      // Extract the latest renewal date from the array
+      const latestRenewalDate = getLatestRenewalDate(vehicle.dateOfRenewal);
+      
+      if (!latestRenewalDate) return; // Skip vehicles without valid renewal date
+      
+      const renewalMonth = new Date(latestRenewalDate).getMonth(); // 0-11
+      const renewalYear = new Date(latestRenewalDate).getFullYear();
+      
+      // Only include vehicles from the specified year
+      if (renewalYear !== yearValue) return;
       
       if (!monthlyData[renewalMonth]) {
         monthlyData[renewalMonth] = {
@@ -1713,7 +1774,7 @@ export const getMonthlyVehicleTrends = async (req, res) => {
       monthlyData[renewalMonth].total++;
       
       // Use the same getVehicleStatus function as the main analytics
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
+      const status = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType || "Old");
       if (status === "1") {
         monthlyData[renewalMonth].active++;
       } else {
@@ -1755,37 +1816,18 @@ export const getMonthlyVehicleTrends = async (req, res) => {
 };
 
 // Get vehicle classification data
+// NOTE: Classification is a permanent property of vehicles, so we show ALL vehicles
+// regardless of date filter to show the overall distribution
 export const getVehicleClassificationData = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    // Ignore month/year filter for classification - show all vehicles
+    // Classification is a permanent property, not tied to renewal dates
     
-    // Build date filter
-    let dateFilter = {};
-    if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0, 23, 59, 59);
-      dateFilter.dateOfRenewal = { $gte: startDate, $lte: endDate, $ne: null };
-    } else if (year && !month) {
-      const startDate = new Date(year, 0, 1);
-      const endDate = new Date(year, 11, 31, 23, 59, 59);
-      dateFilter.dateOfRenewal = { $gte: startDate, $lte: endDate, $ne: null };
-    } else if (month && !year) {
-      dateFilter = {
-        $expr: {
-          $and: [
-            { $eq: [{ $month: "$dateOfRenewal" }, month] },
-            { $ne: ["$dateOfRenewal", null] }
-          ]
-        }
-      };
-    }
-    // If no month and no year provided, show all data (no date filter)
-    
-    console.log('Vehicle classification endpoint - Date filter:', JSON.stringify(dateFilter, null, 2));
+    console.log('Vehicle classification endpoint - Showing all vehicles (no date filter)');
     
     // Get vehicle classification counts with data normalization
+    // No date filter applied - we want the overall distribution
     const classificationData = await VehicleModel.aggregate([
-      ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
       {
         $addFields: {
           normalizedClassification: {
