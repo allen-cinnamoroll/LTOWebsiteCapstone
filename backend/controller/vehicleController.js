@@ -714,8 +714,8 @@ const convertToCSV = (vehicles) => {
 
   // Create CSV rows
   const rows = vehicles.map((vehicle) => {
-    // Convert vehicle to plain object to ensure populated fields are accessible
-    const vehicleObj = vehicle.toObject ? vehicle.toObject() : vehicle;
+    // With lean(), vehicles are already plain objects
+    const vehicleObj = vehicle;
     
     // Get latest renewal date
     const renewalDates = vehicleObj.dateOfRenewal || [];
@@ -827,9 +827,16 @@ export const exportVehicles = async (req, res) => {
 
     // Fetch vehicles with filter and populate driver information
     // Populate driverId with all necessary owner fields
-    const vehicles = await VehicleModel.find(dateFilter)
-      .populate("driverId", "ownerRepresentativeName address driversLicenseNumber")
+    // Note: driverId is an ObjectId that references the Drivers collection
+    let vehicles = await VehicleModel.find(dateFilter)
+      .populate({
+        path: "driverId",
+        select: "ownerRepresentativeName address driversLicenseNumber",
+      })
       .sort({ plateNo: 1 });
+    
+    // Convert to plain objects after populate to ensure populated fields are accessible
+    vehicles = vehicles.map(v => v.toObject ? v.toObject() : v);
 
     console.log(
       `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
@@ -838,26 +845,30 @@ export const exportVehicles = async (req, res) => {
     // Debug: Check first vehicle's driverId population
     if (vehicles.length > 0) {
       const firstVehicle = vehicles[0];
-      const firstVehicleObj = firstVehicle.toObject ? firstVehicle.toObject() : firstVehicle;
       console.log('=== EXPORT DEBUG ===');
-      console.log('Sample vehicle plateNo:', firstVehicleObj.plateNo);
-      console.log('Sample vehicle driverId:', JSON.stringify(firstVehicleObj.driverId, null, 2));
-      console.log('DriverId type:', typeof firstVehicleObj.driverId);
-      console.log('DriverId is object:', typeof firstVehicleObj.driverId === 'object');
-      if (firstVehicleObj.driverId && typeof firstVehicleObj.driverId === 'object') {
-        console.log('DriverId has ownerRepresentativeName:', firstVehicleObj.driverId.ownerRepresentativeName);
-        console.log('DriverId has address:', JSON.stringify(firstVehicleObj.driverId.address, null, 2));
-        console.log('DriverId has driversLicenseNumber:', firstVehicleObj.driverId.driversLicenseNumber);
+      console.log('Total vehicles found:', vehicles.length);
+      console.log('Sample vehicle plateNo:', firstVehicle.plateNo);
+      console.log('Sample vehicle driverId:', JSON.stringify(firstVehicle.driverId, null, 2));
+      console.log('DriverId type:', typeof firstVehicle.driverId);
+      console.log('DriverId is object:', typeof firstVehicle.driverId === 'object');
+      console.log('DriverId is null:', firstVehicle.driverId === null);
+      console.log('DriverId is undefined:', firstVehicle.driverId === undefined);
+      
+      if (firstVehicle.driverId && typeof firstVehicle.driverId === 'object') {
+        console.log('DriverId has ownerRepresentativeName:', firstVehicle.driverId.ownerRepresentativeName);
+        console.log('DriverId has address:', JSON.stringify(firstVehicle.driverId.address, null, 2));
+        console.log('DriverId has driversLicenseNumber:', firstVehicle.driverId.driversLicenseNumber);
       } else {
-        console.log('WARNING: DriverId is not an object or missing ownerRepresentativeName');
+        console.log('WARNING: DriverId is not populated correctly');
+        console.log('DriverId value:', firstVehicle.driverId);
       }
       console.log('=== END EXPORT DEBUG ===');
     }
 
     // Format vehicles data according to required fields
     const exportData = vehicles.map((vehicle) => {
-      // Convert vehicle to plain object to ensure populated fields are accessible
-      const vehicleObj = vehicle.toObject ? vehicle.toObject() : vehicle;
+      // With lean(), vehicles are already plain objects
+      const vehicleObj = vehicle;
       
       // Get latest renewal date
       const renewalDates = vehicleObj.dateOfRenewal || [];
@@ -877,22 +888,25 @@ export const exportVehicles = async (req, res) => {
       }
 
       // Extract driver/owner information
+      // driverId is an ObjectId reference to the Drivers collection
+      // After populate(), it becomes an object with ownerRepresentativeName, address, driversLicenseNumber
+      // If not populated, it remains as an ObjectId
       let driver = {};
       let address = {};
       
-      // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
       if (vehicleObj.driverId) {
         // Check if driverId is populated by checking for ownerRepresentativeName property
-        // When populated, it will be an object with ownerRepresentativeName, address, etc.
-        // When not populated, it will be just an ObjectId
-        if (typeof vehicleObj.driverId === 'object' && 
-            vehicleObj.driverId.ownerRepresentativeName !== undefined) {
-          // It's populated, use it directly
+        // If populated, it will have ownerRepresentativeName
+        // If not populated, it will just be an ObjectId (which doesn't have this property)
+        if (vehicleObj.driverId.ownerRepresentativeName !== undefined) {
+          // Successfully populated - use the driver data
           driver = vehicleObj.driverId;
           address = vehicleObj.driverId.address || {};
         } else {
-          // It's just an ObjectId, wasn't populated
-          console.warn(`Driver not populated for vehicle ${vehicleObj.plateNo || vehicleObj._id}. driverId:`, vehicleObj.driverId);
+          // Not populated - driverId is still just an ObjectId
+          // This shouldn't happen if populate worked, but log it for debugging
+          console.warn(`Driver not populated for vehicle ${vehicleObj.plateNo || vehicleObj._id}`);
+          console.warn(`DriverId value:`, vehicleObj.driverId);
         }
       }
 
@@ -918,6 +932,11 @@ export const exportVehicles = async (req, res) => {
     });
 
     // Convert to requested format and send
+    // Set CORS headers explicitly for blob responses
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    
     if (format === "csv") {
       const csvContent = convertToCSV(exportData);
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
