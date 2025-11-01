@@ -632,3 +632,250 @@ export const fixDriverVehicleRelationships = async (req, res) => {
     });
   }
 };
+
+/**
+ * Helper function to build date filter for dateOfRenewal array field
+ * Filters vehicles whose date of renewal falls within the specified month and year
+ */
+const buildDateOfRenewalFilter = (month, year) => {
+  // Build date range for the specified month/year
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+  return {
+    $expr: {
+      $gt: [
+        {
+          $size: {
+            $filter: {
+              input: { $ifNull: ["$dateOfRenewal", []] },
+              as: "renewal",
+              cond: {
+                $and: [
+                  {
+                    $gte: [
+                      {
+                        $cond: {
+                          if: { $ne: ["$$renewal.date", null] },
+                          then: "$$renewal.date",
+                          else: "$$renewal",
+                        },
+                      },
+                      startDate,
+                    ],
+                  },
+                  {
+                    $lte: [
+                      {
+                        $cond: {
+                          if: { $ne: ["$$renewal.date", null] },
+                          then: "$$renewal.date",
+                          else: "$$renewal",
+                        },
+                      },
+                      endDate,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+        0,
+      ],
+    },
+  };
+};
+
+/**
+ * Convert array of vehicles to CSV format
+ */
+const convertToCSV = (vehicles) => {
+  // Define CSV headers
+  const headers = [
+    "fileNo",
+    "plateNo",
+    "engineNo",
+    "serialChassisNumber",
+    "make",
+    "bodyType",
+    "color",
+    "classification",
+    "dateOfRenewal",
+    "vehicleStatusType",
+    "ownerRepresentativeName",
+    "address_purok",
+    "address_barangay",
+    "address_municipality",
+    "address_province",
+    "address_region",
+    "driverLicenseNumber",
+  ];
+
+  // Create CSV rows
+  const rows = vehicles.map((vehicle) => {
+    // Get latest renewal date
+    const renewalDates = vehicle.dateOfRenewal || [];
+    const latestRenewalDate =
+      Array.isArray(renewalDates) && renewalDates.length > 0
+        ? renewalDates[renewalDates.length - 1]?.date ||
+          renewalDates[renewalDates.length - 1]
+        : null;
+    const renewalDateStr = latestRenewalDate
+      ? new Date(latestRenewalDate).toISOString().split("T")[0]
+      : "";
+
+    // Extract driver/owner information
+    const driver = vehicle.driverId || {};
+    const address = driver.address || {};
+
+    return [
+      vehicle.fileNo || "",
+      vehicle.plateNo || "",
+      vehicle.engineNo || "",
+      vehicle.serialChassisNumber || "",
+      vehicle.make || "",
+      vehicle.bodyType || "",
+      vehicle.color || "",
+      vehicle.classification || "",
+      renewalDateStr,
+      vehicle.vehicleStatusType || "",
+      driver.ownerRepresentativeName || "",
+      address.purok || "",
+      address.barangay || "",
+      address.municipality || "",
+      address.province || "",
+      address.region || "",
+      driver.driversLicenseNumber || "",
+    ];
+  });
+
+  // Escape CSV values (handle commas, quotes, newlines)
+  const escapeCSV = (value) => {
+    if (value === null || value === undefined) return "";
+    const str = String(value);
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  // Build CSV content
+  const csvRows = [
+    headers.join(","),
+    ...rows.map((row) => row.map(escapeCSV).join(",")),
+  ];
+
+  return csvRows.join("\n");
+};
+
+/**
+ * Export vehicles filtered by date of renewal
+ */
+export const exportVehicles = async (req, res) => {
+  try {
+    const { format = "csv", month, year } = req.query;
+
+    // Validate format
+    if (format !== "csv" && format !== "json") {
+      return res.status(400).json({
+        success: false,
+        message: "Format must be either 'csv' or 'json'",
+      });
+    }
+
+    // Validate month and year
+    if (!month || !year) {
+      return res.status(400).json({
+        success: false,
+        message: "Month and year are required",
+      });
+    }
+
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(year);
+
+    if (monthNum < 1 || monthNum > 12) {
+      return res.status(400).json({
+        success: false,
+        message: "Month must be between 1 and 12",
+      });
+    }
+
+    // Build date filter
+    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
+
+    // Fetch vehicles with filter and populate driver information
+    const vehicles = await VehicleModel.find(dateFilter)
+      .populate("driverId", "ownerRepresentativeName address driversLicenseNumber")
+      .sort({ plateNo: 1 });
+
+    console.log(
+      `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
+    );
+
+    // Format vehicles data according to required fields
+    const exportData = vehicles.map((vehicle) => {
+      // Get latest renewal date
+      const renewalDates = vehicle.dateOfRenewal || [];
+      const latestRenewalDate =
+        Array.isArray(renewalDates) && renewalDates.length > 0
+          ? renewalDates[renewalDates.length - 1]?.date ||
+            renewalDates[renewalDates.length - 1]
+          : null;
+      const renewalDateStr = latestRenewalDate
+        ? new Date(latestRenewalDate).toISOString().split("T")[0]
+        : "";
+
+      // Extract driver/owner information
+      const driver = vehicle.driverId || {};
+      const address = driver.address || {};
+
+      return {
+        fileNo: vehicle.fileNo || "",
+        plateNo: vehicle.plateNo || "",
+        engineNo: vehicle.engineNo || "",
+        serialChassisNumber: vehicle.serialChassisNumber || "",
+        make: vehicle.make || "",
+        bodyType: vehicle.bodyType || "",
+        color: vehicle.color || "",
+        classification: vehicle.classification || "",
+        dateOfRenewal: renewalDateStr,
+        vehicleStatusType: vehicle.vehicleStatusType || "",
+        ownerRepresentativeName: driver.ownerRepresentativeName || "",
+        address_purok: address.purok || "",
+        address_barangay: address.barangay || "",
+        address_municipality: address.municipality || "",
+        address_province: address.province || "",
+        address_region: address.region || "",
+        driverLicenseNumber: driver.driversLicenseNumber || "",
+      };
+    });
+
+    // Convert to requested format and send
+    if (format === "csv") {
+      const csvContent = convertToCSV(exportData);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=vehicles_${month}_${year}.csv`
+      );
+      res.send("\ufeff" + csvContent); // Add BOM for Excel compatibility
+    } else {
+      // JSON format
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=vehicles_${month}_${year}.json`
+      );
+      res.json(exportData);
+    }
+  } catch (error) {
+    console.error("Error exporting vehicles:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};

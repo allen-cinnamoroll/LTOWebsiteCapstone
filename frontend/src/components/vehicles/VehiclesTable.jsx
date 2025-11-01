@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "../ui/button";
 import { DataTableViewOptions } from "../table/DataTableViewOptions";
 import { DataTablePagination } from "../table/DataTablePagination";
+import VehicleExportModal from "../vehicle/VehicleExportModal";
 
 const VehiclesTable = ({
   title,
@@ -133,6 +134,7 @@ const VehiclesTable = ({
             <Plus />
             <span className="hidden lg:inline">{"Add Vehicle"}</span>
           </Button>
+          <VehicleExportModal />
           <DataTableViewOptions table={table} />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,20 +20,6 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { formatDate } from "@/util/dateFormatter";
 
-// Validation schema based on UserModel
-const registerAccountSchema = z.object({
-  firstName: z.string().min(1, "First name is required").trim(),
-  middleName: z.string().optional(),
-  lastName: z.string().min(1, "Last name is required").trim(),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-  role: z.enum(["0", "1", "2"]).optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
 const roleOptions = [
   { value: "1", label: "Admin" },
   { value: "2", label: "Employee" },
@@ -44,6 +30,24 @@ export default function RegisterAccountPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const date = formatDate(Date.now());
 
+  // Create schema dynamically based on user role
+  const registerAccountSchema = useMemo(() => z.object({
+    firstName: z.string().min(1, "First name is required").trim(),
+    middleName: z.string().optional(),
+    lastName: z.string().min(1, "Last name is required").trim(),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Confirm password is required"),
+    role: currentUser?.role === "0" 
+      ? z.enum(["0", "1", "2"], {
+          required_error: "Role is required",
+        })
+      : z.enum(["0", "1", "2"]).optional(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  }), [currentUser?.role]);
+
   const form = useForm({
     resolver: zodResolver(registerAccountSchema),
     defaultValues: {
@@ -53,7 +57,7 @@ export default function RegisterAccountPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      role: currentUser?.role === "0" ? "2" : undefined, // Superadmin can choose, admin auto-assigns employee
+      role: undefined, // No default role selection
     },
   });
 
@@ -86,7 +90,7 @@ export default function RegisterAccountPage() {
           email: "",
           password: "",
           confirmPassword: "",
-          role: currentUser?.role === "0" ? "2" : undefined, // Reset role based on user type
+          role: undefined, // Reset to no selection
         });
       }
     } catch (error) {
@@ -100,10 +104,11 @@ export default function RegisterAccountPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
-      <div className="max-w-2xl mx-auto">
+    <div className="h-full bg-white dark:bg-black">
+      <div className="container mx-auto px-6 py-4 h-full flex items-center justify-center">
+        <div className="max-w-2xl w-full">
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-4">
             <div className="flex items-center gap-2">
               <UserPlus className="h-6 w-6" />
               <CardTitle>Register New Account</CardTitle>
@@ -114,9 +119,9 @@ export default function RegisterAccountPage() {
                 : "Create a new employee account for the LTO system"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* First Row: First Name, Middle Name, Last Name */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormField
@@ -124,11 +129,11 @@ export default function RegisterAccountPage() {
                     name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>First Name *</FormLabel>
+                        <FormLabel className="text-foreground">First Name *</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter first name" {...field} />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -142,7 +147,7 @@ export default function RegisterAccountPage() {
                         <FormControl>
                           <Input placeholder="Enter middle name (optional)" {...field} />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -152,11 +157,11 @@ export default function RegisterAccountPage() {
                     name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Last Name *</FormLabel>
+                        <FormLabel className="text-foreground">Last Name *</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter last name" {...field} />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-xs" />
                       </FormItem>
                     )}
                   />
@@ -166,9 +171,14 @@ export default function RegisterAccountPage() {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Email Address *</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <FormLabel className="text-foreground">Email Address *</FormLabel>
+                        {fieldState.error && (
+                          <span className="text-xs text-red-500">{fieldState.error.message}</span>
+                        )}
+                      </div>
                       <FormControl>
                         <Input 
                           type="email" 
@@ -176,7 +186,6 @@ export default function RegisterAccountPage() {
                           {...field} 
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -185,9 +194,14 @@ export default function RegisterAccountPage() {
                 <FormField
                   control={form.control}
                   name="password"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Password *</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <FormLabel className="text-foreground">Password *</FormLabel>
+                        {fieldState.error && (
+                          <span className="text-xs text-red-500">{fieldState.error.message}</span>
+                        )}
+                      </div>
                       <FormControl>
                         <Input 
                           type="password" 
@@ -195,7 +209,6 @@ export default function RegisterAccountPage() {
                           {...field} 
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -204,9 +217,14 @@ export default function RegisterAccountPage() {
                 <FormField
                   control={form.control}
                   name="confirmPassword"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password *</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <FormLabel className="text-foreground">Confirm Password *</FormLabel>
+                        {fieldState.error && (
+                          <span className="text-xs text-red-500">{fieldState.error.message}</span>
+                        )}
+                      </div>
                       <FormControl>
                         <Input 
                           type="password" 
@@ -214,7 +232,6 @@ export default function RegisterAccountPage() {
                           {...field} 
                         />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -224,10 +241,15 @@ export default function RegisterAccountPage() {
                   <FormField
                     control={form.control}
                     name="role"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel>Role *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <div className="flex items-center gap-2">
+                          <FormLabel className="text-foreground">Role *</FormLabel>
+                          {fieldState.error && (
+                            <span className="text-xs text-red-500">{fieldState.error.message}</span>
+                          )}
+                        </div>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a role" />
@@ -241,14 +263,13 @@ export default function RegisterAccountPage() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 )}
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4">
+                <div className="flex gap-4 pt-2">
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
@@ -278,7 +299,7 @@ export default function RegisterAccountPage() {
                         email: "",
                         password: "",
                         confirmPassword: "",
-                        role: currentUser?.role === "0" ? "2" : undefined,
+                        role: undefined,
                       });
                     }}
                     disabled={isSubmitting}
@@ -291,6 +312,7 @@ export default function RegisterAccountPage() {
             </Form>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
