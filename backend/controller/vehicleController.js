@@ -135,8 +135,25 @@ export const createVehicle = async (req, res) => {
 // Get all vehicles
 export const getVehicle = async (req, res) => {
   try {
-    const { page = 1, limit = 100, search, status, classification } = req.query;
-    const skip = (page - 1) * limit;
+    const { page = 1, limit, search, status, classification, fetchAll } = req.query;
+    
+    // DEBUG: Log query parameters
+    console.log('=== GET VEHICLES API DEBUG ===');
+    console.log('Query params:', { page, limit, search, status, classification, fetchAll });
+    console.log('fetchAll type:', typeof fetchAll);
+    console.log('fetchAll value:', fetchAll);
+    
+    // If fetchAll is true, don't apply pagination
+    // Handle string "true", boolean true, or string "1"
+    const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
+    const shouldPaginate = !isFetchAll;
+    const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
+    const skip = shouldPaginate ? (page - 1) * limitValue : 0;
+    
+    console.log('isFetchAll:', isFetchAll);
+    console.log('shouldPaginate:', shouldPaginate);
+    console.log('limitValue:', limitValue);
+    console.log('skip:', skip);
 
     let query = {};
 
@@ -160,15 +177,30 @@ export const getVehicle = async (req, res) => {
       query.classification = classification;
     }
 
-    const vehicles = await VehicleModel.find(query)
+    let vehiclesQuery = VehicleModel.find(query)
       .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
+      .sort({ createdAt: -1 });
+    
+    // Only apply skip and limit if pagination is enabled
+    if (shouldPaginate) {
+      console.log('Applying pagination - skip:', skip, 'limit:', limitValue);
+      vehiclesQuery = vehiclesQuery.skip(skip);
+      if (limitValue) {
+        vehiclesQuery = vehiclesQuery.limit(limitValue);
+      }
+    } else {
+      console.log('FetchAll mode - NO pagination limits applied');
+    }
+    
+    const vehicles = await vehiclesQuery;
+    
+    console.log('Vehicles fetched from DB:', vehicles.length);
 
     const total = await VehicleModel.countDocuments(query);
+    
+    console.log('Total vehicles in DB:', total);
 
     // Add calculated status for each vehicle and update database status if needed
     const vehiclesWithStatus = await Promise.all(vehicles.map(async (vehicle) => {
@@ -198,20 +230,28 @@ export const getVehicle = async (req, res) => {
         // The frontend will handle building the full name from firstName, middleName, lastName
       };
       
-      // Debug logging
-      console.log(`Vehicle ${vehicle.plateNo} - Status: ${calculatedStatus} (${calculatedStatus === "1" ? "ACTIVE" : "EXPIRED"})`);
-      console.log(`Vehicle ${vehicle.plateNo} - DriverId: ${vehicleData.driverId}`);
+      // Verbose logging disabled for performance (uncomment for debugging specific vehicles)
+      // console.log(`Vehicle ${vehicle.plateNo} - Status: ${calculatedStatus} (${calculatedStatus === "1" ? "ACTIVE" : "EXPIRED"})`);
+      // console.log(`Vehicle ${vehicle.plateNo} - DriverId: ${vehicleData.driverId}`);
       
       return vehicleData;
     }));
+
+    console.log('=== SENDING RESPONSE ===');
+    console.log('Total vehicles in response:', vehiclesWithStatus.length);
+    console.log('Total in database:', total);
+    console.log('FetchAll mode:', !shouldPaginate);
+    console.log('=== END GET VEHICLES DEBUG ===');
 
     res.json({
       success: true,
       data: vehiclesWithStatus,
       pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
+        current: shouldPaginate ? parseInt(page) : 1,
+        pages: shouldPaginate ? Math.ceil(total / (limitValue || 100)) : 1,
         total,
+        limit: limitValue || null,
+        fetchAll: !shouldPaginate,
       },
     });
   } catch (error) {

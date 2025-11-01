@@ -111,12 +111,17 @@ export const createDriver = async (req, res) => {
 
 export const getDrivers = async (req, res) => {
   try {
+    console.log('=== GET DRIVERS API DEBUG ===');
+    console.log('Fetching all drivers from database...');
+    
     const drivers = await DriverModel.find()
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
       .populate('createdBy', 'firstName middleName lastName')
       .populate('updatedBy', 'firstName middleName lastName')
       .sort({createdAt:-1})
+    
+    console.log('Total drivers fetched from DB:', drivers.length);
 
     // Return drivers with their vehicle information and user tracking
     const driversWithVehicles = drivers.map(driver => {
@@ -138,9 +143,13 @@ export const getDrivers = async (req, res) => {
       return driverObj;
     });
 
+    console.log('Total drivers being returned:', driversWithVehicles.length);
+    console.log('=== END GET DRIVERS DEBUG ===');
+
     res.status(200).json({
       success: true,
       data: driversWithVehicles,
+      total: driversWithVehicles.length,
     });
   } catch (err) {
     return res.status(500).json({

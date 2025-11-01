@@ -42,11 +42,25 @@ const DriverPage = () => {
 
   const fetchDrivers = async () => {
     try {
+      setLoading(true);
+      console.log('=== FETCHING DRIVERS ===');
+      
       const { data } = await apiClient.get("/driver", {
         headers: {
           Authorization: token,
         },
       });
+
+      console.log('=== DRIVERS API RESPONSE ===');
+      console.log('Response success:', data.success);
+      console.log('Total drivers received:', data.data?.length || 0);
+      console.log('First driver sample:', data.data?.[0]);
+
+      if (!data.data || !Array.isArray(data.data)) {
+        console.error('API response does not contain data array:', data);
+        setDriverData([]);
+        return;
+      }
 
       const driverData = data.data.map((dData) => {
         // Extract plate numbers and file numbers from vehicleIds array
@@ -80,13 +94,25 @@ const DriverPage = () => {
         };
       });
 
+      console.log('=== PROCESSED DRIVERS ===');
+      console.log('Total processed:', driverData.length);
+      console.log('Active drivers:', driverData.filter(d => d.isActive).length);
+      console.log('Inactive drivers:', driverData.filter(d => !d.isActive).length);
+
+      // Show only active drivers by default (you can change this if you want to show all)
       const active = driverData.filter((data) => data.isActive);
+      console.log('Setting active drivers in state:', active.length);
+      
       setDriverData(active);
 
       setLoading(false);
     } catch (error) {
+      console.error('=== ERROR FETCHING DRIVERS ===');
+      console.error('Error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      setDriverData([]);
       setLoading(false);
-      console.log(error);
     }
   };
 
