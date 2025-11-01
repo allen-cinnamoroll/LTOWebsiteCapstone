@@ -53,7 +53,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         suffix: formData.suffix,
         violations: formData.violations,
         violationType: formData.violationType,
-        licenseType: formData.licenseType,
+        licenseType: formData.violationType === "confiscated" ? formData.licenseType : undefined,
         plateNo: formData.plateNo,
         apprehendingOfficer: formData.apprehendingOfficer,
         chassisNo: formData.chassisNo,

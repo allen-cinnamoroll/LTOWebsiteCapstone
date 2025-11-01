@@ -166,7 +166,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{violationData?.apprehendingOfficer || "N/A"}</p>
         </div>
         {violationData?.licenseType && (
-          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+          <div className="md:col-span-2 bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
             <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
               <CreditCard className="h-3 w-3" />
               License Type
@@ -176,6 +176,32 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
             </div>
           </div>
         )}
+
+        {/* Created/Updated metadata moved from footer */}
+        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <User className="h-3 w-3" />
+              Created By
+            </label>
+            <div className="ml-4 flex items-center gap-2 text-xs">
+              <span className="font-semibold text-gray-900 dark:text-gray-100">{violationData?.createdBy?.name || "Unknown"}</span>
+              <span className="text-gray-500 dark:text-gray-400">•</span>
+              <span className="text-gray-500 dark:text-gray-400">{formatDateTime(violationData?.createdAt)}</span>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Edit className="h-3 w-3" />
+              Updated By
+            </label>
+            <div className="ml-4 flex items-center gap-2 text-xs">
+              <span className="font-semibold text-gray-900 dark:text-gray-100">{violationData?.updatedBy?.name || (violationData?.createdBy?.name || "Unknown")}</span>
+              <span className="text-gray-500 dark:text-gray-400">•</span>
+              <span className="text-gray-500 dark:text-gray-400">{formatDateTime(violationData?.updatedAt || violationData?.createdAt)}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -277,29 +303,9 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
             {activeTab === "violations" && <DriverViolationsTab />}
           </div>
 
-           {/* Footer with metadata and Edit Button */}
+         {/* Footer with Edit Button */}
            <div className="flex-shrink-0 pt-4 border-t border-gray-200 dark:border-gray-700">
-             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-               <div className="flex-1">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-[10px] text-gray-600 dark:text-gray-400">
-                   <div>
-                     <span className="font-semibold">Created By:</span>
-                     <span className="ml-1">{violationData?.createdBy?.name || "Unknown"}</span>
-                   </div>
-                   <div>
-                     <span className="font-semibold">Last Made:</span>
-                     <span className="ml-1">{formatDateTime(violationData?.createdAt)}</span>
-                   </div>
-                   <div>
-                     <span className="font-semibold">Updated By:</span>
-                     <span className="ml-1">{violationData?.updatedBy?.name || (violationData?.createdBy?.name || "Unknown")}</span>
-                   </div>
-                   <div>
-                     <span className="font-semibold">Last Updated:</span>
-                     <span className="ml-1">{formatDateTime(violationData?.updatedAt || violationData?.createdAt)}</span>
-                   </div>
-                 </div>
-               </div>
+             <div className="flex items-center justify-end">
                <Button
                  onClick={() => {
                    onOpenChange(false);
