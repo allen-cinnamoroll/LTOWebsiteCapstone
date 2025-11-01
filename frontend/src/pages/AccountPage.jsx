@@ -248,7 +248,6 @@ const AccountPage = () => {
                 </div>
 
                 <Separator />
-
                 {/* Account Details */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
@@ -352,6 +351,7 @@ const AccountPage = () => {
                     </p>
                   </div>
                 </div>
+
               </CardContent>
             </Card>
           </div>
@@ -368,7 +368,6 @@ const AccountPage = () => {
                   Update your account information and profile picture
                 </DialogDescription>
               </DialogHeader>
-
               <div className="space-y-6">
                 {/* Avatar Section */}
                 <div className="flex items-center gap-4">
