@@ -28,6 +28,19 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const { token } = useAuth();
 
   useEffect(() => {
+    // DEBUG: Log vehicle data to check metadata fields
+    if (open && vehicleData) {
+      console.log('=== VEHICLE DETAILS MODAL DEBUG ===');
+      console.log('Full vehicleData:', vehicleData);
+      console.log('createdBy:', vehicleData.createdBy);
+      console.log('createdBy type:', typeof vehicleData.createdBy);
+      console.log('createdAt:', vehicleData.createdAt);
+      console.log('updatedBy:', vehicleData.updatedBy);
+      console.log('updatedBy type:', typeof vehicleData.updatedBy);
+      console.log('updatedAt:', vehicleData.updatedAt);
+      console.log('=== END DEBUG ===');
+    }
+    
     if (open && vehicleData?.driverId) {
       fetchOwnerData();
     }
@@ -98,7 +111,11 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
 
   const buildFullName = (user) => {
     if (!user) return '';
-    const full = user.fullname || `${user.firstName || ''} ${user.middleName || ''} ${user.lastName || ''}`.replace(/\s+/g, ' ').trim();
+    // Handle different formats: full user object, or { _id, name } format
+    if (user.name) {
+      return user.name; // Handle the transformed format from getVehicle endpoint
+    }
+    const full = user.fullname || `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.replace(/\s+/g, ' ').trim();
     return full;
   };
 

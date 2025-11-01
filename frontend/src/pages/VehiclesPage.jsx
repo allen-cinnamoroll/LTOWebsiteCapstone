@@ -66,6 +66,11 @@ const VehiclesPage = () => {
           status: dData.status,
           driverId: driverId, // Use the extracted driverId
           vehicleStatusType: dData.vehicleStatusType, // Include vehicleStatusType
+          // Include metadata fields
+          createdBy: dData.createdBy,
+          createdAt: dData.createdAt,
+          updatedBy: dData.updatedBy,
+          updatedAt: dData.updatedAt,
         };
       });
 

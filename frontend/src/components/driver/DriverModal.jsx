@@ -33,6 +33,19 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
 
   // Prefetch names for createdBy / updatedBy
   useEffect(() => {
+    // DEBUG: Log driver data to check metadata fields
+    if (open && driverData) {
+      console.log('=== DRIVER MODAL DEBUG ===');
+      console.log('Full driverData:', driverData);
+      console.log('createdBy:', driverData.createdBy);
+      console.log('createdBy type:', typeof driverData.createdBy);
+      console.log('createdAt:', driverData.createdAt);
+      console.log('updatedBy:', driverData.updatedBy);
+      console.log('updatedBy type:', typeof driverData.updatedBy);
+      console.log('updatedAt:', driverData.updatedAt);
+      console.log('=== END DEBUG ===');
+    }
+    
     if (!open || !driverData) return;
     const ids = [driverData.createdBy, driverData.updatedBy]
       .map(u => (typeof u === 'object' ? u?._id : u))
@@ -237,6 +250,10 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                         const u = driverData?.createdBy;
                         if (!u) return 'Unknown';
                         if (typeof u === 'object') {
+                          // Handle different formats: full user object, or { _id, name } format
+                          if (u.name) {
+                            return u.name;
+                          }
                           const fullName = u.fullname || `${u.firstName || ''} ${u.middleName ? u.middleName + ' ' : ''}${u.lastName || ''}`.trim();
                           return fullName || 'Unknown';
                         }
@@ -307,6 +324,10 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                         const u = driverData?.updatedBy;
                         if (!u) return 'Not yet updated';
                         if (typeof u === 'object') {
+                          // Handle different formats: full user object, or { _id, name } format
+                          if (u.name) {
+                            return u.name;
+                          }
                           const fullName = u.fullname || `${u.firstName || ''} ${u.middleName ? u.middleName + ' ' : ''}${u.lastName || ''}`.trim();
                           return fullName || 'Not yet updated';
                         }

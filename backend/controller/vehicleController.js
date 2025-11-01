@@ -162,8 +162,8 @@ export const getVehicle = async (req, res) => {
 
     const vehicles = await VehicleModel.find(query)
       .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
-      .populate("createdBy", "firstName lastName")
-      .populate("updatedBy", "firstName lastName")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -194,15 +194,8 @@ export const getVehicle = async (req, res) => {
         driverId: typeof vehicle.driverId === 'object' && vehicle.driverId?._id 
           ? vehicle.driverId._id 
           : vehicle.driverId,
-        // Add user tracking with populated names
-        createdBy: vehicle.createdBy ? {
-          _id: vehicle.createdBy._id,
-          name: `${vehicle.createdBy.firstName} ${vehicle.createdBy.lastName}`.trim()
-        } : null,
-        updatedBy: vehicle.updatedBy ? {
-          _id: vehicle.updatedBy._id,
-          name: `${vehicle.updatedBy.firstName} ${vehicle.updatedBy.lastName}`.trim()
-        } : null
+        // Keep the full populated user objects for createdBy/updatedBy (don't transform)
+        // The frontend will handle building the full name from firstName, middleName, lastName
       };
       
       // Debug logging

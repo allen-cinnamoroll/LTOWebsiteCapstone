@@ -72,6 +72,11 @@ const DriverPage = () => {
           hasDriversLicense: dData.hasDriversLicense,
           driversLicenseNumber: dData.driversLicenseNumber,
           isActive: dData.isActive,
+          // Include metadata fields
+          createdBy: dData.createdBy,
+          createdAt: dData.createdAt,
+          updatedBy: dData.updatedBy,
+          updatedAt: dData.updatedAt,
         };
       });
 

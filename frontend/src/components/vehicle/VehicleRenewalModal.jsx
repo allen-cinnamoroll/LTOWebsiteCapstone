@@ -364,12 +364,18 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                     </label>
                     <div className="ml-4 flex items-center gap-2 text-xs">
                       <span className="font-semibold text-gray-900 dark:text-gray-100">
-                        {(() => {
-                          const u = vehicleData?.createdBy;
-                          if (!u) return 'Unknown';
-                          if (typeof u === 'object') return buildFullName(u) || 'Unknown';
-                          return userNameCache[u] || u;
-                        })()}
+                      {(() => {
+                        const u = vehicleData?.createdBy;
+                        if (!u) return 'Unknown';
+                        if (typeof u === 'object') {
+                          // Handle different formats: full user object, or { _id, name } format
+                          if (u.name) {
+                            return u.name;
+                          }
+                          return buildFullName(u) || 'Unknown';
+                        }
+                        return userNameCache[u] || u;
+                      })()}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400">•</span>
                       <span className="text-gray-500 dark:text-gray-400">
@@ -384,12 +390,18 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                     </label>
                     <div className="ml-4 flex items-center gap-2 text-xs">
                       <span className="font-semibold text-gray-900 dark:text-gray-100">
-                        {(() => {
-                          const u = vehicleData?.updatedBy;
-                          if (!u) return 'Not yet updated';
-                          if (typeof u === 'object') return buildFullName(u) || 'Not yet updated';
-                          return userNameCache[u] || u;
-                        })()}
+                      {(() => {
+                        const u = vehicleData?.updatedBy;
+                        if (!u) return 'Not yet updated';
+                        if (typeof u === 'object') {
+                          // Handle different formats: full user object, or { _id, name } format
+                          if (u.name) {
+                            return u.name;
+                          }
+                          return buildFullName(u) || 'Not yet updated';
+                        }
+                        return userNameCache[u] || u;
+                      })()}
                       </span>
                       <span className="text-gray-500 dark:text-gray-400">•</span>
                       <span className="text-gray-500 dark:text-gray-400">
