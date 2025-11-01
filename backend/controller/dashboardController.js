@@ -336,19 +336,18 @@ export const getRegistrationAnalytics = async (req, res) => {
     console.log(`Total vehicles found: ${totalVehicles}`);
     console.log(`Date filter applied:`, JSON.stringify(dateFilter, null, 2));
     
-    // Get all vehicles to calculate proper active/expired status
-    const allVehicles = await VehicleModel.find(dateFilter, 'plateNo dateOfRenewal');
-    let activeVehicles = 0;
-    let expiredVehicles = 0;
-    
-    allVehicles.forEach(vehicle => {
-      const status = getVehicleStatus(vehicle.plateNo, vehicle.dateOfRenewal, vehicle.vehicleStatusType);
-      if (status === "1") {
-        activeVehicles++;
-      } else {
-        expiredVehicles++;
-      }
+    // Get active/expired counts based on the status field in the database
+    const activeVehicles = await VehicleModel.countDocuments({
+      ...dateFilter,
+      status: "1"
     });
+    
+    const expiredVehicles = await VehicleModel.countDocuments({
+      ...dateFilter,
+      status: "0"
+    });
+    
+    console.log(`Active vehicles: ${activeVehicles}, Expired vehicles: ${expiredVehicles}`);
 
     // Get driver statistics based on vehicle renewal dates
     let totalDrivers = 0;
