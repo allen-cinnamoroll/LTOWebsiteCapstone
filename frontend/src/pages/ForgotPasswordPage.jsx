@@ -117,27 +117,27 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 md:p-6">
       <div className="w-full max-w-md">
         {/* Logo and Title */}
-        <div className="text-center mb-8">
-          <img src={ltoLogo} alt="LTO Logo" className="h-20 w-20 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">LTO SYSTEM</h1>
-          <p className="text-sm text-gray-600">Land Transportation Management System</p>
+        <div className="text-center mb-6 md:mb-8">
+          <img src={ltoLogo} alt="LTO Logo" className="h-16 w-16 md:h-20 md:w-20 mx-auto mb-3 md:mb-4" />
+          <h1 className="text-2xl md:text-3xl font-bold text-[#1e3a8a] mb-2">LTO SYSTEM</h1>
+          <p className="text-xs md:text-sm text-gray-600">Land Transportation Management System</p>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
           {step === 1 ? (
             // Step 1: Email Input
             <Form {...emailForm}>
               <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)}>
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                    <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                       Forgot Password?
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-sm md:text-base text-gray-600">
                       Enter your email address and we'll send you an OTP to reset your password.
                     </p>
                   </div>
@@ -196,13 +196,13 @@ export default function ForgotPasswordPage() {
               <form onSubmit={otpForm.handleSubmit(handleOTPSubmit)}>
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                    <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                       Verify OTP
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-sm md:text-base text-gray-600 break-words">
                       We've sent a 6-digit OTP to <strong>{email}</strong>
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-xs md:text-sm text-gray-500 mt-1">
                       Please check your email and enter the OTP below.
                     </p>
                   </div>

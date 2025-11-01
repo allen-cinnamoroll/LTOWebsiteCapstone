@@ -57,6 +57,10 @@ const AccidentPage = () => {
         vehicle_type: aData.vehicle_type || "N/A",
         severity: aData.severity || "N/A",
         notes: aData.notes || "",
+        createdBy: aData.createdBy,
+        updatedBy: aData.updatedBy,
+        createdAt: aData.createdAt,
+        updatedAt: aData.updatedAt,
       }));
       setAccidentData(accidentData);
     } catch (error) {
@@ -87,8 +91,8 @@ const AccidentPage = () => {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="bg-white dark:bg-transparent rounded-lg shadow-sm border border-gray-200 dark:border-0 px-6 pt-6 pb-2 flex-1 flex flex-col min-h-0 overflow-hidden">
-        <header className="text-xl md:text-3xl font-bold mb-4 flex-shrink-0">Accidents</header>
+      <div className="bg-white dark:bg-transparent rounded-lg shadow-sm border border-gray-200 dark:border-0 px-4 md:px-6 pt-4 md:pt-6 pb-2 flex-1 flex flex-col min-h-0 overflow-hidden">
+        <header className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 flex-shrink-0">Accidents</header>
         <div className="flex-1 flex flex-col min-h-0">
           <AccidentTable
             data={accidentData}

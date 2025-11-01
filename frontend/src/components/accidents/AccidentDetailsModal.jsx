@@ -15,7 +15,9 @@ import {
   Hash, 
   FileText,
   Edit,
-  Loader2
+  Loader2,
+  User,
+  Clock
 } from "lucide-react";
 import { formatSimpleDate } from "@/util/dateFormatter";
 
@@ -35,6 +37,24 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const formatUserName = (user) => {
+    if (!user) return "Unknown";
+    const { firstName, middleName, lastName } = user;
+    return `${firstName || ''} ${middleName || ''} ${lastName || ''}`.trim() || "Unknown";
   };
 
   const getSeverityBadge = (severity) => {
@@ -133,6 +153,38 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
             <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.notes}</p>
           </div>
         )}
+
+        {/* Created/Updated metadata */}
+        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <User className="h-3 w-3" />
+              Created By
+            </label>
+            <div className="ml-4 flex items-center gap-2 text-xs">
+              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                {formatUserName(accidentData?.createdBy)}
+              </span>
+              <span className="text-gray-500 dark:text-gray-400">•</span>
+              <span className="text-gray-500 dark:text-gray-400">{formatDateTime(accidentData?.createdAt)}</span>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Edit className="h-3 w-3" />
+              Updated By
+            </label>
+            <div className="ml-4 flex items-center gap-2 text-xs">
+              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                {formatUserName(accidentData?.updatedBy || accidentData?.createdBy)}
+              </span>
+              <span className="text-gray-500 dark:text-gray-400">•</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                {formatDateTime(accidentData?.updatedAt || accidentData?.createdAt)}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -205,16 +257,7 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
 
            {/* Footer with Edit Button */}
            <div className="flex-shrink-0 pt-4 border-t border-gray-200 dark:border-gray-700">
-             <div className="flex justify-between items-center">
-               <div className="text-xs text-gray-500 dark:text-gray-400">
-                 {accidentData?.updatedAt ? (
-                   <>Last updated: {formatDate(accidentData.updatedAt)}</>
-                 ) : accidentData?.createdAt ? (
-                   <>Created: {formatDate(accidentData.createdAt)}</>
-                 ) : (
-                   <>Record details • Accident #{accidentData?.accident_id || "N/A"}</>
-                 )}
-               </div>
+             <div className="flex items-center justify-end">
                <Button
                  onClick={() => {
                    onOpenChange(false);

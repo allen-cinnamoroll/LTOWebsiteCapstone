@@ -7,10 +7,10 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen relative">
       {/* Header Bar */}
-      <div className="bg-[#1e3a8a] h-16 flex items-center justify-between px-6 relative z-10">
-        <div className="flex items-center gap-3">
-          <img src="/lto.svg" alt="LTO Logo" className="h-8 w-8" />
-          <span className="text-white text-lg font-semibold">LTO SYSTEM</span>
+      <div className="bg-[#1e3a8a] h-14 md:h-16 flex items-center justify-between px-4 md:px-6 relative z-10">
+        <div className="flex items-center gap-2 md:gap-3">
+          <img src="/lto.svg" alt="LTO Logo" className="h-6 w-6 md:h-8 md:w-8" />
+          <span className="text-white text-base md:text-lg font-semibold">LTO SYSTEM</span>
         </div>
       </div>
       
@@ -23,13 +23,13 @@ const LoginPage = () => {
       </div>
       
       {/* Login Form Container */}
-      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-4rem)] p-6">
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-3.5rem)] md:min-h-[calc(100vh-4rem)] p-4 md:p-6">
         <LoginForm />
       </div>
       
       {/* MID Logo in bottom right */}
-      <div className="absolute bottom-6 right-6 z-10">
-        <img src={ltoMidLogo} alt="MID Logo" className="h-16 w-auto object-contain opacity-70" />
+      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-10">
+        <img src={ltoMidLogo} alt="MID Logo" className="h-12 w-auto md:h-16 object-contain opacity-70" />
       </div>
     </div>
   )

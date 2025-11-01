@@ -6,7 +6,9 @@ import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.j
 
 export const getAccidents = async (req, res) => {
   try {
-    const accidents = await AccidentModel.find();
+    const accidents = await AccidentModel.find()
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName');
 
     res.json({ success: true, data: accidents });
   } catch (error) {
@@ -29,11 +31,19 @@ export const createAccident = async (req, res) => {
     // Create accident with plateNo directly
     const accidentData = {
       ...req.body,
-      accident_id: finalAccidentId
+      accident_id: finalAccidentId,
+      createdBy: req.user ? req.user.userId : null,
+      updatedBy: null // Only set when actually updated
     };
 
     const accident = new AccidentModel(accidentData);
     await accident.save();
+    
+    // Populate createdBy and updatedBy fields
+    await accident.populate([
+      { path: "createdBy", select: "firstName middleName lastName" },
+      { path: "updatedBy", select: "firstName middleName lastName" }
+    ]);
 
     // Log the activity
     if (req.user && req.user.userId) {
@@ -75,7 +85,9 @@ export const createAccident = async (req, res) => {
 
 export const getAccidentById = async (req, res) => {
   try {
-    const accident = await AccidentModel.findById(req.params.id);
+    const accident = await AccidentModel.findById(req.params.id)
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName');
     if (!accident) {
       return res
         .status(404)
@@ -90,12 +102,19 @@ export const getAccidentById = async (req, res) => {
 export const updateAccident = async (req, res) => {
   try {
     const updateData = { ...req.body };
+    
+    // Set updatedBy if user is authenticated
+    if (req.user && req.user.userId) {
+      updateData.updatedBy = req.user.userId;
+    }
 
     const accident = await AccidentModel.findByIdAndUpdate(
       req.params.id,
-      { ...updateData, time_edited: Date.now() },
+      updateData,
       { new: true }
-    );
+    )
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName');
     if (!accident) {
       return res
         .status(404)

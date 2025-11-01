@@ -39,6 +39,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "../ui/button";
 import { DataTableViewOptions } from "../table/DataTableViewOptions";
 import { DataTablePagination } from "../table/DataTablePagination";
+import VehicleExportModal from "../vehicle/VehicleExportModal";
 
 const VehiclesTable = ({
   title,
@@ -133,14 +134,15 @@ const VehiclesTable = ({
             <Plus />
             <span className="hidden lg:inline">{"Add Vehicle"}</span>
           </Button>
+          <VehicleExportModal />
           <DataTableViewOptions table={table} />
         </div>
       </div>
 
       <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242] min-h-0">
-        <div className="overflow-hidden h-full">
-          <div className="px-0">
-            <Table>
+        <div className="overflow-x-auto overflow-y-auto h-full">
+          <div className="px-0 min-w-full">
+            <Table className="min-w-full">
               <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:bg-[#18181B] border-b-2 border-gray-300 dark:border-[#424242]">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-[#18181B] dark:bg-[#18181B]">

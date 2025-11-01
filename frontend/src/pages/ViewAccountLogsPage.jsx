@@ -230,22 +230,23 @@ export default function ViewAccountLogsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="container mx-auto p-4 md:p-6 bg-white dark:bg-black min-h-screen rounded-lg">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         {/* Header */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <FileText className="h-6 w-6" />
-                <CardTitle>Account Logs</CardTitle>
+                <FileText className="h-5 w-5 md:h-6 md:w-6" />
+                <CardTitle className="text-lg md:text-xl">Account Logs</CardTitle>
               </div>
-              <div className="flex gap-2">
-                <Button onClick={exportLogs} variant="outline" size="sm">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Button onClick={exportLogs} variant="outline" size="sm" className="w-full sm:w-auto">
                   <Download className="mr-2 h-4 w-4" />
-                  Export Excel
+                  <span className="hidden sm:inline">Export Excel</span>
+                  <span className="sm:hidden">Export</span>
                 </Button>
-                <Button onClick={handleSearch} size="sm">
+                <Button onClick={handleSearch} size="sm" className="w-full sm:w-auto">
                   <Search className="mr-2 h-4 w-4" />
                   Search
                 </Button>
@@ -268,7 +269,7 @@ export default function ViewAccountLogsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
               <Input
                 placeholder="Search by email"
                 value={searchEmail}
@@ -386,20 +387,21 @@ export default function ViewAccountLogsPage() {
             ) : (
               <>
                 <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Performed By</TableHead>
-                        <TableHead>Timestamp</TableHead>
-                        <TableHead>User</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Activity</TableHead>
-                        <TableHead>Details</TableHead>
-                        <TableHead>IP Address</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="min-w-[120px]">Performed By</TableHead>
+                            <TableHead className="min-w-[150px]">Timestamp</TableHead>
+                            <TableHead className="min-w-[100px]">User</TableHead>
+                            <TableHead className="min-w-[150px]">Email</TableHead>
+                            <TableHead className="min-w-[80px]">Role</TableHead>
+                            <TableHead className="min-w-[100px]">Activity</TableHead>
+                            <TableHead className="min-w-[150px]">Details</TableHead>
+                            <TableHead className="min-w-[100px]">IP Address</TableHead>
+                            <TableHead className="min-w-[80px]">Status</TableHead>
+                          </TableRow>
+                        </TableHeader>
                     <TableBody>
                       {logs.map((log, index) => (
                         <TableRow key={index}>
@@ -457,7 +459,8 @@ export default function ViewAccountLogsPage() {
                         </TableRow>
                       ))}
                     </TableBody>
-                  </Table>
+                      </Table>
+                    </div>
                 </div>
 
                 {/* Pagination */}

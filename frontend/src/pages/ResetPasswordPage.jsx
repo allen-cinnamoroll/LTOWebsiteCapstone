@@ -93,23 +93,23 @@ export default function ResetPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 md:p-6">
         <div className="w-full max-w-md">
           {/* Logo and Title */}
-          <div className="text-center mb-8">
-            <img src={ltoLogo} alt="LTO Logo" className="h-20 w-20 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">LTO SYSTEM</h1>
-            <p className="text-sm text-gray-600">Land Transportation Management System</p>
+          <div className="text-center mb-6 md:mb-8">
+            <img src={ltoLogo} alt="LTO Logo" className="h-16 w-16 md:h-20 md:w-20 mx-auto mb-3 md:mb-4" />
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1e3a8a] mb-2">LTO SYSTEM</h1>
+            <p className="text-xs md:text-sm text-gray-600">Land Transportation Management System</p>
           </div>
 
           {/* Success Container */}
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 text-center">
             <div className="mb-6">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              <CheckCircle className="w-12 h-12 md:w-16 md:h-16 text-green-500 mx-auto mb-3 md:mb-4" />
+              <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                 Password Reset Successful!
               </h2>
-              <p className="text-gray-600">
+              <p className="text-sm md:text-base text-gray-600">
                 Your password has been successfully reset. You will be redirected to the login page shortly.
               </p>
             </div>
@@ -127,25 +127,25 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 md:p-6">
       <div className="w-full max-w-md">
         {/* Logo and Title */}
-        <div className="text-center mb-8">
-          <img src={ltoLogo} alt="LTO Logo" className="h-20 w-20 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-[#1e3a8a] mb-2">LTO SYSTEM</h1>
-          <p className="text-sm text-gray-600">Land Transportation Management System</p>
+        <div className="text-center mb-6 md:mb-8">
+          <img src={ltoLogo} alt="LTO Logo" className="h-16 w-16 md:h-20 md:w-20 mx-auto mb-3 md:mb-4" />
+          <h1 className="text-2xl md:text-3xl font-bold text-[#1e3a8a] mb-2">LTO SYSTEM</h1>
+          <p className="text-xs md:text-sm text-gray-600">Land Transportation Management System</p>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                     Reset Password
                   </h2>
-                  <p className="text-gray-600">
+                  <p className="text-sm md:text-base text-gray-600">
                     Enter your new password below.
                   </p>
                 </div>

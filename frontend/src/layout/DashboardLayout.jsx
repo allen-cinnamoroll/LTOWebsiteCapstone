@@ -65,6 +65,8 @@ const DashboardLayout = () => {
         return 'Violation Analytics';
       case '/analytics/accident':
         return 'Accident Analytics';
+      case '/account':
+        return 'Account';
       case '/account/register':
         return 'Register Account';
       case '/account/update':

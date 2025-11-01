@@ -10,7 +10,13 @@ userRouter.get("/profile", authenticate, findUser);
 // Get all users (admin and superadmin only)
 userRouter.get("/all", authenticate, authorizeRole("admin", "superadmin"), getAllUsers);
 
-// Get user by id (basic info)
+// Get user logs (admin and superadmin only) - MUST come before /:userId route
+userRouter.get("/logs", authenticate, authorizeRole("admin", "superadmin"), getUserLogs);
+
+// Export user logs to Excel (admin and superadmin only)
+userRouter.get("/logs/export", authenticate, authorizeRole("admin", "superadmin"), exportUserLogs);
+
+// Get user by id (basic info) - MUST come after /logs to avoid route conflicts
 userRouter.get("/:userId", authenticate, getUserById);
 
 // Update user (admin and superadmin only)
@@ -18,11 +24,5 @@ userRouter.put("/:userId", authenticate, authorizeRole("admin", "superadmin"), u
 
 // Delete user (admin and superadmin only)
 userRouter.delete("/:userId", authenticate, authorizeRole("admin", "superadmin"), deleteUser);
-
-// Get user logs (admin and superadmin only)
-userRouter.get("/logs", authenticate, authorizeRole("admin", "superadmin"), getUserLogs);
-
-// Export user logs to Excel (admin and superadmin only)
-userRouter.get("/logs/export", authenticate, authorizeRole("admin", "superadmin"), exportUserLogs);
 
 export default userRouter;

@@ -372,9 +372,31 @@ export const getChartData = async (req, res) => {
     // Get accident data (if AccidentModel exists)
     let accidentData = [];
     try {
+      // Build accident match stage - use accident_date instead of dateOfApprehension
+      let accidentMatchStage = {};
+      if (Object.keys(matchStage).length > 0 && matchStage.dateOfApprehension) {
+        accidentMatchStage = { 
+          accident_date: matchStage.dateOfApprehension 
+        };
+      }
+      
+      // Build accident group stage - use accident_date instead of dateOfApprehension
+      let accidentGroupStage = { ...groupStage };
+      if (accidentGroupStage._id.year) {
+        accidentGroupStage._id.year = { $year: "$accident_date" };
+      }
+      if (accidentGroupStage._id.month) {
+        accidentGroupStage._id.month = { $month: "$accident_date" };
+      }
+      if (accidentGroupStage._id.day) {
+        accidentGroupStage._id.day = { $dayOfMonth: "$accident_date" };
+      }
+      accidentGroupStage.violations = { $sum: 0 };
+      accidentGroupStage.accidents = { $sum: 1 };
+      
       const accidentPipeline = [
-        ...(Object.keys(matchStage).length > 0 ? [{ $match: matchStage }] : []),
-        { $group: { ...groupStage, violations: { $sum: 0 }, accidents: { $sum: 1 } } },
+        ...(Object.keys(accidentMatchStage).length > 0 ? [{ $match: accidentMatchStage }] : []),
+        { $group: accidentGroupStage },
         { $sort: sortStage }
       ];
       accidentData = await AccidentModel.aggregate(accidentPipeline);
@@ -1185,9 +1207,29 @@ export const getDriverChartData = async (req, res) => {
     // Get accident data for the specific driver (if AccidentModel exists)
     let accidentData = [];
     try {
+      // Build accident match stage - use accident_date instead of dateOfApprehension
+      let accidentMatchStage = { plateNo: { $in: driverPlates } };
+      if (matchStage.dateOfApprehension) {
+        accidentMatchStage.accident_date = matchStage.dateOfApprehension;
+      }
+      
+      // Build accident group stage - use accident_date instead of dateOfApprehension
+      let accidentGroupStage = { ...groupStage };
+      if (accidentGroupStage._id.year) {
+        accidentGroupStage._id.year = { $year: "$accident_date" };
+      }
+      if (accidentGroupStage._id.month) {
+        accidentGroupStage._id.month = { $month: "$accident_date" };
+      }
+      if (accidentGroupStage._id.day) {
+        accidentGroupStage._id.day = { $dayOfMonth: "$accident_date" };
+      }
+      accidentGroupStage.violations = { $sum: 0 };
+      accidentGroupStage.accidents = { $sum: 1 };
+      
       const accidentPipeline = [
-        { $match: matchStage },
-        { $group: { ...groupStage, violations: { $sum: 0 }, accidents: { $sum: 1 } } },
+        { $match: accidentMatchStage },
+        { $group: accidentGroupStage },
         { $sort: sortStage }
       ];
       accidentData = await AccidentModel.aggregate(accidentPipeline);
