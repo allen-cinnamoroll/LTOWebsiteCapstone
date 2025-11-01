@@ -46,19 +46,22 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
             try {
               const { data } = await apiClient.get(`/user/${id}`, { headers: { Authorization: token } });
               const user = data?.data || {};
-              const fullName = user.fullname || `${user.firstName || ''} ${user.lastName || ''}`.trim() || id;
+              const fullName = user.fullname || `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() || id;
               return { id, name: fullName };
             } catch {
               return { id, name: id };
             }
           })
         );
-        const newMap = { ...userNameCache };
-        results.forEach(r => { if (r.status === 'fulfilled') newMap[r.value.id] = r.value.name; });
-        setUserNameCache(newMap);
+        setUserNameCache(prevCache => {
+          const newMap = { ...prevCache };
+          results.forEach(r => { if (r.status === 'fulfilled') newMap[r.value.id] = r.value.name; });
+          return newMap;
+        });
       } catch {}
     })();
-  }, [open, driverData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, driverData, token]);
 
   const formatDisplayDate = (dateString) => {
     if (!dateString) return "Unknown";
@@ -233,7 +236,10 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                       {(() => {
                         const u = driverData?.createdBy;
                         if (!u) return 'Unknown';
-                        if (typeof u === 'object') return u.fullname || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown';
+                        if (typeof u === 'object') {
+                          const fullName = u.fullname || `${u.firstName || ''} ${u.middleName ? u.middleName + ' ' : ''}${u.lastName || ''}`.trim();
+                          return fullName || 'Unknown';
+                        }
                         return userNameCache[u] || u;
                       })()}
                         </span>
@@ -300,7 +306,10 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                       {(() => {
                         const u = driverData?.updatedBy;
                         if (!u) return 'Not yet updated';
-                        if (typeof u === 'object') return u.fullname || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Not yet updated';
+                        if (typeof u === 'object') {
+                          const fullName = u.fullname || `${u.firstName || ''} ${u.middleName ? u.middleName + ' ' : ''}${u.lastName || ''}`.trim();
+                          return fullName || 'Not yet updated';
+                        }
                         return userNameCache[u] || u;
                       })()}
                     </span>

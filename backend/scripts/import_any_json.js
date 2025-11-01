@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import DriverModel from '../model/DriverModel.js';
 import VehicleModel from '../model/VehicleModel.js';
+import UserModel from '../model/UserModel.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -107,6 +108,24 @@ const importAnyJson = async (jsonFilePath) => {
     const db = mongoose.connection.db;
     await fixDatabaseIndexes(db);
 
+    // Get Super Admin ID for default createdBy assignment
+    console.log('🔍 Finding Super Admin user for default createdBy...');
+    let superAdminId = null;
+    try {
+      const superadmin = await UserModel.findOne({ role: "0" }).select("_id");
+      if (superadmin) {
+        superAdminId = superadmin._id;
+        console.log(`✅ Found Super Admin: ${superAdminId}`);
+      } else {
+        console.warn('⚠️  No Super Admin found. Records will be created without createdBy.');
+      }
+    } catch (error) {
+      console.warn('⚠️  Error finding Super Admin:', error.message);
+    }
+    
+    // Get current date for default createdAt
+    const currentDate = new Date();
+
     // Check if file exists
     if (!fs.existsSync(jsonFilePath)) {
       console.error(`File not found: ${jsonFilePath}`);
@@ -162,8 +181,20 @@ const importAnyJson = async (jsonFilePath) => {
             }
           })(),
           isActive: true,
-          vehicleIds: [] // Will be populated after vehicles are imported
+          vehicleIds: [], // Will be populated after vehicles are imported
+          // Set default createdBy if not provided in JSON
+          createdBy: record.createdBy || superAdminId || null,
+          // Set default createdAt if not provided in JSON
+          createdAt: record.createdAt ? new Date(record.createdAt) : currentDate,
+          // Do NOT set updatedBy or updatedAt during import - leave them untouched
+          updatedBy: record.updatedBy || null,
+          updatedAt: record.updatedAt ? new Date(record.updatedAt) : undefined
         };
+        
+        // Remove updatedAt if it's undefined (to let Mongoose handle it via timestamps)
+        if (!record.updatedAt) {
+          delete driverData.updatedAt;
+        }
 
         // Create driver document with duplicate handling
         try {
@@ -231,26 +262,37 @@ const importAnyJson = async (jsonFilePath) => {
           color: record.color || '',
           classification: record.classification || '',
           dateOfRenewal: (() => {
-            const SUPERADMIN_ID = "67be680af8b3d2cab591c4a6"; // <--- set your real superadmin ObjectId here
             const val = record.dateOfRenewal;
             if (!val) return [];
             if (Array.isArray(val)) {
               return val.filter(d => d).map(d =>
-                (typeof d === 'object' && d.date) ? d : { date: d, processedBy: SUPERADMIN_ID }
+                (typeof d === 'object' && d.date) ? { ...d, processedBy: d.processedBy || superAdminId } : { date: d, processedBy: superAdminId }
               );
             }
             if (typeof val === 'string') {
-              return [{ date: val, processedBy: SUPERADMIN_ID }];
+              return [{ date: val, processedBy: superAdminId }];
             }
             if (typeof val === 'object' && val.date) {
-              return [val];
+              return [{ ...val, processedBy: val.processedBy || superAdminId }];
             }
             return [];
           })(),
           vehicleStatusType: "Old", // Default to Old as per schema
           status: "1", // Default to active
-          driverId: driverId
+          driverId: driverId,
+          // Set default createdBy if not provided in JSON
+          createdBy: record.createdBy || superAdminId || null,
+          // Set default createdAt if not provided in JSON
+          createdAt: record.createdAt ? new Date(record.createdAt) : currentDate,
+          // Do NOT set updatedBy or updatedAt during import - leave them untouched
+          updatedBy: record.updatedBy || null,
+          updatedAt: record.updatedAt ? new Date(record.updatedAt) : undefined
         };
+        
+        // Remove updatedAt if it's undefined (to let Mongoose handle it via timestamps)
+        if (!record.updatedAt) {
+          delete vehicleData.updatedAt;
+        }
 
         // Create vehicle document with duplicate handling
         try {

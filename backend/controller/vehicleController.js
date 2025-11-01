@@ -110,8 +110,12 @@ export const createVehicle = async (req, res) => {
     );
 
 
-    // Populate driver information
-    await vehicle.populate("driverId", "fullname ownerRepresentativeName");
+    // Populate driver and user information
+    await vehicle.populate([
+      { path: "driverId", select: "fullname ownerRepresentativeName" },
+      { path: "createdBy", select: "firstName middleName lastName" },
+      { path: "updatedBy", select: "firstName middleName lastName" }
+    ]);
 
     res.status(201).json({
       success: true,
@@ -232,10 +236,10 @@ export const findVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const vehicle = await VehicleModel.findById(id).populate(
-      "driverId",
-      "fullname ownerRepresentativeName contactNumber emailAddress address"
-    );
+    const vehicle = await VehicleModel.findById(id)
+      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName");
 
     if (!vehicle) {
       return res.status(404).json({
@@ -347,7 +351,10 @@ export const updateVehicle = async (req, res) => {
       id,
       updateDataWithUser,
       { new: true, runValidators: true }
-    ).populate("driverId", "fullname ownerRepresentativeName contactNumber");
+    )
+      .populate("driverId", "fullname ownerRepresentativeName contactNumber")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName");
 
     if (!vehicle) {
       return res.status(404).json({
@@ -430,7 +437,10 @@ export const updateVehicleStatus = async (req, res) => {
         updatedBy: userId
       },
       { new: true }
-    ).populate("driverId", "fullname ownerRepresentativeName");
+    )
+      .populate("driverId", "fullname ownerRepresentativeName")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName");
 
     if (!vehicle) {
       return res.status(404).json({
@@ -499,10 +509,10 @@ export const getVehicleOwnerByPlate = async (req, res) => {
   try {
     const { plateNo } = req.params;
 
-    const vehicle = await VehicleModel.findOne({ plateNo }).populate(
-      "driverId",
-      "fullname ownerRepresentativeName contactNumber emailAddress address"
-    );
+    const vehicle = await VehicleModel.findOne({ plateNo })
+      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName");
 
     if (!vehicle) {
       return res.status(404).json({
@@ -541,10 +551,10 @@ export const getVehicleByFileNumber = async (req, res) => {
   try {
     const { fileNo } = req.params;
 
-    const vehicle = await VehicleModel.findOne({ fileNo }).populate(
-      "driverId",
-      "fullname ownerRepresentativeName contactNumber emailAddress address"
-    );
+    const vehicle = await VehicleModel.findOne({ fileNo })
+      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName");
 
     if (!vehicle) {
       return res.status(404).json({

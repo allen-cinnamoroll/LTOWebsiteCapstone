@@ -67,6 +67,12 @@ export const createDriver = async (req, res) => {
     
     const newDriver = await DriverModel.create(userTrackingData);
 
+    // Populate driver and user information
+    await newDriver.populate([
+      { path: "createdBy", select: "firstName middleName lastName" },
+      { path: "updatedBy", select: "firstName middleName lastName" }
+    ]);
+
     // Log the activity
     if (req.user) {
       // Fetch full user details from database since JWT only contains userId, role, email
@@ -108,8 +114,8 @@ export const getDrivers = async (req, res) => {
     const drivers = await DriverModel.find()
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
-      .populate('createdBy', 'firstName lastName')
-      .populate('updatedBy', 'firstName lastName')
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName')
       .sort({createdAt:-1})
 
     // Return drivers with their vehicle information and user tracking
@@ -148,8 +154,10 @@ export const findDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
     const driver = await DriverModel.findById(driverId)
-      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds")
-      .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal');
+      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
+      .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal')
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName');
 
     if (!driver) {
       return res.status(404).json({
@@ -205,7 +213,13 @@ export const updateDriver = async (req, res) => {
       updatedBy: userId
     };
     
-    const driver = await DriverModel.findByIdAndUpdate(driverId, updateDataWithUser);
+    const driver = await DriverModel.findByIdAndUpdate(
+      driverId, 
+      updateDataWithUser,
+      { new: true, runValidators: true }
+    )
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName');
 
     if (!driver) {
       return res.status(404).json({

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import DriverModel from '../model/DriverModel.js';
 import VehicleModel from '../model/VehicleModel.js';
+import UserModel from '../model/UserModel.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -107,6 +108,24 @@ const importRestructuredData = async (customDriversFile = null, customVehiclesFi
     const db = mongoose.connection.db;
     await fixDatabaseIndexes(db);
 
+    // Get Super Admin ID for default createdBy assignment
+    console.log('🔍 Finding Super Admin user for default createdBy...');
+    let superAdminId = null;
+    try {
+      const superadmin = await UserModel.findOne({ role: "0" }).select("_id");
+      if (superadmin) {
+        superAdminId = superadmin._id;
+        console.log(`✅ Found Super Admin: ${superAdminId}`);
+      } else {
+        console.warn('⚠️  No Super Admin found. Records will be created without createdBy.');
+      }
+    } catch (error) {
+      console.warn('⚠️  Error finding Super Admin:', error.message);
+    }
+    
+    // Get current date for default createdAt
+    const currentDate = new Date();
+
     // Read the JSON files - use custom paths if provided, otherwise use default restructured paths
     const driversFilePath = customDriversFile || path.join(process.cwd(), 'json', 'restructured', 'drivers_collection.json');
     const vehiclesFilePath = customVehiclesFile || path.join(process.cwd(), 'json', 'restructured', 'vehicles_collection.json');
@@ -162,8 +181,20 @@ const importRestructuredData = async (customDriversFile = null, customVehiclesFi
              }
            })(),
            isActive: true,
-           vehicleIds: [] // Will be populated after vehicles are imported
+           vehicleIds: [], // Will be populated after vehicles are imported
+           // Set default createdBy if not provided in JSON
+           createdBy: driverRecord.createdBy || superAdminId || null,
+           // Set default createdAt if not provided in JSON
+           createdAt: driverRecord.createdAt ? new Date(driverRecord.createdAt) : currentDate,
+           // Do NOT set updatedBy or updatedAt during import - leave them untouched
+           updatedBy: driverRecord.updatedBy || null,
+           updatedAt: driverRecord.updatedAt ? new Date(driverRecord.updatedAt) : undefined
          };
+         
+         // Remove updatedAt if it's undefined (to let Mongoose handle it via timestamps)
+         if (!driverRecord.updatedAt) {
+           delete driverData.updatedAt;
+         }
 
         // Create driver document
         const driver = await DriverModel.create(driverData);
@@ -208,18 +239,37 @@ const importRestructuredData = async (customDriversFile = null, customVehiclesFi
            color: vehicleRecord.color || '',
            classification: vehicleRecord.classification || '',
            dateOfRenewal: (() => {
-             if (!vehicleRecord.dateOfRenewal) return null;
-             try {
-               const date = new Date(vehicleRecord.dateOfRenewal);
-               return isNaN(date.getTime()) ? null : date;
-             } catch (error) {
-               return null;
+             if (!vehicleRecord.dateOfRenewal) return [];
+             const val = vehicleRecord.dateOfRenewal;
+             if (Array.isArray(val)) {
+               return val.filter(d => d).map(d =>
+                 (typeof d === 'object' && d.date) ? { ...d, processedBy: d.processedBy || superAdminId } : { date: d, processedBy: superAdminId }
+               );
              }
+             if (typeof val === 'string') {
+               return [{ date: val, processedBy: superAdminId }];
+             }
+             if (typeof val === 'object' && val.date) {
+               return [{ ...val, processedBy: val.processedBy || superAdminId }];
+             }
+             return [];
            })(),
            vehicleStatusType: "Old", // Default to Old as per schema
            status: "1", // Default to active
-           driverId: driverId
+           driverId: driverId,
+           // Set default createdBy if not provided in JSON
+           createdBy: vehicleRecord.createdBy || superAdminId || null,
+           // Set default createdAt if not provided in JSON
+           createdAt: vehicleRecord.createdAt ? new Date(vehicleRecord.createdAt) : currentDate,
+           // Do NOT set updatedBy or updatedAt during import - leave them untouched
+           updatedBy: vehicleRecord.updatedBy || null,
+           updatedAt: vehicleRecord.updatedAt ? new Date(vehicleRecord.updatedAt) : undefined
          };
+         
+         // Remove updatedAt if it's undefined (to let Mongoose handle it via timestamps)
+         if (!vehicleRecord.updatedAt) {
+           delete vehicleData.updatedAt;
+         }
 
         // Create vehicle document
         const vehicle = await VehicleModel.create(vehicleData);

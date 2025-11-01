@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   LoaderCircle, 
   Calendar, 
   User, 
@@ -30,7 +30,9 @@ import {
   Palette,
   Tag,
   Shield,
-  Clock
+  Clock,
+  UserCheck,
+  Edit
 } from "lucide-react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
@@ -50,6 +52,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [userNameCache, setUserNameCache] = useState({});
   const { token } = useAuth();
 
   useEffect(() => {
@@ -65,6 +68,38 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       }
     }
   }, [open, vehicleData]);
+
+  // Prefetch names for createdBy / updatedBy
+  useEffect(() => {
+    if (!open || !vehicleData) return;
+    const ids = [vehicleData.createdBy, vehicleData.updatedBy]
+      .map(u => (typeof u === 'object' ? u?._id : u))
+      .filter(Boolean);
+    const unknownIds = ids.filter(id => !(id in userNameCache));
+    if (!unknownIds.length) return;
+    (async () => {
+      try {
+        const results = await Promise.allSettled(
+          unknownIds.map(async (id) => {
+            try {
+              const { data } = await apiClient.get(`/user/${id}`, { headers: { Authorization: token } });
+              const user = data?.data || {};
+              const fullName = user.fullname || `${user.firstName || ''} ${user.lastName || ''}`.trim() || id;
+              return { id, name: fullName };
+            } catch {
+              return { id, name: id };
+            }
+          })
+        );
+        setUserNameCache(prevCache => {
+          const newMap = { ...prevCache };
+          results.forEach(r => { if (r.status === 'fulfilled') newMap[r.value.id] = r.value.name; });
+          return newMap;
+        });
+      } catch {}
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, vehicleData, token]);
 
   const fetchOwnerData = async () => {
     if (!vehicleData?.driverId) return;
@@ -91,6 +126,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     setError("");
     setOwnerData(null);
     setConfirmOpen(false);
+    setErrorModalOpen(false);
+    setErrorMessage("");
     onOpenChange(false);
   };
 
@@ -208,6 +245,21 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       .join(", ");
   };
 
+  const buildFullName = (user) => {
+    if (!user) return '';
+    const full = user.fullname || `${user.firstName || ''} ${user.middleName || ''} ${user.lastName || ''}`.replace(/\s+/g, ' ').trim();
+    return full;
+  };
+
+  const formatDateDisplay = (dateString) => {
+    if (!dateString) return "Not set";
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch {
+      return String(dateString);
+    }
+  };
+
   if (!vehicleData) return null;
 
   return (
@@ -304,6 +356,47 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                       )}
                     </>
                   )}
+                  {/* Creator / Updater info */}
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm md:col-span-2">
+                    <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                      <UserCheck className="h-3 w-3" />
+                      Created By
+                    </label>
+                    <div className="ml-4 flex items-center gap-2 text-xs">
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        {(() => {
+                          const u = vehicleData?.createdBy;
+                          if (!u) return 'Unknown';
+                          if (typeof u === 'object') return buildFullName(u) || 'Unknown';
+                          return userNameCache[u] || u;
+                        })()}
+                      </span>
+                      <span className="text-gray-500 dark:text-gray-400">•</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {vehicleData?.createdAt ? formatDateDisplay(vehicleData.createdAt) : 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm md:col-span-2">
+                    <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                      <Edit className="h-3 w-3" />
+                      Last Updated By
+                    </label>
+                    <div className="ml-4 flex items-center gap-2 text-xs">
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        {(() => {
+                          const u = vehicleData?.updatedBy;
+                          if (!u) return 'Not yet updated';
+                          if (typeof u === 'object') return buildFullName(u) || 'Not yet updated';
+                          return userNameCache[u] || u;
+                        })()}
+                      </span>
+                      <span className="text-gray-500 dark:text-gray-400">•</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {vehicleData?.updatedAt && vehicleData?.updatedBy ? formatDateDisplay(vehicleData.updatedAt) : 'Not yet updated'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
