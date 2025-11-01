@@ -21,15 +21,6 @@ export const createVehicle = async (req, res) => {
       driverId,
     } = req.body;
 
-    // Check if plate number already exists
-    const existingVehicle = await VehicleModel.findOne({ plateNo });
-    if (existingVehicle) {
-      return res.status(400).json({
-        success: false,
-        message: "Vehicle with this plate number already exists",
-      });
-    }
-
     // Check if chassis number already exists (only if provided)
     if (serialChassisNumber && serialChassisNumber.trim() !== '') {
       const existingChassis = await VehicleModel.findOne({ serialChassisNumber });
