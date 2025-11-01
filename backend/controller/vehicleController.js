@@ -726,8 +726,19 @@ const convertToCSV = (vehicles) => {
       : "";
 
     // Extract driver/owner information
-    const driver = vehicle.driverId || {};
-    const address = driver.address || {};
+    // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
+    let driver = {};
+    let address = {};
+    
+    if (vehicle.driverId) {
+      // Check if driverId is populated by checking for ownerRepresentativeName property
+      if (typeof vehicle.driverId === 'object' && 
+          vehicle.driverId.ownerRepresentativeName !== undefined) {
+        // It's populated, use it directly
+        driver = vehicle.driverId;
+        address = vehicle.driverId.address || {};
+      }
+    }
 
     return [
       vehicle.fileNo || "",
@@ -806,13 +817,27 @@ export const exportVehicles = async (req, res) => {
     const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Fetch vehicles with filter and populate driver information
+    // Use lean() to get plain JavaScript objects for better performance
     const vehicles = await VehicleModel.find(dateFilter)
       .populate("driverId", "ownerRepresentativeName address driversLicenseNumber")
+      .lean()
       .sort({ plateNo: 1 });
 
     console.log(
       `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
     );
+
+    // Debug: Check first vehicle's driverId population
+    if (vehicles.length > 0) {
+      const firstVehicle = vehicles[0];
+      console.log('Sample vehicle driverId:', firstVehicle.driverId);
+      console.log('DriverId type:', typeof firstVehicle.driverId);
+      console.log('DriverId is object:', typeof firstVehicle.driverId === 'object');
+      if (firstVehicle.driverId && typeof firstVehicle.driverId === 'object') {
+        console.log('DriverId has ownerRepresentativeName:', firstVehicle.driverId.ownerRepresentativeName);
+        console.log('DriverId has address:', firstVehicle.driverId.address);
+      }
+    }
 
     // Format vehicles data according to required fields
     const exportData = vehicles.map((vehicle) => {
@@ -828,8 +853,26 @@ export const exportVehicles = async (req, res) => {
         : "";
 
       // Extract driver/owner information
-      const driver = vehicle.driverId || {};
-      const address = driver.address || {};
+      // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
+      // When using .lean(), populated objects are plain JavaScript objects
+      let driver = {};
+      let address = {};
+      
+      if (vehicle.driverId) {
+        // Check if driverId is populated by checking for ownerRepresentativeName property
+        // When populated, it will be an object with ownerRepresentativeName, address, etc.
+        // When not populated, it will be just an ObjectId (string or object with only _id)
+        if (typeof vehicle.driverId === 'object' && 
+            vehicle.driverId.ownerRepresentativeName !== undefined) {
+          // It's populated, use it directly
+          driver = vehicle.driverId;
+          address = vehicle.driverId.address || {};
+        } else {
+          // It's just an ObjectId, wasn't populated
+          // This shouldn't happen with our populate query, but log it for debugging
+          console.warn(`Driver not populated for vehicle ${vehicle.plateNo || vehicle._id}`);
+        }
+      }
 
       return {
         fileNo: vehicle.fileNo || "",
