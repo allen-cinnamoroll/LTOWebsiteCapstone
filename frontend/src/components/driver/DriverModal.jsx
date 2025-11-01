@@ -158,9 +158,9 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
           </div>
 
           {/* Content: non-scroll for Personal, scroll for Assigned Vehicles */}
-          <div className={`p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg m-4 mt-2 flex-1 min-h-[56vh] ${activeTab === 'vehicles' ? 'overflow-y-auto max-h-[50vh]' : 'overflow-visible'}`}>
-            {/* Tab Navigation */}
-            <div className="flex mb-4">
+          <div className="p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg m-4 mt-2 flex-1 min-h-0 flex flex-col">
+            {/* Tab Navigation - Sticky at top */}
+            <div className="flex mb-4 sticky top-0 z-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm pb-2 -mx-6 px-6 -mt-6 pt-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex-1 flex space-x-1 bg-white/80 p-1 rounded-lg border border-gray-200">
                 <button
                   onClick={() => setActiveTab("personal")}
@@ -173,7 +173,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                   <User className="h-3 w-3" />
                   <span>Personal Information</span>
                 </button>
-                              <button
+                <button
                   onClick={() => setActiveTab("vehicles")}
                   className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium px-3 py-2 rounded-md transition-all duration-200 ${
                     activeTab === "vehicles"
@@ -183,9 +183,9 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                 >
                   <List className="h-3 w-3" />
                   <span>Assigned Vehicles</span>
-                              </button>
-                    </div>
-                  </div>
+                </button>
+              </div>
+            </div>
 
             {activeTab === "personal" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 flex-1">
@@ -343,33 +343,36 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
             )}
 
             {activeTab === "vehicles" && (
-              <div className="space-y-3 flex-1 overflow-y-auto max-h-[50vh] pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex items-center gap-2 mb-3">
                   <Car className="h-4 w-4 text-blue-600" />
                   <h3 className="text-sm font-semibold text-gray-800">Assigned Vehicles</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {driverData.vehicleIds && driverData.vehicleIds.length > 0 ? (
-                    driverData.vehicleIds.map((vehicle, index) => (
-                      <div key={index} className="bg-white p-2 rounded-lg border border-gray-200 hover:border-blue-300 shadow-sm">
-                        <div className="text-[10px] text-gray-500 uppercase tracking-wide flex items-center gap-1">
-                          <FileText className="h-3 w-3" /> File Number
+                {/* Scrollable vehicles container */}
+                <div className="flex-1 overflow-y-auto min-h-0 pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {driverData.vehicleIds && driverData.vehicleIds.length > 0 ? (
+                      driverData.vehicleIds.map((vehicle, index) => (
+                        <div key={index} className="bg-white p-2 rounded-lg border border-gray-200 hover:border-blue-300 shadow-sm">
+                          <div className="text-[10px] text-gray-500 uppercase tracking-wide flex items-center gap-1">
+                            <FileText className="h-3 w-3" /> File Number
+                          </div>
+                          <button
+                            onClick={() => handleFileNumberClick(vehicle.fileNo)}
+                            className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline break-all mt-0.5"
+                            title={`View vehicle details for ${vehicle.fileNo}`}
+                          >
+                            {vehicle.fileNo}
+                          </button>
+                          {vehicle.plateNo && (
+                            <div className="text-xs text-gray-500">Plate: {vehicle.plateNo}</div>
+                          )}
                         </div>
-                        <button
-                          onClick={() => handleFileNumberClick(vehicle.fileNo)}
-                          className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline break-all mt-0.5"
-                          title={`View vehicle details for ${vehicle.fileNo}`}
-                        >
-                          {vehicle.fileNo}
-                        </button>
-                        {vehicle.plateNo && (
-                          <div className="text-xs text-gray-500">Plate: {vehicle.plateNo}</div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-xs text-gray-500">No vehicles assigned.</div>
-                  )}
+                      ))
+                    ) : (
+                      <div className="text-xs text-gray-500">No vehicles assigned.</div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

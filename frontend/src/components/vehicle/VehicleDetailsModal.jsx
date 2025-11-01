@@ -387,18 +387,30 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             Last Updated By
           </label>
           <div className="ml-4 flex items-center gap-2 text-xs">
-            <span className="font-semibold text-gray-900 dark:text-gray-100">
-              {(() => {
-                const u = vehicleData?.updatedBy;
-                if (!u) return 'Not yet updated';
-                if (typeof u === 'object') return buildFullName(u) || 'Not yet updated';
-                return userNameCache[u] || u;
-              })()}
-            </span>
-            <span className="text-gray-500 dark:text-gray-400">•</span>
-            <span className="text-gray-500 dark:text-gray-400">
-              {vehicleData?.updatedAt && vehicleData?.updatedBy ? formatDate(vehicleData.updatedAt) : 'Not yet updated'}
-            </span>
+            {(() => {
+              const u = vehicleData?.updatedBy;
+              const hasUpdatedBy = u && (typeof u === 'object' ? buildFullName(u) : userNameCache[u] || u);
+              
+              if (!hasUpdatedBy) {
+                return <span className="font-semibold text-gray-900 dark:text-gray-100">Not yet updated</span>;
+              }
+              
+              return (
+                <>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    {typeof u === 'object' ? buildFullName(u) : userNameCache[u] || u}
+                  </span>
+                  {vehicleData?.updatedAt && (
+                    <>
+                      <span className="text-gray-500 dark:text-gray-400">•</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {formatDate(vehicleData.updatedAt)}
+                      </span>
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

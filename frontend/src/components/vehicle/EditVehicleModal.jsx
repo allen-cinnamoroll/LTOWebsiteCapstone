@@ -25,6 +25,8 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
   const [originalData, setOriginalData] = useState({});
   const [loading, setLoading] = useState(false);
   const [noChangesModalOpen, setNoChangesModalOpen] = useState(false);
+  const [confirmUpdateModalOpen, setConfirmUpdateModalOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState(null);
   const { token } = useAuth();
   const date = formatDate(Date.now());
 
@@ -170,20 +172,30 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
       return;
     }
 
+    // Store form data and show confirmation modal
+    setPendingFormData(formData);
+    setConfirmUpdateModalOpen(true);
+  };
+
+  const handleConfirmUpdate = async () => {
+    if (!pendingFormData) return;
+
+    setConfirmUpdateModalOpen(false);
     setIsSubmitting(true);
+    
     try {
       const content = {
-        plateNo: formData.plateNo,
-        fileNo: formData.fileNo,
-        engineNo: formData.engineNo,
-        serialChassisNumber: formData.chassisNo,
-        make: formData.make,
-        bodyType: formData.bodyType,
-        color: formData.color,
-        classification: formData.classification,
-        vehicleStatusType: formData.vehicleStatusType,
+        plateNo: pendingFormData.plateNo,
+        fileNo: pendingFormData.fileNo,
+        engineNo: pendingFormData.engineNo,
+        serialChassisNumber: pendingFormData.chassisNo,
+        make: pendingFormData.make,
+        bodyType: pendingFormData.bodyType,
+        color: pendingFormData.color,
+        classification: pendingFormData.classification,
+        vehicleStatusType: pendingFormData.vehicleStatusType,
         // Only include driverId if it's provided and different from original
-        ...(formData.driver && formData.driver !== originalData.driver && { driverId: formData.driver }),
+        ...(pendingFormData.driver && pendingFormData.driver !== originalData.driver && { driverId: pendingFormData.driver }),
       };
 
       const { data } = await apiClient.patch(`/vehicle/${vehicleId}`, content, {
@@ -210,7 +222,13 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
       });
     } finally {
       setIsSubmitting(false);
+      setPendingFormData(null);
     }
+  };
+
+  const handleCancelUpdate = () => {
+    setConfirmUpdateModalOpen(false);
+    setPendingFormData(null);
   };
 
   const handleOpenChange = (isOpen) => {
@@ -323,6 +341,108 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
         onContinue={handleNoChangesContinue}
         onCancel={handleNoChangesCancel}
       />
+
+      {/* Confirmation Modal */}
+      <Dialog open={confirmUpdateModalOpen} onOpenChange={setConfirmUpdateModalOpen}>
+        <DialogContent className="max-w-lg border border-gray-200">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Car className="h-5 w-5" />
+              Confirm Vehicle Update
+            </DialogTitle>
+            <DialogDescription>
+              Please review the updated vehicle information before submitting.
+            </DialogDescription>
+          </DialogHeader>
+
+          {pendingFormData && (
+            <div className="space-y-3">
+              <div>
+                <h4 className="font-semibold text-xs text-black mb-2 pl-3">Vehicle Details</h4>
+                <div className="bg-gray-50 rounded-md p-3">
+                  <div className="grid grid-cols-4 gap-2 text-xs">
+                    <div className="font-medium text-gray-600">Plate No:</div>
+                    <div className="col-span-3">{pendingFormData.plateNo}</div>
+                    
+                    <div className="font-medium text-gray-600">File No:</div>
+                    <div className="col-span-3">{pendingFormData.fileNo || 'Not provided'}</div>
+                    
+                    <div className="font-medium text-gray-600">Engine No:</div>
+                    <div className="col-span-3">{pendingFormData.engineNo || 'Not provided'}</div>
+                    
+                    <div className="font-medium text-gray-600">Chassis No:</div>
+                    <div className="col-span-3">{pendingFormData.chassisNo || 'Not provided'}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-xs text-black mb-2 pl-3">Vehicle Specifications</h4>
+                <div className="bg-gray-50 rounded-md p-3">
+                  <div className="grid grid-cols-4 gap-2 text-xs">
+                    <div className="font-medium text-gray-600">Make:</div>
+                    <div className="col-span-3">{pendingFormData.make}</div>
+                    
+                    <div className="font-medium text-gray-600">Body Type:</div>
+                    <div className="col-span-3">{pendingFormData.bodyType}</div>
+                    
+                    <div className="font-medium text-gray-600">Color:</div>
+                    <div className="col-span-3">{pendingFormData.color || 'Not provided'}</div>
+                    
+                    <div className="font-medium text-gray-600">Classification:</div>
+                    <div className="col-span-3">{pendingFormData.classification}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-xs text-black mb-2 pl-3">Renewal</h4>
+                <div className="bg-gray-50 rounded-md p-3">
+                  <div className="grid grid-cols-4 gap-2 text-xs">
+                    <div className="font-medium text-gray-600">Date of Renewal:</div>
+                    <div className="col-span-3">{pendingFormData.dateOfRenewal ? new Date(pendingFormData.dateOfRenewal).toLocaleDateString() : 'Not provided'}</div>
+                    
+                    <div className="font-medium text-gray-600">Vehicle Status:</div>
+                    <div className="col-span-3">{pendingFormData.vehicleStatusType || 'Not selected'}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-xs text-black mb-2 pl-3">Owner</h4>
+                <div className="bg-gray-50 rounded-md p-3">
+                  <div className="grid grid-cols-4 gap-2 text-xs">
+                    <div className="font-medium text-gray-600">Owner Name:</div>
+                    <div className="col-span-3">{pendingFormData.ownerName || vehicleData.ownerName || 'Not selected'}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex justify-end gap-3 pt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancelUpdate}
+              disabled={submitting}
+              className="min-w-[100px] bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmUpdate}
+              disabled={submitting}
+              className="flex items-center gap-2 min-w-[120px] bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white shadow-lg border border-blue-600 relative overflow-hidden"
+            >
+              {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
+              {submitting ? "Updating..." : "Confirm & Update Vehicle"}
+              {/* Page fold detail */}
+              <div className="absolute top-0 right-0 w-4 h-4 bg-gradient-to-br from-blue-300 to-blue-500 transform rotate-45 translate-x-2 -translate-y-2 opacity-60"></div>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
