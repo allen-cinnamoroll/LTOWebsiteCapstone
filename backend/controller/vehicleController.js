@@ -714,43 +714,52 @@ const convertToCSV = (vehicles) => {
 
   // Create CSV rows
   const rows = vehicles.map((vehicle) => {
+    // Convert vehicle to plain object to ensure populated fields are accessible
+    const vehicleObj = vehicle.toObject ? vehicle.toObject() : vehicle;
+    
     // Get latest renewal date
-    const renewalDates = vehicle.dateOfRenewal || [];
+    const renewalDates = vehicleObj.dateOfRenewal || [];
     const latestRenewalDate =
       Array.isArray(renewalDates) && renewalDates.length > 0
         ? renewalDates[renewalDates.length - 1]?.date ||
           renewalDates[renewalDates.length - 1]
         : null;
-    const renewalDateStr = latestRenewalDate
-      ? new Date(latestRenewalDate).toISOString().split("T")[0]
-      : "";
+    // Format date as MM/dd/yyyy
+    let renewalDateStr = "";
+    if (latestRenewalDate) {
+      const date = new Date(latestRenewalDate);
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // MM (01-12)
+      const day = String(date.getDate()).padStart(2, '0'); // dd (01-31)
+      const year = date.getFullYear(); // yyyy
+      renewalDateStr = `${month}/${day}/${year}`;
+    }
 
     // Extract driver/owner information
     // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
     let driver = {};
     let address = {};
     
-    if (vehicle.driverId) {
+    if (vehicleObj.driverId) {
       // Check if driverId is populated by checking for ownerRepresentativeName property
-      if (typeof vehicle.driverId === 'object' && 
-          vehicle.driverId.ownerRepresentativeName !== undefined) {
+      if (typeof vehicleObj.driverId === 'object' && 
+          vehicleObj.driverId.ownerRepresentativeName !== undefined) {
         // It's populated, use it directly
-        driver = vehicle.driverId;
-        address = vehicle.driverId.address || {};
+        driver = vehicleObj.driverId;
+        address = vehicleObj.driverId.address || {};
       }
     }
 
     return [
-      vehicle.fileNo || "",
-      vehicle.plateNo || "",
-      vehicle.engineNo || "",
-      vehicle.serialChassisNumber || "",
-      vehicle.make || "",
-      vehicle.bodyType || "",
-      vehicle.color || "",
-      vehicle.classification || "",
+      vehicleObj.fileNo || "",
+      vehicleObj.plateNo || "",
+      vehicleObj.engineNo || "",
+      vehicleObj.serialChassisNumber || "",
+      vehicleObj.make || "",
+      vehicleObj.bodyType || "",
+      vehicleObj.color || "",
+      vehicleObj.classification || "",
       renewalDateStr,
-      vehicle.vehicleStatusType || "",
+      vehicleObj.vehicleStatusType || "",
       driver.ownerRepresentativeName || "",
       address.purok || "",
       address.barangay || "",
@@ -817,10 +826,9 @@ export const exportVehicles = async (req, res) => {
     const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Fetch vehicles with filter and populate driver information
-    // Use lean() to get plain JavaScript objects for better performance
+    // Populate driverId with all necessary owner fields
     const vehicles = await VehicleModel.find(dateFilter)
       .populate("driverId", "ownerRepresentativeName address driversLicenseNumber")
-      .lean()
       .sort({ plateNo: 1 });
 
     console.log(
@@ -830,61 +838,75 @@ export const exportVehicles = async (req, res) => {
     // Debug: Check first vehicle's driverId population
     if (vehicles.length > 0) {
       const firstVehicle = vehicles[0];
-      console.log('Sample vehicle driverId:', firstVehicle.driverId);
-      console.log('DriverId type:', typeof firstVehicle.driverId);
-      console.log('DriverId is object:', typeof firstVehicle.driverId === 'object');
-      if (firstVehicle.driverId && typeof firstVehicle.driverId === 'object') {
-        console.log('DriverId has ownerRepresentativeName:', firstVehicle.driverId.ownerRepresentativeName);
-        console.log('DriverId has address:', firstVehicle.driverId.address);
+      const firstVehicleObj = firstVehicle.toObject ? firstVehicle.toObject() : firstVehicle;
+      console.log('=== EXPORT DEBUG ===');
+      console.log('Sample vehicle plateNo:', firstVehicleObj.plateNo);
+      console.log('Sample vehicle driverId:', JSON.stringify(firstVehicleObj.driverId, null, 2));
+      console.log('DriverId type:', typeof firstVehicleObj.driverId);
+      console.log('DriverId is object:', typeof firstVehicleObj.driverId === 'object');
+      if (firstVehicleObj.driverId && typeof firstVehicleObj.driverId === 'object') {
+        console.log('DriverId has ownerRepresentativeName:', firstVehicleObj.driverId.ownerRepresentativeName);
+        console.log('DriverId has address:', JSON.stringify(firstVehicleObj.driverId.address, null, 2));
+        console.log('DriverId has driversLicenseNumber:', firstVehicleObj.driverId.driversLicenseNumber);
+      } else {
+        console.log('WARNING: DriverId is not an object or missing ownerRepresentativeName');
       }
+      console.log('=== END EXPORT DEBUG ===');
     }
 
     // Format vehicles data according to required fields
     const exportData = vehicles.map((vehicle) => {
+      // Convert vehicle to plain object to ensure populated fields are accessible
+      const vehicleObj = vehicle.toObject ? vehicle.toObject() : vehicle;
+      
       // Get latest renewal date
-      const renewalDates = vehicle.dateOfRenewal || [];
+      const renewalDates = vehicleObj.dateOfRenewal || [];
       const latestRenewalDate =
         Array.isArray(renewalDates) && renewalDates.length > 0
           ? renewalDates[renewalDates.length - 1]?.date ||
             renewalDates[renewalDates.length - 1]
           : null;
-      const renewalDateStr = latestRenewalDate
-        ? new Date(latestRenewalDate).toISOString().split("T")[0]
-        : "";
+      // Format date as MM/dd/yyyy
+      let renewalDateStr = "";
+      if (latestRenewalDate) {
+        const date = new Date(latestRenewalDate);
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // MM (01-12)
+        const day = String(date.getDate()).padStart(2, '0'); // dd (01-31)
+        const year = date.getFullYear(); // yyyy
+        renewalDateStr = `${month}/${day}/${year}`;
+      }
 
       // Extract driver/owner information
-      // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
-      // When using .lean(), populated objects are plain JavaScript objects
       let driver = {};
       let address = {};
       
-      if (vehicle.driverId) {
+      // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
+      if (vehicleObj.driverId) {
         // Check if driverId is populated by checking for ownerRepresentativeName property
         // When populated, it will be an object with ownerRepresentativeName, address, etc.
-        // When not populated, it will be just an ObjectId (string or object with only _id)
-        if (typeof vehicle.driverId === 'object' && 
-            vehicle.driverId.ownerRepresentativeName !== undefined) {
+        // When not populated, it will be just an ObjectId
+        if (typeof vehicleObj.driverId === 'object' && 
+            vehicleObj.driverId.ownerRepresentativeName !== undefined) {
           // It's populated, use it directly
-          driver = vehicle.driverId;
-          address = vehicle.driverId.address || {};
+          driver = vehicleObj.driverId;
+          address = vehicleObj.driverId.address || {};
         } else {
           // It's just an ObjectId, wasn't populated
-          // This shouldn't happen with our populate query, but log it for debugging
-          console.warn(`Driver not populated for vehicle ${vehicle.plateNo || vehicle._id}`);
+          console.warn(`Driver not populated for vehicle ${vehicleObj.plateNo || vehicleObj._id}. driverId:`, vehicleObj.driverId);
         }
       }
 
       return {
-        fileNo: vehicle.fileNo || "",
-        plateNo: vehicle.plateNo || "",
-        engineNo: vehicle.engineNo || "",
-        serialChassisNumber: vehicle.serialChassisNumber || "",
-        make: vehicle.make || "",
-        bodyType: vehicle.bodyType || "",
-        color: vehicle.color || "",
-        classification: vehicle.classification || "",
+        fileNo: vehicleObj.fileNo || "",
+        plateNo: vehicleObj.plateNo || "",
+        engineNo: vehicleObj.engineNo || "",
+        serialChassisNumber: vehicleObj.serialChassisNumber || "",
+        make: vehicleObj.make || "",
+        bodyType: vehicleObj.bodyType || "",
+        color: vehicleObj.color || "",
+        classification: vehicleObj.classification || "",
         dateOfRenewal: renewalDateStr,
-        vehicleStatusType: vehicle.vehicleStatusType || "",
+        vehicleStatusType: vehicleObj.vehicleStatusType || "",
         ownerRepresentativeName: driver.ownerRepresentativeName || "",
         address_purok: address.purok || "",
         address_barangay: address.barangay || "",
