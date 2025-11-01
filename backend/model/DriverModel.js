@@ -82,7 +82,10 @@ const driverSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true,
+    timestamps: {
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt'
+    },
     toJSON: { virtuals: true }, // Enable virtuals in JSON response
     toObject: { virtuals: true }, // Enable virtuals when using .toObject()
   }
@@ -101,6 +104,24 @@ driverSchema.pre("save", async function (next) {
     next();
   } catch (err) {
     // Do not block save on lookup failure; proceed without setting createdBy
+    next();
+  }
+});
+
+// Prevent updatedAt from being set on initial creation
+driverSchema.post("save", async function (doc, next) {
+  try {
+    // If updatedAt exists and equals createdAt (within 1 second margin), it means it was just created
+    if (doc.updatedAt && doc.createdAt) {
+      const timeDiff = Math.abs(doc.updatedAt.getTime() - doc.createdAt.getTime());
+      // If updatedAt equals createdAt (within 1 second), it's a new document - unset updatedAt
+      if (timeDiff < 1000 && !doc.updatedBy) {
+        await DriverModel.updateOne({ _id: doc._id }, { $unset: { updatedAt: "" } });
+        doc.updatedAt = undefined;
+      }
+    }
+    next();
+  } catch (err) {
     next();
   }
 });
