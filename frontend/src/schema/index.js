@@ -66,21 +66,15 @@ export const VehicleSchema = z.object({
   fileNo: z.string().min(1, {
     message: "File number is required",
   }),
-  engineNo: z.string().min(1, {
-    message: "Engine number is required",
-  }),
-  chassisNo: z.string().min(1, {
-    message: "Chassis number is required",
-  }),
+  engineNo: z.string().optional(),
+  chassisNo: z.string().optional(),
   make: z.string().min(1, {
     message: "Make is required",
   }),
   bodyType: z.string().min(1, {
     message: "Body type is required",
   }),
-  color: z.string().min(1, {
-    message: "Color is required",
-  }),
+  color: z.string().optional(),
   classification: z.string().min(1, {
     message: "Classification is required",
   }),
@@ -102,21 +96,15 @@ export const EditVehicleSchema = z.object({
   fileNo: z.string().min(1, {
     message: "File number is required",
   }),
-  engineNo: z.string().min(1, {
-    message: "Engine number is required",
-  }),
-  chassisNo: z.string().min(1, {
-    message: "Chassis number is required",
-  }),
+  engineNo: z.string().optional(),
+  chassisNo: z.string().optional(),
   make: z.string().min(1, {
     message: "Make is required",
   }),
   bodyType: z.string().min(1, {
     message: "Body type is required",
   }),
-  color: z.string().min(1, {
-    message: "Color is required",
-  }),
+  color: z.string().optional(),
   classification: z.string().min(1, {
     message: "Classification is required",
   }),

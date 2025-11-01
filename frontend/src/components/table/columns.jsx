@@ -130,16 +130,16 @@ export const deactivatedDriverColumns = (onAction) => [
       const hasLicense = row.getValue("hasDriversLicense");
       const licenseNumber = row.original.driversLicenseNumber;
       return (
-        <div className="">
+        <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
           {hasLicense ? (
-            <div>
-              <div className="font-semibold text-green-600">Yes</div>
+            <>
+              <span className="font-semibold text-green-600 whitespace-nowrap">Yes</span>
               {licenseNumber && (
-                <div className="text-xs text-muted-foreground">{licenseNumber}</div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{licenseNumber}</span>
               )}
-            </div>
+            </>
           ) : (
-            <div className="font-semibold text-red-600">No</div>
+            <span className="font-semibold text-red-600 whitespace-nowrap">No</span>
           )}
         </div>
       );
@@ -204,7 +204,7 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
   {
     accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title={"Owner"} />
+      <DataTableColumnHeader column={column} title={"Owner"} disableHide={true} />
     ),
     cell: ({ row }) => (
       <div className="font-medium text-gray-900 dark:text-gray-200 text-xs max-w-sm break-words whitespace-normal leading-tight">
@@ -215,7 +215,9 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
   },
   {
     accessorKey: "vehicleCount",
-    header: "No. of Vehicles",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title={"No. of Vehicles"} disableHide={true} />
+    ),
     cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs text-center">{row.getValue("vehicleCount") || 0}</div>,
     size: 80, // Set smaller width for No. of Vehicles column
   },
@@ -263,16 +265,16 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
       const hasLicense = row.getValue("hasDriversLicense");
       const licenseNumber = row.original.driversLicenseNumber;
       return (
-        <div className="">
+        <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
           {hasLicense ? (
-            <div>
-              <div className="font-semibold text-green-600 text-xs">Yes</div>
+            <>
+              <span className="font-semibold text-green-600 text-xs whitespace-nowrap">Yes</span>
               {licenseNumber && (
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{licenseNumber}</div>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{licenseNumber}</span>
               )}
-            </div>
+            </>
           ) : (
-            <div className="font-semibold text-red-600 text-xs">No</div>
+            <span className="font-semibold text-red-600 text-xs whitespace-nowrap">No</span>
           )}
         </div>
       );

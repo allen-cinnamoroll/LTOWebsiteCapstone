@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function DataTableColumnHeader({ column, title, className }) {
+export function DataTableColumnHeader({ column, title, className, disableHide = false }) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }
@@ -44,11 +44,15 @@ export function DataTableColumnHeader({ column, title, className }) {
             <ArrowDown className="h-3.5 w-3.5 text-muted-foreground/70" />
             Desc
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-            <EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
-            Hide
-          </DropdownMenuItem>
+          {!disableHide && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
+                <EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
+                Hide
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

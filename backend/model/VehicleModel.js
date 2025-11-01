@@ -46,12 +46,13 @@
       },
       engineNo: {
         type: String,
-        required: [true, "engineNo is required"],
+        required: false,
       },
       serialChassisNumber: {
         type: String,
-        required: [true, "serialChassisNumber is required"],
+        required: false,
         unique: true,
+        sparse: true, // Allow multiple null/undefined values with unique constraint
       },
       make: {
         type: String,

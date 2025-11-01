@@ -54,11 +54,11 @@ export const driverValidationRules = () => [
 export const vehicleRegistrationRules = () =>[
   body("plateNo").notEmpty().withMessage("plateNo is required"),
   body("fileNo").notEmpty().withMessage("fileNo is required"),
-  body("engineNo").notEmpty().withMessage("engineNo is required"),
-  body("serialChassisNumber").notEmpty().withMessage("serialChassisNumber is required"),
+  body("engineNo").optional(),
+  body("serialChassisNumber").optional(),
   body("make").notEmpty().withMessage("make is required"),
   body("bodyType").notEmpty().withMessage("bodyType is required"),
-  body("color").notEmpty().withMessage("color is required"),
+  body("color").optional(),
   body("classification").notEmpty().withMessage("classification is required"),
   body("dateOfRenewal").optional().custom((value) => {
     if (value && value !== '') {

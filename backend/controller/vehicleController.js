@@ -30,13 +30,15 @@ export const createVehicle = async (req, res) => {
       });
     }
 
-    // Check if chassis number already exists
-    const existingChassis = await VehicleModel.findOne({ serialChassisNumber });
-    if (existingChassis) {
-      return res.status(400).json({
-        success: false,
-        message: "Vehicle with this chassis number already exists",
-      });
+    // Check if chassis number already exists (only if provided)
+    if (serialChassisNumber && serialChassisNumber.trim() !== '') {
+      const existingChassis = await VehicleModel.findOne({ serialChassisNumber });
+      if (existingChassis) {
+        return res.status(400).json({
+          success: false,
+          message: "Vehicle with this chassis number already exists",
+        });
+      }
     }
 
     // Verify driver exists

@@ -20,7 +20,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LoaderCircle,
-  Plus,
   Search,
   Settings2,
   X,
@@ -55,7 +54,7 @@ const DriversTable = ({
   const [columnSizing, setColumnSizing] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 8, // 8 rows per page
+    pageSize: 9, // 9 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   // Define the columns where you want to apply the global filter
@@ -120,19 +119,12 @@ const DriversTable = ({
         </div>
 
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
-          <Button
-            onClick={onAdd}
-            className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}
-          >
-            <Plus />
-            <span className="hidden lg:inline">{"Add Driver"}</span>
-          </Button>
           <DataTableViewOptions table={table}/>
         </div>
       </div>
 
       <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-gray-600 min-h-0">
-        <div className="overflow-auto h-full">
+        <div className="overflow-auto h-full scrollbar-hide">
           <div className="px-0">
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b-2 border-gray-300 dark:border-gray-600">
