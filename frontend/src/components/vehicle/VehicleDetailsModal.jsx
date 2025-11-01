@@ -285,56 +285,56 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const VehicleInformationTab = () => (
     <div className="space-y-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Hash className="h-3 w-3" />
             Plate Number
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.plateNo || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <FileText className="h-3 w-3" />
             File Number
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.fileNo || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Wrench className="h-3 w-3" />
             Engine Number
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.engineNo || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Hash className="h-3 w-3" />
             Chassis Number
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.chassisNo || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Building className="h-3 w-3" />
             Make
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.make || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Car className="h-3 w-3" />
             Body Type
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.bodyType || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Palette className="h-3 w-3" />
             Color
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.color || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Tag className="h-3 w-3" />
             Classification
@@ -342,14 +342,14 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.classification || "N/A"}</p>
         </div>
         {/* Vehicle Status Type moved next to Status */}
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Clock className="h-3 w-3" />
             Vehicle Status Type
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.vehicleStatusType || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Shield className="h-3 w-3" />
             Status
@@ -361,7 +361,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       </div>
       {/* Creator / Updater info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <UserCheck className="h-3 w-3" />
             Created By
@@ -381,7 +381,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             </span>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Edit className="h-3 w-3" />
             Last Updated By
@@ -436,35 +436,35 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
 
     return (
       <div className="space-y-2">
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <User className="h-3 w-3" />
             Owner/Representative Name
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData?.ownerRepresentativeName || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Phone className="h-3 w-3" />
             Contact Number
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData?.contactNumber || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Mail className="h-3 w-3" />
             Email Address
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData?.emailAddress || "N/A"}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <CalendarIcon className="h-3 w-3" />
             Birth Date
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatBirthDate(ownerData?.birthDate)}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <CreditCard className="h-3 w-3" />
             Driver's License
@@ -489,7 +489,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           </div>
         </div>
         {ownerData?.address && (
-          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
             <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               Address
@@ -575,7 +575,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           </Button>
         </div>
         
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-h-[50vh] overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-[#424242] max-h-[50vh] overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
@@ -655,7 +655,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
         <div className="flex flex-col flex-1 min-h-0">
           {/* Fixed Tab Navigation */}
           <div className="flex-shrink-0 mb-3">
-            <div className="flex space-x-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+            <div className="flex space-x-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1 rounded-lg shadow-lg border border-gray-200 dark:border-[#424242]">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -678,7 +678,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           </div>
 
           {/* Scrollable Tab Content */}
-          <div className="flex-1 overflow-y-auto bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex-1 overflow-y-auto bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200 dark:border-[#424242]">
             {activeTab === "vehicle" && <VehicleInformationTab />}
             {activeTab === "owner" && <OwnerInformationTab />}
             {activeTab === "renewal" && <RenewalInformationTab />}

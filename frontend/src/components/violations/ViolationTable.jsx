@@ -109,7 +109,7 @@ const ViolationTable = ({
             placeholder={"Search Violation..."}
             value={globalFilter ?? ""}
             onChange={(event) => setGlobalFilter(event.target.value)}
-            className={"pl-10 pr-10 bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-gray-600"}
+            className={"pl-10 pr-10 bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-[#424242]"}
           />
           {globalFilter && (
             <button
@@ -124,7 +124,7 @@ const ViolationTable = ({
           {/* Violation Type Filter */}
           <div className="w-40">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="bg-white text-black border border-gray-300 dark:bg-black dark:text-white dark:border-gray-600 h-8 px-2 text-xs">
+              <SelectTrigger className="bg-white text-black border border-gray-300 dark:bg-black dark:text-white dark:border-[#424242] h-8 px-2 text-xs">
                 <div className="flex items-center gap-2">
                   {getTypeMeta(typeFilter).icon && getTypeMeta(typeFilter).icon}
                   <span className="hidden lg:inline">{getTypeMeta(typeFilter).label}</span>
@@ -143,20 +143,20 @@ const ViolationTable = ({
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"}>
+          <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
             <Plus />
             <span className="hidden lg:inline">{"Add Violation"}</span>
           </Button>
           <DataTableViewOptions table={table} />
         </div>
       </div>
-      <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-gray-600 min-h-0">
+      <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242] min-h-0">
         <div className="overflow-hidden h-full">
           <div className="px-0">
             <Table>
-              <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-b-2 border-gray-300 dark:border-gray-600">
+              <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:bg-[#18181B] border-b-2 border-gray-300 dark:border-[#424242]">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
+                  <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-[#18181B] dark:bg-[#18181B]">
                     {headerGroup.headers.map((header) => (
                       <TableHead key={header.id} className="text-xs font-semibold text-gray-800 dark:text-gray-200 px-3 py-2 whitespace-nowrap text-left">
                         {flexRender(

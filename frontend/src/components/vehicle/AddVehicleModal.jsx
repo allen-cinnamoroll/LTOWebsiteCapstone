@@ -197,7 +197,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
       
       {/* Confirmation Modal */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-        <DialogContent className="max-w-lg border border-gray-200">
+        <DialogContent className="max-w-lg border-0 dark:border-0 bg-white dark:bg-[#212121]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Car className="h-5 w-5" />
@@ -211,62 +211,62 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
         {confirmationData && (
           <div className="space-y-3">
             <div>
-              <h4 className="font-semibold text-xs text-black mb-2 pl-3">Vehicle Details</h4>
-              <div className="bg-gray-50 rounded-md p-3">
+              <h4 className="font-semibold text-xs text-black dark:text-white mb-2 pl-3">Vehicle Details</h4>
+              <div className="bg-gray-50 dark:bg-[#171717] rounded-md p-3 border border-gray-200 dark:border-[#424242]">
                 <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div className="font-medium text-gray-600">Plate No:</div>
-                  <div className="col-span-3">{confirmationData.plateNo}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Plate No:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.plateNo}</div>
                   
-                  <div className="font-medium text-gray-600">File No:</div>
-                  <div className="col-span-3">{confirmationData.fileNo || 'Not provided'}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">File No:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.fileNo || 'Not provided'}</div>
                   
-                  <div className="font-medium text-gray-600">Engine No:</div>
-                  <div className="col-span-3">{confirmationData.engineNo}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Engine No:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.engineNo}</div>
                   
-                  <div className="font-medium text-gray-600">Chassis No:</div>
-                  <div className="col-span-3">{confirmationData.chassisNo}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Chassis No:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.chassisNo}</div>
                 </div>
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold text-xs text-black mb-2 pl-3">Vehicle Specifications</h4>
-              <div className="bg-gray-50 rounded-md p-3">
+              <h4 className="font-semibold text-xs text-black dark:text-white mb-2 pl-3">Vehicle Specifications</h4>
+              <div className="bg-gray-50 dark:bg-[#171717] rounded-md p-3 border border-gray-200 dark:border-[#424242]">
                 <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div className="font-medium text-gray-600">Make:</div>
-                  <div className="col-span-3">{confirmationData.make}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Make:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.make}</div>
                   
-                  <div className="font-medium text-gray-600">Body Type:</div>
-                  <div className="col-span-3">{confirmationData.bodyType}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Body Type:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.bodyType}</div>
                   
-                  <div className="font-medium text-gray-600">Color:</div>
-                  <div className="col-span-3">{confirmationData.color}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Color:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.color}</div>
                   
-                  <div className="font-medium text-gray-600">Classification:</div>
-                  <div className="col-span-3">{confirmationData.classification}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Classification:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.classification}</div>
                 </div>
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold text-xs text-black mb-2 pl-3">Renewal</h4>
-              <div className="bg-gray-50 rounded-md p-3">
+              <h4 className="font-semibold text-xs text-black dark:text-white mb-2 pl-3">Renewal</h4>
+              <div className="bg-gray-50 dark:bg-[#171717] rounded-md p-3 border border-gray-200 dark:border-[#424242]">
                 <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div className="font-medium text-gray-600">Date of Renewal:</div>
-                  <div className="col-span-3">{confirmationData.dateOfRenewal ? new Date(confirmationData.dateOfRenewal).toLocaleDateString() : 'Not provided'}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Date of Renewal:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.dateOfRenewal ? new Date(confirmationData.dateOfRenewal).toLocaleDateString() : 'Not provided'}</div>
                   
-                  <div className="font-medium text-gray-600">Vehicle Status:</div>
-                  <div className="col-span-3">{confirmationData.vehicleStatusType || 'Not selected'}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Vehicle Status:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.vehicleStatusType || 'Not selected'}</div>
                 </div>
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold text-xs text-black mb-2 pl-3">Owner</h4>
-              <div className="bg-gray-50 rounded-md p-3">
+              <h4 className="font-semibold text-xs text-black dark:text-white mb-2 pl-3">Owner</h4>
+              <div className="bg-gray-50 dark:bg-[#171717] rounded-md p-3 border border-gray-200 dark:border-[#424242]">
                 <div className="grid grid-cols-4 gap-2 text-xs">
-                  <div className="font-medium text-gray-600">Owner Name:</div>
-                  <div className="col-span-3">{confirmationData.ownerName || 'Not selected'}</div>
+                  <div className="font-medium text-gray-600 dark:text-gray-400">Owner Name:</div>
+                  <div className="col-span-3 text-gray-900 dark:text-gray-100">{confirmationData.ownerName || 'Not selected'}</div>
                 </div>
               </div>
             </div>
@@ -283,7 +283,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
               form.clearErrors();
             }}
             disabled={submitting}
-            className="min-w-[100px] bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="min-w-[100px] bg-white dark:bg-[#212121] border-gray-300 dark:border-[#424242] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#171717]"
           >
             Cancel
           </Button>

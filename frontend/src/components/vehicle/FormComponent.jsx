@@ -268,7 +268,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         className={cn(
                           "text-black dark:text-white text-sm",
                           form.formState.errors.fileNo && "border-red-400",
-                          isEditMode && readOnlyFields.includes('fileNo') && "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
+                          isEditMode && readOnlyFields.includes('fileNo') && "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-[#424242]"
                         )}
                       />
                     </FormControl>
@@ -535,7 +535,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         <Input
                           value={field.value ? format(field.value, "PPP") : "Not set"}
                           readOnly
-                          className="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600 text-sm"
+                          className="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-[#424242] text-sm"
                         />
                       ) : (
                         <Popover>
@@ -612,7 +612,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                             }}
                             className={cn(
                               "pr-10 text-sm",
-                              isEditMode && !isOwnerEditable && "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
+                              isEditMode && !isOwnerEditable && "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-[#424242]"
                             )}
                             readOnly={isEditMode && !isOwnerEditable}
                           />
@@ -693,13 +693,13 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
 
                       {/* Selected Driver Display */}
                       {selectedDriver && !isOwnerEditable && (
-                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                        <div className="mt-2 p-2 bg-green-50 dark:bg-[#18181B] border border-green-200 dark:border-[#424242] rounded-md">
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="text-sm font-medium text-green-800">
-                                Selected: {selectedDriver.ownerRepresentativeName}
+                              <div className="text-sm font-medium text-green-800 dark:text-gray-200">
+                                Selected: <span className="dark:text-white dark:font-semibold">{selectedDriver.ownerRepresentativeName}</span>
                               </div>
-                              <div className="text-xs text-green-600">
+                              <div className="text-xs text-green-600 dark:text-gray-400">
                                 Current vehicles: {selectedDriver.plateNo || "None"}
                               </div>
                             </div>

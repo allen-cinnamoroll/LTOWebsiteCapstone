@@ -306,14 +306,14 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
                     <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                       <Hash className="h-3 w-3" />
                       Plate Number
                     </label>
                     <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData.plateNo}</p>
                   </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
                     <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                       <FileText className="h-3 w-3" />
                       File Number
@@ -322,14 +322,14 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                   </div>
                   {ownerData && (
                     <>
-                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
                         <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                           <User className="h-3 w-3" />
                           Owner Name
                         </label>
                         <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData.ownerRepresentativeName || "N/A"}</p>
                       </div>
-                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm md:col-start-2">
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm md:col-start-2">
                         <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                           <CalendarIcon className="h-3 w-3" />
                           Current Renewal Date
@@ -340,7 +340,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                         })()}</p>
                       </div>
                       {ownerData.address && (
-                        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm md:col-span-2">
+                        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm md:col-span-2">
                           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             Address
@@ -357,7 +357,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                     </>
                   )}
                   {/* Creator / Updater info */}
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm md:col-span-2">
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm md:col-span-2">
                     <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                       <UserCheck className="h-3 w-3" />
                       Created By
@@ -383,7 +383,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                       </span>
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm md:col-span-2">
+                  <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm md:col-span-2">
                     <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
                       <Edit className="h-3 w-3" />
                       Last Updated By
@@ -514,7 +514,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           <p className="text-gray-600 dark:text-gray-300"><span className="font-medium">Renewal Date:</span> {newRenewalDate ? new Date(newRenewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
         </div>
         <DialogFooter className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => setConfirmOpen(false)} className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">No</Button>
+          <Button variant="outline" onClick={() => setConfirmOpen(false)} className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-[#424242] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">No</Button>
           <Button onClick={async () => { setConfirmOpen(false); await handleUpdateRenewalDate(); }} className="min-w-[80px] bg-blue-600 hover:bg-blue-700 text-white">Yes</Button>
         </DialogFooter>
       </DialogContent>
@@ -537,7 +537,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           <Button 
             variant="outline" 
             onClick={() => setErrorModalOpen(false)} 
-            className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-[#424242] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             OK
           </Button>
