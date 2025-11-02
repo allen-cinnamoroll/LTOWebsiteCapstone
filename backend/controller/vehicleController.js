@@ -795,15 +795,17 @@ export const exportVehicles = async (req, res) => {
     // Fetch vehicles with filter and populate driver information
     // Populate driverId with all necessary owner fields
     // Note: driverId is an ObjectId that references the Drivers collection
+    // Use .lean() for performance, but we need to handle date conversion properly
     let vehicles = await VehicleModel.find(dateFilter)
       .populate({
         path: "driverId",
         select: "ownerRepresentativeName address driversLicenseNumber",
       })
+      .lean() // Use lean() for better performance - returns plain JS objects
       .sort({ plateNo: 1 });
     
-    // Convert to plain objects after populate to ensure populated fields are accessible
-    vehicles = vehicles.map(v => v.toObject ? v.toObject() : v);
+    // Note: With .lean(), dates are already converted to Date objects or ISO strings
+    // No need to call toObject() as lean() already returns plain objects
 
     console.log(
       `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
@@ -875,13 +877,15 @@ export const exportVehicles = async (req, res) => {
       const vehicleObj = vehicle;
       
       // Get latest renewal date from the array structure: [{date: Date, processedBy: ObjectId}]
+      // After toObject(), dates may be strings or Date objects
       const renewalDates = vehicleObj.dateOfRenewal || [];
       let latestRenewalDate = null;
       
       if (Array.isArray(renewalDates) && renewalDates.length > 0) {
         const latestEntry = renewalDates[renewalDates.length - 1];
-        // Extract date from object structure: {date: Date, processedBy: ObjectId}
-        if (latestEntry && typeof latestEntry === 'object' && latestEntry.date) {
+        // Extract date from object structure: {date: Date/String, processedBy: ObjectId/String}
+        // After toObject(), date might be a string like "2025-02-24T16:00:00.000Z"
+        if (latestEntry && typeof latestEntry === 'object' && latestEntry.date !== undefined) {
           latestRenewalDate = latestEntry.date;
         } else if (latestEntry) {
           // Fallback: if it's directly a date
@@ -899,22 +903,32 @@ export const exportVehicles = async (req, res) => {
           let isoString;
           
           // Get ISO string representation (always in UTC)
+          // After toObject(), latestRenewalDate might be a string like "2025-02-24T16:00:00.000Z"
           if (latestRenewalDate instanceof Date) {
+            // It's already a Date object
             date = latestRenewalDate;
             isoString = date.toISOString();
           } else if (typeof latestRenewalDate === 'string') {
-            // If it's already an ISO string, use it directly
-            if (latestRenewalDate.includes('T') && latestRenewalDate.includes('Z')) {
+            // It's a string - could be ISO string or other format
+            // Check if it's already an ISO string with timezone indicator
+            if (latestRenewalDate.includes('T') && (latestRenewalDate.includes('Z') || latestRenewalDate.includes('+'))) {
+              // Already ISO format, use directly
               isoString = latestRenewalDate;
               date = new Date(latestRenewalDate);
             } else {
-              // Try to parse it
+              // Not ISO format, try to parse it
               date = new Date(latestRenewalDate);
+              if (isNaN(date.getTime())) {
+                throw new Error(`Invalid date string: ${latestRenewalDate}`);
+              }
               isoString = date.toISOString();
             }
           } else {
-            // Convert to Date object first
+            // Other type (number, object), convert to Date
             date = new Date(latestRenewalDate);
+            if (isNaN(date.getTime())) {
+              throw new Error(`Invalid date value: ${latestRenewalDate}`);
+            }
             isoString = date.toISOString();
           }
           
@@ -939,14 +953,23 @@ export const exportVehicles = async (req, res) => {
               
               // Log the extraction for debugging (only for first few vehicles to avoid spam)
               if (exportData.length === 0 && vehicles.length <= 5) {
-                console.log(`[DATE EXTRACTION] Vehicle ${vehicleObj.plateNo}: ISO=${isoString}, Hour=${hour}, Extracted=${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
+                console.log(`[DATE EXTRACTION] Vehicle ${vehicleObj.plateNo}: ISO=${isoString}, Hour=${hour}, BeforeAdjust=${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
               }
               
-              // If the time is 8:00 AM UTC or later, it likely represents next day in UTC+8
-              // Threshold of 8 hours covers: 8 AM UTC = 4 PM UTC+8 (still same day)
-              // But 8 PM UTC = 4 AM next day UTC+8, so we add a day
-              // Actually, let's use 12:00 (noon) as threshold - anything noon or later UTC adds a day
-              if (hour >= 12) {
+              // ROOT CAUSE ANALYSIS:
+              // Dates are stored with afternoon UTC times (e.g., 16:00 = 4 PM UTC)
+              // In UTC+8 timezone (Philippines), these represent the NEXT day at midnight:
+              // - 2025-02-24T16:00:00Z (4 PM UTC) = 2025-02-25T00:00:00+08:00 (midnight Feb 25 in Philippines)
+              // Therefore, we must add 1 day to show the correct local date
+              //
+              // Threshold calculation for UTC+8:
+              // - 8:00 AM UTC = 4:00 PM UTC+8 (same calendar day)
+              // - 4:00 PM UTC = 12:00 AM UTC+8 (next calendar day) ✓
+              // Using hour >= 16 ensures we only adjust dates that are definitely next day
+              // But since all dates in investigation show hour 16, we'll use >= 16 for safety
+              const shouldAddDay = hour >= 16; // 4 PM UTC or later = definitely next day in UTC+8
+              
+              if (shouldAddDay) {
                 // Add one day using UTC to avoid timezone issues
                 const tempDate = new Date(Date.UTC(year, month - 1, day));
                 tempDate.setUTCDate(tempDate.getUTCDate() + 1);
@@ -955,7 +978,11 @@ export const exportVehicles = async (req, res) => {
                 day = tempDate.getUTCDate();
                 
                 if (exportData.length === 0 && vehicles.length <= 5) {
-                  console.log(`[DATE ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Added 1 day -> ${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`);
+                  console.log(`[DATE ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Hour=${hour} UTC >= 16, Added 1 day -> ${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`);
+                }
+              } else {
+                if (exportData.length === 0 && vehicles.length <= 5) {
+                  console.log(`[DATE NO ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Hour=${hour} UTC < 16, Using original date ${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
                 }
               }
               
