@@ -41,6 +41,14 @@ export const AuthProvider = ({ children }) => {
               // Token is not expired, use local validation for now
               // TODO: Add backend validation when the endpoint is available
               setToken(token);
+              
+              // Ensure avatar URL is properly constructed
+              if (userData && userData.avatar && !userData.avatar.startsWith('http')) {
+                const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+                const backendURL = baseURL.replace('/api', '');
+                userData.avatar = `${backendURL}/${userData.avatar}`;
+              }
+              
               setUserData(userData);
               setIsAuthenticated(true);
             }

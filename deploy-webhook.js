@@ -29,6 +29,10 @@ async function deploy() {
     console.log('📥 Pulling latest changes...');
     await execCommand('git pull origin main');
     
+    // Ensure uploads directory exists
+    console.log('📁 Creating uploads directory...');
+    await execCommand('cd backend && mkdir -p uploads/avatars && chmod -R 755 uploads');
+    
     // Install backend dependencies
     console.log('📦 Installing backend dependencies...');
     await execCommand('cd backend && npm install');

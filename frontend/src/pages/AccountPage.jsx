@@ -51,6 +51,9 @@ const AccountPage = () => {
 
     // Initialize edit data
     if (userData) {
+      console.log('AccountPage - Current userData.avatar:', userData.avatar);
+      console.log('AccountPage - Full userData:', userData);
+      
       setEditData({
         firstName: userData.firstName || '',
         middleName: userData.middleName || '',
@@ -105,20 +108,25 @@ const AccountPage = () => {
         const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
         const backendURL = baseURL.replace('/api', '');
 
+        const avatarURL = response.data.user.avatar
+          ? `${backendURL}/${response.data.user.avatar}`
+          : '';
+
+        console.log('Backend response avatar:', response.data.user.avatar);
+        console.log('Constructed avatar URL:', avatarURL);
+
         setUserData(prev => ({
           ...prev,
           ...response.data.user,
-          avatar: response.data.user.avatar
-            ? `${backendURL}/${response.data.user.avatar}`
-            : prev.avatar,
+          avatar: avatarURL || prev.avatar,
         }));
 
         const updatedUserData = {
           ...response.data.user,
-          avatar: response.data.user.avatar
-            ? `${backendURL}/${response.data.user.avatar}`
-            : '',
+          avatar: avatarURL,
         };
+        
+        console.log('Saving to localStorage:', updatedUserData);
         localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
         setIsEditModalOpen(false);
@@ -210,17 +218,14 @@ const AccountPage = () => {
                   <div className="relative">
                     <Avatar className="h-14 w-14">
                       <AvatarImage
-                        src={
-                          userData?.avatar?.startsWith('http')
-                            ? userData.avatar
-                            : (() => {
-                                const baseURL =
-                                  import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
-                                const backendURL = baseURL.replace('/api', '');
-                                return userData?.avatar ? `${backendURL}/${userData.avatar}` : '';
-                              })()
-                        }
+                        src={userData?.avatar || ''}
                         alt={userData?.email}
+                        onError={(e) => {
+                          console.error('Avatar image failed to load:', e.target.src);
+                        }}
+                        onLoad={() => {
+                          console.log('Avatar image loaded successfully:', userData?.avatar);
+                        }}
                       />
                       <AvatarFallback className="text-lg font-bold">
                         {(userData?.firstName || userData?.email)?.charAt(0)?.toUpperCase() || 'U'}
@@ -374,18 +379,14 @@ const AccountPage = () => {
                   <div className="relative">
                     <Avatar className="h-20 w-20">
                       <AvatarImage
-                        src={
-                          previewAvatar ||
-                          (userData?.avatar?.startsWith('http')
-                            ? userData.avatar
-                            : (() => {
-                                const baseURL =
-                                  import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
-                                const backendURL = baseURL.replace('/api', '');
-                                return userData?.avatar ? `${backendURL}/${userData.avatar}` : '';
-                              })())
-                        }
+                        src={previewAvatar || userData?.avatar || ''}
                         alt={editData.email || userData?.email}
+                        onError={(e) => {
+                          console.error('Avatar preview failed to load:', e.target.src);
+                        }}
+                        onLoad={() => {
+                          console.log('Avatar preview loaded:', previewAvatar || userData?.avatar);
+                        }}
                       />
                       <AvatarFallback className="text-lg font-bold">
                         {(editData.firstName ||
