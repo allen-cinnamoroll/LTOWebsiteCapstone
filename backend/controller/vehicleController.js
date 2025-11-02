@@ -844,13 +844,15 @@ export const exportVehicles = async (req, res) => {
           ? renewalDates[renewalDates.length - 1]?.date ||
             renewalDates[renewalDates.length - 1]
           : null;
-      // Format date as MM/dd/yyyy
+      // Format date as MM/dd/yyyy using UTC methods to avoid timezone shifts
+      // MongoDB stores dates in UTC, so we use UTC methods to get the exact date
       let renewalDateStr = "";
       if (latestRenewalDate) {
         const date = new Date(latestRenewalDate);
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // MM (01-12)
-        const day = String(date.getDate()).padStart(2, '0'); // dd (01-31)
-        const year = date.getFullYear(); // yyyy
+        // Use UTC methods to avoid timezone conversion issues
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // MM (01-12)
+        const day = String(date.getUTCDate()).padStart(2, '0'); // dd (01-31)
+        const year = date.getUTCFullYear(); // yyyy
         renewalDateStr = `${month}/${day}/${year}`;
       }
 
@@ -898,6 +900,25 @@ export const exportVehicles = async (req, res) => {
       };
     });
 
+    // Sort exportData by dateOfRenewal in ascending order (oldest to newest)
+    // Only apply sorting for CSV exports to keep chronological order
+    if (format === "csv") {
+      exportData.sort((a, b) => {
+        // Parse MM/dd/yyyy date strings for comparison
+        const parseDate = (dateStr) => {
+          if (!dateStr || dateStr === "") return new Date(0); // Treat empty dates as epoch
+          const [month, day, year] = dateStr.split('/').map(Number);
+          return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+        };
+
+        const dateA = parseDate(a.dateOfRenewal);
+        const dateB = parseDate(b.dateOfRenewal);
+
+        // Ascending order: oldest dates first
+        return dateA.getTime() - dateB.getTime();
+      });
+    }
+
     // Debug: Check if exportData contains owner information
     if (exportData.length > 0) {
       const sampleExport = exportData[0];
@@ -907,6 +928,10 @@ export const exportVehicles = async (req, res) => {
       console.log('Sample address_purok:', sampleExport.address_purok);
       console.log('Sample address_barangay:', sampleExport.address_barangay);
       console.log('Sample dateOfRenewal:', sampleExport.dateOfRenewal);
+      console.log('Total vehicles in export:', exportData.length);
+      if (format === "csv") {
+        console.log('CSV export sorted by dateOfRenewal (ascending)');
+      }
       console.log('=== END EXPORT DATA DEBUG ===');
     }
 
