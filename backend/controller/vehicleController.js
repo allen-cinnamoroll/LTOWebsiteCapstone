@@ -824,12 +824,34 @@ export const exportVehicles = async (req, res) => {
         console.log('Latest renewal entry:', JSON.stringify(latestEntry, null, 2));
         const latestDate = latestEntry?.date || latestEntry;
         if (latestDate) {
-          const date = latestDate instanceof Date ? latestDate : new Date(latestDate);
-          console.log('Parsed date ISO:', date.toISOString());
+          // Show raw value before any conversion
+          console.log('Raw latestDate type:', typeof latestDate);
+          console.log('Raw latestDate value:', latestDate);
+          console.log('Raw latestDate instanceof Date:', latestDate instanceof Date);
+          
+          // Get ISO string
+          let isoString;
+          if (latestDate instanceof Date) {
+            isoString = latestDate.toISOString();
+          } else if (typeof latestDate === 'string') {
+            isoString = latestDate.includes('Z') ? latestDate : new Date(latestDate).toISOString();
+          } else {
+            isoString = new Date(latestDate).toISOString();
+          }
+          
+          const date = new Date(isoString);
+          console.log('Parsed date ISO:', isoString);
+          console.log('ISO string extracted - Year:', isoString.substring(0, 4), 'Month:', isoString.substring(5, 7), 'Day:', isoString.substring(8, 10));
           console.log('UTC components - Year:', date.getUTCFullYear(), 'Month:', date.getUTCMonth() + 1, 'Day:', date.getUTCDate());
           console.log('Local components - Year:', date.getFullYear(), 'Month:', date.getMonth() + 1, 'Day:', date.getDate());
-          const formatted = `${String(date.getUTCMonth() + 1).padStart(2, '0')}/${String(date.getUTCDate()).padStart(2, '0')}/${date.getUTCFullYear()}`;
-          console.log('Formatted date (UTC):', formatted);
+          
+          // Extract directly from ISO string
+          const isoMatch = isoString.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+          if (isoMatch) {
+            console.log('Direct ISO extraction - Year:', isoMatch[1], 'Month:', isoMatch[2], 'Day:', isoMatch[3]);
+            const formatted = `${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`;
+            console.log('Formatted date (from ISO string):', formatted);
+          }
         }
       }
       
@@ -869,34 +891,57 @@ export const exportVehicles = async (req, res) => {
       
       // Format date as MM/dd/yyyy using UTC methods to avoid timezone shifts
       // MongoDB stores dates in UTC (ISO 8601 with +00:00), so we extract UTC components directly
-      // Example: 2025-02-11T00:00:00.000+00:00 should display as 02/11/2025 (not 02/10/2025)
+      // Extract date components directly from ISO string to avoid any timezone conversion
       let renewalDateStr = "";
       if (latestRenewalDate) {
-        // Ensure we have a Date object - handle both Date objects and ISO strings
-        let date;
-        if (latestRenewalDate instanceof Date) {
-          date = latestRenewalDate;
-        } else if (typeof latestRenewalDate === 'string' || typeof latestRenewalDate === 'number') {
-          // Parse ISO string or timestamp
-          date = new Date(latestRenewalDate);
-        } else {
-          // If it's already an object with date property, extract it
-          date = new Date(latestRenewalDate);
-        }
-        
-        // Validate the date is valid
-        if (isNaN(date.getTime())) {
-          console.warn(`Invalid date for vehicle ${vehicleObj.plateNo}:`, latestRenewalDate);
-          renewalDateStr = "";
-        } else {
-          // Use UTC methods to extract date components without timezone conversion
-          // This ensures we get the exact date as stored in UTC, regardless of server timezone
-          // Example: 2025-02-11T00:00:00Z → month=1 (Feb), day=11, year=2025 → "02/11/2025"
-          const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // MM (01-12)
-          const day = String(date.getUTCDate()).padStart(2, '0'); // dd (01-31)
-          const year = date.getUTCFullYear(); // yyyy
+        try {
+          let date;
+          let isoString;
           
-          renewalDateStr = `${month}/${day}/${year}`;
+          // Get ISO string representation (always in UTC)
+          if (latestRenewalDate instanceof Date) {
+            date = latestRenewalDate;
+            isoString = date.toISOString();
+          } else if (typeof latestRenewalDate === 'string') {
+            // If it's already an ISO string, use it directly
+            if (latestRenewalDate.includes('T') && latestRenewalDate.includes('Z')) {
+              isoString = latestRenewalDate;
+              date = new Date(latestRenewalDate);
+            } else {
+              // Try to parse it
+              date = new Date(latestRenewalDate);
+              isoString = date.toISOString();
+            }
+          } else {
+            // Convert to Date object first
+            date = new Date(latestRenewalDate);
+            isoString = date.toISOString();
+          }
+          
+          // Validate the date is valid
+          if (isNaN(date.getTime())) {
+            console.warn(`Invalid date for vehicle ${vehicleObj.plateNo}:`, latestRenewalDate);
+            renewalDateStr = "";
+          } else {
+            // Extract date components directly from ISO string (YYYY-MM-DDTHH:mm:ss.sssZ)
+            // Example: "2025-02-11T00:00:00.000Z" → year=2025, month=02, day=11
+            const isoMatch = isoString.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+            if (isoMatch) {
+              const year = isoMatch[1];
+              const month = isoMatch[2];
+              const day = isoMatch[3];
+              renewalDateStr = `${month}/${day}/${year}`;
+            } else {
+              // Fallback to UTC methods if ISO parsing fails
+              const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+              const day = String(date.getUTCDate()).padStart(2, '0');
+              const year = date.getUTCFullYear();
+              renewalDateStr = `${month}/${day}/${year}`;
+            }
+          }
+        } catch (error) {
+          console.warn(`Error formatting date for vehicle ${vehicleObj.plateNo}:`, error);
+          renewalDateStr = "";
         }
       }
 
