@@ -115,16 +115,17 @@ const AccountPage = () => {
         console.log('Backend response avatar:', response.data.user.avatar);
         console.log('Constructed avatar URL:', avatarURL);
 
-        setUserData(prev => ({
-          ...prev,
-          ...response.data.user,
-          avatar: avatarURL || prev.avatar,
-        }));
-
+        // Merge with existing userData to preserve all necessary fields
         const updatedUserData = {
-          ...response.data.user,
+          ...userData, // Keep existing data (userId, role, isPasswordChange, isOtpVerified, etc.)
+          firstName: response.data.user.firstName,
+          middleName: response.data.user.middleName,
+          lastName: response.data.user.lastName,
+          email: response.data.user.email,
           avatar: avatarURL,
         };
+
+        setUserData(updatedUserData);
         
         console.log('Saving to localStorage:', updatedUserData);
         localStorage.setItem('userData', JSON.stringify(updatedUserData));
