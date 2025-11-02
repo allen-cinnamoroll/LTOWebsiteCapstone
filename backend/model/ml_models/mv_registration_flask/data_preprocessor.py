@@ -94,17 +94,16 @@ class DataPreprocessor:
         weekly_data = weekly_data.set_index('week_start')
         weekly_data.index = pd.to_datetime(weekly_data.index)
         
-        # Resample to ensure weekly frequency (fill missing weeks with 0)
-        date_range = pd.date_range(
-            start=weekly_data.index.min(),
-            end=weekly_data.index.max(),
-            freq='W-SUN'
-        )
+        # For sparse data, only keep weeks with actual registrations
+        # Don't fill with zeros as it causes issues with SARIMA
+        weekly_data = weekly_data[weekly_data['count'] > 0].copy()
         
-        weekly_data = weekly_data.reindex(date_range, fill_value=0)
-        weekly_data['count'] = weekly_data['count'].fillna(0).astype(int)
+        # Sort by date to ensure proper time series order
+        weekly_data = weekly_data.sort_index()
         
-        print(f"After resampling: {len(weekly_data)} weeks")
+        print(f"After filtering zero weeks: {len(weekly_data)} weeks with registrations")
+        print(f"Weeks with data: {weekly_data['count'].sum()} total registrations")
+        print(f"Mean per week: {weekly_data['count'].mean():.1f}")
         
         return weekly_data[['count']]
     

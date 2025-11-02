@@ -59,6 +59,12 @@ class SARIMAModel:
         # This is a conservative approach suitable for limited data
         n_weeks = len(series)
         
+        # Check if series is constant (all same values or all zeros)
+        series_clean = series.dropna()
+        if len(series_clean) == 0 or series_clean.nunique() <= 1:
+            print(f"Warning: Series is constant or empty. Using default parameters.")
+            return (1, 1, 1, 1, 1, 1, 4)
+        
         if n_weeks < 20:
             print(f"Small dataset detected ({n_weeks} weeks). Using conservative parameters.")
             # Conservative parameters for small datasets
@@ -66,9 +72,19 @@ class SARIMAModel:
             P, D, Q, s = 1, 1, 1, 4  # Seasonal: 4-week cycle
             return (p, d, q, P, D, Q, s)
         
-        # Check stationarity
-        adf_result = adfuller(series.dropna())
-        is_stationary = adf_result[1] < 0.05
+        # Check stationarity - only if we have enough non-zero values
+        try:
+            non_zero_series = series_clean[series_clean != 0]
+            if len(non_zero_series) > 10:  # Need at least 10 non-zero values
+                adf_result = adfuller(non_zero_series)
+                is_stationary = adf_result[1] < 0.05
+            else:
+                # Too many zeros, assume non-stationary
+                is_stationary = False
+        except (ValueError, Exception) as e:
+            # If ADF test fails (e.g., constant data), assume non-stationary
+            print(f"ADF test failed: {str(e)}. Assuming non-stationary.")
+            is_stationary = False
         
         # Determine differencing order
         if is_stationary:
