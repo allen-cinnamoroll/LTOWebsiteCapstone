@@ -70,6 +70,8 @@ const ViolationPage = () => {
         apprehendingOfficer: vData.apprehendingOfficer || "N/A",
         createdAt: vData.createdAt,
         updatedAt: vData.updatedAt,
+        createdBy: vData.createdBy,
+        updatedBy: vData.updatedBy,
       }));
       setViolationData(violationData);
     } catch (error) {
