@@ -108,12 +108,13 @@ const AccountPage = () => {
         const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
         const backendURL = baseURL.replace('/api', '');
 
+        // Add cache-busting timestamp to force image reload
         const avatarURL = response.data.user.avatar
-          ? `${backendURL}/${response.data.user.avatar}`
+          ? `${backendURL}/${response.data.user.avatar}?t=${Date.now()}`
           : '';
 
         console.log('Backend response avatar:', response.data.user.avatar);
-        console.log('Constructed avatar URL:', avatarURL);
+        console.log('Constructed avatar URL with cache-busting:', avatarURL);
 
         // Merge with existing userData to preserve all necessary fields
         const updatedUserData = {
@@ -129,6 +130,9 @@ const AccountPage = () => {
         
         console.log('Saving to localStorage:', updatedUserData);
         localStorage.setItem('userData', JSON.stringify(updatedUserData));
+
+        // Update preview avatar to show the new image immediately
+        setPreviewAvatar(avatarURL);
 
         setIsEditModalOpen(false);
         toast.success('Profile updated successfully!', {
@@ -219,6 +223,7 @@ const AccountPage = () => {
                   <div className="relative">
                     <Avatar className="h-14 w-14" key={userData?.avatar || 'default'}>
                       <AvatarImage
+                        key={userData?.avatar || 'default-img'}
                         src={userData?.avatar || ''}
                         alt={userData?.email}
                         onError={(e) => {
@@ -380,6 +385,7 @@ const AccountPage = () => {
                   <div className="relative">
                     <Avatar className="h-20 w-20" key={previewAvatar || userData?.avatar || 'default'}>
                       <AvatarImage
+                        key={`preview-${previewAvatar || userData?.avatar || 'default-img'}`}
                         src={previewAvatar || userData?.avatar || ''}
                         alt={editData.email || userData?.email}
                         onError={(e) => {
