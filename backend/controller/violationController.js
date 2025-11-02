@@ -54,11 +54,30 @@ export const createViolation = async (req, res) => {
                 actorRole: req.user.role
             });
         }
+
+        // Populate and format the response
+        await savedViolation.populate([
+            { path: 'createdBy', select: 'firstName lastName' },
+            { path: 'updatedBy', select: 'firstName lastName' }
+        ]);
+
+        const v = savedViolation.toObject();
+        const formatted = {
+            ...v,
+            createdBy: v.createdBy ? {
+                _id: v.createdBy._id,
+                name: `${v.createdBy.firstName} ${v.createdBy.lastName}`.trim()
+            } : null,
+            updatedBy: v.updatedBy ? {
+                _id: v.updatedBy._id,
+                name: `${v.updatedBy.firstName} ${v.updatedBy.lastName}`.trim()
+            } : null,
+        };
         
         res.status(201).json({
             success: true,
             message: "Violation created successfully",
-            data: savedViolation
+            data: formatted
         });
     } catch (error) {
         console.log("=== BACKEND ERROR ===");
@@ -160,7 +179,9 @@ export const updateViolation = async (req, res) => {
             req.params.id,
             updateData,
             { new: true, runValidators: true }
-        );
+        )
+        .populate('createdBy', 'firstName lastName')
+        .populate('updatedBy', 'firstName lastName');
 
         if (!violation) {
             return res.status(404).json({ success: false, message: "Violation not found" });
@@ -185,10 +206,24 @@ export const updateViolation = async (req, res) => {
             });
         }
 
+        // Transform the response to include formatted createdBy/updatedBy
+        const v = violation.toObject();
+        const formatted = {
+            ...v,
+            createdBy: v.createdBy ? {
+                _id: v.createdBy._id,
+                name: `${v.createdBy.firstName} ${v.createdBy.lastName}`.trim()
+            } : null,
+            updatedBy: v.updatedBy ? {
+                _id: v.updatedBy._id,
+                name: `${v.updatedBy.firstName} ${v.updatedBy.lastName}`.trim()
+            } : null,
+        };
+
         res.status(200).json({
             success: true,
             message: "Violation updated successfully",
-            data: violation
+            data: formatted
         });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });

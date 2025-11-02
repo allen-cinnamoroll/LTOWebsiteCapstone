@@ -92,46 +92,37 @@ async function getSuperadminId() {
   return cachedSuperadminId;
 }
 
-// Ensure createdBy/updatedBy default to superadmin if missing on create
+// Ensure createdBy defaults to superadmin if missing on create
 ViolationSchema.pre("save", async function (next) {
   try {
     if (!this.createdBy) {
       const superadminId = await getSuperadminId();
       if (superadminId) this.createdBy = superadminId;
     }
-    // On create, set updatedBy to the same actor as createdBy when available
-    if (!this.updatedBy) {
-      if (this.createdBy) {
-        this.updatedBy = this.createdBy;
-      } else {
-        const superadminId = await getSuperadminId();
-        if (superadminId) this.updatedBy = superadminId;
-      }
-    }
     next();
   } catch (err) {
-    next(err);
+    // Do not block save on lookup failure; proceed without setting createdBy
+    next();
   }
 });
 
-// Ensure updatedBy defaults to superadmin on update operations if not provided
-ViolationSchema.pre("findOneAndUpdate", async function (next) {
+// Prevent updatedAt and updatedBy from being set on initial creation
+ViolationSchema.post("save", async function (doc, next) {
   try {
-    const update = this.getUpdate() || {};
-    // If updatedBy is not being explicitly set, default it to superadmin
-    if (update.updatedBy == null) {
-      const superadminId = await getSuperadminId();
-      if (superadminId) {
-        // Use $set to avoid overwriting entire document
-        this.setUpdate({
-          ...update,
-          $set: { ...(update.$set || {}), updatedBy: superadminId }
-        });
+    // If updatedAt exists and equals createdAt (within 1 second margin), it means it was just created
+    if (doc.updatedAt && doc.createdAt) {
+      const timeDiff = Math.abs(doc.updatedAt.getTime() - doc.createdAt.getTime());
+      // If updatedAt equals createdAt (within 1 second), it's a new document - unset updatedAt and updatedBy
+      if (timeDiff < 1000 && !doc.updatedBy) {
+        const Violation = mongoose.model("Violations");
+        await Violation.updateOne({ _id: doc._id }, { $unset: { updatedAt: "", updatedBy: "" } });
+        doc.updatedAt = undefined;
+        doc.updatedBy = undefined;
       }
     }
     next();
   } catch (err) {
-    next(err);
+    next();
   }
 });
 
