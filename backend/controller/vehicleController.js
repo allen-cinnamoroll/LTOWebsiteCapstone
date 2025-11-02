@@ -639,6 +639,7 @@ export const fixDriverVehicleRelationships = async (req, res) => {
  */
 const buildDateOfRenewalFilter = (month, year) => {
   // Build date range for the specified month/year
+  // MongoDB aggregation requires ISODate, so we create date objects in the pipeline
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
@@ -651,46 +652,46 @@ const buildDateOfRenewalFilter = (month, year) => {
               input: { $ifNull: ["$dateOfRenewal", []] },
               as: "renewal",
               cond: {
-                $and: [
-                  {
-                    $gte: [
-                      {
-                        $cond: {
-                          if: { $ne: ["$$renewal.date", null] },
-                          then: "$$renewal.date",
-                          else: "$$renewal",
-                        },
-                      },
-                      startDate,
-                    ],
+                $let: {
+                  vars: {
+                    // Extract the date value - handle both {date: Date} object and direct Date
+                    renewalDate: {
+                      $cond: {
+                        if: { $eq: [{ $type: "$$renewal" }, "object"] },
+                        then: "$$renewal.date", // If object, use .date property
+                        else: {
+                          $cond: {
+                            if: { $eq: [{ $type: "$$renewal" }, "date"] },
+                            then: "$$renewal", // If already a date, use it
+                            else: null
+                          }
+                        }
+                      }
+                    }
                   },
-                  {
-                    $lte: [
-                      {
-                        $cond: {
-                          if: { $ne: ["$$renewal.date", null] },
-                          then: "$$renewal.date",
-                          else: "$$renewal",
-                        },
-                      },
-                      endDate,
-                    ],
-                  },
-                ],
-              },
-            },
-          },
+                  in: {
+                    $and: [
+                      { $ne: ["$$renewalDate", null] },
+                      { $gte: ["$$renewalDate", startDate] },
+                      { $lte: ["$$renewalDate", endDate] }
+                    ]
+                  }
+                }
+              }
+            }
+          }
         },
-        0,
-      ],
-    },
+        0
+      ]
+    }
   };
 };
 
 /**
- * Convert array of vehicles to CSV format
+ * Convert array of export data (already processed) to CSV format
+ * @param {Array} exportData - Already processed vehicle data with driver info extracted
  */
-const convertToCSV = (vehicles) => {
+const convertToCSV = (exportData) => {
   // Define CSV headers
   const headers = [
     "fileNo",
@@ -712,61 +713,27 @@ const convertToCSV = (vehicles) => {
     "driverLicenseNumber",
   ];
 
-  // Create CSV rows
-  const rows = vehicles.map((vehicle) => {
-    // With lean(), vehicles are already plain objects
-    const vehicleObj = vehicle;
-    
-    // Get latest renewal date
-    const renewalDates = vehicleObj.dateOfRenewal || [];
-    const latestRenewalDate =
-      Array.isArray(renewalDates) && renewalDates.length > 0
-        ? renewalDates[renewalDates.length - 1]?.date ||
-          renewalDates[renewalDates.length - 1]
-        : null;
-    // Format date as MM/dd/yyyy
-    let renewalDateStr = "";
-    if (latestRenewalDate) {
-      const date = new Date(latestRenewalDate);
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // MM (01-12)
-      const day = String(date.getDate()).padStart(2, '0'); // dd (01-31)
-      const year = date.getFullYear(); // yyyy
-      renewalDateStr = `${month}/${day}/${year}`;
-    }
-
-    // Extract driver/owner information
-    // driverId will be populated as an object with ownerRepresentativeName, address, driversLicenseNumber
-    let driver = {};
-    let address = {};
-    
-    if (vehicleObj.driverId) {
-      // Check if driverId is populated by checking for ownerRepresentativeName property
-      if (typeof vehicleObj.driverId === 'object' && 
-          vehicleObj.driverId.ownerRepresentativeName !== undefined) {
-        // It's populated, use it directly
-        driver = vehicleObj.driverId;
-        address = vehicleObj.driverId.address || {};
-      }
-    }
-
+  // Create CSV rows from already-processed exportData
+  // exportData already has all fields extracted (including owner data)
+  const rows = exportData.map((vehicle) => {
     return [
-      vehicleObj.fileNo || "",
-      vehicleObj.plateNo || "",
-      vehicleObj.engineNo || "",
-      vehicleObj.serialChassisNumber || "",
-      vehicleObj.make || "",
-      vehicleObj.bodyType || "",
-      vehicleObj.color || "",
-      vehicleObj.classification || "",
-      renewalDateStr,
-      vehicleObj.vehicleStatusType || "",
-      driver.ownerRepresentativeName || "",
-      address.purok || "",
-      address.barangay || "",
-      address.municipality || "",
-      address.province || "",
-      address.region || "",
-      driver.driversLicenseNumber || "",
+      vehicle.fileNo || "",
+      vehicle.plateNo || "",
+      vehicle.engineNo || "",
+      vehicle.serialChassisNumber || "",
+      vehicle.make || "",
+      vehicle.bodyType || "",
+      vehicle.color || "",
+      vehicle.classification || "",
+      vehicle.dateOfRenewal || "",
+      vehicle.vehicleStatusType || "",
+      vehicle.ownerRepresentativeName || "",
+      vehicle.address_purok || "",
+      vehicle.address_barangay || "",
+      vehicle.address_municipality || "",
+      vehicle.address_province || "",
+      vehicle.address_region || "",
+      vehicle.driverLicenseNumber || "",
     ];
   });
 
@@ -930,6 +897,18 @@ export const exportVehicles = async (req, res) => {
         driverLicenseNumber: driver.driversLicenseNumber || "",
       };
     });
+
+    // Debug: Check if exportData contains owner information
+    if (exportData.length > 0) {
+      const sampleExport = exportData[0];
+      console.log('=== EXPORT DATA DEBUG ===');
+      console.log('Sample export data plateNo:', sampleExport.plateNo);
+      console.log('Sample ownerRepresentativeName:', sampleExport.ownerRepresentativeName);
+      console.log('Sample address_purok:', sampleExport.address_purok);
+      console.log('Sample address_barangay:', sampleExport.address_barangay);
+      console.log('Sample dateOfRenewal:', sampleExport.dateOfRenewal);
+      console.log('=== END EXPORT DATA DEBUG ===');
+    }
 
     // Convert to requested format and send
     // Set CORS headers explicitly for blob responses
