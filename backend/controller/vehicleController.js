@@ -809,17 +809,32 @@ export const exportVehicles = async (req, res) => {
       `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
     );
 
-    // Debug: Check first vehicle's driverId population
+    // Debug: Check first vehicle's driverId population and date extraction
     if (vehicles.length > 0) {
       const firstVehicle = vehicles[0];
       console.log('=== EXPORT DEBUG ===');
       console.log('Total vehicles found:', vehicles.length);
       console.log('Sample vehicle plateNo:', firstVehicle.plateNo);
+      
+      // Debug dateOfRenewal extraction
+      const renewalDates = firstVehicle.dateOfRenewal || [];
+      console.log('dateOfRenewal array:', JSON.stringify(renewalDates, null, 2));
+      if (Array.isArray(renewalDates) && renewalDates.length > 0) {
+        const latestEntry = renewalDates[renewalDates.length - 1];
+        console.log('Latest renewal entry:', JSON.stringify(latestEntry, null, 2));
+        const latestDate = latestEntry?.date || latestEntry;
+        if (latestDate) {
+          const date = latestDate instanceof Date ? latestDate : new Date(latestDate);
+          console.log('Parsed date ISO:', date.toISOString());
+          console.log('UTC components - Year:', date.getUTCFullYear(), 'Month:', date.getUTCMonth() + 1, 'Day:', date.getUTCDate());
+          console.log('Local components - Year:', date.getFullYear(), 'Month:', date.getMonth() + 1, 'Day:', date.getDate());
+          const formatted = `${String(date.getUTCMonth() + 1).padStart(2, '0')}/${String(date.getUTCDate()).padStart(2, '0')}/${date.getUTCFullYear()}`;
+          console.log('Formatted date (UTC):', formatted);
+        }
+      }
+      
       console.log('Sample vehicle driverId:', JSON.stringify(firstVehicle.driverId, null, 2));
       console.log('DriverId type:', typeof firstVehicle.driverId);
-      console.log('DriverId is object:', typeof firstVehicle.driverId === 'object');
-      console.log('DriverId is null:', firstVehicle.driverId === null);
-      console.log('DriverId is undefined:', firstVehicle.driverId === undefined);
       
       if (firstVehicle.driverId && typeof firstVehicle.driverId === 'object') {
         console.log('DriverId has ownerRepresentativeName:', firstVehicle.driverId.ownerRepresentativeName);
@@ -837,23 +852,52 @@ export const exportVehicles = async (req, res) => {
       // With lean(), vehicles are already plain objects
       const vehicleObj = vehicle;
       
-      // Get latest renewal date
+      // Get latest renewal date from the array structure: [{date: Date, processedBy: ObjectId}]
       const renewalDates = vehicleObj.dateOfRenewal || [];
-      const latestRenewalDate =
-        Array.isArray(renewalDates) && renewalDates.length > 0
-          ? renewalDates[renewalDates.length - 1]?.date ||
-            renewalDates[renewalDates.length - 1]
-          : null;
+      let latestRenewalDate = null;
+      
+      if (Array.isArray(renewalDates) && renewalDates.length > 0) {
+        const latestEntry = renewalDates[renewalDates.length - 1];
+        // Extract date from object structure: {date: Date, processedBy: ObjectId}
+        if (latestEntry && typeof latestEntry === 'object' && latestEntry.date) {
+          latestRenewalDate = latestEntry.date;
+        } else if (latestEntry) {
+          // Fallback: if it's directly a date
+          latestRenewalDate = latestEntry;
+        }
+      }
+      
       // Format date as MM/dd/yyyy using UTC methods to avoid timezone shifts
-      // MongoDB stores dates in UTC, so we use UTC methods to get the exact date
+      // MongoDB stores dates in UTC (ISO 8601 with +00:00), so we extract UTC components directly
+      // Example: 2025-02-11T00:00:00.000+00:00 should display as 02/11/2025 (not 02/10/2025)
       let renewalDateStr = "";
       if (latestRenewalDate) {
-        const date = new Date(latestRenewalDate);
-        // Use UTC methods to avoid timezone conversion issues
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // MM (01-12)
-        const day = String(date.getUTCDate()).padStart(2, '0'); // dd (01-31)
-        const year = date.getUTCFullYear(); // yyyy
-        renewalDateStr = `${month}/${day}/${year}`;
+        // Ensure we have a Date object - handle both Date objects and ISO strings
+        let date;
+        if (latestRenewalDate instanceof Date) {
+          date = latestRenewalDate;
+        } else if (typeof latestRenewalDate === 'string' || typeof latestRenewalDate === 'number') {
+          // Parse ISO string or timestamp
+          date = new Date(latestRenewalDate);
+        } else {
+          // If it's already an object with date property, extract it
+          date = new Date(latestRenewalDate);
+        }
+        
+        // Validate the date is valid
+        if (isNaN(date.getTime())) {
+          console.warn(`Invalid date for vehicle ${vehicleObj.plateNo}:`, latestRenewalDate);
+          renewalDateStr = "";
+        } else {
+          // Use UTC methods to extract date components without timezone conversion
+          // This ensures we get the exact date as stored in UTC, regardless of server timezone
+          // Example: 2025-02-11T00:00:00Z → month=1 (Feb), day=11, year=2025 → "02/11/2025"
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // MM (01-12)
+          const day = String(date.getUTCDate()).padStart(2, '0'); // dd (01-31)
+          const year = date.getUTCFullYear(); // yyyy
+          
+          renewalDateStr = `${month}/${day}/${year}`;
+        }
       }
 
       // Extract driver/owner information
