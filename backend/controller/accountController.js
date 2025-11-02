@@ -43,7 +43,7 @@ export const upload = multer({
   fileFilter: fileFilter
 });
 
-// Update user profile (including avatar)
+// Update user profile (name and email only, avatar handled separately)
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -76,20 +76,6 @@ export const updateProfile = async (req, res) => {
       updateData.email = email;
     }
 
-    // Handle avatar upload
-    if (req.file) {
-      // Delete old avatar if it exists
-      if (user.avatar && user.avatar !== '') {
-        const oldAvatarPath = path.join(process.cwd(), user.avatar);
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
-        }
-      }
-      
-      // Set new avatar path (relative to project root)
-      updateData.avatar = `uploads/avatars/${req.file.filename}`;
-    }
-
     // Update user data
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
@@ -107,7 +93,7 @@ export const updateProfile = async (req, res) => {
       ipAddress: getClientIP(req),
       userAgent: getUserAgent(req),
       status: "success",
-      details: `Profile updated successfully${req.file ? ' with new avatar' : ''}`,
+      details: "Profile updated successfully",
       actorId: updatedUser._id,
       actorName: `${updatedUser.firstName} ${updatedUser.middleName ? updatedUser.middleName + ' ' : ''}${updatedUser.lastName}`.trim(),
       actorEmail: updatedUser.email,
