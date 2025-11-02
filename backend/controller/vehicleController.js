@@ -872,19 +872,20 @@ export const exportVehicles = async (req, res) => {
     }
 
     // Format vehicles data according to required fields
-    const exportData = vehicles.map((vehicle) => {
+    // Track index for logging (only log first few vehicles)
+    const exportData = vehicles.map((vehicle, index) => {
       // With lean(), vehicles are already plain objects
       const vehicleObj = vehicle;
       
       // Get latest renewal date from the array structure: [{date: Date, processedBy: ObjectId}]
-      // After toObject(), dates may be strings or Date objects
+      // After lean(), dates may be strings or Date objects
       const renewalDates = vehicleObj.dateOfRenewal || [];
       let latestRenewalDate = null;
       
       if (Array.isArray(renewalDates) && renewalDates.length > 0) {
         const latestEntry = renewalDates[renewalDates.length - 1];
         // Extract date from object structure: {date: Date/String, processedBy: ObjectId/String}
-        // After toObject(), date might be a string like "2025-02-24T16:00:00.000Z"
+        // After lean(), date might be a string like "2025-02-24T16:00:00.000Z" or a Date object
         if (latestEntry && typeof latestEntry === 'object' && latestEntry.date !== undefined) {
           latestRenewalDate = latestEntry.date;
         } else if (latestEntry) {
@@ -952,7 +953,8 @@ export const exportVehicles = async (req, res) => {
               const hour = parseInt(isoMatch[4]);
               
               // Log the extraction for debugging (only for first few vehicles to avoid spam)
-              if (exportData.length === 0 && vehicles.length <= 5) {
+              const shouldLog = index < 5;
+              if (shouldLog) {
                 console.log(`[DATE EXTRACTION] Vehicle ${vehicleObj.plateNo}: ISO=${isoString}, Hour=${hour}, BeforeAdjust=${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
               }
               
@@ -977,11 +979,11 @@ export const exportVehicles = async (req, res) => {
                 month = tempDate.getUTCMonth() + 1;
                 day = tempDate.getUTCDate();
                 
-                if (exportData.length === 0 && vehicles.length <= 5) {
+                if (shouldLog) {
                   console.log(`[DATE ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Hour=${hour} UTC >= 16, Added 1 day -> ${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`);
                 }
               } else {
-                if (exportData.length === 0 && vehicles.length <= 5) {
+                if (shouldLog) {
                   console.log(`[DATE NO ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Hour=${hour} UTC < 16, Using original date ${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
                 }
               }
