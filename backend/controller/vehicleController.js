@@ -924,13 +924,42 @@ export const exportVehicles = async (req, res) => {
             renewalDateStr = "";
           } else {
             // Extract date components directly from ISO string (YYYY-MM-DDTHH:mm:ss.sssZ)
-            // Example: "2025-02-11T00:00:00.000Z" → year=2025, month=02, day=11
-            const isoMatch = isoString.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+            // INVESTIGATION: Dates stored with afternoon UTC times (like 16:00 = 4 PM UTC)
+            // likely represent the next day in local timezone (UTC+8 for Philippines)
+            // Example: 2025-02-10T16:00:00Z (4 PM UTC) = 2025-02-11T00:00:00+08:00 (midnight Feb 11 in Philippines)
+            // 
+            // Strategy: If hour >= 8 (8 AM UTC or later), it's likely the next day in UTC+8
+            // We add 1 day to match what users see in MongoDB UI (which may display in local timezone)
+            const isoMatch = isoString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
             if (isoMatch) {
-              const year = isoMatch[1];
-              const month = isoMatch[2];
-              const day = isoMatch[3];
-              renewalDateStr = `${month}/${day}/${year}`;
+              let year = parseInt(isoMatch[1]);
+              let month = parseInt(isoMatch[2]);
+              let day = parseInt(isoMatch[3]);
+              const hour = parseInt(isoMatch[4]);
+              
+              // Log the extraction for debugging (only for first few vehicles to avoid spam)
+              if (exportData.length === 0 && vehicles.length <= 5) {
+                console.log(`[DATE EXTRACTION] Vehicle ${vehicleObj.plateNo}: ISO=${isoString}, Hour=${hour}, Extracted=${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
+              }
+              
+              // If the time is 8:00 AM UTC or later, it likely represents next day in UTC+8
+              // Threshold of 8 hours covers: 8 AM UTC = 4 PM UTC+8 (still same day)
+              // But 8 PM UTC = 4 AM next day UTC+8, so we add a day
+              // Actually, let's use 12:00 (noon) as threshold - anything noon or later UTC adds a day
+              if (hour >= 12) {
+                // Add one day using UTC to avoid timezone issues
+                const tempDate = new Date(Date.UTC(year, month - 1, day));
+                tempDate.setUTCDate(tempDate.getUTCDate() + 1);
+                year = tempDate.getUTCFullYear();
+                month = tempDate.getUTCMonth() + 1;
+                day = tempDate.getUTCDate();
+                
+                if (exportData.length === 0 && vehicles.length <= 5) {
+                  console.log(`[DATE ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Added 1 day -> ${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`);
+                }
+              }
+              
+              renewalDateStr = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
             } else {
               // Fallback to UTC methods if ISO parsing fails
               const month = String(date.getUTCMonth() + 1).padStart(2, '0');
