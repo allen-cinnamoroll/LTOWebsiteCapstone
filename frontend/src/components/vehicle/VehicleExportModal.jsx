@@ -13,7 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Download, FileText, FileJson, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Download, FileText, FileJson, X, AlertCircle } from "lucide-react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -25,6 +32,7 @@ const VehicleExportModal = () => {
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [loading, setLoading] = useState(false);
+  const [noDataModalOpen, setNoDataModalOpen] = useState(false);
   const { token } = useAuth();
   const buttonRef = useRef(null);
 
@@ -55,6 +63,7 @@ const VehicleExportModal = () => {
       setFormat("");
       setYear("");
       setMonth("");
+      setNoDataModalOpen(false);
     }
   }, [open]);
 
@@ -97,8 +106,43 @@ const VehicleExportModal = () => {
         return;
       }
 
-      // Create a blob URL and trigger download
-      const blob = new Blob([response.data], {
+      // Check if response has no data by reading the response text
+      const responseText = await response.data.text();
+      let hasNoData = false;
+      
+      if (format === "json") {
+        // For JSON, check if it's an empty array
+        try {
+          const jsonData = JSON.parse(responseText);
+          if (Array.isArray(jsonData) && jsonData.length === 0) {
+            hasNoData = true;
+          }
+        } catch {
+          // If it's not valid JSON or empty, check if it's just whitespace/empty
+          if (responseText.trim() === "" || responseText.trim() === "[]") {
+            hasNoData = true;
+          }
+        }
+      } else {
+        // For CSV, check if it only has headers or is very small
+        // Remove BOM if present for checking (first character might be \ufeff)
+        const cleanText = responseText.replace(/^\ufeff/, '');
+        const lines = cleanText.split('\n').filter(line => line.trim() !== '');
+        // CSV with only header row means no data
+        if (lines.length <= 1) {
+          hasNoData = true;
+        }
+      }
+
+      if (hasNoData) {
+        setNoDataModalOpen(true);
+        setLoading(false);
+        return;
+      }
+
+      // Create a blob from the original response text (preserving BOM for CSV if present)
+      // The responseText already contains the BOM if the backend sent it
+      const blob = new Blob([responseText], {
         type:
           format === "csv"
             ? "text/csv;charset=utf-8;"
@@ -281,6 +325,34 @@ const VehicleExportModal = () => {
           </div>
         )}
       </PopoverContent>
+
+      {/* No Data Modal */}
+      <Dialog open={noDataModalOpen} onOpenChange={setNoDataModalOpen}>
+        <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              No Data Available
+            </DialogTitle>
+          </DialogHeader>
+          <div className="pt-2 pb-3">
+            <p className="text-gray-600 dark:text-gray-300">
+              No data yet for this selected date range.
+            </p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Please select a different month and year that contains vehicle data.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setNoDataModalOpen(false)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Popover>
   );
 };
