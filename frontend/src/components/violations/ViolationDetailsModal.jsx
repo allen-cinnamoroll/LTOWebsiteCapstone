@@ -184,7 +184,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
               <User className="h-3 w-3" />
               Created By
             </label>
-            <div className="ml-4 flex items-center gap-2 text-xs">
+            <div className="ml-4 flex items-center gap-2 text-[11px]">
               <span className="font-semibold text-gray-900 dark:text-gray-100">{violationData?.createdBy?.name || "Unknown"}</span>
               <span className="text-gray-500 dark:text-gray-400">•</span>
               <span className="text-gray-500 dark:text-gray-400">{formatDateTime(violationData?.createdAt)}</span>
@@ -195,7 +195,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
               <Edit className="h-3 w-3" />
               Updated By
             </label>
-            <div className="ml-4 flex items-center gap-2 text-xs">
+            <div className="ml-4 flex items-center gap-2 text-[11px]">
               {(() => {
                 const u = violationData?.updatedBy;
                 const hasUpdatedBy = u && u.name;
