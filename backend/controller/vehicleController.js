@@ -1097,13 +1097,14 @@ export const exportVehicles = async (req, res) => {
       );
       res.send("\ufeff" + csvContent); // Add BOM for Excel compatibility
     } else {
-      // JSON format
+      // JSON format - format with proper indentation (2 spaces) for readability
+      const jsonContent = JSON.stringify(exportData, null, 2);
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
         `attachment; filename=vehicles_${month}_${year}.json`
       );
-      res.json(exportData);
+      res.send(jsonContent);
     }
   } catch (error) {
     console.error("Error exporting vehicles:", error);
