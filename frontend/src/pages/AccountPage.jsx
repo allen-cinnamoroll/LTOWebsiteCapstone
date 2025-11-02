@@ -217,7 +217,7 @@ const AccountPage = () => {
               <CardContent className="space-y-4 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <Avatar className="h-14 w-14">
+                    <Avatar className="h-14 w-14" key={userData?.avatar || 'default'}>
                       <AvatarImage
                         src={userData?.avatar || ''}
                         alt={userData?.email}
@@ -378,7 +378,7 @@ const AccountPage = () => {
                 {/* Avatar Section */}
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <Avatar className="h-20 w-20">
+                    <Avatar className="h-20 w-20" key={previewAvatar || userData?.avatar || 'default'}>
                       <AvatarImage
                         src={previewAvatar || userData?.avatar || ''}
                         alt={editData.email || userData?.email}
