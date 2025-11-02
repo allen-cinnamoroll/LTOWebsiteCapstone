@@ -8,7 +8,6 @@ import authRoutes from "./auth.js";
 import logRoutes from "./logs.js";
 import dashboardRoutes from "./dashboard.js";
 import accountRoutes from "./account.js";
-import avatarRoutes from "./avatar.js";
 
 const router = express.Router();
 
@@ -20,7 +19,6 @@ router.use("/accident", accidentRoutes);
 router.use("/auth", authRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/account", accountRoutes);
-router.use("/avatar", avatarRoutes);
 //log routes for admin and driver
 router.use("/logs", logRoutes);
 
