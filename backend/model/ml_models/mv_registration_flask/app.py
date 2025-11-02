@@ -32,13 +32,20 @@ def initialize_model():
     try:
         # Get the directory paths
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        # Handle directory name with spaces - try both possible paths
-        data_dir = os.path.join(base_dir, '../../mv registration training')
+        # Handle directory name with spaces - the CSV is in a sibling directory
+        # mv_registration_flask and "mv registration training" are siblings in ml_models/
+        data_dir = os.path.join(base_dir, '../mv registration training')
         if not os.path.exists(data_dir):
             # Try alternative path without spaces (if renamed)
-            data_dir_alt = os.path.join(base_dir, '../../mv_registration_training')
+            data_dir_alt = os.path.join(base_dir, '../mv_registration_training')
             if os.path.exists(data_dir_alt):
                 data_dir = data_dir_alt
+            else:
+                # Try absolute path from project root
+                project_root = os.path.join(base_dir, '../../../..')
+                data_dir_abs = os.path.join(project_root, 'backend/model/ml_models/mv registration training')
+                if os.path.exists(data_dir_abs):
+                    data_dir = data_dir_abs
         
         model_dir = os.path.join(base_dir, '../trained')
         
