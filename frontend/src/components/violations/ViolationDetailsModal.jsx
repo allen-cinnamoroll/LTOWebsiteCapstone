@@ -177,30 +177,62 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
         </div>
 
         {/* Then Date of Apprehension and the rest */}
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            Date of Apprehension
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatDate(violationData?.dateOfApprehension)}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Shield className="h-3 w-3" />
-            Apprehending Officer
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{violationData?.apprehendingOfficer || "N/A"}</p>
-        </div>
-        {violationData?.licenseType && (
-          <div className="md:col-span-2 bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-              <CreditCard className="h-3 w-3" />
-              License Type
-            </label>
-            <div className="ml-4">
-              {getLicenseTypeBadge(violationData?.licenseType)}
+        {violationData?.violationType === "confiscated" ? (
+          /* For confiscated: Date, Officer, and License Type in one row */
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Date of Apprehension
+              </label>
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatDate(violationData?.dateOfApprehension)}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                <Shield className="h-3 w-3" />
+                Apprehending Officer
+              </label>
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{violationData?.apprehendingOfficer || "N/A"}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                <CreditCard className="h-3 w-3" />
+                License Type
+              </label>
+              <div className="ml-4">
+                {getLicenseTypeBadge(violationData?.licenseType)}
+              </div>
             </div>
           </div>
+        ) : (
+          /* For other types: Date and Officer in separate fields, License Type below if exists */
+          <>
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Date of Apprehension
+              </label>
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatDate(violationData?.dateOfApprehension)}</p>
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                <Shield className="h-3 w-3" />
+                Apprehending Officer
+              </label>
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{violationData?.apprehendingOfficer || "N/A"}</p>
+            </div>
+            {violationData?.licenseType && (
+              <div className="md:col-span-2 bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+                <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                  <CreditCard className="h-3 w-3" />
+                  License Type
+                </label>
+                <div className="ml-4">
+                  {getLicenseTypeBadge(violationData?.licenseType)}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Created/Updated metadata moved from footer */}
