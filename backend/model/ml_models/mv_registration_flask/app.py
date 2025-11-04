@@ -358,7 +358,16 @@ if __name__ == '__main__':
         print("Model initialized successfully!")
         print("Starting Flask server...")
         # Run on all interfaces, port 5000
-        app.run(host='0.0.0.0', port=5000, debug=False)
+        # Note: If port 5000 is in use, change to port 5001 or kill the process using port 5000
+        try:
+            app.run(host='0.0.0.0', port=5000, debug=False)
+        except OSError as e:
+            if "Address already in use" in str(e):
+                print("\n⚠️  Port 5000 is in use. Trying port 5001...")
+                print("To kill the process on port 5000, run: lsof -i :5000 && kill -9 <PID>")
+                app.run(host='0.0.0.0', port=5001, debug=False)
+            else:
+                raise
     else:
         print("Failed to initialize model. Please check the error messages above.")
         sys.exit(1)
