@@ -12,6 +12,7 @@ import os
 import sys
 from datetime import datetime
 import traceback
+from werkzeug.utils import secure_filename
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,7 +22,14 @@ from data_preprocessor import DataPreprocessor
 from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Enable CORS for all routes with more permissive settings
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Initialize models
 aggregated_model = None  # Main aggregated model (always used)
@@ -232,6 +240,93 @@ def get_model_accuracy():
             'success': False,
             'error': str(e),
             'traceback': traceback.format_exc()
+        }), 500
+
+@app.route('/api/upload-csv', methods=['POST'])
+def upload_csv():
+    """
+    Upload a CSV file to the training data directory
+    
+    Form Data:
+    - file: CSV file to upload
+    
+    Returns:
+    - success: Boolean indicating success
+    - message: Status message
+    - filename: Name of the saved file
+    """
+    try:
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        if not file.filename.lower().endswith('.csv'):
+            return jsonify({
+                'success': False,
+                'error': 'File must be a CSV file'
+            }), 400
+        
+        # Get the training data directory
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        data_dir = os.path.join(base_dir, '../mv registration training')
+        
+        # Try alternative paths if directory doesn't exist
+        if not os.path.exists(data_dir):
+            data_dir_alt = os.path.join(base_dir, '../mv_registration_training')
+            if os.path.exists(data_dir_alt):
+                data_dir = data_dir_alt
+            else:
+                project_root = os.path.join(base_dir, '../../../..')
+                data_dir_abs = os.path.join(project_root, 'backend/model/ml_models/mv registration training')
+                if os.path.exists(data_dir_abs):
+                    data_dir = data_dir_abs
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Training data directory not found'
+                    }), 500
+        
+        # Create directory if it doesn't exist
+        os.makedirs(data_dir, exist_ok=True)
+        
+        # Secure the filename
+        filename = secure_filename(file.filename)
+        
+        # Add timestamp to avoid overwriting existing files
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        name, ext = os.path.splitext(filename)
+        filename = f"{name}_{timestamp}{ext}"
+        
+        # Save the file
+        file_path = os.path.join(data_dir, filename)
+        file.save(file_path)
+        
+        print(f"CSV file uploaded successfully: {filename}")
+        print(f"Saved to: {file_path}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'CSV file uploaded successfully',
+            'filename': filename,
+            'path': file_path
+        }), 200
+        
+    except Exception as e:
+        print(f"Error uploading CSV file: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Failed to upload file: {str(e)}'
         }), 500
 
 @app.route('/api/model/retrain', methods=['POST'])

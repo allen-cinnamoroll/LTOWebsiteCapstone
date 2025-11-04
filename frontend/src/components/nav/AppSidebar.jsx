@@ -27,6 +27,9 @@ import {
   Edit,
   FileText,
   ChevronRight,
+  Brain,
+  TrendingUp,
+  ClipboardCheck,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav/NavMain";
@@ -126,6 +129,8 @@ export function AppSidebar(props) {
   
   // State for managing collapsible sections
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isTrainedModelsOpen, setIsTrainedModelsOpen] = useState(false);
+  const [isVehicleModelOpen, setIsVehicleModelOpen] = useState(false);
   const [isManageAccountOpen, setIsManageAccountOpen] = useState(false);
   
   // Check if sidebar is collapsed
@@ -135,19 +140,34 @@ export function AppSidebar(props) {
   const handleAnalyticsChange = (open) => {
     setIsAnalyticsOpen(open);
     if (open) {
+      setIsTrainedModelsOpen(false);
       setIsManageAccountOpen(false);
     }
+  };
+  
+  const handleTrainedModelsChange = (open) => {
+    setIsTrainedModelsOpen(open);
+    if (open) {
+      setIsAnalyticsOpen(false);
+      setIsManageAccountOpen(false);
+    }
+  };
+  
+  const handleVehicleModelChange = (open) => {
+    setIsVehicleModelOpen(open);
   };
   
   const handleManageAccountChange = (open) => {
     setIsManageAccountOpen(open);
     if (open) {
       setIsAnalyticsOpen(false);
+      setIsTrainedModelsOpen(false);
     }
   };
   
   // Check user roles for different permissions
   const canManageAccounts = userData?.role === "0" || userData?.role === "1"; // Admin and superadmin
+  const isSuperAdmin = userData?.role === "0"; // Superadmin only
   const userRole = userData?.role;
   
   return (
@@ -305,6 +325,113 @@ export function AppSidebar(props) {
             )}
           </SidebarMenu>
         </SidebarGroup>
+
+        {/* Trained Models Section - Only visible for SuperAdmin */}
+        {isSuperAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Trained Models</SidebarGroupLabel>
+            <SidebarMenu>
+            {isCollapsed ? (
+              // Dropdown menu for collapsed state
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton tooltip="Trained Models">
+                      <Brain />
+                      <span>Trained Models</span>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="right" align="start" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/trained-models/vehicle" className="flex items-center gap-2">
+                        <Car className="h-4 w-4" />
+                        <span>Vehicle Model</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/trained-models/violation" className="flex items-center gap-2">
+                        <SquareChartGantt className="h-4 w-4" />
+                        <span>Violation Model</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/trained-models/accident" className="flex items-center gap-2">
+                        <SquareActivity className="h-4 w-4" />
+                        <span>Accident Model</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            ) : (
+              // Collapsible for expanded state
+              <Collapsible asChild className="group/collapsible" open={isTrainedModelsOpen} onOpenChange={handleTrainedModelsChange}>
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Brain />
+                      <span>Trained Models</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {/* Vehicle Model - with nested sub-menu */}
+                      <SidebarMenuSubItem>
+                        <Collapsible className="group/nested-collapsible" open={isVehicleModelOpen} onOpenChange={handleVehicleModelChange}>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuSubButton>
+                              <Car />
+                              <span>Vehicle Model</span>
+                              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/nested-collapsible:rotate-90" />
+                            </SidebarMenuSubButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub className="ml-4">
+                              <SidebarMenuSubItem>
+                                <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/mv-prediction"} asChild>
+                                  <Link to="/trained-models/vehicle/mv-prediction">
+                                    <TrendingUp />
+                                    <span>MV Prediction</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                              <SidebarMenuSubItem>
+                                <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/prescription"} asChild>
+                                  <Link to="/trained-models/vehicle/prescription">
+                                    <ClipboardCheck />
+                                    <span>Prescription</span>
+                                  </Link>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/violation"} asChild>
+                          <Link to="/trained-models/violation">
+                            <SquareChartGantt />
+                            <span>Violation Model</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/accident"} asChild>
+                          <Link to="/trained-models/accident">
+                            <SquareActivity />
+                            <span>Accident Model</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )}
+          </SidebarMenu>
+        </SidebarGroup>
+        )}
 
         {/* Manage Account Section - Only visible for Admin and Superadmin */}
         {canManageAccounts && (

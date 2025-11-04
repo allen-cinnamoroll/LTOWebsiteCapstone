@@ -28,6 +28,7 @@ import ViewAccountLogsPage from "./pages/ViewAccountLogsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AccountPage from "./pages/AccountPage";
+import MVPredictionPage from "./pages/MVPredictionPage";
 
 function App() {
   return (
@@ -95,6 +96,13 @@ function App() {
             <Route path="account/logs" element={
               <RoleBasedRoute allowedRoles={["admin", "superadmin"]}>
                 <ViewAccountLogsPage />
+              </RoleBasedRoute>
+            } />
+            
+            {/* Trained Models routes - for superadmin only */}
+            <Route path="trained-models/vehicle/mv-prediction" element={
+              <RoleBasedRoute allowedRoles={["superadmin"]}>
+                <MVPredictionPage />
               </RoleBasedRoute>
             } />
           </Route>

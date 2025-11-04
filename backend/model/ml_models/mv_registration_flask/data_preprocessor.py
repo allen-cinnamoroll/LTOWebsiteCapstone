@@ -23,19 +23,58 @@ class DataPreprocessor:
     def load_and_process_data(self):
         """
         Load CSV data and process it into time series format
+        Automatically combines multiple CSV files if they exist in the directory
         
         Returns:
             DataFrame with weekly aggregated registration counts
         """
-        if not os.path.exists(self.csv_path):
-            raise FileNotFoundError(f"CSV file not found: {self.csv_path}")
+        csv_dir = os.path.dirname(self.csv_path)
+        csv_filename = os.path.basename(self.csv_path)
         
-        print(f"Loading data from: {self.csv_path}")
+        # Check if directory exists
+        if not os.path.exists(csv_dir):
+            raise FileNotFoundError(f"Directory not found: {csv_dir}")
         
-        # Read CSV file
-        df = pd.read_csv(self.csv_path)
+        # Find all CSV files in the directory
+        all_csv_files = [f for f in os.listdir(csv_dir) if f.endswith('.csv')]
         
-        print(f"Loaded {len(df)} rows")
+        if not all_csv_files:
+            raise FileNotFoundError(f"No CSV files found in: {csv_dir}")
+        
+        print(f"Found {len(all_csv_files)} CSV file(s) in directory: {csv_dir}")
+        print(f"Files: {', '.join(all_csv_files)}")
+        
+        # Load and combine all CSV files
+        dfs = []
+        total_rows = 0
+        
+        for csv_file in all_csv_files:
+            csv_path = os.path.join(csv_dir, csv_file)
+            try:
+                df_temp = pd.read_csv(csv_path)
+                dfs.append(df_temp)
+                total_rows += len(df_temp)
+                print(f"  - Loaded {csv_file}: {len(df_temp)} rows")
+            except Exception as e:
+                print(f"  - Warning: Could not load {csv_file}: {str(e)}")
+                continue
+        
+        if not dfs:
+            raise ValueError("No valid CSV files could be loaded")
+        
+        # Combine all dataframes
+        df = pd.concat(dfs, ignore_index=True)
+        
+        # Remove duplicates based on key columns (if they exist)
+        # This prevents duplicate registrations if same data appears in multiple files
+        if 'plateNo' in df.columns and 'dateOfRenewal' in df.columns:
+            before_dedup = len(df)
+            df = df.drop_duplicates(subset=['plateNo', 'dateOfRenewal'], keep='first')
+            after_dedup = len(df)
+            if before_dedup != after_dedup:
+                print(f"  - Removed {before_dedup - after_dedup} duplicate rows")
+        
+        print(f"Combined total: {len(df)} rows from {len(all_csv_files)} CSV file(s)")
         
         # Filter for Davao Oriental municipalities
         # Normalize municipality names (case-insensitive)
@@ -132,6 +171,7 @@ class DataPreprocessor:
         """
         Load CSV data and process it into time series format for a specific municipality
         or return data for all municipalities separately
+        Automatically combines multiple CSV files if they exist
         
         Args:
             municipality: Specific municipality name (None for all municipalities)
@@ -140,14 +180,42 @@ class DataPreprocessor:
             If municipality specified: DataFrame with weekly aggregated counts for that municipality
             If None: Dictionary {municipality_name: DataFrame} for all municipalities
         """
-        if not os.path.exists(self.csv_path):
-            raise FileNotFoundError(f"CSV file not found: {self.csv_path}")
+        csv_dir = os.path.dirname(self.csv_path)
         
-        print(f"Loading data from: {self.csv_path}")
+        # Check if directory exists
+        if not os.path.exists(csv_dir):
+            raise FileNotFoundError(f"Directory not found: {csv_dir}")
         
-        # Read CSV file
-        df = pd.read_csv(self.csv_path)
-        print(f"Loaded {len(df)} rows")
+        # Find all CSV files in the directory
+        all_csv_files = [f for f in os.listdir(csv_dir) if f.endswith('.csv')]
+        
+        if not all_csv_files:
+            raise FileNotFoundError(f"No CSV files found in: {csv_dir}")
+        
+        print(f"Loading data from {len(all_csv_files)} CSV file(s)...")
+        
+        # Load and combine all CSV files
+        dfs = []
+        for csv_file in all_csv_files:
+            csv_path = os.path.join(csv_dir, csv_file)
+            try:
+                df_temp = pd.read_csv(csv_path)
+                dfs.append(df_temp)
+            except Exception as e:
+                print(f"Warning: Could not load {csv_file}: {str(e)}")
+                continue
+        
+        if not dfs:
+            raise ValueError("No valid CSV files could be loaded")
+        
+        # Combine all dataframes
+        df = pd.concat(dfs, ignore_index=True)
+        
+        # Remove duplicates
+        if 'plateNo' in df.columns and 'dateOfRenewal' in df.columns:
+            df = df.drop_duplicates(subset=['plateNo', 'dateOfRenewal'], keep='first')
+        
+        print(f"Combined total: {len(df)} rows from {len(all_csv_files)} CSV file(s)")
         
         # Filter for Davao Oriental municipalities
         df['municipality_upper'] = df['address_municipality'].str.upper().str.strip()
