@@ -15,23 +15,33 @@ from datetime import datetime, timedelta
 import json
 
 class SARIMAModel:
-    def __init__(self, model_dir):
+    def __init__(self, model_dir, municipality=None):
         """
         Initialize SARIMA model
         
         Args:
             model_dir: Directory to save/load model files
+            municipality: Municipality name (None for aggregated model)
         """
         self.model_dir = model_dir
+        self.municipality = municipality
         self.model = None
         self.fitted_model = None
         self.model_params = None
         self.training_data = None
         self.accuracy_metrics = None
         
-        # Model file paths
-        self.model_file = os.path.join(model_dir, 'sarima_model.pkl')
-        self.metadata_file = os.path.join(model_dir, 'sarima_metadata.json')
+        # Model file paths (include municipality in filename if specified)
+        if municipality:
+            safe_name = municipality.upper().replace(' ', '_').replace('/', '_')
+            model_filename = f'sarima_model_{safe_name}.pkl'
+            metadata_filename = f'sarima_metadata_{safe_name}.json'
+        else:
+            model_filename = 'sarima_model.pkl'
+            metadata_filename = 'sarima_metadata.json'
+        
+        self.model_file = os.path.join(model_dir, model_filename)
+        self.metadata_file = os.path.join(model_dir, metadata_filename)
     
     def model_exists(self):
         """Check if a trained model exists"""
@@ -247,7 +257,7 @@ class SARIMAModel:
         
         Args:
             weeks: Number of weeks to predict (default: 4)
-            municipality: Specific municipality (not used in current implementation, kept for future use)
+            municipality: Specific municipality (for per-municipality mode, should match model's municipality)
             
         Returns:
             Dictionary with predictions

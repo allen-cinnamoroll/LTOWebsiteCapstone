@@ -18,17 +18,19 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sarima_model import SARIMAModel
 from data_preprocessor import DataPreprocessor
+from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Initialize model and preprocessor
-model = None
+# Initialize models
+aggregated_model = None  # Main aggregated model (always used)
+municipality_models = {}  # Dictionary of per-municipality models (when enabled)
 preprocessor = None
 
 def initialize_model():
-    """Initialize the SARIMA model and preprocessor"""
-    global model, preprocessor
+    """Initialize the SARIMA model(s) and preprocessor"""
+    global aggregated_model, municipality_models, preprocessor
     try:
         # Get the directory paths
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -56,17 +58,49 @@ def initialize_model():
         csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
         preprocessor = DataPreprocessor(csv_path)
         
-        # Initialize model
-        model = SARIMAModel(model_dir)
+        # Initialize aggregated model (always needed)
+        print("Initializing aggregated model...")
+        aggregated_model = SARIMAModel(model_dir, municipality=None)
         
-        # Load existing model or train new one
-        if model.model_exists():
-            print("Loading existing model...")
-            model.load_model()
+        if aggregated_model.model_exists():
+            print("Loading existing aggregated model...")
+            aggregated_model.load_model()
         else:
-            print("No existing model found. Training new model...")
+            print("Training aggregated model...")
             data = preprocessor.load_and_process_data()
-            model.train(data)
+            aggregated_model.train(data)
+        
+        # Initialize per-municipality models if enabled
+        if ENABLE_PER_MUNICIPALITY:
+            print("\nPer-municipality mode enabled. Initializing municipality models...")
+            municipalities_data = preprocessor.load_and_process_data_by_municipality()
+            
+            for municipality, data in municipalities_data.items():
+                # Check if municipality has sufficient data
+                sufficiency = preprocessor.check_municipality_data_sufficiency(data)
+                
+                if sufficiency['is_sufficient']:
+                    print(f"\nTraining model for {municipality}...")
+                    print(f"  - Weeks: {sufficiency['weeks_with_data']}")
+                    print(f"  - Avg/week: {sufficiency['avg_per_week']:.1f}")
+                    
+                    mun_model = SARIMAModel(model_dir, municipality=municipality)
+                    
+                    if mun_model.model_exists():
+                        print(f"  Loading existing model for {municipality}...")
+                        mun_model.load_model()
+                    else:
+                        print(f"  Training new model for {municipality}...")
+                        mun_model.train(data)
+                    
+                    municipality_models[municipality] = mun_model
+                else:
+                    print(f"\nSkipping {municipality} - {sufficiency['sufficient_reason']}")
+                    print(f"  - Weeks: {sufficiency['weeks_with_data']}/{sufficiency['min_weeks_required']}")
+                    print(f"  - Avg/week: {sufficiency['avg_per_week']:.1f}/{sufficiency['min_avg_required']}")
+        else:
+            print("Per-municipality mode disabled. Using aggregated model only.")
+            print("To enable, set ENABLE_PER_MUNICIPALITY = True in config.py when you have 6+ months of data.")
         
         return True
     except Exception as e:
@@ -89,7 +123,7 @@ def predict_registrations():
     - prediction_dates: List of dates for predictions
     """
     try:
-        if model is None:
+        if aggregated_model is None:
             return jsonify({
                 'success': False,
                 'error': 'Model not initialized'
@@ -106,8 +140,30 @@ def predict_registrations():
                 'error': 'Weeks must be between 1 and 52'
             }), 400
         
+        # Determine which model to use
+        use_municipality_model = False
+        selected_model = aggregated_model
+        
+        if municipality and ENABLE_PER_MUNICIPALITY:
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper in municipality_models:
+                use_municipality_model = True
+                selected_model = municipality_models[municipality_upper]
+                print(f"Using municipality-specific model for {municipality_upper}")
+            else:
+                print(f"Municipality model not available for {municipality_upper}, using aggregated model")
+                print(f"Per-municipality models available for: {list(municipality_models.keys())}")
+        elif municipality and not ENABLE_PER_MUNICIPALITY:
+            print(f"Per-municipality mode disabled. Using aggregated model for all predictions.")
+        
         # Make predictions
-        predictions = model.predict(weeks=weeks, municipality=municipality)
+        predictions = selected_model.predict(weeks=weeks, municipality=municipality)
+        
+        # Add metadata about which model was used
+        predictions['model_used'] = (
+            f"{municipality}" if use_municipality_model else "aggregated"
+        )
+        predictions['per_municipality_enabled'] = ENABLE_PER_MUNICIPALITY
         
         return jsonify({
             'success': True,
@@ -134,20 +190,37 @@ def get_model_accuracy():
     - data_info: Information about training data
     """
     try:
-        if model is None:
+        if aggregated_model is None:
             return jsonify({
                 'success': False,
                 'error': 'Model not initialized'
             }), 500
         
-        # Get accuracy metrics
-        accuracy = model.get_accuracy_metrics()
+        # Get municipality parameter
+        municipality = request.args.get('municipality', default=None, type=str)
+        
+        # Get accuracy metrics from appropriate model
+        if municipality and ENABLE_PER_MUNICIPALITY:
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper in municipality_models:
+                accuracy = municipality_models[municipality_upper].get_accuracy_metrics()
+                model_type = f"municipality ({municipality_upper})"
+            else:
+                accuracy = aggregated_model.get_accuracy_metrics()
+                model_type = "aggregated (municipality model not available)"
+        else:
+            accuracy = aggregated_model.get_accuracy_metrics()
+            model_type = "aggregated"
         
         if accuracy is None:
             return jsonify({
                 'success': False,
                 'error': 'Model not trained yet. Please train the model first.'
             }), 404
+        
+        # Add model type info
+        accuracy['model_type'] = model_type
+        accuracy['per_municipality_enabled'] = ENABLE_PER_MUNICIPALITY
         
         return jsonify({
             'success': True,
@@ -176,7 +249,7 @@ def retrain_model():
     - training_info: Information about the training process
     """
     try:
-        if model is None or preprocessor is None:
+        if aggregated_model is None or preprocessor is None:
             return jsonify({
                 'success': False,
                 'error': 'Model or preprocessor not initialized'
@@ -185,22 +258,55 @@ def retrain_model():
         # Get request body
         data = request.get_json() or {}
         force = data.get('force', False)
+        municipality = data.get('municipality', None)  # Optional: retrain specific municipality
         
-        # Load and process data
-        print("Loading and processing data...")
+        training_results = {}
+        
+        # Retrain aggregated model
+        print("Retraining aggregated model...")
         processed_data = preprocessor.load_and_process_data()
         
-        # Check if model exists and should be retrained
-        if model.model_exists() and not force:
+        if aggregated_model.model_exists() and not force:
             return jsonify({
                 'success': False,
                 'error': 'Model already exists. Use force=true to retrain.',
                 'message': 'Set "force": true in request body to retrain existing model'
             }), 400
         
-        # Train the model
-        print("Training model...")
-        training_info = model.train(processed_data, force=force)
+        training_info = aggregated_model.train(processed_data, force=force)
+        training_results['aggregated'] = training_info
+        
+        # Retrain per-municipality models if enabled
+        if ENABLE_PER_MUNICIPALITY:
+            print("\nRetraining per-municipality models...")
+            municipalities_data = preprocessor.load_and_process_data_by_municipality()
+            
+            for mun_name, mun_data in municipalities_data.items():
+                # Skip if specific municipality requested and this isn't it
+                if municipality and mun_name.upper() != municipality.upper():
+                    continue
+                
+                sufficiency = preprocessor.check_municipality_data_sufficiency(mun_data)
+                
+                if sufficiency['is_sufficient']:
+                    print(f"\nRetraining model for {mun_name}...")
+                    if mun_name not in municipality_models:
+                        municipality_models[mun_name] = SARIMAModel(
+                            aggregated_model.model_dir, 
+                            municipality=mun_name
+                        )
+                    
+                    mun_model = municipality_models[mun_name]
+                    if not mun_model.model_exists() or force:
+                        mun_training_info = mun_model.train(mun_data, force=force)
+                        training_results[mun_name] = mun_training_info
+                    else:
+                        training_results[mun_name] = "Model exists (use force=true to retrain)"
+                else:
+                    print(f"Skipping {mun_name} - {sufficiency['sufficient_reason']}")
+                    training_results[mun_name] = f"Insufficient data: {sufficiency['sufficient_reason']}"
+        
+        training_info = training_results
         
         return jsonify({
             'success': True,
@@ -218,11 +324,16 @@ def retrain_model():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
+    municipality_models_count = len(municipality_models) if municipality_models else 0
+    
     return jsonify({
         'success': True,
         'status': 'healthy',
-        'model_initialized': model is not None,
-        'model_trained': model.model_exists() if model else False,
+        'aggregated_model_initialized': aggregated_model is not None,
+        'aggregated_model_trained': aggregated_model.model_exists() if aggregated_model else False,
+        'per_municipality_enabled': ENABLE_PER_MUNICIPALITY,
+        'municipality_models_count': municipality_models_count,
+        'available_municipality_models': list(municipality_models.keys()) if municipality_models else [],
         'timestamp': datetime.now().isoformat()
     }), 200
 

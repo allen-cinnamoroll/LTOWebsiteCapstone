@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import os
+from config import DAVAO_ORIENTAL_MUNICIPALITIES, MIN_WEEKS_FOR_MUNICIPALITY_MODEL, MIN_AVG_REGISTRATIONS_PER_WEEK
 
 class DataPreprocessor:
     def __init__(self, csv_path):
@@ -17,11 +18,7 @@ class DataPreprocessor:
             csv_path: Path to the CSV file containing vehicle registration data
         """
         self.csv_path = csv_path
-        self.davao_oriental_municipalities = [
-            'BAGANGA', 'BANAYBANAY', 'BOSTON', 'CARAGA', 'CATEEL',
-            'GOVERNOR GENEROSO', 'LUPON', 'MANAY', 'SAN ISIDRO',
-            'TARRAGONA', 'CITY OF MATI'
-        ]
+        self.davao_oriental_municipalities = DAVAO_ORIENTAL_MUNICIPALITIES
     
     def load_and_process_data(self):
         """
@@ -129,5 +126,125 @@ class DataPreprocessor:
             'std_weekly_registrations': float(processed_data['count'].std()),
             'min_weekly_registrations': int(processed_data['count'].min()),
             'max_weekly_registrations': int(processed_data['count'].max())
+        }
+    
+    def load_and_process_data_by_municipality(self, municipality=None):
+        """
+        Load CSV data and process it into time series format for a specific municipality
+        or return data for all municipalities separately
+        
+        Args:
+            municipality: Specific municipality name (None for all municipalities)
+            
+        Returns:
+            If municipality specified: DataFrame with weekly aggregated counts for that municipality
+            If None: Dictionary {municipality_name: DataFrame} for all municipalities
+        """
+        if not os.path.exists(self.csv_path):
+            raise FileNotFoundError(f"CSV file not found: {self.csv_path}")
+        
+        print(f"Loading data from: {self.csv_path}")
+        
+        # Read CSV file
+        df = pd.read_csv(self.csv_path)
+        print(f"Loaded {len(df)} rows")
+        
+        # Filter for Davao Oriental municipalities
+        df['municipality_upper'] = df['address_municipality'].str.upper().str.strip()
+        davao_mask = df['municipality_upper'].isin(self.davao_oriental_municipalities)
+        df_filtered = df[davao_mask].copy()
+        
+        # Filter by specific municipality if provided
+        if municipality:
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper not in self.davao_oriental_municipalities:
+                raise ValueError(f"Municipality '{municipality}' not found in Davao Oriental")
+            df_filtered = df_filtered[df_filtered['municipality_upper'] == municipality_upper].copy()
+        
+        print(f"Filtered to {len(df_filtered)} rows from Davao Oriental municipalities")
+        
+        # Parse dates
+        df_filtered['dateOfRenewal_parsed'] = pd.to_datetime(
+            df_filtered['dateOfRenewal'],
+            format='%m/%d/%Y',
+            errors='coerce'
+        )
+        df_filtered = df_filtered.dropna(subset=['dateOfRenewal_parsed'])
+        
+        if municipality:
+            # Return single time series for specific municipality
+            return self._aggregate_by_week(df_filtered)
+        else:
+            # Return dictionary of time series for all municipalities
+            municipalities_data = {}
+            for mun in self.davao_oriental_municipalities:
+                mun_data = df_filtered[df_filtered['municipality_upper'] == mun].copy()
+                if len(mun_data) > 0:
+                    weekly_data = self._aggregate_by_week(mun_data)
+                    if len(weekly_data) > 0:
+                        municipalities_data[mun] = weekly_data
+            return municipalities_data
+    
+    def _aggregate_by_week(self, df_filtered):
+        """Helper method to aggregate data by week"""
+        df_filtered = df_filtered.sort_values('dateOfRenewal_parsed')
+        
+        # Extract week information
+        df_filtered['year'] = df_filtered['dateOfRenewal_parsed'].dt.year
+        df_filtered['week'] = df_filtered['dateOfRenewal_parsed'].dt.isocalendar().week
+        df_filtered['year_week'] = (
+            df_filtered['year'].astype(str) + '-' + 
+            df_filtered['week'].astype(str).str.zfill(2)
+        )
+        df_filtered['week_start'] = df_filtered['dateOfRenewal_parsed'].dt.to_period('W-SUN').dt.start_time
+        
+        # Aggregate by week
+        weekly_data = df_filtered.groupby(['week_start', 'year_week']).agg({
+            'plateNo': 'count'
+        }).rename(columns={'plateNo': 'count'}).reset_index()
+        
+        weekly_data = weekly_data.sort_values('week_start')
+        
+        # Set index
+        weekly_data = weekly_data.set_index('week_start')
+        weekly_data.index = pd.to_datetime(weekly_data.index)
+        
+        # Filter zero weeks
+        weekly_data = weekly_data[weekly_data['count'] > 0].copy()
+        weekly_data = weekly_data.sort_index()
+        
+        return weekly_data[['count']]
+    
+    def check_municipality_data_sufficiency(self, municipality_data):
+        """
+        Check if a municipality has sufficient data for training a model
+        
+        Args:
+            municipality_data: DataFrame with weekly registration counts
+            
+        Returns:
+            Dictionary with sufficiency check results
+        """
+        weeks_with_data = len(municipality_data)
+        total_registrations = int(municipality_data['count'].sum())
+        avg_per_week = float(municipality_data['count'].mean()) if weeks_with_data > 0 else 0
+        
+        is_sufficient = (
+            weeks_with_data >= MIN_WEEKS_FOR_MUNICIPALITY_MODEL and
+            avg_per_week >= MIN_AVG_REGISTRATIONS_PER_WEEK
+        )
+        
+        return {
+            'is_sufficient': is_sufficient,
+            'weeks_with_data': weeks_with_data,
+            'total_registrations': total_registrations,
+            'avg_per_week': avg_per_week,
+            'min_weeks_required': MIN_WEEKS_FOR_MUNICIPALITY_MODEL,
+            'min_avg_required': MIN_AVG_REGISTRATIONS_PER_WEEK,
+            'sufficient_reason': (
+                'Sufficient data' if is_sufficient else
+                f'Need {MIN_WEEKS_FOR_MUNICIPALITY_MODEL - weeks_with_data} more weeks' if weeks_with_data < MIN_WEEKS_FOR_MUNICIPALITY_MODEL else
+                f'Need {MIN_AVG_REGISTRATIONS_PER_WEEK - avg_per_week:.1f} more avg registrations/week'
+            )
         }
 
