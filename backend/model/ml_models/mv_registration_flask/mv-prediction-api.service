@@ -1,0 +1,18 @@
+[Unit]
+Description=Vehicle Registration Prediction API (MV Prediction)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/LTOWebsiteCapstone/backend/model/ml_models/mv_registration_flask
+Environment="PATH=/var/www/LTOWebsiteCapstone/backend/model/ml_models/mv_registration_flask/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/var/www/LTOWebsiteCapstone/backend/model/ml_models/mv_registration_flask/venv/bin/python3 /var/www/LTOWebsiteCapstone/backend/model/ml_models/mv_registration_flask/app.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
