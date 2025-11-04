@@ -5,25 +5,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import FormComponent from "./FormComponent";
-import { formatDate } from "@/util/dateFormatter";
-import { toast } from "sonner";
-import { ViolationCreateSchema } from "@/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
-import { useForm } from "react-hook-form";
 import { AlertTriangle, LoaderCircle, X, Edit3, Eye } from "lucide-react";
+import DriverOwnerInfoModal from "./DriverOwnerInfoModal";
+import AddViolatorModal from "./AddViolatorModal";
 
-const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues }) => {
-  const [submitting, setIsSubmitting] = useState(false);
+const ViolationEntryModal = ({ open, onOpenChange, onViolationAdded, initialViolator = null, onViolatorAdded }) => {
   const { token } = useAuth();
-  const date = formatDate(Date.now());
 
   const [allViolations, setAllViolations] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,27 +25,11 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
   const [showNoResults, setShowNoResults] = useState(false);
   const [selectedViolator, setSelectedViolator] = useState(null);
   const [isViolatorEditable, setIsViolatorEditable] = useState(true);
+  const [driverOwnerInfoModalOpen, setDriverOwnerInfoModalOpen] = useState(false);
+  const [selectedViolatorForInfo, setSelectedViolatorForInfo] = useState(null);
+  const [addViolatorModalOpen, setAddViolatorModalOpen] = useState(false);
+  const [newViolatorName, setNewViolatorName] = useState("");
   const searchInputRef = React.useRef(null);
-
-  const form = useForm({
-    resolver: zodResolver(ViolationCreateSchema),
-    defaultValues: {
-      topNo: "",
-      firstName: "",
-      middleInitial: "",
-      lastName: "",
-      suffix: "",
-      violations: [""],
-      violationType: "confiscated",
-      licenseType: undefined,
-      plateNo: "",
-      dateOfApprehension: undefined,
-      apprehendingOfficer: "",
-      chassisNo: "",
-      engineNo: "",
-      fileNo: "",
-    },
-  });
 
   // Fetch all violations when open for client-side searching
   React.useEffect(() => {
@@ -75,6 +52,20 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
     return () => { cancelled = true; };
   }, [open, token]);
 
+  // Initialize with initialViolator if provided
+  React.useEffect(() => {
+    if (open && initialViolator) {
+      setSelectedViolator(initialViolator);
+      setSearchTerm(formatNameFirstLast(initialViolator.firstName, initialViolator.lastName));
+      setIsViolatorEditable(false);
+    } else if (open && !initialViolator) {
+      setSearchTerm("");
+      setShowNoResults(false);
+      setSelectedViolator(null);
+      setIsViolatorEditable(true);
+    }
+  }, [open, initialViolator]);
+
   // Debounced search with client-side filtering
   React.useEffect(() => {
     const searchViolators = () => {
@@ -96,8 +87,10 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
         });
         
         setSearchResults(results);
-        if (results.length === 0 && searchTerm.length >= 3) {
+        if (results.length === 0 && searchTerm.length >= 2) {
           setShowNoResults(true);
+        } else {
+          setShowNoResults(false);
         }
         setIsSearching(false);
       } else {
@@ -135,14 +128,6 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
 
   const handleViolatorSelect = (violator) => {
     setSelectedViolator(violator);
-    form.setValue("firstName", violator.firstName || "");
-    form.setValue("lastName", violator.lastName || "");
-    form.setValue("middleInitial", violator.middleInitial || "");
-    form.setValue("suffix", violator.suffix || "");
-    form.setValue("plateNo", violator.plateNo || "");
-    form.setValue("chassisNo", violator.chassisNo || "");
-    form.setValue("engineNo", violator.engineNo || "");
-    form.setValue("fileNo", violator.fileNo || "");
     setSearchTerm(formatNameFirstLast(violator.firstName, violator.lastName));
     setSearchResults([]);
     setShowNoResults(false);
@@ -151,10 +136,6 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
 
   const handleClearViolator = () => {
     setSelectedViolator(null);
-    form.setValue("firstName", "");
-    form.setValue("lastName", "");
-    form.setValue("middleInitial", "");
-    form.setValue("suffix", "");
     setSearchTerm("");
     setSearchResults([]);
     setShowNoResults(false);
@@ -164,108 +145,21 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
   const handleAddAsNew = () => {
     const raw = (searchTerm || "").trim();
     if (!raw) return;
+    
+    // Close current modal and open AddViolatorModal with the name pre-filled
     const parts = raw.split(/\s+/);
     const lastName = parts.length > 1 ? parts[parts.length - 1] : "";
     const firstName = parts.length > 1 ? parts.slice(0, -1).join(" ") : parts[0];
-    form.setValue("firstName", firstName);
-    form.setValue("lastName", lastName);
-    setSearchTerm("");
-    setShowNoResults(false);
-    setSelectedViolator(null);
-    setIsViolatorEditable(false);
+    
+    setNewViolatorName(raw);
+    onOpenChange(false);
+    setAddViolatorModalOpen(true);
   };
 
-  const onSubmit = async (formData) => {
-    setIsSubmitting(true);
-    try {
-      const content = {
-        topNo: formData.topNo,
-        firstName: formData.firstName,
-        middleInitial: formData.middleInitial,
-        lastName: formData.lastName,
-        suffix: formData.suffix,
-        violations: formData.violations,
-        violationType: formData.violationType,
-        licenseType: formData.violationType === "confiscated" ? formData.licenseType : undefined,
-        plateNo: formData.plateNo,
-        apprehendingOfficer: formData.apprehendingOfficer,
-        chassisNo: formData.chassisNo,
-        engineNo: formData.engineNo,
-      fileNo: formData.fileNo,
-      };
-
-      // Only include dateOfApprehension if it has a value
-      if (formData.dateOfApprehension) {
-        content.dateOfApprehension = formData.dateOfApprehension;
-      }
-
-      const { data } = await apiClient.post("/violations", content, {
-        headers: {
-          Authorization: token,
-        },
-      });
-
-      if (data.success) {
-        toast.success("Violation has been added", {
-          description: date,
-        });
-
-        // Reset form
-        form.reset({
-          topNo: "",
-          firstName: "",
-          middleInitial: "",
-          lastName: "",
-          suffix: "",
-          violations: [""],
-          violationType: "confiscated",
-          licenseType: undefined,
-          plateNo: "",
-          dateOfApprehension: undefined,
-          apprehendingOfficer: "",
-          chassisNo: "",
-          engineNo: "",
-          fileNo: "",
-        });
-
-        // Close modal and refresh data
-        onOpenChange(false);
-        if (onViolationAdded) {
-          onViolationAdded();
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      const message = error.response?.data?.message || "Failed to add violation";
-      toast.error(message, {
-        description: date,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleOpenChange = (isOpen) => {
-    if (!isOpen && !submitting) {
+    if (!isOpen) {
       // Reset form when closing modal
-      form.reset({
-        topNo: "",
-        firstName: "",
-        middleInitial: "",
-        lastName: "",
-        suffix: "",
-        violations: [""],
-        violationType: "confiscated",
-        licenseType: undefined,
-        plateNo: "",
-        dateOfApprehension: undefined,
-        apprehendingOfficer: "",
-        chassisNo: "",
-        engineNo: "",
-        fileNo: "",
-      });
-
-      // Clear search state so previous results don't persist between openings
       setSearchTerm("");
       setAllViolations([]);
       setSearchResults([]);
@@ -275,63 +169,32 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
     onOpenChange(isOpen);
   };
 
-  // Apply initial values when opening
-  React.useEffect(() => {
-    if (open && initialValues) {
-      form.reset({
-        topNo: "",
-        firstName: initialValues.firstName || "",
-        middleInitial: "",
-        lastName: initialValues.lastName || "",
-        suffix: "",
-        violations: [""],
-        violationType: "confiscated",
-        licenseType: undefined,
-        plateNo: initialValues.plateNo || "",
-        dateOfApprehension: undefined,
-        apprehendingOfficer: "",
-        chassisNo: initialValues.chassisNo || "",
-        engineNo: initialValues.engineNo || "",
-        fileNo: initialValues.fileNo || "",
-      });
-      // also ensure search UI is blank on open
-      setSearchTerm("");
-      setShowNoResults(false);
-      setSelectedViolator(null);
-      setIsViolatorEditable(true);
-    } else if (open && !initialValues) {
-      setSearchTerm("");
-      setShowNoResults(false);
-      setSelectedViolator(null);
-      setIsViolatorEditable(true);
-    }
-  }, [open, initialValues]);
-
   return (
+    <>
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-visible">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
             Add New Violation
           </DialogTitle>
           <DialogDescription>
-            Fill in the required fields to add a new violation record to the system.
+            Search and select a violator to proceed.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-1 py-2">
-          {/* Violator Search Section - matching vehicle form structure */}
-          <div className="mb-4">
+        <div className="flex-1 flex flex-col min-h-0 px-1 py-2 overflow-visible">
+          {/* Violator Search Section - Fixed */}
+          <div className="flex-shrink-0 mb-4 overflow-visible">
             <Label>Violator Information</Label>
             <div className="mt-1">
               <Label className="text-muted-foreground mb-0">
                 Search and Select Violator
               </Label>
               <p className="text-xs text-gray-500 mb-2">
-                Format: Surname Suffix (Optional), FirstName, Middle Initial
+                Format: Firstname Surname
               </p>
-              <div className="relative">
+              <div className="relative z-50 overflow-visible">
                 <div className="flex gap-2">
                   <div className="flex-1 relative">
                     <Input
@@ -369,9 +232,9 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
                   </div>
                 </div>
                 
-                {/* Search Results Dropdown */}
+                {/* Search Results Dropdown - Scrollable */}
                 {(searchResults.length > 0 || showNoResults) && isViolatorEditable && (
-                  <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+                  <div className="absolute z-[100] w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
                     {searchResults.map((violator) => (
                       <div
                         key={violator._id}
@@ -394,12 +257,41 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onOpenChange(false);
-                            window.dispatchEvent(new CustomEvent('editViolation', { detail: violator._id }));
+                            // Open Driver/Owner Information modal
+                            setSelectedViolatorForInfo(violator);
+                            setDriverOwnerInfoModalOpen(true);
                           }}
-                          className="ml-2 h-6 w-6 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                          className="ml-2 h-6 w-6 p-0 hover:bg-orange-50"
                         >
-                          <Eye className="h-3 w-3" />
+                          <svg
+                            className="h-3 w-3"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <defs>
+                              <linearGradient id="eyeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#f97316" />
+                                <stop offset="100%" stopColor="#ea580c" />
+                              </linearGradient>
+                            </defs>
+                            <path
+                              d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"
+                              stroke="url(#eyeGradient)"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="3"
+                              stroke="url(#eyeGradient)"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </Button>
                       </div>
                     ))}
@@ -438,7 +330,11 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => setIsViolatorEditable(true)}
+                          onClick={() => {
+                            // Close this modal and open EditViolationModal
+                            handleOpenChange(false);
+                            window.dispatchEvent(new CustomEvent('editViolation', { detail: selectedViolator._id }));
+                          }}
                           className="text-blue-600 hover:text-blue-800 h-6 w-6 p-0"
                         >
                           <Edit3 className="h-3 w-3" />
@@ -459,39 +355,35 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues
               </div>
             </div>
           </div>
-
-          {/* Main form */}
-          <FormComponent
-            form={form}
-            onSubmit={onSubmit}
-            submitting={submitting}
-            isEditMode={false}
-          />
         </div>
-
-        <DialogFooter className="flex-shrink-0 flex justify-start gap-3 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={submitting}
-            className="min-w-[100px]"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="violation-form"
-            disabled={submitting}
-            className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-            {submitting ? "Adding..." : "Add Violation"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Driver/Owner Information Modal */}
+    <DriverOwnerInfoModal
+      open={driverOwnerInfoModalOpen}
+      onOpenChange={setDriverOwnerInfoModalOpen}
+      violatorData={selectedViolatorForInfo}
+    />
+
+    {/* Add Violator Modal */}
+    <AddViolatorModal
+      open={addViolatorModalOpen}
+      onOpenChange={(isOpen) => {
+        setAddViolatorModalOpen(isOpen);
+        if (!isOpen) {
+          setNewViolatorName("");
+        }
+      }}
+      onViolationAdded={onViolationAdded}
+      initialValues={newViolatorName ? {
+        firstName: newViolatorName.split(/\s+/).slice(0, -1).join(" ") || newViolatorName,
+        lastName: newViolatorName.split(/\s+/).slice(-1)[0] || "",
+      } : null}
+    />
+    </>
   );
 };
 
-export default AddViolationModal;
+export default ViolationEntryModal;
+

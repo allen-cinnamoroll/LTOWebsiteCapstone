@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { violationColumns } from "@/components/table/columns";
 import ViolationTable from "@/components/violations/ViolationTable";
-import AddViolationModal from "@/components/violations/AddViolationModal";
+import ViolationEntryModal from "@/components/violations/ViolationEntryModal";
 import ViolationDetailsModal from "@/components/violations/ViolationDetailsModal";
 import EditViolationModal from "@/components/violations/EditViolationModal";
 
@@ -21,6 +21,7 @@ const ViolationPage = () => {
   const [editViolationModalOpen, setEditViolationModalOpen] = useState(false);
   const [selectedViolation, setSelectedViolation] = useState(null);
   const [selectedViolationId, setSelectedViolationId] = useState(null);
+  const [initialViolator, setInitialViolator] = useState(null);
 
   useEffect(() => {
     fetchViolations();
@@ -36,6 +37,19 @@ const ViolationPage = () => {
     window.addEventListener('editViolation', handleEditViolation);
     return () => {
       window.removeEventListener('editViolation', handleEditViolation);
+    };
+  }, []);
+
+  // Listen for open violation entry with pre-filled violator
+  useEffect(() => {
+    const handleOpenViolationEntry = (event) => {
+      setInitialViolator(event.detail);
+      setAddViolationModalOpen(true);
+    };
+
+    window.addEventListener('openViolationEntry', handleOpenViolationEntry);
+    return () => {
+      window.removeEventListener('openViolationEntry', handleOpenViolationEntry);
     };
   }, []);
 
@@ -85,6 +99,7 @@ const ViolationPage = () => {
   };
 
   const handleAdd = () => {
+    setInitialViolator(null);
     setAddViolationModalOpen(true);
   };
 
@@ -127,12 +142,17 @@ const ViolationPage = () => {
         </div>
       </div>
 
-      {/* Add Violation Modal */}
-      <AddViolationModal
+      {/* Violation Entry Modal */}
+      <ViolationEntryModal
         open={addViolationModalOpen}
-        onOpenChange={setAddViolationModalOpen}
+        onOpenChange={(isOpen) => {
+          setAddViolationModalOpen(isOpen);
+          if (!isOpen) {
+            setInitialViolator(null);
+          }
+        }}
         onViolationAdded={handleViolationAdded}
-        initialValues={null}
+        initialViolator={initialViolator}
       />
 
       {/* Violation Details Modal */}
