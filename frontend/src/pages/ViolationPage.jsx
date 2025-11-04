@@ -8,6 +8,7 @@ import ViolationTable from "@/components/violations/ViolationTable";
 import AddViolationModal from "@/components/violations/AddViolationModal";
 import ViolationDetailsModal from "@/components/violations/ViolationDetailsModal";
 import EditViolationModal from "@/components/violations/EditViolationModal";
+import SearchViolatorModal from "@/components/violations/SearchViolatorModal";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
@@ -19,6 +20,8 @@ const ViolationPage = () => {
   const [addViolationModalOpen, setAddViolationModalOpen] = useState(false);
   const [violationDetailsModalOpen, setViolationDetailsModalOpen] = useState(false);
   const [editViolationModalOpen, setEditViolationModalOpen] = useState(false);
+  const [searchViolatorModalOpen, setSearchViolatorModalOpen] = useState(false);
+  const [prefillForAdd, setPrefillForAdd] = useState(null);
   const [selectedViolation, setSelectedViolation] = useState(null);
   const [selectedViolationId, setSelectedViolationId] = useState(null);
 
@@ -85,7 +88,7 @@ const ViolationPage = () => {
   };
 
   const handleAdd = () => {
-    setAddViolationModalOpen(true);
+    setSearchViolatorModalOpen(true);
   };
 
   const onRowClick = (data) => {
@@ -127,11 +130,27 @@ const ViolationPage = () => {
         </div>
       </div>
 
+      {/* Search Violator Modal */}
+      <SearchViolatorModal
+        open={searchViolatorModalOpen}
+        onOpenChange={setSearchViolatorModalOpen}
+        violations={violationData}
+        onSelectExisting={(v) => {
+          setSelectedViolationId(v._id);
+          setEditViolationModalOpen(true);
+        }}
+        onAddNew={(initial) => {
+          setPrefillForAdd(initial || null);
+          setAddViolationModalOpen(true);
+        }}
+      />
+
       {/* Add Violation Modal */}
       <AddViolationModal
         open={addViolationModalOpen}
         onOpenChange={setAddViolationModalOpen}
         onViolationAdded={handleViolationAdded}
+        initialValues={prefillForAdd}
       />
 
       {/* Violation Details Modal */}

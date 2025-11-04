@@ -210,10 +210,10 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
               <User className="h-3 w-3" />
               Created By
             </label>
-            <div className="ml-4 flex items-center gap-2 text-[11px]">
-              <span className="font-semibold text-gray-900 dark:text-gray-100">{violationData?.createdBy?.name || "Unknown"}</span>
+            <div className="ml-4 flex items-center gap-2 text-[10px] whitespace-nowrap">
+              <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">{violationData?.createdBy?.name || "Unknown"}</span>
               <span className="text-gray-500 dark:text-gray-400">•</span>
-              <span className="text-gray-500 dark:text-gray-400">{formatDateTime(violationData?.createdAt)}</span>
+              <span className="text-gray-500 dark:text-gray-400 truncate">{formatDateTime(violationData?.createdAt)}</span>
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -221,7 +221,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
               <Edit className="h-3 w-3" />
               Updated By
             </label>
-            <div className="ml-4 flex items-center gap-2 text-[11px]">
+            <div className="ml-4 flex items-center gap-2 text-[10px] whitespace-nowrap">
               {(() => {
                 const u = violationData?.updatedBy;
                 const hasUpdatedBy = u && u.name;
@@ -232,13 +232,13 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
                 
                 return (
                   <>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {u.name}
                     </span>
                     {violationData?.updatedAt && (
                       <>
                         <span className="text-gray-500 dark:text-gray-400">•</span>
-                        <span className="text-gray-500 dark:text-gray-400">
+                        <span className="text-gray-500 dark:text-gray-400 truncate">
                           {formatDateTime(violationData.updatedAt)}
                         </span>
                       </>

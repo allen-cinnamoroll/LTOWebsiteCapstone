@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { AlertTriangle } from "lucide-react";
 
-const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
+const AddViolationModal = ({ open, onOpenChange, onViolationAdded, initialValues }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
   const date = formatDate(Date.now());
@@ -93,6 +93,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
           apprehendingOfficer: "",
           chassisNo: "",
           engineNo: "",
+          fileNo: "",
         });
 
         // Close modal and refresh data
@@ -130,11 +131,32 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         chassisNo: "",
         engineNo: "",
         fileNo: "",
-        fileNo: "",
       });
     }
     onOpenChange(isOpen);
   };
+
+  // Apply initial values when opening
+  React.useEffect(() => {
+    if (open && initialValues) {
+      form.reset({
+        topNo: "",
+        firstName: initialValues.firstName || "",
+        middleInitial: "",
+        lastName: initialValues.lastName || "",
+        suffix: "",
+        violations: [""],
+        violationType: "confiscated",
+        licenseType: undefined,
+        plateNo: initialValues.plateNo || "",
+        dateOfApprehension: undefined,
+        apprehendingOfficer: "",
+        chassisNo: initialValues.chassisNo || "",
+        engineNo: initialValues.engineNo || "",
+        fileNo: initialValues.fileNo || "",
+      });
+    }
+  }, [open, initialValues]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
