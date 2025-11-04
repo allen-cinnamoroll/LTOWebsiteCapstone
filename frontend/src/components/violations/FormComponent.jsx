@@ -353,7 +353,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
 
         {/* Vehicle Details Section */}
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <FormField
               control={form.control}
               name="plateNo"
@@ -399,6 +399,24 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                   <FormControl>
                     <Input 
                       placeholder="Engine Number" 
+                      {...field}
+                      value={field.value === "null" ? "null" : field.value || ""}
+                      className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs text-red-400" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fileNo"
+              render={({ field }) => (
+                <FormItem className="space-y-0">
+                  <FormLabel className="text-xs text-gray-600">File No. (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="File Number" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}

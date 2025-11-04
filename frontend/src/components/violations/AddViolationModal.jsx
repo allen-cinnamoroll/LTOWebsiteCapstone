@@ -39,6 +39,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
       apprehendingOfficer: "",
       chassisNo: "",
       engineNo: "",
+      fileNo: "",
     },
   });
 
@@ -58,6 +59,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         apprehendingOfficer: formData.apprehendingOfficer,
         chassisNo: formData.chassisNo,
         engineNo: formData.engineNo,
+      fileNo: formData.fileNo,
       };
 
       // Only include dateOfApprehension if it has a value
@@ -127,6 +129,8 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         apprehendingOfficer: "",
         chassisNo: "",
         engineNo: "",
+        fileNo: "",
+        fileNo: "",
       });
     }
     onOpenChange(isOpen);

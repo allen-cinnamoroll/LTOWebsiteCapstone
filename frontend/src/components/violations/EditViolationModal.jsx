@@ -44,6 +44,7 @@ const EditViolationModal = ({ open, onOpenChange, violationId, onViolationUpdate
       apprehendingOfficer: "",
       chassisNo: "",
       engineNo: "",
+      fileNo: "",
     },
   });
 

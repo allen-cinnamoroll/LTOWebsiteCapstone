@@ -32,6 +32,7 @@ const AddViolationForm = () => {
       apprehendingOfficer: "",
       chassisNo: "",
       engineNo: "",
+      fileNo: "",
     },
   });
 
@@ -45,6 +46,7 @@ const AddViolationForm = () => {
         plateNo: formData.plateNo,
         dateOfApprehension: formData.dateOfApprehension,
         apprehendingOfficer: formData.apprehendingOfficer,
+      fileNo: formData.fileNo,
       };
 
       // Add fields based on violation type
