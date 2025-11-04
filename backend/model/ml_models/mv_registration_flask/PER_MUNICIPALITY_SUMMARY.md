@@ -199,3 +199,4 @@ for mun, data in municipalities_data.items():
 ✅ **Smart fallback for insufficient data**
 
 The system is **future-ready** and will scale automatically when you have sufficient data!
+

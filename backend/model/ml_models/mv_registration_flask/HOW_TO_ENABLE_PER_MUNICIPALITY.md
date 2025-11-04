@@ -151,3 +151,4 @@ curl -X POST http://localhost:5000/api/model/retrain \
 - Each municipality model is independent
 - You can have some municipalities with models, others without
 - System automatically routes to appropriate model
+
