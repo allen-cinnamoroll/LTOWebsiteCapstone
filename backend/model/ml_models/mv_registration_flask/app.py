@@ -75,7 +75,7 @@ def initialize_model():
             aggregated_model.load_model()
         else:
             print("Training aggregated model...")
-            data = preprocessor.load_and_process_data()
+            data, _ = preprocessor.load_and_process_data()
             aggregated_model.train(data)
         
         # Initialize per-municipality models if enabled
@@ -359,7 +359,7 @@ def retrain_model():
         
         # Retrain aggregated model
         print("Retraining aggregated model...")
-        processed_data = preprocessor.load_and_process_data()
+        processed_data, processing_info = preprocessor.load_and_process_data()
         
         if aggregated_model.model_exists() and not force:
             return jsonify({
@@ -369,6 +369,8 @@ def retrain_model():
             }), 400
         
         training_info = aggregated_model.train(processed_data, force=force)
+        # Add processing info to training results
+        training_info['processing_info'] = processing_info
         training_results['aggregated'] = training_info
         
         # Retrain per-municipality models if enabled

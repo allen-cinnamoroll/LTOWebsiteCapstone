@@ -26,7 +26,7 @@ class DataPreprocessor:
         Automatically combines multiple CSV files if they exist in the directory
         
         Returns:
-            DataFrame with weekly aggregated registration counts
+            tuple: (DataFrame with weekly aggregated registration counts, dict with processing info)
         """
         csv_dir = os.path.dirname(self.csv_path)
         csv_filename = os.path.basename(self.csv_path)
@@ -67,12 +67,14 @@ class DataPreprocessor:
         
         # Remove duplicates based on key columns (if they exist)
         # This prevents duplicate registrations if same data appears in multiple files
+        duplicates_removed = 0
         if 'plateNo' in df.columns and 'dateOfRenewal' in df.columns:
             before_dedup = len(df)
             df = df.drop_duplicates(subset=['plateNo', 'dateOfRenewal'], keep='first')
             after_dedup = len(df)
-            if before_dedup != after_dedup:
-                print(f"  - Removed {before_dedup - after_dedup} duplicate rows")
+            duplicates_removed = before_dedup - after_dedup
+            if duplicates_removed > 0:
+                print(f"  - Removed {duplicates_removed} duplicate rows")
         
         print(f"Combined total: {len(df)} rows from {len(all_csv_files)} CSV file(s)")
         
@@ -141,7 +143,20 @@ class DataPreprocessor:
         print(f"Weeks with data: {weekly_data['count'].sum()} total registrations")
         print(f"Mean per week: {weekly_data['count'].mean():.1f}")
         
-        return weekly_data[['count']]
+        # Prepare processing info
+        processing_info = {
+            'total_csv_files': len(all_csv_files),
+            'csv_files': all_csv_files,
+            'total_rows_before_dedup': total_rows,
+            'duplicates_removed': duplicates_removed,
+            'total_rows_after_dedup': len(df),
+            'filtered_rows': len(df_filtered),
+            'weeks_with_data': len(weekly_data),
+            'total_registrations': int(weekly_data['count'].sum()),
+            'mean_per_week': float(weekly_data['count'].mean())
+        }
+        
+        return weekly_data[['count']], processing_info
     
     def get_data_info(self, processed_data):
         """

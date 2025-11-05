@@ -315,11 +315,21 @@ class SARIMAModel:
         if self.accuracy_metrics is None:
             return None
         
-        return {
+        result = {
             **self.accuracy_metrics,
             'model_parameters': self.model_params,
             'last_trained': str(self.training_data.index.max()) if self.training_data is not None else None
         }
+        
+        # Add date range information if training data is available
+        if self.training_data is not None and len(self.training_data) > 0:
+            result['date_range'] = {
+                'start': str(self.training_data.index.min()),
+                'end': str(self.training_data.index.max())
+            }
+            result['training_weeks'] = len(self.training_data)
+        
+        return result
     
     def save_model(self):
         """Save the trained model to disk"""
