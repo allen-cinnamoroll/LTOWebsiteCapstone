@@ -12,6 +12,19 @@ async function importData() {
   // 🚗 Import Accidents
   // =====================
   const accidentsCollection = db.collection('accidents');
+  
+  // Drop old/unused indexes that might cause conflicts
+  try {
+    await accidentsCollection.dropIndex('blotterNo_1');
+    console.log('✅ Dropped old blotterNo_1 index');
+  } catch (error) {
+    if (error.code === 27) {
+      console.log('ℹ️  blotterNo_1 index does not exist (already removed)');
+    } else {
+      console.log('⚠️  Error dropping blotterNo_1 index:', error.message);
+    }
+  }
+  
   const accidentsPath = path.join(__dirname, 'accidents_2024_2025_clean.json');
   const accidentsData = JSON.parse(fs.readFileSync(accidentsPath, 'utf8'));
 
@@ -24,33 +37,6 @@ async function importData() {
   await accidentsCollection.deleteMany({});
   await accidentsCollection.insertMany(transformedAccidents);
   console.log('✅ Accidents data imported successfully!');
-
-  // =====================
-  // 🚨 Import Violations
-  // =====================
-  const violationsCollection = db.collection('violations');
-  const violationsPath = path.join(__dirname, 'violations_impounded.json');
-  const violationsData = JSON.parse(fs.readFileSync(violationsPath, 'utf8'));
-
-  // Get superadmin ID for default createdBy
-  const usersCollection = db.collection('users');
-  const superadmin = await usersCollection.findOne({ role: "0" });
-  const superadminId = superadmin ? superadmin._id : null;
-
-  // Clear collection before re-import
-  await violationsCollection.deleteMany({});
-  const now = new Date();
-  const transformedViolations = violationsData.map(item => ({
-    ...item,
-    // Ensure impounded type is set; the frontend may default missing values to 'confiscated'
-    violationType: item.violationType || "impounded",
-    createdAt: item.createdAt ? new Date(item.createdAt) : now,
-    // Don't set updatedAt or updatedBy for new imports (they weren't updated yet)
-    createdBy: item.createdBy || superadminId,
-    updatedBy: null,
-  }));
-  await violationsCollection.insertMany(transformedViolations);
-  console.log('✅ Violations data imported successfully!');
 
   await client.close();
 }

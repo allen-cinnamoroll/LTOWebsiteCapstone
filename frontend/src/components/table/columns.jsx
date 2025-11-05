@@ -337,11 +337,18 @@ export const violationColumns = (onEdit, onUpdateStatus, submitting) => [
     header: "Violations",
     cell: ({ row }) => {
       const violations = row.getValue("violations");
+      let violationCount = 0;
+      
+      if (violations && Array.isArray(violations)) {
+        // Count only non-"None" violations
+        violationCount = violations.filter(v => v && v !== "None").length;
+      } else if (violations && violations !== "None") {
+        violationCount = 1;
+      }
+      
       return (
-        <div className="max-w-xs text-xs text-gray-900 dark:text-gray-200">
-          {violations && violations.length > 0 && violations[0] !== "None" 
-            ? (Array.isArray(violations) ? violations.join(", ") : violations) 
-            : "None"}
+        <div className="text-xs text-gray-900 dark:text-gray-200 font-medium">
+          {violationCount > 0 ? violationCount : "0"}
         </div>
       );
     },
