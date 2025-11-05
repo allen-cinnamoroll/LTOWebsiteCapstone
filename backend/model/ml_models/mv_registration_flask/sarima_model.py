@@ -31,6 +31,8 @@ class SARIMAModel:
         self.model_params = None
         self.training_data = None
         self.test_data = None
+        self.all_data = None  # Store entire dataset (training + test) for prediction start date
+        self._metadata = None  # Store metadata when loading model
         self.accuracy_metrics = None
         self.test_accuracy_metrics = None
         self.diagnostics = None
@@ -186,6 +188,8 @@ class SARIMAModel:
         # Store training and test data
         self.training_data = train_series.to_frame('count')
         self.test_data = test_series.to_frame('count')
+        # Store entire dataset to determine correct prediction start date
+        self.all_data = series.to_frame('count')
         
         # Find optimal parameters using training data only
         p, d, q, P, D, Q, s = self.find_optimal_parameters(train_series)
@@ -492,7 +496,35 @@ class SARIMAModel:
         forecast_ci = self.fitted_model.get_forecast(steps=weeks).conf_int()
         
         # Generate dates for predictions
-        last_date = self.training_data.index.max()
+        # Use the maximum date from ALL available data (training + test), not just training
+        # This ensures we predict truly future dates, not dates that exist in test data
+        last_date = None
+        
+        # Priority 1: Use all_data if available (from freshly trained model)
+        if self.all_data is not None and len(self.all_data) > 0:
+            last_date = pd.to_datetime(self.all_data.index.max())
+            print(f"Using last date from entire dataset (all_data): {last_date}")
+        # Priority 2: Check if we have metadata with last_data_date (from loaded model)
+        elif hasattr(self, '_metadata') and self._metadata and 'last_data_date' in self._metadata:
+            last_data_date_str = self._metadata['last_data_date']
+            if last_data_date_str:
+                last_date = pd.to_datetime(last_data_date_str)
+                print(f"Using last date from metadata: {last_date}")
+        # Priority 3: Try to reconstruct from test_data if available
+        elif self.test_data is not None and len(self.test_data) > 0 and self.training_data is not None:
+            last_date = pd.to_datetime(max(
+                self.training_data.index.max(),
+                self.test_data.index.max()
+            ))
+            print(f"Using last date from training + test data: {last_date}")
+        # Priority 4: Fallback to training data (for backward compatibility)
+        else:
+            last_date = pd.to_datetime(self.training_data.index.max())
+            print(f"Using last date from training data (fallback): {last_date}")
+        
+        if last_date is None:
+            raise ValueError("Cannot determine last data date for predictions")
+        
         forecast_dates = pd.date_range(
             start=last_date + timedelta(weeks=1),
             periods=weeks,
@@ -524,7 +556,8 @@ class SARIMAModel:
             },
             'prediction_dates': [p['date'] for p in weekly_predictions],
             'prediction_weeks': weeks,
-            'last_training_date': str(last_date),
+            'last_training_date': str(self.training_data.index.max()),
+            'last_data_date': str(last_date),  # Last date from entire dataset
             'prediction_start_date': weekly_predictions[0]['date']
         }
         
@@ -571,6 +604,19 @@ class SARIMAModel:
                 pickle.dump(self.fitted_model, f)
             
             # Save metadata
+            # Store last date from entire dataset (training + test) for correct prediction start date
+            last_data_date = None
+            if self.all_data is not None and len(self.all_data) > 0:
+                last_data_date = str(self.all_data.index.max())
+            elif self.test_data is not None and len(self.test_data) > 0:
+                # If all_data not set but test_data exists, use max of training + test
+                last_data_date = str(max(
+                    self.training_data.index.max() if self.training_data is not None else pd.Timestamp.min,
+                    self.test_data.index.max()
+                ))
+            elif self.training_data is not None:
+                last_data_date = str(self.training_data.index.max())
+            
             metadata = {
                 'model_params': self.model_params,
                 'accuracy_metrics': self.accuracy_metrics,
@@ -579,7 +625,8 @@ class SARIMAModel:
                 'date_range': {
                     'start': str(self.training_data.index.min()) if self.training_data is not None else None,
                     'end': str(self.training_data.index.max()) if self.training_data is not None else None
-                }
+                },
+                'last_data_date': last_data_date  # Last date from entire dataset (training + test)
             }
             
             with open(self.metadata_file, 'w') as f:
@@ -604,9 +651,13 @@ class SARIMAModel:
             
             self.model_params = metadata['model_params']
             self.accuracy_metrics = metadata.get('accuracy_metrics')
+            # Store metadata for access in predict() method
+            self._metadata = metadata
             
             print(f"Model loaded from {self.model_file}")
             print(f"Model parameters: {self.model_params}")
+            if 'last_data_date' in metadata:
+                print(f"Last data date from metadata: {metadata['last_data_date']}")
             
             # Reconstruct training data info (we don't have the full data, just metadata)
             if metadata.get('date_range'):

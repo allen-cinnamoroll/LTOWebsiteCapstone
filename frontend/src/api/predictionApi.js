@@ -16,16 +16,46 @@ export const getWeeklyPredictions = async (weeks = 12, municipality = null) => {
       params.append('municipality', municipality);
     }
     
-    const response = await fetch(`${MV_PREDICTION_API_BASE}/api/predict/registrations?${params.toString()}`);
+    const url = `${MV_PREDICTION_API_BASE}/api/predict/registrations?${params.toString()}`;
+    console.log('Fetching predictions from:', url);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: errorText || `HTTP ${response.status}` };
+      }
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || errorText}`);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error fetching weekly predictions:', error);
+    
+    // Re-throw with more context if it's a network error
+    if (error.name === 'AbortError' || error.message.includes('timeout')) {
+      throw new Error('Request timed out. The server may be slow or unreachable.');
+    } else if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+      throw new Error(`Failed to fetch: Cannot connect to ${MV_PREDICTION_API_BASE}. Please check if the server is running.`);
+    }
+    
     throw error;
   }
 };
