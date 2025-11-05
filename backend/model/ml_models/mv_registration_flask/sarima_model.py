@@ -151,13 +151,14 @@ class SARIMAModel:
         print(f"Optimal parameters: SARIMA{best_params[:3]} x SARIMA{best_params[3:]}")
         return best_params
     
-    def train(self, data, force=False):
+    def train(self, data, force=False, processing_info=None):
         """
         Train the SARIMA model
         
         Args:
             data: Processed time series data (DataFrame with 'count' column)
             force: Force retraining even if model exists
+            processing_info: Optional dict with processing information including actual_date_range
             
         Returns:
             Dictionary with training information
@@ -228,19 +229,42 @@ class SARIMAModel:
         # Save model
         self.save_model()
         
+        # Use actual registration dates if available, otherwise fall back to week_start dates
+        # The key fix: use actual min registration date instead of week_start Monday
+        if processing_info and 'actual_date_range' in processing_info:
+            actual_date_range = processing_info['actual_date_range']
+            # Use actual earliest registration date for training start (fixes the Dec 30 issue)
+            training_start = actual_date_range['start']
+            # For end dates, use week_start dates as they're reasonable approximations
+            # since we're splitting by weeks anyway
+            training_end = str(train_series.index.max())
+            
+            if len(test_series) > 0:
+                test_start = str(test_series.index.min())
+                test_end = str(test_series.index.max())
+            else:
+                test_start = None
+                test_end = None
+        else:
+            # Fall back to week_start dates
+            training_start = str(train_series.index.min())
+            training_end = str(train_series.index.max())
+            test_start = str(test_series.index.min()) if len(test_series) > 0 else None
+            test_end = str(test_series.index.max()) if len(test_series) > 0 else None
+        
         training_info = {
             'model_params': self.model_params,
             'training_weeks': len(train_series),
             'test_weeks': len(test_series),
             'total_weeks': len(series),
             'date_range': {
-                'start': str(train_series.index.min()),
-                'end': str(train_series.index.max())
+                'start': training_start,
+                'end': training_end
             },
             'test_date_range': {
-                'start': str(test_series.index.min()),
-                'end': str(test_series.index.max())
-            },
+                'start': test_start,
+                'end': test_end
+            } if test_start else None,
             'accuracy_metrics': self.accuracy_metrics,  # Training (in-sample) metrics
             'test_accuracy_metrics': self.test_accuracy_metrics,  # Test (out-of-sample) metrics
             'diagnostics': self.diagnostics,

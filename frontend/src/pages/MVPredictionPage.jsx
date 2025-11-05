@@ -24,12 +24,134 @@ export default function MVPredictionPage() {
   const [duplicateInfo, setDuplicateInfo] = useState(null);
   const [hasNewFile, setHasNewFile] = useState(false);
   const [currentPage, setCurrentPage] = useState(0); // 0 for accuracy, 1 for diagnostics
+  const [dateRange, setDateRange] = useState(null); // { startDate, endDate } from CSV
+  const [isAnalyzingDateRange, setIsAnalyzingDateRange] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleFileSelect = (file) => {
+  // Helper function to parse CSV row handling quoted fields
+  const parseCSVRow = (line) => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // Field separator
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    // Add last field
+    result.push(current.trim());
+    return result;
+  };
+
+  // Function to parse CSV and extract date range from dateOfRenewal column
+  const analyzeCSVDateRange = async (file) => {
+    setIsAnalyzingDateRange(true);
+    setDateRange(null);
+    
+    try {
+      const text = await file.text();
+      // Handle different line endings (Windows \r\n, Unix \n, Mac \r)
+      const lines = text.split(/\r?\n/).filter(line => line.trim());
+      
+      if (lines.length === 0) {
+        return;
+      }
+      
+      // Parse header row to find dateOfRenewal column index
+      const header = parseCSVRow(lines[0]).map(col => col.replace(/^"|"$/g, ''));
+      const dateColumnIndex = header.findIndex(col => col.toLowerCase() === 'dateofrenewal');
+      
+      if (dateColumnIndex === -1) {
+        // Column not found, silently return (date range won't be shown)
+        setIsAnalyzingDateRange(false);
+        return;
+      }
+      
+      // Parse dates from data rows
+      const dates = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = parseCSVRow(lines[i]).map(cell => cell.replace(/^"|"$/g, ''));
+        if (row[dateColumnIndex]) {
+          const dateStr = row[dateColumnIndex].trim();
+          if (dateStr) {
+            // Try to parse date in MM/DD/YYYY format
+            const dateParts = dateStr.split('/');
+            if (dateParts.length === 3) {
+              const month = parseInt(dateParts[0], 10);
+              const day = parseInt(dateParts[1], 10);
+              const year = parseInt(dateParts[2], 10);
+              
+              if (!isNaN(month) && !isNaN(day) && !isNaN(year) && 
+                  month >= 1 && month <= 12 && 
+                  day >= 1 && day <= 31 && 
+                  year >= 1900 && year <= 2100) {
+                const date = new Date(year, month - 1, day);
+                // Validate the date is correct (catches invalid dates like 02/30/2025)
+                if (!isNaN(date.getTime()) && 
+                    date.getMonth() === month - 1 && 
+                    date.getDate() === day) {
+                  dates.push(date);
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      if (dates.length > 0) {
+        // Find min and max dates
+        const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+        const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+        
+        // Format as "Month Day, Year" (e.g., "January 2, 2025")
+        const formatDate = (date) => {
+          const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+          ];
+          const month = monthNames[date.getMonth()];
+          const day = date.getDate();
+          const year = date.getFullYear();
+          return `${month} ${day}, ${year}`;
+        };
+        
+        setDateRange({
+          startDate: formatDate(minDate),
+          endDate: formatDate(maxDate)
+        });
+      }
+    } catch (error) {
+      console.error('Error analyzing CSV date range:', error);
+      // Silently fail - don't show error to user, just don't show date range
+    } finally {
+      setIsAnalyzingDateRange(false);
+    }
+  };
+
+  const handleFileSelect = async (file) => {
     if (file && file.type === 'text/csv' || file.name.endsWith('.csv')) {
       setSelectedFile(file);
       setRetrainStatus(null);
+      // Analyze CSV for date range
+      await analyzeCSVDateRange(file);
     } else {
       toast.error('Invalid file type', {
         description: 'Please upload a CSV file'
@@ -47,26 +169,27 @@ export default function MVPredictionPage() {
     setIsDragging(false);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
     
     const file = e.dataTransfer.files[0];
     if (file) {
-      handleFileSelect(file);
+      await handleFileSelect(file);
     }
   };
 
-  const handleFileInputChange = (e) => {
+  const handleFileInputChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      handleFileSelect(file);
+      await handleFileSelect(file);
     }
   };
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setRetrainStatus(null);
+    setDateRange(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -211,6 +334,7 @@ export default function MVPredictionPage() {
         setSelectedFile(null);
         setRetrainStatus(null);
         setUploadProgress(0);
+        setDateRange(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
@@ -389,6 +513,25 @@ export default function MVPredictionPage() {
               </div>
             )}
           </div>
+
+          {/* Date Range Display */}
+          {selectedFile && (
+            <div className="flex items-center justify-center">
+              {isAnalyzingDateRange ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Analyzing file date range...</span>
+                </div>
+              ) : dateRange ? (
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">File contains data from: </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {dateRange.startDate} to {dateRange.endDate}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          )}
 
           {/* Progress Indicator */}
           {(isUploading || retrainStatus) && (

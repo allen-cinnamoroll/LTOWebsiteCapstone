@@ -391,7 +391,7 @@ def retrain_model():
                 'message': 'Set "force": true in request body to retrain existing model'
             }), 400
         
-        training_info = aggregated_model.train(processed_data, force=force)
+        training_info = aggregated_model.train(processed_data, force=force, processing_info=processing_info)
         # Add processing info to training results
         training_info['processing_info'] = processing_info
         training_results['aggregated'] = training_info

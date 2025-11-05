@@ -154,6 +154,12 @@ class DataPreprocessor:
         print(f"Weeks with data: {weekly_data['count'].sum()} total registrations")
         print(f"Mean per week: {weekly_data['count'].mean():.1f}")
         
+        # Track actual min/max registration dates (not week_start dates)
+        actual_min_date = df_filtered['dateOfRenewal_parsed'].min()
+        actual_max_date = df_filtered['dateOfRenewal_parsed'].max()
+        
+        print(f"Actual registration date range: {actual_min_date} to {actual_max_date}")
+        
         # Prepare processing info
         processing_info = {
             'total_csv_files': len(all_csv_files),
@@ -164,7 +170,11 @@ class DataPreprocessor:
             'filtered_rows': len(df_filtered),
             'weeks_with_data': len(weekly_data),
             'total_registrations': int(weekly_data['count'].sum()),
-            'mean_per_week': float(weekly_data['count'].mean())
+            'mean_per_week': float(weekly_data['count'].mean()),
+            'actual_date_range': {
+                'start': str(actual_min_date),
+                'end': str(actual_max_date)
+            }
         }
         
         return weekly_data[['count']], processing_info
