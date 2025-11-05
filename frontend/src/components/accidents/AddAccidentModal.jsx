@@ -26,15 +26,29 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
   const form = useForm({
     resolver: zodResolver(AccidentSchema),
     defaultValues: {
-      accident_id: "",
-      plateNo: "",
-      accident_date: undefined,
-      street: "",
-      barangay: "",
+      blotterNo: "",
+      vehiclePlateNo: "",
+      vehicleMCPlateNo: "",
+      vehicleChassisNo: "",
+      suspect: "",
+      stageOfFelony: "",
+      offense: "",
+      offenseType: "",
+      narrative: "",
+      caseStatus: "",
+      region: "",
+      province: "",
       municipality: "",
-      vehicle_type: "",
-      severity: "",
-      notes: "",
+      barangay: "",
+      street: "",
+      lat: undefined,
+      lng: undefined,
+      dateEncoded: undefined,
+      dateReported: undefined,
+      timeReported: "",
+      dateCommited: undefined,
+      timeCommited: "",
+      incidentType: "",
     },
   });
 
@@ -42,37 +56,65 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
     setIsSubmitting(true);
     try {
       const content = {
-        accident_id: formData.accident_id,
-        plateNo: formData.plateNo,
-        accident_date: formData.accident_date ? formData.accident_date.toISOString() : null,
-        street: formData.street,
-        barangay: formData.barangay,
+        blotterNo: formData.blotterNo,
+        vehiclePlateNo: formData.vehiclePlateNo,
+        vehicleMCPlateNo: formData.vehicleMCPlateNo,
+        vehicleChassisNo: formData.vehicleChassisNo,
+        suspect: formData.suspect,
+        stageOfFelony: formData.stageOfFelony,
+        offense: formData.offense,
+        offenseType: formData.offenseType,
+        narrative: formData.narrative,
+        caseStatus: formData.caseStatus,
+        region: formData.region,
+        province: formData.province,
         municipality: formData.municipality,
-        vehicle_type: formData.vehicle_type,
-        severity: formData.severity,
-        notes: formData.notes,
+        barangay: formData.barangay,
+        street: formData.street,
+        lat: formData.lat,
+        lng: formData.lng,
+        dateEncoded: formData.dateEncoded ? formData.dateEncoded.toISOString() : null,
+        dateReported: formData.dateReported ? formData.dateReported.toISOString() : null,
+        timeReported: formData.timeReported,
+        dateCommited: formData.dateCommited ? formData.dateCommited.toISOString() : null,
+        timeCommited: formData.timeCommited,
+        incidentType: formData.incidentType,
       };
 
-      console.log("Sending accident data:", content);
+      console.log("Sending incident data:", content);
 
       const { data } = await apiClient.post("/accident", content, {
         headers: { Authorization: token },
       });
 
       if (data.success) {
-        toast.success("Accident has been added", { description: date });
+        toast.success("Incident has been added", { description: date });
 
         // Reset form
         form.reset({
-          accident_id: "",
-          plateNo: "",
-          accident_date: undefined,
-          street: "",
-          barangay: "",
+          blotterNo: "",
+          vehiclePlateNo: "",
+          vehicleMCPlateNo: "",
+          vehicleChassisNo: "",
+          suspect: "",
+          stageOfFelony: "",
+          offense: "",
+          offenseType: "",
+          narrative: "",
+          caseStatus: "",
+          region: "",
+          province: "",
           municipality: "",
-          vehicle_type: "",
-          severity: "",
-          notes: "",
+          barangay: "",
+          street: "",
+          lat: undefined,
+          lng: undefined,
+          dateEncoded: undefined,
+          dateReported: undefined,
+          timeReported: "",
+          dateCommited: undefined,
+          timeCommited: "",
+          incidentType: "",
         });
 
         // Close modal and refresh data
@@ -82,7 +124,7 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
         }
       }
     } catch (error) {
-      const message = error?.response?.data?.message || "Failed to add accident";
+      const message = error?.response?.data?.message || "Failed to add incident";
       toast.error(message, {
         description: date,
       });
@@ -95,15 +137,29 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
     if (!isOpen && !submitting) {
       // Reset form when closing modal
       form.reset({
-        accident_id: "",
-        plateNo: "",
-        accident_date: undefined,
-        street: "",
-        barangay: "",
+        blotterNo: "",
+        vehiclePlateNo: "",
+        vehicleMCPlateNo: "",
+        vehicleChassisNo: "",
+        suspect: "",
+        stageOfFelony: "",
+        offense: "",
+        offenseType: "",
+        narrative: "",
+        caseStatus: "",
+        region: "",
+        province: "",
         municipality: "",
-        vehicle_type: "",
-        severity: "",
-        notes: "",
+        barangay: "",
+        street: "",
+        lat: undefined,
+        lng: undefined,
+        dateEncoded: undefined,
+        dateReported: undefined,
+        timeReported: "",
+        dateCommited: undefined,
+        timeCommited: "",
+        incidentType: "",
       });
     }
     onOpenChange(isOpen);
@@ -115,10 +171,10 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Add New Accident
+            Add New Incident
           </DialogTitle>
           <DialogDescription>
-            Fill in the required fields to add a new accident record to the system.
+            Fill in the required fields to add a new incident record to the system.
           </DialogDescription>
         </DialogHeader>
 

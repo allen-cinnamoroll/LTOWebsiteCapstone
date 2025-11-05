@@ -37,12 +37,19 @@ class FeatureEngineer:
         return df
     
     def extract_temporal_features(self, df):
-        """Extract temporal features from accident_date"""
-        df['year'] = df[self.config['features']['date_feature']].dt.year
-        df['month'] = df[self.config['features']['date_feature']].dt.month
-        df['day'] = df[self.config['features']['date_feature']].dt.day
-        df['day_of_week'] = df[self.config['features']['date_feature']].dt.dayofweek
-        df['hour'] = df[self.config['features']['date_feature']].dt.hour
+        """Extract temporal features from dateCommited"""
+        date_col = self.config['features']['date_feature']
+        df['year'] = df[date_col].dt.year
+        df['month'] = df[date_col].dt.month
+        df['day'] = df[date_col].dt.day
+        df['day_of_week'] = df[date_col].dt.dayofweek
+        
+        # Extract hour if time data is available, otherwise default to 0
+        if df[date_col].dt.hour.notna().any():
+            df['hour'] = df[date_col].dt.hour
+        else:
+            df['hour'] = 0  # Default hour if not available
+            
         df['is_weekend'] = df['day_of_week'].isin([5, 6]).astype(int)
         df['is_rush_hour'] = df['hour'].isin([7, 8, 17, 18]).astype(int)
         
@@ -136,18 +143,20 @@ class FeatureEngineer:
         """Prepare target variable"""
         target_feature = self.config['features']['target_feature']
         
-        # Map severity to numerical values
-        severity_mapping = self.config['rule_system']['severity_mapping']
-        df['severity_encoded'] = df[target_feature].map(severity_mapping)
+        # Map target to numerical values
+        target_mapping = self.config['rule_system']['case_status_mapping']
+        df['target_encoded'] = df[target_feature].map(target_mapping)
         
-        # Remove rows with unmapped severity values
-        df = df.dropna(subset=['severity_encoded'])
+        # Remove rows with unmapped target values
+        df = df.dropna(subset=['target_encoded'])
+        
+        print(f"Target distribution:\n{df['target_encoded'].value_counts()}")
         
         return df
     
     def split_data(self, df):
         """Split data into train and test sets"""
-        target = df['severity_encoded']
+        target = df['target_encoded']
         features = df[self.feature_columns]
         
         X_train, X_test, y_train, y_test = train_test_split(
@@ -159,6 +168,8 @@ class FeatureEngineer:
         
         print(f"Training set: {len(X_train)} samples")
         print(f"Test set: {len(X_test)} samples")
+        print(f"Training target distribution:\n{pd.Series(y_train).value_counts()}")
+        print(f"Test target distribution:\n{pd.Series(y_test).value_counts()}")
         
         return X_train, X_test, y_train, y_test
     

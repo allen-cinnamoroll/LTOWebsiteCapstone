@@ -67,7 +67,7 @@ The system expects accident data in CSV format with the following columns:
 
 Place your accident data in:
 ```
-backend/data/raw/accidents_dummy_data.csv
+backend/data/raw/cleaned_accidents_data.csv
 ```
 
 ### 2. Configuration
@@ -138,15 +138,15 @@ python validateModels.py
 ```
 
 ### Validation Criteria
-- **Accuracy**: ≥50% (for demo data)
-- **F1-Score**: ≥40% (for demo data)
+- **Accuracy**: ≥70% (production threshold with 80/20 train-test split)
+- **F1-Score**: ≥65% (production threshold with 80/20 train-test split)
 - **Model Loading**: All files present and loadable
 - **Inference Test**: Real-time prediction working
 
 ### Validation Output
 ```
-✅ Model accuracy (0.5161) meets minimum requirement (0.5)
-✅ Model F1-score (0.4525) meets minimum requirement (0.4)
+✅ Model accuracy (0.8200) meets minimum requirement (0.70)
+✅ Model F1-score (0.7850) meets minimum requirement (0.65)
 ✅ Inference test successful!
 ✅ ALL VALIDATIONS PASSED - Models are ready for deployment!
 ```
@@ -173,14 +173,15 @@ python validateModels.py
 
 ## Model Performance
 
-### Current Performance (Demo Data)
-- **Accuracy**: 51.6%
-- **Precision**: 44.6%
-- **Recall**: 51.6%
-- **F1-Score**: 45.3%
+### Expected Performance Thresholds (Production)
+With 80/20 train-test split on cleaned accident data:
+- **Minimum Accuracy**: 70%
+- **Minimum Precision**: 68%
+- **Minimum Recall**: 68%
+- **Minimum F1-Score**: 65%
 
 ### Risk Distribution
-- **Medium Risk**: 90.3% (Regular monitoring)
+After training, the model should provide balanced risk predictions across high, medium, and low categories
 - **High Risk**: 6.5% (Increased patrols, signage)
 - **Low Risk**: 3.2% (Standard monitoring)
 

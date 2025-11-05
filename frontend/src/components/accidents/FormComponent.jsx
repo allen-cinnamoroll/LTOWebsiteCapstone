@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,23 +11,137 @@ import DatePicker from "@/components/calendar/DatePicker";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
+// Default options
+const DEFAULT_INCIDENT_TYPES = [
+  "(Incident) Vehicular Accident",
+  "(Simple) Police Dispatch for Incident Response",
+  "(Incident) Accident caused by negligence",
+  "(Simple) Police Dispatch to secure and area/checkpoint",
+  "(Operation) Buy Bust"
+];
+
+const DEFAULT_OFFENSE_TYPES = [
+  "Crimes Against Persons",
+  "Crimes Against Property"
+];
+
 const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const navigate = useNavigate();
+  
+  // State for custom options
+  const [incidentTypes, setIncidentTypes] = useState([]);
+  const [offenseTypes, setOffenseTypes] = useState([]);
+  const [showIncidentTypeInput, setShowIncidentTypeInput] = useState(false);
+  const [showOffenseTypeInput, setShowOffenseTypeInput] = useState(false);
+
+  // Load custom options from localStorage on mount
+  useEffect(() => {
+    const storedIncidentTypes = localStorage.getItem("customIncidentTypes");
+    const storedOffenseTypes = localStorage.getItem("customOffenseTypes");
+    
+    if (storedIncidentTypes) {
+      setIncidentTypes([...DEFAULT_INCIDENT_TYPES, ...JSON.parse(storedIncidentTypes)]);
+    } else {
+      setIncidentTypes(DEFAULT_INCIDENT_TYPES);
+    }
+    
+    if (storedOffenseTypes) {
+      setOffenseTypes([...DEFAULT_OFFENSE_TYPES, ...JSON.parse(storedOffenseTypes)]);
+    } else {
+      setOffenseTypes(DEFAULT_OFFENSE_TYPES);
+    }
+  }, []);
+
+  // Check if current value is "Others" or if it's a custom value on mount
+  useEffect(() => {
+    const currentIncidentType = form.getValues("incidentType");
+    const currentOffenseType = form.getValues("offenseType");
+    
+    if (currentIncidentType && !incidentTypes.includes(currentIncidentType) && currentIncidentType !== "Others") {
+      setShowIncidentTypeInput(false);
+    } else if (currentIncidentType === "Others") {
+      setShowIncidentTypeInput(true);
+    }
+    
+    if (currentOffenseType && !offenseTypes.includes(currentOffenseType) && currentOffenseType !== "Others") {
+      setShowOffenseTypeInput(false);
+    } else if (currentOffenseType === "Others") {
+      setShowOffenseTypeInput(true);
+    }
+  }, [incidentTypes, offenseTypes]);
+
+  // Handle incident type change
+  const handleIncidentTypeChange = (value) => {
+    if (value === "Others") {
+      setShowIncidentTypeInput(true);
+      form.setValue("incidentType", "");
+    } else {
+      setShowIncidentTypeInput(false);
+      form.setValue("incidentType", value);
+    }
+  };
+
+  // Handle offense type change
+  const handleOffenseTypeChange = (value) => {
+    if (value === "Others") {
+      setShowOffenseTypeInput(true);
+      form.setValue("offenseType", "");
+    } else {
+      setShowOffenseTypeInput(false);
+      form.setValue("offenseType", value);
+    }
+  };
+
+  // Save custom values to localStorage and update dropdown
+  const saveCustomValues = () => {
+    const currentIncidentType = form.getValues("incidentType");
+    const currentOffenseType = form.getValues("offenseType");
+
+    // Save custom incident type if it's not in the default list
+    if (currentIncidentType && !DEFAULT_INCIDENT_TYPES.includes(currentIncidentType)) {
+      const storedIncidentTypes = localStorage.getItem("customIncidentTypes");
+      const customIncidentTypes = storedIncidentTypes ? JSON.parse(storedIncidentTypes) : [];
+      
+      if (!customIncidentTypes.includes(currentIncidentType)) {
+        customIncidentTypes.push(currentIncidentType);
+        localStorage.setItem("customIncidentTypes", JSON.stringify(customIncidentTypes));
+        setIncidentTypes([...DEFAULT_INCIDENT_TYPES, ...customIncidentTypes]);
+      }
+    }
+
+    // Save custom offense type if it's not in the default list
+    if (currentOffenseType && !DEFAULT_OFFENSE_TYPES.includes(currentOffenseType)) {
+      const storedOffenseTypes = localStorage.getItem("customOffenseTypes");
+      const customOffenseTypes = storedOffenseTypes ? JSON.parse(storedOffenseTypes) : [];
+      
+      if (!customOffenseTypes.includes(currentOffenseType)) {
+        customOffenseTypes.push(currentOffenseType);
+        localStorage.setItem("customOffenseTypes", JSON.stringify(customOffenseTypes));
+        setOffenseTypes([...DEFAULT_OFFENSE_TYPES, ...customOffenseTypes]);
+      }
+    }
+  };
+
+  // Wrap onSubmit to save custom values first
+  const handleFormSubmit = async (data) => {
+    saveCustomValues();
+    return onSubmit(data);
+  };
 
   return (
     <Form {...form}>
-      <form id="accident-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Row 1: Accident ID */}
+      <form id="accident-form" onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+        {/* Row 1: Blotter No */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="accident_id"
+            name="blotterNo"
             render={({ field }) => (
               <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Accident ID</FormLabel>
+                <FormLabel className="text-xs text-gray-600">Blotter No.</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="ACC-0001" 
+                    placeholder="BLT-0001" 
                     {...field} 
                     className={cn(
                       "text-xs",
@@ -42,16 +156,16 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
           />
         </div>
 
-        {/* Row 2: Plate No., Accident Date */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Row 1.5: Vehicle Information */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
-            name="plateNo"
+            name="vehiclePlateNo"
             render={({ field }) => (
               <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Plate No.</FormLabel>
+                <FormLabel className="text-xs text-gray-600">Vehicle Plate No.</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter vehicle plate number" {...field} className="text-xs" />
+                  <Input placeholder="Enter vehicle plate no." {...field} className="text-xs" />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -59,10 +173,349 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
           />
           <FormField
             control={form.control}
-            name="accident_date"
+            name="vehicleMCPlateNo"
             render={({ field }) => (
               <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Accident Date</FormLabel>
+                <FormLabel className="text-xs text-gray-600">Vehicle MC Plate No.</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter motorcycle plate no." {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="vehicleChassisNo"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Vehicle Chassis No.</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter chassis no." {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 2: Suspect, Incident Type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="suspect"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Suspect</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter suspect name" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="incidentType"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Incident Type</FormLabel>
+                {!showIncidentTypeInput ? (
+                  <Select onValueChange={handleIncidentTypeChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="text-xs">
+                        <SelectValue placeholder="Select incident type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {incidentTypes.map((type) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                      <SelectItem value="Others">Others</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <FormControl>
+                    <Input
+                      placeholder="Enter custom incident type"
+                      {...field}
+                      className="text-xs"
+                      autoFocus
+                    />
+                  </FormControl>
+                )}
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 3: Offense, Offense Type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="offense"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Offense</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter offense" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="offenseType"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Offense Type</FormLabel>
+                {!showOffenseTypeInput ? (
+                  <Select onValueChange={handleOffenseTypeChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="text-xs">
+                        <SelectValue placeholder="Select offense type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {offenseTypes.map((type) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                      <SelectItem value="Others">Others</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <FormControl>
+                    <Input
+                      placeholder="Enter custom offense type"
+                      {...field}
+                      className="text-xs"
+                      autoFocus
+                    />
+                  </FormControl>
+                )}
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 4: Stage of Felony, Case Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="stageOfFelony"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Stage of Felony</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter stage of felony" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="caseStatus"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Case Status</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter case status" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+
+        {/* Row 6: Region, Province */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="region"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Region</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter region" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="province"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Province</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter province" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 7: Municipality, Barangay */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="municipality"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Municipality</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter municipality" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="barangay"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Barangay</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter barangay" {...field} className="text-xs" />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 8: Street */}
+        <FormField
+          control={form.control}
+          name="street"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel className="text-xs text-gray-600">Street</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter street" {...field} className="text-xs" />
+              </FormControl>
+              <FormMessage className="text-xs text-red-400" />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 9: Latitude, Longitude */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="lat"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Latitude</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="any"
+                    placeholder="Enter latitude" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                    className="text-xs" 
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lng"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Longitude</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    step="any"
+                    placeholder="Enter longitude" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                    className="text-xs" 
+                  />
+                </FormControl>
+                <FormMessage className="text-xs text-red-400" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Row 10: Date Committed */}
+        <FormField
+          control={form.control}
+          name="dateCommited"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel className="text-xs text-gray-600">Date Committed</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full text-left font-normal text-xs justify-start",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2 space-y-2" align="start">
+                    <DatePicker
+                      fieldValue={field.value}
+                      dateValue={(date) =>
+                        form.setValue("dateCommited", date, { shouldValidate: true })
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+              <FormMessage className="text-xs text-red-400" />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 11: Time Committed */}
+        <FormField
+          control={form.control}
+          name="timeCommited"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel className="text-xs text-gray-600">Time Committed</FormLabel>
+              <FormControl>
+                <Input type="time" {...field} className="text-xs" />
+              </FormControl>
+              <FormMessage className="text-xs text-red-400" />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 12: Date Reported, Time Reported */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="dateReported"
+            render={({ field }) => (
+              <FormItem className="space-y-0">
+                <FormLabel className="text-xs text-gray-600">Date Reported</FormLabel>
                 <FormControl>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -87,7 +540,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       <DatePicker
                         fieldValue={field.value}
                         dateValue={(date) =>
-                          form.setValue("accident_date", date, { shouldValidate: true })
+                          form.setValue("dateReported", date, { shouldValidate: true })
                         }
                       />
                     </PopoverContent>
@@ -97,44 +550,14 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               </FormItem>
             )}
           />
-        </div>
-
-        {/* Row 3: Street, Barangay, Municipality */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
-            name="street"
+            name="timeReported"
             render={({ field }) => (
               <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Street</FormLabel>
+                <FormLabel className="text-xs text-gray-600">Time Reported</FormLabel>
                 <FormControl>
-                  <Input placeholder="Street" {...field} className="text-xs" />
-                </FormControl>
-                <FormMessage className="text-xs text-red-400" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="barangay"
-            render={({ field }) => (
-              <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Barangay</FormLabel>
-                <FormControl>
-                  <Input placeholder="Barangay" {...field} className="text-xs" />
-                </FormControl>
-                <FormMessage className="text-xs text-red-400" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="municipality"
-            render={({ field }) => (
-              <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Municipality</FormLabel>
-                <FormControl>
-                  <Input placeholder="Municipality" {...field} className="text-xs" />
+                  <Input type="time" {...field} className="text-xs" />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -142,72 +565,60 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
           />
         </div>
 
-        {/* Row 4: Vehicle Type, Severity */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="vehicle_type"
-            render={({ field }) => (
-              <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Vehicle Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="text-xs">
-                      <SelectValue placeholder="Select vehicle type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                    <SelectItem value="car">Car</SelectItem>
-                    <SelectItem value="truck">Truck</SelectItem>
-                    <SelectItem value="bus">Bus</SelectItem>
-                    <SelectItem value="van">Van</SelectItem>
-                    <SelectItem value="jeepney">Jeepney</SelectItem>
-                    <SelectItem value="tricycle">Tricycle</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-xs text-red-400" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="severity"
-            render={({ field }) => (
-              <FormItem className="space-y-0">
-                <FormLabel className="text-xs text-gray-600">Severity</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="text-xs">
-                      <SelectValue placeholder="Select severity" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="minor">Minor</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="severe">Severe</SelectItem>
-                    <SelectItem value="fatal">Fatal</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage className="text-xs text-red-400" />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Row 5: Notes */}
+        {/* Row 13: Date Encoded */}
         <FormField
           control={form.control}
-          name="notes"
+          name="dateEncoded"
           render={({ field }) => (
             <FormItem className="space-y-0">
-              <FormLabel className="text-xs text-gray-600">Notes</FormLabel>
+              <FormLabel className="text-xs text-gray-600">Date Encoded</FormLabel>
+              <FormControl>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full text-left font-normal text-xs justify-start",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2 space-y-2" align="start">
+                    <DatePicker
+                      fieldValue={field.value}
+                      dateValue={(date) =>
+                        form.setValue("dateEncoded", date, { shouldValidate: true })
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormControl>
+              <FormMessage className="text-xs text-red-400" />
+            </FormItem>
+          )}
+        />
+
+        {/* Row 14: Narrative */}
+        <FormField
+          control={form.control}
+          name="narrative"
+          render={({ field }) => (
+            <FormItem className="space-y-0">
+              <FormLabel className="text-xs text-gray-600">Narrative</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Enter additional notes about the accident..." 
+                  placeholder="Enter narrative details about the incident..." 
                   className="resize-none text-xs"
-                  rows={3}
+                  rows={4}
                   {...field} 
                 />
               </FormControl>
@@ -215,7 +626,6 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
             </FormItem>
           )}
         />
-
 
         {/* Removed duplicate buttons - using modal footer buttons instead */}
       </form>

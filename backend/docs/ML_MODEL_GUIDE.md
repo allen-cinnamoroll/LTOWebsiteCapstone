@@ -167,8 +167,8 @@ Risk Distribution:
   medium: 8 samples
   low: 5 samples
 
-✅ Model accuracy (0.8200) meets minimum requirement (0.5)
-✅ Model F1-score (0.8150) meets minimum requirement (0.4)
+✅ Model accuracy (0.8200) meets minimum requirement (0.70)
+✅ Model F1-score (0.8150) meets minimum requirement (0.65)
 ```
 
 ## 🐛 Troubleshooting
@@ -192,7 +192,7 @@ pip install pandas numpy scikit-learn joblib pyyaml matplotlib seaborn
 #### 3. Data Path Issues
 ```bash
 # Check if data file exists
-ls backend/data/raw/accidents_dummy_data.csv
+ls backend/data/raw/cleaned_accidents_data.csv
 ```
 
 #### 4. Permission Issues (Windows)
@@ -233,7 +233,7 @@ backend/
 │       ├── scaler.pkl
 │       └── model_metadata.json
 └── data/raw/
-    └── accidents_dummy_data.csv
+    └── cleaned_accidents_data.csv
 ```
 
 ## 🎯 Model Performance
@@ -255,7 +255,7 @@ backend/
 
 ### Retrain with New Data
 ```bash
-# Add new accident data to backend/data/raw/accidents_dummy_data.csv
+# Add new accident data to backend/data/raw/cleaned_accidents_data.csv
 # Then retrain
 cd "C:\Final Capstone\LTOWebsiteCapstone"
 backend\scripts\trainModels.sh

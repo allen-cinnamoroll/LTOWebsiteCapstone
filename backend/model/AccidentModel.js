@@ -1,20 +1,56 @@
 import mongoose from "mongoose";
 
 const AccidentSchema = new mongoose.Schema({
-  accident_id: {
+  blotterNo: {
     type: String,
     required: true,
     unique: true,
   },
-  plateNo: {
+  vehiclePlateNo: {
     type: String,
-    required: true,
+    required: false,
   },
-  accident_date: {
-    type: Date,
-    required: true,
+  vehicleMCPlateNo: {
+    type: String,
+    required: false,
   },
-  street: {
+  vehicleChassisNo: {
+    type: String,
+    required: false,
+  },
+  suspect: {
+    type: String,
+    required: false,
+  },
+  stageOfFelony: {
+    type: String,
+    required: false,
+  },
+  offense: {
+    type: String,
+    required: false,
+  },
+  offenseType: {
+    type: String,
+    required: false,
+  },
+  narrative: {
+    type: String,
+    required: false,
+  },
+  caseStatus: {
+    type: String,
+    required: false,
+  },
+  region: {
+    type: String,
+    required: false,
+  },
+  province: {
+    type: String,
+    required: false,
+  },
+  municipality: {
     type: String,
     required: true,
   },
@@ -22,21 +58,39 @@ const AccidentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  municipality: {
+  street: {
     type: String,
+    required: false,
+  },
+  lat: {
+    type: Number,
+    required: false,
+  },
+  lng: {
+    type: Number,
+    required: false,
+  },
+  dateEncoded: {
+    type: Date,
+    required: false,
+  },
+  dateReported: {
+    type: Date,
+    required: false,
+  },
+  timeReported: {
+    type: String,
+    required: false,
+  },
+  dateCommited: {
+    type: Date,
     required: true,
   },
-  vehicle_type: {
+  timeCommited: {
     type: String,
-    required: true,
-    enum: ['motorcycle', 'car', 'truck', 'bus', 'van', 'jeepney', 'tricycle', 'other']
+    required: false,
   },
-  severity: {
-    type: String,
-    required: true,
-    enum: ['minor', 'moderate', 'severe', 'fatal']
-  },
-  notes: {
+  incidentType: {
     type: String,
     required: false,
   },

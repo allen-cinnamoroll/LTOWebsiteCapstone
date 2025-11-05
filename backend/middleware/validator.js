@@ -139,15 +139,29 @@ export const adminRegistrationValidationRules = () => [
 
 // Accident validation
 export const validateAccident = [
-  body("accident_id").optional(),
-  body("plateNo").notEmpty().withMessage("Plate number is required"),
-  body("accident_date").isISO8601().withMessage("Accident date is required and must be valid"),
-  body("street").notEmpty().withMessage("Street is required"),
-  body("barangay").notEmpty().withMessage("Barangay is required"),
+  body("blotterNo").optional(),
+  body("vehiclePlateNo").optional().isString().withMessage("Vehicle plate number must be a string"),
+  body("vehicleMCPlateNo").optional().isString().withMessage("Vehicle MC plate number must be a string"),
+  body("vehicleChassisNo").optional().isString().withMessage("Vehicle chassis number must be a string"),
+  body("suspect").optional().isString().withMessage("Suspect must be a string"),
+  body("stageOfFelony").optional().isString().withMessage("Stage of felony must be a string"),
+  body("offense").optional().isString().withMessage("Offense must be a string"),
+  body("offenseType").optional().isString().withMessage("Offense type must be a string"),
+  body("narrative").optional().isString().withMessage("Narrative must be a string"),
+  body("caseStatus").optional().isString().withMessage("Case status must be a string"),
+  body("region").optional().isString().withMessage("Region must be a string"),
+  body("province").optional().isString().withMessage("Province must be a string"),
   body("municipality").notEmpty().withMessage("Municipality is required"),
-  body("vehicle_type").isIn(['motorcycle', 'car', 'truck', 'bus', 'van', 'jeepney', 'tricycle', 'other']).withMessage("Vehicle type must be one of: motorcycle, car, truck, bus, van, jeepney, tricycle, other"),
-  body("severity").isIn(['minor', 'moderate', 'severe', 'fatal']).withMessage("Severity must be one of: minor, moderate, severe, fatal"),
-  body("notes").optional().isString().withMessage("Notes must be a string"),
+  body("barangay").notEmpty().withMessage("Barangay is required"),
+  body("street").optional().isString().withMessage("Street must be a string"),
+  body("lat").optional().isFloat().withMessage("Latitude must be a number"),
+  body("lng").optional().isFloat().withMessage("Longitude must be a number"),
+  body("dateEncoded").optional().isISO8601().withMessage("Date encoded must be valid"),
+  body("dateReported").optional().isISO8601().withMessage("Date reported must be valid"),
+  body("timeReported").optional().isString().withMessage("Time reported must be a string"),
+  body("dateCommited").isISO8601().withMessage("Date committed is required and must be valid"),
+  body("timeCommited").optional().isString().withMessage("Time committed must be a string"),
+  body("incidentType").optional().isString().withMessage("Incident type must be a string"),
 ];
 
 // Middleware to handle validation errors

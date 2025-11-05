@@ -48,15 +48,29 @@ const AccidentPage = () => {
       });
       const accidentData = data.data.map((aData) => ({
         _id: aData._id,
-        accident_id: aData.accident_id,
-        plateNo: aData.plateNo || "N/A",
-        accident_date: formatSimpleDate(aData.accident_date),
-        street: aData.street,
-        barangay: aData.barangay,
+        blotterNo: aData.blotterNo,
+        vehiclePlateNo: aData.vehiclePlateNo || "",
+        vehicleMCPlateNo: aData.vehicleMCPlateNo || "",
+        vehicleChassisNo: aData.vehicleChassisNo || "",
+        suspect: aData.suspect || "",
+        stageOfFelony: aData.stageOfFelony || "",
+        offense: aData.offense || "",
+        offenseType: aData.offenseType || "",
+        narrative: aData.narrative || "",
+        caseStatus: aData.caseStatus || "",
+        region: aData.region || "",
+        province: aData.province || "",
         municipality: aData.municipality,
-        vehicle_type: aData.vehicle_type || "N/A",
-        severity: aData.severity || "N/A",
-        notes: aData.notes || "",
+        barangay: aData.barangay,
+        street: aData.street,
+        lat: aData.lat,
+        lng: aData.lng,
+        dateEncoded: aData.dateEncoded,
+        dateReported: aData.dateReported,
+        timeReported: aData.timeReported || "",
+        dateCommited: formatSimpleDate(aData.dateCommited),
+        timeCommited: aData.timeCommited || "",
+        incidentType: aData.incidentType || "",
         createdBy: aData.createdBy,
         updatedBy: aData.updatedBy,
         createdAt: aData.createdAt,
@@ -92,11 +106,11 @@ const AccidentPage = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="bg-white dark:bg-transparent rounded-lg shadow-sm border border-gray-200 dark:border-0 px-4 md:px-6 pt-4 md:pt-6 pb-2 flex-1 flex flex-col min-h-0 overflow-hidden">
-        <header className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 flex-shrink-0">Accidents</header>
+        <header className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 flex-shrink-0">Incidents</header>
         <div className="flex-1 flex flex-col min-h-0">
           <AccidentTable
             data={accidentData}
-            filters={["accident_id", "plateNo", "accident_date", "street", "barangay", "municipality", "vehicle_type", "severity"]}
+            filters={["blotterNo", "vehiclePlateNo", "incidentType", "suspect", "dateCommited", "caseStatus", "municipality", "barangay"]}
             tableColumn={accidentColumns}
             onAdd={handleAdd}
             loading={loading}
