@@ -668,17 +668,27 @@ export default function MVPredictionPage() {
           
           {trainingData && (
             <div className="space-y-4 py-4">
-              {/* Model Accuracy Percentage */}
-              {trainingData.accuracy_metrics?.mape && (
+              {/* Model Accuracy Percentage - Use Test Accuracy if available, otherwise Training */}
+              {(trainingData.test_accuracy_metrics?.mape || trainingData.accuracy_metrics?.mape) && (
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">Overall Model Accuracy</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">
+                        Overall Model Accuracy
+                        {trainingData.test_accuracy_metrics?.mape 
+                          ? ' (Test Set - Out-of-Sample)' 
+                          : ' (Training Set - In-Sample)'}
+                      </p>
                       <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">
-                        {(100 - trainingData.accuracy_metrics.mape).toFixed(2)}%
+                        {trainingData.test_accuracy_metrics?.mape
+                          ? (100 - trainingData.test_accuracy_metrics.mape).toFixed(2)
+                          : (100 - trainingData.accuracy_metrics.mape).toFixed(2)}%
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        Based on MAPE of {trainingData.accuracy_metrics.mape.toFixed(2)}%
+                        Based on MAPE of {trainingData.test_accuracy_metrics?.mape
+                          ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
+                          : `${trainingData.accuracy_metrics.mape.toFixed(2)}%`}
+                        {trainingData.test_accuracy_metrics?.mape && ' (Test Set)'}
                       </p>
                     </div>
                     <div className="text-4xl">📊</div>
@@ -686,12 +696,12 @@ export default function MVPredictionPage() {
                 </div>
               )}
 
-              {/* Accuracy Metrics */}
+              {/* Accuracy Metrics - Training (In-Sample) */}
               {trainingData.accuracy_metrics && (
                 <div className="space-y-3">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    Model Accuracy Metrics
+                    Training Accuracy (In-Sample) - {trainingData.training_weeks || 'N/A'} weeks
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <TooltipProvider>
@@ -776,6 +786,102 @@ export default function MVPredictionPage() {
                             A RMSE of {trainingData.accuracy_metrics.rmse?.toFixed(2)} means some predictions 
                             have significant errors. Lower is better. RMSE is typically higher than MAE when 
                             there are large prediction errors.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              )}
+
+              {/* Test Accuracy Metrics (Out-of-Sample) */}
+              {trainingData.test_accuracy_metrics && (
+                <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    Test Accuracy (Out-of-Sample) - {trainingData.test_weeks || 'N/A'} weeks
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-xs text-green-600 dark:text-green-400 mb-1 flex items-center gap-1">
+                              MAPE
+                            </p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.test_accuracy_metrics.mape 
+                                ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
+                                : 'N/A'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Mean Absolute Percentage Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">MAPE (Test Set)</p>
+                          <p className="text-xs">
+                            Out-of-sample accuracy on unseen test data. A MAPE of {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% 
+                            means predictions on the test set are off by about {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% on average. 
+                            This is a more realistic measure of model performance than training accuracy.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-xs text-green-600 dark:text-green-400 mb-1">MAE</p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.test_accuracy_metrics.mae?.toFixed(2) || 'N/A'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Mean Absolute Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">MAE (Test Set)</p>
+                          <p className="text-xs">
+                            The average number of registrations the model is off by on the test set. 
+                            A MAE of {trainingData.test_accuracy_metrics.mae?.toFixed(2)} means test predictions are wrong by 
+                            about {Math.round(trainingData.test_accuracy_metrics.mae || 0)} registrations on average.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-xs text-green-600 dark:text-green-400 mb-1">RMSE</p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.test_accuracy_metrics.rmse?.toFixed(2) || 'N/A'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Root Mean Square Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">RMSE (Test Set)</p>
+                          <p className="text-xs">
+                            Similar to MAE but gives more weight to larger errors on the test set. 
+                            A RMSE of {trainingData.test_accuracy_metrics.rmse?.toFixed(2)} means some test predictions 
+                            have significant errors. Lower is better.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -881,8 +987,14 @@ export default function MVPredictionPage() {
                     <span className="text-gray-600 dark:text-gray-400">Training Weeks:</span>
                     <span className="ml-2 font-medium">{trainingData.training_weeks || 'N/A'}</span>
                   </div>
+                  {trainingData.test_weeks && (
+                    <div>
+                      <span className="text-gray-600 dark:text-gray-400">Test Weeks:</span>
+                      <span className="ml-2 font-medium">{trainingData.test_weeks}</span>
+                    </div>
+                  )}
                   <div className="col-span-2">
-                    <span className="text-gray-600 dark:text-gray-400">Date Range: </span>
+                    <span className="text-gray-600 dark:text-gray-400">Training Date Range: </span>
                     <span className="font-medium">
                       {trainingData.date_range?.start 
                         ? formatDate(trainingData.date_range.start)
@@ -891,6 +1003,14 @@ export default function MVPredictionPage() {
                         : 'N/A'}
                     </span>
                   </div>
+                  {trainingData.test_date_range && (
+                    <div className="col-span-2">
+                      <span className="text-gray-600 dark:text-gray-400">Test Date Range: </span>
+                      <span className="font-medium">
+                        {formatDate(trainingData.test_date_range.start)} - {formatDate(trainingData.test_date_range.end)}
+                      </span>
+                    </div>
+                  )}
                   {trainingData.processing_info && (
                     <>
                       <div>

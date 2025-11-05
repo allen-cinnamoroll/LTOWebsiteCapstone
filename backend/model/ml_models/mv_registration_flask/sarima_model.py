@@ -30,7 +30,9 @@ class SARIMAModel:
         self.fitted_model = None
         self.model_params = None
         self.training_data = None
+        self.test_data = None
         self.accuracy_metrics = None
+        self.test_accuracy_metrics = None
         self.diagnostics = None
         
         # Model file paths (include municipality in filename if specified)
@@ -166,28 +168,37 @@ class SARIMAModel:
         
         print("Training SARIMA model...")
         
-        # Store training data
-        self.training_data = data.copy()
-        
         # Extract series
         series = data['count']
         
-        print(f"Training on {len(series)} weeks of data")
-        print(f"Date range: {series.index.min()} to {series.index.max()}")
+        # Split data: 80% training, 20% testing (chronological split for time series)
+        split_idx = int(len(series) * 0.8)
+        train_series = series.iloc[:split_idx]
+        test_series = series.iloc[split_idx:]
         
-        # Find optimal parameters
-        p, d, q, P, D, Q, s = self.find_optimal_parameters(series)
+        print(f"Total data: {len(series)} weeks")
+        print(f"Training set: {len(train_series)} weeks ({len(train_series)/len(series)*100:.1f}%)")
+        print(f"Test set: {len(test_series)} weeks ({len(test_series)/len(series)*100:.1f}%)")
+        print(f"Training date range: {train_series.index.min()} to {train_series.index.max()}")
+        print(f"Test date range: {test_series.index.min()} to {test_series.index.max()}")
+        
+        # Store training and test data
+        self.training_data = train_series.to_frame('count')
+        self.test_data = test_series.to_frame('count')
+        
+        # Find optimal parameters using training data only
+        p, d, q, P, D, Q, s = self.find_optimal_parameters(train_series)
         self.model_params = {
             'order': (p, d, q),
             'seasonal_order': (P, D, Q, s),
             'full_params': (p, d, q, P, D, Q, s)
         }
         
-        # Create and fit model
+        # Create and fit model on training data only
         print(f"Fitting SARIMA model with parameters: order={self.model_params['order']}, seasonal={self.model_params['seasonal_order']}")
         
         self.model = SARIMAX(
-            series,
+            train_series,
             order=(p, d, q),
             seasonal_order=(P, D, Q, s),
             enforce_stationarity=False,
@@ -201,23 +212,37 @@ class SARIMAModel:
             print(f"Error fitting model: {str(e)}")
             raise
         
-        # Calculate accuracy metrics on training data
-        self._calculate_accuracy_metrics(series)
+        # Calculate accuracy metrics on training data (in-sample)
+        self._calculate_accuracy_metrics(train_series, is_training=True)
         
-        # Calculate diagnostic metrics (residuals, ACF/PACF)
-        self._calculate_diagnostics(series)
+        # Calculate accuracy metrics on test data (out-of-sample)
+        if len(test_series) > 0:
+            self._calculate_test_accuracy(test_series)
+        else:
+            print("Warning: Test set is empty, skipping test metrics")
+            self.test_accuracy_metrics = None
+        
+        # Calculate diagnostic metrics on training residuals
+        self._calculate_diagnostics(train_series)
         
         # Save model
         self.save_model()
         
         training_info = {
             'model_params': self.model_params,
-            'training_weeks': len(series),
+            'training_weeks': len(train_series),
+            'test_weeks': len(test_series),
+            'total_weeks': len(series),
             'date_range': {
-                'start': str(series.index.min()),
-                'end': str(series.index.max())
+                'start': str(train_series.index.min()),
+                'end': str(train_series.index.max())
             },
-            'accuracy_metrics': self.accuracy_metrics,
+            'test_date_range': {
+                'start': str(test_series.index.min()),
+                'end': str(test_series.index.max())
+            },
+            'accuracy_metrics': self.accuracy_metrics,  # Training (in-sample) metrics
+            'test_accuracy_metrics': self.test_accuracy_metrics,  # Test (out-of-sample) metrics
             'diagnostics': self.diagnostics,
             'aic': float(self.fitted_model.aic),
             'bic': float(self.fitted_model.bic)
@@ -225,8 +250,8 @@ class SARIMAModel:
         
         return training_info
     
-    def _calculate_accuracy_metrics(self, actual_series):
-        """Calculate accuracy metrics using in-sample predictions"""
+    def _calculate_accuracy_metrics(self, actual_series, is_training=True):
+        """Calculate accuracy metrics using in-sample predictions (training data)"""
         try:
             # Get fitted values (in-sample predictions)
             fitted_values = self.fitted_model.fittedvalues
@@ -243,7 +268,7 @@ class SARIMAModel:
             else:
                 mape = np.nan
             
-            self.accuracy_metrics = {
+            metrics = {
                 'mae': float(mae),
                 'rmse': float(rmse),
                 'mape': float(mape) if not np.isnan(mape) else None,
@@ -251,11 +276,71 @@ class SARIMAModel:
                 'std_actual': float(actual_series.std())
             }
             
-            print(f"Model Accuracy - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
+            if is_training:
+                self.accuracy_metrics = metrics
+                print(f"Training Accuracy (In-Sample) - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
+            else:
+                self.test_accuracy_metrics = metrics
+                print(f"Test Accuracy (Out-of-Sample) - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
             
         except Exception as e:
             print(f"Error calculating accuracy metrics: {str(e)}")
-            self.accuracy_metrics = None
+            if is_training:
+                self.accuracy_metrics = None
+            else:
+                self.test_accuracy_metrics = None
+    
+    def _calculate_test_accuracy(self, test_series):
+        """Calculate accuracy metrics on test data (out-of-sample predictions)"""
+        try:
+            # Generate forecasts for the test period
+            # Use the last training date as the forecast start point
+            forecast_steps = len(test_series)
+            forecast = self.fitted_model.forecast(steps=forecast_steps)
+            
+            # Convert forecast to numpy array if it's not already
+            if hasattr(forecast, 'values'):
+                forecast = forecast.values
+            forecast = np.array(forecast).flatten()
+            
+            # Ensure forecast and test_series have same length
+            if len(forecast) != len(test_series):
+                min_len = min(len(forecast), len(test_series))
+                forecast = forecast[:min_len]
+                test_series = test_series.iloc[:min_len]
+            
+            # Calculate metrics
+            test_values = test_series.values.flatten()
+            mae = np.mean(np.abs(test_values - forecast))
+            mse = np.mean((test_values - forecast) ** 2)
+            rmse = np.sqrt(mse)
+            
+            # MAPE (avoid division by zero)
+            non_zero_mask = test_values != 0
+            if non_zero_mask.sum() > 0:
+                test_non_zero = test_values[non_zero_mask]
+                forecast_non_zero = forecast[non_zero_mask]
+                mape = np.mean(np.abs((test_non_zero - forecast_non_zero) / test_non_zero)) * 100
+            else:
+                mape = np.nan
+            
+            self.test_accuracy_metrics = {
+                'mae': float(mae),
+                'rmse': float(rmse),
+                'mape': float(mape) if not np.isnan(mape) else None,
+                'mean_actual': float(test_series.mean()),
+                'std_actual': float(test_series.std())
+            }
+            
+            print(f"\n=== Test Set Performance (Out-of-Sample) ===")
+            print(f"MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
+            print("=============================================\n")
+            
+        except Exception as e:
+            print(f"Error calculating test accuracy: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            self.test_accuracy_metrics = None
     
     def _calculate_diagnostics(self, actual_series):
         """Calculate diagnostic metrics: residuals randomness, ACF/PACF"""
@@ -439,6 +524,16 @@ class SARIMAModel:
                 'end': str(self.training_data.index.max())
             }
             result['training_weeks'] = len(self.training_data)
+        
+        # Add test metrics if available
+        if self.test_accuracy_metrics is not None:
+            result['test_accuracy_metrics'] = self.test_accuracy_metrics
+            if self.test_data is not None and len(self.test_data) > 0:
+                result['test_date_range'] = {
+                    'start': str(self.test_data.index.min()),
+                    'end': str(self.test_data.index.max())
+                }
+                result['test_weeks'] = len(self.test_data)
         
         return result
     
