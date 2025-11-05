@@ -784,6 +784,92 @@ export default function MVPredictionPage() {
                 </div>
               )}
 
+              {/* Model Diagnostics */}
+              {trainingData.diagnostics && (
+                <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    Model Diagnostics
+                  </h3>
+                  
+                  {/* Residuals Randomness Check */}
+                  <div className={`p-3 rounded-lg border ${
+                    trainingData.diagnostics.residuals_random 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+                      : trainingData.diagnostics.residuals_random === false
+                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                      : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                          Residuals Randomness
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {trainingData.diagnostics.residuals_random === true 
+                            ? '✓ Residuals are random - model fits well!' 
+                            : trainingData.diagnostics.residuals_random === false
+                            ? '⚠ Residuals show patterns - model may need improvement'
+                            : 'Could not determine'}
+                        </p>
+                        {trainingData.diagnostics.ljung_box_pvalue !== null && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
+                            {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
+                          </p>
+                        )}
+                      </div>
+                      {trainingData.diagnostics.residuals_random !== null && (
+                        <div className={`text-2xl ${trainingData.diagnostics.residuals_random ? 'text-green-600' : 'text-yellow-600'}`}>
+                          {trainingData.diagnostics.residuals_random ? '✓' : '⚠'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ACF/PACF Summary */}
+                  {trainingData.diagnostics.acf_values && trainingData.diagnostics.acf_values.length > 0 && (
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                        ACF/PACF Analysis
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        Checked {trainingData.diagnostics.acf_values.length} lags for leftover autocorrelation
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">ACF Lags:</span>
+                          <span className="ml-1 font-medium">{trainingData.diagnostics.acf_values.length}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600 dark:text-gray-400">PACF Lags:</span>
+                          <span className="ml-1 font-medium">{trainingData.diagnostics.pacf_values?.length || 0}</span>
+                        </div>
+                      </div>
+                      {trainingData.diagnostics.acf_values.some(acf => Math.abs(acf.value) > 0.2) && (
+                        <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                          ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Residual Statistics */}
+                  {trainingData.diagnostics.residuals_mean !== null && (
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Residuals Mean:</span>
+                        <span className="ml-2 font-medium">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">Residuals Std:</span>
+                        <span className="ml-2 font-medium">{trainingData.diagnostics.residuals_std.toFixed(4)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Training Information */}
               <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold flex items-center gap-2">

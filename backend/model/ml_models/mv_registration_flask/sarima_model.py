@@ -8,7 +8,8 @@ import numpy as np
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.stats.diagnostic import acorr_ljungbox
-from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller, acf, pacf
+from scipy import stats
 import pickle
 import os
 from datetime import datetime, timedelta
@@ -30,6 +31,7 @@ class SARIMAModel:
         self.model_params = None
         self.training_data = None
         self.accuracy_metrics = None
+        self.diagnostics = None
         
         # Model file paths (include municipality in filename if specified)
         if municipality:
@@ -202,6 +204,9 @@ class SARIMAModel:
         # Calculate accuracy metrics on training data
         self._calculate_accuracy_metrics(series)
         
+        # Calculate diagnostic metrics (residuals, ACF/PACF)
+        self._calculate_diagnostics(series)
+        
         # Save model
         self.save_model()
         
@@ -213,6 +218,7 @@ class SARIMAModel:
                 'end': str(series.index.max())
             },
             'accuracy_metrics': self.accuracy_metrics,
+            'diagnostics': self.diagnostics,
             'aic': float(self.fitted_model.aic),
             'bic': float(self.fitted_model.bic)
         }
@@ -250,6 +256,111 @@ class SARIMAModel:
         except Exception as e:
             print(f"Error calculating accuracy metrics: {str(e)}")
             self.accuracy_metrics = None
+    
+    def _calculate_diagnostics(self, actual_series):
+        """Calculate diagnostic metrics: residuals randomness, ACF/PACF"""
+        try:
+            # Get residuals
+            residuals = self.fitted_model.resid
+            
+            # Remove NaN values
+            residuals_clean = residuals.dropna()
+            
+            if len(residuals_clean) < 2:
+                self.diagnostics = {
+                    'residuals_random': None,
+                    'ljung_box_pvalue': None,
+                    'ljung_box_statistic': None,
+                    'residuals_mean': None,
+                    'residuals_std': None,
+                    'acf_values': None,
+                    'pacf_values': None,
+                    'message': 'Insufficient data for diagnostics'
+                }
+                return
+            
+            # 1. Ljung-Box test for residual randomness
+            # Test if residuals are random (white noise)
+            # Null hypothesis: residuals are random (no autocorrelation)
+            # p-value > 0.05 means residuals are random (good!)
+            try:
+                ljung_box = acorr_ljungbox(residuals_clean, lags=min(10, len(residuals_clean)//2), return_df=True)
+                # Use the p-value from the last lag
+                ljung_box_pvalue = float(ljung_box['lb_pvalue'].iloc[-1])
+                ljung_box_statistic = float(ljung_box['lb_stat'].iloc[-1])
+                residuals_random = ljung_box_pvalue > 0.05
+            except Exception as e:
+                print(f"Error in Ljung-Box test: {str(e)}")
+                ljung_box_pvalue = None
+                ljung_box_statistic = None
+                residuals_random = None
+            
+            # 2. Residual statistics
+            residuals_mean = float(residuals_clean.mean())
+            residuals_std = float(residuals_clean.std())
+            
+            # 3. ACF and PACF values for residuals
+            # Calculate up to 10 lags or half the data length, whichever is smaller
+            max_lags = min(10, len(residuals_clean) // 2)
+            if max_lags > 0:
+                try:
+                    acf_values, acf_confint = acf(residuals_clean, nlags=max_lags, alpha=0.05, fft=True)
+                    pacf_values, pacf_confint = pacf(residuals_clean, nlags=max_lags, alpha=0.05)
+                    
+                    # Convert to lists (excluding lag 0 which is always 1.0)
+                    acf_data = [
+                        {
+                            'lag': int(i),
+                            'value': float(acf_values[i]),
+                            'lower_ci': float(acf_confint[i][0]) if acf_confint is not None else None,
+                            'upper_ci': float(acf_confint[i][1]) if acf_confint is not None else None
+                        }
+                        for i in range(1, len(acf_values))
+                    ]
+                    
+                    pacf_data = [
+                        {
+                            'lag': int(i),
+                            'value': float(pacf_values[i]),
+                            'lower_ci': float(pacf_confint[i][0]) if pacf_confint is not None else None,
+                            'upper_ci': float(pacf_confint[i][1]) if pacf_confint is not None else None
+                        }
+                        for i in range(1, len(pacf_values))
+                    ]
+                except Exception as e:
+                    print(f"Error calculating ACF/PACF: {str(e)}")
+                    acf_data = None
+                    pacf_data = None
+            else:
+                acf_data = None
+                pacf_data = None
+            
+            self.diagnostics = {
+                'residuals_random': bool(residuals_random) if residuals_random is not None else None,
+                'ljung_box_pvalue': ljung_box_pvalue,
+                'ljung_box_statistic': ljung_box_statistic,
+                'residuals_mean': residuals_mean,
+                'residuals_std': residuals_std,
+                'acf_values': acf_data,
+                'pacf_values': pacf_data,
+                'total_residuals': len(residuals_clean)
+            }
+            
+            # Print diagnostic results
+            print(f"\n=== Model Diagnostics ===")
+            print(f"Residuals Random: {residuals_random} (p-value: {ljung_box_pvalue:.4f})")
+            print(f"Residuals Mean: {residuals_mean:.4f}, Std: {residuals_std:.4f}")
+            if residuals_random:
+                print("✓ Residuals appear random - model fits well!")
+            else:
+                print("⚠ Residuals show patterns - model may need improvement")
+            print("=======================\n")
+            
+        except Exception as e:
+            print(f"Error calculating diagnostics: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            self.diagnostics = None
     
     def predict(self, weeks=4, municipality=None):
         """
