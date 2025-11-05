@@ -1,6 +1,7 @@
 """
-Model Training Script for LTO Accident Prediction System
-Implements Random Forest Classifier and Rule-Based System
+Model Training Script for LTO Incident Prediction System
+Implements Random Forest Classifier and Rule-Based System for Case Status Prediction
+Updated to work with new incident data structure (blotterNo, dateCommited, caseStatus, incidentType, etc.)
 """
 
 import pandas as pd
@@ -17,9 +18,9 @@ import logging
 
 from feature_engineering import FeatureEngineer
 
-class AccidentPredictionTrainer:
+class IncidentPredictionTrainer:
     def __init__(self, config_path="model_config.yaml"):
-        """Initialize trainer with configuration"""
+        """Initialize trainer with configuration for incident case status prediction"""
         with open(config_path, 'r') as file:
             self.config = yaml.safe_load(file)
         
@@ -151,7 +152,7 @@ class AccidentPredictionTrainer:
         self.rule_system = {
             'risk_thresholds': risk_thresholds,
             'prescriptive_actions': self.config['rule_system']['prescriptive_actions'],
-            'severity_mapping': self.config['rule_system']['severity_mapping']
+            'case_status_mapping': self.config['rule_system']['case_status_mapping']
         }
         
         self.logger.info("Rule-based system created successfully")
@@ -230,14 +231,26 @@ class AccidentPredictionTrainer:
 
 def main():
     """Main function to run training"""
-    trainer = AccidentPredictionTrainer()
+    print("=" * 60)
+    print("LTO Incident Case Status Prediction Model Training")
+    print("Updated for new incident data structure")
+    print("=" * 60)
+    
+    trainer = IncidentPredictionTrainer()
     results = trainer.train_complete_pipeline()
     
     if results['status'] == 'success':
-        print("Training completed successfully!")
+        print("\n" + "=" * 60)
+        print("✅ Training completed successfully!")
         print(f"Model accuracy: {results['evaluation_results']['accuracy']:.4f}")
+        print(f"Model precision: {results['evaluation_results']['precision']:.4f}")
+        print(f"Model recall: {results['evaluation_results']['recall']:.4f}")
+        print(f"Model F1-score: {results['evaluation_results']['f1_score']:.4f}")
+        print("=" * 60)
     else:
-        print(f"Training failed: {results['error']}")
+        print("\n" + "=" * 60)
+        print(f"❌ Training failed: {results['error']}")
+        print("=" * 60)
 
 if __name__ == "__main__":
     main()

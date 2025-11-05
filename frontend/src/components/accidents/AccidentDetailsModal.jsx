@@ -57,24 +57,24 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
     return `${firstName || ''} ${middleName || ''} ${lastName || ''}`.trim() || "Unknown";
   };
 
-  const getSeverityBadge = (severity) => {
+  const getCaseStatusBadge = (caseStatus) => {
     let badgeColor, icon;
     
-    switch (severity?.toLowerCase()) {
-      case 'minor':
+    switch (caseStatus?.toLowerCase()) {
+      case 'pending':
+        badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        icon = <Clock className="h-3 w-3" />;
+        break;
+      case 'ongoing':
+        badgeColor = 'bg-blue-100 text-blue-800 border-blue-200';
+        icon = <AlertTriangle className="h-3 w-3" />;
+        break;
+      case 'solved':
         badgeColor = 'bg-green-100 text-green-800 border-green-200';
         icon = <AlertTriangle className="h-3 w-3" />;
         break;
-      case 'moderate':
-        badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        icon = <AlertTriangle className="h-3 w-3" />;
-        break;
-      case 'severe':
-        badgeColor = 'bg-orange-100 text-orange-800 border-orange-200';
-        icon = <AlertTriangle className="h-3 w-3" />;
-        break;
-      case 'fatal':
-        badgeColor = 'bg-red-100 text-red-800 border-red-200';
+      case 'closed':
+        badgeColor = 'bg-gray-100 text-gray-800 border-gray-200';
         icon = <AlertTriangle className="h-3 w-3" />;
         break;
       default:
@@ -86,7 +86,7 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
       <Badge variant="outline" className={`text-xs font-medium ${badgeColor}`}>
         <div className="flex items-center gap-1">
           {icon}
-          {severity?.charAt(0).toUpperCase() + severity?.slice(1) || "N/A"}
+          {caseStatus?.charAt(0).toUpperCase() + caseStatus?.slice(1) || "N/A"}
         </div>
       </Badge>
     );
@@ -95,62 +95,143 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
   const AccidentDetailsTab = () => (
     <div className="space-y-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Basic Information */}
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Hash className="h-3 w-3" />
-            Accident ID
+            Blotter No.
           </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData?.accident_id || "N/A"}</p>
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData?.blotterNo || "N/A"}</p>
+        </div>
+        {accidentData?.vehiclePlateNo && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Hash className="h-3 w-3" />
+              Vehicle Plate No.
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.vehiclePlateNo}</p>
+          </div>
+        )}
+        {accidentData?.vehicleMCPlateNo && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Hash className="h-3 w-3" />
+              Vehicle MC Plate No.
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.vehicleMCPlateNo}</p>
+          </div>
+        )}
+        {accidentData?.vehicleChassisNo && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Hash className="h-3 w-3" />
+              Vehicle Chassis No.
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.vehicleChassisNo}</p>
+          </div>
+        )}
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+            <User className="h-3 w-3" />
+            Suspect
+          </label>
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData?.suspect || "N/A"}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <AlertTriangle className="h-3 w-3" />
-            Severity
+            Incident Type
+          </label>
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData?.incidentType || "N/A"}</p>
+        </div>
+        
+        {/* Case Information */}
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+            <FileText className="h-3 w-3" />
+            Case Status
           </label>
           <div className="ml-4">
-            {getSeverityBadge(accidentData?.severity)}
+            {getCaseStatusBadge(accidentData?.caseStatus)}
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            Date
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatDate(accidentData?.accident_date)}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Car className="h-3 w-3" />
-            Vehicle Type
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4 capitalize">{accidentData?.vehicle_type || "N/A"}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Hash className="h-3 w-3" />
-            Plate Number
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData?.plateNo || "N/A"}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+        {accidentData?.offense && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              Offense
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.offense}</p>
+          </div>
+        )}
+        {accidentData?.offenseType && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              Offense Type
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.offenseType}</p>
+          </div>
+        )}
+        {accidentData?.stageOfFelony && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              Stage of Felony
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.stageOfFelony}</p>
+          </div>
+        )}
+        
+        {/* Location Information */}
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600 md:col-span-2">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             Location
           </label>
           <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
-            {accidentData?.street && accidentData?.barangay && accidentData?.municipality 
-              ? `${accidentData.street}, ${accidentData.barangay}, ${accidentData.municipality}`
-              : "N/A"
-            }
+            {[
+              accidentData?.street,
+              accidentData?.barangay,
+              accidentData?.municipality,
+              accidentData?.province,
+              accidentData?.region
+            ].filter(Boolean).join(", ") || "N/A"}
           </p>
         </div>
-        {accidentData?.notes && (
+        
+        {/* Date Information */}
+        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            Date Committed
+          </label>
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
+            {accidentData?.dateCommited || "N/A"}
+            {accidentData?.timeCommited && ` at ${accidentData.timeCommited}`}
+          </p>
+        </div>
+        {accidentData?.dateReported && (
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Date Reported
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
+              {formatDate(accidentData.dateReported)}
+              {accidentData?.timeReported && ` at ${accidentData.timeReported}`}
+            </p>
+          </div>
+        )}
+
+        {/* Narrative */}
+        {accidentData?.narrative && (
           <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600 md:col-span-2">
             <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
               <FileText className="h-3 w-3" />
-              Notes
+              Narrative
             </label>
-            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.notes}</p>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{accidentData.narrative}</p>
           </div>
         )}
 
@@ -217,14 +298,14 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
-                Accident Details
+                Incident Details
               </DialogTitle>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Comprehensive accident information including location, vehicle details, and severity assessment
+                Comprehensive incident information including case details, location, and status
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1">
                 <Hash className="h-3 w-3 text-red-500" />
-                Accident ID: <span className="font-semibold text-red-600">{accidentData?.accident_id || "N/A"}</span>
+                Blotter No: <span className="font-semibold text-red-600">{accidentData?.blotterNo || "N/A"}</span>
               </p>
             </div>
           </div>

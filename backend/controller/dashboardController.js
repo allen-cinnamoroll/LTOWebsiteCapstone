@@ -161,18 +161,55 @@ export const getDashboardStats = async (req, res) => {
     // Get driver statistics (no active/expired status for drivers - drivers don't have expiration status)
     const totalDrivers = await DriverModel.countDocuments();
 
-    // Get violation statistics
-    const totalViolations = await ViolationModel.countDocuments();
+    // Get violation statistics - count actual violations from arrays, not documents
+    const totalViolationsResult = await ViolationModel.aggregate([
+      {
+        $project: {
+          violationsCount: {
+            $size: {
+              $ifNull: ["$violations", []]
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$violationsCount" }
+        }
+      }
+    ]);
+    const totalViolations = totalViolationsResult[0]?.total || 0;
 
     // Get accident statistics
     const totalAccidents = await AccidentModel.countDocuments();
 
-    // Get recent violations (last 30 days)
+    // Get recent violations (last 30 days) - count actual violations from arrays
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentViolations = await ViolationModel.countDocuments({
-      dateOfApprehension: { $gte: thirtyDaysAgo }
-    });
+    const recentViolationsResult = await ViolationModel.aggregate([
+      {
+        $match: {
+          dateOfApprehension: { $gte: thirtyDaysAgo }
+        }
+      },
+      {
+        $project: {
+          violationsCount: {
+            $size: {
+              $ifNull: ["$violations", []]
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$violationsCount" }
+        }
+      }
+    ]);
+    const recentViolations = recentViolationsResult[0]?.total || 0;
 
     // Get violations by type
     const violationsByType = await ViolationModel.aggregate([

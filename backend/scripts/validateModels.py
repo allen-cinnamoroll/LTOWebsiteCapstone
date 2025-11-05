@@ -22,7 +22,7 @@ def validate_models():
     
     # Paths
     model_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'ml_models', 'trained')
-    data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'accidents_dummy_data.csv')
+    data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw', 'cleaned_accidents_data.csv')
     config_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'ml_models', 'training', 'model_config.yaml')
     
     # Check if model files exist
@@ -77,9 +77,9 @@ def validate_models():
         for risk, count in results['rule_system_evaluation']['risk_distribution'].items():
             print(f"  {risk}: {count} samples")
         
-        # Check if model meets minimum performance criteria (adjusted for demo data)
-        min_accuracy = 0.5  # 50% minimum accuracy (realistic for small dataset)
-        min_f1 = 0.4  # 40% minimum F1 score (realistic for small dataset)
+        # Check if model meets minimum performance criteria (production thresholds)
+        min_accuracy = 0.70  # 70% minimum accuracy for production model
+        min_f1 = 0.65  # 65% minimum F1 score for production model
         
         if results['basic_metrics']['accuracy'] >= min_accuracy:
             print(f"\n✅ Model accuracy ({results['basic_metrics']['accuracy']:.4f}) meets minimum requirement ({min_accuracy})")

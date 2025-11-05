@@ -41,7 +41,7 @@ const ViolationTable = ({
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 8, // 8 rows per page
+    pageSize: 9, // 9 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("all");

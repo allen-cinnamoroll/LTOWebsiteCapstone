@@ -19,19 +19,19 @@ export const getAccidents = async (req, res) => {
 
 export const createAccident = async (req, res) => {
   try {
-    const { plateNo, accident_id } = req.body;
+    const { vehiclePlateNo, vehicleMCPlateNo, blotterNo } = req.body;
 
-    // Generate accident_id if not provided or empty
-    let finalAccidentId = accident_id;
-    if (!finalAccidentId || finalAccidentId.trim() === "") {
+    // Generate blotterNo if not provided or empty
+    let finalBlotterNo = blotterNo;
+    if (!finalBlotterNo || finalBlotterNo.trim() === "") {
       const timestamp = Date.now();
-      finalAccidentId = `ACC-${timestamp}`;
+      finalBlotterNo = `BLT-${timestamp}`;
     }
 
-    // Create accident with plateNo directly
+    // Create accident data
     const accidentData = {
       ...req.body,
-      accident_id: finalAccidentId,
+      blotterNo: finalBlotterNo,
       createdBy: req.user ? req.user.userId : null,
       updatedBy: null // Only set when actually updated
     };
@@ -51,6 +51,7 @@ export const createAccident = async (req, res) => {
         // Fetch user details for logging
         const user = await UserModel.findById(req.user.userId);
         if (user) {
+          const vehicleInfo = vehiclePlateNo || vehicleMCPlateNo || 'N/A';
           await logUserActivity({
             userId: user._id,
             userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
@@ -60,7 +61,7 @@ export const createAccident = async (req, res) => {
             ipAddress: getClientIP(req),
             userAgent: getUserAgent(req),
             status: 'success',
-            details: `Added accident: ${finalAccidentId} (Plate: ${plateNo})`,
+            details: `Added incident: ${finalBlotterNo} (Vehicle: ${vehicleInfo})`,
             actorId: user._id,
             actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
             actorEmail: user.email,
@@ -77,7 +78,7 @@ export const createAccident = async (req, res) => {
 
     res
       .status(201)
-      .json({ success: true, message: "Accident created", data: accident });
+      .json({ success: true, message: "Incident created", data: accident });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
@@ -136,7 +137,7 @@ export const updateAccident = async (req, res) => {
             ipAddress: getClientIP(req),
             userAgent: getUserAgent(req),
             status: 'success',
-            details: `Updated accident: ${accident.accident_id} (Plate: ${updateData.plateNo || 'unchanged'})`,
+            details: `Updated incident: ${accident.blotterNo} (Vehicle: ${updateData.vehiclePlateNo || updateData.vehicleMCPlateNo || 'unchanged'})`,
             actorId: user._id,
             actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
             actorEmail: user.email,
@@ -184,7 +185,7 @@ export const deleteAccident = async (req, res) => {
             ipAddress: getClientIP(req),
             userAgent: getUserAgent(req),
             status: 'success',
-            details: `Deleted accident: ${accident.accident_id}`,
+            details: `Deleted incident: ${accident.blotterNo}`,
             actorId: user._id,
             actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
             actorEmail: user.email,
@@ -253,7 +254,7 @@ export const getAccidentAnalytics = async (req, res) => {
 
     // Get total accidents
     const totalAccidents = await AccidentModel.countDocuments(
-      startDate ? { accident_date: { $gte: startDate } } : {}
+      startDate ? { dateCommited: { $gte: startDate } } : {}
     );
 
     // Get previous period for comparison (skip for alltime)
@@ -265,7 +266,7 @@ export const getAccidentAnalytics = async (req, res) => {
       previousStartDate.setTime(previousStartDate.getTime() - periodLength);
       
       previousTotalAccidents = await AccidentModel.countDocuments({
-        accident_date: { $gte: previousStartDate, $lt: previousEndDate }
+        dateCommited: { $gte: previousStartDate, $lt: previousEndDate }
       });
     }
 
@@ -274,54 +275,16 @@ export const getAccidentAnalytics = async (req, res) => {
       ? ((totalAccidents - previousTotalAccidents) / previousTotalAccidents * 100).toFixed(1)
       : 0;
 
-    // Get fatalities count
-    const fatalities = await AccidentModel.countDocuments({
-      ...(startDate ? { accident_date: { $gte: startDate } } : {}),
-      severity: 'fatal'
-    });
-
-    let previousFatalities = 0;
-    if (startDate) {
-      const previousStartDate = new Date(startDate);
-      const previousEndDate = new Date(startDate);
-      const periodLength = now.getTime() - startDate.getTime();
-      previousStartDate.setTime(previousStartDate.getTime() - periodLength);
-      
-      previousFatalities = await AccidentModel.countDocuments({
-        accident_date: { $gte: previousStartDate, $lt: previousEndDate },
-        severity: 'fatal'
-      });
-    }
-
-    const fatalitiesChange = previousFatalities > 0 
-      ? (fatalities - previousFatalities)
-      : 0;
-
-    // Get severity distribution
-    const severityDistribution = await AccidentModel.aggregate([
+    // Get incident type distribution
+    const incidentTypeDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          ...(startDate ? { accident_date: { $gte: startDate } } : {})
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
         }
       },
       {
         $group: {
-          _id: '$severity',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    // Get vehicle type distribution
-    const vehicleTypeDistribution = await AccidentModel.aggregate([
-      {
-        $match: {
-          ...(startDate ? { accident_date: { $gte: startDate } } : {})
-        }
-      },
-      {
-        $group: {
-          _id: '$vehicle_type',
+          _id: '$incidentType',
           count: { $sum: 1 }
         }
       },
@@ -330,18 +293,137 @@ export const getAccidentAnalytics = async (req, res) => {
       }
     ]);
 
+    // Get offense type distribution (ML target variable)
+    const offenseTypeDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {}),
+          offenseType: { $exists: true, $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$offenseType',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Get case status distribution
+    const caseStatusDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {}),
+          caseStatus: { $exists: true, $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$caseStatus',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Get temporal patterns - hourly distribution
+    // Use timeCommited if available (more accurate), otherwise fallback to dateCommited hour
+    const hourlyDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {}),
+          dateCommited: { $exists: true }
+        }
+      },
+      {
+        $addFields: {
+          // Extract hour from timeCommited string (format: "HH:MM" or "HH:MM:SS")
+          // If timeCommited exists and is valid, parse it; otherwise use hour from dateCommited
+          hourFromTime: {
+            $cond: {
+              if: { 
+                $and: [
+                  { $ne: ['$timeCommited', null] }, 
+                  { $ne: ['$timeCommited', ''] },
+                  { $ne: [{ $size: { $split: ['$timeCommited', ':'] } }, 0] }
+                ] 
+              },
+              then: {
+                $let: {
+                  vars: {
+                    hourStr: { $arrayElemAt: [{ $split: ['$timeCommited', ':'] }, 0] }
+                  },
+                  in: {
+                    $cond: {
+                      if: { 
+                        $and: [
+                          { $ne: ['$$hourStr', ''] },
+                          { $gte: [{ $toInt: '$$hourStr' }, 0] },
+                          { $lte: [{ $toInt: '$$hourStr' }, 23] }
+                        ]
+                      },
+                      then: { $toInt: '$$hourStr' },
+                      else: { $hour: '$dateCommited' }
+                    }
+                  }
+                }
+              },
+              else: { $hour: '$dateCommited' }
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          hourFromTime: { $exists: true, $ne: null, $gte: 0, $lte: 23 }
+        }
+      },
+      {
+        $group: {
+          _id: '$hourFromTime',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id': 1 }
+      }
+    ]);
+
+    // Get day of week distribution
+    const dayOfWeekDistribution = await AccidentModel.aggregate([
+      {
+        $match: {
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: '$dateCommited' },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id': 1 }
+      }
+    ]);
+
     // Get monthly trends
     const monthlyTrends = await AccidentModel.aggregate([
       {
         $match: {
-          ...(startDate ? { accident_date: { $gte: startDate } } : {})
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
         }
       },
       {
         $group: {
           _id: {
-            year: { $year: '$accident_date' },
-            month: { $month: '$accident_date' }
+            year: { $year: '$dateCommited' },
+            month: { $month: '$dateCommited' }
           },
           count: { $sum: 1 }
         }
@@ -355,7 +437,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const municipalityDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          ...(startDate ? { accident_date: { $gte: startDate } } : {})
+          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
         }
       },
       {
@@ -389,7 +471,7 @@ export const getAccidentAnalytics = async (req, res) => {
     // Get all accidents for map (using geocoding based on location) with normalized municipality
     const accidentsWithCoordinates = await AccidentModel.aggregate([
       {
-        $match: startDate ? { accident_date: { $gte: startDate } } : {}
+        $match: startDate ? { dateCommited: { $gte: startDate } } : {}
       },
       {
         $addFields: {
@@ -404,18 +486,26 @@ export const getAccidentAnalytics = async (req, res) => {
       },
       {
         $project: {
-          accident_id: 1,
-          plateNo: 1,
-          severity: 1,
+          blotterNo: 1,
+          vehiclePlateNo: 1,
+          vehicleMCPlateNo: 1,
+          vehicleChassisNo: 1,
+          incidentType: 1,
           municipality: "$normalized_municipality",
           barangay: 1,
           street: 1,
-          accident_date: 1,
-          vehicle_type: 1,
-          notes: 1
+          dateCommited: 1,
+          narrative: 1,
+          lat: 1,
+          lng: 1
         }
       }
     ]);
+
+    // Calculate crimes against persons count
+    const crimesAgainstPersons = offenseTypeDistribution.find(
+      item => item._id === 'Crimes Against Persons'
+    )?.count || 0;
 
     res.json({
       success: true,
@@ -423,14 +513,16 @@ export const getAccidentAnalytics = async (req, res) => {
         summary: {
           totalAccidents,
           accidentChange: parseFloat(accidentChange),
-          fatalities,
-          fatalitiesChange,
+          crimesAgainstPersons,
           period
         },
         distributions: {
-          severity: severityDistribution,
-          vehicleType: vehicleTypeDistribution,
-          municipality: municipalityDistribution
+          incidentType: incidentTypeDistribution,
+          offenseType: offenseTypeDistribution,
+          caseStatus: caseStatusDistribution,
+          municipality: municipalityDistribution,
+          hourly: hourlyDistribution,
+          dayOfWeek: dayOfWeekDistribution
         },
         trends: {
           monthly: monthlyTrends
@@ -487,44 +579,51 @@ export const getAccidentRiskAnalytics = async (req, res) => {
 
     // Get all accidents in the period
     const accidents = await AccidentModel.find(
-      startDate ? { accident_date: { $gte: startDate } } : {}
+      startDate ? { dateCommited: { $gte: startDate } } : {}
     );
 
-    // For now, we'll simulate risk predictions based on severity
-    // In a real implementation, you would call the ML prediction service
+    // Risk predictions based on offenseType (ML model target) and case status
+    // "Crimes Against Persons" = High Risk, "Crimes Against Property" = Medium/Low Risk
     const riskPredictions = accidents.map(accident => {
       let riskLevel = 'low';
       let confidence = 0.3;
       
-      switch (accident.severity) {
-        case 'fatal':
-          riskLevel = 'high';
-          confidence = 0.9;
-          break;
-        case 'severe':
-          riskLevel = 'high';
-          confidence = 0.8;
-          break;
-        case 'moderate':
-          riskLevel = 'medium';
-          confidence = 0.6;
-          break;
-        case 'minor':
-          riskLevel = 'low';
-          confidence = 0.4;
-          break;
+      // Use offenseType (ML model target) as primary indicator
+      const offenseType = accident.offenseType?.toLowerCase() || '';
+      const caseStatus = accident.caseStatus?.toLowerCase() || '';
+      
+      // "Crimes Against Persons" = High Risk (requires immediate response)
+      if (offenseType.includes('persons') || offenseType.includes('person')) {
+        riskLevel = 'high';
+        confidence = 0.85;
+      } 
+      // "Crimes Against Property" = Medium Risk
+      else if (offenseType.includes('property')) {
+        riskLevel = 'medium';
+        confidence = 0.6;
+      }
+      // Check case status for additional risk indicators
+      else if (caseStatus === 'pending' || caseStatus === 'ongoing') {
+        riskLevel = 'medium';
+        confidence = 0.5;
+      } 
+      // Default to low risk
+      else {
+        riskLevel = 'low';
+        confidence = 0.4;
       }
 
       // Normalize municipality name for consistency
       const normalizedMunicipality = (accident.municipality === "Mati City") ? "Mati" : accident.municipality;
       
       return {
-        accident_id: accident.accident_id,
+        blotterNo: accident.blotterNo,
         riskLevel,
         confidence,
-        severity: accident.severity,
+        offenseType: accident.offenseType,
+        incidentType: accident.incidentType,
         municipality: normalizedMunicipality,
-        vehicle_type: accident.vehicle_type
+        caseStatus: accident.caseStatus
       };
     });
 
@@ -541,9 +640,10 @@ export const getAccidentRiskAnalytics = async (req, res) => {
       : 0;
 
     // Rule-based detection (simplified)
-    const ruleBasedFlagged = accidents.filter(accident => 
-      accident.severity === 'fatal' || accident.severity === 'severe'
-    ).length;
+    const ruleBasedFlagged = accidents.filter(accident => {
+      const incidentType = accident.incidentType?.toLowerCase() || '';
+      return incidentType.includes('fatal') || incidentType.includes('serious');
+    }).length;
 
     const ruleBasedPercentage = accidents.length > 0 
       ? ((ruleBasedFlagged / accidents.length) * 100).toFixed(1)

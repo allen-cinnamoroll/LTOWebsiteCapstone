@@ -27,15 +27,29 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
   const form = useForm({
     resolver: zodResolver(AccidentSchema),
     defaultValues: {
-      accident_id: "",
-      plateNo: "",
-      accident_date: undefined,
-      street: "",
-      barangay: "",
+      blotterNo: "",
+      vehiclePlateNo: "",
+      vehicleMCPlateNo: "",
+      vehicleChassisNo: "",
+      suspect: "",
+      stageOfFelony: "",
+      offense: "",
+      offenseType: "",
+      narrative: "",
+      caseStatus: "",
+      region: "",
+      province: "",
       municipality: "",
-      vehicle_type: "",
-      severity: "",
-      notes: "",
+      barangay: "",
+      street: "",
+      lat: undefined,
+      lng: undefined,
+      dateEncoded: undefined,
+      dateReported: undefined,
+      timeReported: "",
+      dateCommited: undefined,
+      timeCommited: "",
+      incidentType: "",
     },
   });
 
@@ -58,15 +72,29 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
       if (data.success && data.data) {
         const accident = data.data;
         form.reset({
-          accident_id: accident.accident_id || "",
-          plateNo: accident.plateNo || "",
-          accident_date: accident.accident_date ? new Date(accident.accident_date) : undefined,
-          street: accident.street || "",
-          barangay: accident.barangay || "",
+          blotterNo: accident.blotterNo || "",
+          vehiclePlateNo: accident.vehiclePlateNo || "",
+          vehicleMCPlateNo: accident.vehicleMCPlateNo || "",
+          vehicleChassisNo: accident.vehicleChassisNo || "",
+          suspect: accident.suspect || "",
+          stageOfFelony: accident.stageOfFelony || "",
+          offense: accident.offense || "",
+          offenseType: accident.offenseType || "",
+          narrative: accident.narrative || "",
+          caseStatus: accident.caseStatus || "",
+          region: accident.region || "",
+          province: accident.province || "",
           municipality: accident.municipality || "",
-          vehicle_type: accident.vehicle_type || "",
-          severity: accident.severity || "",
-          notes: accident.notes || "",
+          barangay: accident.barangay || "",
+          street: accident.street || "",
+          lat: accident.lat || undefined,
+          lng: accident.lng || undefined,
+          dateEncoded: accident.dateEncoded ? new Date(accident.dateEncoded) : undefined,
+          dateReported: accident.dateReported ? new Date(accident.dateReported) : undefined,
+          timeReported: accident.timeReported || "",
+          dateCommited: accident.dateCommited ? new Date(accident.dateCommited) : undefined,
+          timeCommited: accident.timeCommited || "",
+          incidentType: accident.incidentType || "",
         });
       }
     } catch (error) {
@@ -83,25 +111,39 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
     setIsSubmitting(true);
     try {
       const content = {
-        accident_id: formData.accident_id,
-        plateNo: formData.plateNo,
-        accident_date: formData.accident_date ? formData.accident_date.toISOString() : null,
-        street: formData.street,
-        barangay: formData.barangay,
+        blotterNo: formData.blotterNo,
+        vehiclePlateNo: formData.vehiclePlateNo,
+        vehicleMCPlateNo: formData.vehicleMCPlateNo,
+        vehicleChassisNo: formData.vehicleChassisNo,
+        suspect: formData.suspect,
+        stageOfFelony: formData.stageOfFelony,
+        offense: formData.offense,
+        offenseType: formData.offenseType,
+        narrative: formData.narrative,
+        caseStatus: formData.caseStatus,
+        region: formData.region,
+        province: formData.province,
         municipality: formData.municipality,
-        vehicle_type: formData.vehicle_type,
-        severity: formData.severity,
-        notes: formData.notes,
+        barangay: formData.barangay,
+        street: formData.street,
+        lat: formData.lat,
+        lng: formData.lng,
+        dateEncoded: formData.dateEncoded ? formData.dateEncoded.toISOString() : null,
+        dateReported: formData.dateReported ? formData.dateReported.toISOString() : null,
+        timeReported: formData.timeReported,
+        dateCommited: formData.dateCommited ? formData.dateCommited.toISOString() : null,
+        timeCommited: formData.timeCommited,
+        incidentType: formData.incidentType,
       };
 
-      console.log("Updating accident data:", content);
+      console.log("Updating incident data:", content);
 
       const { data } = await apiClient.patch(`/accident/${accidentId}`, content, {
         headers: { Authorization: token },
       });
 
       if (data.success) {
-        toast.success("Accident has been updated", { description: date });
+        toast.success("Incident has been updated", { description: date });
 
         // Close modal and refresh data
         onOpenChange(false);
@@ -110,7 +152,7 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
         }
       }
     } catch (error) {
-      const message = error?.response?.data?.message || "Failed to update accident";
+      const message = error?.response?.data?.message || "Failed to update incident";
       toast.error(message, {
         description: date,
       });
@@ -123,15 +165,29 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
     if (!isOpen && !submitting) {
       // Reset form when closing modal
       form.reset({
-        accident_id: "",
-        plateNo: "",
-        accident_date: undefined,
-        street: "",
-        barangay: "",
+        blotterNo: "",
+        vehiclePlateNo: "",
+        vehicleMCPlateNo: "",
+        vehicleChassisNo: "",
+        suspect: "",
+        stageOfFelony: "",
+        offense: "",
+        offenseType: "",
+        narrative: "",
+        caseStatus: "",
+        region: "",
+        province: "",
         municipality: "",
-        vehicle_type: "",
-        severity: "",
-        notes: "",
+        barangay: "",
+        street: "",
+        lat: undefined,
+        lng: undefined,
+        dateEncoded: undefined,
+        dateReported: undefined,
+        timeReported: "",
+        dateCommited: undefined,
+        timeCommited: "",
+        incidentType: "",
       });
     }
     onOpenChange(isOpen);
@@ -155,7 +211,7 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Edit Accident
+            Edit Incident
           </DialogTitle>
           <DialogDescription>
             Update the accident information. Accident ID cannot be modified.

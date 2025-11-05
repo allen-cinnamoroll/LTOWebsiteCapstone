@@ -1,62 +1,116 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/components/theme/theme-provider';
 
-// Counter animation hook - copied exactly from Registration Analytics
-const useCounterAnimation = (end, duration = 2000) => {
+// Counter animation hook - starts animation when data is available
+const useCounterAnimation = (end, duration = 2000, shouldAnimate = true) => {
   const [count, setCount] = useState(0);
+  const animationRef = useRef(null);
   
   useEffect(() => {
-    let startTime;
-    const startValue = 0;
+    // Reset count when animation should not run
+    if (!shouldAnimate) {
+      setCount(0);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
     
-    const animate = (currentTime) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
+    // Reset to 0 and start animation
+    setCount(0);
+    
+    // Small delay to ensure all animations start together
+    const timeoutId = setTimeout(() => {
+      let startTime = null;
+      const startValue = 0;
       
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentCount = Math.floor(startValue + (end - startValue) * easeOutQuart);
+      const animate = (currentTime) => {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentCount = Math.floor(startValue + (end - startValue) * easeOutQuart);
+        
+        setCount(currentCount);
+        
+        if (progress < 1) {
+          animationRef.current = requestAnimationFrame(animate);
+        } else {
+          setCount(end);
+          animationRef.current = null;
+        }
+      };
       
-      setCount(currentCount);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
+      animationRef.current = requestAnimationFrame(animate);
+    }, 50); // Small delay to synchronize all animations
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
       }
     };
-    
-    requestAnimationFrame(animate);
-  }, [end, duration]);
+  }, [end, duration, shouldAnimate]);
   
   return count;
 };
 
 // Progress bar animation hook - synchronized with counter animation (same pattern)
-const useProgressBarAnimation = (targetPercentage, duration = 2000) => {
+const useProgressBarAnimation = (targetPercentage, duration = 2000, shouldAnimate = true) => {
   const [width, setWidth] = useState(0);
+  const animationRef = useRef(null);
   
   useEffect(() => {
-    let startTime;
-    const startValue = 0;
+    // Reset width when animation should not run
+    if (!shouldAnimate) {
+      setWidth(0);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
     
-    const animate = (currentTime) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
+    // Reset to 0 and start animation
+    setWidth(0);
+    
+    // Small delay to ensure all animations start together
+    const timeoutId = setTimeout(() => {
+      let startTime = null;
+      const startValue = 0;
       
-      // Same easing function as counter animation - easeOutQuart
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentWidth = startValue + (targetPercentage - startValue) * easeOutQuart;
+      const animate = (currentTime) => {
+        if (!startTime) startTime = currentTime;
+        const progress = Math.min((currentTime - startTime) / duration, 1);
+        
+        // Same easing function as counter animation - easeOutQuart
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentWidth = startValue + (targetPercentage - startValue) * easeOutQuart;
+        
+        setWidth(currentWidth);
+        
+        if (progress < 1) {
+          animationRef.current = requestAnimationFrame(animate);
+        } else {
+          setWidth(targetPercentage);
+          animationRef.current = null;
+        }
+      };
       
-      setWidth(currentWidth);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setWidth(targetPercentage);
+      animationRef.current = requestAnimationFrame(animate);
+    }, 50); // Small delay to synchronize all animations
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
       }
     };
-    
-    requestAnimationFrame(animate);
-  }, [targetPercentage, duration]);
+  }, [targetPercentage, duration, shouldAnimate]);
   
   return width;
 };
@@ -66,20 +120,45 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   
-  // Counter animations - must be called at top level (copied from Registration Analytics)
-  const violationsAnimated = useCounterAnimation(totalViolations || 0);
-  const violatorsAnimated = useCounterAnimation(totalTrafficViolators || 0);
-  const commonViolationCountAnimated = useCounterAnimation(mostCommonViolation?.count || 0);
-  const officerCountAnimated = useCounterAnimation(topOfficer?.count || topOfficer?.violationCount || 0);
+  // Track when data becomes available to trigger simultaneous animations
+  const [animationTrigger, setAnimationTrigger] = useState(0);
   
-  // Progress bar animations - synchronized with counter animations
-  const violationsBarWidth = useProgressBarAnimation(100);
-  const violatorsBarWidth = useProgressBarAnimation(100);
+  useEffect(() => {
+    // When loading finishes and we have data, trigger all animations to start together
+    // Also trigger when data values change (e.g., when filtering by year)
+    if (!loading) {
+      // Small delay to ensure all hooks are ready, then trigger animations
+      const timer = setTimeout(() => {
+        setAnimationTrigger(prev => prev + 1);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else {
+      // Reset trigger when loading starts
+      setAnimationTrigger(0);
+    }
+  }, [loading, totalViolations, totalTrafficViolators]);
+  
+  // Determine if we should animate - all animations start together when data is loaded
+  const shouldAnimate = !loading && animationTrigger > 0;
+  
+  // Counter animations - all start simultaneously when data is available
+  const violationsAnimated = useCounterAnimation(totalViolations || 0, 2000, shouldAnimate);
+  const violatorsAnimated = useCounterAnimation(totalTrafficViolators || 0, 2000, shouldAnimate);
+  const commonViolationCountAnimated = useCounterAnimation(mostCommonViolation?.count || 0, 2000, shouldAnimate);
+  const officerCountAnimated = useCounterAnimation(topOfficer?.count || topOfficer?.violationCount || 0, 2000, shouldAnimate);
+  
+  // Progress bar animations - synchronized with counter animations, all start together
+  const violationsBarWidth = useProgressBarAnimation(100, 2000, shouldAnimate);
+  const violatorsBarWidth = useProgressBarAnimation(100, 2000, shouldAnimate);
   const commonViolationBarWidth = useProgressBarAnimation(
-    Math.min(((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100, 100)
+    Math.min(((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100, 100),
+    2000,
+    shouldAnimate
   );
   const officerBarWidth = useProgressBarAnimation(
-    Math.min(((topOfficer?.count || topOfficer?.violationCount || 0) / ((topOfficer?.count || topOfficer?.violationCount || 0) + ((topOfficer?.count || topOfficer?.violationCount || 0) * 0.8))) * 100, 100)
+    Math.min(((topOfficer?.count || topOfficer?.violationCount || 0) / ((topOfficer?.count || topOfficer?.violationCount || 0) + ((topOfficer?.count || topOfficer?.violationCount || 0) * 0.8))) * 100, 100),
+    2000,
+    shouldAnimate
   );
   if (loading) {
     return (

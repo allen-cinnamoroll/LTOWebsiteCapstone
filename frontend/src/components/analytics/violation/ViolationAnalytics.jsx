@@ -8,35 +8,6 @@ import {
 } from './index';
 import { ViolationMonitoring } from './ViolationMonitoring.jsx';
 
-// Counter animation hook
-const useCounterAnimation = (end, duration = 2000) => {
-  const [count, setCount] = useState(0);
-  
-  useEffect(() => {
-    let startTime;
-    const startValue = 0;
-    
-    const animate = (currentTime) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentCount = Math.floor(startValue + (end - startValue) * easeOutQuart);
-      
-      setCount(currentCount);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    
-    requestAnimationFrame(animate);
-  }, [end, duration]);
-  
-  return count;
-};
-
 export function ViolationAnalytics() {
   const [selectedYear, setSelectedYear] = useState('');
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
@@ -70,11 +41,9 @@ export function ViolationAnalytics() {
     confiscatedItemTypesArray: []
   };
 
-  // Counter animations - use the data directly from analyticsData
-  const totalViolations = useCounterAnimation(analyticsData?.totalViolations || 0);
-  const totalTrafficViolators = useCounterAnimation(
-    (totalTrafficViolatorsOverride ?? analyticsData?.totalTrafficViolators) || 0
-  );
+  // Pass raw data values directly to KPICards - let it handle all animations simultaneously
+  const totalViolations = analyticsData?.totalViolations || 0;
+  const totalTrafficViolators = (totalTrafficViolatorsOverride ?? analyticsData?.totalTrafficViolators) || 0;
 
   // Close dropdowns when clicking outside
   useEffect(() => {

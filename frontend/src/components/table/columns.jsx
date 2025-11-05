@@ -1,28 +1,46 @@
 export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
   {
-    accessorKey: "accident_id",
-    header: "Accident ID",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("accident_id")}</div>,
+    accessorKey: "blotterNo",
+    header: "Blotter No.",
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("blotterNo")}</div>,
   },
   {
-    accessorKey: "plateNo",
-    header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
+    accessorKey: "vehiclePlateNo",
+    header: "Vehicle Plate No.",
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehiclePlateNo") || "N/A"}</div>,
   },
   {
-    accessorKey: "accident_date",
-    header: "Date",
-    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{row.getValue("accident_date")}</div>,
+    accessorKey: "incidentType",
+    header: "Incident Type",
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("incidentType") || "N/A"}</div>,
   },
   {
-    accessorKey: "street",
-    header: "Street",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("street") || "N/A"}</div>,
+    accessorKey: "suspect",
+    header: "Suspect",
+    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{row.getValue("suspect") || "N/A"}</div>,
   },
   {
-    accessorKey: "barangay",
-    header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    accessorKey: "dateCommited",
+    header: "Date Committed",
+    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{row.getValue("dateCommited")}</div>,
+  },
+  {
+    accessorKey: "caseStatus",
+    header: "Case Status",
+    cell: ({ row }) => {
+      const caseStatus = row.getValue("caseStatus");
+      const statusColors = {
+        pending: "text-yellow-600 bg-yellow-100",
+        ongoing: "text-blue-600 bg-blue-100", 
+        solved: "text-green-600 bg-green-100",
+        closed: "text-gray-600 bg-gray-100"
+      };
+      return (
+        <div className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${statusColors[caseStatus?.toLowerCase()] || 'text-gray-600 bg-gray-100'}`}>
+          {caseStatus || "N/A"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "municipality",
@@ -30,27 +48,9 @@ export const accidentColumns = (onEdit, onUpdateStatus, submitting) => [
     cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
   },
   {
-    accessorKey: "vehicle_type",
-    header: "Vehicle Type",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehicle_type") || "N/A"}</div>,
-  },
-  {
-    accessorKey: "severity",
-    header: "Severity",
-    cell: ({ row }) => {
-      const severity = row.getValue("severity");
-      const severityColors = {
-        minor: "text-green-600 bg-green-100",
-        moderate: "text-yellow-600 bg-yellow-100", 
-        severe: "text-orange-600 bg-orange-100",
-        fatal: "text-red-600 bg-red-100"
-      };
-      return (
-        <div className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${severityColors[severity] || 'text-gray-600 bg-gray-100'}`}>
-          {severity}
-        </div>
-      );
-    },
+    accessorKey: "barangay",
+    header: "Barangay",
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
   },
   {
     id: "actions",

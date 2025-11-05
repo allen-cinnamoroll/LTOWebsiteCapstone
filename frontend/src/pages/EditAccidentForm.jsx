@@ -20,15 +20,29 @@ const EditAccidentForm = () => {
   const form = useForm({
     resolver: zodResolver(AccidentSchema),
     defaultValues: {
-      accident_id: "",
-      plateNo: "",
-      accident_date: undefined,
-      street: "",
-      barangay: "",
+      blotterNo: "",
+      vehiclePlateNo: "",
+      vehicleMCPlateNo: "",
+      vehicleChassisNo: "",
+      suspect: "",
+      stageOfFelony: "",
+      offense: "",
+      offenseType: "",
+      narrative: "",
+      caseStatus: "",
+      region: "",
+      province: "",
       municipality: "",
-      vehicle_type: "",
-      severity: "",
-      notes: "",
+      barangay: "",
+      street: "",
+      lat: undefined,
+      lng: undefined,
+      dateEncoded: undefined,
+      dateReported: undefined,
+      timeReported: "",
+      dateCommited: undefined,
+      timeCommited: "",
+      incidentType: "",
     },
   });
   const { reset } = form;
@@ -46,15 +60,29 @@ const EditAccidentForm = () => {
       if (data?.data) {
         const a = data.data;
         reset({
-          accident_id: a.accident_id,
-          plateNo: a.plateNo || "",
-          accident_date: new Date(a.accident_date),
-          street: a.street,
-          barangay: a.barangay,
-          municipality: a.municipality,
-          vehicle_type: a.vehicle_type || "",
-          severity: a.severity || "",
-          notes: a.notes || "",
+          blotterNo: a.blotterNo || "",
+          vehiclePlateNo: a.vehiclePlateNo || "",
+          vehicleMCPlateNo: a.vehicleMCPlateNo || "",
+          vehicleChassisNo: a.vehicleChassisNo || "",
+          suspect: a.suspect || "",
+          stageOfFelony: a.stageOfFelony || "",
+          offense: a.offense || "",
+          offenseType: a.offenseType || "",
+          narrative: a.narrative || "",
+          caseStatus: a.caseStatus || "",
+          region: a.region || "",
+          province: a.province || "",
+          municipality: a.municipality || "",
+          barangay: a.barangay || "",
+          street: a.street || "",
+          lat: a.lat || undefined,
+          lng: a.lng || undefined,
+          dateEncoded: a.dateEncoded ? new Date(a.dateEncoded) : undefined,
+          dateReported: a.dateReported ? new Date(a.dateReported) : undefined,
+          timeReported: a.timeReported || "",
+          dateCommited: a.dateCommited ? new Date(a.dateCommited) : undefined,
+          timeCommited: a.timeCommited || "",
+          incidentType: a.incidentType || "",
         });
       }
     } catch (error) {
@@ -66,15 +94,29 @@ const EditAccidentForm = () => {
     setIsSubmitting(true);
     try {
       const content = {
-        accident_id: formData.accident_id,
-        plateNo: formData.plateNo,
-        accident_date: formData.accident_date ? formData.accident_date.toISOString() : null,
-        street: formData.street,
-        barangay: formData.barangay,
+        blotterNo: formData.blotterNo,
+        vehiclePlateNo: formData.vehiclePlateNo,
+        vehicleMCPlateNo: formData.vehicleMCPlateNo,
+        vehicleChassisNo: formData.vehicleChassisNo,
+        suspect: formData.suspect,
+        stageOfFelony: formData.stageOfFelony,
+        offense: formData.offense,
+        offenseType: formData.offenseType,
+        narrative: formData.narrative,
+        caseStatus: formData.caseStatus,
+        region: formData.region,
+        province: formData.province,
         municipality: formData.municipality,
-        vehicle_type: formData.vehicle_type,
-        severity: formData.severity,
-        notes: formData.notes,
+        barangay: formData.barangay,
+        street: formData.street,
+        lat: formData.lat,
+        lng: formData.lng,
+        dateEncoded: formData.dateEncoded ? formData.dateEncoded.toISOString() : null,
+        dateReported: formData.dateReported ? formData.dateReported.toISOString() : null,
+        timeReported: formData.timeReported,
+        dateCommited: formData.dateCommited ? formData.dateCommited.toISOString() : null,
+        timeCommited: formData.timeCommited,
+        incidentType: formData.incidentType,
       };
 
       const { data } = await apiClient.patch(`/accident/${params.id}`, content, {
@@ -82,11 +124,11 @@ const EditAccidentForm = () => {
       });
 
       if (data.success) {
-        toast.success("Accident updated", { description: date });
+        toast.success("Incident updated", { description: date });
         navigate(-1);
       }
     } catch (error) {
-      const message = error?.response?.data?.message || "Failed to update accident";
+      const message = error?.response?.data?.message || "Failed to update incident";
       toast.error(message, { description: `${date}` });
     } finally {
       setIsSubmitting(false);
@@ -96,8 +138,8 @@ const EditAccidentForm = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl md:text-3xl font-bold">Edit Accident</CardTitle>
-        <CardDescription>Update accident details.</CardDescription>
+        <CardTitle className="text-xl md:text-3xl font-bold">Edit Incident</CardTitle>
+        <CardDescription>Update incident details.</CardDescription>
       </CardHeader>
       <CardContent>
         <FormComponent

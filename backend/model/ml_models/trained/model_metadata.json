@@ -1,38 +1,43 @@
 {
   "model_name": "accident_rf_model",
   "rule_system_name": "accident_rule_system",
-  "training_date": "2025-09-25T07:40:06.517916",
+  "training_date": "2025-11-05T13:42:42.643994",
   "config": {
     "data": {
-      "raw_data_path": "../../../data/raw/accidents_data.csv",
+      "raw_data_path": "../../../data/raw/cleaned_accidents_data.csv",
       "processed_data_path": "../../../data/processed/",
       "train_test_split": 0.8,
       "random_state": 42
     },
     "features": {
       "categorical_features": [
-        "vehicle_type",
+        "incidentType",
         "municipality",
         "barangay",
-        "street"
+        "street",
+        "stageOfFelony",
+        "province",
+        "region"
       ],
-      "numerical_features": [],
-      "target_feature": "severity",
-      "date_feature": "accident_date"
+      "numerical_features": [
+        "lat",
+        "lng"
+      ],
+      "target_feature": "offenseType",
+      "date_feature": "dateCommited"
     },
     "random_forest": {
-      "n_estimators": 100,
-      "max_depth": 10,
-      "min_samples_split": 5,
-      "min_samples_leaf": 2,
+      "n_estimators": 50,
+      "max_depth": 5,
+      "min_samples_split": 10,
+      "min_samples_leaf": 5,
       "random_state": 42,
       "n_jobs": -1
     },
     "rule_system": {
-      "severity_mapping": {
-        "minor": 1,
-        "moderate": 2,
-        "severe": 3
+      "case_status_mapping": {
+        "Crimes Against Persons": 1,
+        "Crimes Against Property": 2
       },
       "risk_thresholds": {
         "high_risk": 0.7,
@@ -40,20 +45,150 @@
         "low_risk": 0.0
       },
       "prescriptive_actions": {
-        "high_risk": [
-          "Increase patrol frequency",
-          "Install additional signage",
-          "Implement speed limit reduction",
-          "Add traffic calming measures"
+        "high_risk_persons": {
+          "enforcement": [
+            "Deploy traffic enforcers at identified hotspots during peak hours (7-9 AM, 5-7 PM)",
+            "Establish sobriety checkpoints during weekends and evenings",
+            "Implement mandatory helmet and seatbelt inspection checkpoints",
+            "Increase mobile patrol frequency by 50% in high-incident areas"
+          ],
+          "infrastructure": [
+            "Install traffic lights at high-risk intersections",
+            "Add speed bumps in residential and school zones",
+            "Improve street lighting in identified dark spots",
+            "Install road safety mirrors at blind corners"
+          ],
+          "public_outreach": [
+            "Conduct road safety seminars in barangays with high incident rates",
+            "Launch anti-drunk driving campaigns targeting weekend travelers",
+            "Distribute educational materials on defensive driving",
+            "Partner with schools for youth traffic safety programs"
+          ],
+          "medical_response": [
+            "Pre-position ambulance units in high-risk corridors",
+            "Train barangay health workers in emergency response",
+            "Establish first-aid stations at identified hotspots"
+          ]
+        },
+        "medium_risk": {
+          "enforcement": [
+            "Conduct bi-weekly traffic monitoring operations",
+            "Implement random vehicle documentation checks",
+            "Monitor speed limits with radar guns"
+          ],
+          "infrastructure": [
+            "Install reflective road markers and signage",
+            "Improve road maintenance in identified areas",
+            "Add pedestrian crossing signs"
+          ],
+          "public_outreach": [
+            "Distribute road safety flyers during community events",
+            "Conduct quarterly barangay safety meetings",
+            "Social media awareness campaigns"
+          ]
+        },
+        "low_risk_property": {
+          "enforcement": [
+            "Monthly vehicle registration compliance checks",
+            "Insurance verification campaigns",
+            "Driver's license validity monitoring"
+          ],
+          "infrastructure": [
+            "Standard road maintenance schedule",
+            "Regular signage inspection and repair"
+          ],
+          "public_outreach": [
+            "Promote proper vehicle documentation compliance",
+            "Educate on importance of insurance coverage"
+          ]
+        },
+        "urban_areas": [
+          "Install CCTV cameras at major intersections",
+          "Implement stricter parking regulations",
+          "Deploy traffic enforcers at congestion points",
+          "Create dedicated motorcycle lanes"
         ],
-        "medium_risk": [
-          "Regular patrol monitoring",
-          "Maintain existing signage",
-          "Monitor traffic patterns"
+        "rural_highways": [
+          "Install kilometer markers and warning signs",
+          "Add curve warning signals with reflective materials",
+          "Conduct regular pothole repairs",
+          "Deploy mobile patrol units for monitoring"
         ],
-        "low_risk": [
-          "Standard monitoring",
-          "Routine maintenance"
+        "school_zones": [
+          "Assign traffic aides during school hours (6:30-7:30 AM, 4:30-5:30 PM)",
+          "Enforce 20 km/h speed limit strictly",
+          "Install pedestrian crossing lights",
+          "Create drop-off/pick-up zones"
+        ],
+        "market_areas": [
+          "Manage traffic flow during market days",
+          "Designate loading/unloading zones",
+          "Control street vendor placement",
+          "Increase foot patrol presence"
+        ]
+      },
+      "resource_allocation": {
+        "patrol_units": {
+          "high_priority_hours": [
+            7,
+            8,
+            9,
+            17,
+            18,
+            19
+          ],
+          "high_priority_days": [
+            5,
+            6,
+            0
+          ],
+          "minimum_units_per_hotspot": 2
+        },
+        "medical_units": {
+          "deployment_trigger": "3+ accidents per month in area",
+          "response_time_target": "10 minutes",
+          "coverage_radius": "5 km"
+        },
+        "enforcement_checkpoints": {
+          "frequency_high_risk": "3 times per week",
+          "frequency_medium_risk": "1 time per week",
+          "optimal_duration": "2-3 hours",
+          "recommended_times": [
+            "Friday evenings",
+            "Saturday nights",
+            "Holiday eves"
+          ]
+        }
+      },
+      "outreach_strategy": {
+        "target_groups": [
+          "Young drivers (18-25 years)",
+          "Motorcycle riders",
+          "Public transport drivers",
+          "Senior citizens"
+        ],
+        "campaign_themes": [
+          "Helmet saves lives",
+          "Don't drink and drive",
+          "Speed thrills but kills",
+          "Pedestrian right of way"
+        ],
+        "channels": [
+          "Barangay community meetings",
+          "Social media (Facebook, local groups)",
+          "School seminars",
+          "Radio announcements",
+          "Tarpaulin/posters in public areas"
+        ],
+        "timing": [
+          "Before major holidays (Christmas, New Year, Holy Week)",
+          "Start of school year (June)",
+          "Before long weekends"
+        ],
+        "success_metrics": [
+          "20% reduction in target area accidents within 6 months",
+          "Increased helmet usage (target: 90%)",
+          "Reduced DUI incidents (target: 30% decrease)"
         ]
       }
     },
@@ -75,15 +210,20 @@
     }
   },
   "feature_columns": [
+    "lat",
+    "lng",
     "year",
     "month",
     "day",
     "day_of_week",
     "hour",
-    "vehicle_type_encoded",
+    "incidentType_encoded",
     "municipality_encoded",
     "barangay_encoded",
     "street_encoded",
+    "stageOfFelony_encoded",
+    "province_encoded",
+    "region_encoded",
     "road_type_encoded"
   ],
   "model_type": "RandomForestClassifier",

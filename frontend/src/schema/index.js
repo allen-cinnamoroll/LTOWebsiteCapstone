@@ -118,15 +118,29 @@ export const EditVehicleSchema = z.object({
 });
 
 export const AccidentSchema = z.object({
-  accident_id: z.string().optional(),
-  plateNo: z.string().min(1, { message: "Plate number is required" }),
-  accident_date: z.date({ required_error: "Accident date is required" }),
-  street: z.string().min(1, { message: "Street is required" }),
-  barangay: z.string().min(1, { message: "Barangay is required" }),
+  blotterNo: z.string().optional(),
+  vehiclePlateNo: z.string().optional(),
+  vehicleMCPlateNo: z.string().optional(),
+  vehicleChassisNo: z.string().optional(),
+  suspect: z.string().optional(),
+  stageOfFelony: z.string().optional(),
+  offense: z.string().optional(),
+  offenseType: z.string().optional(),
+  narrative: z.string().optional(),
+  caseStatus: z.string().optional(),
+  region: z.string().optional(),
+  province: z.string().optional(),
   municipality: z.string().min(1, { message: "Municipality is required" }),
-  vehicle_type: z.string().min(1, { message: "Vehicle type is required" }),
-  severity: z.string().min(1, { message: "Severity is required" }),
-  notes: z.string().optional(),
+  barangay: z.string().min(1, { message: "Barangay is required" }),
+  street: z.string().optional(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  dateEncoded: z.date().optional(),
+  dateReported: z.date().optional(),
+  timeReported: z.string().optional(),
+  dateCommited: z.date({ required_error: "Date committed is required" }),
+  timeCommited: z.string().optional(),
+  incidentType: z.string().optional(),
 });
 
 export const ViolationCreateSchema = z.object({

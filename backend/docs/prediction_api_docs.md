@@ -474,11 +474,11 @@ result.data.predictions.forEach(prediction => {
 
 ## Performance Metrics
 
-### Current Model Performance
-- **Accuracy**: 51.6%
-- **Precision**: 44.6%
-- **Recall**: 51.6%
-- **F1-Score**: 45.3%
+### Model Performance Requirements
+- **Minimum Accuracy**: 70% (80/20 train-test split)
+- **Minimum Precision**: 68%
+- **Minimum Recall**: 68%
+- **Minimum F1-Score**: 65%
 
 ### API Performance
 - **Average Response Time**: <500ms for single predictions
