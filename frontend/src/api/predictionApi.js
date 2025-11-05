@@ -1,0 +1,62 @@
+// API functions for vehicle registration predictions
+// Get Flask API URL from environment variable or use default
+const MV_PREDICTION_API_BASE = import.meta.env.VITE_MV_PREDICTION_API_URL || 'http://72.60.198.244:5001';
+
+/**
+ * Fetch weekly vehicle registration predictions
+ * @param {number} weeks - Number of weeks to predict (default: 12, max: 52)
+ * @param {string} municipality - Optional municipality filter
+ * @returns {Promise} Prediction data with weekly_predictions array
+ */
+export const getWeeklyPredictions = async (weeks = 12, municipality = null) => {
+  try {
+    const params = new URLSearchParams();
+    params.append('weeks', weeks.toString());
+    if (municipality) {
+      params.append('municipality', municipality);
+    }
+    
+    const response = await fetch(`${MV_PREDICTION_API_BASE}/api/predict/registrations?${params.toString()}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching weekly predictions:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get model accuracy metrics
+ * @param {string} municipality - Optional municipality filter
+ * @returns {Promise} Accuracy data with MAPE, MAE, RMSE
+ */
+export const getModelAccuracy = async (municipality = null) => {
+  try {
+    const params = new URLSearchParams();
+    if (municipality) {
+      params.append('municipality', municipality);
+    }
+    
+    const url = municipality 
+      ? `${MV_PREDICTION_API_BASE}/api/model/accuracy?${params.toString()}`
+      : `${MV_PREDICTION_API_BASE}/api/model/accuracy`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching model accuracy:', error);
+    throw error;
+  }
+};
+

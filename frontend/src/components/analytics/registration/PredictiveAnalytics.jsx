@@ -1,4 +1,5 @@
 import React from 'react';
+import WeeklyPredictionsChart from './WeeklyPredictionsChart.jsx';
 
 export function PredictiveAnalytics() {
   // Get current year and predict next year
@@ -27,6 +28,11 @@ export function PredictiveAnalytics() {
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Weekly Predictions Chart */}
+      <div className="p-6">
+        <WeeklyPredictionsChart />
       </div>
     </div>
   );
