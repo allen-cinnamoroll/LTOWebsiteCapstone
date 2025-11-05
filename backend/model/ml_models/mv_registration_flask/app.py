@@ -22,14 +22,32 @@ from data_preprocessor import DataPreprocessor
 from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES
 
 app = Flask(__name__)
+# Set maximum upload size to 50MB
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB
+
 # Enable CORS for all routes with more permissive settings
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+# Allow all origins, methods, and headers to fix CORS issues
+CORS(app, 
+     resources={
+         r"/api/*": {
+             "origins": "*",
+             "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+             "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+             "expose_headers": ["Content-Type"],
+             "supports_credentials": False
+         }
+     },
+     supports_credentials=False,
+     automatic_options=True)
+
+# Add after_request handler to ensure CORS headers are always set
+@app.after_request
+def after_request(response):
+    """Ensure CORS headers are always present"""
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,DELETE')
+    return response
 
 # Initialize models
 aggregated_model = None  # Main aggregated model (always used)
@@ -242,6 +260,11 @@ def get_model_accuracy():
             'traceback': traceback.format_exc()
         }), 500
 
+@app.route('/api/upload-csv', methods=['OPTIONS'])
+def upload_csv_options():
+    """Handle CORS preflight requests for upload endpoint"""
+    return '', 200
+
 @app.route('/api/upload-csv', methods=['POST'])
 def upload_csv():
     """
@@ -434,6 +457,23 @@ def health_check():
         'timestamp': datetime.now().isoformat()
     }), 200
 
+# Error handlers
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    """Handle file size too large errors"""
+    return jsonify({
+        'success': False,
+        'error': 'File size too large. Maximum size is 50MB.'
+    }), 413
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Handle forbidden errors"""
+    return jsonify({
+        'success': False,
+        'error': 'Access forbidden. Please check CORS and server configuration.'
+    }), 403
+
 @app.route('/', methods=['GET'])
 def index():
     """API information endpoint"""
@@ -444,20 +484,27 @@ def index():
             'predict': '/api/predict/registrations',
             'accuracy': '/api/model/accuracy',
             'retrain': '/api/model/retrain',
+            'upload': '/api/upload-csv',
             'health': '/api/health'
         },
         'description': 'SARIMA-based prediction API for vehicle registration volumes in Davao Oriental'
     }), 200
 
 if __name__ == '__main__':
+    # Check for debug mode from environment variable
+    # Set FLASK_DEBUG=1 to enable auto-reload on code changes (development only!)
+    debug_mode = os.getenv('FLASK_DEBUG', '0').lower() in ('1', 'true', 'yes')
+    
     print("Initializing Vehicle Registration Prediction API...")
     if initialize_model():
         print("Model initialized successfully!")
         print("Starting Flask server...")
+        if debug_mode:
+            print("⚠️  DEBUG MODE ENABLED - Auto-reload is ON (not recommended for production)")
         # Run on all interfaces, port 5001 
         # Frontend expects port 5001
         try:
-            app.run(host='0.0.0.0', port=5001, debug=False)
+            app.run(host='0.0.0.0', port=5001, debug=debug_mode)
         except OSError as e:
             if "Address already in use" in str(e):
                 print(f"\n⚠️  Port 5001 is in use. Error: {str(e)}")
