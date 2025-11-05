@@ -65,16 +65,27 @@ class DataPreprocessor:
         # Combine all dataframes
         df = pd.concat(dfs, ignore_index=True)
         
-        # Remove duplicates based on key columns (if they exist)
+        # Validate required columns
+        required_columns = ['fileNo', 'dateOfRenewal', 'address_municipality']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise ValueError(
+                f"CSV file is missing required columns: {', '.join(missing_columns)}. "
+                f"Required columns are: {', '.join(required_columns)}. "
+                f"Found columns: {', '.join(df.columns.tolist())}"
+            )
+        
+        # Remove duplicates based on fileNo + dateOfRenewal
+        # Using fileNo is more reliable since temporary plate numbers can be duplicates
         # This prevents duplicate registrations if same data appears in multiple files
         duplicates_removed = 0
-        if 'plateNo' in df.columns and 'dateOfRenewal' in df.columns:
+        if 'fileNo' in df.columns and 'dateOfRenewal' in df.columns:
             before_dedup = len(df)
-            df = df.drop_duplicates(subset=['plateNo', 'dateOfRenewal'], keep='first')
+            df = df.drop_duplicates(subset=['fileNo', 'dateOfRenewal'], keep='first')
             after_dedup = len(df)
             duplicates_removed = before_dedup - after_dedup
             if duplicates_removed > 0:
-                print(f"  - Removed {duplicates_removed} duplicate rows")
+                print(f"  - Removed {duplicates_removed} duplicate rows using fileNo + dateOfRenewal")
         
         print(f"Combined total: {len(df)} rows from {len(all_csv_files)} CSV file(s)")
         
@@ -226,9 +237,10 @@ class DataPreprocessor:
         # Combine all dataframes
         df = pd.concat(dfs, ignore_index=True)
         
-        # Remove duplicates
-        if 'plateNo' in df.columns and 'dateOfRenewal' in df.columns:
-            df = df.drop_duplicates(subset=['plateNo', 'dateOfRenewal'], keep='first')
+        # Remove duplicates using fileNo + dateOfRenewal
+        # Using fileNo is more reliable since temporary plate numbers can be duplicates
+        if 'fileNo' in df.columns and 'dateOfRenewal' in df.columns:
+            df = df.drop_duplicates(subset=['fileNo', 'dateOfRenewal'], keep='first')
         
         print(f"Combined total: {len(df)} rows from {len(all_csv_files)} CSV file(s)")
         
