@@ -3,7 +3,6 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import OTPVerificationModal from "@/components/otp/OTPVerificationModal";
 import apiClient from "@/api/axios";
-import { getRelativeAvatarPath } from "@/utils/avatarUtils";
 
 const AuthContext = createContext(null);
 
@@ -43,9 +42,11 @@ export const AuthProvider = ({ children }) => {
               // TODO: Add backend validation when the endpoint is available
               setToken(token);
               
-              // Ensure avatar is stored as relative path (remove full URL if present)
-              if (userData && userData.avatar) {
-                userData.avatar = getRelativeAvatarPath(userData.avatar);
+              // Ensure avatar URL is properly constructed
+              if (userData && userData.avatar && !userData.avatar.startsWith('http')) {
+                const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+                const backendURL = baseURL.replace('/api', '');
+                userData.avatar = `${backendURL}/${userData.avatar}`;
               }
               
               setUserData(userData);
@@ -97,7 +98,11 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
-      avatar: decoded.avatar ? getRelativeAvatarPath(decoded.avatar) : '',
+      avatar: decoded.avatar ? (() => {
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        return `${backendURL}/${decoded.avatar}`;
+      })() : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };
@@ -129,7 +134,11 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
-      avatar: decoded.avatar ? getRelativeAvatarPath(decoded.avatar) : '',
+      avatar: decoded.avatar ? (() => {
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+        return `${backendURL}/${decoded.avatar}`;
+      })() : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };

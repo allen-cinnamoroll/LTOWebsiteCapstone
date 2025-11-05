@@ -27,7 +27,6 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/api/axios';
 import { toast } from 'sonner';
-import { getAvatarURL, getRelativeAvatarPath } from '@/utils/avatarUtils';
 
 const AccountPage = () => {
   const { userData, setUserData } = useAuth();
@@ -62,8 +61,7 @@ const AccountPage = () => {
         email: userData.email || '',
         avatar: userData.avatar || '',
       });
-      // Set preview avatar with full URL
-      setPreviewAvatar(getAvatarURL(userData.avatar, true) || '');
+      setPreviewAvatar(userData.avatar || '');
     }
   }, [userData]);
 
@@ -78,7 +76,7 @@ const AccountPage = () => {
       email: userData?.email || '',
       avatar: userData?.avatar || '',
     });
-    setPreviewAvatar(getAvatarURL(userData?.avatar, true) || '');
+    setPreviewAvatar(userData?.avatar || '');
   };
 
   const handleSave = async () => {
@@ -107,13 +105,16 @@ const AccountPage = () => {
       });
 
       if (response.data.success) {
-        // Store only the relative path from backend response
-        const relativeAvatarPath = response.data.user.avatar
-          ? getRelativeAvatarPath(response.data.user.avatar)
+        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
+        const backendURL = baseURL.replace('/api', '');
+
+        // Add cache-busting timestamp to force image reload
+        const avatarURL = response.data.user.avatar
+          ? `${backendURL}/${response.data.user.avatar}?t=${Date.now()}`
           : '';
 
         console.log('Backend response avatar:', response.data.user.avatar);
-        console.log('Stored relative avatar path:', relativeAvatarPath);
+        console.log('Constructed avatar URL with cache-busting:', avatarURL);
 
         // Merge with existing userData to preserve all necessary fields
         const updatedUserData = {
@@ -122,7 +123,7 @@ const AccountPage = () => {
           middleName: response.data.user.middleName,
           lastName: response.data.user.lastName,
           email: response.data.user.email,
-          avatar: relativeAvatarPath,
+          avatar: avatarURL,
         };
 
         setUserData(updatedUserData);
@@ -130,8 +131,8 @@ const AccountPage = () => {
         console.log('Saving to localStorage:', updatedUserData);
         localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
-        // Update preview avatar with cache-busting for immediate display
-        setPreviewAvatar(getAvatarURL(relativeAvatarPath, true));
+        // Update preview avatar to show the new image immediately
+        setPreviewAvatar(avatarURL);
 
         setIsEditModalOpen(false);
         toast.success('Profile updated successfully!', {
@@ -223,13 +224,13 @@ const AccountPage = () => {
                     <Avatar className="h-14 w-14" key={userData?.avatar || 'default'}>
                       <AvatarImage
                         key={userData?.avatar || 'default-img'}
-                        src={getAvatarURL(userData?.avatar, true)}
+                        src={userData?.avatar || ''}
                         alt={userData?.email}
                         onError={(e) => {
                           console.error('Avatar image failed to load:', e.target.src);
                         }}
                         onLoad={() => {
-                          console.log('Avatar image loaded successfully:', getAvatarURL(userData?.avatar, true));
+                          console.log('Avatar image loaded successfully:', userData?.avatar);
                         }}
                       />
                       <AvatarFallback className="text-lg font-bold">
@@ -385,13 +386,13 @@ const AccountPage = () => {
                     <Avatar className="h-20 w-20" key={previewAvatar || userData?.avatar || 'default'}>
                       <AvatarImage
                         key={`preview-${previewAvatar || userData?.avatar || 'default-img'}`}
-                        src={previewAvatar || getAvatarURL(userData?.avatar, true) || ''}
+                        src={previewAvatar || userData?.avatar || ''}
                         alt={editData.email || userData?.email}
                         onError={(e) => {
                           console.error('Avatar preview failed to load:', e.target.src);
                         }}
                         onLoad={() => {
-                          console.log('Avatar preview loaded:', previewAvatar || getAvatarURL(userData?.avatar, true));
+                          console.log('Avatar preview loaded:', previewAvatar || userData?.avatar);
                         }}
                       />
                       <AvatarFallback className="text-lg font-bold">
