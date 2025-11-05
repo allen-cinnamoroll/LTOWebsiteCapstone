@@ -23,6 +23,7 @@ export default function MVPredictionPage() {
   const [trainingData, setTrainingData] = useState(null);
   const [duplicateInfo, setDuplicateInfo] = useState(null);
   const [hasNewFile, setHasNewFile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0); // 0 for accuracy, 1 for diagnostics
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (file) => {
@@ -652,7 +653,10 @@ export default function MVPredictionPage() {
        </div>
 
       {/* Success Modal with Accuracy Metrics */}
-      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+      <Dialog open={showSuccessModal} onOpenChange={(open) => {
+        setShowSuccessModal(open);
+        if (!open) setCurrentPage(0); // Reset to first page when closing
+      }}>
         <DialogContent className="max-w-2xl bg-white dark:bg-gray-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
@@ -667,13 +671,24 @@ export default function MVPredictionPage() {
           </DialogHeader>
           
           {trainingData && (
-            <div className="space-y-4 py-4">
+            <div className="relative overflow-hidden">
+              {/* Page Container with Smooth Transitions */}
+              <div className="relative" style={{ minHeight: '450px' }}>
+                {/* Page 1: Accuracy Metrics */}
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    currentPage === 0 
+                      ? 'opacity-100 translate-x-0' 
+                      : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
+                  }`}
+                >
+                  <div className="space-y-4 py-4">
               {/* Model Accuracy Percentage - Use Test Accuracy if available, otherwise Training */}
               {(trainingData.test_accuracy_metrics?.mape || trainingData.accuracy_metrics?.mape) && (
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">
+                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
                         Overall Model Accuracy
                         {trainingData.test_accuracy_metrics?.mape 
                           ? ' (Test Set - Out-of-Sample)' 
@@ -684,7 +699,7 @@ export default function MVPredictionPage() {
                           ? (100 - trainingData.test_accuracy_metrics.mape).toFixed(2)
                           : (100 - trainingData.accuracy_metrics.mape).toFixed(2)}%
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         Based on MAPE of {trainingData.test_accuracy_metrics?.mape
                           ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
                           : `${trainingData.accuracy_metrics.mape.toFixed(2)}%`}
@@ -711,7 +726,7 @@ export default function MVPredictionPage() {
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 cursor-help" />
                             </div>
-                            <p className="text-xs text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                            <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
                               MAPE
                             </p>
                             <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">
@@ -719,7 +734,7 @@ export default function MVPredictionPage() {
                                 ? `${trainingData.accuracy_metrics.mape.toFixed(2)}%`
                                 : 'N/A'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               Mean Absolute Percentage Error
                             </p>
                           </div>
@@ -742,11 +757,11 @@ export default function MVPredictionPage() {
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
-                            <p className="text-xs text-green-600 dark:text-green-400 mb-1">MAE</p>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">MAE</p>
                             <p className="text-2xl font-bold text-green-900 dark:text-green-300">
                               {trainingData.accuracy_metrics.mae?.toFixed(2) || 'N/A'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               Mean Absolute Error
                             </p>
                           </div>
@@ -770,11 +785,11 @@ export default function MVPredictionPage() {
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-purple-600 dark:text-purple-400 cursor-help" />
                             </div>
-                            <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">RMSE</p>
+                            <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-1">RMSE</p>
                             <p className="text-2xl font-bold text-purple-900 dark:text-purple-300">
                               {trainingData.accuracy_metrics.rmse?.toFixed(2) || 'N/A'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               Root Mean Square Error
                             </p>
                           </div>
@@ -809,7 +824,7 @@ export default function MVPredictionPage() {
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
-                            <p className="text-xs text-green-600 dark:text-green-400 mb-1 flex items-center gap-1">
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1 flex items-center gap-1">
                               MAPE
                             </p>
                             <p className="text-2xl font-bold text-green-900 dark:text-green-300">
@@ -817,7 +832,7 @@ export default function MVPredictionPage() {
                                 ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
                                 : 'N/A'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               Mean Absolute Percentage Error
                             </p>
                           </div>
@@ -840,11 +855,11 @@ export default function MVPredictionPage() {
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
-                            <p className="text-xs text-green-600 dark:text-green-400 mb-1">MAE</p>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">MAE</p>
                             <p className="text-2xl font-bold text-green-900 dark:text-green-300">
                               {trainingData.test_accuracy_metrics.mae?.toFixed(2) || 'N/A'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               Mean Absolute Error
                             </p>
                           </div>
@@ -867,11 +882,11 @@ export default function MVPredictionPage() {
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
-                            <p className="text-xs text-green-600 dark:text-green-400 mb-1">RMSE</p>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">RMSE</p>
                             <p className="text-2xl font-bold text-green-900 dark:text-green-300">
                               {trainingData.test_accuracy_metrics.rmse?.toFixed(2) || 'N/A'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               Root Mean Square Error
                             </p>
                           </div>
@@ -889,10 +904,21 @@ export default function MVPredictionPage() {
                   </div>
                 </div>
               )}
+                  </div>
+                </div>
 
-              {/* Model Diagnostics */}
-              {trainingData.diagnostics && (
-                <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                {/* Page 2: Diagnostics & Training Information */}
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    currentPage === 1 
+                      ? 'opacity-100 translate-x-0' 
+                      : 'opacity-0 absolute inset-0 -translate-x-full pointer-events-none'
+                  }`}
+                >
+                  <div className="space-y-4 py-4">
+                    {/* Model Diagnostics */}
+                    {trainingData.diagnostics && (
+                      <div className="space-y-3">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     Model Diagnostics
@@ -911,7 +937,7 @@ export default function MVPredictionPage() {
                         <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
                           Residuals Randomness
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
                           {trainingData.diagnostics.residuals_random === true 
                             ? '✓ Residuals are random - model fits well!' 
                             : trainingData.diagnostics.residuals_random === false
@@ -919,7 +945,7 @@ export default function MVPredictionPage() {
                             : 'Could not determine'}
                         </p>
                         {trainingData.diagnostics.ljung_box_pvalue !== null && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
                             {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
                           </p>
@@ -939,21 +965,21 @@ export default function MVPredictionPage() {
                       <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
                         ACF/PACF Analysis
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
                         Checked {trainingData.diagnostics.acf_values.length} lags for leftover autocorrelation
                       </p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <span className="text-gray-600 dark:text-gray-400">ACF Lags:</span>
-                          <span className="ml-1 font-medium">{trainingData.diagnostics.acf_values.length}</span>
+                          <span className="text-gray-700 dark:text-gray-300">ACF Lags:</span>
+                          <span className="ml-1 font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.acf_values.length}</span>
                         </div>
                         <div>
-                          <span className="text-gray-600 dark:text-gray-400">PACF Lags:</span>
-                          <span className="ml-1 font-medium">{trainingData.diagnostics.pacf_values?.length || 0}</span>
+                          <span className="text-gray-700 dark:text-gray-300">PACF Lags:</span>
+                          <span className="ml-1 font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.pacf_values?.length || 0}</span>
                         </div>
                       </div>
                       {trainingData.diagnostics.acf_values.some(acf => Math.abs(acf.value) > 0.2) && (
-                        <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                        <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 mt-2">
                           ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
                         </p>
                       )}
@@ -962,40 +988,40 @@ export default function MVPredictionPage() {
 
                   {/* Residual Statistics */}
                   {trainingData.diagnostics.residuals_mean !== null && (
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-2 gap-3 text-base">
                       <div>
-                        <span className="text-gray-600 dark:text-gray-400">Residuals Mean:</span>
-                        <span className="ml-2 font-medium">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Mean:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
                       </div>
                       <div>
-                        <span className="text-gray-600 dark:text-gray-400">Residuals Std:</span>
-                        <span className="ml-2 font-medium">{trainingData.diagnostics.residuals_std.toFixed(4)}</span>
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Std:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_std.toFixed(4)}</span>
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Training Information */}
-              <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Info className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                    {/* Training Information */}
+                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-base flex items-center gap-2">
+                  <Info className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   Training Information
                 </h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-base">
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Training Weeks:</span>
-                    <span className="ml-2 font-medium">{trainingData.training_weeks || 'N/A'}</span>
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">Training Weeks:</span>
+                    <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.training_weeks || 'N/A'}</span>
                   </div>
                   {trainingData.test_weeks && (
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">Test Weeks:</span>
-                      <span className="ml-2 font-medium">{trainingData.test_weeks}</span>
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">Test Weeks:</span>
+                      <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.test_weeks}</span>
                     </div>
                   )}
                   <div className="col-span-2">
-                    <span className="text-gray-600 dark:text-gray-400">Training Date Range: </span>
-                    <span className="font-medium">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">Training Date Range: </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
                       {trainingData.date_range?.start 
                         ? formatDate(trainingData.date_range.start)
                         : 'N/A'} - {trainingData.date_range?.end 
@@ -1005,8 +1031,8 @@ export default function MVPredictionPage() {
                   </div>
                   {trainingData.test_date_range && (
                     <div className="col-span-2">
-                      <span className="text-gray-600 dark:text-gray-400">Test Date Range: </span>
-                      <span className="font-medium">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">Test Date Range: </span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
                         {formatDate(trainingData.test_date_range.start)} - {formatDate(trainingData.test_date_range.end)}
                       </span>
                     </div>
@@ -1014,20 +1040,45 @@ export default function MVPredictionPage() {
                   {trainingData.processing_info && (
                     <>
                       <div>
-                        <span className="text-gray-600 dark:text-gray-400">CSV Files Combined:</span>
-                        <span className="ml-2 font-medium">
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">CSV Files Combined:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">
                           {trainingData.processing_info.total_csv_files || 'N/A'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-gray-600 dark:text-gray-400">Total Registrations:</span>
-                        <span className="ml-2 font-medium">
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">Total Registrations:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">
                           {trainingData.processing_info.total_registrations?.toLocaleString() || 'N/A'}
                         </span>
                       </div>
                     </>
                   )}
                 </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Minimal Navigation Dots */}
+              <div className="flex justify-center items-center gap-2 pt-3 pb-1 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setCurrentPage(0)}
+                  className={`transition-all duration-200 ${
+                    currentPage === 0
+                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
+                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label="Go to accuracy metrics page"
+                />
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  className={`transition-all duration-200 ${
+                    currentPage === 1
+                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
+                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label="Go to diagnostics page"
+                />
               </div>
             </div>
           )}
