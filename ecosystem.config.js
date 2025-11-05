@@ -10,6 +10,20 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 5000,
       },
+      // Enable watch mode for auto-reload on file changes
+      watch: true,
+      watch_delay: 1000, // Wait 1 second after file change before restart
+      ignore_watch: [
+        "node_modules",
+        "logs",
+        "uploads",
+        "*.log",
+        ".git",
+        "json",
+        "scripts",
+        "data",
+        "model/ml_models"
+      ],
       error_file: "/var/log/pm2/lto-backend-error.log",
       out_file: "/var/log/pm2/lto-backend-out.log",
       log_file: "/var/log/pm2/lto-backend.log",
