@@ -5,7 +5,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { violationColumns } from "@/components/table/columns";
 import ViolationTable from "@/components/violations/ViolationTable";
-import AddViolationModal from "@/components/violations/AddViolationModal";
+import ViolationEntryModal from "@/components/violations/ViolationEntryModal";
+import ViolationInformationModal from "@/components/violations/ViolationInformationModal";
 import ViolationDetailsModal from "@/components/violations/ViolationDetailsModal";
 import EditViolationModal from "@/components/violations/EditViolationModal";
 
@@ -17,10 +18,14 @@ const ViolationPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setIsSubmitting] = useState(false);
   const [addViolationModalOpen, setAddViolationModalOpen] = useState(false);
+  const [violationInformationModalOpen, setViolationInformationModalOpen] = useState(false);
   const [violationDetailsModalOpen, setViolationDetailsModalOpen] = useState(false);
   const [editViolationModalOpen, setEditViolationModalOpen] = useState(false);
   const [selectedViolation, setSelectedViolation] = useState(null);
+  const [selectedViolationForDetails, setSelectedViolationForDetails] = useState(null);
   const [selectedViolationId, setSelectedViolationId] = useState(null);
+  const [initialViolator, setInitialViolator] = useState(null);
+  const [shouldReopenInformationModal, setShouldReopenInformationModal] = useState(false);
 
   useEffect(() => {
     fetchViolations();
@@ -36,6 +41,41 @@ const ViolationPage = () => {
     window.addEventListener('editViolation', handleEditViolation);
     return () => {
       window.removeEventListener('editViolation', handleEditViolation);
+    };
+  }, []);
+
+  // Listen for open violation entry with pre-filled violator
+  useEffect(() => {
+    const handleOpenViolationEntry = (event) => {
+      setInitialViolator(event.detail);
+      setAddViolationModalOpen(true);
+    };
+
+    window.addEventListener('openViolationEntry', handleOpenViolationEntry);
+    return () => {
+      window.removeEventListener('openViolationEntry', handleOpenViolationEntry);
+    };
+  }, []);
+
+  // Listen for open violation details from information modal
+  useEffect(() => {
+    const handleOpenViolationDetails = (event) => {
+      // Check if event detail has the new structure with reopenInformationModal flag
+      if (event.detail && typeof event.detail === 'object' && 'violation' in event.detail) {
+        // New structure: { violation, reopenInformationModal }
+        setShouldReopenInformationModal(event.detail.reopenInformationModal || false);
+        setSelectedViolationForDetails(event.detail.violation);
+      } else {
+        // Old structure: just the violation object (for backward compatibility)
+        setShouldReopenInformationModal(false);
+        setSelectedViolationForDetails(event.detail);
+      }
+      setViolationDetailsModalOpen(true);
+    };
+
+    window.addEventListener('openViolationDetails', handleOpenViolationDetails);
+    return () => {
+      window.removeEventListener('openViolationDetails', handleOpenViolationDetails);
     };
   }, []);
 
@@ -66,6 +106,9 @@ const ViolationPage = () => {
         violationType: vData.violationType || "confiscated",
         licenseType: vData.licenseType || null,
         plateNo: vData.plateNo || "N/A",
+        chassisNo: vData.chassisNo || null,
+        engineNo: vData.engineNo || null,
+        fileNo: vData.fileNo || null,
         dateOfApprehension: vData.dateOfApprehension,
         apprehendingOfficer: vData.apprehendingOfficer || "N/A",
         createdAt: vData.createdAt,
@@ -82,12 +125,13 @@ const ViolationPage = () => {
   };
 
   const handleAdd = () => {
+    setInitialViolator(null);
     setAddViolationModalOpen(true);
   };
 
   const onRowClick = (data) => {
     setSelectedViolation(data);
-    setViolationDetailsModalOpen(true);
+    setViolationInformationModalOpen(true);
   };
 
   const onEdit = (violationId) => {
@@ -124,18 +168,39 @@ const ViolationPage = () => {
         </div>
       </div>
 
-      {/* Add Violation Modal */}
-      <AddViolationModal
+      {/* Violation Entry Modal */}
+      <ViolationEntryModal
         open={addViolationModalOpen}
-        onOpenChange={setAddViolationModalOpen}
+        onOpenChange={(isOpen) => {
+          setAddViolationModalOpen(isOpen);
+          if (!isOpen) {
+            setInitialViolator(null);
+          }
+        }}
         onViolationAdded={handleViolationAdded}
+        initialViolator={initialViolator}
+      />
+
+      {/* Violation Information Modal */}
+      <ViolationInformationModal
+        open={violationInformationModalOpen}
+        onOpenChange={setViolationInformationModalOpen}
+        violationData={selectedViolation}
+        allViolations={violationData}
       />
 
       {/* Violation Details Modal */}
       <ViolationDetailsModal
         open={violationDetailsModalOpen}
-        onOpenChange={setViolationDetailsModalOpen}
-        violationData={selectedViolation}
+        onOpenChange={(isOpen) => {
+          setViolationDetailsModalOpen(isOpen);
+          // If closing and we should reopen information modal, reopen it
+          if (!isOpen && shouldReopenInformationModal) {
+            setShouldReopenInformationModal(false);
+            setViolationInformationModalOpen(true);
+          }
+        }}
+        violationData={selectedViolationForDetails}
       />
 
       {/* Edit Violation Modal */}

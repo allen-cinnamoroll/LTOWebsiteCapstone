@@ -73,6 +73,8 @@ const DashboardLayout = () => {
         return 'Update Account';
       case '/account/logs':
         return 'Account Logs';
+      case '/trained-models/vehicle/mv-prediction':
+        return 'MV Prediction Model';
       default:
         return 'Overview';
     }

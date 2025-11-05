@@ -63,6 +63,10 @@ const ViolationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    fileNo: {
+      type: String,
+      trim: true,
+    },
     // User tracking fields
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

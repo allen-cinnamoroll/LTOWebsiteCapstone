@@ -8,30 +8,46 @@ import numpy as np
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.stats.diagnostic import acorr_ljungbox
-from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller, acf, pacf
+from scipy import stats
 import pickle
 import os
 from datetime import datetime, timedelta
 import json
 
 class SARIMAModel:
-    def __init__(self, model_dir):
+    def __init__(self, model_dir, municipality=None):
         """
         Initialize SARIMA model
         
         Args:
             model_dir: Directory to save/load model files
+            municipality: Municipality name (None for aggregated model)
         """
         self.model_dir = model_dir
+        self.municipality = municipality
         self.model = None
         self.fitted_model = None
         self.model_params = None
         self.training_data = None
+        self.test_data = None
+        self.all_data = None  # Store entire dataset (training + test) for prediction start date
+        self._metadata = None  # Store metadata when loading model
         self.accuracy_metrics = None
+        self.test_accuracy_metrics = None
+        self.diagnostics = None
         
-        # Model file paths
-        self.model_file = os.path.join(model_dir, 'sarima_model.pkl')
-        self.metadata_file = os.path.join(model_dir, 'sarima_metadata.json')
+        # Model file paths (include municipality in filename if specified)
+        if municipality:
+            safe_name = municipality.upper().replace(' ', '_').replace('/', '_')
+            model_filename = f'sarima_model_{safe_name}.pkl'
+            metadata_filename = f'sarima_metadata_{safe_name}.json'
+        else:
+            model_filename = 'sarima_model.pkl'
+            metadata_filename = 'sarima_metadata.json'
+        
+        self.model_file = os.path.join(model_dir, model_filename)
+        self.metadata_file = os.path.join(model_dir, metadata_filename)
     
     def model_exists(self):
         """Check if a trained model exists"""
@@ -137,13 +153,14 @@ class SARIMAModel:
         print(f"Optimal parameters: SARIMA{best_params[:3]} x SARIMA{best_params[3:]}")
         return best_params
     
-    def train(self, data, force=False):
+    def train(self, data, force=False, processing_info=None):
         """
         Train the SARIMA model
         
         Args:
             data: Processed time series data (DataFrame with 'count' column)
             force: Force retraining even if model exists
+            processing_info: Optional dict with processing information including actual_date_range
             
         Returns:
             Dictionary with training information
@@ -154,28 +171,39 @@ class SARIMAModel:
         
         print("Training SARIMA model...")
         
-        # Store training data
-        self.training_data = data.copy()
-        
         # Extract series
         series = data['count']
         
-        print(f"Training on {len(series)} weeks of data")
-        print(f"Date range: {series.index.min()} to {series.index.max()}")
+        # Split data: 80% training, 20% testing (chronological split for time series)
+        split_idx = int(len(series) * 0.8)
+        train_series = series.iloc[:split_idx]
+        test_series = series.iloc[split_idx:]
         
-        # Find optimal parameters
-        p, d, q, P, D, Q, s = self.find_optimal_parameters(series)
+        print(f"Total data: {len(series)} weeks")
+        print(f"Training set: {len(train_series)} weeks ({len(train_series)/len(series)*100:.1f}%)")
+        print(f"Test set: {len(test_series)} weeks ({len(test_series)/len(series)*100:.1f}%)")
+        print(f"Training date range: {train_series.index.min()} to {train_series.index.max()}")
+        print(f"Test date range: {test_series.index.min()} to {test_series.index.max()}")
+        
+        # Store training and test data
+        self.training_data = train_series.to_frame('count')
+        self.test_data = test_series.to_frame('count')
+        # Store entire dataset to determine correct prediction start date
+        self.all_data = series.to_frame('count')
+        
+        # Find optimal parameters using training data only
+        p, d, q, P, D, Q, s = self.find_optimal_parameters(train_series)
         self.model_params = {
             'order': (p, d, q),
             'seasonal_order': (P, D, Q, s),
             'full_params': (p, d, q, P, D, Q, s)
         }
         
-        # Create and fit model
+        # Create and fit model on training data only
         print(f"Fitting SARIMA model with parameters: order={self.model_params['order']}, seasonal={self.model_params['seasonal_order']}")
         
         self.model = SARIMAX(
-            series,
+            train_series,
             order=(p, d, q),
             seasonal_order=(P, D, Q, s),
             enforce_stationarity=False,
@@ -189,28 +217,69 @@ class SARIMAModel:
             print(f"Error fitting model: {str(e)}")
             raise
         
-        # Calculate accuracy metrics on training data
-        self._calculate_accuracy_metrics(series)
+        # Calculate accuracy metrics on training data (in-sample)
+        self._calculate_accuracy_metrics(train_series, is_training=True)
+        
+        # Calculate accuracy metrics on test data (out-of-sample)
+        if len(test_series) > 0:
+            self._calculate_test_accuracy(test_series)
+        else:
+            print("Warning: Test set is empty, skipping test metrics")
+            self.test_accuracy_metrics = None
+        
+        # Calculate diagnostic metrics on training residuals
+        self._calculate_diagnostics(train_series)
         
         # Save model
         self.save_model()
         
+        # Use actual registration dates if available, otherwise fall back to week_start dates
+        # The key fix: use actual min registration date instead of week_start Monday
+        if processing_info and 'actual_date_range' in processing_info:
+            actual_date_range = processing_info['actual_date_range']
+            # Use actual earliest registration date for training start (fixes the Dec 30 issue)
+            training_start = actual_date_range['start']
+            # For end dates, use week_start dates as they're reasonable approximations
+            # since we're splitting by weeks anyway
+            training_end = str(train_series.index.max())
+            
+            if len(test_series) > 0:
+                test_start = str(test_series.index.min())
+                test_end = str(test_series.index.max())
+            else:
+                test_start = None
+                test_end = None
+        else:
+            # Fall back to week_start dates
+            training_start = str(train_series.index.min())
+            training_end = str(train_series.index.max())
+            test_start = str(test_series.index.min()) if len(test_series) > 0 else None
+            test_end = str(test_series.index.max()) if len(test_series) > 0 else None
+        
         training_info = {
             'model_params': self.model_params,
-            'training_weeks': len(series),
+            'training_weeks': len(train_series),
+            'test_weeks': len(test_series),
+            'total_weeks': len(series),
             'date_range': {
-                'start': str(series.index.min()),
-                'end': str(series.index.max())
+                'start': training_start,
+                'end': training_end
             },
-            'accuracy_metrics': self.accuracy_metrics,
+            'test_date_range': {
+                'start': test_start,
+                'end': test_end
+            } if test_start else None,
+            'accuracy_metrics': self.accuracy_metrics,  # Training (in-sample) metrics
+            'test_accuracy_metrics': self.test_accuracy_metrics,  # Test (out-of-sample) metrics
+            'diagnostics': self.diagnostics,
             'aic': float(self.fitted_model.aic),
             'bic': float(self.fitted_model.bic)
         }
         
         return training_info
     
-    def _calculate_accuracy_metrics(self, actual_series):
-        """Calculate accuracy metrics using in-sample predictions"""
+    def _calculate_accuracy_metrics(self, actual_series, is_training=True):
+        """Calculate accuracy metrics using in-sample predictions (training data)"""
         try:
             # Get fitted values (in-sample predictions)
             fitted_values = self.fitted_model.fittedvalues
@@ -227,7 +296,7 @@ class SARIMAModel:
             else:
                 mape = np.nan
             
-            self.accuracy_metrics = {
+            metrics = {
                 'mae': float(mae),
                 'rmse': float(rmse),
                 'mape': float(mape) if not np.isnan(mape) else None,
@@ -235,11 +304,176 @@ class SARIMAModel:
                 'std_actual': float(actual_series.std())
             }
             
-            print(f"Model Accuracy - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
+            if is_training:
+                self.accuracy_metrics = metrics
+                print(f"Training Accuracy (In-Sample) - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
+            else:
+                self.test_accuracy_metrics = metrics
+                print(f"Test Accuracy (Out-of-Sample) - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
             
         except Exception as e:
             print(f"Error calculating accuracy metrics: {str(e)}")
-            self.accuracy_metrics = None
+            if is_training:
+                self.accuracy_metrics = None
+            else:
+                self.test_accuracy_metrics = None
+    
+    def _calculate_test_accuracy(self, test_series):
+        """Calculate accuracy metrics on test data (out-of-sample predictions)"""
+        try:
+            # Generate forecasts for the test period
+            # Use the last training date as the forecast start point
+            forecast_steps = len(test_series)
+            forecast = self.fitted_model.forecast(steps=forecast_steps)
+            
+            # Convert forecast to numpy array if it's not already
+            if hasattr(forecast, 'values'):
+                forecast = forecast.values
+            forecast = np.array(forecast).flatten()
+            
+            # Ensure forecast and test_series have same length
+            if len(forecast) != len(test_series):
+                min_len = min(len(forecast), len(test_series))
+                forecast = forecast[:min_len]
+                test_series = test_series.iloc[:min_len]
+            
+            # Calculate metrics
+            test_values = test_series.values.flatten()
+            mae = np.mean(np.abs(test_values - forecast))
+            mse = np.mean((test_values - forecast) ** 2)
+            rmse = np.sqrt(mse)
+            
+            # MAPE (avoid division by zero)
+            non_zero_mask = test_values != 0
+            if non_zero_mask.sum() > 0:
+                test_non_zero = test_values[non_zero_mask]
+                forecast_non_zero = forecast[non_zero_mask]
+                mape = np.mean(np.abs((test_non_zero - forecast_non_zero) / test_non_zero)) * 100
+            else:
+                mape = np.nan
+            
+            self.test_accuracy_metrics = {
+                'mae': float(mae),
+                'rmse': float(rmse),
+                'mape': float(mape) if not np.isnan(mape) else None,
+                'mean_actual': float(test_series.mean()),
+                'std_actual': float(test_series.std())
+            }
+            
+            print(f"\n=== Test Set Performance (Out-of-Sample) ===")
+            print(f"MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%")
+            print("=============================================\n")
+            
+        except Exception as e:
+            print(f"Error calculating test accuracy: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            self.test_accuracy_metrics = None
+    
+    def _calculate_diagnostics(self, actual_series):
+        """Calculate diagnostic metrics: residuals randomness, ACF/PACF"""
+        try:
+            # Get residuals
+            residuals = self.fitted_model.resid
+            
+            # Remove NaN values
+            residuals_clean = residuals.dropna()
+            
+            if len(residuals_clean) < 2:
+                self.diagnostics = {
+                    'residuals_random': None,
+                    'ljung_box_pvalue': None,
+                    'ljung_box_statistic': None,
+                    'residuals_mean': None,
+                    'residuals_std': None,
+                    'acf_values': None,
+                    'pacf_values': None,
+                    'message': 'Insufficient data for diagnostics'
+                }
+                return
+            
+            # 1. Ljung-Box test for residual randomness
+            # Test if residuals are random (white noise)
+            # Null hypothesis: residuals are random (no autocorrelation)
+            # p-value > 0.05 means residuals are random (good!)
+            try:
+                ljung_box = acorr_ljungbox(residuals_clean, lags=min(10, len(residuals_clean)//2), return_df=True)
+                # Use the p-value from the last lag
+                ljung_box_pvalue = float(ljung_box['lb_pvalue'].iloc[-1])
+                ljung_box_statistic = float(ljung_box['lb_stat'].iloc[-1])
+                residuals_random = ljung_box_pvalue > 0.05
+            except Exception as e:
+                print(f"Error in Ljung-Box test: {str(e)}")
+                ljung_box_pvalue = None
+                ljung_box_statistic = None
+                residuals_random = None
+            
+            # 2. Residual statistics
+            residuals_mean = float(residuals_clean.mean())
+            residuals_std = float(residuals_clean.std())
+            
+            # 3. ACF and PACF values for residuals
+            # Calculate up to 10 lags or half the data length, whichever is smaller
+            max_lags = min(10, len(residuals_clean) // 2)
+            if max_lags > 0:
+                try:
+                    acf_values, acf_confint = acf(residuals_clean, nlags=max_lags, alpha=0.05, fft=True)
+                    pacf_values, pacf_confint = pacf(residuals_clean, nlags=max_lags, alpha=0.05)
+                    
+                    # Convert to lists (excluding lag 0 which is always 1.0)
+                    acf_data = [
+                        {
+                            'lag': int(i),
+                            'value': float(acf_values[i]),
+                            'lower_ci': float(acf_confint[i][0]) if acf_confint is not None else None,
+                            'upper_ci': float(acf_confint[i][1]) if acf_confint is not None else None
+                        }
+                        for i in range(1, len(acf_values))
+                    ]
+                    
+                    pacf_data = [
+                        {
+                            'lag': int(i),
+                            'value': float(pacf_values[i]),
+                            'lower_ci': float(pacf_confint[i][0]) if pacf_confint is not None else None,
+                            'upper_ci': float(pacf_confint[i][1]) if pacf_confint is not None else None
+                        }
+                        for i in range(1, len(pacf_values))
+                    ]
+                except Exception as e:
+                    print(f"Error calculating ACF/PACF: {str(e)}")
+                    acf_data = None
+                    pacf_data = None
+            else:
+                acf_data = None
+                pacf_data = None
+            
+            self.diagnostics = {
+                'residuals_random': bool(residuals_random) if residuals_random is not None else None,
+                'ljung_box_pvalue': ljung_box_pvalue,
+                'ljung_box_statistic': ljung_box_statistic,
+                'residuals_mean': residuals_mean,
+                'residuals_std': residuals_std,
+                'acf_values': acf_data,
+                'pacf_values': pacf_data,
+                'total_residuals': len(residuals_clean)
+            }
+            
+            # Print diagnostic results
+            print(f"\n=== Model Diagnostics ===")
+            print(f"Residuals Random: {residuals_random} (p-value: {ljung_box_pvalue:.4f})")
+            print(f"Residuals Mean: {residuals_mean:.4f}, Std: {residuals_std:.4f}")
+            if residuals_random:
+                print("✓ Residuals appear random - model fits well!")
+            else:
+                print("⚠ Residuals show patterns - model may need improvement")
+            print("=======================\n")
+            
+        except Exception as e:
+            print(f"Error calculating diagnostics: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            self.diagnostics = None
     
     def predict(self, weeks=4, municipality=None):
         """
@@ -247,7 +481,7 @@ class SARIMAModel:
         
         Args:
             weeks: Number of weeks to predict (default: 4)
-            municipality: Specific municipality (not used in current implementation, kept for future use)
+            municipality: Specific municipality (for per-municipality mode, should match model's municipality)
             
         Returns:
             Dictionary with predictions
@@ -262,7 +496,35 @@ class SARIMAModel:
         forecast_ci = self.fitted_model.get_forecast(steps=weeks).conf_int()
         
         # Generate dates for predictions
-        last_date = self.training_data.index.max()
+        # Use the maximum date from ALL available data (training + test), not just training
+        # This ensures we predict truly future dates, not dates that exist in test data
+        last_date = None
+        
+        # Priority 1: Use all_data if available (from freshly trained model)
+        if self.all_data is not None and len(self.all_data) > 0:
+            last_date = pd.to_datetime(self.all_data.index.max())
+            print(f"Using last date from entire dataset (all_data): {last_date}")
+        # Priority 2: Check if we have metadata with last_data_date (from loaded model)
+        elif hasattr(self, '_metadata') and self._metadata and 'last_data_date' in self._metadata:
+            last_data_date_str = self._metadata['last_data_date']
+            if last_data_date_str:
+                last_date = pd.to_datetime(last_data_date_str)
+                print(f"Using last date from metadata: {last_date}")
+        # Priority 3: Try to reconstruct from test_data if available
+        elif self.test_data is not None and len(self.test_data) > 0 and self.training_data is not None:
+            last_date = pd.to_datetime(max(
+                self.training_data.index.max(),
+                self.test_data.index.max()
+            ))
+            print(f"Using last date from training + test data: {last_date}")
+        # Priority 4: Fallback to training data (for backward compatibility)
+        else:
+            last_date = pd.to_datetime(self.training_data.index.max())
+            print(f"Using last date from training data (fallback): {last_date}")
+        
+        if last_date is None:
+            raise ValueError("Cannot determine last data date for predictions")
+        
         forecast_dates = pd.date_range(
             start=last_date + timedelta(weeks=1),
             periods=weeks,
@@ -294,7 +556,8 @@ class SARIMAModel:
             },
             'prediction_dates': [p['date'] for p in weekly_predictions],
             'prediction_weeks': weeks,
-            'last_training_date': str(last_date),
+            'last_training_date': str(self.training_data.index.max()),
+            'last_data_date': str(last_date),  # Last date from entire dataset
             'prediction_start_date': weekly_predictions[0]['date']
         }
         
@@ -305,11 +568,31 @@ class SARIMAModel:
         if self.accuracy_metrics is None:
             return None
         
-        return {
+        result = {
             **self.accuracy_metrics,
             'model_parameters': self.model_params,
             'last_trained': str(self.training_data.index.max()) if self.training_data is not None else None
         }
+        
+        # Add date range information if training data is available
+        if self.training_data is not None and len(self.training_data) > 0:
+            result['date_range'] = {
+                'start': str(self.training_data.index.min()),
+                'end': str(self.training_data.index.max())
+            }
+            result['training_weeks'] = len(self.training_data)
+        
+        # Add test metrics if available
+        if self.test_accuracy_metrics is not None:
+            result['test_accuracy_metrics'] = self.test_accuracy_metrics
+            if self.test_data is not None and len(self.test_data) > 0:
+                result['test_date_range'] = {
+                    'start': str(self.test_data.index.min()),
+                    'end': str(self.test_data.index.max())
+                }
+                result['test_weeks'] = len(self.test_data)
+        
+        return result
     
     def save_model(self):
         """Save the trained model to disk"""
@@ -321,6 +604,19 @@ class SARIMAModel:
                 pickle.dump(self.fitted_model, f)
             
             # Save metadata
+            # Store last date from entire dataset (training + test) for correct prediction start date
+            last_data_date = None
+            if self.all_data is not None and len(self.all_data) > 0:
+                last_data_date = str(self.all_data.index.max())
+            elif self.test_data is not None and len(self.test_data) > 0:
+                # If all_data not set but test_data exists, use max of training + test
+                last_data_date = str(max(
+                    self.training_data.index.max() if self.training_data is not None else pd.Timestamp.min,
+                    self.test_data.index.max()
+                ))
+            elif self.training_data is not None:
+                last_data_date = str(self.training_data.index.max())
+            
             metadata = {
                 'model_params': self.model_params,
                 'accuracy_metrics': self.accuracy_metrics,
@@ -329,7 +625,8 @@ class SARIMAModel:
                 'date_range': {
                     'start': str(self.training_data.index.min()) if self.training_data is not None else None,
                     'end': str(self.training_data.index.max()) if self.training_data is not None else None
-                }
+                },
+                'last_data_date': last_data_date  # Last date from entire dataset (training + test)
             }
             
             with open(self.metadata_file, 'w') as f:
@@ -354,9 +651,13 @@ class SARIMAModel:
             
             self.model_params = metadata['model_params']
             self.accuracy_metrics = metadata.get('accuracy_metrics')
+            # Store metadata for access in predict() method
+            self._metadata = metadata
             
             print(f"Model loaded from {self.model_file}")
             print(f"Model parameters: {self.model_params}")
+            if 'last_data_date' in metadata:
+                print(f"Last data date from metadata: {metadata['last_data_date']}")
             
             # Reconstruct training data info (we don't have the full data, just metadata)
             if metadata.get('date_range'):

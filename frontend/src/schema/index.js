@@ -157,6 +157,7 @@ export const ViolationCreateSchema = z.object({
   apprehendingOfficer: z.string().min(1, { message: "Apprehending officer is required" }),
   chassisNo: z.string().optional().nullable(),
   engineNo: z.string().optional().nullable(),
+  fileNo: z.string().optional().nullable(),
 }).refine((data) => {
   // Validate middleInitial length only if it has a value, is not null, and is not "null" string
   if (data.middleInitial && data.middleInitial !== null && data.middleInitial !== "null" && data.middleInitial.trim() !== '') {

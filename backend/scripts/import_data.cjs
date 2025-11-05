@@ -12,7 +12,20 @@ async function importData() {
   // 🚗 Import Incidents (Accidents)
   // =====================
   const accidentsCollection = db.collection('accidents');
-  const accidentsPath = path.join(__dirname, 'merged_Accident_Data_2023_2024.json');
+  
+  // Drop old/unused indexes that might cause conflicts
+  try {
+    await accidentsCollection.dropIndex('blotterNo_1');
+    console.log('✅ Dropped old blotterNo_1 index');
+  } catch (error) {
+    if (error.code === 27) {
+      console.log('ℹ️  blotterNo_1 index does not exist (already removed)');
+    } else {
+      console.log('⚠️  Error dropping blotterNo_1 index:', error.message);
+    }
+  }
+  
+  const accidentsPath = path.join(__dirname, 'accidents_2024_2025_clean.json');
   const accidentsData = JSON.parse(fs.readFileSync(accidentsPath, 'utf8'));
 
   // Get superadmin ID for default createdBy

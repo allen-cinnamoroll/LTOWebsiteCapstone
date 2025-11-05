@@ -18,10 +18,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { AlertTriangle } from "lucide-react";
 
-const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
+const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues, searchTerm }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
   const date = formatDate(Date.now());
+
 
   const form = useForm({
     resolver: zodResolver(ViolationCreateSchema),
@@ -39,8 +40,10 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
       apprehendingOfficer: "",
       chassisNo: "",
       engineNo: "",
+      fileNo: "",
     },
   });
+
 
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
@@ -58,6 +61,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         apprehendingOfficer: formData.apprehendingOfficer,
         chassisNo: formData.chassisNo,
         engineNo: formData.engineNo,
+      fileNo: formData.fileNo,
       };
 
       // Only include dateOfApprehension if it has a value
@@ -91,6 +95,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
           apprehendingOfficer: "",
           chassisNo: "",
           engineNo: "",
+          fileNo: "",
         });
 
         // Close modal and refresh data
@@ -127,10 +132,87 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         apprehendingOfficer: "",
         chassisNo: "",
         engineNo: "",
+        fileNo: "",
       });
+
     }
     onOpenChange(isOpen);
   };
+
+  // Apply initial values when opening - parse searchTerm if provided
+  React.useEffect(() => {
+    if (open) {
+      let firstName = "";
+      let lastName = "";
+      
+      // Parse searchTerm if provided
+      if (searchTerm && searchTerm.trim()) {
+        const nameParts = searchTerm.trim().split(/\s+/);
+        if (nameParts.length === 1) {
+          firstName = nameParts[0];
+        } else if (nameParts.length >= 2) {
+          lastName = nameParts[nameParts.length - 1];
+          firstName = nameParts.slice(0, -1).join(" ");
+        }
+      }
+      
+      // Use initialValues if provided, otherwise use parsed searchTerm
+      if (initialValues && initialValues.firstName) {
+        form.reset({
+          topNo: "",
+          firstName: initialValues.firstName || "",
+          middleInitial: initialValues.middleInitial || "",
+          lastName: initialValues.lastName || "",
+          suffix: initialValues.suffix || "",
+          violations: [""],
+          violationType: "confiscated",
+          licenseType: undefined,
+          plateNo: initialValues.plateNo || "",
+          dateOfApprehension: undefined,
+          apprehendingOfficer: "",
+          chassisNo: initialValues.chassisNo || "",
+          engineNo: initialValues.engineNo || "",
+          fileNo: initialValues.fileNo || "",
+        });
+      } else if (searchTerm && firstName) {
+        // Use parsed name from searchTerm
+        form.reset({
+          topNo: "",
+          firstName: firstName,
+          middleInitial: "",
+          lastName: lastName,
+          suffix: "",
+          violations: [""],
+          violationType: "confiscated",
+          licenseType: undefined,
+          plateNo: "",
+          dateOfApprehension: undefined,
+          apprehendingOfficer: "",
+          chassisNo: "",
+          engineNo: "",
+          fileNo: "",
+        });
+      } else {
+        // Reset to empty form
+        form.reset({
+          topNo: "",
+          firstName: "",
+          middleInitial: "",
+          lastName: "",
+          suffix: "",
+          violations: [""],
+          violationType: "confiscated",
+          licenseType: undefined,
+          plateNo: "",
+          dateOfApprehension: undefined,
+          apprehendingOfficer: "",
+          chassisNo: "",
+          engineNo: "",
+          fileNo: "",
+        });
+      }
+    }
+  }, [open, initialValues, searchTerm, form]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -138,14 +220,15 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
-            Add New Violation
+            Add New Violator
           </DialogTitle>
           <DialogDescription>
-            Fill in the required fields to add a new violation record to the system.
+            Fill in the required fields to add a new violator and violation record to the system.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-1 py-2">
+          {/* Main form */}
           <FormComponent
             form={form}
             onSubmit={onSubmit}
@@ -171,7 +254,7 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
             className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
           >
             {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-            {submitting ? "Adding..." : "Add Violation"}
+            {submitting ? "Adding..." : "Add Violator"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -179,4 +262,5 @@ const AddViolationModal = ({ open, onOpenChange, onViolationAdded }) => {
   );
 };
 
-export default AddViolationModal;
+export default AddViolatorModal;
+

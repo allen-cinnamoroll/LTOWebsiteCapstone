@@ -1,0 +1,1387 @@
+import React, { useState, useRef } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from 'sonner';
+
+// Get Flask API URL from environment variable or use default
+const MV_PREDICTION_API_BASE = import.meta.env.VITE_MV_PREDICTION_API_URL || 'http://72.60.198.244:5001';
+
+export default function MVPredictionPage() {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [retrainStatus, setRetrainStatus] = useState(null); // 'idle', 'uploading', 'training', 'success', 'error'
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorDetails, setErrorDetails] = useState(null);
+  const [trainingData, setTrainingData] = useState(null);
+  const [duplicateInfo, setDuplicateInfo] = useState(null);
+  const [hasNewFile, setHasNewFile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0); // 0 for accuracy, 1 for diagnostics
+  const [dateRange, setDateRange] = useState(null); // { startDate, endDate } from CSV
+  const [isAnalyzingDateRange, setIsAnalyzingDateRange] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // Helper function to parse CSV row handling quoted fields
+  const parseCSVRow = (line) => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // Field separator
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    // Add last field
+    result.push(current.trim());
+    return result;
+  };
+
+  // Function to parse CSV and extract date range from dateOfRenewal column
+  const analyzeCSVDateRange = async (file) => {
+    setIsAnalyzingDateRange(true);
+    setDateRange(null);
+    
+    try {
+      const text = await file.text();
+      // Handle different line endings (Windows \r\n, Unix \n, Mac \r)
+      const lines = text.split(/\r?\n/).filter(line => line.trim());
+      
+      if (lines.length === 0) {
+        return;
+      }
+      
+      // Parse header row to find dateOfRenewal column index
+      const header = parseCSVRow(lines[0]).map(col => col.replace(/^"|"$/g, ''));
+      const dateColumnIndex = header.findIndex(col => col.toLowerCase() === 'dateofrenewal');
+      
+      if (dateColumnIndex === -1) {
+        // Column not found, silently return (date range won't be shown)
+        setIsAnalyzingDateRange(false);
+        return;
+      }
+      
+      // Parse dates from data rows
+      const dates = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = parseCSVRow(lines[i]).map(cell => cell.replace(/^"|"$/g, ''));
+        if (row[dateColumnIndex]) {
+          const dateStr = row[dateColumnIndex].trim();
+          if (dateStr) {
+            // Try to parse date in MM/DD/YYYY format
+            const dateParts = dateStr.split('/');
+            if (dateParts.length === 3) {
+              const month = parseInt(dateParts[0], 10);
+              const day = parseInt(dateParts[1], 10);
+              const year = parseInt(dateParts[2], 10);
+              
+              if (!isNaN(month) && !isNaN(day) && !isNaN(year) && 
+                  month >= 1 && month <= 12 && 
+                  day >= 1 && day <= 31 && 
+                  year >= 1900 && year <= 2100) {
+                const date = new Date(year, month - 1, day);
+                // Validate the date is correct (catches invalid dates like 02/30/2025)
+                if (!isNaN(date.getTime()) && 
+                    date.getMonth() === month - 1 && 
+                    date.getDate() === day) {
+                  dates.push(date);
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      if (dates.length > 0) {
+        // Find min and max dates
+        const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+        const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+        
+        // Format as "Month Day, Year" (e.g., "January 2, 2025")
+        const formatDate = (date) => {
+          const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+          ];
+          const month = monthNames[date.getMonth()];
+          const day = date.getDate();
+          const year = date.getFullYear();
+          return `${month} ${day}, ${year}`;
+        };
+        
+        setDateRange({
+          startDate: formatDate(minDate),
+          endDate: formatDate(maxDate)
+        });
+      }
+    } catch (error) {
+      console.error('Error analyzing CSV date range:', error);
+      // Silently fail - don't show error to user, just don't show date range
+    } finally {
+      setIsAnalyzingDateRange(false);
+    }
+  };
+
+  const handleFileSelect = async (file) => {
+    if (file && file.type === 'text/csv' || file.name.endsWith('.csv')) {
+      setSelectedFile(file);
+      setRetrainStatus(null);
+      // Analyze CSV for date range
+      await analyzeCSVDateRange(file);
+    } else {
+      toast.error('Invalid file type', {
+        description: 'Please upload a CSV file'
+      });
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      await handleFileSelect(file);
+    }
+  };
+
+  const handleFileInputChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      await handleFileSelect(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setRetrainStatus(null);
+    setDateRange(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRetrain = async () => {
+    setIsUploading(true);
+    setRetrainStatus('uploading');
+    setUploadProgress(0);
+
+    try {
+      // Track if a new file is being uploaded
+      const fileWasUploaded = !!selectedFile;
+      setHasNewFile(fileWasUploaded);
+      
+      // Step 1: Upload CSV file if one is selected (optional)
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        // Simulate upload progress
+        const uploadInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev < 90) return prev + 10;
+            return prev;
+          });
+        }, 200);
+
+        let uploadResponse;
+        try {
+          // Create timeout controller for browser compatibility
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+          
+          uploadResponse = await fetch(`${MV_PREDICTION_API_BASE}/api/upload-csv`, {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal,
+          });
+          
+          clearTimeout(timeoutId);
+        } catch (fetchError) {
+          clearInterval(uploadInterval);
+          setUploadProgress(0);
+          
+          if (fetchError.name === 'AbortError' || fetchError.name === 'TypeError') {
+            throw new Error(
+              `Cannot connect to prediction API server. Please ensure the Flask API is running on ${MV_PREDICTION_API_BASE}. ` +
+              `Check if the server is accessible and port 5001 is open.`
+            );
+          }
+          throw fetchError;
+        }
+
+        clearInterval(uploadInterval);
+        setUploadProgress(100);
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(errorData.error || `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        }
+
+        const uploadData = await uploadResponse.json();
+        
+        if (!uploadData.success) {
+          throw new Error(uploadData.error || 'Failed to upload file');
+        }
+      } else {
+        // No file selected, skip upload and go straight to retraining
+        setUploadProgress(100);
+      }
+
+      // Step 2: Retrain the model
+      setRetrainStatus('training');
+      setUploadProgress(0);
+      
+      let retrainResponse;
+      try {
+        // Create timeout controller for browser compatibility
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout for training
+        
+        retrainResponse = await fetch(`${MV_PREDICTION_API_BASE}/api/model/retrain`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ force: true }),
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        if (fetchError.name === 'AbortError' || fetchError.name === 'TypeError') {
+          throw new Error(
+            `Cannot connect to prediction API server for retraining. Please ensure the Flask API is running on ${MV_PREDICTION_API_BASE}.`
+          );
+        }
+        throw fetchError;
+      }
+
+      const retrainData = await retrainResponse.json();
+
+      if (!retrainResponse.ok || !retrainData.success) {
+        const error = new Error(retrainData.error || retrainData.message || 'Failed to retrain model');
+        error.isFormatError = retrainData.error?.includes('missing required columns') || 
+                             retrainData.error?.includes('CSV file is missing') ||
+                             retrainData.error?.includes('required columns') ||
+                             retrainData.error?.includes('No data found for Davao Oriental');
+        throw error;
+      }
+
+      setRetrainStatus('success');
+      setUploadProgress(100);
+      
+      // Extract training data and duplicate info
+      const aggregatedData = retrainData.data?.aggregated;
+      if (aggregatedData) {
+        setTrainingData(aggregatedData);
+        
+        // Check for duplicates
+        const processingInfo = aggregatedData.processing_info;
+        if (processingInfo && processingInfo.duplicates_removed > 0) {
+          setDuplicateInfo(processingInfo);
+          setShowDuplicateModal(true);
+        }
+      }
+      
+      // Show success modal with accuracy metrics
+      setShowSuccessModal(true);
+      
+      const successMessage = fileWasUploaded 
+        ? 'The prediction model has been updated with new data'
+        : 'The prediction model has been retrained using existing data';
+      
+      toast.success('Model retrained successfully', {
+        description: successMessage
+      });
+
+      // Reset after success (but keep modals open)
+      setTimeout(() => {
+        setSelectedFile(null);
+        setRetrainStatus(null);
+        setUploadProgress(0);
+        setDateRange(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error('Retrain error:', error);
+      setRetrainStatus('error');
+      setUploadProgress(0);
+      
+      // Get error message
+      let errorMessage = error.message || 'An error occurred during the retraining process';
+      
+      // Check if it's a CSV format error (either from error.isFormatError flag or message content)
+      const isFormatError = error.isFormatError || 
+                           errorMessage.includes('missing required columns') || 
+                           errorMessage.includes('CSV file is missing') ||
+                           errorMessage.includes('required columns') ||
+                           errorMessage.includes('No data found for Davao Oriental');
+      
+      if (isFormatError) {
+        // Show error modal for format errors
+        setErrorDetails({
+          title: 'CSV Format Error',
+          message: errorMessage,
+          type: 'format'
+        });
+        setShowErrorModal(true);
+      } else {
+        // Show toast for other errors (connection, etc.)
+        if (error.message?.includes('Cannot connect')) {
+          errorMessage = error.message;
+        } else if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_CONNECTION')) {
+          errorMessage = `Cannot connect to the prediction API server at ${MV_PREDICTION_API_BASE}. ` +
+            `Please ensure the Flask API is running. Check the server status or contact your administrator.`;
+        }
+        
+        toast.error('Failed to retrain model', {
+          description: errorMessage,
+          duration: 10000, // Show longer for connection errors
+        });
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  return (
+    <div className="h-full bg-white dark:bg-black overflow-y-auto">
+      <div className="container mx-auto p-4 md:p-6 max-w-4xl">
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+              MV Prediction Model
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Upload new CSV data to retrain the prediction model
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Card */}
+      <Card className="border border-gray-200 dark:border-gray-800">
+        <CardHeader>
+          <CardTitle className="text-xl">Retrain Model</CardTitle>
+          <CardDescription>
+            Upload a CSV file (optional) to add new data, or retrain with existing CSV files in the training directory. The system will automatically combine all CSV files and retrain the model.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* File Upload Area */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`
+              relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
+              ${isDragging 
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50'
+              }
+              ${isUploading ? 'pointer-events-none opacity-60' : 'cursor-pointer'}
+            `}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleFileInputChange}
+              className="hidden"
+              disabled={isUploading}
+            />
+
+            {!selectedFile ? (
+              <div className="space-y-4">
+                <div className="flex justify-center">
+                  <div className={`
+                    w-16 h-16 rounded-full flex items-center justify-center
+                    ${isDragging 
+                      ? 'bg-blue-100 dark:bg-blue-900/30' 
+                      : 'bg-gray-100 dark:bg-gray-800'
+                    }
+                  `}>
+                    <Upload className={`
+                      w-8 h-8
+                      ${isDragging 
+                        ? 'text-blue-600 dark:text-blue-400' 
+                        : 'text-gray-400 dark:text-gray-500'
+                      }
+                    `} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Drag and drop your CSV file here, or click to browse
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    CSV files only
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <File className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatFileSize(selectedFile.size)}
+                    </p>
+                  </div>
+                  {!isUploading && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFile();
+                      }}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Date Range Display */}
+          {selectedFile && (
+            <div className="flex items-center justify-center">
+              {isAnalyzingDateRange ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Analyzing file date range...</span>
+                </div>
+              ) : dateRange ? (
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">File contains data from: </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {dateRange.startDate} to {dateRange.endDate}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {/* Progress Indicator */}
+          {(isUploading || retrainStatus) && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  {retrainStatus === 'uploading' && 'Uploading file...'}
+                  {retrainStatus === 'training' && 'Training model...'}
+                  {retrainStatus === 'success' && 'Complete!'}
+                  {retrainStatus === 'error' && 'Error occurred'}
+                </span>
+                <span className="text-gray-500 dark:text-gray-400">
+                  {uploadProgress}%
+                </span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+
+          {/* Status Messages */}
+          {retrainStatus === 'success' && (
+            <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                  Model retrained successfully!
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  The prediction model has been updated with the new data.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {retrainStatus === 'error' && (
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                  Retraining failed
+                </p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                  Please check the file format and try again.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Retrain Button */}
+          <div className="flex justify-end">
+            <Button
+              onClick={handleRetrain}
+              disabled={isUploading}
+              className="min-w-[140px]"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Retrain Model
+                </>
+              )}
+            </Button>
+          </div>
+          
+          {!selectedFile && (
+            <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                No file selected. Clicking "Retrain Model" will retrain using all existing CSV files in the training directory.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+       {/* CSV Format Requirements Card */}
+       <Card className="mt-6 border border-gray-200 dark:border-gray-800">
+         <CardHeader>
+           <CardTitle className="text-lg flex items-center gap-2">
+             <File className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+             CSV File Format Requirements
+           </CardTitle>
+         </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Required Columns:</p>
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm font-mono">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-gray-700 dark:text-gray-300">fileNo</span>
+                    <span className="text-xs text-red-600 dark:text-red-400">(required)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-gray-700 dark:text-gray-300">dateOfRenewal</span>
+                    <span className="text-xs text-red-600 dark:text-red-400">(required)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-gray-700 dark:text-gray-300">address_municipality</span>
+                    <span className="text-xs text-red-600 dark:text-red-400">(required)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-gray-700 dark:text-gray-300">plateNo</span>
+                    <span className="text-xs text-orange-600 dark:text-orange-400">(optional, fallback)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-gray-700 dark:text-gray-300">ownerName</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">(optional)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Date Format:</p>
+              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-700 dark:text-gray-300 font-mono">
+                  <strong>dateOfRenewal:</strong> MM/DD/YYYY (e.g., 02/15/2025)
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Municipality Filter:</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Only data from Davao Oriental municipalities will be processed. The system automatically filters for:
+              </p>
+              <div className="mt-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  BAGANGA, BANAYBANAY, BOSTON, CARAGA, CATEEL, GOVERNOR GENEROSO, LUPON, MANAY, SAN ISIDRO, TARRAGONA, CITY OF MATI
+                </p>
+              </div>
+            </div>
+          </div>
+         </CardContent>
+       </Card>
+
+       {/* Important Notes Card */}
+       <Card className="mt-6 border border-gray-200 dark:border-gray-800">
+         <CardHeader>
+           <CardTitle className="text-lg">Important Notes</CardTitle>
+         </CardHeader>
+         <CardContent>
+           <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <li className="flex items-start gap-2 cursor-help">
+                     <span className="text-blue-500 mt-0.5">•</span>
+                     <span className="flex-1">The system automatically combines all CSV files in the training directory</span>
+                     <HelpCircle className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                   </li>
+                 </TooltipTrigger>
+                 <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                   <p className="font-semibold mb-1">Automatic CSV Combination</p>
+                   <p className="text-xs">
+                     When you retrain the model, the system scans the training directory and loads all CSV files found there. 
+                     These files are automatically merged together before processing, so you don't need to manually combine them. 
+                     This allows you to add new data incrementally by uploading additional CSV files.
+                   </p>
+                 </TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <li className="flex items-start gap-2 cursor-help">
+                     <span className="text-blue-500 mt-0.5">•</span>
+                     <span className="flex-1">Duplicate registrations (same fileNo + dateOfRenewal) are automatically removed</span>
+                     <HelpCircle className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                   </li>
+                 </TooltipTrigger>
+                 <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                   <p className="font-semibold mb-1">Duplicate Removal</p>
+                   <p className="text-xs">
+                     The system identifies duplicates based on fileNo + dateOfRenewal. This prevents duplicate registrations 
+                     from appearing in the training data. Using fileNo is more reliable because temporary plate numbers 
+                     (like "11010") can be duplicates. The system will show you how many duplicates were removed after processing.
+                   </p>
+                 </TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <li className="flex items-start gap-2 cursor-help">
+                     <span className="text-blue-500 mt-0.5">•</span>
+                     <span className="flex-1">CSV files must contain the required columns (fileNo, dateOfRenewal, address_municipality). fileNo is used for duplicate detection. Extra columns are acceptable and will be ignored.</span>
+                     <HelpCircle className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                   </li>
+                 </TooltipTrigger>
+                 <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                   <p className="font-semibold mb-1">Column Structure Requirement</p>
+                   <p className="text-xs">
+                     Your CSV file must contain at least these columns: <strong>fileNo</strong>, <strong>dateOfRenewal</strong>, 
+                     and <strong>address_municipality</strong> (all required). The column names must match exactly (case-sensitive). 
+                     <strong>fileNo</strong> is used for deduplication since temporary plate numbers can be duplicates. You can also 
+                     include <strong>ownerName</strong> and <strong>plateNo</strong> (both optional) and any other additional columns - 
+                     they will be ignored during processing.
+                   </p>
+                 </TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <li className="flex items-start gap-2 cursor-help">
+                     <span className="text-blue-500 mt-0.5">•</span>
+                     <span className="flex-1">Model retraining may take several minutes depending on data size</span>
+                     <HelpCircle className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                   </li>
+                 </TooltipTrigger>
+                 <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                   <p className="font-semibold mb-1">Training Time</p>
+                   <p className="text-xs">
+                     Retraining involves processing all CSV files, aggregating data by week, and training a SARIMA 
+                     time series model. The time required depends on the total number of registrations and weeks of data. 
+                     Larger datasets (more files or more registrations) will take longer. The system has a 5-minute timeout, 
+                     so very large datasets may need to be split into smaller batches.
+                   </p>
+                 </TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+
+             <TooltipProvider>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <li className="flex items-start gap-2 cursor-help">
+                     <span className="text-blue-500 mt-0.5">•</span>
+                     <span className="flex-1">Only registrations from Davao Oriental municipalities will be included in training</span>
+                     <HelpCircle className="w-4 h-4 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
+                   </li>
+                 </TooltipTrigger>
+                 <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                   <p className="font-semibold mb-1">Municipality Filtering</p>
+                   <p className="text-xs">
+                     The system automatically filters data to only include registrations where address_municipality matches 
+                     one of the Davao Oriental municipalities: BAGANGA, BANAYBANAY, BOSTON, CARAGA, CATEEL, GOVERNOR GENEROSO, 
+                     LUPON, MANAY, SAN ISIDRO, TARRAGONA, or CITY OF MATI. Registrations from other municipalities are 
+                     excluded to ensure the model is trained specifically on relevant data for Davao Oriental predictions.
+                   </p>
+                 </TooltipContent>
+               </Tooltip>
+             </TooltipProvider>
+           </ul>
+         </CardContent>
+       </Card>
+
+       </div>
+
+      {/* Success Modal with Accuracy Metrics */}
+      <Dialog open={showSuccessModal} onOpenChange={(open) => {
+        setShowSuccessModal(open);
+        if (!open) setCurrentPage(0); // Reset to first page when closing
+      }}>
+        <DialogContent className="max-w-2xl bg-white dark:bg-gray-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+              Model Retrained Successfully!
+            </DialogTitle>
+            <DialogDescription>
+              {hasNewFile 
+                ? 'The prediction model has been updated with new data. Here are the training results:'
+                : 'The prediction model has been retrained using existing data. Here are the training results:'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {trainingData && (
+            <div className="relative overflow-hidden">
+              {/* Page Container with Smooth Transitions */}
+              <div className="relative" style={{ minHeight: '450px' }}>
+                {/* Page 1: Accuracy Metrics */}
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    currentPage === 0 
+                      ? 'opacity-100 translate-x-0' 
+                      : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
+                  }`}
+                >
+                  <div className="space-y-4 py-4">
+              {/* Model Accuracy Percentage - Use Test Accuracy if available, otherwise Training */}
+              {(trainingData.test_accuracy_metrics?.mape || trainingData.accuracy_metrics?.mape) && (
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
+                        Overall Model Accuracy
+                        {trainingData.test_accuracy_metrics?.mape 
+                          ? ' (Test Set - Out-of-Sample)' 
+                          : ' (Training Set - In-Sample)'}
+                      </p>
+                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">
+                        {trainingData.test_accuracy_metrics?.mape
+                          ? (100 - trainingData.test_accuracy_metrics.mape).toFixed(2)
+                          : (100 - trainingData.accuracy_metrics.mape).toFixed(2)}%
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Based on MAPE of {trainingData.test_accuracy_metrics?.mape
+                          ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
+                          : `${trainingData.accuracy_metrics.mape.toFixed(2)}%`}
+                        {trainingData.test_accuracy_metrics?.mape && ' (Test Set)'}
+                      </p>
+                    </div>
+                    <div className="text-4xl">📊</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Accuracy Metrics - Training (In-Sample) */}
+              {trainingData.accuracy_metrics && (
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    Training Accuracy (In-Sample) - {trainingData.training_weeks || 'N/A'} weeks
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                              MAPE
+                            </p>
+                            <p className="text-2xl font-bold text-blue-900 dark:text-blue-300">
+                              {trainingData.accuracy_metrics.mape 
+                                ? `${trainingData.accuracy_metrics.mape.toFixed(2)}%`
+                                : 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Mean Absolute Percentage Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">MAPE (Mean Absolute Percentage Error)</p>
+                          <p className="text-xs">
+                            Measures the average percentage difference between predicted and actual values. 
+                            Lower MAPE = better accuracy. A MAPE of {trainingData.accuracy_metrics.mape?.toFixed(2)}% means 
+                            predictions are off by about {trainingData.accuracy_metrics.mape?.toFixed(2)}% on average.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">MAE</p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.accuracy_metrics.mae?.toFixed(2) || 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Mean Absolute Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">MAE (Mean Absolute Error)</p>
+                          <p className="text-xs">
+                            The average number of registrations the model is off by. 
+                            A MAE of {trainingData.accuracy_metrics.mae?.toFixed(2)} means predictions are wrong by 
+                            about {Math.round(trainingData.accuracy_metrics.mae || 0)} registrations on average. 
+                            Lower is better.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-purple-600 dark:text-purple-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-1">RMSE</p>
+                            <p className="text-2xl font-bold text-purple-900 dark:text-purple-300">
+                              {trainingData.accuracy_metrics.rmse?.toFixed(2) || 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Root Mean Square Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">RMSE (Root Mean Square Error)</p>
+                          <p className="text-xs">
+                            Similar to MAE but gives more weight to larger errors. 
+                            A RMSE of {trainingData.accuracy_metrics.rmse?.toFixed(2)} means some predictions 
+                            have significant errors. Lower is better. RMSE is typically higher than MAE when 
+                            there are large prediction errors.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              )}
+
+              {/* Test Accuracy Metrics (Out-of-Sample) */}
+              {trainingData.test_accuracy_metrics && (
+                <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    Test Accuracy (Out-of-Sample) - {trainingData.test_weeks || 'N/A'} weeks
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1 flex items-center gap-1">
+                              MAPE
+                            </p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.test_accuracy_metrics.mape 
+                                ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
+                                : 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Mean Absolute Percentage Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">MAPE (Test Set)</p>
+                          <p className="text-xs">
+                            Out-of-sample accuracy on unseen test data. A MAPE of {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% 
+                            means predictions on the test set are off by about {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% on average. 
+                            This is a more realistic measure of model performance than training accuracy.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">MAE</p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.test_accuracy_metrics.mae?.toFixed(2) || 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Mean Absolute Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">MAE (Test Set)</p>
+                          <p className="text-xs">
+                            The average number of registrations the model is off by on the test set. 
+                            A MAE of {trainingData.test_accuracy_metrics.mae?.toFixed(2)} means test predictions are wrong by 
+                            about {Math.round(trainingData.test_accuracy_metrics.mae || 0)} registrations on average.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-1">RMSE</p>
+                            <p className="text-2xl font-bold text-green-900 dark:text-green-300">
+                              {trainingData.test_accuracy_metrics.rmse?.toFixed(2) || 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Root Mean Square Error
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">RMSE (Test Set)</p>
+                          <p className="text-xs">
+                            Similar to MAE but gives more weight to larger errors on the test set. 
+                            A RMSE of {trainingData.test_accuracy_metrics.rmse?.toFixed(2)} means some test predictions 
+                            have significant errors. Lower is better.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              )}
+                  </div>
+                </div>
+
+                {/* Page 2: Diagnostics & Training Information */}
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    currentPage === 1 
+                      ? 'opacity-100 translate-x-0' 
+                      : 'opacity-0 absolute inset-0 -translate-x-full pointer-events-none'
+                  }`}
+                >
+                  <div className="space-y-4 py-4">
+                    {/* Model Diagnostics */}
+                    {trainingData.diagnostics && (
+                      <div className="space-y-3">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    Model Diagnostics
+                  </h3>
+                  
+                  {/* Residuals Randomness Check */}
+                  <div className={`p-3 rounded-lg border ${
+                    trainingData.diagnostics.residuals_random 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+                      : trainingData.diagnostics.residuals_random === false
+                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                      : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                          Residuals Randomness
+                        </p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {trainingData.diagnostics.residuals_random === true 
+                            ? '✓ Residuals are random - model fits well!' 
+                            : trainingData.diagnostics.residuals_random === false
+                            ? '⚠ Residuals show patterns - model may need improvement'
+                            : 'Could not determine'}
+                        </p>
+                        {trainingData.diagnostics.ljung_box_pvalue !== null && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
+                            {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
+                          </p>
+                        )}
+                      </div>
+                      {trainingData.diagnostics.residuals_random !== null && (
+                        <div className={`text-2xl ${trainingData.diagnostics.residuals_random ? 'text-green-600' : 'text-yellow-600'}`}>
+                          {trainingData.diagnostics.residuals_random ? '✓' : '⚠'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ACF/PACF Summary */}
+                  {trainingData.diagnostics.acf_values && trainingData.diagnostics.acf_values.length > 0 && (
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                        ACF/PACF Analysis
+                      </p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
+                        Checked {trainingData.diagnostics.acf_values.length} lags for leftover autocorrelation
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-700 dark:text-gray-300">ACF Lags:</span>
+                          <span className="ml-1 font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.acf_values.length}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-700 dark:text-gray-300">PACF Lags:</span>
+                          <span className="ml-1 font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.pacf_values?.length || 0}</span>
+                        </div>
+                      </div>
+                      {trainingData.diagnostics.acf_values.some(acf => Math.abs(acf.value) > 0.2) && (
+                        <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 mt-2">
+                          ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Residual Statistics */}
+                  {trainingData.diagnostics.residuals_mean !== null && (
+                    <div className="grid grid-cols-2 gap-3 text-base">
+                      <div>
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Mean:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Std:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_std.toFixed(4)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+                    {/* Training Information */}
+                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <h3 className="font-semibold text-base flex items-center gap-2">
+                  <Info className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  Training Information
+                </h3>
+                <div className="grid grid-cols-2 gap-3 text-base">
+                  <div>
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">Training Weeks:</span>
+                    <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.training_weeks || 'N/A'}</span>
+                  </div>
+                  {trainingData.test_weeks && (
+                    <div>
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">Test Weeks:</span>
+                      <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.test_weeks}</span>
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">Training Date Range: </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {trainingData.date_range?.start 
+                        ? formatDate(trainingData.date_range.start)
+                        : 'N/A'} - {trainingData.date_range?.end 
+                        ? formatDate(trainingData.date_range.end)
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  {trainingData.test_date_range && (
+                    <div className="col-span-2">
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">Test Date Range: </span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {formatDate(trainingData.test_date_range.start)} - {formatDate(trainingData.test_date_range.end)}
+                      </span>
+                    </div>
+                  )}
+                  {trainingData.processing_info && (
+                    <>
+                      <div>
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">CSV Files Combined:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">
+                          {trainingData.processing_info.total_csv_files || 'N/A'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">Total Registrations:</span>
+                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">
+                          {trainingData.processing_info.total_registrations?.toLocaleString() || 'N/A'}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Minimal Navigation Dots */}
+              <div className="flex justify-center items-center gap-2 pt-3 pb-1 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setCurrentPage(0)}
+                  className={`transition-all duration-200 ${
+                    currentPage === 0
+                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
+                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label="Go to accuracy metrics page"
+                />
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  className={`transition-all duration-200 ${
+                    currentPage === 1
+                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
+                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label="Go to diagnostics page"
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setShowSuccessModal(false)} className="w-full sm:w-auto">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Information Modal */}
+      <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+        <DialogContent className="max-w-lg bg-white dark:bg-gray-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              Duplicate Records Removed
+            </DialogTitle>
+            <DialogDescription>
+              The system automatically removed duplicate registration records during processing.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {duplicateInfo && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-8 h-8 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-orange-900 dark:text-orange-300">
+                      {duplicateInfo.duplicates_removed} duplicate record(s) removed
+                    </p>
+                     <p className="text-sm text-orange-700 dark:text-orange-400 mt-1">
+                       Duplicates were identified based on the same <strong>fileNo</strong> and <strong>dateOfRenewal</strong> combination.
+                     </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Total rows before deduplication:</span>
+                  <span className="font-medium">{duplicateInfo.total_rows_before_dedup?.toLocaleString() || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Duplicates removed:</span>
+                  <span className="font-medium text-orange-600 dark:text-orange-400">
+                    {duplicateInfo.duplicates_removed?.toLocaleString() || 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">Total rows after deduplication:</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">
+                    {duplicateInfo.total_rows_after_dedup?.toLocaleString() || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {duplicateInfo.csv_files && duplicateInfo.csv_files.length > 0 && (
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    CSV files processed:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                    {duplicateInfo.csv_files.slice(0, 5).map((file, idx) => (
+                      <li key={idx}>{file}</li>
+                    ))}
+                    {duplicateInfo.csv_files.length > 5 && (
+                      <li className="text-gray-500">...and {duplicateInfo.csv_files.length - 5} more</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setShowDuplicateModal(false)} className="w-full sm:w-auto">
+              I Understand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Modal for CSV Format Issues */}
+      <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+        <DialogContent className="max-w-lg bg-white dark:bg-gray-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              {errorDetails?.title || 'Error Processing CSV File'}
+            </DialogTitle>
+            <DialogDescription>
+              The CSV file does not meet the required format specifications.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {errorDetails && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-red-900 dark:text-red-300 mb-2">
+                      Format Requirements Not Met
+                    </p>
+                    <p className="text-sm text-red-700 dark:text-red-400">
+                      {errorDetails.message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <p className="font-semibold text-gray-900 dark:text-white mb-2">Required Columns:</p>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <ul className="space-y-1 text-gray-700 dark:text-gray-300">
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-600 dark:text-red-400">•</span>
+                      <span className="font-mono">fileNo</span>
+                      <span className="text-xs text-red-600 dark:text-red-400">(required)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-600 dark:text-red-400">•</span>
+                      <span className="font-mono">dateOfRenewal</span>
+                      <span className="text-xs text-red-600 dark:text-red-400">(required)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-red-600 dark:text-red-400">•</span>
+                      <span className="font-mono">address_municipality</span>
+                      <span className="text-xs text-red-600 dark:text-red-400">(required)</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <strong>What to do:</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300 mt-2">
+                  <li>Ensure your CSV file has all required columns with exact names (case-sensitive)</li>
+                  <li>Check that dateOfRenewal is in MM/DD/YYYY format</li>
+                  <li>Verify that address_municipality contains valid Davao Oriental municipality names</li>
+                  <li>Review the CSV File Format Requirements section above for detailed specifications</li>
+                </ul>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setShowErrorModal(false)} className="w-full sm:w-auto">
+              I Understand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
