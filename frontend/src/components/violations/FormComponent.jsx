@@ -268,47 +268,45 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
           </div>
         ) : null}
 
-        {/* Violations Section - Always show in add mode, conditional in edit mode */}
-        {!isEditMode || (violationType === "confiscated" || violationType === "impounded") ? (
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs text-gray-600">Violation/s</label>
-              {console.log("=== RENDERING VIOLATIONS ===", violations)}
-              {violations.map((violation, index) => {
-                console.log(`Rendering violation ${index}:`, violation);
-                return (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      placeholder={`Violation ${index + 1}`}
-                      value={violation || ""}
-                      onChange={(e) => updateViolation(index, e.target.value)}
-                      className="text-xs"
-                    />
-                    {violations.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => removeViolation(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                );
-              })}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addViolation}
-                className="w-full text-xs"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Violation
-              </Button>
-            </div>
+        {/* Violations Section - Always show in both add and edit mode */}
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-600">Violation/s</label>
+            {console.log("=== RENDERING VIOLATIONS ===", violations)}
+            {violations.map((violation, index) => {
+              console.log(`Rendering violation ${index}:`, violation);
+              return (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    placeholder={`Violation ${index + 1}`}
+                    value={violation || ""}
+                    onChange={(e) => updateViolation(index, e.target.value)}
+                    className="text-xs"
+                  />
+                  {violations.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => removeViolation(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addViolation}
+              className="w-full text-xs"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Violation
+            </Button>
           </div>
-        ) : null}
+        </div>
 
         {/* License Type Section - In add mode always show; disabled unless 'confiscated'. In edit mode only when 'confiscated'. */}
         {!isEditMode || violationType === "confiscated" ? (
