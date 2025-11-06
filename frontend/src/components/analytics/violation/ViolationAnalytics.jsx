@@ -4,7 +4,6 @@ import {
   KPICards, 
   ChartsSection, 
   ViolationRanking, 
-  ViolationCombinations,
   ViolationPrescriptionTable
 } from './index';
 import { ViolationMonitoring } from './ViolationMonitoring.jsx';
@@ -16,10 +15,6 @@ export function ViolationAnalytics() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [totalTrafficViolatorsOverride, setTotalTrafficViolatorsOverride] = useState(null);
-  
-  // Pagination state for violation ranking
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
   const yearDropdownRef = useRef(null);
 
@@ -155,79 +150,6 @@ export function ViolationAnalytics() {
     }
   }, [selectedYear]);
 
-  // Pagination logic for violation ranking
-  const totalViolationItems = analyticsData?.mostCommonViolations?.length || 0;
-  const totalPages = Math.ceil(totalViolationItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentViolations = analyticsData?.mostCommonViolations?.slice(startIndex, endIndex) || [];
-
-  const handlePrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
-
-  // Function to get recommended action based on violation combinations
-  const getCombinationRecommendation = (violations) => {
-    const violationsLower = violations.map(v => v.toLowerCase());
-    
-    // Check for specific dangerous combinations
-    if (violationsLower.some(v => v.includes('no helmet')) && 
-        violationsLower.some(v => v.includes('no license'))) {
-      return 'Immediate impoundment - High risk rider without proper documentation';
-    }
-    
-    if (violationsLower.some(v => v.includes('speeding')) && 
-        violationsLower.some(v => v.includes('no license'))) {
-      return 'Vehicle impoundment and court hearing - Reckless driving without license';
-    }
-    
-    if (violationsLower.some(v => v.includes('no registration')) && 
-        violationsLower.some(v => v.includes('no license'))) {
-      return 'Complete documentation check and vehicle impoundment until compliance';
-    }
-    
-    if (violationsLower.some(v => v.includes('drunk')) || 
-        violationsLower.some(v => v.includes('alcohol'))) {
-      return 'Immediate arrest and breathalyzer test - Zero tolerance policy';
-    }
-    
-    if (violationsLower.some(v => v.includes('reckless')) && 
-        violationsLower.some(v => v.includes('speeding'))) {
-      return 'License suspension and mandatory driver education program';
-    }
-    
-    // Check for high-severity violations
-    if (violationsLower.some(v => v.includes('confiscated')) || 
-        violationsLower.some(v => v.includes('impound'))) {
-      return 'Severe violation - Court hearing and possible vehicle forfeiture';
-    }
-    
-    // Check for documentation issues
-    if (violationsLower.some(v => v.includes('no license')) || 
-        violationsLower.some(v => v.includes('no registration'))) {
-      return 'Documentation violation - Vehicle impoundment until proper documents provided';
-    }
-    
-    // Check for safety violations
-    if (violationsLower.some(v => v.includes('helmet')) || 
-        violationsLower.some(v => v.includes('safety'))) {
-      return 'Safety violation - Fine and safety education requirement';
-    }
-    
-    // Check for traffic violations
-    if (violationsLower.some(v => v.includes('speeding')) || 
-        violationsLower.some(v => v.includes('traffic'))) {
-      return 'Traffic violation - Fine and license demerit points';
-    }
-    
-    // Default recommendation
-    return 'Standard fine and documentation review';
-  };
-
   return (
     <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
       <div className="mb-8">
@@ -275,7 +197,6 @@ export function ViolationAnalytics() {
         loading={loading}
         totalViolations={totalViolations}
         totalTrafficViolators={totalTrafficViolators}
-        topOfficer={analyticsData?.topOfficers?.[0]}
         mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
@@ -284,19 +205,11 @@ export function ViolationAnalytics() {
         <ViolationMonitoring analyticsData={analyticsData} />
       </div>
 
-      {/* Charts Section with Violation Ranking and Combinations */}
+      {/* Charts Section with Violation Ranking */}
       <ChartsSection
         displayData={analyticsData}
         loading={loading}
-        currentViolations={currentViolations}
-        startIndex={startIndex}
-        endIndex={endIndex}
-        totalViolationItems={totalViolationItems}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        handlePrevPage={handlePrevPage}
-        handleNextPage={handleNextPage}
-        getCombinationRecommendation={getCombinationRecommendation}
+        topOfficer={analyticsData?.topOfficers?.[0]}
       />
 
       {/* Violation Prescription Table */}

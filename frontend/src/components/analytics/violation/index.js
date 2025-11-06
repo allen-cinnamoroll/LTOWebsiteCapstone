@@ -4,7 +4,6 @@ export { ChartsSection } from './ChartsSection';
 export { BarChart } from './BarChart';
 export { PieChart } from './PieChart';
 export { ViolationRanking } from './ViolationRanking';
-export { ViolationCombinations } from './ViolationCombinations';
 export { ConfiscatedItemsChart } from './ConfiscatedItemsChart';
 export { ViolationMonitoring } from './ViolationMonitoring';
 export { ViolationPrescriptionTable } from './ViolationPrescriptionTable';

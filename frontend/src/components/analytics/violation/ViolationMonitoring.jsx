@@ -15,9 +15,10 @@ import {
 } from 'recharts';
 
 export function ViolationMonitoring({ analyticsData }) {
-  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
+  const [viewMode, setViewMode] = useState('monthly'); // 'daily' | 'monthly' | 'yearly'
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [selectedYear, setSelectedYear] = useState('All Time'); // Default to All Time
+  const [selectedMonth, setSelectedMonth] = useState(''); // 1-12 as string, required for daily
   const [yearlyStartYear, setYearlyStartYear] = useState(2020); // Default 2020 -> 2025
   const [yearlyChartType, setYearlyChartType] = useState('line'); // 'bar' | 'line'
   const exportMenuRef = useRef(null);
@@ -27,7 +28,7 @@ export function ViolationMonitoring({ analyticsData }) {
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const currentMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const minYear = 2000;
-  const maxYear = 2030;
+  const maxYear = 2025;
 
   // Close export menu when clicking outside
   useEffect(() => {
@@ -43,10 +44,10 @@ export function ViolationMonitoring({ analyticsData }) {
     };
   }, []);
 
-  // Get available years from analytics data (2000 to current year)
+  // Get available years (2000 to 2025)
   const getAvailableYears = () => {
     const years = [];
-    for (let year = 2000; year <= currentYear; year++) {
+    for (let year = minYear; year <= maxYear; year++) {
       years.push(year);
     }
     return years.sort((a, b) => b - a); // Most recent first
@@ -133,6 +134,55 @@ export function ViolationMonitoring({ analyticsData }) {
       isAllTime: false
     };
   };
+
+  // Generate daily data for selected year and month. Uses analyticsData.dailyTrends if available; otherwise derives from monthly totals.
+  const generateDailyData = () => {
+    if (selectedYear === 'All Time' || !selectedMonth) return null; // daily requires specific year and month
+
+    const yearNum = parseInt(selectedYear);
+    const monthNum = parseInt(selectedMonth); // 1-12
+    const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+
+    // Try using backend-provided daily trends if present
+    const dailyTrends = analyticsData?.dailyTrends || [];
+    const hasDaily = Array.isArray(dailyTrends) && dailyTrends.length > 0;
+
+    const dailyCounts = Array.from({ length: daysInMonth }, () => 0);
+
+    if (hasDaily) {
+      dailyTrends.forEach(trend => {
+        const y = trend._id?.year;
+        const m = trend._id?.month;
+        const d = trend._id?.day;
+        if (y === yearNum && m === monthNum && d >= 1 && d <= daysInMonth) {
+          dailyCounts[d - 1] = trend.count || 0;
+        }
+      });
+    } else {
+      // Derive from monthly total for that year+month
+      let monthTotal = 0;
+      (analyticsData?.monthlyTrends || []).forEach(trend => {
+        if (trend._id?.year === yearNum && trend._id?.month === monthNum) {
+          monthTotal = trend.count || 0;
+        }
+      });
+      if (monthTotal > 0) {
+        let remaining = monthTotal;
+        for (let i = 0; i < daysInMonth; i++) {
+          const variation = Math.sin(((i + 1) / daysInMonth) * Math.PI) * 0.3 + 0.7;
+          const value = i === daysInMonth - 1 ? remaining : Math.max(0, Math.round((monthTotal / daysInMonth) * variation));
+          dailyCounts[i] = value;
+          remaining -= value;
+        }
+      }
+    }
+
+    const total = dailyCounts.reduce((a, b) => a + b, 0);
+    return {
+      days: dailyCounts.map((v, idx) => ({ day: idx + 1, violations: v })),
+      monthlyTotal: total
+    };
+  };
   
   // Fallback function if monthly trends not available
   const generateMonthlyFromYearly = () => {
@@ -199,7 +249,35 @@ export function ViolationMonitoring({ analyticsData }) {
   
   // Compute KPI values based on view mode
   const computeKPIs = () => {
-    if (viewMode === 'monthly') {
+    if (viewMode === 'daily') {
+      const dailyData = generateDailyData();
+      if (!dailyData) {
+        return {
+          totalViolations: 0,
+          topMonth: { month: 'N/A', value: 0 },
+          peakMonth: 'N/A',
+          peakValue: 0,
+          avgPerMonth: 0,
+          peakYear: null,
+          avgPerYear: null,
+          peakDay: 'N/A',
+          avgPerDay: 0
+        };
+      }
+      const peak = dailyData.days.reduce((max, item) => item.violations > max.violations ? item : max, { day: 1, violations: 0 });
+      const avgPerDay = Math.round((dailyData.monthlyTotal || 0) / dailyData.days.length || 0);
+      return {
+        totalViolations: dailyData.monthlyTotal || 0,
+        topMonth: { month: 'N/A', value: 0 },
+        peakMonth: null,
+        peakValue: peak.violations,
+        avgPerMonth: null,
+        peakYear: null,
+        avgPerYear: null,
+        peakDay: `Day ${peak.day}`,
+        avgPerDay
+      };
+    } else if (viewMode === 'monthly') {
       // Monthly view KPIs
     if (!monitoringData) {
       return {
@@ -305,7 +383,10 @@ export function ViolationMonitoring({ analyticsData }) {
   const processChartData = () => {
     if (!monitoringData) return [];
 
-    if (viewMode === 'monthly') {
+    if (viewMode === 'daily') {
+      const dailyData = generateDailyData();
+      return dailyData ? dailyData.days : [];
+    } else if (viewMode === 'monthly') {
       // Monthly line chart data - filtered by selected year
       const months = Object.keys(monitoringData.monthly);
       return months.map(month => ({
@@ -362,7 +443,7 @@ export function ViolationMonitoring({ analyticsData }) {
       return (
         <div className="bg-white dark:bg-gray-800 p-3 border border-red-200 dark:border-red-700 rounded-lg shadow-lg max-w-xs">
           <p className="text-sm font-bold text-red-800 dark:text-red-300 mb-2 text-center">
-            {viewMode === 'monthly' ? `${label} ${selectedYear}` : label}
+            {viewMode === 'daily' ? `${label} ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : viewMode === 'monthly' ? `${label} ${selectedYear}` : label}
           </p>
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -389,7 +470,29 @@ export function ViolationMonitoring({ analyticsData }) {
     let filename = '';
     let mimeType = '';
     
-    if (viewMode === 'monthly') {
+    if (viewMode === 'daily') {
+      const dailyData = generateDailyData();
+      if (!dailyData) return;
+      if (format === 'csv') {
+        content = 'Day,Violations\n';
+        dailyData.days.forEach(({ day, violations }) => {
+          content += `${day},${violations}\n`;
+        });
+        filename = `violation_monitoring_daily_${selectedYear}_${currentMonthNames[parseInt(selectedMonth || '1') - 1]}_${new Date().toISOString().split('T')[0]}.csv`;
+        mimeType = 'text/csv';
+      } else if (format === 'json') {
+        content = JSON.stringify(dailyData.days, null, 2);
+        filename = `violation_monitoring_daily_${selectedYear}_${currentMonthNames[parseInt(selectedMonth || '1') - 1]}_${new Date().toISOString().split('T')[0]}.json`;
+        mimeType = 'application/json';
+      } else if (format === 'excel') {
+        content = 'Day,Violations\n';
+        dailyData.days.forEach(({ day, violations }) => {
+          content += `${day},${violations}\n`;
+        });
+        filename = `violation_monitoring_daily_${selectedYear}_${currentMonthNames[parseInt(selectedMonth || '1') - 1]}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      }
+    } else if (viewMode === 'monthly') {
       if (format === 'csv') {
         content = 'Month,Violations\n';
         Object.entries(monitoringData.monthly).forEach(([month, value]) => {
@@ -453,25 +556,26 @@ export function ViolationMonitoring({ analyticsData }) {
   }
 
   return (
-    <div className="mt-8 border border-red-200/70 dark:border-red-800/60 rounded-xl shadow-lg">
+    <div className="mt-8 border-2 border-red-200/80 dark:border-red-900/70 rounded-2xl shadow-xl bg-gradient-to-br from-red-50/60 via-red-50/40 to-red-50/60 dark:from-red-950/40 dark:via-red-950/30 dark:to-red-950/40 backdrop-blur-sm">
       {/* Header */}
-      <div className="p-6 border-b border-red-200/50 dark:border-red-700/50">
+      <div className="px-4 py-3 border-b-2 border-red-200/60 dark:border-red-800/60 bg-gradient-to-r from-red-50/40 to-red-50/20 dark:from-red-950/30 dark:to-red-950/20">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center">
-              <svg className="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {/* Warning badge icon - appropriate for violation monitoring */}
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-md shadow-red-500/30">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Violation Monitoring</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Violation Monitoring</h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
                 Real-time monitoring of violations to track trends, identify patterns, and support data-driven traffic management decisions.
               </p>
               <div className="mt-2 flex items-center gap-2">
-                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">
-                  {viewMode === 'monthly' 
+                <div className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/60 dark:to-red-900/40 text-red-800 dark:text-red-200 border border-red-200/50 dark:border-red-800/50 shadow-sm">
+                  {viewMode === 'daily'
+                    ? (selectedYear && selectedMonth ? `Monitoring ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Year and Month')
+                    : viewMode === 'monthly' 
                     ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
                     : `Monitoring ${yearlyStartYear}-${yearlyStartYear + 5}`
                   }
@@ -483,79 +587,25 @@ export function ViolationMonitoring({ analyticsData }) {
       </div>
 
       {/* Main Content - Responsive layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 h-full">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-3 h-full">
         {/* Left: Charts area */}
-        <div className="xl:col-span-3 p-2 sm:p-4">
-          <div className="space-y-4 sm:space-y-6">
+        <div className="xl:col-span-4 p-3 sm:p-4">
+          <div className="space-y-3">
             {/* Charts Area */}
-            <div className="relative backdrop-blur-sm rounded-xl p-3 sm:p-6 border border-orange-200/20 dark:border-orange-700/20 shadow-lg overflow-hidden">
-              <div className="absolute inset-0 opacity-5 flex items-center justify-center">
-                <svg className="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Center: Main Violation Badge/Icon */}
-                  <g transform="translate(200, 150)">
-                    {/* Shield/Badge shape for violations */}
-                    <path d="M-40,-50 Q-40,-60 -30,-60 L30,-60 Q40,-60 40,-50 L40,10 Q40,20 30,20 L20,30 Q10,40 0,40 Q-10,40 -20,30 L-30,20 Q-40,20 -40,10 Z" fill="#DC2626" />
-                    {/* Exclamation mark inside */}
-                    <circle cx="0" cy="-15" r="4" fill="#FFF" />
-                    <rect x="-2" y="-8" width="4" height="20" rx="2" fill="#FFF" />
-                    <circle cx="0" cy="12" r="2" fill="#FFF" />
-                  </g>
-                  
-                  {/* Top left: Warning Triangle */}
-                  <g transform="translate(80, 80)">
-                    <path d="M0,-25 L25,25 L-25,25 Z" fill="#EF4444" />
-                    <path d="M0,-15 L12,15 L-12,15 Z" fill="#FFF" />
-                    <path d="M0,-10 L0,5" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" />
-                    <circle cx="0" cy="8" r="1.5" fill="#EF4444" />
-                  </g>
-                  
-                  {/* Top right: Stop Sign */}
-                  <g transform="translate(320, 80)">
-                    <path d="M-15,-25 L15,-25 L25,0 L15,25 L-15,25 L-25,0 Z" fill="#DC2626" />
-                    <text x="0" y="5" textAnchor="middle" fill="#FFF" fontSize="14" fontWeight="bold">STOP</text>
-                  </g>
-                  
-                  {/* Bottom left: Traffic Ticket/Notice */}
-                  <g transform="translate(60, 200)">
-                    <rect x="-25" y="-15" width="50" height="30" rx="3" fill="#FBBF24" stroke="#DC2626" strokeWidth="2" />
-                    <rect x="-20" y="-10" width="40" height="3" fill="#DC2626" />
-                    <path d="M-10,5 L10,5" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
-                    <path d="M-10,10 L5,10" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round" />
-                    <circle cx="15" cy="-10" r="3" fill="#DC2626" />
-                  </g>
-                  
-                  {/* Bottom right: Speed Limit Sign */}
-                  <g transform="translate(340, 200)">
-                    <circle cx="0" cy="0" r="20" fill="#FFF" stroke="#DC2626" strokeWidth="3" />
-                    <text x="0" y="8" textAnchor="middle" fill="#DC2626" fontSize="16" fontWeight="bold">60</text>
-                    <path d="M-15,-15 L-10,-10 M15,-15 L10,-10" stroke="#DC2626" strokeWidth="1.5" />
-                  </g>
-                  
-                  {/* Center left: Warning Exclamation */}
-                  <g transform="translate(120, 140)">
-                    <circle cx="0" cy="0" r="15" fill="#EF4444" />
-                    <text x="0" y="6" textAnchor="middle" fill="#FFF" fontSize="18" fontWeight="bold">!</text>
-                  </g>
-                  
-                  {/* Center right: Prohibition Sign */}
-                  <g transform="translate(280, 140)">
-                    <circle cx="0" cy="0" r="18" fill="#F97316" />
-                    <path d="M-12,-12 L12,12 M12,-12 L-12,12" stroke="#FFF" strokeWidth="3" strokeLinecap="round" />
-                  </g>
-                </svg>
+            <div className="relative rounded-xl p-3 sm:p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-red-100/60 dark:border-red-900/40 shadow-xl overflow-hidden">
+              <div className="mb-3 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                    {viewMode === 'daily' ? 'Daily Trend' : viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
+                  </h4>
               </div>
-              
-              <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                  {viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
-                </h4>
                 
                 {/* Controls */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3" style={{ pointerEvents: 'auto' }}>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between sm:items-center" style={{ pointerEvents: 'auto' }}>
                   {/* Filters on the left: Year filter for monthly OR yearly filters for yearly view */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  {/* Year Filter - Only show in monthly view */}
-                  {viewMode === 'monthly' && (
+                  {/* Year Filter - Show in daily and monthly view */}
+                  {(viewMode === 'monthly' || viewMode === 'daily') && (
                     <div className="flex items-center gap-2 relative">
                       <label className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
                         Year:
@@ -564,10 +614,12 @@ export function ViolationMonitoring({ analyticsData }) {
                         <select
                           value={selectedYear}
                           onChange={(e) => setSelectedYear(e.target.value)}
-                          className="px-3 pr-8 py-1.5 text-xs font-medium bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white hover:border-red-300 dark:hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
-                          style={{ minWidth: '180px' }}
+                          className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-red-400 dark:hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 dark:focus:border-red-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                          style={{ minWidth: '160px' }}
                         >
+                          {viewMode === 'monthly' && (
                           <option value="All Time">All Time (2000-2025)</option>
+                          )}
                           {availableYears.map((year) => (
                             <option key={year} value={year}>
                               {year}
@@ -575,6 +627,33 @@ export function ViolationMonitoring({ analyticsData }) {
                           ))}
                         </select>
                         {/* Custom Dropdown Arrow */}
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Month Filter - Only for daily view and required */}
+                  {viewMode === 'daily' && (
+                    <div className="flex items-center gap-2 relative">
+                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+                        Month:
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedMonth}
+                          onChange={(e) => setSelectedMonth(e.target.value)}
+                          className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-red-400 dark:hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 dark:focus:border-red-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                          style={{ minWidth: '120px' }}
+                        >
+                          <option value="" disabled>Select month</option>
+                          {currentMonthNames.map((name, idx) => (
+                            <option key={idx + 1} value={`${idx + 1}`}>{name}</option>
+                          ))}
+                        </select>
                         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
                           <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -595,8 +674,8 @@ export function ViolationMonitoring({ analyticsData }) {
                             <select
                               value={yearlyStartYear}
                               onChange={(e) => setYearlyStartYear(parseInt(e.target.value))}
-                              className="px-3 pr-8 py-1.5 text-xs font-medium bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white hover:border-red-300 dark:hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
-                              style={{ minWidth: '160px' }}
+                              className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-red-400 dark:hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 dark:focus:border-red-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                              style={{ minWidth: '140px' }}
                             >
                               {getFiveYearStartYears().map((start) => (
                                 <option key={start} value={start}>{`${start}-${start + 5}`}</option>
@@ -610,13 +689,13 @@ export function ViolationMonitoring({ analyticsData }) {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">Chart:</span>
-                          <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 hidden sm:inline">Chart:</span>
+                          <div className="flex bg-gray-100 dark:bg-gray-700 rounded-md p-0.5 shadow-inner">
                             <button
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setYearlyChartType('bar'); }}
-                              className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative ${
-                                yearlyChartType === 'bar' ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                              className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative ${
+                                yearlyChartType === 'bar' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                               }`}
                               type="button"
                               style={{ pointerEvents: 'auto' }}
@@ -625,8 +704,8 @@ export function ViolationMonitoring({ analyticsData }) {
                             </button>
                             <button
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setYearlyChartType('line'); }}
-                              className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative ${
-                                yearlyChartType === 'line' ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                              className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative ${
+                                yearlyChartType === 'line' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                               }`}
                               type="button"
                               style={{ pointerEvents: 'auto' }}
@@ -639,20 +718,38 @@ export function ViolationMonitoring({ analyticsData }) {
                     )}
                   </div>
 
-                  {/* Toggle: Monthly/Yearly - in the middle */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">View:</span>
-                    <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
+                  {/* View Toggle and Export Button - Always together on the right */}
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {/* Toggle: Daily/Monthly/Yearly */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 hidden sm:inline">View:</span>
+                      <div className="flex bg-gray-100 dark:bg-gray-700 rounded-md p-0.5 shadow-inner">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setViewMode('daily');
+                          }}
+                          className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                            viewMode === 'daily'
+                              ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                          }`}
+                          type="button"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Daily
+                        </button>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           setViewMode('monthly');
                         }}
-                        className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                          className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
                           viewMode === 'monthly'
-                            ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                              ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                         }`}
                         type="button"
                         style={{ pointerEvents: 'auto' }}
@@ -665,10 +762,10 @@ export function ViolationMonitoring({ analyticsData }) {
                           e.stopPropagation();
                           setViewMode('yearly');
                         }}
-                        className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                          className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
                           viewMode === 'yearly'
-                            ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                              ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
                         }`}
                         type="button"
                         style={{ pointerEvents: 'auto' }}
@@ -679,11 +776,11 @@ export function ViolationMonitoring({ analyticsData }) {
                   </div>
 
                   {/* Export Button */}
-                  <div className="flex items-center gap-2 ml-auto relative">
+                    <div className="flex items-center gap-2 relative">
                     <div className="relative" ref={exportMenuRef}>
                       <button
                         onClick={() => setShowExportMenu(!showExportMenu)}
-                        className="px-2 sm:px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors duration-200 flex items-center gap-1 touch-manipulation"
+                          className="px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-[11px] font-semibold rounded-md transition-all duration-200 flex items-center gap-1 touch-manipulation shadow-md hover:shadow-lg"
                       >
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -696,11 +793,11 @@ export function ViolationMonitoring({ analyticsData }) {
                       
                       {/* Export Dropdown Menu */}
                       {showExportMenu && (
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                          <div className="py-1">
+                        <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+                          <div className="py-1.5">
                             <button
                               onClick={() => exportData('csv')}
-                              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition-colors duration-150"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -709,7 +806,7 @@ export function ViolationMonitoring({ analyticsData }) {
                             </button>
                             <button
                               onClick={() => exportData('json')}
-                              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition-colors duration-150"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -718,7 +815,7 @@ export function ViolationMonitoring({ analyticsData }) {
                             </button>
                             <button
                               onClick={() => exportData('excel')}
-                              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition-colors duration-150"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -728,14 +825,53 @@ export function ViolationMonitoring({ analyticsData }) {
                           </div>
                         </div>
                       )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="h-64 sm:h-80 lg:h-96">
+              <div className="h-56 sm:h-72 lg:h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  {viewMode === 'monthly' ? (
+                  {viewMode === 'daily' ? (
+                    (selectedYear !== 'All Time' && selectedMonth) ? (
+                      <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+                        <defs>
+                          <linearGradient id="colorViolationsDaily" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
+                        <XAxis dataKey="day" stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} />
+                        <YAxis stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                        <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
+                        <Area
+                          type="monotone"
+                          dataKey="violations"
+                          stroke="none"
+                          fill="url(#colorViolationsDaily)"
+                          fillOpacity={1}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="violations"
+                          stroke="#E15759"
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          dot={{ r: 4, fill: '#E15759', stroke: '#fff', strokeWidth: 2 }}
+                          activeDot={{ r: 7, fill: '#E15759', stroke: '#fff', strokeWidth: 3, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                          name="Violations"
+                        />
+                      </LineChart>
+                    ) : (
+                      <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                        Select Year and Month to view daily trend
+                      </div>
+                    )
+                  ) : viewMode === 'monthly' ? (
                     <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <defs>
                         <linearGradient id="colorViolationsMonthly" x1="0" y1="0" x2="0" y2="1">
@@ -769,7 +905,7 @@ export function ViolationMonitoring({ analyticsData }) {
                     </LineChart>
                   ) : (
                     yearlyChartType === 'bar' ? (
-                    <BarChart data={chartData} margin={{ top: 20, right: 20, left: 20, bottom: 10 }}>
+                    <BarChart data={chartData} margin={{ top: 10, right: 15, left: 10, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
                         <XAxis dataKey="year" stroke="#E15759" fontSize={12} fontWeight={"600"} tick={{ fill: '#E15759', fontSize: 12 }} />
                         <YAxis stroke="#E15759" fontSize={12} fontWeight={"600"} tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
@@ -778,7 +914,7 @@ export function ViolationMonitoring({ analyticsData }) {
                       <Bar dataKey="violations" name="Violations" fill="#E15759" />
                     </BarChart>
                     ) : (
-                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                         <defs>
                           <linearGradient id="colorViolationsYearly" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
@@ -818,69 +954,73 @@ export function ViolationMonitoring({ analyticsData }) {
         </div>
 
         {/* Right: KPI Cards */}
-        <div className="xl:col-span-1 p-2 sm:p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3 sm:gap-4">
-            {/* Total Predicted */}
-            <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
+        <div className="xl:col-span-1 p-3 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
+            {/* Total Violations */}
+            <div className="p-3 rounded-xl bg-gradient-to-br from-white to-red-50/30 dark:from-gray-800 dark:to-red-950/30 shadow-md border-2 border-red-100/60 dark:border-red-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
-                  <svg className="w-3 h-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-sm shadow-red-500/30 flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Total Violations</span>
+                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Total Violations</span>
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5">
                 {kpis.totalViolations.toLocaleString()}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {viewMode === 'monthly' 
+              <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                {viewMode === 'daily'
+                  ? (selectedYear && selectedMonth ? `${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Month & Year')
+                  : viewMode === 'monthly' 
                   ? (selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`)
                   : `${yearlyStartYear}-${yearlyStartYear + 5}`
                 }
               </div>
             </div>
 
-            {/* Peak Month/Year */}
-            <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
+            {/* Peak Day/Month/Year */}
+            <div className="p-3 rounded-xl bg-gradient-to-br from-white to-orange-50/30 dark:from-gray-800 dark:to-orange-950/30 shadow-md border-2 border-orange-100/60 dark:border-orange-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
-                  <svg className="w-3 h-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm shadow-orange-500/30 flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {viewMode === 'monthly' ? 'Peak Month' : 'Peak Year'}
+                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                  {viewMode === 'daily' ? 'Peak Day' : viewMode === 'monthly' ? 'Peak Month' : 'Peak Year'}
                 </span>
               </div>
-              <div className="text-lg font-bold text-gray-900 dark:text-white truncate w-full">
-                {viewMode === 'monthly' ? kpis.peakMonth : kpis.peakYear}
+              <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-0.5 truncate w-full">
+                {viewMode === 'daily' ? kpis.peakDay : viewMode === 'monthly' ? kpis.peakMonth : kpis.peakYear}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
                 {kpis.peakValue.toLocaleString()} violations
               </div>
             </div>
 
-            {/* Average per Month/Year */}
-            <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
+            {/* Average per Day/Month/Year */}
+            <div className="p-3 rounded-xl bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-950/30 shadow-md border-2 border-blue-100/60 dark:border-blue-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center">
-                  <svg className="w-3 h-3 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm shadow-blue-500/30 flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {viewMode === 'monthly' ? 'Average/Month' : 'Average/Year'}
+                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                  {viewMode === 'daily' ? 'Average/Day' : viewMode === 'monthly' ? 'Average/Month' : 'Average/Year'}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {viewMode === 'monthly' 
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5">
+                {viewMode === 'daily'
+                  ? kpis.avgPerDay?.toLocaleString()
+                  : viewMode === 'monthly' 
                   ? kpis.avgPerMonth.toLocaleString() 
                   : kpis.avgPerYear.toLocaleString()
                 }
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {viewMode === 'monthly' ? 'Per month average' : 'Per year average'}
+              <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                {viewMode === 'daily' ? 'Per day average' : viewMode === 'monthly' ? 'Per month average' : 'Per year average'}
               </div>
             </div>
           </div>
