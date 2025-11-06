@@ -186,7 +186,7 @@ def predict_registrations():
             last_date = pd.to_datetime(aggregated_model.all_data.index.max())
         elif hasattr(aggregated_model, '_metadata') and aggregated_model._metadata and 'last_data_date' in aggregated_model._metadata:
             last_date = pd.to_datetime(aggregated_model._metadata['last_data_date'])
-            else:
+        else:
             last_date = pd.to_datetime(aggregated_model.training_data.index.max())
         
         # Create future dates for exogenous variables
