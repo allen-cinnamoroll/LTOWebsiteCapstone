@@ -4,7 +4,8 @@ import {
   KPICards, 
   ChartsSection, 
   ViolationRanking, 
-  ViolationCombinations
+  ViolationCombinations,
+  ViolationPrescriptionTable
 } from './index';
 import { ViolationMonitoring } from './ViolationMonitoring.jsx';
 
@@ -296,6 +297,13 @@ export function ViolationAnalytics() {
         handlePrevPage={handlePrevPage}
         handleNextPage={handleNextPage}
         getCombinationRecommendation={getCombinationRecommendation}
+      />
+
+      {/* Violation Prescription Table */}
+      <ViolationPrescriptionTable
+        displayData={analyticsData}
+        loading={loading}
+        totalViolations={totalViolations}
       />
 
     </div>
