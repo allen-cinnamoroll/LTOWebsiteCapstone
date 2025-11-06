@@ -1763,86 +1763,80 @@ export default function MVPredictionPage() {
                         {(() => {
                           const cvData = trainingData.cv_results || trainingData.cross_validation;
                           return (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div className="flex flex-col md:flex-row gap-4 md:gap-6 text-sm">
                               {cvData.mean_mape !== undefined && cvData.mean_mape !== null && (
-                                <div className="flex flex-col gap-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Mean MAPE:</span>
-                                    <TooltipProvider>
-                                      <Tooltip delayDuration={300}>
-                                        <TooltipTrigger asChild>
-                                          <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
-                                        </TooltipTrigger>
-                                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                                          <div className="space-y-2">
-                                            <p className="font-semibold">Mean MAPE</p>
-                                            <div className="text-xs space-y-1">
-                                              <p><strong>What it is:</strong> The average prediction error (MAPE) across all cross-validation folds.</p>
-                                              <p><strong>What it means:</strong> Shows the typical prediction error when the model is tested on different time periods. Lower values indicate better average performance.</p>
-                                              <p><strong>What it helps with:</strong> Provides a more reliable estimate of model accuracy than a single test, as it averages performance across multiple validation periods.</p>
-                                            </div>
-                                          </div>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                  </div>
+                                <div className="flex-1 flex items-center gap-2">
+                                  <span className="text-gray-700 dark:text-gray-300 font-medium">Mean MAPE:</span>
                                   <span className="font-semibold text-lg text-teal-900 dark:text-teal-300">
                                     {cvData.mean_mape.toFixed(2)}%
                                   </span>
+                                  <TooltipProvider>
+                                    <Tooltip delayDuration={300}>
+                                      <TooltipTrigger asChild>
+                                        <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                        <div className="space-y-2">
+                                          <p className="font-semibold">Mean MAPE</p>
+                                          <div className="text-xs space-y-1">
+                                            <p><strong>What it is:</strong> The average prediction error (MAPE) across all cross-validation folds.</p>
+                                            <p><strong>What it means:</strong> Shows the typical prediction error when the model is tested on different time periods. Lower values indicate better average performance.</p>
+                                            <p><strong>What it helps with:</strong> Provides a more reliable estimate of model accuracy than a single test, as it averages performance across multiple validation periods.</p>
+                                          </div>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </div>
                               )}
                               {cvData.std_mape !== undefined && cvData.std_mape !== null && (
-                                <div className="flex flex-col gap-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Std MAPE:</span>
-                                    <TooltipProvider>
-                                      <Tooltip delayDuration={300}>
-                                        <TooltipTrigger asChild>
-                                          <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
-                                        </TooltipTrigger>
-                                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                                          <div className="space-y-2">
-                                            <p className="font-semibold">Std MAPE</p>
-                                            <div className="text-xs space-y-1">
-                                              <p><strong>What it is:</strong> The standard deviation (spread) of MAPE values across all cross-validation folds.</p>
-                                              <p><strong>What it means:</strong> Measures how consistent the model's performance is across different time periods. Lower values mean the model performs similarly across all test periods (more reliable).</p>
-                                              <p><strong>What it helps with:</strong> Indicates model stability - a low Std MAPE means you can trust the model will perform consistently, while a high value suggests the model's accuracy varies significantly across different time periods.</p>
-                                            </div>
-                                          </div>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                  </div>
+                                <div className="flex-1 flex items-center gap-2">
+                                  <span className="text-gray-700 dark:text-gray-300 font-medium">Std MAPE:</span>
                                   <span className="font-semibold text-lg text-teal-900 dark:text-teal-300">
                                     {cvData.std_mape.toFixed(2)}%
                                   </span>
+                                  <TooltipProvider>
+                                    <Tooltip delayDuration={300}>
+                                      <TooltipTrigger asChild>
+                                        <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                        <div className="space-y-2">
+                                          <p className="font-semibold">Std MAPE</p>
+                                          <div className="text-xs space-y-1">
+                                            <p><strong>What it is:</strong> The standard deviation (spread) of MAPE values across all cross-validation folds.</p>
+                                            <p><strong>What it means:</strong> Measures how consistent the model's performance is across different time periods. Lower values mean the model performs similarly across all test periods (more reliable).</p>
+                                            <p><strong>What it helps with:</strong> Indicates model stability - a low Std MAPE means you can trust the model will perform consistently, while a high value suggests the model's accuracy varies significantly across different time periods.</p>
+                                          </div>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </div>
                               )}
                               {cvData.n_splits && (
-                                <div className="flex flex-col gap-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Folds:</span>
-                                    <TooltipProvider>
-                                      <Tooltip delayDuration={300}>
-                                        <TooltipTrigger asChild>
-                                          <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
-                                        </TooltipTrigger>
-                                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                                          <div className="space-y-2">
-                                            <p className="font-semibold">Folds</p>
-                                            <div className="text-xs space-y-1">
-                                              <p><strong>What it is:</strong> The number of times the data was split chronologically for cross-validation testing.</p>
-                                              <p><strong>What it means:</strong> Each fold represents a different time period used for testing. More folds mean more comprehensive validation, but require more data.</p>
-                                              <p><strong>What it helps with:</strong> More folds provide a more thorough evaluation of model performance across different time periods, giving you greater confidence in the model's reliability.</p>
-                                            </div>
-                                          </div>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                  </div>
+                                <div className="flex-1 flex items-center gap-2">
+                                  <span className="text-gray-700 dark:text-gray-300 font-medium">Folds:</span>
                                   <span className="font-semibold text-lg text-teal-900 dark:text-teal-300">
                                     {cvData.n_splits}
                                   </span>
+                                  <TooltipProvider>
+                                    <Tooltip delayDuration={300}>
+                                      <TooltipTrigger asChild>
+                                        <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                        <div className="space-y-2">
+                                          <p className="font-semibold">Folds</p>
+                                          <div className="text-xs space-y-1">
+                                            <p><strong>What it is:</strong> The number of times the data was split chronologically for cross-validation testing.</p>
+                                            <p><strong>What it means:</strong> Each fold represents a different time period used for testing. More folds mean more comprehensive validation, but require more data.</p>
+                                            <p><strong>What it helps with:</strong> More folds provide a more thorough evaluation of model performance across different time periods, giving you greater confidence in the model's reliability.</p>
+                                          </div>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </div>
                               )}
                             </div>
