@@ -528,31 +528,67 @@ class SARIMAModel:
                 self.test_data.index.max()
             ))
             print(f"Warning: Using week_start date as fallback (may be incorrect): {actual_last_date}")
-        # Priority 5: Final fallback to training data
-        else:
+        # Priority 5: Try training_data only if available
+        elif self.training_data is not None and len(self.training_data) > 0:
             actual_last_date = pd.to_datetime(self.training_data.index.max())
             print(f"Warning: Using week_start date as fallback (may be incorrect): {actual_last_date}")
+        # Priority 6: Try test_data only if available
+        elif self.test_data is not None and len(self.test_data) > 0:
+            actual_last_date = pd.to_datetime(self.test_data.index.max())
+            print(f"Warning: Using week_start date as fallback (may be incorrect): {actual_last_date}")
+        # Priority 7: Last resort - try to get from metadata's last_data_date (week_start)
+        elif hasattr(self, '_metadata') and self._metadata and 'last_data_date' in self._metadata:
+            actual_last_date = pd.to_datetime(self._metadata['last_data_date'])
+            print(f"Warning: Using week_start date from metadata as last resort (may be incorrect): {actual_last_date}")
         
         if actual_last_date is None:
             raise ValueError("Cannot determine last data date for predictions")
         
-        # Calculate the next week_start (Sunday) after the actual last registration date
-        # If actual_last_date is already a Sunday, start from the next Sunday
-        # If actual_last_date is not a Sunday, find the next Sunday
-        days_until_next_sunday = (6 - actual_last_date.weekday()) % 7
-        if days_until_next_sunday == 0:
-            # If it's already Sunday, start from next Sunday
-            next_week_start = actual_last_date + timedelta(weeks=1)
+        # Calculate the first day of the next month after the actual last registration date
+        # User requirement: Start predictions from August 1, 2025 (first day of next month)
+        actual_last_date_dt = pd.to_datetime(actual_last_date)
+        
+        # Get the first day of the next month
+        if actual_last_date_dt.month == 12:
+            # If December, next month is January of next year
+            next_month_start = pd.Timestamp(year=actual_last_date_dt.year + 1, month=1, day=1)
         else:
-            # Find the next Sunday
-            next_week_start = actual_last_date + timedelta(days=days_until_next_sunday)
+            # Otherwise, next month, day 1
+            next_month_start = pd.Timestamp(year=actual_last_date_dt.year, month=actual_last_date_dt.month + 1, day=1)
+        
+        # Find the Sunday that is on or after the first day of next month
+        # This ensures predictions start from the week containing or after August 1
+        next_month_start_weekday = next_month_start.weekday()  # Monday=0, Sunday=6
+        
+        if next_month_start_weekday == 6:
+            # If August 1 is already a Sunday, use it
+            prediction_week_start = next_month_start
+        else:
+            # Find the next Sunday after August 1
+            # Days until next Sunday = (6 - weekday) % 7, but if 0, add 7
+            days_until_next_sunday = (6 - next_month_start_weekday) % 7
+            if days_until_next_sunday == 0:
+                days_until_next_sunday = 7  # If already Sunday, go to next week
+            prediction_week_start = next_month_start + timedelta(days=days_until_next_sunday)
+        
+        # Ensure prediction week start is after the last registration date
+        if prediction_week_start <= actual_last_date:
+            # If somehow the calculated Sunday is before/on last date, use next Sunday
+            prediction_week_start = actual_last_date + timedelta(weeks=1)
+            # Find the Sunday of that week
+            days_to_sunday = (6 - prediction_week_start.weekday()) % 7
+            if days_to_sunday == 0:
+                prediction_week_start = prediction_week_start + timedelta(weeks=1)
+            else:
+                prediction_week_start = prediction_week_start + timedelta(days=days_to_sunday)
         
         print(f"Actual last registration date: {actual_last_date}")
-        print(f"Next week start (Sunday) for predictions: {next_week_start}")
+        print(f"First day of next month: {next_month_start}")
+        print(f"Prediction week start (Sunday on/after {next_month_start}): {prediction_week_start}")
         
-        # Generate forecast dates starting from the next week_start
+        # Generate forecast dates starting from the calculated week_start
         forecast_dates = pd.date_range(
-            start=next_week_start,
+            start=prediction_week_start,
             periods=weeks,
             freq='W-SUN'
         )
@@ -582,7 +618,7 @@ class SARIMAModel:
             },
             'prediction_dates': [p['date'] for p in weekly_predictions],
             'prediction_weeks': weeks,
-            'last_training_date': str(self.training_data.index.max()),
+            'last_training_date': str(self.training_data.index.max()) if self.training_data is not None else None,
             'last_data_date': str(actual_last_date),  # Actual last registration date
             'prediction_start_date': weekly_predictions[0]['date']
         }
