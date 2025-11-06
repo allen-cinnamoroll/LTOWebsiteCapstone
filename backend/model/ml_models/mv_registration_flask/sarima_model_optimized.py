@@ -579,7 +579,8 @@ class OptimizedSARIMAModel:
                 logger.info(f"  MAE: {mae:.2f}")
                 logger.info(f"  RMSE: {rmse:.2f}")
                 logger.info(f"  MAPE: {mape:.2f}%")
-                logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
+                r2_str = f"{r2:.4f}" if r2 is not None else "N/A"
+                logger.info(f"  R²: {r2_str}")
                 # Debug: Verify R² was saved
                 if self.accuracy_metrics:
                     logger.info(f"DEBUG: Saved accuracy_metrics.r2 = {self.accuracy_metrics.get('r2')}")
@@ -591,10 +592,15 @@ class OptimizedSARIMAModel:
                 logger.info(f"  MAE: {mae:.2f}")
                 logger.info(f"  RMSE: {rmse:.2f}")
                 logger.info(f"  MAPE: {mape:.2f}%")
-                logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
+                r2_str = f"{r2:.4f}" if r2 is not None else "N/A"
+                logger.info(f"  R²: {r2_str}")
             
         except Exception as e:
             logger.error(f"Error calculating accuracy metrics: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            logger.error(f"Actual series length: {len(actual_series) if 'actual_series' in locals() else 'N/A'}")
+            logger.error(f"Fitted values length: {len(self.fitted_model.fittedvalues) if hasattr(self, 'fitted_model') and self.fitted_model else 'N/A'}")
             if is_training:
                 self.accuracy_metrics = None
             else:
@@ -720,7 +726,8 @@ class OptimizedSARIMAModel:
             logger.info(f"  MAE: {mae:.2f}")
             logger.info(f"  RMSE: {rmse:.2f}")
             logger.info(f"  MAPE: {mape:.2f}%")
-            logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
+            r2_str = f"{r2:.4f}" if r2 is not None else "N/A"
+            logger.info(f"  R²: {r2_str}")
             
         except Exception as e:
             logger.error(f"Error calculating test accuracy: {str(e)}")
