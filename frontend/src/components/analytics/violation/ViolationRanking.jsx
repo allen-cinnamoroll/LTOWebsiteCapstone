@@ -106,10 +106,10 @@ export function ViolationRanking({
             </div>
             <button
               onClick={() => setShowModal(true)}
-              className="group px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center space-x-2"
+              className="group px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-xs font-bold rounded-lg shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center space-x-1.5"
             >
               <span>More Details</span>
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -117,13 +117,14 @@ export function ViolationRanking({
 
           {/* Chart Section */}
           {top5Violations.length > 0 ? (
-            <div className="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-inner flex-1 flex flex-col min-h-0">
+            <div className="bg-white dark:bg-gray-800/50 rounded-xl p-2 border border-gray-100 dark:border-gray-700 shadow-inner flex-1 flex flex-col min-h-0">
               <div className="flex-1 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={top5Violations}
-                    margin={{ top: 10, right: 20, left: 20, bottom: 50 }}
+                    margin={{ top: 5, right: 10, left: 2, bottom: 8 }}
                     layout="vertical"
+                    barCategoryGap="10%"
                   >
                     <CartesianGrid 
                       strokeDasharray="3 3" 
@@ -135,7 +136,7 @@ export function ViolationRanking({
                     <XAxis 
                       type="number"
                       stroke="#EF4444"
-                      fontSize={13}
+                      fontSize={12}
                       fontWeight={600}
                       tick={{ fill: '#EF4444' }}
                       axisLine={{ stroke: '#EF4444', strokeWidth: 2 }}
@@ -145,9 +146,9 @@ export function ViolationRanking({
                       type="category"
                       dataKey="name"
                       stroke="#EF4444"
-                      fontSize={13}
+                      fontSize={11}
                       fontWeight={600}
-                      width={200}
+                      width={140}
                       tick={{ fill: '#EF4444' }}
                       axisLine={{ stroke: '#EF4444', strokeWidth: 2 }}
                       tickLine={{ stroke: '#EF4444' }}
