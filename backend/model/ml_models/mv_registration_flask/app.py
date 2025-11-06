@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 import traceback
 from werkzeug.utils import secure_filename
 import pandas as pd
+import numpy as np
 import logging
 
 # Add parent directory to path for imports
@@ -33,6 +34,40 @@ from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def convert_to_native_types(obj):
+    """
+    Recursively convert NumPy/pandas types to native Python types for JSON serialization.
+    
+    Handles:
+    - numpy int64, int32, etc. -> int
+    - numpy float64, float32, etc. -> float
+    - numpy bool_ -> bool
+    - numpy arrays -> lists
+    - pandas Series -> lists
+    - pandas Timestamp -> str
+    - dict and list (recursive)
+    """
+    if isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+        return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return [convert_to_native_types(item) for item in obj]
+    elif isinstance(obj, pd.Series):
+        return [convert_to_native_types(item) for item in obj]
+    elif isinstance(obj, pd.Timestamp):
+        return str(obj)
+    elif isinstance(obj, dict):
+        return {key: convert_to_native_types(value) for key, value in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [convert_to_native_types(item) for item in obj]
+    elif pd.isna(obj):
+        return None
+    else:
+        return obj
 
 app = Flask(__name__)
 # Set maximum upload size to 50MB
@@ -289,9 +324,12 @@ def get_model_accuracy():
                 'error': 'Model not trained yet. Please train the model first.'
             }), 404
         
+        # Convert NumPy/pandas types to native Python types for JSON serialization
+        accuracy_data_serializable = convert_to_native_types(accuracy_data)
+        
         return jsonify({
             'success': True,
-            'data': accuracy_data
+            'data': accuracy_data_serializable
         }), 200
         
     except Exception as e:
@@ -449,11 +487,14 @@ def retrain_model():
             training_info['processing_info'] = processing_info
             training_info['model_type'] = 'optimized_sarima_daily'
         
+        # Convert NumPy/pandas types to native Python types for JSON serialization
+        training_info_serializable = convert_to_native_types(training_info) if training_info else None
+        
         return jsonify({
             'success': True,
             'message': 'Optimized model retrained successfully',
             'data': {
-                'aggregated': training_info
+                'aggregated': training_info_serializable
             }
         }), 200
         
