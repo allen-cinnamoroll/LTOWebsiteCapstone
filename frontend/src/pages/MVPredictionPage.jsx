@@ -824,10 +824,10 @@ export default function MVPredictionPage() {
         setShowSuccessModal(open);
         if (!open) setCurrentPage(0); // Reset to first page when closing
       }}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-gray-800">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+        <DialogContent className="max-w-xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 sm:max-w-xl md:max-w-2xl">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
               Model Retrained Successfully!
             </DialogTitle>
             <DialogDescription>
@@ -844,7 +844,7 @@ export default function MVPredictionPage() {
           ) : (
             <div className="relative overflow-hidden">
               {/* Page Container with Smooth Transitions */}
-              <div className="relative" style={{ minHeight: '450px' }}>
+              <div className="relative max-h-[60vh] overflow-y-auto" style={{ minHeight: '400px' }}>
                 {/* Page 1: Accuracy Metrics */}
                 <div 
                   className={`transition-all duration-300 ease-in-out ${
@@ -853,10 +853,10 @@ export default function MVPredictionPage() {
                       : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
                   }`}
                 >
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-3 py-3 px-1">
               {/* Model Accuracy Percentage - Use Test Accuracy if available, otherwise Training */}
               {(trainingData.test_accuracy_metrics?.mape || trainingData.accuracy_metrics?.mape) && (
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
@@ -885,7 +885,7 @@ export default function MVPredictionPage() {
               {/* Accuracy Metrics - Training (In-Sample) */}
               {trainingData.accuracy_metrics && (
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     Training Accuracy (In-Sample) - {trainingData.training_days 
                       ? `${trainingData.training_days} days (${Math.round(trainingData.training_days / 7)} weeks)`
@@ -893,11 +893,11 @@ export default function MVPredictionPage() {
                         ? `${trainingData.training_weeks} weeks`
                         : 'N/A'}
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 cursor-help" />
                             </div>
@@ -936,7 +936,7 @@ export default function MVPredictionPage() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
@@ -971,7 +971,7 @@ export default function MVPredictionPage() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-purple-600 dark:text-purple-400 cursor-help" />
                             </div>
@@ -1005,7 +1005,7 @@ export default function MVPredictionPage() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 cursor-help" />
                             </div>
@@ -1048,15 +1048,19 @@ export default function MVPredictionPage() {
               {/* Test Accuracy Metrics (Out-of-Sample) */}
               {trainingData.test_accuracy_metrics && (
                 <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    Test Accuracy (Out-of-Sample) - {trainingData.test_weeks || 'N/A'} weeks
+                    Test Accuracy (Out-of-Sample) - {trainingData.test_days 
+                      ? `${trainingData.test_days} days (${Math.round(trainingData.test_days / 7)} weeks)`
+                      : trainingData.test_weeks 
+                        ? `${trainingData.test_weeks} weeks`
+                        : 'N/A'}
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
@@ -1095,7 +1099,7 @@ export default function MVPredictionPage() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
@@ -1132,7 +1136,7 @@ export default function MVPredictionPage() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help" />
                             </div>
@@ -1168,7 +1172,7 @@ export default function MVPredictionPage() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 relative">
+                          <div className="p-2.5 sm:p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 relative">
                             <div className="absolute top-2 right-2">
                               <HelpCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 cursor-help" />
                             </div>
@@ -1220,11 +1224,11 @@ export default function MVPredictionPage() {
                       : 'opacity-0 absolute inset-0 -translate-x-full pointer-events-none'
                   }`}
                 >
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-3 py-3 px-1">
                     {/* Model Diagnostics */}
                     {trainingData.diagnostics && (
                       <div className="space-y-3">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                  <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     Model Diagnostics
                   </h3>
@@ -1304,7 +1308,7 @@ export default function MVPredictionPage() {
 
                   {/* ACF/PACF Summary */}
                   {trainingData.diagnostics.acf_values && trainingData.diagnostics.acf_values.length > 0 && (
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="p-2.5 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-center gap-2 mb-2">
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         ACF/PACF Analysis
@@ -1393,7 +1397,7 @@ export default function MVPredictionPage() {
 
                   {/* Residual Statistics */}
                   {trainingData.diagnostics.residuals_mean !== null && (
-                    <div className="grid grid-cols-2 gap-3 text-base">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm sm:text-base">
                       <div className="flex items-center gap-2">
                         <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Mean:</span>
                         <span className="font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
@@ -1443,13 +1447,13 @@ export default function MVPredictionPage() {
 
                     {/* Model Parameters (Best Parameters from auto_arima) */}
                     {trainingData.model_params && (
-                      <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <div className="space-y-2 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
                         <h3 className="font-semibold text-base flex items-center gap-2">
                           <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                           Best Model Parameters (Auto-Selected)
                         </h3>
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
-                          <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="p-2.5 sm:p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                             {trainingData.model_params.full_params && (
                               <div className="col-span-2 flex items-start gap-2">
                                 <span className="text-gray-700 dark:text-gray-300 font-medium">SARIMA Order:</span>
@@ -1545,16 +1549,16 @@ export default function MVPredictionPage() {
 
                     {/* Cross-Validation Results */}
                     {(trainingData.cv_results || trainingData.cross_validation) && (
-                      <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <div className="space-y-2 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
                         <h3 className="font-semibold text-base flex items-center gap-2">
                           <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
                           Cross-Validation Results (TimeSeriesSplit)
                         </h3>
-                        <div className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                        <div className="p-2.5 sm:p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
                           {(() => {
                             const cvData = trainingData.cv_results || trainingData.cross_validation;
                             return (
-                              <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
                                 {cvData.mean_mape !== undefined && cvData.mean_mape !== null && (
                                   <div className="flex items-center gap-2">
                                     <span className="text-gray-700 dark:text-gray-300 font-medium">Mean MAPE:</span>
@@ -1655,14 +1659,14 @@ export default function MVPredictionPage() {
                       : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
                   }`}
                 >
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-3 py-3 px-1">
                     {/* Training Information */}
                     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-base flex items-center gap-2">
                   <Info className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                   Training Information
                 </h3>
-                <div className="grid grid-cols-2 gap-3 text-base">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm sm:text-base">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-700 dark:text-gray-300 font-medium">
                       {trainingData.training_days ? 'Training Days:' : 'Training Weeks:'}
@@ -1684,7 +1688,7 @@ export default function MVPredictionPage() {
                               <p><strong>What it is:</strong> The number of {trainingData.training_days ? 'days' : 'weeks'} of historical data used to train the model (80% of total data).</p>
                               <p><strong>What it means:</strong> More training data generally leads to better pattern recognition, but requires sufficient data quality.</p>
                               <p><strong>What it helps with:</strong> Understanding how much historical data the model learned from, which affects prediction reliability.</p>
-                            </div>
+                  </div>
                           </div>
                         </TooltipContent>
                       </Tooltip>
@@ -1776,7 +1780,7 @@ export default function MVPredictionPage() {
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                         {trainingData.aic !== undefined && (
                           <div className="flex items-center gap-2">
                             <span className="text-gray-700 dark:text-gray-300 font-medium">AIC:</span>
@@ -1840,7 +1844,7 @@ export default function MVPredictionPage() {
               </div>
 
               {/* Minimal Navigation Dots */}
-              <div className="flex justify-center items-center gap-2 pt-3 pb-1 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex justify-center items-center gap-2 pt-2 pb-1 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => setCurrentPage(0)}
                   className={`transition-all duration-200 ${
@@ -1872,7 +1876,7 @@ export default function MVPredictionPage() {
             </div>
           )}
           
-          <DialogFooter>
+          <DialogFooter className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
             <Button onClick={() => setShowSuccessModal(false)} className="w-full sm:w-auto">
               Close
             </Button>
@@ -1882,10 +1886,10 @@ export default function MVPredictionPage() {
 
       {/* Duplicate Information Modal */}
       <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
-        <DialogContent className="max-w-lg bg-white dark:bg-gray-800">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+        <DialogContent className="max-w-xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 sm:max-w-xl md:max-w-2xl">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-orange-400" />
               Duplicate Records Removed
             </DialogTitle>
             <DialogDescription>
@@ -1894,8 +1898,8 @@ export default function MVPredictionPage() {
           </DialogHeader>
           
           {duplicateInfo && (
-            <div className="space-y-4 py-4">
-              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+            <div className="space-y-3 py-3 px-1">
+              <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="w-8 h-8 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                   <div>
@@ -1946,7 +1950,7 @@ export default function MVPredictionPage() {
             </div>
           )}
           
-          <DialogFooter>
+          <DialogFooter className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
             <Button onClick={() => setShowDuplicateModal(false)} className="w-full sm:w-auto">
               I Understand
             </Button>
@@ -1956,10 +1960,10 @@ export default function MVPredictionPage() {
 
       {/* Error Modal for CSV Format Issues */}
       <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
-        <DialogContent className="max-w-lg bg-white dark:bg-gray-800">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+        <DialogContent className="max-w-xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 sm:max-w-xl md:max-w-2xl">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 dark:text-red-400" />
               {errorDetails?.title || 'Error Processing CSV File'}
             </DialogTitle>
             <DialogDescription>
@@ -1968,8 +1972,8 @@ export default function MVPredictionPage() {
           </DialogHeader>
           
           {errorDetails && (
-            <div className="space-y-4 py-4">
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="space-y-3 py-3 px-1">
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
@@ -2020,7 +2024,7 @@ export default function MVPredictionPage() {
             </div>
           )}
           
-          <DialogFooter>
+          <DialogFooter className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
             <Button onClick={() => setShowErrorModal(false)} className="w-full sm:w-auto">
               I Understand
             </Button>
