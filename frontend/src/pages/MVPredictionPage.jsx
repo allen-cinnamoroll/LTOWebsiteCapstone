@@ -906,6 +906,12 @@ export default function MVPredictionPage() {
                             <div className="text-xs space-y-1">
                               <p><strong>What it is:</strong> A measure of the average percentage difference between predicted and actual values.</p>
                               <p><strong>What it means:</strong> Lower MAPE = better accuracy. A MAPE of {trainingData.accuracy_metrics.mape?.toFixed(2)}% means predictions are off by about {trainingData.accuracy_metrics.mape?.toFixed(2)}% on average.</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.accuracy_metrics.mape !== undefined && trainingData.accuracy_metrics.mape !== null ? (
+                                trainingData.accuracy_metrics.mape < 10 ? '✅ Excellent! Less than 10% error is very accurate.' :
+                                trainingData.accuracy_metrics.mape < 20 ? '✅ Good! 10-20% error is acceptable for most business decisions.' :
+                                trainingData.accuracy_metrics.mape < 30 ? '⚠️ Acceptable. 20-30% error may need attention for critical decisions.' :
+                                '❌ Poor. Over 30% error indicates the model needs improvement.'
+                              ) : 'Lower is better - aim for under 20% for good performance.'}</p>
                               <p><strong>What it helps with:</strong> Helps you understand prediction accuracy in percentage terms, making it easy to compare across different scales and time periods.</p>
                             </div>
                           </div>
@@ -935,6 +941,12 @@ export default function MVPredictionPage() {
                             <div className="text-xs space-y-1">
                               <p><strong>What it is:</strong> The average number of registrations the model is off by (in actual units).</p>
                               <p><strong>What it means:</strong> A MAE of {trainingData.accuracy_metrics.mae?.toFixed(2)} means predictions are wrong by about {Math.round(trainingData.accuracy_metrics.mae || 0)} registrations on average. Lower is better.</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.accuracy_metrics.mae !== undefined && trainingData.accuracy_metrics.mae !== null && trainingData.accuracy_metrics.mean_actual ? (
+                                (trainingData.accuracy_metrics.mae / trainingData.accuracy_metrics.mean_actual) < 0.1 ? '✅ Excellent! Error is less than 10% of average value.' :
+                                (trainingData.accuracy_metrics.mae / trainingData.accuracy_metrics.mean_actual) < 0.2 ? '✅ Good! Error is 10-20% of average value.' :
+                                (trainingData.accuracy_metrics.mae / trainingData.accuracy_metrics.mean_actual) < 0.3 ? '⚠️ Acceptable. Error is 20-30% of average value.' :
+                                '❌ Poor. Error exceeds 30% of average value - model needs improvement.'
+                              ) : 'Lower is better - compare to your average daily registrations to assess impact.'}</p>
                               <p><strong>What it helps with:</strong> Provides an intuitive understanding of prediction errors in the same units as your data, helping you gauge practical impact.</p>
                             </div>
                           </div>
@@ -964,6 +976,11 @@ export default function MVPredictionPage() {
                             <div className="text-xs space-y-1">
                               <p><strong>What it is:</strong> A measure similar to MAE but gives more weight to larger errors (penalizes big mistakes more).</p>
                               <p><strong>What it means:</strong> A RMSE of {trainingData.accuracy_metrics.rmse?.toFixed(2)} means some predictions have significant errors. Lower is better. RMSE is typically higher than MAE when there are large prediction errors.</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.accuracy_metrics.rmse !== undefined && trainingData.accuracy_metrics.rmse !== null && trainingData.accuracy_metrics.mae !== undefined && trainingData.accuracy_metrics.mae !== null ? (
+                                trainingData.accuracy_metrics.rmse / trainingData.accuracy_metrics.mae < 1.2 ? '✅ Good! RMSE is close to MAE, indicating consistent errors without large outliers.' :
+                                trainingData.accuracy_metrics.rmse / trainingData.accuracy_metrics.mae < 1.5 ? '⚠️ Acceptable. Some larger errors present, but manageable.' :
+                                '❌ Poor. RMSE much higher than MAE indicates frequent large errors that need attention.'
+                              ) : 'Lower is better - compare to MAE: if RMSE is much higher, you have large prediction errors.'}</p>
                               <p><strong>What it helps with:</strong> Identifies if your model has occasional large errors that need attention, even if average errors seem acceptable.</p>
                             </div>
                           </div>
@@ -997,6 +1014,13 @@ export default function MVPredictionPage() {
                               <p><strong>What it means:</strong> R² ranges from 0 to 1, where 1 means perfect fit. {trainingData.accuracy_metrics.r2 !== undefined && trainingData.accuracy_metrics.r2 !== null 
                                 ? ` An R² of ${trainingData.accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
                                 : ' Higher is better.'}</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.accuracy_metrics.r2 !== undefined && trainingData.accuracy_metrics.r2 !== null ? (
+                                trainingData.accuracy_metrics.r2 >= 0.8 ? '✅ Excellent! R² ≥ 0.8 indicates the model explains most of the variance very well.' :
+                                trainingData.accuracy_metrics.r2 >= 0.6 ? '✅ Good! R² 0.6-0.8 shows solid explanatory power.' :
+                                trainingData.accuracy_metrics.r2 >= 0.4 ? '⚠️ Acceptable. R² 0.4-0.6 is moderate but may need improvement.' :
+                                trainingData.accuracy_metrics.r2 >= 0 ? '❌ Poor. R² < 0.4 indicates weak explanatory power.' :
+                                '❌ Very Poor. Negative R² means the model performs worse than just predicting the mean.'
+                              ) : 'Higher is better - aim for R² ≥ 0.6 for good performance, ≥ 0.8 for excellent.'}</p>
                               <p><strong>What it helps with:</strong> Provides a standardized measure of model quality independent of data scale, helping you understand overall model performance.</p>
                             </div>
                           </div>
@@ -1041,6 +1065,12 @@ export default function MVPredictionPage() {
                             <div className="text-xs space-y-1">
                               <p><strong>What it is:</strong> Out-of-sample accuracy measure on unseen test data (data the model hasn't seen during training).</p>
                               <p><strong>What it means:</strong> A MAPE of {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% means predictions on the test set are off by about {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% on average. This is a more realistic measure of model performance than training accuracy.</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.test_accuracy_metrics.mape !== undefined && trainingData.test_accuracy_metrics.mape !== null ? (
+                                trainingData.test_accuracy_metrics.mape < 10 ? '✅ Excellent! Less than 10% error on unseen data is very reliable.' :
+                                trainingData.test_accuracy_metrics.mape < 20 ? '✅ Good! 10-20% error on test data indicates good generalization.' :
+                                trainingData.test_accuracy_metrics.mape < 30 ? '⚠️ Acceptable. 20-30% error suggests the model may overfit - monitor closely.' :
+                                '❌ Poor. Over 30% error on test data indicates poor generalization - model needs improvement.'
+                              ) : 'Lower is better - compare to training MAPE: if test MAPE is much higher, the model may be overfitting.'}</p>
                               <p><strong>What it helps with:</strong> Provides realistic expectations for future predictions, ensuring the model will perform reliably on new data.</p>
                             </div>
                           </div>
@@ -1070,6 +1100,14 @@ export default function MVPredictionPage() {
                             <div className="text-xs space-y-1">
                               <p><strong>What it is:</strong> The average number of registrations the model is off by on unseen test data.</p>
                               <p><strong>What it means:</strong> A MAE of {trainingData.test_accuracy_metrics.mae?.toFixed(2)} means test predictions are wrong by about {Math.round(trainingData.test_accuracy_metrics.mae || 0)} registrations on average.</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.test_accuracy_metrics.mae !== undefined && trainingData.test_accuracy_metrics.mae !== null && trainingData.test_accuracy_metrics.mean_actual ? (
+                                (trainingData.test_accuracy_metrics.mae / trainingData.test_accuracy_metrics.mean_actual) < 0.1 ? '✅ Excellent! Test error is less than 10% of average - very reliable.' :
+                                (trainingData.test_accuracy_metrics.mae / trainingData.test_accuracy_metrics.mean_actual) < 0.2 ? '✅ Good! Test error is 10-20% of average - acceptable for planning.' :
+                                (trainingData.test_accuracy_metrics.mae / trainingData.test_accuracy_metrics.mean_actual) < 0.3 ? '⚠️ Acceptable. Test error is 20-30% of average - use with caution.' :
+                                '❌ Poor. Test error exceeds 30% of average - model struggles on new data.'
+                              ) : trainingData.accuracy_metrics?.mae ? (
+                                `Compare to training MAE (${trainingData.accuracy_metrics.mae.toFixed(2)}): ${trainingData.test_accuracy_metrics.mae > trainingData.accuracy_metrics.mae * 1.5 ? '❌ Test MAE is much higher - model may be overfitting.' : '✅ Test MAE is similar to training - good generalization.'}`
+                              ) : 'Lower is better - compare to training MAE to check if model generalizes well.'}</p>
                               <p><strong>What it helps with:</strong> Shows the actual prediction error you can expect in real-world usage, helping you plan for uncertainty.</p>
                             </div>
                           </div>
@@ -1099,6 +1137,13 @@ export default function MVPredictionPage() {
                             <div className="text-xs space-y-1">
                               <p><strong>What it is:</strong> A measure similar to MAE but gives more weight to larger errors on the test set (penalizes big mistakes).</p>
                               <p><strong>What it means:</strong> A RMSE of {trainingData.test_accuracy_metrics.rmse?.toFixed(2)} means some test predictions have significant errors. Lower is better.</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.test_accuracy_metrics.rmse !== undefined && trainingData.test_accuracy_metrics.rmse !== null && trainingData.test_accuracy_metrics.mae !== undefined && trainingData.test_accuracy_metrics.mae !== null ? (
+                                trainingData.test_accuracy_metrics.rmse / trainingData.test_accuracy_metrics.mae < 1.2 ? '✅ Good! Test RMSE close to MAE indicates consistent errors without large outliers.' :
+                                trainingData.test_accuracy_metrics.rmse / trainingData.test_accuracy_metrics.mae < 1.5 ? '⚠️ Acceptable. Some larger errors on test data, but manageable.' :
+                                '❌ Poor. Test RMSE much higher than MAE indicates frequent large errors on new data - needs attention.'
+                              ) : trainingData.accuracy_metrics?.rmse && trainingData.test_accuracy_metrics.rmse ? (
+                                `Compare to training RMSE (${trainingData.accuracy_metrics.rmse.toFixed(2)}): ${trainingData.test_accuracy_metrics.rmse > trainingData.accuracy_metrics.rmse * 1.5 ? '❌ Test RMSE is much higher - model struggles with new data.' : '✅ Test RMSE is similar to training - good generalization.'}`
+                              ) : 'Lower is better - compare to test MAE and training RMSE to assess consistency.'}</p>
                               <p><strong>What it helps with:</strong> Identifies if your model has occasional large prediction errors on new data that could impact decision-making.</p>
                             </div>
                           </div>
@@ -1132,6 +1177,15 @@ export default function MVPredictionPage() {
                               <p><strong>What it means:</strong> R² ranges from 0 to 1, where 1 means perfect fit. {trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null 
                                 ? ` An R² of ${trainingData.test_accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.test_accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
                                 : ' Higher is better.'}</p>
+                              <p><strong>Is this good or bad?</strong> {trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null ? (
+                                trainingData.test_accuracy_metrics.r2 >= 0.8 ? '✅ Excellent! R² ≥ 0.8 on test data shows strong generalization.' :
+                                trainingData.test_accuracy_metrics.r2 >= 0.6 ? '✅ Good! R² 0.6-0.8 on test data indicates reliable predictions.' :
+                                trainingData.test_accuracy_metrics.r2 >= 0.4 ? '⚠️ Acceptable. R² 0.4-0.6 on test data is moderate - monitor performance.' :
+                                trainingData.test_accuracy_metrics.r2 >= 0 ? '❌ Poor. R² < 0.4 on test data indicates weak generalization.' :
+                                '❌ Very Poor. Negative R² means the model performs worse than predicting the mean on new data.'
+                              ) : trainingData.accuracy_metrics?.r2 !== undefined && trainingData.accuracy_metrics?.r2 !== null ? (
+                                `Compare to training R² (${trainingData.accuracy_metrics.r2.toFixed(4)}): ${trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null && trainingData.test_accuracy_metrics.r2 < trainingData.accuracy_metrics.r2 * 0.8 ? '❌ Test R² is much lower - model may be overfitting.' : '✅ Test R² is similar to training - good generalization.'}`
+                              ) : 'Higher is better - compare to training R² to check if model generalizes well.'}</p>
                               <p><strong>What it helps with:</strong> Validates that the model's explanatory power generalizes to new data, not just the training data it learned from.</p>
                             </div>
                           </div>
