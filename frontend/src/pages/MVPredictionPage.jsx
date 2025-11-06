@@ -900,13 +900,15 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">MAPE (Mean Absolute Percentage Error)</p>
-                          <p className="text-xs">
-                            Measures the average percentage difference between predicted and actual values. 
-                            Lower MAPE = better accuracy. A MAPE of {trainingData.accuracy_metrics.mape?.toFixed(2)}% means 
-                            predictions are off by about {trainingData.accuracy_metrics.mape?.toFixed(2)}% on average.
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">MAPE (Mean Absolute Percentage Error)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> A measure of the average percentage difference between predicted and actual values.</p>
+                              <p><strong>What it means:</strong> Lower MAPE = better accuracy. A MAPE of {trainingData.accuracy_metrics.mape?.toFixed(2)}% means predictions are off by about {trainingData.accuracy_metrics.mape?.toFixed(2)}% on average.</p>
+                              <p><strong>What it helps with:</strong> Helps you understand prediction accuracy in percentage terms, making it easy to compare across different scales and time periods.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -927,14 +929,15 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">MAE (Mean Absolute Error)</p>
-                          <p className="text-xs">
-                            The average number of registrations the model is off by. 
-                            A MAE of {trainingData.accuracy_metrics.mae?.toFixed(2)} means predictions are wrong by 
-                            about {Math.round(trainingData.accuracy_metrics.mae || 0)} registrations on average. 
-                            Lower is better.
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">MAE (Mean Absolute Error)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> The average number of registrations the model is off by (in actual units).</p>
+                              <p><strong>What it means:</strong> A MAE of {trainingData.accuracy_metrics.mae?.toFixed(2)} means predictions are wrong by about {Math.round(trainingData.accuracy_metrics.mae || 0)} registrations on average. Lower is better.</p>
+                              <p><strong>What it helps with:</strong> Provides an intuitive understanding of prediction errors in the same units as your data, helping you gauge practical impact.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -955,14 +958,15 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">RMSE (Root Mean Square Error)</p>
-                          <p className="text-xs">
-                            Similar to MAE but gives more weight to larger errors. 
-                            A RMSE of {trainingData.accuracy_metrics.rmse?.toFixed(2)} means some predictions 
-                            have significant errors. Lower is better. RMSE is typically higher than MAE when 
-                            there are large prediction errors.
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">RMSE (Root Mean Square Error)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> A measure similar to MAE but gives more weight to larger errors (penalizes big mistakes more).</p>
+                              <p><strong>What it means:</strong> A RMSE of {trainingData.accuracy_metrics.rmse?.toFixed(2)} means some predictions have significant errors. Lower is better. RMSE is typically higher than MAE when there are large prediction errors.</p>
+                              <p><strong>What it helps with:</strong> Identifies if your model has occasional large errors that need attention, even if average errors seem acceptable.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -985,15 +989,17 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">R² (Coefficient of Determination)</p>
-                          <p className="text-xs">
-                            Measures how well the model explains the variance in the data. 
-                            R² ranges from 0 to 1, where 1 means perfect fit. 
-                            {trainingData.accuracy_metrics.r2 !== undefined && trainingData.accuracy_metrics.r2 !== null 
-                              ? ` An R² of ${trainingData.accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
-                              : ' Higher is better.'}
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">R² (Coefficient of Determination)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> A measure of how well the model explains the variance in the data (proportion of variance explained).</p>
+                              <p><strong>What it means:</strong> R² ranges from 0 to 1, where 1 means perfect fit. {trainingData.accuracy_metrics.r2 !== undefined && trainingData.accuracy_metrics.r2 !== null 
+                                ? ` An R² of ${trainingData.accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
+                                : ' Higher is better.'}</p>
+                              <p><strong>What it helps with:</strong> Provides a standardized measure of model quality independent of data scale, helping you understand overall model performance.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1029,13 +1035,15 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">MAPE (Test Set)</p>
-                          <p className="text-xs">
-                            Out-of-sample accuracy on unseen test data. A MAPE of {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% 
-                            means predictions on the test set are off by about {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% on average. 
-                            This is a more realistic measure of model performance than training accuracy.
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">MAPE (Test Set)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> Out-of-sample accuracy measure on unseen test data (data the model hasn't seen during training).</p>
+                              <p><strong>What it means:</strong> A MAPE of {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% means predictions on the test set are off by about {trainingData.test_accuracy_metrics.mape?.toFixed(2)}% on average. This is a more realistic measure of model performance than training accuracy.</p>
+                              <p><strong>What it helps with:</strong> Provides realistic expectations for future predictions, ensuring the model will perform reliably on new data.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1056,13 +1064,15 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">MAE (Test Set)</p>
-                          <p className="text-xs">
-                            The average number of registrations the model is off by on the test set. 
-                            A MAE of {trainingData.test_accuracy_metrics.mae?.toFixed(2)} means test predictions are wrong by 
-                            about {Math.round(trainingData.test_accuracy_metrics.mae || 0)} registrations on average.
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">MAE (Test Set)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> The average number of registrations the model is off by on unseen test data.</p>
+                              <p><strong>What it means:</strong> A MAE of {trainingData.test_accuracy_metrics.mae?.toFixed(2)} means test predictions are wrong by about {Math.round(trainingData.test_accuracy_metrics.mae || 0)} registrations on average.</p>
+                              <p><strong>What it helps with:</strong> Shows the actual prediction error you can expect in real-world usage, helping you plan for uncertainty.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1083,13 +1093,15 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">RMSE (Test Set)</p>
-                          <p className="text-xs">
-                            Similar to MAE but gives more weight to larger errors on the test set. 
-                            A RMSE of {trainingData.test_accuracy_metrics.rmse?.toFixed(2)} means some test predictions 
-                            have significant errors. Lower is better.
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">RMSE (Test Set)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> A measure similar to MAE but gives more weight to larger errors on the test set (penalizes big mistakes).</p>
+                              <p><strong>What it means:</strong> A RMSE of {trainingData.test_accuracy_metrics.rmse?.toFixed(2)} means some test predictions have significant errors. Lower is better.</p>
+                              <p><strong>What it helps with:</strong> Identifies if your model has occasional large prediction errors on new data that could impact decision-making.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1112,15 +1124,17 @@ export default function MVPredictionPage() {
                             </p>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-                          <p className="font-semibold mb-1">R² (Test Set)</p>
-                          <p className="text-xs">
-                            Measures how well the model explains the variance in test data. 
-                            R² ranges from 0 to 1, where 1 means perfect fit. 
-                            {trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null 
-                              ? ` An R² of ${trainingData.test_accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.test_accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
-                              : ' Higher is better.'}
-                          </p>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">R² (Test Set)</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> A measure of how well the model explains the variance in unseen test data.</p>
+                              <p><strong>What it means:</strong> R² ranges from 0 to 1, where 1 means perfect fit. {trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null 
+                                ? ` An R² of ${trainingData.test_accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.test_accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
+                                : ' Higher is better.'}</p>
+                              <p><strong>What it helps with:</strong> Validates that the model's explanatory power generalizes to new data, not just the training data it learned from.</p>
+                            </div>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -1157,9 +1171,28 @@ export default function MVPredictionPage() {
                   }`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                          Residuals Randomness
-                        </p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                            Residuals Randomness
+                          </p>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                <div className="space-y-2">
+                                  <p className="font-semibold">Residuals Randomness</p>
+                                  <div className="text-xs space-y-1">
+                                    <p><strong>What it is:</strong> A test to check if the model's prediction errors (residuals) are random or contain patterns.</p>
+                                    <p><strong>What it means:</strong> Random residuals indicate the model captured all patterns. Non-random residuals suggest the model missed some patterns in the data.</p>
+                                    <p><strong>What it helps with:</strong> Helps you determine if the model is reliable or needs improvement to capture more patterns.</p>
+                                  </div>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                         <p className="text-sm text-gray-700 dark:text-gray-300">
                           {trainingData.diagnostics.residuals_random === true 
                             ? '✓ Residuals are random - model fits well!' 
@@ -1168,10 +1201,29 @@ export default function MVPredictionPage() {
                             : 'Could not determine'}
                         </p>
                         {trainingData.diagnostics.ljung_box_pvalue !== null && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
-                            {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
-                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
+                              {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
+                            </p>
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                  <div className="space-y-2">
+                                    <p className="font-semibold">Ljung-Box Test</p>
+                                    <div className="text-xs space-y-1">
+                                      <p><strong>What it is:</strong> A statistical test that checks if residuals are random (white noise) or contain autocorrelation.</p>
+                                      <p><strong>What it means:</strong> p-value &gt; 0.05 means residuals are random (good). p-value ≤ 0.05 means patterns exist (may need model improvement).</p>
+                                      <p><strong>What it helps with:</strong> Provides a quantitative measure to validate model quality and identify if more features or parameters are needed.</p>
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         )}
                       </div>
                       {trainingData.diagnostics.residuals_random !== null && (
@@ -1185,26 +1237,88 @@ export default function MVPredictionPage() {
                   {/* ACF/PACF Summary */}
                   {trainingData.diagnostics.acf_values && trainingData.diagnostics.acf_values.length > 0 && (
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                        ACF/PACF Analysis
-                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                          ACF/PACF Analysis
+                        </p>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="w-4 h-4 text-blue-500 dark:text-blue-400 cursor-help hover:text-blue-700 dark:hover:text-blue-300" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                              <div className="space-y-2">
+                                <p className="font-semibold">ACF/PACF Analysis</p>
+                                <div className="text-xs space-y-1">
+                                  <p><strong>What it is:</strong> ACF (Autocorrelation Function) and PACF (Partial Autocorrelation Function) measure correlation between residuals at different time lags.</p>
+                                  <p><strong>What it means:</strong> Values within ±0.2 indicate random residuals. Values outside ±0.2 suggest leftover patterns the model didn't capture.</p>
+                                  <p><strong>What it helps with:</strong> Helps identify specific lag patterns that need to be addressed in model improvements.</p>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                       <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
                         Checked {trainingData.diagnostics.acf_values.length} lags for leftover autocorrelation
                       </p>
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
+                        <div className="flex items-center gap-1">
                           <span className="text-gray-700 dark:text-gray-300">ACF Lags:</span>
-                          <span className="ml-1 font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.acf_values.length}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.acf_values.length}</span>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                <div className="text-xs">
+                                  <p><strong>ACF Lags:</strong> Number of time steps checked for correlation between residuals.</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-1">
                           <span className="text-gray-700 dark:text-gray-300">PACF Lags:</span>
-                          <span className="ml-1 font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.pacf_values?.length || 0}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{trainingData.diagnostics.pacf_values?.length || 0}</span>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                <div className="text-xs">
+                                  <p><strong>PACF Lags:</strong> Similar to ACF but removes indirect correlations, showing direct relationships only.</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </div>
                       {trainingData.diagnostics.acf_values.some(acf => Math.abs(acf.value) > 0.2) && (
-                        <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400 mt-2">
-                          ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
-                        </p>
+                        <div className="flex items-start gap-2 mt-2">
+                          <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                            ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
+                          </p>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 cursor-help hover:text-yellow-700 dark:hover:text-yellow-300 mt-0.5" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                <div className="space-y-2">
+                                  <p className="font-semibold">ACF Values Exceeding ±0.2</p>
+                                  <div className="text-xs space-y-1">
+                                    <p><strong>What it is:</strong> ACF values outside the ±0.2 range indicate significant correlation at specific time lags.</p>
+                                    <p><strong>What it means:</strong> The model may have missed some patterns or seasonal effects that could improve predictions.</p>
+                                    <p><strong>What it helps with:</strong> Identifies specific areas where the model could be enhanced, such as adding more seasonal parameters or exogenous variables.</p>
+                                  </div>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       )}
                     </div>
                   )}
@@ -1212,13 +1326,47 @@ export default function MVPredictionPage() {
                   {/* Residual Statistics */}
                   {trainingData.diagnostics.residuals_mean !== null && (
                     <div className="grid grid-cols-2 gap-3 text-base">
-                      <div>
+                      <div className="flex items-center gap-2">
                         <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Mean:</span>
-                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_mean.toFixed(4)}</span>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                              <div className="space-y-2">
+                                <p className="font-semibold">Residuals Mean</p>
+                                <div className="text-xs space-y-1">
+                                  <p><strong>What it is:</strong> The average of all prediction errors (actual - predicted).</p>
+                                  <p><strong>What it means:</strong> Should be close to 0. Values far from 0 indicate systematic bias (over or under-prediction).</p>
+                                  <p><strong>What it helps with:</strong> Identifies if the model consistently overestimates or underestimates, helping you adjust expectations or improve the model.</p>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
-                      <div>
+                      <div className="flex items-center gap-2">
                         <span className="text-gray-700 dark:text-gray-300 font-medium">Residuals Std:</span>
-                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_std.toFixed(4)}</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{trainingData.diagnostics.residuals_std.toFixed(4)}</span>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                              <div className="space-y-2">
+                                <p className="font-semibold">Residuals Standard Deviation</p>
+                                <div className="text-xs space-y-1">
+                                  <p><strong>What it is:</strong> A measure of how spread out the prediction errors are.</p>
+                                  <p><strong>What it means:</strong> Lower values indicate more consistent predictions. Higher values mean more variability in errors.</p>
+                                  <p><strong>What it helps with:</strong> Helps you understand prediction uncertainty - higher std means less reliable individual predictions.</p>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   )}
@@ -1235,34 +1383,94 @@ export default function MVPredictionPage() {
                         <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             {trainingData.model_params.full_params && (
-                              <div className="col-span-2">
+                              <div className="col-span-2 flex items-start gap-2">
                                 <span className="text-gray-700 dark:text-gray-300 font-medium">SARIMA Order:</span>
                                 <span className="ml-2 font-mono font-semibold text-indigo-900 dark:text-indigo-300">
                                   ({trainingData.model_params.full_params[0]},{trainingData.model_params.full_params[1]},{trainingData.model_params.full_params[2]})
                                   ({trainingData.model_params.full_params[3]},{trainingData.model_params.full_params[4]},{trainingData.model_params.full_params[5]},{trainingData.model_params.full_params[6]})
                                 </span>
+                                <TooltipProvider>
+                                  <Tooltip delayDuration={300}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="w-4 h-4 text-indigo-500 dark:text-indigo-400 cursor-help hover:text-indigo-700 dark:hover:text-indigo-300 mt-0.5" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                      <div className="space-y-2">
+                                        <p className="font-semibold">SARIMA Order</p>
+                                        <div className="text-xs space-y-1">
+                                          <p><strong>What it is:</strong> The complete parameter set (p,d,q)(P,D,Q,s) that defines the SARIMA model structure.</p>
+                                          <p><strong>What it means:</strong> These numbers control how the model learns patterns: p/P=autoregressive, d/D=differencing, q/Q=moving average, s=seasonal period.</p>
+                                          <p><strong>What it helps with:</strong> Understanding the model complexity and how it processes time series patterns. Auto-selected to balance fit and simplicity.</p>
+                                        </div>
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </div>
                             )}
                             {trainingData.model_params.order && (
-                              <div>
+                              <div className="flex items-center gap-2">
                                 <span className="text-gray-700 dark:text-gray-300 font-medium">Non-Seasonal (p,d,q):</span>
-                                <span className="ml-2 font-mono font-semibold text-indigo-900 dark:text-indigo-300">
+                                <span className="font-mono font-semibold text-indigo-900 dark:text-indigo-300">
                                   ({trainingData.model_params.order.join(',')})
                                 </span>
+                                <TooltipProvider>
+                                  <Tooltip delayDuration={300}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 cursor-help hover:text-indigo-700 dark:hover:text-indigo-300" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                      <div className="text-xs space-y-1">
+                                        <p><strong>Non-Seasonal (p,d,q):</strong> p=AR terms, d=differencing, q=MA terms. Controls non-seasonal patterns.</p>
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </div>
                             )}
                             {trainingData.model_params.seasonal_order && (
-                              <div>
+                              <div className="flex items-center gap-2">
                                 <span className="text-gray-700 dark:text-gray-300 font-medium">Seasonal (P,D,Q,s):</span>
-                                <span className="ml-2 font-mono font-semibold text-indigo-900 dark:text-indigo-300">
+                                <span className="font-mono font-semibold text-indigo-900 dark:text-indigo-300">
                                   ({trainingData.model_params.seasonal_order.join(',')})
                                 </span>
+                                <TooltipProvider>
+                                  <Tooltip delayDuration={300}>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 cursor-help hover:text-indigo-700 dark:hover:text-indigo-300" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                      <div className="text-xs space-y-1">
+                                        <p><strong>Seasonal (P,D,Q,s):</strong> P,D,Q=seasonal equivalents, s=seasonal period (7 for weekly cycles). Controls seasonal patterns.</p>
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                            Parameters automatically selected by pmdarima.auto_arima based on AIC optimization
-                          </p>
+                          <div className="flex items-start gap-2 mt-2">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              Parameters automatically selected by pmdarima.auto_arima based on AIC optimization
+                            </p>
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300 mt-0.5" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                  <div className="space-y-2">
+                                    <p className="font-semibold">Auto Parameter Selection</p>
+                                    <div className="text-xs space-y-1">
+                                      <p><strong>What it is:</strong> pmdarima.auto_arima automatically tests hundreds of parameter combinations to find the best fit.</p>
+                                      <p><strong>What it means:</strong> The model uses AIC (Akaike Information Criterion) to balance prediction accuracy with model complexity, preventing overfitting.</p>
+                                      <p><strong>What it helps with:</strong> Ensures optimal model configuration without manual tuning, saving time and improving reliability.</p>
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1280,35 +1488,90 @@ export default function MVPredictionPage() {
                             return (
                               <div className="grid grid-cols-2 gap-3 text-sm">
                                 {cvData.mean_mape !== undefined && cvData.mean_mape !== null && (
-                                  <div>
+                                  <div className="flex items-center gap-2">
                                     <span className="text-gray-700 dark:text-gray-300 font-medium">Mean MAPE:</span>
-                                    <span className="ml-2 font-semibold text-teal-900 dark:text-teal-300">
+                                    <span className="font-semibold text-teal-900 dark:text-teal-300">
                                       {cvData.mean_mape.toFixed(2)}%
                                     </span>
+                                    <TooltipProvider>
+                                      <Tooltip delayDuration={300}>
+                                        <TooltipTrigger asChild>
+                                          <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                          <div className="text-xs">
+                                            <p><strong>Mean MAPE:</strong> Average prediction error across all cross-validation folds.</p>
+                                          </div>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   </div>
                                 )}
                                 {cvData.std_mape !== undefined && cvData.std_mape !== null && (
-                                  <div>
+                                  <div className="flex items-center gap-2">
                                     <span className="text-gray-700 dark:text-gray-300 font-medium">Std MAPE:</span>
-                                    <span className="ml-2 font-semibold text-teal-900 dark:text-teal-300">
+                                    <span className="font-semibold text-teal-900 dark:text-teal-300">
                                       {cvData.std_mape.toFixed(2)}%
                                     </span>
+                                    <TooltipProvider>
+                                      <Tooltip delayDuration={300}>
+                                        <TooltipTrigger asChild>
+                                          <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                          <div className="text-xs">
+                                            <p><strong>Std MAPE:</strong> Standard deviation of MAPE across folds. Lower = more consistent performance.</p>
+                                          </div>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   </div>
                                 )}
                                 {cvData.n_splits && (
-                                  <div className="col-span-2">
+                                  <div className="col-span-2 flex items-center gap-2">
                                     <span className="text-gray-700 dark:text-gray-300 font-medium">Folds:</span>
-                                    <span className="ml-2 font-semibold text-teal-900 dark:text-teal-300">
+                                    <span className="font-semibold text-teal-900 dark:text-teal-300">
                                       {cvData.n_splits}
                                     </span>
+                                    <TooltipProvider>
+                                      <Tooltip delayDuration={300}>
+                                        <TooltipTrigger asChild>
+                                          <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
+                                          <div className="text-xs">
+                                            <p><strong>Folds:</strong> Number of time periods the data was split into for validation.</p>
+                                          </div>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   </div>
                                 )}
                               </div>
                             );
                           })()}
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                            Walk-forward validation across multiple time periods for robust model evaluation
-                          </p>
+                          <div className="flex items-start gap-2 mt-2">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              Walk-forward validation across multiple time periods for robust model evaluation
+                            </p>
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300 mt-0.5" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                  <div className="space-y-2">
+                                    <p className="font-semibold">TimeSeriesSplit Cross-Validation</p>
+                                    <div className="text-xs space-y-1">
+                                      <p><strong>What it is:</strong> A validation method that splits data chronologically and tests the model on future periods.</p>
+                                      <p><strong>What it means:</strong> Simulates real-world prediction scenarios where you predict future data based on past data.</p>
+                                      <p><strong>What it helps with:</strong> Provides more realistic accuracy estimates than single train-test split, ensuring the model performs well across different time periods.</p>
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1320,14 +1583,48 @@ export default function MVPredictionPage() {
                   Training Information
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-base">
-                  <div>
+                  <div className="flex items-center gap-2">
                     <span className="text-gray-700 dark:text-gray-300 font-medium">Training Weeks:</span>
-                    <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.training_weeks || 'N/A'}</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{trainingData.training_weeks || 'N/A'}</span>
+                    <TooltipProvider>
+                      <Tooltip delayDuration={300}>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                          <div className="space-y-2">
+                            <p className="font-semibold">Training Weeks</p>
+                            <div className="text-xs space-y-1">
+                              <p><strong>What it is:</strong> The number of weeks of historical data used to train the model (80% of total data).</p>
+                              <p><strong>What it means:</strong> More training weeks generally lead to better pattern recognition, but requires sufficient data quality.</p>
+                              <p><strong>What it helps with:</strong> Understanding how much historical data the model learned from, which affects prediction reliability.</p>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   {trainingData.test_weeks && (
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-gray-700 dark:text-gray-300 font-medium">Test Weeks:</span>
-                      <span className="ml-2 font-semibold text-gray-900 dark:text-white">{trainingData.test_weeks}</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{trainingData.test_weeks}</span>
+                      <TooltipProvider>
+                        <Tooltip delayDuration={300}>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                            <div className="space-y-2">
+                              <p className="font-semibold">Test Weeks</p>
+                              <div className="text-xs space-y-1">
+                                <p><strong>What it is:</strong> The number of weeks reserved for testing model accuracy (20% of total data, most recent).</p>
+                                <p><strong>What it means:</strong> Out-of-sample data the model hasn't seen during training, used to validate true prediction performance.</p>
+                                <p><strong>What it helps with:</strong> Provides realistic accuracy estimates for future predictions, ensuring the model works on unseen data.</p>
+                              </div>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   )}
                   <div className="col-span-2">
@@ -1367,22 +1664,75 @@ export default function MVPredictionPage() {
                   {/* Model Summary (AIC, BIC) */}
                   {(trainingData.aic !== undefined || trainingData.bic !== undefined) && (
                     <div className="col-span-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Model Information Criteria:</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Model Information Criteria:</p>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                              <div className="space-y-2">
+                                <p className="font-semibold">Information Criteria</p>
+                                <div className="text-xs space-y-1">
+                                  <p><strong>What it is:</strong> Statistical measures (AIC/BIC) that balance model accuracy with complexity.</p>
+                                  <p><strong>What it means:</strong> Lower values indicate better models. Penalizes overly complex models to prevent overfitting.</p>
+                                  <p><strong>What it helps with:</strong> Helps select the optimal model configuration that generalizes well without being too simple or too complex.</p>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                       <div className="grid grid-cols-2 gap-3">
                         {trainingData.aic !== undefined && (
-                          <div>
+                          <div className="flex items-center gap-2">
                             <span className="text-gray-700 dark:text-gray-300 font-medium">AIC:</span>
-                            <span className="ml-2 font-mono font-semibold text-gray-900 dark:text-white">
+                            <span className="font-mono font-semibold text-gray-900 dark:text-white">
                               {trainingData.aic.toFixed(2)}
                             </span>
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                  <div className="space-y-2">
+                                    <p className="font-semibold">AIC (Akaike Information Criterion)</p>
+                                    <div className="text-xs space-y-1">
+                                      <p><strong>What it is:</strong> A measure that balances model fit quality with model complexity.</p>
+                                      <p><strong>What it means:</strong> Lower AIC = better model. Penalizes extra parameters to prevent overfitting.</p>
+                                      <p><strong>What it helps with:</strong> Guides automatic parameter selection to find the best trade-off between accuracy and simplicity.</p>
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         )}
                         {trainingData.bic !== undefined && (
-                          <div>
+                          <div className="flex items-center gap-2">
                             <span className="text-gray-700 dark:text-gray-300 font-medium">BIC:</span>
-                            <span className="ml-2 font-mono font-semibold text-gray-900 dark:text-white">
+                            <span className="font-mono font-semibold text-gray-900 dark:text-white">
                               {trainingData.bic.toFixed(2)}
                             </span>
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                  <div className="space-y-2">
+                                    <p className="font-semibold">BIC (Bayesian Information Criterion)</p>
+                                    <div className="text-xs space-y-1">
+                                      <p><strong>What it is:</strong> Similar to AIC but with a stronger penalty for model complexity.</p>
+                                      <p><strong>What it means:</strong> Lower BIC = better model. Favors simpler models more than AIC does.</p>
+                                      <p><strong>What it helps with:</strong> Prefers simpler models, useful when you want to avoid overfitting with limited data.</p>
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         )}
                       </div>
