@@ -13,7 +13,7 @@ import {
   ComposedChart
 } from 'recharts';
 import { getWeeklyPredictions } from '../../../api/predictionApi.js';
-import { TrendingUp, TrendingDown, Minus, Award } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, BarChart2, AlertCircle, CheckCircle2, Info } from 'lucide-react';
 
 const WeeklyPredictionsChart = () => {
   const [rawWeeklyData, setRawWeeklyData] = useState([]); // Store raw weekly predictions
@@ -401,8 +401,165 @@ const WeeklyPredictionsChart = () => {
     };
   };
 
+  // Calculate comparative analysis
+  const calculateComparativeAnalysis = () => {
+    if (viewType !== 'weekly' || weeklyData.length === 0 || weeksToPredict !== 4) {
+      return null;
+    }
+
+    const currentPredictions = weeklyData.map(week => week.predicted);
+    const currentTotal = currentPredictions.reduce((sum, val) => sum + val, 0);
+    const currentAvg = currentTotal / currentPredictions.length;
+    
+    // Note: Historical data would come from API
+    // For now, we'll structure the analysis to show format
+    // When historical data is available, it can be passed as props or fetched
+    
+    // Placeholder structure - to be populated with actual historical data
+    // This demonstrates the format and calculations
+    const previousPeriodTotal = null; // Would be from API: previous 4-week period
+    const previousYearTotal = null; // Would be from API: same period last year
+    
+    // Calculate comparisons if data is available
+    let previousPeriodChange = null;
+    let previousYearChange = null;
+    let previousPeriodAvg = null;
+    let previousYearAvg = null;
+    
+    if (previousPeriodTotal !== null) {
+      previousPeriodChange = ((currentTotal - previousPeriodTotal) / previousPeriodTotal) * 100;
+      previousPeriodAvg = previousPeriodTotal / 4;
+    }
+    
+    if (previousYearTotal !== null) {
+      previousYearChange = ((currentTotal - previousYearTotal) / previousYearTotal) * 100;
+      previousYearAvg = previousYearTotal / 4;
+    }
+    
+    // Generate insights
+    const insights = [];
+    
+    if (previousPeriodChange !== null) {
+      const changeAbs = Math.abs(previousPeriodChange);
+      if (previousPeriodChange > 10) {
+        insights.push({
+          type: 'positive',
+          text: `Significant growth: ${previousPeriodChange.toFixed(1)}% increase vs previous 4-week period (${previousPeriodTotal?.toLocaleString()} vehicles). This represents strong momentum.`,
+          context: 'exceptional'
+        });
+      } else if (previousPeriodChange > 0) {
+        insights.push({
+          type: 'positive',
+          text: `Moderate growth: ${previousPeriodChange.toFixed(1)}% increase vs previous 4-week period. Steady upward trend observed.`,
+          context: 'normal'
+        });
+      } else if (previousPeriodChange < -10) {
+        insights.push({
+          type: 'negative',
+          text: `Significant decline: ${previousPeriodChange.toFixed(1)}% decrease vs previous 4-week period. This may indicate seasonal patterns or external factors.`,
+          context: 'concerning'
+        });
+      } else if (previousPeriodChange < 0) {
+        insights.push({
+          type: 'negative',
+          text: `Slight decline: ${previousPeriodChange.toFixed(1)}% decrease vs previous 4-week period. Monitor for trend continuation.`,
+          context: 'normal'
+        });
+      } else {
+        insights.push({
+          type: 'neutral',
+          text: `Stable performance: ${previousPeriodChange.toFixed(1)}% change vs previous 4-week period. Consistent registration levels maintained.`,
+          context: 'normal'
+        });
+      }
+      
+      const avgChange = ((currentAvg - previousPeriodAvg) / previousPeriodAvg) * 100;
+      insights.push({
+        type: 'info',
+        text: `Average weekly registrations: ${currentAvg.toFixed(0)} vehicles (${avgChange > 0 ? '+' : ''}${avgChange.toFixed(1)}% vs previous period average of ${previousPeriodAvg?.toFixed(0)}).`,
+        context: 'normal'
+      });
+    }
+    
+    if (previousYearChange !== null) {
+      const changeAbs = Math.abs(previousYearChange);
+      if (previousYearChange > 15) {
+        insights.push({
+          type: 'positive',
+          text: `Year-over-year growth: ${previousYearChange.toFixed(1)}% increase vs same period last year (${previousYearTotal?.toLocaleString()} vehicles). Strong annual growth trajectory.`,
+          context: 'exceptional'
+        });
+      } else if (previousYearChange > 0) {
+        insights.push({
+          type: 'positive',
+          text: `Year-over-year improvement: ${previousYearChange.toFixed(1)}% increase vs same period last year. Positive annual trend.`,
+          context: 'normal'
+        });
+      } else if (previousYearChange < -15) {
+        insights.push({
+          type: 'negative',
+          text: `Year-over-year decline: ${previousYearChange.toFixed(1)}% decrease vs same period last year. Investigate seasonal or market factors.`,
+          context: 'concerning'
+        });
+      } else if (previousYearChange < 0) {
+        insights.push({
+          type: 'negative',
+          text: `Year-over-year decrease: ${previousYearChange.toFixed(1)}% lower vs same period last year. May reflect seasonal variations.`,
+          context: 'normal'
+        });
+      } else {
+        insights.push({
+          type: 'neutral',
+          text: `Year-over-year stability: ${previousYearChange.toFixed(1)}% change vs same period last year. Consistent annual performance.`,
+          context: 'normal'
+        });
+      }
+    }
+    
+    // Note: kpiMetrics will be calculated separately, so we calculate trend here
+    const firstWeek = currentPredictions[0];
+    const lastWeek = currentPredictions[currentPredictions.length - 1];
+    const periodTrendChange = firstWeek !== 0 ? ((lastWeek - firstWeek) / firstWeek) * 100 : 0;
+    const trendStrength = Math.abs(periodTrendChange);
+    const trendDirection = periodTrendChange > 2 ? 'increasing' : periodTrendChange < -2 ? 'decreasing' : 'stable';
+    
+    // Always add current period trend insight
+    if (trendStrength > 20) {
+      insights.push({
+        type: 'info',
+        text: `Strong ${trendDirection} trend within period: ${periodTrendChange.toFixed(1)}% change from first to last week.`,
+        context: trendDirection === 'decreasing' ? 'concerning' : 'exceptional'
+      });
+    } else if (trendStrength > 5) {
+      insights.push({
+        type: 'info',
+        text: `${trendDirection.charAt(0).toUpperCase() + trendDirection.slice(1)} trend observed: ${periodTrendChange.toFixed(1)}% change from first to last week.`,
+        context: 'normal'
+      });
+    } else {
+      insights.push({
+        type: 'info',
+        text: `Stable trend within period: ${periodTrendChange.toFixed(1)}% change from first to last week. Consistent weekly performance.`,
+        context: 'normal'
+      });
+    }
+    
+    return {
+      currentTotal,
+      currentAvg,
+      previousPeriodTotal,
+      previousPeriodChange,
+      previousPeriodAvg,
+      previousYearTotal,
+      previousYearChange,
+      previousYearAvg,
+      insights
+    };
+  };
+
   const currentData = getCurrentData();
   const kpiMetrics = calculateKPIMetrics();
+  const comparativeAnalysis = calculateComparativeAnalysis();
 
   return (
     <div className="bg-white/80 dark:bg-gray-800/50 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
@@ -546,6 +703,165 @@ const WeeklyPredictionsChart = () => {
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {kpiMetrics.peakValue.toLocaleString()} vehicles (highest)
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Comparative Analysis - Only show for weekly view with 4 weeks */}
+      {comparativeAnalysis && viewType === 'weekly' && weeksToPredict === 4 && !loading && !error && (
+        <div className="mb-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/30 dark:to-slate-700/30 border border-slate-200 dark:border-slate-700 rounded-lg p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart2 className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+              Comparative Analysis
+            </h3>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Current Period Summary */}
+            <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Current 4-Week Prediction Period
+              </p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {comparativeAnalysis.currentTotal.toLocaleString()}
+                </span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  total vehicles ({comparativeAnalysis.currentAvg.toFixed(0)} avg/week)
+                </span>
+              </div>
+            </div>
+
+            {/* Comparison Sections */}
+            {comparativeAnalysis.previousPeriodTotal !== null ? (
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  vs. Previous 4-Week Period
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-xl font-bold ${
+                    comparativeAnalysis.previousPeriodChange > 0 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : comparativeAnalysis.previousPeriodChange < 0
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {comparativeAnalysis.previousPeriodChange > 0 ? '+' : ''}
+                    {comparativeAnalysis.previousPeriodChange.toFixed(1)}%
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    ({comparativeAnalysis.previousPeriodTotal.toLocaleString()} vehicles in previous period)
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  vs. Previous 4-Week Period
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  Historical data not available for comparison
+                </p>
+              </div>
+            )}
+
+            {comparativeAnalysis.previousYearTotal !== null ? (
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  vs. Same Period Last Year
+                </p>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-xl font-bold ${
+                    comparativeAnalysis.previousYearChange > 0 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : comparativeAnalysis.previousYearChange < 0
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {comparativeAnalysis.previousYearChange > 0 ? '+' : ''}
+                    {comparativeAnalysis.previousYearChange.toFixed(1)}%
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    ({comparativeAnalysis.previousYearTotal.toLocaleString()} vehicles same period last year)
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  vs. Same Period Last Year
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  Historical data not available for comparison
+                </p>
+              </div>
+            )}
+
+            {/* Analytical Insights */}
+            {comparativeAnalysis.insights.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Analytical Insights
+                </p>
+                <ul className="space-y-2">
+                  {comparativeAnalysis.insights.map((insight, index) => {
+                    let icon = Info;
+                    let iconColor = 'text-blue-600 dark:text-blue-400';
+                    let bgColor = 'bg-blue-50 dark:bg-blue-900/20';
+                    let borderColor = 'border-blue-200 dark:border-blue-800';
+                    
+                    if (insight.type === 'positive') {
+                      icon = CheckCircle2;
+                      iconColor = 'text-green-600 dark:text-green-400';
+                      bgColor = 'bg-green-50 dark:bg-green-900/20';
+                      borderColor = 'border-green-200 dark:border-green-800';
+                    } else if (insight.type === 'negative') {
+                      icon = AlertCircle;
+                      iconColor = 'text-red-600 dark:text-red-400';
+                      bgColor = 'bg-red-50 dark:bg-red-900/20';
+                      borderColor = 'border-red-200 dark:border-red-800';
+                    }
+                    
+                    return (
+                      <li 
+                        key={index}
+                        className={`flex items-start gap-2 p-2 rounded-md ${bgColor} border ${borderColor}`}
+                      >
+                        {React.createElement(icon, {
+                          className: `w-4 h-4 mt-0.5 flex-shrink-0 ${iconColor}`,
+                          strokeWidth: 2
+                        })}
+                        <span className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {insight.text}
+                          {insight.context && (
+                            <span className={`ml-1 font-medium ${
+                              insight.context === 'exceptional' 
+                                ? 'text-green-700 dark:text-green-300'
+                                : insight.context === 'concerning'
+                                ? 'text-red-700 dark:text-red-300'
+                                : 'text-gray-600 dark:text-gray-400'
+                            }`}>
+                              ({insight.context})
+                            </span>
+                          )}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {/* Note about data availability */}
+            {(comparativeAnalysis.previousPeriodTotal === null || comparativeAnalysis.previousYearTotal === null) && (
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  Note: Historical comparison data will be available when the API provides previous period and year-over-year data.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
