@@ -1756,9 +1756,14 @@ export default function MVPredictionPage() {
                                       <TooltipTrigger asChild>
                                         <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
                                       </TooltipTrigger>
-                                      <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
-                                        <div className="text-xs">
-                                          <p><strong>Mean MAPE:</strong> Average prediction error across all cross-validation folds.</p>
+                                      <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                        <div className="space-y-2">
+                                          <p className="font-semibold">Mean MAPE</p>
+                                          <div className="text-xs space-y-1">
+                                            <p><strong>What it is:</strong> The average prediction error (MAPE) across all cross-validation folds.</p>
+                                            <p><strong>What it means:</strong> Shows the typical prediction error when the model is tested on different time periods. Lower values indicate better average performance.</p>
+                                            <p><strong>What it helps with:</strong> Provides a more reliable estimate of model accuracy than a single test, as it averages performance across multiple validation periods.</p>
+                                          </div>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
@@ -1776,9 +1781,14 @@ export default function MVPredictionPage() {
                                       <TooltipTrigger asChild>
                                         <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
                                       </TooltipTrigger>
-                                      <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
-                                        <div className="text-xs">
-                                          <p><strong>Std MAPE:</strong> Standard deviation of MAPE across folds. Lower = more consistent performance.</p>
+                                      <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                        <div className="space-y-2">
+                                          <p className="font-semibold">Std MAPE</p>
+                                          <div className="text-xs space-y-1">
+                                            <p><strong>What it is:</strong> The standard deviation (spread) of MAPE values across all cross-validation folds.</p>
+                                            <p><strong>What it means:</strong> Measures how consistent the model's performance is across different time periods. Lower values mean the model performs similarly across all test periods (more reliable).</p>
+                                            <p><strong>What it helps with:</strong> Indicates model stability - a low Std MAPE means you can trust the model will perform consistently, while a high value suggests the model's accuracy varies significantly across different time periods.</p>
+                                          </div>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
@@ -1796,9 +1806,14 @@ export default function MVPredictionPage() {
                                       <TooltipTrigger asChild>
                                         <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
                                       </TooltipTrigger>
-                                      <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
-                                        <div className="text-xs">
-                                          <p><strong>Folds:</strong> Number of time periods the data was split into for validation.</p>
+                                      <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                        <div className="space-y-2">
+                                          <p className="font-semibold">Folds</p>
+                                          <div className="text-xs space-y-1">
+                                            <p><strong>What it is:</strong> The number of times the data was split chronologically for cross-validation testing.</p>
+                                            <p><strong>What it means:</strong> Each fold represents a different time period used for testing. More folds mean more comprehensive validation, but require more data.</p>
+                                            <p><strong>What it helps with:</strong> More folds provide a more thorough evaluation of model performance across different time periods, giving you greater confidence in the model's reliability.</p>
+                                          </div>
                                         </div>
                                       </TooltipContent>
                                     </Tooltip>
