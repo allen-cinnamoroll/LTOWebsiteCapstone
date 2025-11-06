@@ -23,12 +23,14 @@ git pull origin main  # or your branch name
 ### Step 2: Restart Flask API
 
 **If using systemd service:**
+
 ```bash
 sudo systemctl restart mv-prediction-api
 # or whatever your service name is
 ```
 
 **If running directly:**
+
 ```bash
 # Find and kill the process
 ps aux | grep "python.*app.py"
@@ -41,6 +43,7 @@ python3 app.py
 ```
 
 **If using PM2:**
+
 ```bash
 pm2 restart mv-prediction-api
 # or
@@ -101,12 +104,14 @@ curl "http://localhost:5002/api/predict/registrations?weeks=4" | python3 -m json
 ```
 
 **Expected output:**
+
 - First prediction date should be **August 1, 2025** or later
 - No dates in July 2025
 
 ### Step 5: Clear Frontend Cache
 
 After restarting the backend:
+
 1. Hard refresh the browser (Ctrl+Shift+R or Cmd+Shift+R)
 2. Or clear browser cache
 3. The frontend should now show August dates
@@ -114,21 +119,25 @@ After restarting the backend:
 ## What Was Fixed
 
 ### Backend (`sarima_model_optimized.py`):
+
 - ✅ Stores `actual_last_date` during training
 - ✅ Uses `actual_last_date` in predictions
 - ✅ Starts predictions from **first day of next month** (August 1, 2025)
 - ✅ Saves `actual_last_date` in metadata
 
 ### Backend (`app.py`):
+
 - ✅ Uses same date logic as model
 - ✅ Generates exogenous variables for correct date range
 - ✅ Returns correct `last_data_date` in API response
 
 ### Backend (`data_preprocessor_daily.py`):
+
 - ✅ Adds `actual_date_range` to `processing_info`
 - ✅ Tracks actual last registration date (not filled date range)
 
 ### Frontend (`WeeklyPredictionsChart.jsx`):
+
 - ✅ Uses ISO week numbers correctly
 - ✅ Displays actual dates from backend
 - ✅ Shows correct week numbers and years
@@ -136,6 +145,7 @@ After restarting the backend:
 ## Expected Result
 
 After retraining and restarting:
+
 - **Last registration**: July 31, 2025
 - **First prediction**: August 1, 2025 ✅
 - **All predictions**: August 1, 2, 3, ... (future dates) ✅
@@ -145,25 +155,31 @@ After retraining and restarting:
 ### Still seeing July dates?
 
 1. **Check if model was retrained:**
+
    ```bash
    cat ../trained/sarima_metadata.json | grep actual_last_date
    ```
+
    Should show: `"actual_last_date": "2025-07-31 00:00:00"`
 
 2. **Check API logs:**
+
    ```bash
    # If using systemd
    sudo journalctl -u mv-prediction-api -f
-   
+
    # If using PM2
    pm2 logs mv-prediction-api
    ```
+
    Look for: "Using actual last registration date: 2025-07-31"
 
 3. **Test API directly:**
+
    ```bash
    curl "http://localhost:5002/api/predict/registrations?weeks=4"
    ```
+
    Check the `prediction_start_date` field
 
 4. **Clear browser cache** and hard refresh
@@ -171,4 +187,3 @@ After retraining and restarting:
 ---
 
 **End of Instructions**
-
