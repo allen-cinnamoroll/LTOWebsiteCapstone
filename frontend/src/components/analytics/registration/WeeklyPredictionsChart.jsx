@@ -97,13 +97,16 @@ const WeeklyPredictionsChart = () => {
 
     // Process Weekly View
     const weeklyProcessed = weeklyPredictions.map((prediction, index) => {
-      const date = new Date(prediction.date);
+      // Handle both 'date' and 'week_start' fields for compatibility
+      const dateStr = prediction.date || prediction.week_start;
+      const date = new Date(dateStr);
       return {
         week: index + 1,
         weekLabel: `Week ${index + 1}`,
-        date: prediction.date,
+        date: dateStr,
         dateLabel: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        predicted: prediction.predicted_count || prediction.predicted || 0,
+        // Check for predicted_count, predicted, or total_predicted (in that order)
+        predicted: prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0,
         lowerBound: prediction.lower_bound || 0,
         upperBound: prediction.upper_bound || 0,
         weekNumber: prediction.week || date.getWeek(),
@@ -132,9 +135,10 @@ const WeeklyPredictionsChart = () => {
         };
       }
       
-      const predictedValue = prediction.predicted_count || prediction.predicted || 0;
+      const dateStr = prediction.date || prediction.week_start;
+      const predictedValue = prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0;
       monthlyGrouped[monthKey].weeks.push({
-        date: prediction.date,
+        date: dateStr,
         week: prediction.week,
         predicted: predictedValue,
         lowerBound: prediction.lower_bound || 0,
@@ -179,9 +183,10 @@ const WeeklyPredictionsChart = () => {
         };
       }
       
-      const predictedValue = prediction.predicted_count || prediction.predicted || 0;
+      const dateStr = prediction.date || prediction.week_start;
+      const predictedValue = prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0;
       yearlyGrouped[year].weeks.push({
-        date: prediction.date,
+        date: dateStr,
         predicted: predictedValue,
       });
       

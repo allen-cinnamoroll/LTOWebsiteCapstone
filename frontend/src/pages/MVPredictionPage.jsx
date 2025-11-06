@@ -325,8 +325,12 @@ export default function MVPredictionPage() {
       
       // Extract training data and duplicate info
       const aggregatedData = retrainData.data?.aggregated;
+      console.log('Retrain response data:', retrainData);
+      console.log('Aggregated data:', aggregatedData);
+      
       if (aggregatedData) {
         setTrainingData(aggregatedData);
+        console.log('Training data set:', aggregatedData);
         
         // Check for duplicates
         const processingInfo = aggregatedData.processing_info;
@@ -334,6 +338,8 @@ export default function MVPredictionPage() {
           setDuplicateInfo(processingInfo);
           setShowDuplicateModal(true);
         }
+      } else {
+        console.error('No aggregated data in retrain response:', retrainData);
       }
       
       // Show success modal with accuracy metrics
