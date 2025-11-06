@@ -1,7 +1,5 @@
 import React from 'react';
 import WeeklyPredictionsChart from './WeeklyPredictionsChart.jsx';
-import WeeklyPredictionsTable from './WeeklyPredictionsTable.jsx';
-import TrackerModelsTable from './TrackerModelsTable.jsx';
 
 export function PredictiveAnalytics() {
   // Get current year and predict next year
@@ -9,16 +7,8 @@ export function PredictiveAnalytics() {
   const predictionYear = currentYear + 1;
 
   return (
-    <div 
-      className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg mx-auto w-full"
-      style={{
-        maxWidth: '1000px',
-        minWidth: '800px',
-        minHeight: '900px',
-        maxHeight: '1200px'
-      }}
-    >
-      {/* Header Section */}
+    <div className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg">
+      {/* Header */}
       <div className="p-6 border-b border-blue-200/50 dark:border-blue-700/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -40,20 +30,9 @@ export function PredictiveAnalytics() {
         </div>
       </div>
       
-      {/* Main Content - Three Section Layout */}
-      <div className="flex flex-col">
-        {/* Top Section: KPI Cards and Chart Container */}
-        <div className="flex flex-col p-6 space-y-6" style={{ minHeight: '500px', paddingBottom: '24px' }}>
-          <WeeklyPredictionsChart />
-        </div>
-        
-        {/* Bottom Section: Data Tables */}
-        <div className="px-6 pb-6 space-y-6 border-t border-blue-200/50 dark:border-blue-700/50" style={{ paddingTop: '24px' }}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <WeeklyPredictionsTable />
-            <TrackerModelsTable />
-          </div>
-        </div>
+      {/* Weekly Predictions Chart */}
+      <div className="p-6">
+        <WeeklyPredictionsChart />
       </div>
     </div>
   );

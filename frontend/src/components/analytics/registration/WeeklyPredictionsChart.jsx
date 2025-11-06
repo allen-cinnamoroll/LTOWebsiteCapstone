@@ -405,7 +405,7 @@ const WeeklyPredictionsChart = () => {
   const kpiMetrics = calculateKPIMetrics();
 
   return (
-    <div className="bg-white/80 dark:bg-gray-800/50 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-6 w-full shadow-sm flex flex-col backdrop-blur-sm">
+    <div className="bg-white/80 dark:bg-gray-800/50 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 flex items-center justify-center">
@@ -550,8 +550,8 @@ const WeeklyPredictionsChart = () => {
         </div>
       )}
 
-      {/* Chart Container - Primary Visualization (300-400px) */}
-      <div className="w-full" style={{ height: '350px', minHeight: '300px', maxHeight: '400px' }}>
+      {/* Chart Container */}
+      <div className="h-80 w-full min-h-[320px] flex-1">
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -568,7 +568,7 @@ const WeeklyPredictionsChart = () => {
             <p>No prediction data available</p>
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={320}>
             {viewType === 'yearly' ? (
               // Yearly View - Bar Chart
               <BarChart
