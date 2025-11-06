@@ -263,7 +263,7 @@ export function AppSidebar(props) {
                     <DropdownMenuItem asChild>
                       <Link to="/analytics/registration" className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4" />
-                        <span>Registration</span>
+                        <span>MV Registration</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -298,7 +298,7 @@ export function AppSidebar(props) {
                         <SidebarMenuSubButton isActive={location.pathname === "/analytics/registration"} asChild>
                           <Link to="/analytics/registration">
                             <BookOpen />
-                            <span>Registration</span>
+                            <span>MV Registration</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
