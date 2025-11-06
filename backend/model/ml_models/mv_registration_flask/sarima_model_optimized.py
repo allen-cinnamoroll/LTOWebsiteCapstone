@@ -99,6 +99,10 @@ class OptimizedSARIMAModel:
         self.model_file = os.path.join(model_dir, model_filename)
         self.metadata_file = os.path.join(model_dir, metadata_filename)
     
+    def model_exists(self):
+        """Check if a trained model exists"""
+        return os.path.exists(self.model_file) and os.path.exists(self.metadata_file)
+    
     def check_stationarity(self, series, verbose=True):
         """
         Check stationarity using Augmented Dickey-Fuller test
