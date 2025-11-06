@@ -18,7 +18,7 @@ const getMVPredictionAPIBase = () => {
   
   // In development mode, use localhost
   if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
-    return 'http://localhost:5001';
+    return 'http://localhost:5002';
   }
   
   // In production, use relative path through nginx proxy
@@ -256,7 +256,7 @@ export default function MVPredictionPage() {
           if (fetchError.name === 'AbortError' || fetchError.name === 'TypeError') {
             throw new Error(
               `Cannot connect to prediction API server. Please ensure the Flask API is running on ${MV_PREDICTION_API_BASE}. ` +
-              `Check if the server is accessible and port 5001 is open.`
+              `Check if the server is accessible and port 5002 is open.`
             );
           }
           throw fetchError;

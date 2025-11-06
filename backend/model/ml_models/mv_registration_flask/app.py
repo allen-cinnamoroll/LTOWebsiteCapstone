@@ -534,14 +534,14 @@ if __name__ == '__main__':
         logger.info("Starting Flask server...")
         if debug_mode:
             logger.warning("⚠️  DEBUG MODE ENABLED - Auto-reload is ON (not recommended for production)")
-        # Run on all interfaces, port 5001 
-        # Frontend expects port 5001
+        # Run on all interfaces, port 5002 
+        # Frontend expects port 5002
         try:
-            app.run(host='0.0.0.0', port=5001, debug=debug_mode)
+            app.run(host='0.0.0.0', port=5002, debug=debug_mode)
         except OSError as e:
             if "Address already in use" in str(e):
-                logger.error(f"\n⚠️  Port 5001 is in use. Error: {str(e)}")
-                logger.error("To kill the process on port 5001, run: sudo lsof -i :5001 && kill -9 <PID>")
+                logger.error(f"\n⚠️  Port 5002 is in use. Error: {str(e)}")
+                logger.error("To kill the process on port 5002, run: sudo lsof -i :5002 && kill -9 <PID>")
                 sys.exit(1)
             else:
                 raise

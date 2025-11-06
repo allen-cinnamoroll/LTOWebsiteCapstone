@@ -68,7 +68,7 @@ const WeeklyPredictionsChart = () => {
       // Provide more specific error messages
       let errorMessage = 'Error loading predictions';
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-        const apiBase = import.meta.env.VITE_MV_PREDICTION_API_URL || 'http://72.60.198.244:5001';
+        const apiBase = import.meta.env.VITE_MV_PREDICTION_API_URL || 'http://72.60.198.244:5002';
         errorMessage = `Cannot connect to prediction API at ${apiBase}. Please ensure the Flask API server is running.`;
       } else if (err.message.includes('HTTP error')) {
         errorMessage = `Server error: ${err.message}`;

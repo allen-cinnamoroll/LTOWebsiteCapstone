@@ -10,7 +10,7 @@ const getMVPredictionAPIBase = () => {
   
   // In development mode, use localhost
   if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
-    return 'http://localhost:5001';
+    return 'http://localhost:5002';
   }
   
   // In production, use relative path through nginx proxy
