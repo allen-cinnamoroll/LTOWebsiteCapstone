@@ -650,13 +650,13 @@ export function ViolationMonitoring({ analyticsData }) {
                 </svg>
               </div>
               
-              <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="mb-4 flex flex-col gap-2">
                 <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                   {viewMode === 'daily' ? 'Daily Trend' : viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
                 </h4>
-                
+
                 {/* Controls */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3" style={{ pointerEvents: 'auto' }}>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between sm:items-center" style={{ pointerEvents: 'auto' }}>
                   {/* Filters on the left: Year filter for monthly OR yearly filters for yearly view */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   {/* Year Filter - Show in daily and monthly view */}
@@ -773,76 +773,78 @@ export function ViolationMonitoring({ analyticsData }) {
                     )}
                   </div>
 
-                  {/* Toggle: Monthly/Yearly - in the middle */}
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">View:</span>
-                    <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setViewMode('daily');
-                        }}
-                        className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
-                          viewMode === 'daily'
-                            ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
-                        }`}
-                        type="button"
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        Daily
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setViewMode('monthly');
-                        }}
-                        className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
-                          viewMode === 'monthly'
-                            ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
-                        }`}
-                        type="button"
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setViewMode('yearly');
-                        }}
-                        className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
-                          viewMode === 'yearly'
-                            ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
-                        }`}
-                        type="button"
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        Yearly
-                      </button>
+                  {/* View Toggle and Export Button - Always together on the right */}
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {/* Toggle: Daily/Monthly/Yearly */}
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">View:</span>
+                      <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setViewMode('daily');
+                          }}
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                            viewMode === 'daily'
+                              ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                          }`}
+                          type="button"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Daily
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setViewMode('monthly');
+                          }}
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                            viewMode === 'monthly'
+                              ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                          }`}
+                          type="button"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Monthly
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setViewMode('yearly');
+                          }}
+                          className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                            viewMode === 'yearly'
+                              ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
+                              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                          }`}
+                          type="button"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Yearly
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Export Button */}
-                  <div className="flex items-center gap-2 ml-auto relative">
-                    <div className="relative" ref={exportMenuRef}>
-                      <button
-                        onClick={() => setShowExportMenu(!showExportMenu)}
-                        className="px-2 sm:px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors duration-200 flex items-center gap-1 touch-manipulation"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span className="hidden sm:inline">Export</span>
-                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
+                    {/* Export Button */}
+                    <div className="flex items-center gap-2 relative">
+                      <div className="relative" ref={exportMenuRef}>
+                        <button
+                          onClick={() => setShowExportMenu(!showExportMenu)}
+                          className="px-2 sm:px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors duration-200 flex items-center gap-1 touch-manipulation"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span className="hidden sm:inline">Export</span>
+                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
                       
                       {/* Export Dropdown Menu */}
                       {showExportMenu && (
@@ -878,6 +880,7 @@ export function ViolationMonitoring({ analyticsData }) {
                           </div>
                         </div>
                       )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1022,14 +1025,16 @@ export function ViolationMonitoring({ analyticsData }) {
                 {kpis.totalViolations.toLocaleString()}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {viewMode === 'monthly' 
-                  ? (selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`)
-                  : `${yearlyStartYear}-${yearlyStartYear + 5}`
+                {viewMode === 'daily'
+                  ? (selectedYear && selectedMonth ? `${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Month & Year')
+                  : viewMode === 'monthly' 
+                    ? (selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`)
+                    : `${yearlyStartYear}-${yearlyStartYear + 5}`
                 }
               </div>
             </div>
 
-            {/* Peak Month/Year */}
+            {/* Peak Day/Month/Year */}
             <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center">
@@ -1038,7 +1043,7 @@ export function ViolationMonitoring({ analyticsData }) {
                   </svg>
                 </div>
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {viewMode === 'monthly' ? 'Peak Month' : 'Peak Year'}
+                  {viewMode === 'daily' ? 'Peak Day' : viewMode === 'monthly' ? 'Peak Month' : 'Peak Year'}
                 </span>
               </div>
               <div className="text-lg font-bold text-gray-900 dark:text-white truncate w-full">
@@ -1049,7 +1054,7 @@ export function ViolationMonitoring({ analyticsData }) {
               </div>
             </div>
 
-            {/* Average per Month/Year */}
+            {/* Average per Day/Month/Year */}
             <div className="p-3 rounded-xl bg-white dark:bg-gray-800/60 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-start">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 bg-orange-100 dark:bg-orange-900/50 rounded-lg flex items-center justify-center">
@@ -1058,7 +1063,7 @@ export function ViolationMonitoring({ analyticsData }) {
                   </svg>
                 </div>
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  {viewMode === 'monthly' ? 'Average/Month' : 'Average/Year'}
+                  {viewMode === 'daily' ? 'Average/Day' : viewMode === 'monthly' ? 'Average/Month' : 'Average/Year'}
                 </span>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
