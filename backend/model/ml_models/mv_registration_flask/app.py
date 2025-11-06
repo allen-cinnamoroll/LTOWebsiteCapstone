@@ -238,7 +238,19 @@ def predict_registrations():
         future_exog = future_exog[['is_weekend_or_holiday']]  # Use only the combined indicator
         
         # Make predictions using optimized model (returns daily, weekly, and monthly aggregations)
+        logger.info(f"Making predictions for {days} days ({weeks} weeks)")
+        logger.info(f"Last data date: {last_date}")
+        logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
+        logger.info(f"Exogenous variables shape: {future_exog.shape}")
+        logger.info(f"Weekend/holiday days in future period: {(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}")
+        
         predictions = aggregated_model.predict(days=days, exogenous=future_exog)
+        
+        # Debug: Log prediction summary
+        if predictions.get('weekly_predictions'):
+            weekly_totals = [w.get('total_predicted', 0) for w in predictions['weekly_predictions']]
+            logger.info(f"DEBUG: Weekly prediction totals: {weekly_totals}")
+            logger.info(f"DEBUG: Total monthly prediction: {predictions.get('monthly_aggregation', {}).get('total_predicted', 0)}")
         
         # Format response to match expected API format (backward compatibility)
         # The optimized model already provides weekly_predictions and monthly_aggregation

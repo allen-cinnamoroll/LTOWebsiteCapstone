@@ -831,7 +831,11 @@ export default function MVPredictionPage() {
             </DialogDescription>
           </DialogHeader>
           
-          {trainingData && (
+          {!trainingData ? (
+            <div className="py-8 text-center">
+              <p className="text-gray-500 dark:text-gray-400">Loading training results...</p>
+            </div>
+          ) : (
             <div className="relative overflow-hidden">
               {/* Page Container with Smooth Transitions */}
               <div className="relative" style={{ minHeight: '450px' }}>

@@ -952,6 +952,13 @@ class OptimizedSARIMAModel:
                 forecast_ci_lower = forecast_ci.iloc[:, 0]
                 forecast_ci_upper = forecast_ci.iloc[:, 1]
             
+            # Debug: Log forecast statistics
+            logger.info(f"DEBUG: Forecast statistics:")
+            logger.info(f"  Min: {forecast.min():.2f}, Max: {forecast.max():.2f}, Mean: {forecast.mean():.2f}")
+            logger.info(f"  Negative values: {(forecast < 0).sum()} out of {len(forecast)}")
+            logger.info(f"  Values < 1: {(forecast < 1).sum()} out of {len(forecast)}")
+            logger.info(f"  First 5 forecast values: {forecast.head().tolist()}")
+            
             # Prepare daily predictions
             daily_predictions = []
             for i, date in enumerate(forecast_dates):
@@ -974,19 +981,36 @@ class OptimizedSARIMAModel:
                 
                 if week_key not in weekly_grouped:
                     weekly_grouped[week_key] = {
+                        'date': week_key,  # Use 'date' for compatibility
                         'week_start': week_key,
                         'days': [],
                         'total_predicted': 0,
+                        'predicted_count': 0,  # Add for frontend compatibility
+                        'predicted': 0,  # Add for frontend compatibility
                         'lower_bound': 0,
                         'upper_bound': 0
                     }
                 
                 weekly_grouped[week_key]['days'].append(pred)
                 weekly_grouped[week_key]['total_predicted'] += pred['predicted_count']
+                weekly_grouped[week_key]['predicted_count'] += pred['predicted_count']  # Same value
+                weekly_grouped[week_key]['predicted'] += pred['predicted_count']  # Same value
                 weekly_grouped[week_key]['lower_bound'] += pred['lower_bound']
                 weekly_grouped[week_key]['upper_bound'] += pred['upper_bound']
             
-            weekly_predictions = list(weekly_grouped.values())
+            # Convert to list and ensure all fields are present
+            weekly_predictions = []
+            for week_data in weekly_grouped.values():
+                weekly_predictions.append({
+                    'date': week_data['date'],
+                    'week_start': week_data['week_start'],
+                    'predicted_count': int(week_data['predicted_count']),
+                    'predicted': int(week_data['predicted']),  # Alias for compatibility
+                    'total_predicted': int(week_data['total_predicted']),  # Keep for backward compatibility
+                    'lower_bound': int(week_data['lower_bound']),
+                    'upper_bound': int(week_data['upper_bound']),
+                    'week': pd.to_datetime(week_data['date']).isocalendar()[1]  # Add week number
+                })
             
             # Aggregate to monthly total
             monthly_total = int(round(max(0, forecast.sum())))
