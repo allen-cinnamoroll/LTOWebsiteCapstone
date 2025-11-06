@@ -191,6 +191,13 @@ class SARIMAModel:
         # Store entire dataset to determine correct prediction start date
         self.all_data = series.to_frame('count')
         
+        # Store actual last registration date from processing_info for correct prediction start
+        if processing_info and 'actual_date_range' in processing_info:
+            self.actual_last_date = pd.to_datetime(processing_info['actual_date_range']['end'])
+        else:
+            # Fallback to week_start date if actual_date_range not available
+            self.actual_last_date = pd.to_datetime(series.index.max())
+        
         # Find optimal parameters using training data only
         p, d, q, P, D, Q, s = self.find_optimal_parameters(train_series)
         self.model_params = {
@@ -496,37 +503,56 @@ class SARIMAModel:
         forecast_ci = self.fitted_model.get_forecast(steps=weeks).conf_int()
         
         # Generate dates for predictions
-        # Use the maximum date from ALL available data (training + test), not just training
-        # This ensures we predict truly future dates, not dates that exist in test data
-        last_date = None
+        # CRITICAL: Use the ACTUAL last registration date, not the week_start date
+        # This ensures predictions start from the correct future period
+        actual_last_date = None
         
-        # Priority 1: Use all_data if available (from freshly trained model)
-        if self.all_data is not None and len(self.all_data) > 0:
-            last_date = pd.to_datetime(self.all_data.index.max())
-            print(f"Using last date from entire dataset (all_data): {last_date}")
-        # Priority 2: Check if we have metadata with last_data_date (from loaded model)
-        elif hasattr(self, '_metadata') and self._metadata and 'last_data_date' in self._metadata:
-            last_data_date_str = self._metadata['last_data_date']
-            if last_data_date_str:
-                last_date = pd.to_datetime(last_data_date_str)
-                print(f"Using last date from metadata: {last_date}")
-        # Priority 3: Try to reconstruct from test_data if available
+        # Priority 1: Use actual_last_date if available (from freshly trained model)
+        if hasattr(self, 'actual_last_date') and self.actual_last_date is not None:
+            actual_last_date = pd.to_datetime(self.actual_last_date)
+            print(f"Using actual last registration date: {actual_last_date}")
+        # Priority 2: Check if we have metadata with actual_last_date (from loaded model)
+        elif hasattr(self, '_metadata') and self._metadata and 'actual_last_date' in self._metadata:
+            actual_last_date_str = self._metadata['actual_last_date']
+            if actual_last_date_str:
+                actual_last_date = pd.to_datetime(actual_last_date_str)
+                print(f"Using actual last registration date from metadata: {actual_last_date}")
+        # Priority 3: Fallback to week_start date from all_data (backward compatibility)
+        elif self.all_data is not None and len(self.all_data) > 0:
+            actual_last_date = pd.to_datetime(self.all_data.index.max())
+            print(f"Warning: Using week_start date as fallback (may be incorrect): {actual_last_date}")
+        # Priority 4: Try to reconstruct from test_data if available
         elif self.test_data is not None and len(self.test_data) > 0 and self.training_data is not None:
-            last_date = pd.to_datetime(max(
+            actual_last_date = pd.to_datetime(max(
                 self.training_data.index.max(),
                 self.test_data.index.max()
             ))
-            print(f"Using last date from training + test data: {last_date}")
-        # Priority 4: Fallback to training data (for backward compatibility)
+            print(f"Warning: Using week_start date as fallback (may be incorrect): {actual_last_date}")
+        # Priority 5: Final fallback to training data
         else:
-            last_date = pd.to_datetime(self.training_data.index.max())
-            print(f"Using last date from training data (fallback): {last_date}")
+            actual_last_date = pd.to_datetime(self.training_data.index.max())
+            print(f"Warning: Using week_start date as fallback (may be incorrect): {actual_last_date}")
         
-        if last_date is None:
+        if actual_last_date is None:
             raise ValueError("Cannot determine last data date for predictions")
         
+        # Calculate the next week_start (Sunday) after the actual last registration date
+        # If actual_last_date is already a Sunday, start from the next Sunday
+        # If actual_last_date is not a Sunday, find the next Sunday
+        days_until_next_sunday = (6 - actual_last_date.weekday()) % 7
+        if days_until_next_sunday == 0:
+            # If it's already Sunday, start from next Sunday
+            next_week_start = actual_last_date + timedelta(weeks=1)
+        else:
+            # Find the next Sunday
+            next_week_start = actual_last_date + timedelta(days=days_until_next_sunday)
+        
+        print(f"Actual last registration date: {actual_last_date}")
+        print(f"Next week start (Sunday) for predictions: {next_week_start}")
+        
+        # Generate forecast dates starting from the next week_start
         forecast_dates = pd.date_range(
-            start=last_date + timedelta(weeks=1),
+            start=next_week_start,
             periods=weeks,
             freq='W-SUN'
         )
@@ -557,7 +583,7 @@ class SARIMAModel:
             'prediction_dates': [p['date'] for p in weekly_predictions],
             'prediction_weeks': weeks,
             'last_training_date': str(self.training_data.index.max()),
-            'last_data_date': str(last_date),  # Last date from entire dataset
+            'last_data_date': str(actual_last_date),  # Actual last registration date
             'prediction_start_date': weekly_predictions[0]['date']
         }
         
@@ -604,18 +630,27 @@ class SARIMAModel:
                 pickle.dump(self.fitted_model, f)
             
             # Save metadata
-            # Store last date from entire dataset (training + test) for correct prediction start date
-            last_data_date = None
-            if self.all_data is not None and len(self.all_data) > 0:
-                last_data_date = str(self.all_data.index.max())
+            # CRITICAL: Store ACTUAL last registration date, not week_start date
+            # This ensures predictions start from the correct future period
+            actual_last_date = None
+            if hasattr(self, 'actual_last_date') and self.actual_last_date is not None:
+                actual_last_date = str(self.actual_last_date)
+            elif self.all_data is not None and len(self.all_data) > 0:
+                # Fallback to week_start date if actual_last_date not available (backward compatibility)
+                actual_last_date = str(self.all_data.index.max())
             elif self.test_data is not None and len(self.test_data) > 0:
                 # If all_data not set but test_data exists, use max of training + test
-                last_data_date = str(max(
+                actual_last_date = str(max(
                     self.training_data.index.max() if self.training_data is not None else pd.Timestamp.min,
                     self.test_data.index.max()
                 ))
             elif self.training_data is not None:
-                last_data_date = str(self.training_data.index.max())
+                actual_last_date = str(self.training_data.index.max())
+            
+            # Also store week_start date for backward compatibility
+            week_start_last_date = None
+            if self.all_data is not None and len(self.all_data) > 0:
+                week_start_last_date = str(self.all_data.index.max())
             
             metadata = {
                 'model_params': self.model_params,
@@ -626,7 +661,8 @@ class SARIMAModel:
                     'start': str(self.training_data.index.min()) if self.training_data is not None else None,
                     'end': str(self.training_data.index.max()) if self.training_data is not None else None
                 },
-                'last_data_date': last_data_date  # Last date from entire dataset (training + test)
+                'actual_last_date': actual_last_date,  # ACTUAL last registration date (CRITICAL for correct predictions)
+                'last_data_date': week_start_last_date  # Week_start date (for backward compatibility)
             }
             
             with open(self.metadata_file, 'w') as f:
@@ -654,10 +690,16 @@ class SARIMAModel:
             # Store metadata for access in predict() method
             self._metadata = metadata
             
+            # Restore actual_last_date if available
+            if 'actual_last_date' in metadata and metadata['actual_last_date']:
+                self.actual_last_date = pd.to_datetime(metadata['actual_last_date'])
+            
             print(f"Model loaded from {self.model_file}")
             print(f"Model parameters: {self.model_params}")
-            if 'last_data_date' in metadata:
-                print(f"Last data date from metadata: {metadata['last_data_date']}")
+            if 'actual_last_date' in metadata:
+                print(f"Actual last registration date from metadata: {metadata['actual_last_date']}")
+            elif 'last_data_date' in metadata:
+                print(f"Last data date from metadata (week_start): {metadata['last_data_date']}")
             
             # Reconstruct training data info (we don't have the full data, just metadata)
             if metadata.get('date_range'):
