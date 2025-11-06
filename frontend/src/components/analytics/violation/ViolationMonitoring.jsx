@@ -159,20 +159,24 @@ export function ViolationMonitoring({ analyticsData }) {
         }
       });
     } else {
-      // Derive from monthly total for that year+month
+      // Derive from monthly total for that year+month when daily breakdown is unavailable
       let monthTotal = 0;
       (analyticsData?.monthlyTrends || []).forEach(trend => {
         if (trend._id?.year === yearNum && trend._id?.month === monthNum) {
           monthTotal = trend.count || 0;
         }
       });
+
       if (monthTotal > 0) {
-        let remaining = monthTotal;
+        const baseValue = Math.floor(monthTotal / daysInMonth);
+        let remainder = monthTotal - baseValue * daysInMonth;
+
         for (let i = 0; i < daysInMonth; i++) {
-          const variation = Math.sin(((i + 1) / daysInMonth) * Math.PI) * 0.3 + 0.7;
-          const value = i === daysInMonth - 1 ? remaining : Math.max(0, Math.round((monthTotal / daysInMonth) * variation));
-          dailyCounts[i] = value;
-          remaining -= value;
+          const extra = remainder > 0 ? 1 : 0;
+          dailyCounts[i] = baseValue + extra;
+          if (remainder > 0) {
+            remainder -= 1;
+          }
         }
       }
     }

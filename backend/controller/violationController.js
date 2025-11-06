@@ -414,10 +414,13 @@ export const getViolationAnalytics = async (req, res) => {
 
         // Get monthly trends - count actual violations from the violations array or comma-separated string
         const monthlyTrends = [];
+        const dailyTrendsMap = new Map();
         violations.forEach(violation => {
             if (violation.dateOfApprehension && violation.violations) {
-                const year = new Date(violation.dateOfApprehension).getFullYear();
-                const month = new Date(violation.dateOfApprehension).getMonth() + 1; // 1-12
+                const apprehensionDate = new Date(violation.dateOfApprehension);
+                const year = apprehensionDate.getFullYear();
+                const month = apprehensionDate.getMonth() + 1; // 1-12
+                const day = apprehensionDate.getDate();
                 
                 // Count violations - handle both array and string format
                 let violationCount = 0;
@@ -439,6 +442,18 @@ export const getViolationAnalytics = async (req, res) => {
                             count: violationCount
                         });
                     }
+
+                    // Track daily counts as well
+                    const dayKey = `${year}-${month}-${day}`;
+                    const existingDaily = dailyTrendsMap.get(dayKey);
+                    if (existingDaily) {
+                        existingDaily.count += violationCount;
+                    } else {
+                        dailyTrendsMap.set(dayKey, {
+                            _id: { year, month, day },
+                            count: violationCount
+                        });
+                    }
                 }
             }
         });
@@ -447,6 +462,13 @@ export const getViolationAnalytics = async (req, res) => {
         monthlyTrends.sort((a, b) => {
             if (a._id.year !== b._id.year) return a._id.year - b._id.year;
             return a._id.month - b._id.month;
+        });
+
+        // Convert daily trends map to sorted array
+        const dailyTrends = Array.from(dailyTrendsMap.values()).sort((a, b) => {
+            if (a._id.year !== b._id.year) return a._id.year - b._id.year;
+            if (a._id.month !== b._id.month) return a._id.month - b._id.month;
+            return a._id.day - b._id.day;
         });
 
         // Get violation combinations (simplified)
@@ -571,6 +593,7 @@ export const getViolationAnalytics = async (req, res) => {
                 violationsByType: violationsByTypeArray,
                 yearlyTrends: yearlyTrendsArray,
                 monthlyTrends: monthlyTrends,
+                dailyTrends,
                 violationCombinations: violationCombinations.slice(0, 20), // Top 20 combinations
                 violationPatterns,
                 confiscatedItemTypesCount,
