@@ -459,15 +459,42 @@ class OptimizedSARIMAModel:
             # Get fitted values (in-sample predictions)
             fitted_values = self.fitted_model.fittedvalues
             
-            # Ensure same length
-            min_len = min(len(actual_series), len(fitted_values))
-            actual_aligned = actual_series.iloc[:min_len]
-            fitted_aligned = fitted_values.iloc[:min_len]
+            # Align by index (more robust than position-based alignment)
+            # Find common indices
+            common_indices = actual_series.index.intersection(fitted_values.index)
+            
+            if len(common_indices) == 0:
+                # Fallback: use position-based alignment if indices don't match
+                logger.warning("Index mismatch between actual and fitted values, using position-based alignment")
+                min_len = min(len(actual_series), len(fitted_values))
+                actual_aligned = actual_series.iloc[:min_len].values
+                fitted_aligned = fitted_values.iloc[:min_len].values
+            else:
+                actual_aligned = actual_series.loc[common_indices]
+                fitted_aligned = fitted_values.loc[common_indices]
+            
+            # Convert to numpy arrays for calculations
+            actual_aligned = np.array(actual_aligned, dtype=float)
+            fitted_aligned = np.array(fitted_aligned, dtype=float)
+            
+            # Remove any NaN or Inf values
+            mask = np.isfinite(actual_aligned) & np.isfinite(fitted_aligned)
+            if mask.sum() < 2:
+                logger.error("Insufficient valid data points for R² calculation")
+                r2 = None
+            else:
+                actual_aligned = actual_aligned[mask]
+                fitted_aligned = fitted_aligned[mask]
             
             # Inverse transform if normalization was used
             if self.use_normalization:
-                actual_aligned = self.inverse_normalize(actual_aligned)
-                fitted_aligned = self.inverse_normalize(fitted_aligned)
+                # Convert back to Series for inverse transform, then back to array
+                actual_aligned_series = pd.Series(actual_aligned, index=range(len(actual_aligned)))
+                fitted_aligned_series = pd.Series(fitted_aligned, index=range(len(fitted_aligned)))
+                actual_aligned_series = self.inverse_normalize(actual_aligned_series)
+                fitted_aligned_series = self.inverse_normalize(fitted_aligned_series)
+                actual_aligned = actual_aligned_series.values
+                fitted_aligned = fitted_aligned_series.values
             
             # Calculate metrics
             mae = mean_absolute_error(actual_aligned, fitted_aligned)
@@ -483,21 +510,29 @@ class OptimizedSARIMAModel:
             
             # R² (Coefficient of Determination)
             try:
-                # Check if actual values have variance (required for R²)
-                actual_variance = actual_aligned.var()
-                if actual_variance == 0 or np.isnan(actual_variance):
-                    logger.warning(f"Cannot calculate R²: actual values have zero variance (all values are the same)")
+                # Check if we have enough valid data points
+                if len(actual_aligned) < 2:
+                    logger.warning("Not enough data points to calculate R²")
                     r2 = None
                 else:
-                    r2 = r2_score(actual_aligned, fitted_aligned)
-                    # Handle NaN or inf values
-                    if np.isnan(r2) or np.isinf(r2):
-                        logger.warning(f"R² calculation resulted in NaN/Inf. Actual variance: {actual_variance:.4f}")
+                    # Check if actual values have variance (required for R²)
+                    actual_variance = np.var(actual_aligned)
+                    if actual_variance == 0 or np.isnan(actual_variance) or np.isinf(actual_variance):
+                        logger.warning(f"Cannot calculate R²: actual values have zero variance (all values are the same)")
                         r2 = None
                     else:
-                        r2 = float(r2)
+                        r2 = r2_score(actual_aligned, fitted_aligned)
+                        # Handle NaN or inf values
+                        if np.isnan(r2) or np.isinf(r2):
+                            logger.warning(f"R² calculation resulted in NaN/Inf. Actual variance: {actual_variance:.4f}, len: {len(actual_aligned)}")
+                            r2 = None
+                        else:
+                            r2 = float(r2)
+                            logger.info(f"R² calculated successfully: {r2:.4f} (variance: {actual_variance:.4f})")
             except Exception as e:
-                logger.warning(f"Could not calculate R²: {str(e)}")
+                logger.error(f"Could not calculate R²: {str(e)}")
+                import traceback
+                logger.error(traceback.format_exc())
                 r2 = None
             
             metrics = {
@@ -505,9 +540,14 @@ class OptimizedSARIMAModel:
                 'rmse': float(rmse),
                 'mape': float(mape) if not np.isnan(mape) else None,
                 'r2': r2,
-                'mean_actual': float(actual_aligned.mean()),
-                'std_actual': float(actual_aligned.std())
+                'mean_actual': float(np.mean(actual_aligned)),
+                'std_actual': float(np.std(actual_aligned))
             }
+            
+            # Ensure r2 is always in the metrics dict (even if None)
+            if 'r2' not in metrics:
+                metrics['r2'] = None
+                logger.warning("R² was not included in metrics dictionary, setting to None")
             
             if is_training:
                 self.accuracy_metrics = metrics
