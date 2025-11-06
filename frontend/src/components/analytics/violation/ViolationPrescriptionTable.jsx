@@ -753,9 +753,9 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                     <div className="text-center">Violations</div>
                     <div className="text-center">Percentage</div>
                     <div className="text-center">Severity</div>
-                  </div>
           </div>
-                
+            </div>
+            
                 {/* Table Rows */}
                 <div className="space-y-2">
                   {monthlyData.slice(6, 12).map((month) => (
@@ -794,8 +794,8 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                             }`}
                             style={{ width: `${Math.min(month.percentage, 100)}%` }}
                           ></div>
-                        </div>
-                      </div>
+          </div>
+        </div>
                       <div className="text-center">
                         {month.isHighPriority ? (
                           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
@@ -838,7 +838,7 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm border border-red-600/30"></div>
                 <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">High (≥50%)</span>
           </div>
-        </div>
+              </div>
             <div className="text-[10px] font-semibold text-gray-600 dark:text-gray-400">
               Showing {monthlyData.length} months for {selectedYear}
               </div>
