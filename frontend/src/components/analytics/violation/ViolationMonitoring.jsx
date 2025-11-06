@@ -556,9 +556,9 @@ export function ViolationMonitoring({ analyticsData }) {
   }
 
   return (
-    <div className="mt-8 border border-red-200/70 dark:border-red-800/60 rounded-xl shadow-lg">
+    <div className="mt-8 border border-red-200/70 dark:border-red-900/60 rounded-xl shadow-lg bg-red-50/50 dark:bg-red-950/30">
       {/* Header */}
-      <div className="p-6 border-b border-red-200/50 dark:border-red-700/50">
+      <div className="p-6 border-b border-red-200/50 dark:border-red-700/50 bg-red-50/30 dark:bg-red-950/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center">
