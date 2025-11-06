@@ -184,7 +184,9 @@ def predict_registrations():
         # Get last date from model
         if aggregated_model.all_data is not None and len(aggregated_model.all_data) > 0:
             last_date = pd.to_datetime(aggregated_model.all_data.index.max())
-        elif hasattr(aggregated_model, '_metadata') and aggregated_model._metadata and 'last_data_date' in aggregated_model._metadata:
+        elif (hasattr(aggregated_model, '_metadata') and 
+              aggregated_model._metadata and 
+              'last_data_date' in aggregated_model._metadata):
             last_date = pd.to_datetime(aggregated_model._metadata['last_data_date'])
         else:
             last_date = pd.to_datetime(aggregated_model.training_data.index.max())
