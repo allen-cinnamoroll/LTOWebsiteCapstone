@@ -253,7 +253,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
             <div className="flex items-center space-x-2 mb-1">
               <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">Most Common Violation</p>
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white mb-1 truncate" title={mostCommonViolation?._id || 'N/A'}>
+            <p className="font-bold text-gray-900 dark:text-white mb-1 truncate" style={{ fontSize: '15px' }} title={mostCommonViolation?._id || 'N/A'}>
               {mostCommonViolation?._id || 'N/A'}
             </p>
             <p className="text-xs font-medium text-red-600 dark:text-red-400">

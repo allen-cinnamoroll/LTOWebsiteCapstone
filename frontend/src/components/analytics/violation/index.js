@@ -7,3 +7,4 @@ export { ViolationRanking } from './ViolationRanking';
 export { ViolationCombinations } from './ViolationCombinations';
 export { ConfiscatedItemsChart } from './ConfiscatedItemsChart';
 export { ViolationMonitoring } from './ViolationMonitoring';
+export { ViolationPrescriptionTable } from './ViolationPrescriptionTable';
