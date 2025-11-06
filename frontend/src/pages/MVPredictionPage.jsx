@@ -7,8 +7,26 @@ import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 
-// Get Flask API URL from environment variable or use default
-const MV_PREDICTION_API_BASE = import.meta.env.VITE_MV_PREDICTION_API_URL || 'http://72.60.198.244:5001';
+// Get Flask API URL from environment variable or use relative path in production
+// In production, use relative path through nginx proxy (same origin = no CORS issues)
+// In development, use explicit localhost URL or env variable
+const getMVPredictionAPIBase = () => {
+  // If environment variable is explicitly set, use it (highest priority)
+  if (import.meta.env.VITE_MV_PREDICTION_API_URL) {
+    return import.meta.env.VITE_MV_PREDICTION_API_URL;
+  }
+  
+  // In development mode, use localhost
+  if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+    return 'http://localhost:5001';
+  }
+  
+  // In production, use relative path through nginx proxy
+  // This avoids CORS issues and works with the nginx reverse proxy
+  return '/mv-prediction-api';
+};
+
+const MV_PREDICTION_API_BASE = getMVPredictionAPIBase();
 
 export default function MVPredictionPage() {
   const [selectedFile, setSelectedFile] = useState(null);
