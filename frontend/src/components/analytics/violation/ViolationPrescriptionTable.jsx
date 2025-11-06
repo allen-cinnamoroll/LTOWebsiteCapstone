@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight, X, Calendar, FileText, BarChart3, Target } from 'lucide-react';
 import { useTheme } from '@/components/theme/theme-provider';
-import { Button } from '@/components/ui/button';
+import { getViolations } from '@/api/violationAnalytics';
 
 // Function to get recommended action based on violation type
 const getViolationAction = (violationName) => {
@@ -85,353 +85,374 @@ const getViolationAction = (violationName) => {
     return 'Improve visibility and maintenance of traffic signs. Launch awareness campaigns on traffic sign recognition. Increase enforcement at intersections with traffic violations. Conduct driver education on traffic sign importance.';
   }
   
-  // Passenger Safety Violations
-  if (violation.includes('1J3') || violation.includes('PASSENGERS ON ROOF') || violation.includes('PASSENGERS ON HOOD')) {
-    return 'Launch dangerous passenger position awareness campaigns. Increase enforcement in areas with cargo vehicles. Implement strict penalties for allowing passengers in unsafe positions. Conduct safety education for cargo vehicle operators.';
-  }
-  
-  if (violation.includes('1J5') || violation.includes('PASSENGER ON RUNNING BOARD') || violation.includes('STEPBOARD') || violation.includes('MUDGUARD')) {
-    return 'Strengthen enforcement of passenger safety regulations. Launch awareness campaigns on proper passenger seating. Increase penalties for operators allowing unsafe passenger positions. Conduct safety inspections of public utility vehicles.';
-  }
-  
-  // Vehicle Safety Violations
-  if (violation.includes('1J4') || violation.includes('NO CANVASS COVER')) {
-    return 'Enforce mandatory canvass cover requirements for cargo vehicles. Conduct regular inspections of cargo vehicles. Launch awareness campaigns on cargo safety. Increase penalties for non-compliance.';
-  }
-  
-  if (violation.includes('1J6') || violation.includes('HEADLIGHTS ARE NOT DIMMED')) {
-    return 'Conduct vehicle lighting system awareness campaigns. Enforce mandatory headlight dimming requirements. Increase enforcement during night operations. Provide education on proper headlight usage.';
-  }
-  
-  if (violation.includes('1J33') || violation.includes('LEAVING VEHICLE WITHOUT BRAKE')) {
-    return 'Implement mandatory brake system checks during vehicle inspections. Launch awareness campaigns on proper vehicle parking procedures. Increase enforcement for improperly parked vehicles. Require driver training on vehicle safety procedures.';
-  }
-  
-  // Traffic Direction Violations
-  if (violation.includes('1J7') || violation.includes('DRIVING PROHIBITED AREA')) {
-    return 'Improve road signage for prohibited areas. Increase enforcement in restricted zones. Launch awareness campaigns on area restrictions. Install barriers or markers in prohibited areas.';
-  }
-  
-  if (violation.includes('1J9') || violation.includes('DRIVING AGAINST TRAFFIC')) {
-    return 'Improve road markings and signage for one-way roads. Increase enforcement in areas with wrong-way violations. Install barriers to prevent wrong-way entry. Launch awareness campaigns on traffic direction importance.';
-  }
-  
-  // Overtaking Violations (1J11-1J22)
-  if (violation.includes('1J11') || violation.includes('ILLEGAL OVERTAKING')) {
-    return 'Improve road markings for overtaking zones. Launch awareness campaigns on safe overtaking practices. Increase enforcement in areas with high overtaking violations. Install overtaking warning signs.';
-  }
-  
-  if (violation.includes('1J12') || violation.includes('OVERTAKING AT UNSAFE DISTANCE')) {
-    return 'Conduct driver education on safe following distances. Increase enforcement in areas with frequent accidents. Launch awareness campaigns on proper spacing. Require defensive driving courses.';
-  }
-  
-  if (violation.includes('1J13') || violation.includes('CUTTING AN OVERTAKEN VEHICLE')) {
-    return 'Strengthen enforcement of safe lane change practices. Launch awareness campaigns on proper lane changing. Increase penalties for dangerous lane cutting. Conduct driver education programs.';
-  }
-  
-  if (violation.includes('1J14') || violation.includes('FAILURE TO GIVE WAY TO OVERTAKING')) {
-    return 'Launch awareness campaigns on yielding to overtaking vehicles. Improve road markings for overtaking lanes. Increase enforcement in overtaking zones. Conduct driver education on road courtesy.';
-  }
-  
-  if (violation.includes('1J15') || violation.includes('SPEEDING WHEN OVERTAKEN')) {
-    return 'Increase enforcement of speed limits during overtaking. Launch awareness campaigns on speed control. Install speed cameras in overtaking zones. Require speed awareness training.';
-  }
-  
-  if (violation.includes('1J16') || violation.includes('OVERTAKING WITHOUT CLEAR VIEW')) {
-    return 'Improve road visibility through better lighting and signage. Launch awareness campaigns on safe overtaking conditions. Increase enforcement in areas with poor visibility. Require driver education on visibility requirements.';
-  }
-  
-  if (violation.includes('1J17') || violation.includes('OVERTAKING UPON CREST')) {
-    return 'Install warning signs at crest locations. Increase enforcement at grade areas. Launch awareness campaigns on dangerous overtaking locations. Require defensive driving courses.';
-  }
-  
-  if (violation.includes('1J18') || violation.includes('OVERTAKEN UPON A CURVE')) {
-    return 'Improve road markings and signage at curves. Increase enforcement at curve locations. Launch awareness campaigns on curve safety. Install curve warning systems.';
-  }
-  
-  if (violation.includes('1J19') || violation.includes('OVERTAKING AT RAILWAY GRADE')) {
-    return 'Strengthen enforcement at railway crossings. Install warning systems at railway crossings. Launch awareness campaigns on railway crossing safety. Require mandatory stop at railway crossings.';
-  }
-  
-  if (violation.includes('1J20') || violation.includes('OVERTAKING AT AN INTERSECTION')) {
-    return 'Improve intersection markings and signage. Increase enforcement at intersections. Launch awareness campaigns on intersection safety. Install intersection warning systems.';
-  }
-  
-  if (violation.includes('1J21') || violation.includes('OVERTAKING ON MEN WORKING')) {
-    return 'Strengthen enforcement in construction zones. Improve signage at work sites. Launch awareness campaigns on work zone safety. Require mandatory speed reduction in work zones.';
-  }
-  
-  if (violation.includes('1J22') || violation.includes('OVERTAKING AT NO OVERTAKING ZONE')) {
-    return 'Improve visibility of no-overtaking zone markings. Increase enforcement in no-overtaking zones. Install barriers or markers in restricted zones. Launch awareness campaigns on zone restrictions.';
-  }
-  
-  // Right of Way Violations (1J23-1J29)
-  if (violation.includes('1J23') || violation.includes('FAILURE TO YIELD TO VEHICLE ON RIGHT')) {
-    return 'Launch awareness campaigns on right-of-way rules. Improve intersection markings. Increase enforcement at intersections. Conduct driver education on yielding procedures.';
-  }
-  
-  if (violation.includes('1J24') || violation.includes('FAILURE TO YIELD IN INTERSECTION')) {
-    return 'Improve intersection traffic control systems. Launch awareness campaigns on intersection yielding. Increase enforcement at busy intersections. Install yield signs and markings.';
-  }
-  
-  if (violation.includes('1J25') || violation.includes('FAILURE TO YIELD TO PEDESTRIAN')) {
-    return 'Install pedestrian crossing systems and signals. Launch awareness campaigns on pedestrian rights. Increase enforcement at pedestrian crossings. Require driver education on pedestrian safety.';
-  }
-  
-  if (violation.includes('1J26') || violation.includes('FAILURE TO STOP AT HIGHWAY/RAILROAD')) {
-    return 'Strengthen enforcement at highway and railway crossings. Install stop signs and warning systems. Launch awareness campaigns on crossing safety. Require mandatory stop procedures.';
-  }
-  
-  if (violation.includes('1J27') || violation.includes('FAILURE TO YIELD ENTERING HIGHWAY')) {
-    return 'Improve signage at highway entrances. Launch awareness campaigns on highway entry procedures. Increase enforcement at highway entrances. Install yield signs and markings.';
-  }
-  
-  if (violation.includes('1J28') || violation.includes('FAILURE TO YIELD TO EMERGENCY VEHICLE')) {
-    return 'Launch awareness campaigns on yielding to emergency vehicles. Increase enforcement when emergency vehicles are present. Require driver education on emergency vehicle procedures. Strengthen penalties for non-compliance.';
-  }
-  
-  if (violation.includes('1J29') || violation.includes('FAILURE TO YIELD AT STOP/THRU')) {
-    return 'Improve stop sign and through traffic markings. Launch awareness campaigns on stop sign compliance. Increase enforcement at stop intersections. Install traffic control systems.';
-  }
-  
-  // Signaling and Lane Violations
-  if (violation.includes('1J30') || violation.includes('IMPROPER SIGNALING')) {
-    return 'Launch awareness campaigns on proper signaling procedures. Increase enforcement of signaling violations. Require driver education on signaling importance. Install signal reminder systems.';
-  }
-  
-  if (violation.includes('1J31') || violation.includes('ILLEGAL TURN, NOT KEEPING TO RIGHT')) {
-    return 'Improve lane markings for turns. Launch awareness campaigns on proper lane positioning. Increase enforcement at turn intersections. Install turn lane markers.';
-  }
-  
-  if (violation.includes('1J32') || violation.includes('ILLEGAL TURN, IMPROPER LANE USE')) {
-    return 'Improve lane markings and signage. Launch awareness campaigns on proper lane usage. Increase enforcement at intersections. Require driver education on lane discipline.';
-  }
-  
-  if (violation.includes('1J10') || violation.includes('ILLEGAL LEFT TURN')) {
-    return 'Improve signage for turn restrictions. Increase enforcement at restricted turn intersections. Launch awareness campaigns on turn regulations. Install turn restriction markers.';
-  }
-  
-  // Towing and Vehicle Operations
-  if (violation.includes('1J34') || violation.includes('UNSAFE TOWING')) {
-    return 'Enforce mandatory towing safety standards. Launch awareness campaigns on safe towing practices. Require towing equipment inspections. Increase penalties for unsafe towing.';
-  }
-  
-  if (violation.includes('1J35') || violation.includes('OBSTRUCTION')) {
-    return 'Improve road maintenance and clearance procedures. Launch awareness campaigns on proper vehicle parking. Increase enforcement of obstruction violations. Require proper vehicle positioning.';
-  }
-  
-  // Commercial Vehicle Violations - Passenger/Cargo
-  if (violation.includes('1J36') || violation.includes('EXCESS PASSENGERS') || violation.includes('EXCESS CARGO')) {
-    return 'Conduct regular inspections of passenger and cargo loads. Launch awareness campaigns on load limits. Increase enforcement at checkpoints. Require load monitoring systems.';
-  }
-  
-  if (violation.includes('1J37') || violation.includes('4-2') || violation.includes('REFUSAL TO ACCEPT PASSENGER')) {
-    return 'Strengthen enforcement of passenger acceptance policies. Establish complaint hotlines for passenger reports. Launch awareness campaigns on passenger rights. Require mandatory passenger acceptance training.';
-  }
-  
-  if (violation.includes('1J38') || violation.includes('4-3') || violation.includes('OVERCHARGING') || violation.includes('UNDERCHARGING')) {
-    return 'Implement fare monitoring systems with digital displays. Launch awareness campaigns on proper fare collection. Establish complaint mechanisms for fare disputes. Increase penalties for fare violations.';
-  }
-  
-  if (violation.includes('1J39') || violation.includes('4-5') || violation.includes('NO FRANCHISE') || violation.includes('CPC')) {
-    return 'Strengthen enforcement of franchise requirements. Conduct regular franchise verification. Launch awareness campaigns on franchise importance. Increase penalties for colorum operations.';
-  }
-  
-  if (violation.includes('1J41') || violation.includes('4-9') || violation.includes('OPERATING WITH DEFECTIVE PARTS')) {
-    return 'Implement mandatory vehicle inspection programs. Require repair before vehicle operation. Conduct regular safety inspections. Launch awareness campaigns on vehicle maintenance.';
-  }
-  
-  if (violation.includes('1J42') || violation.includes('4-10') || violation.includes('FAILURE TO PROVIDE FARE DISCOUNT')) {
-    return 'Launch awareness campaigns on passenger fare discount rights. Establish complaint mechanisms for discount violations. Strengthen enforcement of discount policies. Require mandatory discount training.';
-  }
-  
-  if (violation.includes('1J43') || violation.includes('4-13') || violation.includes('FAULTY TAXIMETER')) {
-    return 'Implement mandatory taximeter calibration and inspection. Launch awareness campaigns on taximeter accuracy. Increase penalties for faulty taximeters. Require regular taximeter maintenance.';
-  }
-  
-  if (violation.includes('1J44') || violation.includes('4-14') || violation.includes('TAMPERED SEALING WIRE')) {
-    return 'Strengthen enforcement of tampering violations. Conduct regular sealing wire inspections. Launch awareness campaigns on tampering consequences. Increase penalties for tampering.';
-  }
-  
-  if (violation.includes('1J45') || violation.includes('4-18') || violation.includes('NO SIGNBOARD')) {
-    return 'Enforce mandatory signboard requirements. Launch awareness campaigns on signboard importance. Conduct regular signboard inspections. Require proper signboard installation.';
-  }
-  
-  if (violation.includes('1J46') || violation.includes('4-19') || violation.includes('ILLEGAL PICK/DROP')) {
-    return 'Improve designated pick-up and drop-off areas. Launch awareness campaigns on proper pick/drop locations. Increase enforcement at restricted areas. Install clear signage for pick/drop zones.';
-  }
-  
-  if (violation.includes('1J47') || violation.includes('4-20') || violation.includes('ILLEGAL CARGOES')) {
-    return 'Strengthen enforcement of cargo regulations. Launch awareness campaigns on prohibited cargoes. Conduct regular cargo inspections. Increase penalties for illegal cargo transport.';
-  }
-  
-  if (violation.includes('1J48') || violation.includes('4-21') || violation.includes('MISSING FIRE EXTINGUISHER')) {
-    return 'Enforce mandatory fire safety equipment requirements. Conduct regular safety equipment inspections. Launch awareness campaigns on fire safety. Require mandatory safety equipment training.';
-  }
-  
-  if (violation.includes('1J49') || violation.includes('4-22') || violation.includes('TRIP CUTTING')) {
-    return 'Implement trip monitoring systems. Launch awareness campaigns on trip completion requirements. Strengthen enforcement of trip violations. Establish complaint mechanisms for passengers.';
-  }
-  
-  if (violation.includes('1J50') || violation.includes('4-23') || violation.includes('FAILURE TO DISPLAY FARE MATRIX')) {
-    return 'Enforce mandatory fare matrix display. Launch awareness campaigns on fare transparency. Conduct regular fare matrix inspections. Require clear and visible fare displays.';
-  }
-  
-  if (violation.includes('1J51') || violation.includes('4-25') || violation.includes('BREACH OF FRANCHISE')) {
-    return 'Strengthen franchise compliance monitoring. Launch awareness campaigns on franchise terms. Conduct regular franchise audits. Increase penalties for franchise breaches.';
-  }
-  
-  // Colorum Operations
-  if (violation.includes('4-1') || violation.includes('COLORUM OPERATION')) {
-    return 'Strengthen enforcement against unauthorized operations. Conduct regular franchise verification. Launch awareness campaigns on legal operation requirements. Increase penalties and vehicle impoundment for colorum operations.';
-  }
-  
-  if (violation.includes('4-4') || violation.includes('MISSING BODY MARKINGS')) {
-    return 'Enforce mandatory body marking requirements. Launch awareness campaigns on body marking importance. Conduct regular body marking inspections. Require proper body marking installation.';
-  }
-  
-  if (violation.includes('4-11') || violation.includes('WRONG OPERATOR INFO')) {
-    return 'Strengthen operator information verification. Launch awareness campaigns on correct operator registration. Conduct regular operator information audits. Require mandatory information updates.';
-  }
-  
-  if (violation.includes('4-12') || violation.includes('MISSING/ALLOWING SMOKING')) {
-    return 'Enforce mandatory no-smoking policies in vehicles. Launch awareness campaigns on smoke-free transportation. Strengthen enforcement of smoking violations. Require no-smoking signage.';
-  }
-  
-  if (violation.includes('4-15') || violation.includes('UNAUTHORIZED COLOR/DESIGN')) {
-    return 'Enforce authorized color and design requirements. Launch awareness campaigns on authorized vehicle appearance. Conduct regular appearance inspections. Require approval for design changes.';
-  }
-  
-  if (violation.includes('4-17') || violation.includes('NO PANEL ROUTE')) {
-    return 'Enforce mandatory panel route display. Launch awareness campaigns on route information importance. Conduct regular panel route inspections. Require clear and visible route displays.';
-  }
-  
-  if (violation.includes('4-24') || violation.includes('MISSING PWD/ACCESS SYMBOLS')) {
-    return 'Enforce mandatory accessibility symbol requirements. Launch awareness campaigns on accessibility importance. Conduct regular accessibility inspections. Require proper accessibility markings.';
-  }
-  
-  // Vehicle Registration Violations
-  if (violation.includes('2A') || violation.includes('UNREGISTERED MV')) {
-    return 'Establish mobile registration units in high-traffic areas. Provide incentives for early registration renewal. Increase enforcement in unregistered vehicle hotspots. Launch awareness campaigns on registration importance.';
-  }
-  
-  if (violation.includes('2B') || violation.includes('UNAUTHORIZED MV MODIFICATION')) {
-    return 'Enforce vehicle modification regulations. Require modification permits and inspections. Conduct awareness campaigns on legal vehicle modifications. Increase penalties for unauthorized modifications.';
-  }
-  
-  if (violation.includes('2C') || violation.includes('RIGHT-HAND DRIVE MV')) {
-    return 'Strengthen enforcement against right-hand drive vehicles. Launch awareness campaigns on right-hand drive prohibition. Conduct regular vehicle inspections. Increase penalties for right-hand drive operation.';
-  }
-  
-  if (violation.includes('2D') || violation.includes('OPERATING WITH DEFECTIVE PARTS')) {
-    return 'Implement mandatory vehicle inspection programs. Require repair before vehicle registration renewal. Conduct vehicle safety awareness campaigns. Increase penalties for defective vehicle operation.';
-  }
-  
-  if (violation.includes('2E') || violation.includes('IMPROPER PLATES/STICKER')) {
-    return 'Strengthen plate and sticker verification. Launch awareness campaigns on proper plate/sticker installation. Conduct regular plate/sticker inspections. Increase penalties for improper display.';
-  }
-  
-  if (violation.includes('2G') || violation.includes('FRAUD IN REGISTRATION/RENEWAL')) {
-    return 'Implement digital verification system for registration documents. Strengthen document authentication procedures. Conduct regular registration audits. Increase penalties and criminal charges for fraud.';
-  }
-  
-  if (violation.includes('2H') || violation.includes('OTHER MV VIOLATIONS')) {
-    return 'Conduct review of other vehicle violations patterns. Increase enforcement of miscellaneous violations. Launch awareness campaigns on vehicle compliance. Implement targeted interventions based on violation trends.';
-  }
-  
-  // Overloading Violations
-  if (violation.includes('3A') || violation.includes('OVERWIDTH LOAD')) {
-    return 'Implement mandatory load width measurements. Launch awareness campaigns on load width limits. Conduct regular load inspections. Require proper load securing.';
-  }
-  
-  if (violation.includes('3B') || violation.includes('AXLE OVERLOADING')) {
-    return 'Install weighbridge stations at key locations. Launch awareness campaigns on axle load limits. Conduct regular axle load inspections. Require load distribution education.';
-  }
-  
-  if (violation.includes('3C') || violation.includes('BUS/TRUCK OVERLOADED WITH CARGO')) {
-    return 'Strengthen enforcement of cargo load limits. Launch awareness campaigns on overload dangers. Conduct regular cargo load inspections. Require load monitoring systems.';
-  }
-  
-  // Anti-Distracted Driving Act
-  if (violation.includes('RA 10913') || violation.includes('ANTI-DISTRACTED DRIVING')) {
-    return 'Enforce hands-free device requirements strictly. Increase penalties for mobile phone use while driving. Launch nationwide distracted driving awareness campaigns. Install warning signs in high-traffic areas. Require mandatory distracted driving education.';
-  }
-  
-  // Children's Safety on Motorcycles Act
-  if (violation.includes('RA 10666') || violation.includes("CHILDREN'S SAFETY ON MOTORCYCLES")) {
-    return 'Launch awareness campaigns on children motorcycle safety requirements. Enforce age and height restrictions for child passengers. Strengthen enforcement at checkpoints. Require mandatory child safety equipment. Conduct educational programs in schools.';
-  }
-  
-  // Smoke Belching
-  if (violation.includes('RA 78749') || violation.includes('2F') || violation.includes('SMOKE BELCHING')) {
-    return 'Strengthen emission testing requirements. Conduct regular smoke emission tests. Launch awareness campaigns on environmental protection. Require mandatory vehicle maintenance for emission control. Increase penalties for smoke belching violations.';
-  }
-  
   // Default action for unrecognized violations
   return 'Increase enforcement and public awareness campaigns. Conduct regular review of violation patterns. Implement targeted interventions based on violation trends. Strengthen coordination between enforcement units.';
+};
+
+// Month Detail Modal Component
+const MonthDetailModal = ({ isOpen, onClose, monthData, year, monthName, violationsData, loading }) => {
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  if (!isOpen) return null;
+
+  // Group violations by type and count occurrences
+  const violationCounts = {};
+  if (violationsData && violationsData.length > 0) {
+    violationsData.forEach(violation => {
+      const violations = Array.isArray(violation.violations) 
+        ? violation.violations 
+        : (typeof violation.violations === 'string' 
+            ? violation.violations.split(',').map(v => v.trim()).filter(v => v)
+            : []);
+      
+      violations.forEach(v => {
+        const violationName = v.trim();
+        if (violationName) {
+          violationCounts[violationName] = (violationCounts[violationName] || 0) + 1;
+        }
+      });
+    });
+  }
+
+  // Convert to array and sort by count
+  const violationsList = Object.entries(violationCounts)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percentage: monthData?.totalViolations > 0 ? (count / monthData.totalViolations) * 100 : 0,
+      action: getViolationAction(name)
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  const totalViolations = monthData?.totalViolations || 0;
+  const uniqueViolationTypes = violationsList.length;
+  const topViolation = violationsList[0];
+
+  return (
+    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className={`${isDarkMode ? 'bg-gray-900' : 'bg-white'} rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        {/* Header */}
+        <div className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800 to-gray-800' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} px-8 py-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-transparent'}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-white/40'}`}>
+                <Calendar className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">
+                  {monthName} {year} - Violations Analysis
+                </h2>
+                <div className="flex items-center gap-4 text-sm text-blue-100">
+                  <span>Total Violations: <span className="font-bold text-white">{totalViolations.toLocaleString()}</span></span>
+                  <span>•</span>
+                  <span>Violation Types: <span className="font-bold text-white">{uniqueViolationTypes}</span></span>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white/30 hover:bg-white/40'} transition-colors`}
+            >
+              <X className="h-5 w-5 text-white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Summary Bar */}
+        {!loading && violationsList.length > 0 && (
+          <div className={`${isDarkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-blue-50 border-b border-blue-100'} px-8 py-4`}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                  <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Top Violation</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
+                    {topViolation?.name || 'N/A'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                  <AlertTriangle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Highest Occurrence</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">
+                    {topViolation?.count.toLocaleString() || '0'} violations
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                  <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Percentage Share</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">
+                    {topViolation?.percentage.toFixed(2) || '0.00'}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                Loading violations data...
+              </div>
+            </div>
+          ) : violationsList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-6">
+              <div className={`p-4 rounded-full ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} mb-4`}>
+                <FileText className="h-8 w-8 text-gray-400" />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">
+                No violations found for this month.
+              </p>
+            </div>
+          ) : (
+            <div className="p-6">
+              <div className={`overflow-hidden rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className={`${isDarkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-gray-50 border-b border-gray-200'}`}>
+                        <th className={`text-left py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Violation Type
+                        </th>
+                        <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Occurrences
+                        </th>
+                        <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Percentage
+                        </th>
+                        <th className={`text-left py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Recommended Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {violationsList.map((violation, index) => {
+                        const isHighPriority = violation.percentage >= 50;
+                        const isMediumPriority = violation.percentage >= 25 && violation.percentage < 50;
+                        return (
+                          <tr
+                            key={index}
+                            className={`${isDarkMode ? 'hover:bg-gray-800/50' : 'hover:bg-blue-50/30'} transition-colors`}
+                          >
+                            <td className="py-4 px-6">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-2 h-2 rounded-full ${
+                                  isHighPriority ? 'bg-red-500' : isMediumPriority ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}></div>
+                                <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                                  {violation.name}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="flex flex-col items-center">
+                                <span className="text-base font-bold text-gray-900 dark:text-white">
+                                  {violation.count.toLocaleString()}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                  occurrences
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="flex flex-col items-center gap-2">
+                                <span className="text-base font-bold text-gray-900 dark:text-white">
+                                  {violation.percentage.toFixed(2)}%
+                                </span>
+                                <div className={`w-full max-w-[100px] h-2.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                                  <div
+                                    className={`h-full transition-all duration-700 ${
+                                      isHighPriority
+                                        ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
+                                        : isMediumPriority
+                                        ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
+                                        : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
+                                    }`}
+                                    style={{ width: `${Math.min(violation.percentage, 100)}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="text-xs text-gray-700 dark:text-gray-300 max-w-lg leading-relaxed">
+                                {violation.action}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Summary */}
+        {!loading && violationsList.length > 0 && (
+          <div className={`${isDarkMode ? 'bg-gray-800 border-t border-gray-700' : 'bg-gray-50 border-t border-gray-200'} px-8 py-4`}>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-6 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Normal (&lt;25%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                  <span className="text-gray-600 dark:text-gray-400">Medium (25-50%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                  <span className="text-gray-600 dark:text-gray-400">High Priority (≥50%)</span>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Showing {violationsList.length} violation type(s) for {monthName} {year}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export function ViolationPrescriptionTable({ displayData, loading, totalViolations }) {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  // Year filter state
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [monthViolations, setMonthViolations] = useState([]);
+  const [loadingMonthData, setLoadingMonthData] = useState(false);
   
-  // Get violations data
-  const violations = displayData?.mostCommonViolations || [];
+  const currentYear = new Date().getFullYear();
+  const minYear = 2000;
+  const maxYear = 2025;
   
-  // Calculate percentage for each violation
-  const violationsWithPercentage = violations.map(violation => {
-    const percentage = totalViolations > 0 
-      ? ((violation.count || 0) / totalViolations) * 100 
-      : 0;
+  // Get available years
+  const getAvailableYears = () => {
+    const years = [];
+    for (let year = minYear; year <= maxYear; year++) {
+      years.push(year.toString());
+    }
+    return years.sort((a, b) => parseInt(b) - parseInt(a));
+  };
+
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // Get monthly data for selected year
+  const getMonthlyData = () => {
+    if (!displayData?.monthlyTrends || displayData.monthlyTrends.length === 0) {
+      return [];
+    }
+
+    const selectedYearNum = parseInt(selectedYear);
+    const monthlyData = [];
+
+    // Initialize all months with 0
+    for (let i = 1; i <= 12; i++) {
+      monthlyData.push({
+        month: i,
+        monthName: monthNames[i - 1],
+        monthNameShort: monthNamesShort[i - 1],
+        totalViolations: 0
+      });
+    }
+
+    // Fill in actual data
+    displayData.monthlyTrends.forEach(trend => {
+      if (trend._id?.year === selectedYearNum) {
+        const month = trend._id?.month || 0;
+        if (month >= 1 && month <= 12) {
+          monthlyData[month - 1].totalViolations = trend.count || 0;
+        }
+      }
+    });
+
+    // Calculate total for the year
+    const yearTotal = monthlyData.reduce((sum, month) => sum + month.totalViolations, 0);
+
+    // Calculate percentage and priority for each month
+    const monthlyDataWithPercentage = monthlyData.map(month => {
+      const percentage = yearTotal > 0 ? (month.totalViolations / yearTotal) * 100 : 0;
     const isHighPriority = percentage >= 50;
     
     return {
-      ...violation,
-      percentage: Math.round(percentage * 100) / 100, // Round to 2 decimal places
-      isHighPriority,
-      action: getViolationAction(violation._id)
+        ...month,
+        percentage: Math.round(percentage * 100) / 100,
+        isHighPriority
     };
   });
   
-  // Sort by percentage (highest first)
-  const sortedViolations = [...violationsWithPercentage].sort((a, b) => b.percentage - a.percentage);
-  
-  // Pagination calculations
-  const totalPages = Math.ceil(sortedViolations.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentViolations = sortedViolations.slice(startIndex, endIndex);
-  
-  // Pagination handlers
-  const handlePrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
+    // Return in chronological order (January to December)
+    return monthlyDataWithPercentage;
   };
-  
-  const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+
+  const monthlyData = getMonthlyData();
+  const yearTotal = monthlyData.reduce((sum, month) => sum + month.totalViolations, 0);
+  const highPriorityCount = monthlyData.filter(m => m.isHighPriority).length;
+
+  // Fetch violations for selected month
+  const fetchMonthViolations = async (year, month) => {
+    try {
+      setLoadingMonthData(true);
+      const response = await getViolations();
+      const violations = response.data || response;
+      
+      // Filter violations for the selected month and year
+      const filteredViolations = violations.filter(violation => {
+        if (!violation.dateOfApprehension) return false;
+        const violationDate = new Date(violation.dateOfApprehension);
+        return violationDate.getFullYear() === year && violationDate.getMonth() + 1 === month;
+      });
+      
+      setMonthViolations(filteredViolations);
+      setSelectedMonth({ year, month, monthName: monthNames[month - 1] });
+    } catch (error) {
+      console.error('Error fetching month violations:', error);
+      setMonthViolations([]);
+    } finally {
+      setLoadingMonthData(false);
+    }
   };
-  
-  const handlePageClick = (page) => {
-    setCurrentPage(page);
+
+  const handleMonthClick = (month) => {
+    fetchMonthViolations(parseInt(selectedYear), month);
   };
-  
-  // Reset to page 1 when data changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [displayData?.mostCommonViolations]);
+
+  const handleCloseModal = () => {
+    setSelectedMonth(null);
+    setMonthViolations([]);
+  };
   
   if (loading) {
     return (
-      <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-6 mb-8`}>
+      <div className={`${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl shadow-xl p-8 mb-8`}>
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-4"></div>
-          <div className="space-y-3">
+          <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-80 mb-6"></div>
+          <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
             ))}
           </div>
         </div>
@@ -439,13 +460,13 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
     );
   }
   
-  if (!violations || violations.length === 0) {
+  if (!displayData || !displayData.monthlyTrends || displayData.monthlyTrends.length === 0) {
     return (
-      <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-6 mb-8`}>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className={`${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl shadow-xl p-8 mb-8`}>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Violation Prescription & Action Plan
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-center py-8">
+        <p className="text-gray-600 dark:text-gray-400 text-center py-12">
           No violation data available
         </p>
       </div>
@@ -453,194 +474,208 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
   }
   
   return (
-    <div className={`${isDarkMode ? 'bg-black border-gray-600' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-6 mb-8`}>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <TrendingDown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+    <>
+      <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/30 border-gray-200'} border rounded-2xl shadow-2xl overflow-hidden mb-8`}>
+        {/* Header Section */}
+        <div className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800 to-gray-800' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} px-8 py-6`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl ${isDarkMode ? 'bg-gray-700/50' : 'bg-white/20'} backdrop-blur-sm`}>
+                <FileText className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-1">
             Violation Prescription & Action Plan
           </h2>
-        </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          Total Violations: <span className="font-semibold text-gray-900 dark:text-white">{totalViolations.toLocaleString()}</span>
-        </div>
-      </div>
-      
-      <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-yellow-800 dark:text-yellow-300">
-            <strong>Priority Alert:</strong> Violations with 50% or higher occurrence rate are marked as <strong>HIGH PRIORITY</strong> and require immediate action from LTO.
+                <p className="text-sm text-blue-100">
+                  Monthly violation analysis and recommended actions
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              {/* Year Filter */}
+              <div className="flex items-center gap-2.5">
+                <label className="text-sm font-medium text-white">
+                  Year:
+                </label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="px-4 py-2 text-sm font-medium bg-white/90 border-0 rounded-lg text-gray-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all cursor-pointer shadow-md"
+                >
+                  {getAvailableYears().map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-white/20'} backdrop-blur-sm`}>
+                <div className="text-xs text-blue-100 font-medium mb-0.5">Total Violations</div>
+                <div className="text-xl font-bold text-white">{yearTotal.toLocaleString()}</div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Priority Alert Section */}
+        {highPriorityCount > 0 && (
+          <div className={`mx-8 mt-6 p-4 ${isDarkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-xl`}>
+            <div className="flex items-start gap-3">
+              <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/30' : 'bg-red-100'}`}>
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-red-900 dark:text-red-300 mb-1">
+                  Immediate Action Required
+                </div>
+                <div className="text-sm text-red-800 dark:text-red-400">
+                  <strong>{highPriorityCount}</strong> month(s) marked as <strong>HIGH PRIORITY</strong> (≥50% violation rate) require immediate attention from LTO. Click on any month to view detailed violations and recommended actions.
+                </div>
+              </div>
+        </div>
+      </div>
+        )}
+
+        {/* Info Banner */}
+        <div className={`mx-8 mt-4 mb-6 p-3.5 ${isDarkMode ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'} border rounded-lg`}>
+          <div className="flex items-start gap-2.5">
+            <Target className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="text-xs text-blue-800 dark:text-blue-300">
+              <strong>Note:</strong> Click on any month row to view detailed violation breakdown, occurrences, and specific recommended actions for that period.
+            </div>
+        </div>
       </div>
       
+        {/* Table Section */}
+        <div className="px-8 pb-8">
+          <div className={`overflow-hidden rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-white'}`}>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className={`border-b-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
-              <th className={`text-left py-3 px-4 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Violation
+                  <tr className={`${isDarkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-gray-50 border-b border-gray-200'}`}>
+                    <th className={`text-left py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Month
               </th>
-              <th className={`text-center py-3 px-4 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Occurrences
+                    <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Total Violations
               </th>
-              <th className={`text-center py-3 px-4 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Percentage
               </th>
-              <th className={`text-center py-3 px-4 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Priority
-              </th>
-              <th className={`text-left py-3 px-4 text-xs font-semibold uppercase tracking-wide ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Recommended Action
+                    <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Priority Status
               </th>
             </tr>
           </thead>
-          <tbody>
-            {currentViolations.map((violation, index) => (
-              <tr 
-                key={violation._id || index}
-                className={`border-b ${isDarkMode ? 'border-gray-800 hover:bg-gray-900/50' : 'border-gray-200 hover:bg-gray-50'} transition-colors`}
-              >
-                <td className="py-4 px-4">
-                  <div className="font-medium text-gray-900 dark:text-white">
-                    {violation._id || 'N/A'}
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {monthlyData.map((month, index) => (
+                    <tr
+                      key={month.month}
+                      onClick={() => handleMonthClick(month.month)}
+                      className={`${isDarkMode ? 'hover:bg-gray-800/70' : 'hover:bg-blue-50/50'} transition-all duration-200 cursor-pointer group`}
+                    >
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-700' : 'bg-blue-50 group-hover:bg-blue-100'} transition-colors`}>
+                            <Calendar className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-900 dark:text-white text-sm">
+                              {month.monthName}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {month.monthNameShort} {selectedYear}
+                            </div>
+                          </div>
                   </div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {violation.count?.toLocaleString() || '0'}
+                      <td className="py-4 px-6 text-center">
+                        <div className="flex flex-col items-center">
+                          <span className="text-lg font-bold text-gray-900 dark:text-white">
+                            {month.totalViolations.toLocaleString()}
+                          </span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            violations
                   </span>
+                        </div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {violation.percentage.toFixed(2)}%
+                      <td className="py-4 px-6">
+                        <div className="flex flex-col items-center gap-2">
+                          <span className="text-base font-bold text-gray-900 dark:text-white">
+                            {month.percentage.toFixed(2)}%
                     </span>
-                    <div className={`w-16 h-2 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                      <div 
-                        className={`h-full transition-all duration-500 ${
-                          violation.isHighPriority 
-                            ? 'bg-gradient-to-r from-red-500 to-red-600' 
-                            : violation.percentage >= 25
-                            ? 'bg-gradient-to-r from-yellow-500 to-yellow-600'
-                            : 'bg-gradient-to-r from-green-500 to-green-600'
-                        }`}
-                        style={{ width: `${Math.min(violation.percentage, 100)}%` }}
+                          <div className={`w-full max-w-[120px] h-2.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                            <div
+                              className={`h-full transition-all duration-700 ${
+                                month.isHighPriority
+                                  ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
+                                  : month.percentage >= 25
+                                  ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
+                                  : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
+                              }`}
+                              style={{ width: `${Math.min(month.percentage, 100)}%` }}
                       ></div>
                     </div>
                   </div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  {violation.isHighPriority ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-300 dark:border-red-700">
-                      <AlertTriangle className="h-3 w-3" />
-                      HIGH
+                      <td className="py-4 px-6 text-center">
+                        {month.isHighPriority ? (
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700 shadow-sm">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            HIGH PRIORITY
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-300 dark:border-green-700">
-                      <CheckCircle className="h-3 w-3" />
+                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700 shadow-sm">
+                            <CheckCircle className="h-3.5 w-3.5" />
                       NORMAL
                     </span>
                   )}
-                </td>
-                <td className="py-4 px-4">
-                  <div className="text-sm text-gray-700 dark:text-gray-300 max-w-md">
-                    {violation.action}
-                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Showing {startIndex + 1} to {Math.min(endIndex, sortedViolations.length)} of {sortedViolations.length} violations
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              variant="outline"
-              size="sm"
-              className="border-gray-300 dark:border-gray-600"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                // Show first page, last page, current page, and pages around current
-                if (
-                  page === 1 ||
-                  page === totalPages ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
-                ) {
-                  return (
-                    <Button
-                      key={page}
-                      onClick={() => handlePageClick(page)}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      className={`min-w-[40px] ${
-                        currentPage === page
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "border-gray-300 dark:border-gray-600"
-                      }`}
-                    >
-                      {page}
-                    </Button>
-                  );
-                } else if (
-                  page === currentPage - 2 ||
-                  page === currentPage + 2
-                ) {
-                  return (
-                    <span key={page} className="px-2 text-gray-500 dark:text-gray-400">
-                      ...
-                    </span>
-                  );
-                }
-                return null;
-              })}
-            </div>
-            
-            <Button
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              variant="outline"
-              size="sm"
-              className="border-gray-300 dark:border-gray-600"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
           </div>
         </div>
-      )}
-      
-      {sortedViolations.filter(v => v.isHighPriority).length > 0 && (
-        <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-semibold text-red-900 dark:text-red-300 mb-1">
-                Immediate Action Required
+
+        {/* Summary Footer */}
+        <div className={`${isDarkMode ? 'bg-gray-800/50 border-t border-gray-700' : 'bg-gray-50 border-t border-gray-200'} px-8 py-4`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="text-xs text-gray-600 dark:text-gray-400">Normal Priority</span>
               </div>
-              <div className="text-sm text-red-800 dark:text-red-400">
-                {sortedViolations.filter(v => v.isHighPriority).length} violation(s) require immediate attention. 
-                These violations represent 50% or more of all recorded violations and should be prioritized in LTO action plans.
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span className="text-xs text-gray-600 dark:text-gray-400">Medium (≥25%)</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <span className="text-xs text-gray-600 dark:text-gray-400">High Priority (≥50%)</span>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Showing {monthlyData.length} months for {selectedYear}
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Month Detail Modal */}
+      {selectedMonth && (
+        <MonthDetailModal
+          isOpen={!!selectedMonth}
+          onClose={handleCloseModal}
+          monthData={monthlyData.find(m => m.month === selectedMonth.month)}
+          year={selectedMonth.year}
+          monthName={selectedMonth.monthName}
+          violationsData={monthViolations}
+          loading={loadingMonthData}
+        />
       )}
-    </div>
+    </>
   );
 }
-
