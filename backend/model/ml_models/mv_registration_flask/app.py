@@ -216,19 +216,54 @@ def predict_registrations():
             logger.warning(f"Municipality filter '{municipality}' requested but not yet supported for optimized model. Using aggregated model.")
         
         # Generate future exogenous variables for prediction period
-        # Get last date from model
-        if aggregated_model.all_data is not None and len(aggregated_model.all_data) > 0:
-            last_date = pd.to_datetime(aggregated_model.all_data.index.max())
+        # CRITICAL: Use the same date logic as the model's predict() method
+        # Get actual last registration date (same logic as in OptimizedSARIMAModel.predict())
+        actual_last_date = None
+        
+        # Priority 1: Use actual_last_date if available (from freshly trained model)
+        if hasattr(aggregated_model, 'actual_last_date') and aggregated_model.actual_last_date is not None:
+            actual_last_date = pd.to_datetime(aggregated_model.actual_last_date)
+            logger.info(f"Using actual last registration date: {actual_last_date}")
+        # Priority 2: Check if we have metadata with actual_last_date (from loaded model)
+        elif (hasattr(aggregated_model, '_metadata') and 
+              aggregated_model._metadata and 
+              'actual_last_date' in aggregated_model._metadata):
+            actual_last_date = pd.to_datetime(aggregated_model._metadata['actual_last_date'])
+            logger.info(f"Using actual last registration date from metadata: {actual_last_date}")
+        # Priority 3: Fallback to last date from all_data
+        elif aggregated_model.all_data is not None and len(aggregated_model.all_data) > 0:
+            actual_last_date = pd.to_datetime(aggregated_model.all_data.index.max())
+            logger.warning(f"Warning: Using last date from daily data (may be incorrect): {actual_last_date}")
+        # Priority 4: Fallback to metadata's last_data_date
         elif (hasattr(aggregated_model, '_metadata') and 
               aggregated_model._metadata and 
               'last_data_date' in aggregated_model._metadata):
-            last_date = pd.to_datetime(aggregated_model._metadata['last_data_date'])
+            actual_last_date = pd.to_datetime(aggregated_model._metadata['last_data_date'])
+            logger.warning(f"Warning: Using last_data_date from metadata (may be incorrect): {actual_last_date}")
+        # Priority 5: Final fallback to training data
         else:
-            last_date = pd.to_datetime(aggregated_model.training_data.index.max())
+            actual_last_date = pd.to_datetime(aggregated_model.training_data.index.max())
+            logger.warning(f"Warning: Using last date from training data (fallback): {actual_last_date}")
         
-        # Create future dates for exogenous variables
+        if actual_last_date is None:
+            return jsonify({
+                'success': False,
+                'error': 'Cannot determine last data date for predictions'
+            }), 500
+        
+        # Calculate the first day of the next month (same logic as in OptimizedSARIMAModel.predict())
+        if actual_last_date.month == 12:
+            next_month_start = pd.Timestamp(year=actual_last_date.year + 1, month=1, day=1)
+        else:
+            next_month_start = pd.Timestamp(year=actual_last_date.year, month=actual_last_date.month + 1, day=1)
+        
+        logger.info(f"Actual last registration date: {actual_last_date}")
+        logger.info(f"First day of next month: {next_month_start}")
+        logger.info(f"Generating exogenous variables for dates starting from: {next_month_start}")
+        
+        # Create future dates for exogenous variables starting from first day of next month
         future_dates = pd.date_range(
-            start=last_date + timedelta(days=1),
+            start=next_month_start,
             periods=days,
             freq='D'
         )
@@ -239,7 +274,7 @@ def predict_registrations():
         
         # Make predictions using optimized model (returns daily, weekly, and monthly aggregations)
         logger.info(f"Making predictions for {days} days ({weeks} weeks)")
-        logger.info(f"Last data date: {last_date}")
+        logger.info(f"Actual last registration date: {actual_last_date}")
         logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
         logger.info(f"Exogenous variables shape: {future_exog.shape}")
         logger.info(f"Weekend/holiday days in future period: {(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}")
@@ -259,8 +294,8 @@ def predict_registrations():
             'monthly_aggregation': predictions.get('monthly_aggregation', {}),
             'prediction_dates': predictions.get('prediction_dates', []),
             'prediction_weeks': weeks,
-            'last_training_date': str(last_date),
-            'last_data_date': str(last_date),
+            'last_training_date': str(actual_last_date),
+            'last_data_date': str(actual_last_date),  # Actual last registration date
             'prediction_start_date': predictions.get('prediction_start_date', future_dates[0].strftime('%Y-%m-%d'))
         }
         

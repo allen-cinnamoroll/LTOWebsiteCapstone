@@ -350,6 +350,15 @@ class OptimizedSARIMAModel:
         self.exog_test = exog_test
         self.exog_all = exogenous
         
+        # Store actual last registration date from processing_info for correct prediction start
+        if processing_info and 'actual_date_range' in processing_info:
+            self.actual_last_date = pd.to_datetime(processing_info['actual_date_range']['end'])
+            logger.info(f"Stored actual last registration date: {self.actual_last_date}")
+        else:
+            # Fallback to last date in daily data if actual_date_range not available
+            self.actual_last_date = pd.to_datetime(series.index.max())
+            logger.info(f"Using last date from daily data (fallback): {self.actual_last_date}")
+        
         # Find optimal parameters using auto_arima
         logger.info("\nFinding optimal parameters using auto_arima...")
         p, d, q, P, D, Q, s = self.find_optimal_parameters_auto(
@@ -922,20 +931,55 @@ class OptimizedSARIMAModel:
         
         logger.info(f"Generating predictions for {days} days...")
         
-        # Determine last date
-        if self.all_data is not None and len(self.all_data) > 0:
-            last_date = pd.to_datetime(self.all_data.index.max())
+        # Determine actual last registration date
+        # CRITICAL: Use the ACTUAL last registration date, not just the last date in daily data
+        actual_last_date = None
+        
+        # Priority 1: Use actual_last_date if available (from freshly trained model)
+        if hasattr(self, 'actual_last_date') and self.actual_last_date is not None:
+            actual_last_date = pd.to_datetime(self.actual_last_date)
+            logger.info(f"Using actual last registration date: {actual_last_date}")
+        # Priority 2: Check if we have metadata with actual_last_date (from loaded model)
+        elif hasattr(self, '_metadata') and self._metadata and 'actual_last_date' in self._metadata:
+            actual_last_date_str = self._metadata['actual_last_date']
+            if actual_last_date_str:
+                actual_last_date = pd.to_datetime(actual_last_date_str)
+                logger.info(f"Using actual last registration date from metadata: {actual_last_date}")
+        # Priority 3: Fallback to last date from all_data
+        elif self.all_data is not None and len(self.all_data) > 0:
+            actual_last_date = pd.to_datetime(self.all_data.index.max())
+            logger.info(f"Warning: Using last date from daily data (may be incorrect): {actual_last_date}")
+        # Priority 4: Fallback to metadata's last_data_date
         elif hasattr(self, '_metadata') and self._metadata and 'last_data_date' in self._metadata:
-            last_date = pd.to_datetime(self._metadata['last_data_date'])
+            actual_last_date = pd.to_datetime(self._metadata['last_data_date'])
+            logger.info(f"Warning: Using last_data_date from metadata (may be incorrect): {actual_last_date}")
+        # Priority 5: Final fallback to training data
         else:
-            last_date = pd.to_datetime(self.training_data.index.max())
+            actual_last_date = pd.to_datetime(self.training_data.index.max())
+            logger.info(f"Warning: Using last date from training data (fallback): {actual_last_date}")
         
-        logger.info(f"Last data date: {last_date}")
-        logger.info(f"Prediction start date: {last_date + timedelta(days=1)}")
+        if actual_last_date is None:
+            raise ValueError("Cannot determine last data date for predictions")
         
-        # Generate forecast dates
+        # Calculate the first day of the next month after the actual last registration date
+        # User requirement: Start predictions from August 1, 2025 (first day of next month)
+        actual_last_date_dt = pd.to_datetime(actual_last_date)
+        
+        # Get the first day of the next month
+        if actual_last_date_dt.month == 12:
+            # If December, next month is January of next year
+            next_month_start = pd.Timestamp(year=actual_last_date_dt.year + 1, month=1, day=1)
+        else:
+            # Otherwise, next month, day 1
+            next_month_start = pd.Timestamp(year=actual_last_date_dt.year, month=actual_last_date_dt.month + 1, day=1)
+        
+        logger.info(f"Actual last registration date: {actual_last_date}")
+        logger.info(f"First day of next month: {next_month_start}")
+        logger.info(f"Prediction start date: {next_month_start}")
+        
+        # Generate forecast dates starting from the first day of next month
         forecast_dates = pd.date_range(
-            start=last_date + timedelta(days=1),
+            start=next_month_start,
             periods=days,
             freq='D'
         )
@@ -1034,7 +1078,7 @@ class OptimizedSARIMAModel:
                 },
                 'prediction_dates': [p['date'] for p in daily_predictions],
                 'prediction_days': days,
-                'last_data_date': str(last_date),
+                'last_data_date': str(actual_last_date),  # Actual last registration date
                 'prediction_start_date': daily_predictions[0]['date'],
                 'forecast': forecast.tolist() if hasattr(forecast, 'tolist') else list(forecast),
                 'forecast_ci_lower': forecast_ci_lower.tolist() if hasattr(forecast_ci_lower, 'tolist') else list(forecast_ci_lower),
@@ -1069,16 +1113,25 @@ class OptimizedSARIMAModel:
                 scaler_file = scaler_filename
             
             # Save metadata
-            last_data_date = None
-            if self.all_data is not None and len(self.all_data) > 0:
-                last_data_date = str(self.all_data.index.max())
+            # CRITICAL: Store ACTUAL last registration date, not just last date in daily data
+            actual_last_date = None
+            if hasattr(self, 'actual_last_date') and self.actual_last_date is not None:
+                actual_last_date = str(self.actual_last_date)
+            elif self.all_data is not None and len(self.all_data) > 0:
+                # Fallback to last date in daily data if actual_last_date not available
+                actual_last_date = str(self.all_data.index.max())
             elif self.test_data is not None and len(self.test_data) > 0:
-                last_data_date = str(max(
+                actual_last_date = str(max(
                     self.training_data.index.max() if self.training_data is not None else pd.Timestamp.min,
                     self.test_data.index.max()
                 ))
             elif self.training_data is not None:
-                last_data_date = str(self.training_data.index.max())
+                actual_last_date = str(self.training_data.index.max())
+            
+            # Also store last_data_date for backward compatibility
+            last_data_date = None
+            if self.all_data is not None and len(self.all_data) > 0:
+                last_data_date = str(self.all_data.index.max())
             
             metadata = {
                 'model_params': self.model_params,
@@ -1092,7 +1145,8 @@ class OptimizedSARIMAModel:
                     'start': str(self.training_data.index.min()) if self.training_data is not None else None,
                     'end': str(self.training_data.index.max()) if self.training_data is not None else None
                 },
-                'last_data_date': last_data_date,
+                'actual_last_date': actual_last_date,  # ACTUAL last registration date (CRITICAL for correct predictions)
+                'last_data_date': last_data_date,  # Last date from daily data (for backward compatibility)
                 'normalization': {
                     'enabled': self.use_normalization,
                     'scaler_type': self.scaler_type if self.use_normalization else None,
@@ -1127,6 +1181,10 @@ class OptimizedSARIMAModel:
             self.cv_results = metadata.get('cv_results')
             self._metadata = metadata
             
+            # Restore actual_last_date if available
+            if 'actual_last_date' in metadata and metadata['actual_last_date']:
+                self.actual_last_date = pd.to_datetime(metadata['actual_last_date'])
+            
             # Load scaler if normalization was used
             if metadata.get('normalization', {}).get('enabled'):
                 scaler_file = metadata['normalization'].get('scaler_file')
@@ -1138,8 +1196,10 @@ class OptimizedSARIMAModel:
             
             logger.info(f"Model loaded from {self.model_file}")
             logger.info(f"Model parameters: {self.model_params}")
-            if 'last_data_date' in metadata:
-                logger.info(f"Last data date: {metadata['last_data_date']}")
+            if 'actual_last_date' in metadata:
+                logger.info(f"Actual last registration date from metadata: {metadata['actual_last_date']}")
+            elif 'last_data_date' in metadata:
+                logger.info(f"Last data date from metadata (daily data): {metadata['last_data_date']}")
             
         except Exception as e:
             logger.error(f"Error loading model: {str(e)}")

@@ -168,6 +168,13 @@ class DailyDataPreprocessor:
         print(f"Mean per day: {daily_data['count'].mean():.2f}")
         print(f"Days with zero registrations: {(daily_data['count'] == 0).sum()}")
         
+        # Track actual min/max registration dates (not the filled date range)
+        # This is critical for correct prediction start date
+        actual_min_date = df_filtered['dateOfRenewal_parsed'].min()
+        actual_max_date = df_filtered['dateOfRenewal_parsed'].max()
+        
+        print(f"Actual registration date range: {actual_min_date} to {actual_max_date}")
+        
         # Create exogenous variables
         exogenous_vars = self._create_exogenous_variables(daily_data.index)
         
@@ -187,6 +194,10 @@ class DailyDataPreprocessor:
             'date_range': {
                 'start': str(min_date),
                 'end': str(max_date)
+            },
+            'actual_date_range': {
+                'start': str(actual_min_date),
+                'end': str(actual_max_date)
             },
             'fill_method': fill_method if fill_missing_days else None
         }
