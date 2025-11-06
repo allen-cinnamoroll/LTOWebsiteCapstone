@@ -879,7 +879,7 @@ export default function MVPredictionPage() {
                     <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     Training Accuracy (In-Sample) - {trainingData.training_weeks || 'N/A'} weeks
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -966,6 +966,37 @@ export default function MVPredictionPage() {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-1">R²</p>
+                            <p className="text-2xl font-bold text-orange-900 dark:text-orange-300">
+                              {trainingData.accuracy_metrics.r2 !== undefined && trainingData.accuracy_metrics.r2 !== null
+                                ? trainingData.accuracy_metrics.r2.toFixed(4)
+                                : 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Coefficient of Determination
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">R² (Coefficient of Determination)</p>
+                          <p className="text-xs">
+                            Measures how well the model explains the variance in the data. 
+                            R² ranges from 0 to 1, where 1 means perfect fit. 
+                            {trainingData.accuracy_metrics.r2 !== undefined && trainingData.accuracy_metrics.r2 !== null 
+                              ? ` An R² of ${trainingData.accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
+                              : ' Higher is better.'}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               )}
@@ -977,7 +1008,7 @@ export default function MVPredictionPage() {
                     <BarChart3 className="w-5 h-5 text-green-600 dark:text-green-400" />
                     Test Accuracy (Out-of-Sample) - {trainingData.test_weeks || 'N/A'} weeks
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -1058,6 +1089,37 @@ export default function MVPredictionPage() {
                             Similar to MAE but gives more weight to larger errors on the test set. 
                             A RMSE of {trainingData.test_accuracy_metrics.rmse?.toFixed(2)} means some test predictions 
                             have significant errors. Lower is better.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 relative">
+                            <div className="absolute top-2 right-2">
+                              <HelpCircle className="w-4 h-4 text-orange-600 dark:text-orange-400 cursor-help" />
+                            </div>
+                            <p className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-1">R²</p>
+                            <p className="text-2xl font-bold text-orange-900 dark:text-orange-300">
+                              {trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null
+                                ? trainingData.test_accuracy_metrics.r2.toFixed(4)
+                                : 'N/A'}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Coefficient of Determination
+                            </p>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
+                          <p className="font-semibold mb-1">R² (Test Set)</p>
+                          <p className="text-xs">
+                            Measures how well the model explains the variance in test data. 
+                            R² ranges from 0 to 1, where 1 means perfect fit. 
+                            {trainingData.test_accuracy_metrics.r2 !== undefined && trainingData.test_accuracy_metrics.r2 !== null 
+                              ? ` An R² of ${trainingData.test_accuracy_metrics.r2.toFixed(4)} means the model explains ${(trainingData.test_accuracy_metrics.r2 * 100).toFixed(2)}% of the variance.`
+                              : ' Higher is better.'}
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -1163,6 +1225,94 @@ export default function MVPredictionPage() {
                 </div>
               )}
 
+                    {/* Model Parameters (Best Parameters from auto_arima) */}
+                    {trainingData.model_params && (
+                      <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <h3 className="font-semibold text-base flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                          Best Model Parameters (Auto-Selected)
+                        </h3>
+                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            {trainingData.model_params.full_params && (
+                              <div className="col-span-2">
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">SARIMA Order:</span>
+                                <span className="ml-2 font-mono font-semibold text-indigo-900 dark:text-indigo-300">
+                                  ({trainingData.model_params.full_params[0]},{trainingData.model_params.full_params[1]},{trainingData.model_params.full_params[2]})
+                                  ({trainingData.model_params.full_params[3]},{trainingData.model_params.full_params[4]},{trainingData.model_params.full_params[5]},{trainingData.model_params.full_params[6]})
+                                </span>
+                              </div>
+                            )}
+                            {trainingData.model_params.order && (
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">Non-Seasonal (p,d,q):</span>
+                                <span className="ml-2 font-mono font-semibold text-indigo-900 dark:text-indigo-300">
+                                  ({trainingData.model_params.order.join(',')})
+                                </span>
+                              </div>
+                            )}
+                            {trainingData.model_params.seasonal_order && (
+                              <div>
+                                <span className="text-gray-700 dark:text-gray-300 font-medium">Seasonal (P,D,Q,s):</span>
+                                <span className="ml-2 font-mono font-semibold text-indigo-900 dark:text-indigo-300">
+                                  ({trainingData.model_params.seasonal_order.join(',')})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            Parameters automatically selected by pmdarima.auto_arima based on AIC optimization
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Cross-Validation Results */}
+                    {(trainingData.cv_results || trainingData.cross_validation) && (
+                      <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <h3 className="font-semibold text-base flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                          Cross-Validation Results (TimeSeriesSplit)
+                        </h3>
+                        <div className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                          {(() => {
+                            const cvData = trainingData.cv_results || trainingData.cross_validation;
+                            return (
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                {cvData.mean_mape !== undefined && cvData.mean_mape !== null && (
+                                  <div>
+                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Mean MAPE:</span>
+                                    <span className="ml-2 font-semibold text-teal-900 dark:text-teal-300">
+                                      {cvData.mean_mape.toFixed(2)}%
+                                    </span>
+                                  </div>
+                                )}
+                                {cvData.std_mape !== undefined && cvData.std_mape !== null && (
+                                  <div>
+                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Std MAPE:</span>
+                                    <span className="ml-2 font-semibold text-teal-900 dark:text-teal-300">
+                                      {cvData.std_mape.toFixed(2)}%
+                                    </span>
+                                  </div>
+                                )}
+                                {cvData.n_splits && (
+                                  <div className="col-span-2">
+                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Folds:</span>
+                                    <span className="ml-2 font-semibold text-teal-900 dark:text-teal-300">
+                                      {cvData.n_splits}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            Walk-forward validation across multiple time periods for robust model evaluation
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Training Information */}
                     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-base flex items-center gap-2">
@@ -1213,6 +1363,33 @@ export default function MVPredictionPage() {
                         </span>
                       </div>
                     </>
+                  )}
+                  {/* Model Summary (AIC, BIC) */}
+                  {(trainingData.aic !== undefined || trainingData.bic !== undefined) && (
+                    <div className="col-span-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Model Information Criteria:</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {trainingData.aic !== undefined && (
+                          <div>
+                            <span className="text-gray-700 dark:text-gray-300 font-medium">AIC:</span>
+                            <span className="ml-2 font-mono font-semibold text-gray-900 dark:text-white">
+                              {trainingData.aic.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                        {trainingData.bic !== undefined && (
+                          <div>
+                            <span className="text-gray-700 dark:text-gray-300 font-medium">BIC:</span>
+                            <span className="ml-2 font-mono font-semibold text-gray-900 dark:text-white">
+                              {trainingData.bic.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        Lower AIC/BIC values indicate better model fit (with penalty for complexity)
+                      </p>
+                    </div>
                   )}
                 </div>
                     </div>
