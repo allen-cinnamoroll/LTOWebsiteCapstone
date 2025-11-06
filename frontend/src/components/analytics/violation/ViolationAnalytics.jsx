@@ -197,6 +197,7 @@ export function ViolationAnalytics() {
         loading={loading}
         totalViolations={totalViolations}
         totalTrafficViolators={totalTrafficViolators}
+        mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
       {/* Violation Monitoring */}
@@ -208,7 +209,6 @@ export function ViolationAnalytics() {
       <ChartsSection
         displayData={analyticsData}
         loading={loading}
-        mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
         topOfficer={analyticsData?.topOfficers?.[0]}
       />
 

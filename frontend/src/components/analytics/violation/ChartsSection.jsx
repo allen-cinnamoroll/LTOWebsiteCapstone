@@ -109,7 +109,6 @@ const useProgressBarAnimation = (targetPercentage, duration = 2000, shouldAnimat
 export function ChartsSection({ 
   displayData, 
   loading, 
-  mostCommonViolation,
   topOfficer
 }) {
   const { theme } = useTheme();
@@ -127,17 +126,11 @@ export function ChartsSection({
     } else {
       setAnimationTrigger(0);
     }
-  }, [loading, mostCommonViolation?.count, topOfficer?.count]);
+  }, [loading, topOfficer?.count]);
   
   const shouldAnimate = !loading && animationTrigger > 0;
-  const commonViolationCountAnimated = useCounterAnimation(mostCommonViolation?.count || 0, 2000, shouldAnimate);
   const officerCountAnimated = useCounterAnimation(topOfficer?.count || topOfficer?.violationCount || 0, 2000, shouldAnimate);
   
-  const commonViolationBarWidth = useProgressBarAnimation(
-    Math.min(((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100, 100),
-    2000,
-    shouldAnimate
-  );
   const officerBarWidth = useProgressBarAnimation(
     Math.min(((topOfficer?.count || topOfficer?.violationCount || 0) / ((topOfficer?.count || topOfficer?.violationCount || 0) + ((topOfficer?.count || topOfficer?.violationCount || 0) * 0.8))) * 100, 100),
     2000,
@@ -168,12 +161,6 @@ export function ChartsSection({
 
   // Prepare data for violations by type chart
   const violationsByTypeData = displayData?.violationsByType || [];
-  const totalViolationsByType = violationsByTypeData.reduce((sum, item) => sum + (item.count || 0), 0);
-  
-  // Calculate percentages
-  const mostCommonViolationPercentage = totalViolationsByType > 0 
-    ? ((mostCommonViolation?.count || 0) / totalViolationsByType * 100).toFixed(1)
-    : '0.0';
   
   const topOfficersData = displayData?.topOfficers || [];
   const totalOfficerApprehensions = topOfficersData.reduce((sum, item) => sum + (item.count || item.violationCount || 0), 0);
@@ -183,7 +170,7 @@ export function ChartsSection({
 
   return (
     <div className="space-y-6 mb-8">
-      {/* Pie Chart and KPIs Row */}
+      {/* Pie Chart and Top Officer KPI Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
          {/* Left Side - Violation Types Pie Chart */}
          <div className="flex">
@@ -196,46 +183,8 @@ export function ChartsSection({
         </div>
       </div>
 
-         {/* Right Side - Two KPIs Stacked */}
+         {/* Right Side - Top Officer KPI */}
          <div className="flex flex-col gap-4" style={{ height: '380px' }}>
-           {/* Most Common Violation KPI */}
-           <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white to-red-50/30 border-gray-200'} border-2 rounded-xl shadow-xl p-4 hover:shadow-2xl hover:shadow-red-500/40 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group animate-in slide-in-from-bottom-4 fade-in duration-500 flex-1 flex flex-col justify-between`}>
-             <div className={`absolute top-0 right-0 w-24 h-24 ${isDarkMode ? 'bg-gradient-to-br from-red-500/20 to-red-600/10' : 'bg-gradient-to-br from-red-500/15 to-red-600/8'} rounded-full -translate-y-4 translate-x-4 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
-             <div className="absolute top-4 right-4">
-               <svg className="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-               </svg>
-             </div>
-             <div className="relative z-10 flex-1 flex flex-col justify-between">
-               <div className="flex-1">
-                 <div className="mb-3">
-                   <p className="text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Most Common Violation</p>
-                 </div>
-                 <p className="text-xl font-extrabold text-black dark:text-white mb-2 truncate" title={mostCommonViolation?._id || 'N/A'}>
-                   {mostCommonViolation?._id || 'N/A'}
-                 </p>
-                 <p className="text-sm font-semibold text-red-600 dark:text-red-400">
-                   {loading ? '...' : commonViolationCountAnimated.toLocaleString()}{" "}occurrences
-                 </p>
-               </div>
-               <div className="mt-4">
-                 <div className="flex items-center justify-between mb-1.5">
-                   <p className="text-base font-bold text-red-600 dark:text-red-400">
-                     {loading ? '...' : `${mostCommonViolationPercentage}%`}
-                   </p>
-                 </div>
-                 <div className="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-3 overflow-hidden backdrop-blur-sm">
-                   <div 
-                     className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 h-3 rounded-full shadow-lg shadow-red-500/50 transition-all duration-500"
-                     style={{ 
-                       width: `${commonViolationBarWidth}%`
-                     }}
-                   ></div>
-                 </div>
-               </div>
-             </div>
-           </div>
-
            {/* Top Officer KPI */}
            <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white to-purple-50/30 border-gray-200'} border-2 rounded-xl shadow-xl p-4 hover:shadow-2xl hover:shadow-purple-500/40 hover:-translate-y-1 transition-all duration-300 transform relative overflow-hidden group animate-in slide-in-from-bottom-4 fade-in duration-500 flex-1 flex flex-col justify-between`}>
              <div className={`absolute top-0 right-0 w-24 h-24 ${isDarkMode ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/10' : 'bg-gradient-to-br from-purple-500/15 to-purple-600/8'} rounded-full -translate-y-4 translate-x-4 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
