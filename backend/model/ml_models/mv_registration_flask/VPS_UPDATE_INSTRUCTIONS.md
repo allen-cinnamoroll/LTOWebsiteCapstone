@@ -2,11 +2,15 @@
 
 ## Problem
 
-The Flask API is using `OptimizedSARIMAModel` (not the weekly `SARIMAModel`), and it was still showing July 28 dates instead of August dates.
+The Flask API was showing **July 28** dates instead of August dates because:
+
+1. Weekly aggregation was using **Monday as week_start** instead of **Sunday**
+2. August 1 (Friday) was being grouped into the week starting July 28 (Monday)
+3. That week includes historical dates (July 28-31)
 
 ## Files Updated
 
-1. ✅ `sarima_model_optimized.py` - Fixed date handling
+1. ✅ `sarima_model_optimized.py` - Fixed date handling AND weekly aggregation (Sunday as week_start)
 2. ✅ `app.py` - Fixed date logic to match model
 3. ✅ `data_preprocessor_daily.py` - Added `actual_date_range` to processing_info
 4. ✅ `WeeklyPredictionsChart.jsx` - Fixed frontend date display
@@ -52,49 +56,24 @@ pm2 restart all
 
 ### Step 3: Retrain the Optimized Model
 
-The optimized model needs to be retrained to store `actual_last_date`:
+The optimized model needs to be retrained to store `actual_last_date` and use the new weekly aggregation logic:
 
 ```bash
 cd /var/www/LTOWebsiteCapstone/backend/model/ml_models/mv_registration_flask
 source venv/bin/activate
 
-# Create retrain script for optimized model
-cat > retrain_optimized_model.py << 'EOF'
-from data_preprocessor_daily import DailyDataPreprocessor
-from sarima_model_optimized import OptimizedSARIMAModel
-import os
-
-base_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(base_dir, '../mv registration training')
-model_dir = os.path.join(base_dir, '../trained')
-csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
-
-print("Loading data...")
-preprocessor = DailyDataPreprocessor(csv_path)
-daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
-    fill_missing_days=True,
-    fill_method='zero'
-)
-
-print("Training optimized model...")
-model = OptimizedSARIMAModel(
-    model_dir=model_dir,
-    municipality=None,
-    use_normalization=False,
-    scaler_type='minmax'
-)
-model.train(
-    data=daily_data,
-    exogenous=exogenous_vars[['is_weekend_or_holiday']],
-    force=True,
-    processing_info=processing_info
-)
-
-print("✅ Optimized model retrained successfully!")
-EOF
-
+# Run the retraining script (already exists in the repo)
 python3 retrain_optimized_model.py
 ```
+
+**This will:**
+
+- Load your data
+- Retrain the model with the date fix
+- Store `actual_last_date` in metadata
+- Takes 5-15 minutes
+
+**See `RETRAIN_AND_RESTART.md` for detailed instructions.**
 
 ### Step 4: Verify the Fix
 
@@ -147,8 +126,10 @@ After restarting the backend:
 After retraining and restarting:
 
 - **Last registration**: July 31, 2025
-- **First prediction**: August 1, 2025 ✅
-- **All predictions**: August 1, 2, 3, ... (future dates) ✅
+- **Daily predictions start**: August 1, 2025 ✅
+- **Weekly predictions start**: August 3, 2025 (Sunday on/after Aug 1) ✅
+- **No more "Jul 28"**: First week shows "Aug 3" instead ✅
+- **All predictions**: Future dates only (August 2025 onwards) ✅
 
 ## Troubleshooting
 

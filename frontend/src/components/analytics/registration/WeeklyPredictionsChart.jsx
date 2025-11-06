@@ -13,6 +13,7 @@ import {
   ComposedChart
 } from 'recharts';
 import { getWeeklyPredictions } from '../../../api/predictionApi.js';
+import { TrendingUp, TrendingDown, Minus, Award } from 'lucide-react';
 
 const WeeklyPredictionsChart = () => {
   const [rawWeeklyData, setRawWeeklyData] = useState([]); // Store raw weekly predictions
@@ -354,7 +355,54 @@ const WeeklyPredictionsChart = () => {
     }
   };
 
+  // Calculate KPI metrics for weekly view
+  const calculateKPIMetrics = () => {
+    if (viewType !== 'weekly' || weeklyData.length === 0) {
+      return null;
+    }
+
+    const predictions = weeklyData.map(week => week.predicted);
+    const total = predictions.reduce((sum, val) => sum + val, 0);
+    
+    // Calculate trend
+    const firstWeek = predictions[0];
+    const lastWeek = predictions[predictions.length - 1];
+    const percentageChange = firstWeek !== 0 
+      ? ((lastWeek - firstWeek) / firstWeek) * 100 
+      : 0;
+    
+    let trendDirection = 'stable';
+    let trendIcon = Minus;
+    let trendColor = 'text-gray-600 dark:text-gray-400';
+    
+    if (percentageChange > 2) {
+      trendDirection = 'increasing';
+      trendIcon = TrendingUp;
+      trendColor = 'text-green-600 dark:text-green-400';
+    } else if (percentageChange < -2) {
+      trendDirection = 'decreasing';
+      trendIcon = TrendingDown;
+      trendColor = 'text-red-600 dark:text-red-400';
+    }
+    
+    // Find peak week
+    const maxValue = Math.max(...predictions);
+    const peakWeekIndex = predictions.indexOf(maxValue);
+    const peakWeek = weeklyData[peakWeekIndex];
+    
+    return {
+      total,
+      trendDirection,
+      trendIcon,
+      trendColor,
+      percentageChange,
+      peakWeek: peakWeek ? `Week ${peakWeek.week}` : 'N/A',
+      peakValue: maxValue
+    };
+  };
+
   const currentData = getCurrentData();
+  const kpiMetrics = calculateKPIMetrics();
 
   return (
     <div className="bg-white/80 dark:bg-gray-800/50 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
@@ -429,6 +477,78 @@ const WeeklyPredictionsChart = () => {
           </div>
         </div>
       </div>
+
+      {/* KPI Cards - Only show for weekly view */}
+      {kpiMetrics && viewType === 'weekly' && !loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Total Predicted Registrations */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Total Predicted Registrations
+              </h3>
+              <div className="w-8 h-8 flex items-center justify-center bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
+              {kpiMetrics.total.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              For {weeklyData.length} week{weeklyData.length !== 1 ? 's' : ''} period
+            </p>
+          </div>
+
+          {/* Trend Direction */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Trend Direction
+              </h3>
+              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
+                kpiMetrics.trendDirection === 'increasing' 
+                  ? 'bg-green-500/10 dark:bg-green-400/10' 
+                  : kpiMetrics.trendDirection === 'decreasing'
+                  ? 'bg-red-500/10 dark:bg-red-400/10'
+                  : 'bg-gray-500/10 dark:bg-gray-400/10'
+              }`}>
+                {React.createElement(kpiMetrics.trendIcon, {
+                  className: `w-5 h-5 ${kpiMetrics.trendColor}`,
+                  strokeWidth: 2
+                })}
+              </div>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <p className={`text-2xl font-bold ${kpiMetrics.trendColor}`}>
+                {kpiMetrics.trendDirection.charAt(0).toUpperCase() + kpiMetrics.trendDirection.slice(1)}
+              </p>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.percentageChange > 0 ? '+' : ''}{kpiMetrics.percentageChange.toFixed(1)}% change from first to last week
+            </p>
+          </div>
+
+          {/* Peak Week */}
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Peak Week
+              </h3>
+              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 rounded-lg">
+                <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">
+              {kpiMetrics.peakWeek}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.peakValue.toLocaleString()} vehicles (highest)
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Chart Container */}
       <div className="h-80 w-full min-h-[320px] flex-1">
