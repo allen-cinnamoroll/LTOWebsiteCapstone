@@ -2,7 +2,6 @@ import React from 'react';
 import { BarChart } from './BarChart';
 import { PieChart } from './PieChart';
 import { ViolationRanking } from './ViolationRanking';
-import { ViolationCombinations } from './ViolationCombinations';
 
 export function ChartsSection({ 
   displayData, 
@@ -14,8 +13,7 @@ export function ChartsSection({
   currentPage,
   totalPages,
   handlePrevPage,
-  handleNextPage,
-  getCombinationRecommendation
+  handleNextPage
 }) {
 
   if (loading) {
@@ -90,15 +88,6 @@ export function ChartsSection({
             handleNextPage={handleNextPage}
           />
         </div>
-      </div>
-
-      {/* Violation Combinations and Recommended Actions - Full Width */}
-      <div className="mb-8">
-        <ViolationCombinations
-          displayData={displayData}
-          loading={loading}
-          getCombinationRecommendation={getCombinationRecommendation}
-        />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight, X, Calendar, FileText, BarChart3, Target } from 'lucide-react';
+import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight, X, Calendar, FileText, BarChart3, Target, Shield, TrendingUp } from 'lucide-react';
 import { useTheme } from '@/components/theme/theme-provider';
 import { getViolations } from '@/api/violationAnalytics';
 
@@ -310,15 +310,15 @@ const MonthDetailModal = ({ isOpen, onClose, monthData, year, monthName, violati
               <div className="flex items-center gap-6 text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Normal (&lt;25%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">Low (&lt;25%)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Medium (25-50%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">Moderate (25-50%)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">High Priority (≥50%)</span>
+                  <span className="text-gray-600 dark:text-gray-400">High (≥50%)</span>
                 </div>
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -411,6 +411,14 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
   const monthlyData = getMonthlyData();
   const yearTotal = monthlyData.reduce((sum, month) => sum + month.totalViolations, 0);
   const highPriorityCount = monthlyData.filter(m => m.isHighPriority).length;
+  
+  // Find the month with the highest priority percentage
+  const highestPriorityMonth = monthlyData.length > 0 
+    ? monthlyData.reduce((max, month) => 
+        month.percentage > max.percentage ? month : max, 
+        monthlyData[0]
+      )
+    : null;
 
   // Fetch violations for selected month
   const fetchMonthViolations = async (year, month) => {
@@ -475,33 +483,33 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
   
   return (
     <>
-      <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/30 border-gray-200'} border rounded-2xl shadow-2xl overflow-hidden mb-8`}>
+      <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/40 border-blue-200'} border-2 rounded-2xl shadow-xl overflow-hidden mb-6 backdrop-blur-sm`}>
         {/* Header Section */}
-        <div className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800 to-gray-800' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} px-8 py-6`}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${isDarkMode ? 'bg-gray-700/50' : 'bg-white/20'} backdrop-blur-sm`}>
-                <FileText className="h-7 w-7 text-white" />
+        <div className={`px-6 py-4 border-b-2 ${isDarkMode ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-800/30' : 'border-blue-200/50 bg-gradient-to-r from-blue-50/30 to-indigo-50/20'}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl ${isDarkMode ? 'bg-blue-900/30 border border-blue-800/50' : 'bg-blue-100 border border-blue-200/50'} shadow-md`}>
+                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1">
+                <h2 className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
             Violation Prescription & Action Plan
           </h2>
-                <p className="text-sm text-blue-100">
-                  Monthly violation analysis and recommended actions
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Comprehensive monthly violation analysis with strategic recommendations
                 </p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               {/* Year Filter */}
-              <div className="flex items-center gap-2.5">
-                <label className="text-sm font-medium text-white">
+              <div className="flex items-center gap-2">
+                <label className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                   Year:
                 </label>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
-                  className="px-4 py-2 text-sm font-medium bg-white/90 border-0 rounded-lg text-gray-900 hover:bg-white focus:outline-none focus:ring-2 focus:ring-white/50 transition-all cursor-pointer shadow-md"
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border-2 ${isDarkMode ? 'bg-gray-800/80 border-gray-600 text-gray-200 hover:bg-gray-700 focus:ring-blue-500/50' : 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50 focus:ring-blue-500'} focus:outline-none focus:ring-2 transition-all cursor-pointer shadow-sm hover:shadow-md`}
                 >
                   {getAvailableYears().map((year) => (
                     <option key={year} value={year}>
@@ -510,27 +518,133 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                   ))}
                 </select>
               </div>
-              <div className={`px-4 py-2 rounded-lg ${isDarkMode ? 'bg-gray-700/50' : 'bg-white/20'} backdrop-blur-sm`}>
-                <div className="text-xs text-blue-100 font-medium mb-0.5">Total Violations</div>
-                <div className="text-xl font-bold text-white">{yearTotal.toLocaleString()}</div>
+              <div className={`px-3 py-2 rounded-lg border-2 shadow-sm ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-300'}`}>
+                <div className={`text-[10px] font-semibold mb-0.5 uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Violations</div>
+                <div className={`text-lg font-extrabold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{yearTotal.toLocaleString()}</div>
+              </div>
+        </div>
+        </div>
+      </div>
+      
+        {/* KPI Section */}
+        {highestPriorityMonth && yearTotal > 0 && highestPriorityMonth.totalViolations > 0 && (
+          <div className="mt-5 mb-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
+              {/* KPI 1: Highest Priority Month */}
+              <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-gray-700' : 'bg-gradient-to-br from-red-50 via-red-50/80 to-red-100/60 border-red-200'} border-2 rounded-xl shadow-lg p-3 hover:shadow-xl transition-all duration-300`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/40 border border-red-800/50' : 'bg-red-100 border border-red-200/50'} shadow-sm`}>
+                    <TrendingUp className={`h-4 w-4 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      Highest Priority Month
+                    </h3>
+                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-500">
+                      {selectedYear}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <Calendar className={`h-3 w-3 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
+                    <div>
+                      <div className="text-xs font-bold text-gray-900 dark:text-white">
+                        {highestPriorityMonth.monthName}
+                      </div>
+                      <div className="text-[10px] text-gray-600 dark:text-gray-400">
+                        {highestPriorityMonth.totalViolations.toLocaleString()} violations
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
+                        Priority Percentage
+                      </span>
+                      <span className={`text-xs font-bold ${
+                        highestPriorityMonth.isHighPriority 
+                          ? 'text-red-600 dark:text-red-400' 
+                          : highestPriorityMonth.percentage >= 25
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-green-600 dark:text-green-400'
+                      }`}>
+                        {highestPriorityMonth.percentage.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className={`w-full h-1 rounded-full mt-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                      <div
+                        className={`h-full transition-all duration-700 ${
+                          highestPriorityMonth.isHighPriority
+                            ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
+                            : highestPriorityMonth.percentage >= 25
+                            ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
+                            : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
+                        }`}
+                        style={{ width: `${Math.min(highestPriorityMonth.percentage, 100)}%` }}
+                      ></div>
+                    </div>
+        </div>
+        </div>
+      </div>
+      
+              {/* KPI 2: Checkpoint Recommendation */}
+              <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-gray-700' : 'bg-gradient-to-br from-orange-50 via-orange-50/80 to-amber-50/60 border-orange-200'} border-2 rounded-xl shadow-lg p-3 hover:shadow-xl transition-all duration-300`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/40 border border-orange-800/50' : 'bg-orange-100 border border-orange-200/50'} shadow-sm`}>
+                    <Shield className={`h-4 w-4 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                      Recommended Action
+                    </h3>
+                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-500">
+                      Priority Checkpoint
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+        <div className="flex items-start gap-2">
+                    <AlertTriangle className={`h-3 w-3 mt-0.5 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'} flex-shrink-0`} />
+                    <div>
+                      <div className="text-xs font-bold text-gray-900 dark:text-white mb-1">
+                        Prioritize Checkpoints in {highestPriorityMonth.monthName}
+                      </div>
+                      <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-relaxed">
+                        This month has the highest violation rate ({highestPriorityMonth.percentage.toFixed(2)}%) for {selectedYear}. 
+                        It is recommended to <strong className="text-orange-600 dark:text-orange-400">prioritize conducting checkpoints</strong> during this period 
+                        as it is when people mostly violate traffic rules on roads. Increase enforcement presence and implement stricter monitoring 
+                        to reduce violations and improve road safety.
+                      </p>
+                    </div>
+                  </div>
+                  <div className={`mt-2 p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/30 border border-orange-800/50' : 'bg-orange-100/80 border border-orange-200/50'} shadow-sm`}>
+                    <div className="flex items-center gap-1.5">
+                      <Target className={`h-3 w-3 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} />
+                      <span className="text-[10px] font-semibold text-orange-800 dark:text-orange-300">
+                        Focus enforcement efforts during {highestPriorityMonth.monthName} to maximize impact
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
+        )}
+      
         {/* Priority Alert Section */}
         {highPriorityCount > 0 && (
-          <div className={`mx-8 mt-6 p-4 ${isDarkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-xl`}>
+          <div className={`mx-6 mt-5 p-3 ${isDarkMode ? 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-red-800/50' : 'bg-gradient-to-r from-red-50 to-red-50/80 border-red-200'} border-2 rounded-xl shadow-md`}>
             <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/30' : 'bg-red-100'}`}>
-                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+              <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/40 border border-red-800/50' : 'bg-red-100 border border-red-200/50'} shadow-sm`}>
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
               </div>
               <div className="flex-1">
-                <div className="font-semibold text-red-900 dark:text-red-300 mb-1">
+                <div className="font-bold text-sm text-red-900 dark:text-red-300 mb-1">
                   Immediate Action Required
                 </div>
-                <div className="text-sm text-red-800 dark:text-red-400">
-                  <strong>{highPriorityCount}</strong> month(s) marked as <strong>HIGH PRIORITY</strong> (≥50% violation rate) require immediate attention from LTO. Click on any month to view detailed violations and recommended actions.
+                <div className="text-xs font-medium text-red-800 dark:text-red-400 leading-relaxed">
+                  <strong>{highPriorityCount}</strong> month(s) marked as <strong>HIGH</strong> (≥50% violation rate) require immediate attention from LTO. Click on any month to view detailed violations and recommended actions.
                 </div>
               </div>
         </div>
@@ -538,131 +652,199 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
         )}
 
         {/* Info Banner */}
-        <div className={`mx-8 mt-4 mb-6 p-3.5 ${isDarkMode ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'} border rounded-lg`}>
-          <div className="flex items-start gap-2.5">
-            <Target className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <div className="text-xs text-blue-800 dark:text-blue-300">
-              <strong>Note:</strong> Click on any month row to view detailed violation breakdown, occurrences, and specific recommended actions for that period.
+        <div className={`mx-6 mt-3 mb-5 p-2 ${isDarkMode ? 'bg-gradient-to-r from-green-900/30 to-emerald-900/20 border-green-800/50' : 'bg-gradient-to-r from-green-50 to-emerald-50/80 border-green-200'} border-2 rounded-lg shadow-sm`}>
+          <div className="flex items-center gap-1.5">
+            <div className={`p-1 rounded-md ${isDarkMode ? 'bg-green-900/40' : 'bg-green-100'}`}>
+              <Target className="h-2.5 w-2.5 text-green-600 dark:text-green-400 flex-shrink-0" />
             </div>
+            <div className="text-[10px] font-medium text-green-800 dark:text-green-300">
+              <strong>Note:</strong> Click on any month row to view detailed violation breakdown, occurrences, and specific recommended actions for that period.
+          </div>
         </div>
       </div>
       
         {/* Table Section */}
-        <div className="px-8 pb-8">
-          <div className={`overflow-hidden rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-white'}`}>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-                  <tr className={`${isDarkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-gray-50 border-b border-gray-200'}`}>
-                    <th className={`text-left py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Month
-              </th>
-                    <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Total Violations
-              </th>
-                    <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                Percentage
-              </th>
-                    <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Priority Status
-              </th>
-            </tr>
-          </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {monthlyData.map((month, index) => (
-                    <tr
+        <div className="px-6 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* First Table - First 6 months */}
+            <div className={`overflow-hidden rounded-lg border-2 shadow-md ${isDarkMode ? 'border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/90' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50/50'}`}>
+              <div className="p-3">
+                {/* Table Header */}
+                <div className={`mb-2 pb-2 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
+                  <div className={`grid grid-cols-4 gap-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <div className="text-left">Month</div>
+                    <div className="text-center">Violations</div>
+                    <div className="text-center">Percentage</div>
+                    <div className="text-center">Severity</div>
+                  </div>
+                </div>
+                
+                {/* Table Rows */}
+                <div className="space-y-1.5">
+                  {monthlyData.slice(0, 6).map((month) => (
+                    <div
                       key={month.month}
                       onClick={() => handleMonthClick(month.month)}
-                      className={`${isDarkMode ? 'hover:bg-gray-800/70' : 'hover:bg-blue-50/50'} transition-all duration-200 cursor-pointer group`}
+                      className={`grid grid-cols-4 gap-1 items-center py-2 px-2 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
                     >
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-700' : 'bg-blue-50 group-hover:bg-blue-100'} transition-colors`}>
-                            <Calendar className={`h-4 w-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900 dark:text-white text-sm">
-                              {month.monthName}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {month.monthNameShort} {selectedYear}
-                            </div>
-                          </div>
-                  </div>
-                </td>
-                      <td className="py-4 px-6 text-center">
-                        <div className="flex flex-col items-center">
-                          <span className="text-lg font-bold text-gray-900 dark:text-white">
-                            {month.totalViolations.toLocaleString()}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            violations
-                  </span>
+                      <div className="flex items-center gap-1">
+                        <div className={`p-1 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
+                          <Calendar className={`h-2.5 w-2.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                         </div>
-                </td>
-                      <td className="py-4 px-6">
-                        <div className="flex flex-col items-center gap-2">
-                          <span className="text-base font-bold text-gray-900 dark:text-white">
-                            {month.percentage.toFixed(2)}%
+                        <div>
+                          <div className="font-semibold text-gray-900 dark:text-white text-[10px]">
+                            {month.monthNameShort}
+                          </div>
+                        </div>
+                  </div>
+                      <div className="text-center">
+                        <span className="text-[11px] font-bold text-gray-900 dark:text-white">
+                          {month.totalViolations.toLocaleString()}
+                  </span>
+                      </div>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className="text-[10px] font-bold text-gray-900 dark:text-white">
+                          {month.percentage.toFixed(1)}%
                     </span>
-                          <div className={`w-full max-w-[120px] h-2.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                            <div
-                              className={`h-full transition-all duration-700 ${
-                                month.isHighPriority
-                                  ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
-                                  : month.percentage >= 25
-                                  ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
-                                  : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
-                              }`}
-                              style={{ width: `${Math.min(month.percentage, 100)}%` }}
+                        <div className={`w-full max-w-[50px] h-1 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                          <div
+                            className={`h-full transition-all duration-700 ${
+                              month.isHighPriority
+                                ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
+                                : month.percentage >= 25
+                                ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
+                                : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
+                            }`}
+                            style={{ width: `${Math.min(month.percentage, 100)}%` }}
                       ></div>
                     </div>
                   </div>
-                </td>
-                      <td className="py-4 px-6 text-center">
+                      <div className="text-center">
                         {month.isHighPriority ? (
-                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700 shadow-sm">
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            HIGH PRIORITY
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
+                            <AlertTriangle className="h-2 w-2" />
+                      HIGH
                     </span>
-                  ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700 shadow-sm">
-                            <CheckCircle className="h-3.5 w-3.5" />
-                      NORMAL
+                        ) : month.percentage >= 25 ? (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
+                            <AlertTriangle className="h-2 w-2" />
+                            MODERATE
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
+                            <CheckCircle className="h-2 w-2" />
+                            LOW
                     </span>
                   )}
-                </td>
-              </tr>
+                      </div>
+                  </div>
             ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
       </div>
+      
+            {/* Second Table - Last 6 months */}
+            <div className={`overflow-hidden rounded-lg border-2 shadow-md ${isDarkMode ? 'border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/90' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50/50'}`}>
+              <div className="p-3">
+                {/* Table Header */}
+                <div className={`mb-2 pb-2 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
+                  <div className={`grid grid-cols-4 gap-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <div className="text-left">Month</div>
+                    <div className="text-center">Violations</div>
+                    <div className="text-center">Percentage</div>
+                    <div className="text-center">Severity</div>
+                  </div>
           </div>
-        </div>
-
+                
+                {/* Table Rows */}
+                <div className="space-y-1.5">
+                  {monthlyData.slice(6, 12).map((month) => (
+                    <div
+                      key={month.month}
+                      onClick={() => handleMonthClick(month.month)}
+                      className={`grid grid-cols-4 gap-1 items-center py-2 px-2 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
+                    >
+            <div className="flex items-center gap-1">
+                        <div className={`p-1 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
+                          <Calendar className={`h-2.5 w-2.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-gray-900 dark:text-white text-[10px]">
+                            {month.monthNameShort}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-[11px] font-bold text-gray-900 dark:text-white">
+                          {month.totalViolations.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className="text-[10px] font-bold text-gray-900 dark:text-white">
+                          {month.percentage.toFixed(1)}%
+                        </span>
+                        <div className={`w-full max-w-[50px] h-1 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                          <div
+                            className={`h-full transition-all duration-700 ${
+                              month.isHighPriority
+                                ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
+                                : month.percentage >= 25
+                                ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
+                                : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
+                            }`}
+                            style={{ width: `${Math.min(month.percentage, 100)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        {month.isHighPriority ? (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
+                            <AlertTriangle className="h-2 w-2" />
+                            HIGH
+                          </span>
+                        ) : month.percentage >= 25 ? (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
+                            <AlertTriangle className="h-2 w-2" />
+                            MODERATE
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
+                            <CheckCircle className="h-2 w-2" />
+                            LOW
+                    </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+            </div>
+            
         {/* Summary Footer */}
-        <div className={`${isDarkMode ? 'bg-gray-800/50 border-t border-gray-700' : 'bg-gray-50 border-t border-gray-200'} px-8 py-4`}>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
+        <div className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800/60 to-gray-900/60 border-t-2 border-gray-700/50' : 'bg-gradient-to-r from-gray-50 to-blue-50/30 border-t-2 border-gray-200/50'} px-6 py-3 shadow-inner`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-xs text-gray-600 dark:text-gray-400">Normal Priority</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <span className="text-xs text-gray-600 dark:text-gray-400">Medium (≥25%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className="text-xs text-gray-600 dark:text-gray-400">High Priority (≥50%)</span>
-              </div>
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm border border-green-600/30"></div>
+                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Low (&lt;25%)</span>
+          </div>
+          <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-sm border border-yellow-600/30"></div>
+                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Moderate (25-50%)</span>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm border border-red-600/30"></div>
+                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">High (≥50%)</span>
+          </div>
+        </div>
+            <div className="text-[10px] font-semibold text-gray-600 dark:text-gray-400">
               Showing {monthlyData.length} months for {selectedYear}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
       {/* Month Detail Modal */}
       {selectedMonth && (
