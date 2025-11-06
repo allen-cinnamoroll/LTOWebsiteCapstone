@@ -877,7 +877,11 @@ export default function MVPredictionPage() {
                 <div className="space-y-3">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    Training Accuracy (In-Sample) - {trainingData.training_weeks || 'N/A'} weeks
+                    Training Accuracy (In-Sample) - {trainingData.training_days 
+                      ? `${trainingData.training_days} days (${Math.round(trainingData.training_days / 7)} weeks)`
+                      : trainingData.training_weeks 
+                        ? `${trainingData.training_weeks} weeks`
+                        : 'N/A'}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <TooltipProvider>
@@ -1650,8 +1654,14 @@ export default function MVPredictionPage() {
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-base">
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">Training Weeks:</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">{trainingData.training_weeks || 'N/A'}</span>
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      {trainingData.training_days ? 'Training Days:' : 'Training Weeks:'}
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {trainingData.training_days 
+                        ? `${trainingData.training_days} days (${Math.round(trainingData.training_days / 7)} weeks)`
+                        : trainingData.training_weeks || 'N/A'}
+                    </span>
                     <TooltipProvider>
                       <Tooltip delayDuration={300}>
                         <TooltipTrigger asChild>
@@ -1659,10 +1669,10 @@ export default function MVPredictionPage() {
                         </TooltipTrigger>
                         <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
                           <div className="space-y-2">
-                            <p className="font-semibold">Training Weeks</p>
+                            <p className="font-semibold">{trainingData.training_days ? 'Training Days' : 'Training Weeks'}</p>
                             <div className="text-xs space-y-1">
-                              <p><strong>What it is:</strong> The number of weeks of historical data used to train the model (80% of total data).</p>
-                              <p><strong>What it means:</strong> More training weeks generally lead to better pattern recognition, but requires sufficient data quality.</p>
+                              <p><strong>What it is:</strong> The number of {trainingData.training_days ? 'days' : 'weeks'} of historical data used to train the model (80% of total data).</p>
+                              <p><strong>What it means:</strong> More training data generally leads to better pattern recognition, but requires sufficient data quality.</p>
                               <p><strong>What it helps with:</strong> Understanding how much historical data the model learned from, which affects prediction reliability.</p>
                             </div>
                           </div>
@@ -1670,10 +1680,16 @@ export default function MVPredictionPage() {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  {trainingData.test_weeks && (
+                  {(trainingData.test_days || trainingData.test_weeks) && (
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-700 dark:text-gray-300 font-medium">Test Weeks:</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{trainingData.test_weeks}</span>
+                      <span className="text-gray-700 dark:text-gray-300 font-medium">
+                        {trainingData.test_days ? 'Test Days:' : 'Test Weeks:'}
+                      </span>
+                      <span className="font-semibold text-gray-900 dark:text-white">
+                        {trainingData.test_days 
+                          ? `${trainingData.test_days} days (${Math.round(trainingData.test_days / 7)} weeks)`
+                          : trainingData.test_weeks}
+                      </span>
                       <TooltipProvider>
                         <Tooltip delayDuration={300}>
                           <TooltipTrigger asChild>
