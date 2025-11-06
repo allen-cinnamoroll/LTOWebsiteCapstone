@@ -276,8 +276,18 @@ export function ChartsSection({
          </div>
         </div>
 
-      {/* Apprehending Officers Chart - Full Width Below */}
-      <div className="w-full" style={{ height: '450px' }}>
+      {/* Violation Ranking and Apprehending Officers Row - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Violation Ranking Chart - Left Side */}
+        <div style={{ height: '450px' }}>
+          <ViolationRanking
+            displayData={displayData}
+            loading={loading}
+          />
+        </div>
+
+        {/* Apprehending Officers Chart - Right Side */}
+        <div style={{ height: '450px' }}>
           <BarChart
             data={displayData?.topOfficers || []}
             title="Apprehending Officers"
@@ -285,16 +295,6 @@ export function ChartsSection({
             loading={loading}
             totalCount={displayData?.totalOfficers || 0}
             allOfficersData={displayData?.topOfficers || []}
-          />
-        </div>
-
-      {/* Violation Ranking Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8">
-        {/* Top Violation Ranking */}
-        <div className="lg:col-span-1">
-          <ViolationRanking
-            displayData={displayData}
-            loading={loading}
           />
         </div>
       </div>

@@ -61,13 +61,13 @@ export function ViolationRanking({
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-6">
-        <div className="animate-pulse">
-          <div className="flex items-center justify-between mb-6">
+      <div className="bg-gradient-to-br from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-4 h-full flex flex-col">
+        <div className="animate-pulse flex flex-col h-full">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/3"></div>
             <div className="h-9 bg-gray-200 dark:bg-gray-700 rounded-lg w-32"></div>
           </div>
-          <div className="h-[400px] bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
         </div>
       </div>
     );
@@ -75,14 +75,14 @@ export function ViolationRanking({
 
   return (
     <>
-      <div className="bg-gradient-to-br from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-6 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-white via-white to-gray-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800/50 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-4 relative overflow-hidden h-full flex flex-col">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 dark:bg-red-500/10 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-red-500/5 dark:bg-red-500/10 rounded-full translate-y-24 -translate-x-24 blur-3xl"></div>
         
-        <div className="relative z-10">
+        <div className="relative z-10 flex flex-col h-full">
           {/* Header Section */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 transform hover:scale-105 transition-transform duration-200">
@@ -117,12 +117,12 @@ export function ViolationRanking({
 
           {/* Chart Section */}
           {top5Violations.length > 0 ? (
-            <div className="bg-white dark:bg-gray-800/50 rounded-xl p-6 border border-gray-100 dark:border-gray-700 shadow-inner">
-              <div className="h-[400px]">
+            <div className="bg-white dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-inner flex-1 flex flex-col min-h-0">
+              <div className="flex-1 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={top5Violations}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                    margin={{ top: 10, right: 20, left: 20, bottom: 50 }}
                     layout="vertical"
                   >
                     <CartesianGrid 
@@ -164,8 +164,8 @@ export function ViolationRanking({
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-gray-800/50 rounded-xl p-12 border border-gray-100 dark:border-gray-700 shadow-inner">
-              <div className="text-center py-12">
+            <div className="bg-white dark:bg-gray-800/50 rounded-xl p-12 border border-gray-100 dark:border-gray-700 shadow-inner flex-1 flex items-center justify-center">
+              <div className="text-center">
                 <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center shadow-lg">
                   <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
