@@ -1736,10 +1736,29 @@ export default function MVPredictionPage() {
                   {/* Cross-Validation Results */}
                   {(trainingData.cv_results || trainingData.cross_validation) && (
                     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <h3 className="font-semibold text-base flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-                        Cross-Validation Results (TimeSeriesSplit)
-                      </h3>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-base flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                          Cross-Validation Results (TimeSeriesSplit)
+                        </h3>
+                        <TooltipProvider>
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                              <div className="space-y-2">
+                                <p className="font-semibold">TimeSeriesSplit Cross-Validation</p>
+                                <div className="text-xs space-y-1">
+                                  <p><strong>What it is:</strong> A validation method that splits data chronologically and tests the model on future periods.</p>
+                                  <p><strong>What it means:</strong> Simulates real-world prediction scenarios where you predict future data based on past data.</p>
+                                  <p><strong>What it helps with:</strong> Provides more realistic accuracy estimates than single train-test split, ensuring the model performs well across different time periods.</p>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
                       <div className="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
                         {(() => {
                           const cvData = trainingData.cv_results || trainingData.cross_validation;
@@ -1823,28 +1842,9 @@ export default function MVPredictionPage() {
                             </div>
                           );
                         })()}
-                        <div className="flex items-start gap-2 mt-2">
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Walk-forward validation across multiple time periods for robust model evaluation
-                          </p>
-                          <TooltipProvider>
-                            <Tooltip delayDuration={300}>
-                              <TooltipTrigger asChild>
-                                <HelpCircle className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300 mt-0.5" />
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                                <div className="space-y-2">
-                                  <p className="font-semibold">TimeSeriesSplit Cross-Validation</p>
-                                  <div className="text-xs space-y-1">
-                                    <p><strong>What it is:</strong> A validation method that splits data chronologically and tests the model on future periods.</p>
-                                    <p><strong>What it means:</strong> Simulates real-world prediction scenarios where you predict future data based on past data.</p>
-                                    <p><strong>What it helps with:</strong> Provides more realistic accuracy estimates than single train-test split, ensuring the model performs well across different time periods.</p>
-                                  </div>
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                          Walk-forward validation across multiple time periods for robust model evaluation
+                        </p>
                       </div>
                     </div>
                   )}
