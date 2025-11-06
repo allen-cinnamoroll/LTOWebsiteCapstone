@@ -477,14 +477,13 @@ class OptimizedSARIMAModel:
             actual_aligned = np.array(actual_aligned, dtype=float)
             fitted_aligned = np.array(fitted_aligned, dtype=float)
             
-            # Remove any NaN or Inf values
+            # Remove any NaN or Inf values before processing
             mask = np.isfinite(actual_aligned) & np.isfinite(fitted_aligned)
             if mask.sum() < 2:
-                logger.error("Insufficient valid data points for R² calculation")
-                r2 = None
-            else:
-                actual_aligned = actual_aligned[mask]
-                fitted_aligned = fitted_aligned[mask]
+                logger.error("Insufficient valid data points for metric calculation")
+                raise ValueError("Insufficient valid data points")
+            actual_aligned = actual_aligned[mask]
+            fitted_aligned = fitted_aligned[mask]
             
             # Inverse transform if normalization was used
             if self.use_normalization:
@@ -592,15 +591,40 @@ class OptimizedSARIMAModel:
             forecast = forecast_result.predicted_mean
             forecast_ci = forecast_result.conf_int()
             
-            # Ensure same length
-            min_len = min(len(test_series), len(forecast))
-            test_aligned = test_series.iloc[:min_len]
-            forecast_aligned = forecast.iloc[:min_len]
+            # Align by index (more robust than position-based alignment)
+            common_indices = test_series.index.intersection(forecast.index)
+            
+            if len(common_indices) == 0:
+                # Fallback: use position-based alignment if indices don't match
+                logger.warning("Index mismatch between test and forecast values, using position-based alignment")
+                min_len = min(len(test_series), len(forecast))
+                test_aligned = test_series.iloc[:min_len].values
+                forecast_aligned = forecast.iloc[:min_len].values
+            else:
+                test_aligned = test_series.loc[common_indices]
+                forecast_aligned = forecast.loc[common_indices]
+            
+            # Convert to numpy arrays for calculations
+            test_aligned = np.array(test_aligned, dtype=float)
+            forecast_aligned = np.array(forecast_aligned, dtype=float)
+            
+            # Remove any NaN or Inf values before processing
+            mask = np.isfinite(test_aligned) & np.isfinite(forecast_aligned)
+            if mask.sum() < 2:
+                logger.error("Insufficient valid data points for test metric calculation")
+                raise ValueError("Insufficient valid data points")
+            test_aligned = test_aligned[mask]
+            forecast_aligned = forecast_aligned[mask]
             
             # Inverse transform if normalization was used
             if self.use_normalization:
-                test_aligned = self.inverse_normalize(test_aligned)
-                forecast_aligned = self.inverse_normalize(forecast_aligned)
+                # Convert back to Series for inverse transform, then back to array
+                test_aligned_series = pd.Series(test_aligned, index=range(len(test_aligned)))
+                forecast_aligned_series = pd.Series(forecast_aligned, index=range(len(forecast_aligned)))
+                test_aligned_series = self.inverse_normalize(test_aligned_series)
+                forecast_aligned_series = self.inverse_normalize(forecast_aligned_series)
+                test_aligned = test_aligned_series.values
+                forecast_aligned = forecast_aligned_series.values
             
             # Calculate metrics
             mae = mean_absolute_error(test_aligned, forecast_aligned)
@@ -617,21 +641,29 @@ class OptimizedSARIMAModel:
             
             # R²
             try:
-                # Check if actual values have variance (required for R²)
-                actual_variance = test_aligned.var()
-                if actual_variance == 0 or np.isnan(actual_variance):
-                    logger.warning(f"Cannot calculate R² for test set: actual values have zero variance (all values are the same)")
+                # Check if we have enough valid data points
+                if len(test_aligned) < 2:
+                    logger.warning("Not enough data points to calculate R² for test set")
                     r2 = None
                 else:
-                    r2 = r2_score(test_aligned, forecast_aligned)
-                    # Handle NaN or inf values
-                    if np.isnan(r2) or np.isinf(r2):
-                        logger.warning(f"R² calculation for test set resulted in NaN/Inf. Actual variance: {actual_variance:.4f}")
+                    # Check if actual values have variance (required for R²)
+                    actual_variance = np.var(test_aligned)
+                    if actual_variance == 0 or np.isnan(actual_variance) or np.isinf(actual_variance):
+                        logger.warning(f"Cannot calculate R² for test set: actual values have zero variance (all values are the same)")
                         r2 = None
                     else:
-                        r2 = float(r2)
+                        r2 = r2_score(test_aligned, forecast_aligned)
+                        # Handle NaN or inf values
+                        if np.isnan(r2) or np.isinf(r2):
+                            logger.warning(f"R² calculation for test set resulted in NaN/Inf. Actual variance: {actual_variance:.4f}, len: {len(test_aligned)}")
+                            r2 = None
+                        else:
+                            r2 = float(r2)
+                            logger.info(f"Test set R² calculated successfully: {r2:.4f} (variance: {actual_variance:.4f})")
             except Exception as e:
-                logger.warning(f"Could not calculate R² for test set: {str(e)}")
+                logger.error(f"Could not calculate R² for test set: {str(e)}")
+                import traceback
+                logger.error(traceback.format_exc())
                 r2 = None
             
             self.test_accuracy_metrics = {
@@ -639,9 +671,14 @@ class OptimizedSARIMAModel:
                 'rmse': float(rmse),
                 'mape': float(mape) if not np.isnan(mape) else None,
                 'r2': r2,
-                'mean_actual': float(test_aligned.mean()),
-                'std_actual': float(test_aligned.std())
+                'mean_actual': float(np.mean(test_aligned)),
+                'std_actual': float(np.std(test_aligned))
             }
+            
+            # Ensure r2 is always in the metrics dict (even if None)
+            if 'r2' not in self.test_accuracy_metrics:
+                self.test_accuracy_metrics['r2'] = None
+                logger.warning("R² was not included in test metrics dictionary, setting to None")
             
             logger.info(f"Test Set Performance (Out-of-Sample):")
             logger.info(f"  MAE: {mae:.2f}")
