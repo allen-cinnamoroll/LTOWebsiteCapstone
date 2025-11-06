@@ -482,13 +482,29 @@ class OptimizedSARIMAModel:
                 mape = np.nan
             
             # R² (Coefficient of Determination)
-            r2 = r2_score(actual_aligned, fitted_aligned)
+            try:
+                # Check if actual values have variance (required for R²)
+                actual_variance = actual_aligned.var()
+                if actual_variance == 0 or np.isnan(actual_variance):
+                    logger.warning(f"Cannot calculate R²: actual values have zero variance (all values are the same)")
+                    r2 = None
+                else:
+                    r2 = r2_score(actual_aligned, fitted_aligned)
+                    # Handle NaN or inf values
+                    if np.isnan(r2) or np.isinf(r2):
+                        logger.warning(f"R² calculation resulted in NaN/Inf. Actual variance: {actual_variance:.4f}")
+                        r2 = None
+                    else:
+                        r2 = float(r2)
+            except Exception as e:
+                logger.warning(f"Could not calculate R²: {str(e)}")
+                r2 = None
             
             metrics = {
                 'mae': float(mae),
                 'rmse': float(rmse),
                 'mape': float(mape) if not np.isnan(mape) else None,
-                'r2': float(r2),
+                'r2': r2,
                 'mean_actual': float(actual_aligned.mean()),
                 'std_actual': float(actual_aligned.std())
             }
@@ -499,14 +515,14 @@ class OptimizedSARIMAModel:
                 logger.info(f"  MAE: {mae:.2f}")
                 logger.info(f"  RMSE: {rmse:.2f}")
                 logger.info(f"  MAPE: {mape:.2f}%")
-                logger.info(f"  R²: {r2:.4f}")
+                logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
             else:
                 self.test_accuracy_metrics = metrics
                 logger.info(f"Out-of-Sample Performance:")
                 logger.info(f"  MAE: {mae:.2f}")
                 logger.info(f"  RMSE: {rmse:.2f}")
                 logger.info(f"  MAPE: {mape:.2f}%")
-                logger.info(f"  R²: {r2:.4f}")
+                logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
             
         except Exception as e:
             logger.error(f"Error calculating accuracy metrics: {str(e)}")
@@ -560,13 +576,29 @@ class OptimizedSARIMAModel:
                 mape = np.nan
             
             # R²
-            r2 = r2_score(test_aligned, forecast_aligned)
+            try:
+                # Check if actual values have variance (required for R²)
+                actual_variance = test_aligned.var()
+                if actual_variance == 0 or np.isnan(actual_variance):
+                    logger.warning(f"Cannot calculate R² for test set: actual values have zero variance (all values are the same)")
+                    r2 = None
+                else:
+                    r2 = r2_score(test_aligned, forecast_aligned)
+                    # Handle NaN or inf values
+                    if np.isnan(r2) or np.isinf(r2):
+                        logger.warning(f"R² calculation for test set resulted in NaN/Inf. Actual variance: {actual_variance:.4f}")
+                        r2 = None
+                    else:
+                        r2 = float(r2)
+            except Exception as e:
+                logger.warning(f"Could not calculate R² for test set: {str(e)}")
+                r2 = None
             
             self.test_accuracy_metrics = {
                 'mae': float(mae),
                 'rmse': float(rmse),
                 'mape': float(mape) if not np.isnan(mape) else None,
-                'r2': float(r2),
+                'r2': r2,
                 'mean_actual': float(test_aligned.mean()),
                 'std_actual': float(test_aligned.std())
             }
@@ -575,7 +607,7 @@ class OptimizedSARIMAModel:
             logger.info(f"  MAE: {mae:.2f}")
             logger.info(f"  RMSE: {rmse:.2f}")
             logger.info(f"  MAPE: {mape:.2f}%")
-            logger.info(f"  R²: {r2:.4f}")
+            logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
             
         except Exception as e:
             logger.error(f"Error calculating test accuracy: {str(e)}")
