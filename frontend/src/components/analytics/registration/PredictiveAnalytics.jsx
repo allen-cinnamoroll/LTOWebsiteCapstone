@@ -10,11 +10,10 @@ export function PredictiveAnalytics() {
 
   return (
     <div 
-      className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg mx-auto"
+      className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg mx-auto w-full"
       style={{
-        width: '100%',
         maxWidth: '1000px',
-        minWidth: 'min(800px, 100%)',
+        minWidth: '800px',
         minHeight: '900px',
         maxHeight: '1200px'
       }}
