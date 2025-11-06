@@ -13,7 +13,7 @@ import {
   ComposedChart
 } from 'recharts';
 import { getWeeklyPredictions } from '../../../api/predictionApi.js';
-import { TrendingUp, TrendingDown, Minus, Award, BarChart2, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, BarChart2, AlertCircle, CheckCircle2, Info, Users, Calendar, Target, Lightbulb, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const WeeklyPredictionsChart = () => {
   const [rawWeeklyData, setRawWeeklyData] = useState([]); // Store raw weekly predictions
@@ -355,20 +355,39 @@ const WeeklyPredictionsChart = () => {
     }
   };
 
-  // Calculate KPI metrics for weekly view
+  // Unified KPI metrics calculation for all views
   const calculateKPIMetrics = () => {
-    if (viewType !== 'weekly' || weeklyData.length === 0) {
+    let data = [];
+    let periodLabel = '';
+    
+    if (viewType === 'weekly' && weeklyData.length > 0) {
+      data = weeklyData;
+      periodLabel = 'week';
+    } else if (viewType === 'monthly' && monthlyData.length > 0) {
+      data = monthlyData;
+      periodLabel = 'month';
+    } else if (viewType === 'yearly' && yearlyData.length > 0) {
+      data = yearlyData;
+      periodLabel = 'year';
+    } else {
       return null;
     }
 
-    const predictions = weeklyData.map(week => week.predicted);
-    const total = predictions.reduce((sum, val) => sum + val, 0);
+    // Extract values based on view type
+    const values = viewType === 'weekly' 
+      ? data.map(item => item.predicted)
+      : viewType === 'monthly'
+      ? data.map(item => item.totalPredicted)
+      : data.map(item => item.totalPredicted);
     
-    // Calculate trend
-    const firstWeek = predictions[0];
-    const lastWeek = predictions[predictions.length - 1];
-    const percentageChange = firstWeek !== 0 
-      ? ((lastWeek - firstWeek) / firstWeek) * 100 
+    const total = values.reduce((sum, val) => sum + val, 0);
+    const avg = total / values.length;
+    
+    // Calculate trend (first vs last period)
+    const firstValue = values[0];
+    const lastValue = values[values.length - 1];
+    const percentageChange = firstValue !== 0 
+      ? ((lastValue - firstValue) / firstValue) * 100 
       : 0;
     
     let trendDirection = 'stable';
@@ -385,31 +404,216 @@ const WeeklyPredictionsChart = () => {
       trendColor = 'text-red-600 dark:text-red-400';
     }
     
-    // Find peak week
-    const maxValue = Math.max(...predictions);
-    const peakWeekIndex = predictions.indexOf(maxValue);
-    const peakWeek = weeklyData[peakWeekIndex];
+    // Find peak period
+    const maxValue = Math.max(...values);
+    const maxIndex = values.indexOf(maxValue);
+    const peakPeriod = data[maxIndex];
+    
+    // Find lowest period
+    const minValue = Math.min(...values);
+    const minIndex = values.indexOf(minValue);
+    const lowPeriod = data[minIndex];
+    
+    // Calculate variance (coefficient of variation)
+    const mean = avg;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const stdDev = Math.sqrt(variance);
+    const coefficientOfVariation = mean !== 0 ? (stdDev / mean) * 100 : 0;
+    
+    // Determine peak period label
+    let peakLabel = 'N/A';
+    if (viewType === 'weekly' && peakPeriod) {
+      peakLabel = `Week ${peakPeriod.week}`;
+    } else if (viewType === 'monthly' && peakPeriod) {
+      peakLabel = peakPeriod.monthShort || peakPeriod.month;
+    } else if (viewType === 'yearly' && peakPeriod) {
+      peakLabel = peakPeriod.yearLabel || peakPeriod.year.toString();
+    }
+    
+    // Determine low period label
+    let lowLabel = 'N/A';
+    if (viewType === 'weekly' && lowPeriod) {
+      lowLabel = `Week ${lowPeriod.week}`;
+    } else if (viewType === 'monthly' && lowPeriod) {
+      lowLabel = lowPeriod.monthShort || lowPeriod.month;
+    } else if (viewType === 'yearly' && lowPeriod) {
+      lowLabel = lowPeriod.yearLabel || lowPeriod.year.toString();
+    }
     
     return {
       total,
+      avg,
       trendDirection,
       trendIcon,
       trendColor,
       percentageChange,
-      peakWeek: peakWeek ? `Week ${peakWeek.week}` : 'N/A',
-      peakValue: maxValue
+      peakPeriod: peakLabel,
+      peakValue: maxValue,
+      lowPeriod: lowLabel,
+      lowValue: minValue,
+      coefficientOfVariation,
+      periodCount: values.length,
+      periodLabel
     };
   };
 
-  // Calculate comparative analysis
+  // Generate actionable recommendations
+  const generateRecommendations = (kpiMetrics) => {
+    if (!kpiMetrics) return [];
+    
+    const recommendations = [];
+    const { total, avg, trendDirection, percentageChange, peakPeriod, peakValue, lowPeriod, lowValue, coefficientOfVariation, periodLabel } = kpiMetrics;
+    
+    // Operational Planning Recommendations
+    if (viewType === 'weekly') {
+      // Staffing recommendations
+      const peakRatio = peakValue / avg;
+      if (peakRatio > 1.3) {
+        recommendations.push({
+          type: 'operational',
+          category: 'Staffing',
+          priority: 'high',
+          title: 'Increase Staffing for Peak Week',
+          description: `${peakPeriod} is projected at ${peakValue.toLocaleString()} vehicles (${((peakRatio - 1) * 100).toFixed(0)}% above average). Consider scheduling additional staff or extending hours.`,
+          icon: Users,
+          color: 'blue'
+        });
+      }
+      
+      if (lowValue < avg * 0.7) {
+        recommendations.push({
+          type: 'operational',
+          category: 'Resource Optimization',
+          priority: 'medium',
+          title: 'Optimize Resources During Low Period',
+          description: `${lowPeriod} shows ${lowValue.toLocaleString()} vehicles (${((1 - lowValue/avg) * 100).toFixed(0)}% below average). Consider cross-training staff or scheduling maintenance.`,
+          icon: Target,
+          color: 'amber'
+        });
+      }
+    } else if (viewType === 'monthly') {
+      // Budget allocation
+      if (coefficientOfVariation > 20) {
+        recommendations.push({
+          type: 'strategic',
+          category: 'Budget Planning',
+          priority: 'high',
+          title: 'Variable Budget Allocation Recommended',
+          description: `High variability (${coefficientOfVariation.toFixed(0)}% CV) detected. Allocate ${((peakValue/total) * 100).toFixed(0)}% of budget to ${peakPeriod} peak period.`,
+          icon: Target,
+          color: 'blue'
+        });
+      }
+      
+      // Marketing opportunities
+      if (peakValue > avg * 1.2) {
+        recommendations.push({
+          type: 'strategic',
+          category: 'Marketing',
+          priority: 'medium',
+          title: 'Leverage Peak Month for Campaigns',
+          description: `${peakPeriod} shows strong demand (${peakValue.toLocaleString()} vehicles). Consider launching marketing campaigns to maximize impact.`,
+          icon: Lightbulb,
+          color: 'green'
+        });
+      }
+    } else if (viewType === 'yearly') {
+      // Strategic planning
+      if (percentageChange > 10) {
+        recommendations.push({
+          type: 'strategic',
+          category: 'Growth Planning',
+          priority: 'high',
+          title: 'Plan for Growth Expansion',
+          description: `Projected ${percentageChange.toFixed(1)}% year-over-year growth. Consider infrastructure expansion and capacity planning.`,
+          icon: ArrowUpRight,
+          color: 'green'
+        });
+      } else if (percentageChange < -10) {
+        recommendations.push({
+          type: 'risk',
+          category: 'Risk Mitigation',
+          priority: 'high',
+          title: 'Investigate Declining Trends',
+          description: `Projected ${Math.abs(percentageChange).toFixed(1)}% decline. Review market conditions, competition, and operational factors.`,
+          icon: AlertTriangle,
+          color: 'red'
+        });
+      }
+    }
+    
+    // Risk Mitigation
+    if (trendDirection === 'decreasing' && Math.abs(percentageChange) > 15) {
+      recommendations.push({
+        type: 'risk',
+        category: 'Risk Mitigation',
+        priority: 'high',
+        title: 'Monitor Declining Trend',
+        description: `Strong ${trendDirection} trend (${percentageChange.toFixed(1)}%) detected. Investigate root causes and prepare contingency plans.`,
+        icon: AlertTriangle,
+        color: 'red'
+      });
+    }
+    
+    // High variability warning
+    if (coefficientOfVariation > 25) {
+      recommendations.push({
+        type: 'risk',
+        category: 'Volatility Warning',
+        priority: 'medium',
+        title: 'High Volatility Detected',
+        description: `Significant variation (${coefficientOfVariation.toFixed(0)}% CV) across periods. Ensure flexible resource allocation and contingency planning.`,
+        icon: AlertCircle,
+        color: 'amber'
+      });
+    }
+    
+    // Strategic opportunities
+    if (trendDirection === 'increasing' && percentageChange > 10) {
+      recommendations.push({
+        type: 'strategic',
+        category: 'Growth Opportunity',
+        priority: 'medium',
+        title: 'Capitalize on Growth Momentum',
+        description: `Strong ${trendDirection} trend (${percentageChange.toFixed(1)}%) presents opportunity for strategic initiatives and market expansion.`,
+        icon: ArrowUpRight,
+        color: 'green'
+      });
+    }
+    
+    return recommendations;
+  };
+
+  // Enhanced comparative analysis for all views
   const calculateComparativeAnalysis = () => {
-    if (viewType !== 'weekly' || weeklyData.length === 0 || weeksToPredict !== 4) {
-      return null;
+    if (!kpiMetrics || (viewType === 'weekly' && weeksToPredict !== 4)) {
+      // For weekly, only show when 4 weeks selected
+      // For monthly/yearly, show if we have data
+      if (viewType === 'monthly' && monthlyData.length === 0) return null;
+      if (viewType === 'yearly' && yearlyData.length === 0) return null;
+      if (viewType === 'weekly') return null;
     }
 
-    const currentPredictions = weeklyData.map(week => week.predicted);
-    const currentTotal = currentPredictions.reduce((sum, val) => sum + val, 0);
-    const currentAvg = currentTotal / currentPredictions.length;
+    // Get current data based on view type
+    let currentValues = [];
+    let currentTotal = 0;
+    let currentAvg = 0;
+    
+    if (viewType === 'weekly') {
+      currentValues = weeklyData.map(week => week.predicted);
+      currentTotal = currentValues.reduce((sum, val) => sum + val, 0);
+      currentAvg = currentTotal / currentValues.length;
+    } else if (viewType === 'monthly') {
+      currentValues = monthlyData.map(month => month.totalPredicted);
+      currentTotal = currentValues.reduce((sum, val) => sum + val, 0);
+      currentAvg = currentTotal / currentValues.length;
+    } else if (viewType === 'yearly') {
+      currentValues = yearlyData.map(year => year.totalPredicted);
+      currentTotal = currentValues.reduce((sum, val) => sum + val, 0);
+      currentAvg = currentTotal / currentValues.length;
+    } else {
+      return null;
+    }
     
     // Note: Historical data would come from API
     // For now, we'll structure the analysis to show format
@@ -516,10 +720,10 @@ const WeeklyPredictionsChart = () => {
       }
     }
     
-    // Note: kpiMetrics will be calculated separately, so we calculate trend here
-    const firstWeek = currentPredictions[0];
-    const lastWeek = currentPredictions[currentPredictions.length - 1];
-    const periodTrendChange = firstWeek !== 0 ? ((lastWeek - firstWeek) / firstWeek) * 100 : 0;
+    // Calculate trend from current data
+    const firstValue = currentValues[0];
+    const lastValue = currentValues[currentValues.length - 1];
+    const periodTrendChange = firstValue !== 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
     const trendStrength = Math.abs(periodTrendChange);
     const trendDirection = periodTrendChange > 2 ? 'increasing' : periodTrendChange < -2 ? 'decreasing' : 'stable';
     
@@ -539,9 +743,27 @@ const WeeklyPredictionsChart = () => {
     } else {
       insights.push({
         type: 'info',
-        text: `Stable trend within period: ${periodTrendChange.toFixed(1)}% change from first to last week. Consistent weekly performance.`,
+        text: `Stable trend within period: ${periodTrendChange.toFixed(1)}% change from first to last ${viewType === 'weekly' ? 'week' : viewType === 'monthly' ? 'month' : 'year'}. Consistent performance.`,
         context: 'normal'
       });
+    }
+    
+    // Add period-specific insights
+    if (viewType === 'monthly' && monthlyData.length > 0) {
+      const peakMonth = monthlyData.reduce((max, month) => 
+        month.totalPredicted > max.totalPredicted ? month : max
+      );
+      const lowMonth = monthlyData.reduce((min, month) => 
+        month.totalPredicted < min.totalPredicted ? month : min
+      );
+      
+      if (peakMonth.totalPredicted > currentAvg * 1.3) {
+        insights.push({
+          type: 'info',
+          text: `Peak month identified: ${peakMonth.monthShort || peakMonth.month} with ${peakMonth.totalPredicted.toLocaleString()} vehicles (${((peakMonth.totalPredicted/currentAvg - 1) * 100).toFixed(0)}% above average).`,
+          context: 'normal'
+        });
+      }
     }
     
     return {
@@ -560,6 +782,7 @@ const WeeklyPredictionsChart = () => {
   const currentData = getCurrentData();
   const kpiMetrics = calculateKPIMetrics();
   const comparativeAnalysis = calculateComparativeAnalysis();
+  const recommendations = generateRecommendations(kpiMetrics);
 
   return (
     <div className="bg-white/80 dark:bg-gray-800/50 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
@@ -635,31 +858,29 @@ const WeeklyPredictionsChart = () => {
         </div>
       </div>
 
-      {/* KPI Cards - Only show for weekly view */}
-      {kpiMetrics && viewType === 'weekly' && !loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* KPI Cards - Show for all views */}
+      {kpiMetrics && !loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Total Predicted Registrations */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Total Predicted Registrations
+                Total Predicted
               </h3>
               <div className="w-8 h-8 flex items-center justify-center bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
-                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <BarChart2 className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
               </div>
             </div>
             <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
               {kpiMetrics.total.toLocaleString()}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              For {weeklyData.length} week{weeklyData.length !== 1 ? 's' : ''} period
+              {kpiMetrics.periodCount} {kpiMetrics.periodLabel}{kpiMetrics.periodCount !== 1 ? 's' : ''} • Avg: {kpiMetrics.avg.toFixed(0)}/{kpiMetrics.periodLabel}
             </p>
           </div>
 
           {/* Trend Direction */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Trend Direction
@@ -683,32 +904,74 @@ const WeeklyPredictionsChart = () => {
               </p>
             </div>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {kpiMetrics.percentageChange > 0 ? '+' : ''}{kpiMetrics.percentageChange.toFixed(1)}% change from first to last week
+              {kpiMetrics.percentageChange > 0 ? '+' : ''}{kpiMetrics.percentageChange.toFixed(1)}% vs first {kpiMetrics.periodLabel}
             </p>
           </div>
 
-          {/* Peak Week */}
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 shadow-sm">
+          {/* Peak Period */}
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Peak Week
+                Peak {viewType === 'weekly' ? 'Week' : viewType === 'monthly' ? 'Month' : 'Year'}
               </h3>
               <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 rounded-lg">
                 <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
               </div>
             </div>
-            <p className="text-3xl font-bold text-amber-900 dark:text-amber-200">
-              {kpiMetrics.peakWeek}
+            <p className="text-2xl font-bold text-amber-900 dark:text-amber-200">
+              {kpiMetrics.peakPeriod}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {kpiMetrics.peakValue.toLocaleString()} vehicles (highest)
             </p>
           </div>
+
+          {/* Risk Flags / Volatility */}
+          <div className={`bg-gradient-to-br ${
+            kpiMetrics.coefficientOfVariation > 25 
+              ? 'from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-red-200 dark:border-red-700'
+              : kpiMetrics.coefficientOfVariation > 15
+              ? 'from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700'
+              : 'from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border-green-200 dark:border-green-700'
+          } border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow`}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Volatility
+              </h3>
+              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
+                kpiMetrics.coefficientOfVariation > 25 
+                  ? 'bg-red-500/10 dark:bg-red-400/10'
+                  : kpiMetrics.coefficientOfVariation > 15
+                  ? 'bg-amber-500/10 dark:bg-amber-400/10'
+                  : 'bg-green-500/10 dark:bg-green-400/10'
+              }`}>
+                {kpiMetrics.coefficientOfVariation > 25 ? (
+                  <AlertTriangle className={`w-5 h-5 ${
+                    kpiMetrics.coefficientOfVariation > 25 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'
+                  }`} strokeWidth={2} />
+                ) : (
+                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
+                )}
+              </div>
+            </div>
+            <p className={`text-2xl font-bold ${
+              kpiMetrics.coefficientOfVariation > 25 
+                ? 'text-red-900 dark:text-red-200'
+                : kpiMetrics.coefficientOfVariation > 15
+                ? 'text-amber-900 dark:text-amber-200'
+                : 'text-green-900 dark:text-green-200'
+            }`}>
+              {kpiMetrics.coefficientOfVariation.toFixed(0)}%
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.coefficientOfVariation > 25 ? 'High variability' : kpiMetrics.coefficientOfVariation > 15 ? 'Moderate variability' : 'Low variability'}
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Comparative Analysis - Only show for weekly view with 4 weeks */}
-      {comparativeAnalysis && viewType === 'weekly' && weeksToPredict === 4 && !loading && !error && (
+      {/* Comparative Analysis - Show for all views when data is available */}
+      {comparativeAnalysis && !loading && !error && (
         <div className="mb-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/30 dark:to-slate-700/30 border border-slate-200 dark:border-slate-700 rounded-lg p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <BarChart2 className="w-5 h-5 text-slate-600 dark:text-slate-400" />
@@ -721,14 +984,14 @@ const WeeklyPredictionsChart = () => {
             {/* Current Period Summary */}
             <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Current 4-Week Prediction Period
+                Current {viewType === 'weekly' ? `${weeksToPredict}-Week` : viewType === 'monthly' ? 'Monthly' : 'Yearly'} Prediction Period
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold text-gray-900 dark:text-white">
                   {comparativeAnalysis.currentTotal.toLocaleString()}
                 </span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  total vehicles ({comparativeAnalysis.currentAvg.toFixed(0)} avg/week)
+                  total vehicles ({comparativeAnalysis.currentAvg.toFixed(0)} avg/{viewType === 'weekly' ? 'week' : viewType === 'monthly' ? 'month' : 'year'})
                 </span>
               </div>
             </div>
@@ -737,7 +1000,7 @@ const WeeklyPredictionsChart = () => {
             {comparativeAnalysis.previousPeriodTotal !== null ? (
               <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  vs. Previous 4-Week Period
+                  vs. Previous {viewType === 'weekly' ? `${weeksToPredict}-Week` : viewType === 'monthly' ? 'Month' : 'Year'} Period
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className={`text-xl font-bold ${
@@ -758,7 +1021,7 @@ const WeeklyPredictionsChart = () => {
             ) : (
               <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  vs. Previous 4-Week Period
+                  vs. Previous {viewType === 'weekly' ? `${weeksToPredict}-Week` : viewType === 'monthly' ? 'Month' : 'Year'} Period
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Historical data not available for comparison
@@ -862,6 +1125,81 @@ const WeeklyPredictionsChart = () => {
                 </p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Actionable Recommendations */}
+      {recommendations && recommendations.length > 0 && !loading && !error && (
+        <div className="mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-700 rounded-lg p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+              Actionable Recommendations
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {recommendations.map((rec, index) => {
+              const colorClasses = {
+                blue: {
+                  bg: 'bg-blue-50 dark:bg-blue-900/20',
+                  border: 'border-blue-200 dark:border-blue-800',
+                  icon: 'text-blue-600 dark:text-blue-400',
+                  badge: 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300'
+                },
+                green: {
+                  bg: 'bg-green-50 dark:bg-green-900/20',
+                  border: 'border-green-200 dark:border-green-800',
+                  icon: 'text-green-600 dark:text-green-400',
+                  badge: 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
+                },
+                red: {
+                  bg: 'bg-red-50 dark:bg-red-900/20',
+                  border: 'border-red-200 dark:border-red-800',
+                  icon: 'text-red-600 dark:text-red-400',
+                  badge: 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300'
+                },
+                amber: {
+                  bg: 'bg-amber-50 dark:bg-amber-900/20',
+                  border: 'border-amber-200 dark:border-amber-800',
+                  icon: 'text-amber-600 dark:text-amber-400',
+                  badge: 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300'
+                }
+              };
+              
+              const colors = colorClasses[rec.color] || colorClasses.blue;
+              const IconComponent = rec.icon;
+              
+              return (
+                <div 
+                  key={index}
+                  className={`${colors.bg} ${colors.border} border rounded-lg p-4 hover:shadow-md transition-shadow`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${colors.bg} flex-shrink-0`}>
+                      <IconComponent className={`w-5 h-5 ${colors.icon}`} strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {rec.title}
+                        </h4>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors.badge}`}>
+                          {rec.priority}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                        {rec.category}
+                      </p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {rec.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
