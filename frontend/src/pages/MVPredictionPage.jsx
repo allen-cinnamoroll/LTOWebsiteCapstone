@@ -1144,7 +1144,7 @@ export default function MVPredictionPage() {
                   </div>
                 </div>
 
-                {/* Page 2: Diagnostics & Training Information */}
+                {/* Page 2: Model Diagnostics & Parameters */}
                 <div 
                   className={`transition-all duration-300 ease-in-out ${
                     currentPage === 1 
@@ -1370,8 +1370,8 @@ export default function MVPredictionPage() {
                       </div>
                     </div>
                   )}
-                </div>
-              )}
+                    </div>
+                  )}
 
                     {/* Model Parameters (Best Parameters from auto_arima) */}
                     {trainingData.model_params && (
@@ -1576,6 +1576,18 @@ export default function MVPredictionPage() {
                       </div>
                     )}
 
+                  </div>
+                </div>
+
+                {/* Page 3: Training Information & Model Summary */}
+                <div 
+                  className={`transition-all duration-300 ease-in-out ${
+                    currentPage === 2 
+                      ? 'opacity-100 translate-x-0' 
+                      : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
+                  }`}
+                >
+                  <div className="space-y-4 py-4">
                     {/* Training Information */}
                     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <h3 className="font-semibold text-base flex items-center gap-2">
@@ -1765,7 +1777,16 @@ export default function MVPredictionPage() {
                       ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
                       : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
                   }`}
-                  aria-label="Go to diagnostics page"
+                  aria-label="Go to diagnostics and parameters page"
+                />
+                <button
+                  onClick={() => setCurrentPage(2)}
+                  className={`transition-all duration-200 ${
+                    currentPage === 2
+                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
+                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
+                  }`}
+                  aria-label="Go to training information page"
                 />
               </div>
             </div>
