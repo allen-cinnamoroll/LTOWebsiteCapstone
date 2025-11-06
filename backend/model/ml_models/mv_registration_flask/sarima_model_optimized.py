@@ -411,6 +411,12 @@ class OptimizedSARIMAModel:
         self.save_model()
         
         # Prepare training info
+        # Debug: Check what we're about to return
+        if self.accuracy_metrics:
+            logger.info(f"DEBUG: Before training_info - accuracy_metrics.r2 = {self.accuracy_metrics.get('r2')}")
+        if self.test_accuracy_metrics:
+            logger.info(f"DEBUG: Before training_info - test_accuracy_metrics.r2 = {self.test_accuracy_metrics.get('r2')}")
+        
         training_info = {
             'model_params': self.model_params,
             'training_days': len(train_series),
@@ -439,6 +445,12 @@ class OptimizedSARIMAModel:
                 'variables': list(exogenous.columns) if exogenous is not None else None
             }
         }
+        
+        # Debug: Verify what's in training_info
+        if training_info.get('accuracy_metrics'):
+            logger.info(f"DEBUG: training_info['accuracy_metrics']['r2'] = {training_info['accuracy_metrics'].get('r2')}")
+        if training_info.get('test_accuracy_metrics'):
+            logger.info(f"DEBUG: training_info['test_accuracy_metrics']['r2'] = {training_info['test_accuracy_metrics'].get('r2')}")
         
         logger.info("=" * 60)
         logger.info("TRAINING COMPLETED SUCCESSFULLY")
@@ -481,7 +493,12 @@ class OptimizedSARIMAModel:
             mask = np.isfinite(actual_aligned) & np.isfinite(fitted_aligned)
             if mask.sum() < 2:
                 logger.error("Insufficient valid data points for metric calculation")
-                raise ValueError("Insufficient valid data points")
+                # Set metrics to None but don't raise - let other metrics try to calculate
+                if is_training:
+                    self.accuracy_metrics = None
+                else:
+                    self.test_accuracy_metrics = None
+                return
             actual_aligned = actual_aligned[mask]
             fitted_aligned = fitted_aligned[mask]
             
@@ -548,6 +565,10 @@ class OptimizedSARIMAModel:
                 metrics['r2'] = None
                 logger.warning("R² was not included in metrics dictionary, setting to None")
             
+            # Debug logging
+            logger.info(f"DEBUG: Metrics calculated - R² value: {r2}, type: {type(r2)}")
+            logger.info(f"DEBUG: Metrics dict keys: {list(metrics.keys())}, R² in dict: {'r2' in metrics}")
+            
             if is_training:
                 self.accuracy_metrics = metrics
                 logger.info(f"In-Sample Performance:")
@@ -555,6 +576,11 @@ class OptimizedSARIMAModel:
                 logger.info(f"  RMSE: {rmse:.2f}")
                 logger.info(f"  MAPE: {mape:.2f}%")
                 logger.info(f"  R²: {r2:.4f if r2 is not None else 'N/A'}")
+                # Debug: Verify R² was saved
+                if self.accuracy_metrics:
+                    logger.info(f"DEBUG: Saved accuracy_metrics.r2 = {self.accuracy_metrics.get('r2')}")
+                else:
+                    logger.warning("accuracy_metrics is None after calculation!")
             else:
                 self.test_accuracy_metrics = metrics
                 logger.info(f"Out-of-Sample Performance:")
@@ -612,7 +638,9 @@ class OptimizedSARIMAModel:
             mask = np.isfinite(test_aligned) & np.isfinite(forecast_aligned)
             if mask.sum() < 2:
                 logger.error("Insufficient valid data points for test metric calculation")
-                raise ValueError("Insufficient valid data points")
+                # Set metrics to None but don't raise
+                self.test_accuracy_metrics = None
+                return
             test_aligned = test_aligned[mask]
             forecast_aligned = forecast_aligned[mask]
             
@@ -679,6 +707,10 @@ class OptimizedSARIMAModel:
             if 'r2' not in self.test_accuracy_metrics:
                 self.test_accuracy_metrics['r2'] = None
                 logger.warning("R² was not included in test metrics dictionary, setting to None")
+            
+            # Debug logging
+            logger.info(f"DEBUG: Test metrics calculated - R² value: {r2}, type: {type(r2)}")
+            logger.info(f"DEBUG: Test metrics dict keys: {list(self.test_accuracy_metrics.keys())}, R² in dict: {'r2' in self.test_accuracy_metrics}")
             
             logger.info(f"Test Set Performance (Out-of-Sample):")
             logger.info(f"  MAE: {mae:.2f}")

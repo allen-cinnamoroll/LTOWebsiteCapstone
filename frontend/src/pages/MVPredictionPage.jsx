@@ -1173,8 +1173,8 @@ export default function MVPredictionPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                            Residuals Randomness
-                          </p>
+                          Residuals Randomness
+                        </p>
                           <TooltipProvider>
                             <Tooltip delayDuration={300}>
                               <TooltipTrigger asChild>
@@ -1203,9 +1203,9 @@ export default function MVPredictionPage() {
                         {trainingData.diagnostics.ljung_box_pvalue !== null && (
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
-                              {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
-                            </p>
+                            Ljung-Box p-value: {trainingData.diagnostics.ljung_box_pvalue.toFixed(4)} 
+                            {trainingData.diagnostics.ljung_box_pvalue > 0.05 && ' (p > 0.05 = random)'}
+                          </p>
                             <TooltipProvider>
                               <Tooltip delayDuration={300}>
                                 <TooltipTrigger asChild>
@@ -1239,8 +1239,8 @@ export default function MVPredictionPage() {
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-center gap-2 mb-2">
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          ACF/PACF Analysis
-                        </p>
+                        ACF/PACF Analysis
+                      </p>
                         <TooltipProvider>
                           <Tooltip delayDuration={300}>
                             <TooltipTrigger asChild>
@@ -1274,7 +1274,7 @@ export default function MVPredictionPage() {
                               <TooltipContent className="max-w-xs bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2">
                                 <div className="text-xs">
                                   <p><strong>ACF Lags:</strong> Number of time steps checked for correlation between residuals.</p>
-                                </div>
+                        </div>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -1299,8 +1299,8 @@ export default function MVPredictionPage() {
                       {trainingData.diagnostics.acf_values.some(acf => Math.abs(acf.value) > 0.2) && (
                         <div className="flex items-start gap-2 mt-2">
                           <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                            ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
-                          </p>
+                          ⚠ Some ACF values exceed ±0.2 - may indicate leftover autocorrelation
+                        </p>
                           <TooltipProvider>
                             <Tooltip delayDuration={300}>
                               <TooltipTrigger asChild>
@@ -1341,7 +1341,7 @@ export default function MVPredictionPage() {
                                   <p><strong>What it is:</strong> The average of all prediction errors (actual - predicted).</p>
                                   <p><strong>What it means:</strong> Should be close to 0. Values far from 0 indicate systematic bias (over or under-prediction).</p>
                                   <p><strong>What it helps with:</strong> Identifies if the model consistently overestimates or underestimates, helping you adjust expectations or improve the model.</p>
-                                </div>
+                      </div>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -1370,8 +1370,8 @@ export default function MVPredictionPage() {
                       </div>
                     </div>
                   )}
-                    </div>
-                  )}
+                </div>
+              )}
 
                     {/* Model Parameters (Best Parameters from auto_arima) */}
                     {trainingData.model_params && (
@@ -1690,8 +1690,8 @@ export default function MVPredictionPage() {
                                   <p><strong>What it is:</strong> Statistical measures (AIC/BIC) that balance model accuracy with complexity.</p>
                                   <p><strong>What it means:</strong> Lower values indicate better models. Penalizes overly complex models to prevent overfitting.</p>
                                   <p><strong>What it helps with:</strong> Helps select the optimal model configuration that generalizes well without being too simple or too complex.</p>
-                                </div>
-                              </div>
+                </div>
+                    </div>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
