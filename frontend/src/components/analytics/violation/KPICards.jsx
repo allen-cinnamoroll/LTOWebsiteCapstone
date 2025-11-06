@@ -115,7 +115,7 @@ const useProgressBarAnimation = (targetPercentage, duration = 2000, shouldAnimat
   return width;
 };
 
-export function KPICards({ displayData, loading, totalViolations, totalTrafficViolators, topOfficer, mostCommonViolation }) {
+export function KPICards({ displayData, loading, totalViolations, totalTrafficViolators }) {
   // Use the theme context
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -144,26 +144,14 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   // Counter animations - all start simultaneously when data is available
   const violationsAnimated = useCounterAnimation(totalViolations || 0, 2000, shouldAnimate);
   const violatorsAnimated = useCounterAnimation(totalTrafficViolators || 0, 2000, shouldAnimate);
-  const commonViolationCountAnimated = useCounterAnimation(mostCommonViolation?.count || 0, 2000, shouldAnimate);
-  const officerCountAnimated = useCounterAnimation(topOfficer?.count || topOfficer?.violationCount || 0, 2000, shouldAnimate);
   
   // Progress bar animations - synchronized with counter animations, all start together
   const violationsBarWidth = useProgressBarAnimation(100, 2000, shouldAnimate);
   const violatorsBarWidth = useProgressBarAnimation(100, 2000, shouldAnimate);
-  const commonViolationBarWidth = useProgressBarAnimation(
-    Math.min(((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100, 100),
-    2000,
-    shouldAnimate
-  );
-  const officerBarWidth = useProgressBarAnimation(
-    Math.min(((topOfficer?.count || topOfficer?.violationCount || 0) / ((topOfficer?.count || topOfficer?.violationCount || 0) + ((topOfficer?.count || topOfficer?.violationCount || 0) * 0.8))) * 100, 100),
-    2000,
-    shouldAnimate
-  );
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-        {[...Array(4)].map((_, index) => (
+        {[...Array(2)].map((_, index) => (
            <div key={index} className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white to-gray-50 border-gray-200'} border-2 rounded-2xl p-5 animate-pulse shadow-xl`}>
             <div className="flex items-start">
               <div className="flex-1">
@@ -240,72 +228,6 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
               className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 h-1.5 rounded-full shadow-lg shadow-green-500/50 transition-all duration-500"
               style={{ 
                 width: `${violatorsBarWidth}%`
-              }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Most Common Violation KPI */}
-       <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white to-red-50/30 border-gray-200'} border-2 rounded-2xl shadow-xl p-5 hover:shadow-2xl hover:shadow-red-500/40 hover:-translate-y-1.5 transition-all duration-300 transform relative overflow-hidden group animate-in slide-in-from-bottom-4 fade-in duration-500`}>
-        <div className={`absolute top-0 right-0 w-24 h-24 ${isDarkMode ? 'bg-gradient-to-br from-red-500/20 to-red-600/10' : 'bg-gradient-to-br from-red-500/15 to-red-600/8'} rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
-        <div className="absolute top-4 right-4">
-          <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-          </svg>
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1 pr-10">
-              <div className="mb-2">
-                <p className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Most Common Violation</p>
-              </div>
-              <p className="text-base font-extrabold text-gray-900 dark:text-white mb-2 truncate bg-gradient-to-r from-red-600 to-red-700 dark:from-red-400 dark:to-red-500 bg-clip-text text-transparent" title={mostCommonViolation?._id || 'N/A'}>
-                {mostCommonViolation?._id || 'N/A'}
-              </p>
-              <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-0.5">
-                {loading ? '...' : commonViolationCountAnimated.toLocaleString()}{" "}occurrences
-              </p>
-            </div>
-          </div>
-          <div className="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-1.5 overflow-hidden backdrop-blur-sm">
-            <div 
-              className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 h-1.5 rounded-full shadow-lg shadow-red-500/50 transition-all duration-500"
-              style={{ 
-                width: `${commonViolationBarWidth}%`
-              }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Officer KPI */}
-       <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white to-purple-50/30 border-gray-200'} border-2 rounded-2xl shadow-xl p-5 hover:shadow-2xl hover:shadow-purple-500/40 hover:-translate-y-1.5 transition-all duration-300 transform relative overflow-hidden group animate-in slide-in-from-bottom-4 fade-in duration-500`}>
-        <div className={`absolute top-0 right-0 w-24 h-24 ${isDarkMode ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/10' : 'bg-gradient-to-br from-purple-500/15 to-purple-600/8'} rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
-        <div className="absolute top-4 right-4">
-          <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1 pr-10">
-              <div className="mb-2">
-                <p className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Top Officer</p>
-              </div>
-              <p className="text-base font-extrabold text-gray-900 dark:text-white truncate mb-2 bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-400 dark:to-purple-500 bg-clip-text text-transparent">
-                {topOfficer?.officerName || 'N/A'}
-              </p>
-              <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-0.5">
-                {loading ? '...' : officerCountAnimated.toLocaleString()}{" "}apprehensions
-              </p>
-            </div>
-          </div>
-          <div className="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-1.5 overflow-hidden backdrop-blur-sm">
-            <div 
-              className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 h-1.5 rounded-full shadow-lg shadow-purple-500/50 transition-all duration-500"
-              style={{ 
-                width: `${officerBarWidth}%`
               }}
             ></div>
           </div>

@@ -5,7 +5,7 @@ export function PieChart({ data, title, loading }) {
   const [animatedSegments, setAnimatedSegments] = useState([]);
   if (loading) {
     return (
-      <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-800 rounded-lg shadow-md p-6">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 h-full flex flex-col">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
           <div className="flex items-center justify-center">
@@ -27,7 +27,7 @@ export function PieChart({ data, title, loading }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white dark:bg-black border-2 border-gray-300 dark:border-gray-800 rounded-lg shadow-md p-6">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 h-full flex flex-col">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
@@ -116,7 +116,7 @@ export function PieChart({ data, title, loading }) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 relative overflow-hidden h-full flex flex-col" style={{ minHeight: '400px' }}>
+    <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 relative overflow-hidden h-full flex flex-col">
       
       <div className="relative z-10">
         <h3 className="text-base font-bold text-gray-900 dark:text-white mb-6 flex items-center">

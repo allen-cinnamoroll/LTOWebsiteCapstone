@@ -216,8 +216,6 @@ export function ViolationAnalytics() {
         loading={loading}
         totalViolations={totalViolations}
         totalTrafficViolators={totalTrafficViolators}
-        topOfficer={analyticsData?.topOfficers?.[0]}
-        mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
       />
 
       {/* Violation Monitoring */}
@@ -237,6 +235,8 @@ export function ViolationAnalytics() {
         totalPages={totalPages}
         handlePrevPage={handlePrevPage}
         handleNextPage={handleNextPage}
+        mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
+        topOfficer={analyticsData?.topOfficers?.[0]}
       />
 
       {/* Violation Prescription Table */}

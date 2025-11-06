@@ -56,7 +56,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-black dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
         <div className="animate-pulse">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl"></div>
@@ -87,7 +87,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-black dark:to-black border-2 border-gray-200 dark:border-gray-800 rounded-xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+      <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
         <div className="flex items-center space-x-3 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@ export function BarChart({ data, title, type, loading, totalCount }) {
   }
 
   return (
-    <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col" style={{ minHeight: '400px' }}>
+    <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
       <div className="flex items-center mb-4">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg flex items-center justify-center shadow-md">
@@ -129,8 +129,8 @@ export function BarChart({ data, title, type, loading, totalCount }) {
       </div>
 
       {/* Recharts Bar Chart */}
-      <div className="flex-1 flex flex-col" style={{ minHeight: '320px' }}>
-        <ResponsiveContainer width="100%" height={350}>
+      <div className="flex-1 flex flex-col">
+        <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis 
