@@ -15,9 +15,10 @@ import {
 } from 'recharts';
 
 export function ViolationMonitoring({ analyticsData }) {
-  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' or 'yearly'
+  const [viewMode, setViewMode] = useState('monthly'); // 'daily' | 'monthly' | 'yearly'
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [selectedYear, setSelectedYear] = useState('All Time'); // Default to All Time
+  const [selectedMonth, setSelectedMonth] = useState(''); // 1-12 as string, required for daily
   const [yearlyStartYear, setYearlyStartYear] = useState(2020); // Default 2020 -> 2025
   const [yearlyChartType, setYearlyChartType] = useState('line'); // 'bar' | 'line'
   const exportMenuRef = useRef(null);
@@ -27,7 +28,7 @@ export function ViolationMonitoring({ analyticsData }) {
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const currentMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const minYear = 2000;
-  const maxYear = 2030;
+  const maxYear = 2025;
 
   // Close export menu when clicking outside
   useEffect(() => {
@@ -43,10 +44,10 @@ export function ViolationMonitoring({ analyticsData }) {
     };
   }, []);
 
-  // Get available years from analytics data (2000 to current year)
+  // Get available years (2000 to 2025)
   const getAvailableYears = () => {
     const years = [];
-    for (let year = 2000; year <= currentYear; year++) {
+    for (let year = minYear; year <= maxYear; year++) {
       years.push(year);
     }
     return years.sort((a, b) => b - a); // Most recent first
@@ -133,6 +134,55 @@ export function ViolationMonitoring({ analyticsData }) {
       isAllTime: false
     };
   };
+
+  // Generate daily data for selected year and month. Uses analyticsData.dailyTrends if available; otherwise derives from monthly totals.
+  const generateDailyData = () => {
+    if (selectedYear === 'All Time' || !selectedMonth) return null; // daily requires specific year and month
+
+    const yearNum = parseInt(selectedYear);
+    const monthNum = parseInt(selectedMonth); // 1-12
+    const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+
+    // Try using backend-provided daily trends if present
+    const dailyTrends = analyticsData?.dailyTrends || [];
+    const hasDaily = Array.isArray(dailyTrends) && dailyTrends.length > 0;
+
+    const dailyCounts = Array.from({ length: daysInMonth }, () => 0);
+
+    if (hasDaily) {
+      dailyTrends.forEach(trend => {
+        const y = trend._id?.year;
+        const m = trend._id?.month;
+        const d = trend._id?.day;
+        if (y === yearNum && m === monthNum && d >= 1 && d <= daysInMonth) {
+          dailyCounts[d - 1] = trend.count || 0;
+        }
+      });
+    } else {
+      // Derive from monthly total for that year+month
+      let monthTotal = 0;
+      (analyticsData?.monthlyTrends || []).forEach(trend => {
+        if (trend._id?.year === yearNum && trend._id?.month === monthNum) {
+          monthTotal = trend.count || 0;
+        }
+      });
+      if (monthTotal > 0) {
+        let remaining = monthTotal;
+        for (let i = 0; i < daysInMonth; i++) {
+          const variation = Math.sin(((i + 1) / daysInMonth) * Math.PI) * 0.3 + 0.7;
+          const value = i === daysInMonth - 1 ? remaining : Math.max(0, Math.round((monthTotal / daysInMonth) * variation));
+          dailyCounts[i] = value;
+          remaining -= value;
+        }
+      }
+    }
+
+    const total = dailyCounts.reduce((a, b) => a + b, 0);
+    return {
+      days: dailyCounts.map((v, idx) => ({ day: idx + 1, violations: v })),
+      monthlyTotal: total
+    };
+  };
   
   // Fallback function if monthly trends not available
   const generateMonthlyFromYearly = () => {
@@ -199,7 +249,35 @@ export function ViolationMonitoring({ analyticsData }) {
   
   // Compute KPI values based on view mode
   const computeKPIs = () => {
-    if (viewMode === 'monthly') {
+    if (viewMode === 'daily') {
+      const dailyData = generateDailyData();
+      if (!dailyData) {
+        return {
+          totalViolations: 0,
+          topMonth: { month: 'N/A', value: 0 },
+          peakMonth: 'N/A',
+          peakValue: 0,
+          avgPerMonth: 0,
+          peakYear: null,
+          avgPerYear: null,
+          peakDay: 'N/A',
+          avgPerDay: 0
+        };
+      }
+      const peak = dailyData.days.reduce((max, item) => item.violations > max.violations ? item : max, { day: 1, violations: 0 });
+      const avgPerDay = Math.round((dailyData.monthlyTotal || 0) / dailyData.days.length || 0);
+      return {
+        totalViolations: dailyData.monthlyTotal || 0,
+        topMonth: { month: 'N/A', value: 0 },
+        peakMonth: null,
+        peakValue: peak.violations,
+        avgPerMonth: null,
+        peakYear: null,
+        avgPerYear: null,
+        peakDay: `Day ${peak.day}`,
+        avgPerDay
+      };
+    } else if (viewMode === 'monthly') {
       // Monthly view KPIs
     if (!monitoringData) {
       return {
@@ -305,7 +383,10 @@ export function ViolationMonitoring({ analyticsData }) {
   const processChartData = () => {
     if (!monitoringData) return [];
 
-    if (viewMode === 'monthly') {
+    if (viewMode === 'daily') {
+      const dailyData = generateDailyData();
+      return dailyData ? dailyData.days : [];
+    } else if (viewMode === 'monthly') {
       // Monthly line chart data - filtered by selected year
       const months = Object.keys(monitoringData.monthly);
       return months.map(month => ({
@@ -362,7 +443,7 @@ export function ViolationMonitoring({ analyticsData }) {
       return (
         <div className="bg-white dark:bg-gray-800 p-3 border border-red-200 dark:border-red-700 rounded-lg shadow-lg max-w-xs">
           <p className="text-sm font-bold text-red-800 dark:text-red-300 mb-2 text-center">
-            {viewMode === 'monthly' ? `${label} ${selectedYear}` : label}
+            {viewMode === 'daily' ? `${label} ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : viewMode === 'monthly' ? `${label} ${selectedYear}` : label}
           </p>
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -389,7 +470,29 @@ export function ViolationMonitoring({ analyticsData }) {
     let filename = '';
     let mimeType = '';
     
-    if (viewMode === 'monthly') {
+    if (viewMode === 'daily') {
+      const dailyData = generateDailyData();
+      if (!dailyData) return;
+      if (format === 'csv') {
+        content = 'Day,Violations\n';
+        dailyData.days.forEach(({ day, violations }) => {
+          content += `${day},${violations}\n`;
+        });
+        filename = `violation_monitoring_daily_${selectedYear}_${currentMonthNames[parseInt(selectedMonth || '1') - 1]}_${new Date().toISOString().split('T')[0]}.csv`;
+        mimeType = 'text/csv';
+      } else if (format === 'json') {
+        content = JSON.stringify(dailyData.days, null, 2);
+        filename = `violation_monitoring_daily_${selectedYear}_${currentMonthNames[parseInt(selectedMonth || '1') - 1]}_${new Date().toISOString().split('T')[0]}.json`;
+        mimeType = 'application/json';
+      } else if (format === 'excel') {
+        content = 'Day,Violations\n';
+        dailyData.days.forEach(({ day, violations }) => {
+          content += `${day},${violations}\n`;
+        });
+        filename = `violation_monitoring_daily_${selectedYear}_${currentMonthNames[parseInt(selectedMonth || '1') - 1]}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      }
+    } else if (viewMode === 'monthly') {
       if (format === 'csv') {
         content = 'Month,Violations\n';
         Object.entries(monitoringData.monthly).forEach(([month, value]) => {
@@ -471,9 +574,11 @@ export function ViolationMonitoring({ analyticsData }) {
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">
-                  {viewMode === 'monthly' 
-                    ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
-                    : `Monitoring ${yearlyStartYear}-${yearlyStartYear + 5}`
+                  {viewMode === 'daily'
+                    ? (selectedYear && selectedMonth ? `Monitoring ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Year and Month')
+                    : viewMode === 'monthly' 
+                      ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
+                      : `Monitoring ${yearlyStartYear}-${yearlyStartYear + 5}`
                   }
                 </div>
               </div>
@@ -547,15 +652,15 @@ export function ViolationMonitoring({ analyticsData }) {
               
               <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                  {viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
+                  {viewMode === 'daily' ? 'Daily Trend' : viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
                 </h4>
                 
                 {/* Controls */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3" style={{ pointerEvents: 'auto' }}>
                   {/* Filters on the left: Year filter for monthly OR yearly filters for yearly view */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  {/* Year Filter - Only show in monthly view */}
-                  {viewMode === 'monthly' && (
+                  {/* Year Filter - Show in daily and monthly view */}
+                  {(viewMode === 'monthly' || viewMode === 'daily') && (
                     <div className="flex items-center gap-2 relative">
                       <label className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
                         Year:
@@ -567,7 +672,9 @@ export function ViolationMonitoring({ analyticsData }) {
                           className="px-3 pr-8 py-1.5 text-xs font-medium bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white hover:border-red-300 dark:hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
                           style={{ minWidth: '180px' }}
                         >
-                          <option value="All Time">All Time (2000-2025)</option>
+                          {viewMode === 'monthly' && (
+                            <option value="All Time">All Time (2000-2025)</option>
+                          )}
                           {availableYears.map((year) => (
                             <option key={year} value={year}>
                               {year}
@@ -575,6 +682,33 @@ export function ViolationMonitoring({ analyticsData }) {
                           ))}
                         </select>
                         {/* Custom Dropdown Arrow */}
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Month Filter - Only for daily view and required */}
+                  {viewMode === 'daily' && (
+                    <div className="flex items-center gap-2 relative">
+                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+                        Month:
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={selectedMonth}
+                          onChange={(e) => setSelectedMonth(e.target.value)}
+                          className="px-3 pr-8 py-1.5 text-xs font-medium bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-gray-900 dark:text-white hover:border-red-300 dark:hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                          style={{ minWidth: '140px' }}
+                        >
+                          <option value="" disabled>Select month</option>
+                          {currentMonthNames.map((name, idx) => (
+                            <option key={idx + 1} value={`${idx + 1}`}>{name}</option>
+                          ))}
+                        </select>
                         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
                           <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -643,6 +777,22 @@ export function ViolationMonitoring({ analyticsData }) {
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">View:</span>
                     <div className="flex bg-gray-100 dark:bg-gray-600 rounded-md p-0.5">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setViewMode('daily');
+                        }}
+                        className={`px-2 sm:px-3 py-1.5 text-xs rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
+                          viewMode === 'daily'
+                            ? 'bg-white dark:bg-gray-500 text-gray-900 dark:text-white shadow-sm font-medium'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-500'
+                        }`}
+                        type="button"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        Daily
+                      </button>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -735,7 +885,45 @@ export function ViolationMonitoring({ analyticsData }) {
               
               <div className="h-64 sm:h-80 lg:h-96">
                 <ResponsiveContainer width="100%" height="100%">
-                  {viewMode === 'monthly' ? (
+                  {viewMode === 'daily' ? (
+                    (selectedYear !== 'All Time' && selectedMonth) ? (
+                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <defs>
+                          <linearGradient id="colorViolationsDaily" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
+                        <XAxis dataKey="day" stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} />
+                        <YAxis stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                        <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
+                        <Area
+                          type="monotone"
+                          dataKey="violations"
+                          stroke="none"
+                          fill="url(#colorViolationsDaily)"
+                          fillOpacity={1}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="violations"
+                          stroke="#E15759"
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          dot={{ r: 4, fill: '#E15759', stroke: '#fff', strokeWidth: 2 }}
+                          activeDot={{ r: 7, fill: '#E15759', stroke: '#fff', strokeWidth: 3, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                          name="Violations"
+                        />
+                      </LineChart>
+                    ) : (
+                      <div className="flex items-center justify-center text-xs text-gray-500 dark:text-gray-400">
+                        Select Year and Month to view daily trend
+                      </div>
+                    )
+                  ) : viewMode === 'monthly' ? (
                     <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <defs>
                         <linearGradient id="colorViolationsMonthly" x1="0" y1="0" x2="0" y2="1">
@@ -854,7 +1042,7 @@ export function ViolationMonitoring({ analyticsData }) {
                 </span>
               </div>
               <div className="text-lg font-bold text-gray-900 dark:text-white truncate w-full">
-                {viewMode === 'monthly' ? kpis.peakMonth : kpis.peakYear}
+                {viewMode === 'daily' ? kpis.peakDay : viewMode === 'monthly' ? kpis.peakMonth : kpis.peakYear}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {kpis.peakValue.toLocaleString()} violations
@@ -874,13 +1062,15 @@ export function ViolationMonitoring({ analyticsData }) {
                 </span>
               </div>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {viewMode === 'monthly' 
-                  ? kpis.avgPerMonth.toLocaleString() 
-                  : kpis.avgPerYear.toLocaleString()
+                {viewMode === 'daily'
+                  ? kpis.avgPerDay?.toLocaleString()
+                  : viewMode === 'monthly' 
+                    ? kpis.avgPerMonth.toLocaleString() 
+                    : kpis.avgPerYear.toLocaleString()
                 }
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {viewMode === 'monthly' ? 'Per month average' : 'Per year average'}
+                {viewMode === 'daily' ? 'Per day average' : viewMode === 'monthly' ? 'Per month average' : 'Per year average'}
               </div>
             </div>
           </div>
