@@ -284,6 +284,7 @@ export function ChartsSection({
             type="officers"
             loading={loading}
             totalCount={displayData?.totalOfficers || 0}
+            allOfficersData={displayData?.topOfficers || []}
           />
         </div>
 
