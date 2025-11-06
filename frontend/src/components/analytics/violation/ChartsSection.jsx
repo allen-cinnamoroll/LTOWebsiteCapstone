@@ -109,14 +109,6 @@ const useProgressBarAnimation = (targetPercentage, duration = 2000, shouldAnimat
 export function ChartsSection({ 
   displayData, 
   loading, 
-  currentViolations,
-  startIndex,
-  endIndex,
-  totalViolationItems,
-  currentPage,
-  totalPages,
-  handlePrevPage,
-  handleNextPage,
   mostCommonViolation,
   topOfficer
 }) {
@@ -302,14 +294,6 @@ export function ChartsSection({
           <ViolationRanking
             displayData={displayData}
             loading={loading}
-            currentViolations={currentViolations}
-            startIndex={startIndex}
-            endIndex={endIndex}
-            totalViolationItems={totalViolationItems}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            handlePrevPage={handlePrevPage}
-            handleNextPage={handleNextPage}
           />
         </div>
       </div>

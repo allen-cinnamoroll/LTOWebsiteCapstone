@@ -15,10 +15,6 @@ export function ViolationAnalytics() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [totalTrafficViolatorsOverride, setTotalTrafficViolatorsOverride] = useState(null);
-  
-  // Pagination state for violation ranking
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
   const yearDropdownRef = useRef(null);
 
@@ -154,21 +150,6 @@ export function ViolationAnalytics() {
     }
   }, [selectedYear]);
 
-  // Pagination logic for violation ranking
-  const totalViolationItems = analyticsData?.mostCommonViolations?.length || 0;
-  const totalPages = Math.ceil(totalViolationItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentViolations = analyticsData?.mostCommonViolations?.slice(startIndex, endIndex) || [];
-
-  const handlePrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
-
   return (
     <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen rounded-lg">
       <div className="mb-8">
@@ -227,14 +208,6 @@ export function ViolationAnalytics() {
       <ChartsSection
         displayData={analyticsData}
         loading={loading}
-        currentViolations={currentViolations}
-        startIndex={startIndex}
-        endIndex={endIndex}
-        totalViolationItems={totalViolationItems}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        handlePrevPage={handlePrevPage}
-        handleNextPage={handleNextPage}
         mostCommonViolation={analyticsData?.mostCommonViolations?.[0]}
         topOfficer={analyticsData?.topOfficers?.[0]}
       />
