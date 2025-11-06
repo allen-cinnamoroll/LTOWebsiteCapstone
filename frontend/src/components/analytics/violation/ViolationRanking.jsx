@@ -30,7 +30,7 @@ export function ViolationRanking({
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      return (
+    return (
         <div className="bg-white dark:bg-gray-800 border-2 border-red-200 dark:border-red-800 rounded-xl px-5 py-4 shadow-2xl min-w-[200px] backdrop-blur-sm">
           <div className="text-center">
             <div className="inline-flex items-center justify-center px-3 py-1 mb-2 bg-red-100 dark:bg-red-900/30 rounded-full">
@@ -44,11 +44,11 @@ export function ViolationRanking({
             <div className="flex items-center justify-center space-x-2">
               <div className="text-2xl font-extrabold text-red-600 dark:text-red-400">
                 {data.occurrences.toLocaleString()}
-              </div>
+                </div>
               <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                 occurrences
               </div>
-            </div>
+          </div>
           </div>
         </div>
       );
@@ -87,17 +87,17 @@ export function ViolationRanking({
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 transform hover:scale-105 transition-transform duration-200">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </div>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+        </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center">
                   <span className="text-[9px] font-bold text-white">5</span>
                 </div>
               </div>
               <div>
                 <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-0.5">
-                  Top Violations Ranking
-                </h3>
+          Top Violations Ranking
+        </h3>
                 <p className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center space-x-2">
                   <span>Top 5 violations by occurrences</span>
                   <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
@@ -178,7 +178,7 @@ export function ViolationRanking({
           )}
         </div>
       </div>
-
+      
       {/* Enhanced Modal for All Violations */}
       {showModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto" onClick={() => setShowModal(false)}>
@@ -241,9 +241,9 @@ export function ViolationRanking({
                             if (rank === 2) return 'bg-gradient-to-br from-gray-300 to-gray-400 text-white shadow-lg shadow-gray-400/50';
                             if (rank === 3) return 'bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg shadow-amber-600/50';
                             return 'bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 text-gray-900 dark:text-white';
-                          };
+            };
 
-                          return (
+            return (
                             <tr 
                               key={violation._id || index}
                               className="hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-800 dark:hover:to-gray-700 transition-all duration-150"
@@ -255,33 +255,33 @@ export function ViolationRanking({
                               </td>
                               <td className="px-6 py-4">
                                 <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                                  {violation._id || 'Unknown Violation'}
-                                </div>
+                    {violation._id || 'Unknown Violation'}
+                  </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-right">
                                 <div className="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
                                   <span className="text-sm font-extrabold text-red-700 dark:text-red-400">
                                     {(violation.count || 0).toLocaleString()}
                                   </span>
-                                </div>
+                </div>
                               </td>
                             </tr>
-                          );
-                        })}
+            );
+          })}
                       </tbody>
                     </table>
-                  </div>
-                ) : (
+        </div>
+      ) : (
                   <div className="text-center py-16">
                     <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center shadow-lg">
                       <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
                     <h4 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-2">No Violation Data Available</h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400">There are no violations to display at this time.</p>
-                  </div>
-                )}
+        </div>
+      )}
               </div>
             </div>
           </div>

@@ -665,13 +665,13 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
       
         {/* Table Section */}
         <div className="px-6 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* First Table - First 6 months */}
             <div className={`overflow-hidden rounded-lg border-2 shadow-md ${isDarkMode ? 'border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/90' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50/50'}`}>
-              <div className="p-3">
+              <div className="p-5">
                 {/* Table Header */}
-                <div className={`mb-2 pb-2 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
-                  <div className={`grid grid-cols-4 gap-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <div className={`mb-3 pb-3 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
+                  <div className={`grid grid-cols-4 gap-2 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     <div className="text-left">Month</div>
                     <div className="text-center">Violations</div>
                     <div className="text-center">Percentage</div>
@@ -680,33 +680,33 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                 </div>
                 
                 {/* Table Rows */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {monthlyData.slice(0, 6).map((month) => (
                     <div
                       key={month.month}
                       onClick={() => handleMonthClick(month.month)}
-                      className={`grid grid-cols-4 gap-1 items-center py-2 px-2 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
+                      className={`grid grid-cols-4 gap-2 items-center py-3 px-3 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
                     >
-                      <div className="flex items-center gap-1">
-                        <div className={`p-1 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
-                          <Calendar className={`h-2.5 w-2.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
+                          <Calendar className={`h-3 w-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900 dark:text-white text-[10px]">
+                          <div className="font-semibold text-gray-900 dark:text-white text-xs">
                             {month.monthNameShort}
                           </div>
                         </div>
                   </div>
                       <div className="text-center">
-                        <span className="text-[11px] font-bold text-gray-900 dark:text-white">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">
                           {month.totalViolations.toLocaleString()}
                   </span>
                       </div>
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className="text-[10px] font-bold text-gray-900 dark:text-white">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-xs font-bold text-gray-900 dark:text-white">
                           {month.percentage.toFixed(1)}%
                     </span>
-                        <div className={`w-full max-w-[50px] h-1 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                        <div className={`w-full max-w-[60px] h-1.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
                           <div
                             className={`h-full transition-all duration-700 ${
                               month.isHighPriority
@@ -721,18 +721,18 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                   </div>
                       <div className="text-center">
                         {month.isHighPriority ? (
-                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
-                            <AlertTriangle className="h-2 w-2" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
+                            <AlertTriangle className="h-2.5 w-2.5" />
                       HIGH
                     </span>
                         ) : month.percentage >= 25 ? (
-                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
-                            <AlertTriangle className="h-2 w-2" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
+                            <AlertTriangle className="h-2.5 w-2.5" />
                             MODERATE
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
-                            <CheckCircle className="h-2 w-2" />
+                    </span>
+                  ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
+                            <CheckCircle className="h-2.5 w-2.5" />
                             LOW
                     </span>
                   )}
@@ -745,10 +745,10 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
       
             {/* Second Table - Last 6 months */}
             <div className={`overflow-hidden rounded-lg border-2 shadow-md ${isDarkMode ? 'border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/90' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50/50'}`}>
-              <div className="p-3">
+              <div className="p-5">
                 {/* Table Header */}
-                <div className={`mb-2 pb-2 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
-                  <div className={`grid grid-cols-4 gap-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <div className={`mb-3 pb-3 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
+                  <div className={`grid grid-cols-4 gap-2 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                     <div className="text-left">Month</div>
                     <div className="text-center">Violations</div>
                     <div className="text-center">Percentage</div>
@@ -757,33 +757,33 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
           </div>
                 
                 {/* Table Rows */}
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {monthlyData.slice(6, 12).map((month) => (
                     <div
                       key={month.month}
                       onClick={() => handleMonthClick(month.month)}
-                      className={`grid grid-cols-4 gap-1 items-center py-2 px-2 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
+                      className={`grid grid-cols-4 gap-2 items-center py-3 px-3 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
                     >
-            <div className="flex items-center gap-1">
-                        <div className={`p-1 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
-                          <Calendar className={`h-2.5 w-2.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+            <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
+                          <Calendar className={`h-3 w-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                         </div>
                         <div>
-                          <div className="font-semibold text-gray-900 dark:text-white text-[10px]">
+                          <div className="font-semibold text-gray-900 dark:text-white text-xs">
                             {month.monthNameShort}
                           </div>
                         </div>
                       </div>
                       <div className="text-center">
-                        <span className="text-[11px] font-bold text-gray-900 dark:text-white">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">
                           {month.totalViolations.toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className="text-[10px] font-bold text-gray-900 dark:text-white">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-xs font-bold text-gray-900 dark:text-white">
                           {month.percentage.toFixed(1)}%
                         </span>
-                        <div className={`w-full max-w-[50px] h-1 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                        <div className={`w-full max-w-[60px] h-1.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
                           <div
                             className={`h-full transition-all duration-700 ${
                               month.isHighPriority
@@ -798,18 +798,18 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
                       </div>
                       <div className="text-center">
                         {month.isHighPriority ? (
-                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
-                            <AlertTriangle className="h-2 w-2" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
+                            <AlertTriangle className="h-2.5 w-2.5" />
                             HIGH
                           </span>
                         ) : month.percentage >= 25 ? (
-                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
-                            <AlertTriangle className="h-2 w-2" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
+                            <AlertTriangle className="h-2.5 w-2.5" />
                             MODERATE
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full text-[9px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
-                            <CheckCircle className="h-2 w-2" />
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
+                            <CheckCircle className="h-2.5 w-2.5" />
                             LOW
                     </span>
                         )}

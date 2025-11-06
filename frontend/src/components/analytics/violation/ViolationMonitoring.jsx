@@ -576,8 +576,8 @@ export function ViolationMonitoring({ analyticsData }) {
                   {viewMode === 'daily'
                     ? (selectedYear && selectedMonth ? `Monitoring ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Year and Month')
                     : viewMode === 'monthly' 
-                      ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
-                      : `Monitoring ${yearlyStartYear}-${yearlyStartYear + 5}`
+                    ? (selectedYear === 'All Time' ? 'All Time (2000-2025)' : `Monitoring ${selectedYear}`)
+                    : `Monitoring ${yearlyStartYear}-${yearlyStartYear + 5}`
                   }
                 </div>
               </div>
@@ -598,8 +598,8 @@ export function ViolationMonitoring({ analyticsData }) {
                   <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight">
                     {viewMode === 'daily' ? 'Daily Trend' : viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
                   </h4>
-                </div>
-
+              </div>
+                
                 {/* Controls */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between sm:items-center" style={{ pointerEvents: 'auto' }}>
                   {/* Filters on the left: Year filter for monthly OR yearly filters for yearly view */}
@@ -618,7 +618,7 @@ export function ViolationMonitoring({ analyticsData }) {
                           style={{ minWidth: '160px' }}
                         >
                           {viewMode === 'monthly' && (
-                            <option value="All Time">All Time (2000-2025)</option>
+                          <option value="All Time">All Time (2000-2025)</option>
                           )}
                           {availableYears.map((year) => (
                             <option key={year} value={year}>
@@ -740,56 +740,56 @@ export function ViolationMonitoring({ analyticsData }) {
                         >
                           Daily
                         </button>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setViewMode('monthly');
-                          }}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setViewMode('monthly');
+                        }}
                           className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
-                            viewMode === 'monthly'
+                          viewMode === 'monthly'
                               ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold'
                               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
-                          }`}
-                          type="button"
-                          style={{ pointerEvents: 'auto' }}
-                        >
-                          Monthly
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setViewMode('yearly');
-                          }}
+                        }`}
+                        type="button"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setViewMode('yearly');
+                        }}
                           className={`px-2 py-1 text-[11px] font-semibold rounded transition-all duration-200 cursor-pointer select-none z-10 relative touch-manipulation ${
-                            viewMode === 'yearly'
+                          viewMode === 'yearly'
                               ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm font-bold'
                               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
-                          }`}
-                          type="button"
-                          style={{ pointerEvents: 'auto' }}
-                        >
-                          Yearly
-                        </button>
-                      </div>
+                        }`}
+                        type="button"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        Yearly
+                      </button>
                     </div>
+                  </div>
 
-                    {/* Export Button */}
+                  {/* Export Button */}
                     <div className="flex items-center gap-2 relative">
-                      <div className="relative" ref={exportMenuRef}>
-                        <button
-                          onClick={() => setShowExportMenu(!showExportMenu)}
+                    <div className="relative" ref={exportMenuRef}>
+                      <button
+                        onClick={() => setShowExportMenu(!showExportMenu)}
                           className="px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-[11px] font-semibold rounded-md transition-all duration-200 flex items-center gap-1 touch-manipulation shadow-md hover:shadow-lg"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <span className="hidden sm:inline">Export</span>
-                          <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="hidden sm:inline">Export</span>
+                        <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
                       
                       {/* Export Dropdown Menu */}
                       {showExportMenu && (
@@ -973,8 +973,8 @@ export function ViolationMonitoring({ analyticsData }) {
                 {viewMode === 'daily'
                   ? (selectedYear && selectedMonth ? `${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Month & Year')
                   : viewMode === 'monthly' 
-                    ? (selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`)
-                    : `${yearlyStartYear}-${yearlyStartYear + 5}`
+                  ? (selectedYear === 'All Time' ? 'All Time' : `Year ${selectedYear}`)
+                  : `${yearlyStartYear}-${yearlyStartYear + 5}`
                 }
               </div>
             </div>
@@ -1015,8 +1015,8 @@ export function ViolationMonitoring({ analyticsData }) {
                 {viewMode === 'daily'
                   ? kpis.avgPerDay?.toLocaleString()
                   : viewMode === 'monthly' 
-                    ? kpis.avgPerMonth.toLocaleString() 
-                    : kpis.avgPerYear.toLocaleString()
+                  ? kpis.avgPerMonth.toLocaleString() 
+                  : kpis.avgPerYear.toLocaleString()
                 }
               </div>
               <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
