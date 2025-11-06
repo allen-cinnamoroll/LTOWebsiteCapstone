@@ -16,8 +16,12 @@ const WeeklyPredictionsTable = () => {
         
         const response = await getWeeklyPredictions(weeksToPredict);
         
-        if (response.success && response.data?.weekly_predictions) {
-          const processed = response.data.weekly_predictions.map((prediction, index) => {
+        // Handle different response structures - API might return data directly or wrapped
+        const responseData = response?.data || response;
+        const weeklyPredictions = responseData?.weekly_predictions || responseData?.predictions || [];
+        
+        if (weeklyPredictions && weeklyPredictions.length > 0) {
+          const processed = weeklyPredictions.map((prediction, index) => {
             const date = new Date(prediction.date || prediction.week_start);
             return {
               week: index + 1,
@@ -33,7 +37,8 @@ const WeeklyPredictionsTable = () => {
           });
           setWeeklyData(processed);
         } else {
-          setError(response.error || 'Failed to fetch prediction data');
+          setError(response?.error || 'No prediction data available');
+          setWeeklyData([]);
         }
       } catch (err) {
         console.error('Error fetching weekly predictions:', err);

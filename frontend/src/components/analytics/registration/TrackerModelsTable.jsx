@@ -15,15 +15,18 @@ const TrackerModelsTable = () => {
         
         const response = await getWeeklyPredictions(4);
         
-        if (response.success && response.data) {
-          // Extract model information if available
+        // Handle different response structures - API might return data directly or wrapped
+        const responseData = response?.data || response;
+        
+        if (responseData) {
+          // Extract model information if available, using optional chaining for safety
           const info = {
-            modelType: response.data.model_type || 'SARIMA',
-            lastTrained: response.data.last_trained || 'N/A',
-            accuracy: response.data.accuracy || response.data.mape || 'N/A',
-            dataPoints: response.data.total_data_points || response.data.weekly_predictions?.length || 0,
-            forecastPeriod: response.data.forecast_period || '4 weeks',
-            status: response.data.status || 'Active'
+            modelType: responseData?.model_type || 'SARIMA',
+            lastTrained: responseData?.last_trained || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            accuracy: responseData?.accuracy || responseData?.mape || 'N/A',
+            dataPoints: responseData?.total_data_points || responseData?.weekly_predictions?.length || 0,
+            forecastPeriod: responseData?.forecast_period || '4 weeks',
+            status: responseData?.status || 'Active'
           };
           setModelInfo(info);
         } else {
@@ -60,8 +63,8 @@ const TrackerModelsTable = () => {
   const modelRows = [
     { label: 'Model Type', value: modelInfo?.modelType || 'SARIMA', icon: BarChart3 },
     { label: 'Last Trained', value: modelInfo?.lastTrained || 'N/A', icon: Activity },
-    { label: 'Accuracy (MAPE)', value: modelInfo?.accuracy !== 'N/A' ? `${modelInfo.accuracy}%` : 'N/A', icon: TrendingUp },
-    { label: 'Data Points', value: modelInfo?.dataPoints?.toLocaleString() || '0', icon: BarChart3 },
+    { label: 'Accuracy (MAPE)', value: modelInfo?.accuracy && modelInfo.accuracy !== 'N/A' ? `${modelInfo.accuracy}%` : 'N/A', icon: TrendingUp },
+    { label: 'Data Points', value: modelInfo?.dataPoints ? modelInfo.dataPoints.toLocaleString() : '0', icon: BarChart3 },
     { label: 'Forecast Period', value: modelInfo?.forecastPeriod || '4 weeks', icon: Activity },
     { label: 'Status', value: modelInfo?.status || 'Active', icon: Activity }
   ];
