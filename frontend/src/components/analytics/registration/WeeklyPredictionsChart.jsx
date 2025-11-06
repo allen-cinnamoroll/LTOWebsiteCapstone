@@ -40,6 +40,23 @@ const WeeklyPredictionsChart = () => {
     11: '#a855f7', // December - Violet
   };
 
+  // Helper function to get ISO week number
+  const getISOWeek = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  };
+
+  // Helper function to get ISO week year (year that the week belongs to)
+  const getISOWeekYear = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    return d.getUTCFullYear();
+  };
+
   // Fetch prediction data
   const fetchPredictions = async () => {
     try {
@@ -100,8 +117,13 @@ const WeeklyPredictionsChart = () => {
       // Handle both 'date' and 'week_start' fields for compatibility
       const dateStr = prediction.date || prediction.week_start;
       const date = new Date(dateStr);
+      
+      // Get ISO week number and year for accurate week labeling
+      const weekNumber = prediction.week || getISOWeek(date);
+      const weekYear = getISOWeekYear(date);
+      
       return {
-        week: index + 1,
+        week: index + 1, // Sequential week number for display
         weekLabel: `Week ${index + 1}`,
         date: dateStr,
         dateLabel: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -109,8 +131,9 @@ const WeeklyPredictionsChart = () => {
         predicted: prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0,
         lowerBound: prediction.lower_bound || 0,
         upperBound: prediction.upper_bound || 0,
-        weekNumber: prediction.week || date.getWeek(),
-        year: date.getFullYear(),
+        weekNumber: weekNumber, // ISO week number
+        year: weekYear, // Year for the week (ISO week year)
+        calendarYear: date.getFullYear(), // Calendar year of the date
         month: date.getMonth() + 1,
       };
     });
@@ -208,15 +231,6 @@ const WeeklyPredictionsChart = () => {
     setYearlyData(yearlyProcessed);
   };
 
-  // Helper function to get week number
-  Date.prototype.getWeek = function() {
-    const date = new Date(this.getTime());
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-    const week1 = new Date(date.getFullYear(), 0, 4);
-    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-  };
-
   // Load data on mount and when weeksToPredict changes
   useEffect(() => {
     fetchPredictions();
@@ -244,7 +258,7 @@ const WeeklyPredictionsChart = () => {
                 </span>
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Week {data.week} of {data.year}
+                Week {data.weekNumber} of {data.year} ({data.dateLabel})
               </div>
             </div>
           </div>
