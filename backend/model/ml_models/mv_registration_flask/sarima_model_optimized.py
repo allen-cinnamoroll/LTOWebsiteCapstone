@@ -1023,11 +1023,27 @@ class OptimizedSARIMAModel:
                 })
             
             # Aggregate to weekly totals
+            # Calculate the Sunday on or after next_month_start for the first week
+            next_month_start_weekday = next_month_start.weekday()
+            days_until_sunday = (6 - next_month_start_weekday) % 7
+            if days_until_sunday == 0 and next_month_start_weekday != 6:
+                days_until_sunday = 7
+            first_week_start = next_month_start + timedelta(days=days_until_sunday)
+            
             weekly_predictions = []
             weekly_grouped = {}
             for pred in daily_predictions:
                 date_obj = pd.to_datetime(pred['date'])
-                week_start = date_obj - timedelta(days=date_obj.weekday())
+                # Calculate Sunday of the week (weekday: Monday=0, Sunday=6)
+                # We want to find the previous Sunday (or current date if it's Sunday)
+                # Formula: (weekday + 1) % 7 gives days since Sunday
+                days_since_sunday = (date_obj.weekday() + 1) % 7
+                week_start = date_obj - timedelta(days=days_since_sunday)
+                
+                # If week_start is before next_month_start, use first_week_start instead
+                if week_start < next_month_start:
+                    week_start = first_week_start
+                
                 week_key = week_start.strftime('%Y-%m-%d')
                 
                 if week_key not in weekly_grouped:
