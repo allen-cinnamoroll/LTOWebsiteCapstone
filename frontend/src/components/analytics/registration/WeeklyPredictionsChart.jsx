@@ -858,6 +858,216 @@ const WeeklyPredictionsChart = () => {
         </div>
       </div>
 
+      {/* Chart Container */}
+      <div className="h-80 w-full min-h-[320px] flex-1 mb-6">
+        {loading ? (
+          <div className="flex items-center justify-center w-full h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center w-full h-full text-red-500">
+            <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-center px-4">{error}</p>
+          </div>
+        ) : currentData.length === 0 ? (
+          <div className="flex items-center justify-center w-full h-full text-gray-500 dark:text-gray-400">
+            <p>No prediction data available</p>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%" minHeight={320}>
+            {viewType === 'yearly' ? (
+              // Yearly View - Bar Chart
+              <BarChart
+                data={currentData}
+                margin={{ 
+                  top: 10, 
+                  right: 20, 
+                  left: 0, 
+                  bottom: 20
+                }}
+              >
+                <defs>
+                  <linearGradient id="yearlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <XAxis 
+                  dataKey="yearLabel" 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  width={60}
+                />
+                <YAxis 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  width={80}
+                  label={{ 
+                    value: 'Number of Vehicles', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fill: '#6b7280' }
+                  }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="totalPredicted"
+                  fill="url(#yearlyGradient)"
+                  radius={[8, 8, 0, 0]}
+                  name="Total Predicted"
+                />
+              </BarChart>
+            ) : viewType === 'monthly' ? (
+              // Monthly View - Bar Chart
+              <BarChart
+                data={currentData}
+                margin={{ 
+                  top: 10, 
+                  right: 20, 
+                  left: 0, 
+                  bottom: 20
+                }}
+              >
+                <defs>
+                  <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <XAxis 
+                  dataKey="monthShort" 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  width={80}
+                  label={{ 
+                    value: 'Number of Vehicles', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fill: '#6b7280' }
+                  }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="totalPredicted"
+                  fill="url(#monthlyGradient)"
+                  radius={[8, 8, 0, 0]}
+                  name="Total Predicted"
+                />
+              </BarChart>
+            ) : (
+              // Weekly View - Line Chart
+              <LineChart
+                data={currentData}
+                margin={{ 
+                  top: 10, 
+                  right: 20, 
+                  left: 0, 
+                  bottom: 20
+                }}
+              >
+                <defs>
+                  <linearGradient id="weeklyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <XAxis 
+                  dataKey="weekLabel" 
+                  stroke="#6b7280"
+                  fontSize={11}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickFormatter={(value) => value.toLocaleString()}
+                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  width={80}
+                  label={{ 
+                    value: 'Number of Vehicles', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fill: '#6b7280' }
+                  }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="predicted"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  fill="url(#weeklyGradient)"
+                  dot={{ 
+                    fill: 'white', 
+                    stroke: '#3b82f6', 
+                    strokeWidth: 2, 
+                    r: 4,
+                    filter: 'drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3))'
+                  }}
+                  activeDot={{ 
+                    r: 6, 
+                    fill: 'white',
+                    stroke: '#3b82f6', 
+                    strokeWidth: 2,
+                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4))'
+                  }}
+                  name="Predicted Registrations"
+                />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Legend */}
+      {currentData.length > 0 && !loading && (
+        <div className="flex flex-wrap justify-center gap-4 mb-6" style={{ 
+          fontSize: '12px', 
+          fontWeight: '500',
+          textAlign: 'center'
+        }}>
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            {viewType === 'yearly' ? (
+              <>
+                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                <span>Yearly Total Predictions</span>
+              </>
+            ) : viewType === 'monthly' ? (
+              <>
+                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                <span>Monthly Total Predictions</span>
+              </>
+            ) : (
+              <>
+                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
+                <span>Weekly Predictions</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards - Show for all views */}
       {kpiMetrics && !loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -1200,216 +1410,6 @@ const WeeklyPredictionsChart = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-      )}
-
-      {/* Chart Container */}
-      <div className="h-80 w-full min-h-[320px] flex-1">
-        {loading ? (
-          <div className="flex items-center justify-center w-full h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center w-full h-full text-red-500">
-            <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-center px-4">{error}</p>
-          </div>
-        ) : currentData.length === 0 ? (
-          <div className="flex items-center justify-center w-full h-full text-gray-500 dark:text-gray-400">
-            <p>No prediction data available</p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%" minHeight={320}>
-            {viewType === 'yearly' ? (
-              // Yearly View - Bar Chart
-              <BarChart
-                data={currentData}
-                margin={{ 
-                  top: 10, 
-                  right: 20, 
-                  left: 0, 
-                  bottom: 20
-                }}
-              >
-                <defs>
-                  <linearGradient id="yearlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
-                <XAxis 
-                  dataKey="yearLabel" 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  width={60}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  width={80}
-                  label={{ 
-                    value: 'Number of Vehicles', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6b7280' }
-                  }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="totalPredicted"
-                  fill="url(#yearlyGradient)"
-                  radius={[8, 8, 0, 0]}
-                  name="Total Predicted"
-                />
-              </BarChart>
-            ) : viewType === 'monthly' ? (
-              // Monthly View - Bar Chart
-              <BarChart
-                data={currentData}
-                margin={{ 
-                  top: 10, 
-                  right: 20, 
-                  left: 0, 
-                  bottom: 20
-                }}
-              >
-                <defs>
-                  <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
-                <XAxis 
-                  dataKey="monthShort" 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  width={80}
-                  label={{ 
-                    value: 'Number of Vehicles', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6b7280' }
-                  }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar
-                  dataKey="totalPredicted"
-                  fill="url(#monthlyGradient)"
-                  radius={[8, 8, 0, 0]}
-                  name="Total Predicted"
-                />
-              </BarChart>
-            ) : (
-              // Weekly View - Line Chart
-              <LineChart
-                data={currentData}
-                margin={{ 
-                  top: 10, 
-                  right: 20, 
-                  left: 0, 
-                  bottom: 20
-                }}
-              >
-                <defs>
-                  <linearGradient id="weeklyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
-                <XAxis 
-                  dataKey="weekLabel" 
-                  stroke="#6b7280"
-                  fontSize={11}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={12}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  width={80}
-                  label={{ 
-                    value: 'Number of Vehicles', 
-                    angle: -90, 
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6b7280' }
-                  }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line
-                  type="monotone"
-                  dataKey="predicted"
-                  stroke="#3b82f6"
-                  strokeWidth={3}
-                  fill="url(#weeklyGradient)"
-                  dot={{ 
-                    fill: 'white', 
-                    stroke: '#3b82f6', 
-                    strokeWidth: 2, 
-                    r: 4,
-                    filter: 'drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3))'
-                  }}
-                  activeDot={{ 
-                    r: 6, 
-                    fill: 'white',
-                    stroke: '#3b82f6', 
-                    strokeWidth: 2,
-                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4))'
-                  }}
-                  name="Predicted Registrations"
-                />
-              </LineChart>
-            )}
-          </ResponsiveContainer>
-        )}
-      </div>
-
-      {/* Legend */}
-      {currentData.length > 0 && !loading && (
-        <div className="flex flex-wrap justify-center gap-4 mt-4" style={{ 
-          fontSize: '12px', 
-          fontWeight: '500',
-          textAlign: 'center'
-        }}>
-          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            {viewType === 'yearly' ? (
-              <>
-                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
-                <span>Yearly Total Predictions</span>
-              </>
-            ) : viewType === 'monthly' ? (
-              <>
-                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
-                <span>Monthly Total Predictions</span>
-              </>
-            ) : (
-              <>
-                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
-                <span>Weekly Predictions</span>
-              </>
-            )}
           </div>
         </div>
       )}
