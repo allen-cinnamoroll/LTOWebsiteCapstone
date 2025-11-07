@@ -560,9 +560,9 @@ export function ViolationMonitoring({ analyticsData }) {
   }
 
   return (
-    <div className="mt-8 border-2 border-red-200/80 dark:border-red-900/70 rounded-2xl shadow-xl bg-gradient-to-br from-red-50/60 via-red-50/40 to-red-50/60 dark:from-red-950/40 dark:via-red-950/30 dark:to-red-950/40 backdrop-blur-sm">
+    <div className="mt-8 border-2 border-red-300/80 dark:border-red-900/70 rounded-2xl shadow-xl bg-gradient-to-br from-red-200/80 via-red-300/70 to-red-400/70 dark:from-red-950/40 dark:via-red-950/30 dark:to-red-950/40 backdrop-blur-sm">
       {/* Header */}
-      <div className="px-4 py-3 border-b-2 border-red-200/60 dark:border-red-800/60 bg-gradient-to-r from-red-50/40 to-red-50/20 dark:from-red-950/30 dark:to-red-950/20">
+      <div className="px-4 py-3 border-b-2 border-red-300/70 dark:border-red-800/60 bg-gradient-to-r from-red-500/20 via-red-500/10 to-red-400/10 dark:from-red-900/40 dark:via-red-900/30 dark:to-red-900/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-md shadow-red-500/30">

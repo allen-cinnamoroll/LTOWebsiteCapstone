@@ -483,9 +483,9 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
   
   return (
     <>
-      <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/40 border-blue-200'} border-2 rounded-2xl shadow-xl overflow-hidden mb-6 backdrop-blur-sm`}>
+      <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-blue-200/90 via-blue-300/80 to-indigo-300/80 border-blue-300'} border-2 rounded-2xl shadow-xl overflow-hidden mb-6 backdrop-blur-sm`}>
         {/* Header Section */}
-        <div className={`px-6 py-4 border-b-2 ${isDarkMode ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-800/30' : 'border-blue-200/50 bg-gradient-to-r from-blue-50/30 to-indigo-50/20'}`}>
+        <div className={`px-6 py-4 border-b-2 ${isDarkMode ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/60 to-gray-800/40' : 'border-blue-300/60 bg-gradient-to-r from-blue-500/15 via-blue-500/10 to-indigo-500/10'}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
               <div className={`p-2 rounded-xl bg-blue-600 border border-blue-500 shadow-md`}>

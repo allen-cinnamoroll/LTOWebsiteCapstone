@@ -145,7 +145,7 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
   return (
     <>
       <div className="bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 px-3 py-2 rounded-lg bg-gray-100/80 dark:bg-gray-800/70 border border-gray-200/70 dark:border-gray-700/70 shadow-sm">
           <div className="flex items-center space-x-3">
             <div className={`w-10 h-10 bg-gradient-to-br ${iconGradient} rounded-lg flex items-center justify-center shadow-md`}>
               <IconComponent className="w-5 h-5 text-white" />

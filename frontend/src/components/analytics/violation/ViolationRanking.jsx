@@ -82,7 +82,7 @@ export function ViolationRanking({
         
         <div className="relative z-10 flex flex-col h-full">
           {/* Header Section */}
-          <div className="flex items-center justify-between mb-4 flex-shrink-0">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0 px-3 py-2 rounded-xl bg-red-100/60 dark:bg-gray-800/70 border border-red-200/60 dark:border-red-800/60 shadow-sm">
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/30 transform hover:scale-105 transition-transform duration-200">
