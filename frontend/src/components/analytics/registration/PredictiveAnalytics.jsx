@@ -2,10 +2,6 @@ import React from 'react';
 import WeeklyPredictionsChart from './WeeklyPredictionsChart.jsx';
 
 export function PredictiveAnalytics() {
-  // Get current year and predict next year
-  const currentYear = new Date().getFullYear();
-  const predictionYear = currentYear + 1;
-
   return (
     <div className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg">
       {/* Header */}
@@ -22,9 +18,6 @@ export function PredictiveAnalytics() {
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Uses the SARIMA algorithm to forecast future trends based on historical and current data, providing insights on risks, traffic patterns, and vehicle registrations.
               </p>
-              <div className="mt-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
-                Predicting {predictionYear} (Based on the last data available)
-              </div>
             </div>
           </div>
         </div>
