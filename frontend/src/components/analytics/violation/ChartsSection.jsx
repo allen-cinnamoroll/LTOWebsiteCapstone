@@ -40,7 +40,7 @@ export function ChartsSection({
   return (
     <div className="space-y-6 mb-8">
       {/* Violation Types Distribution */}
-      <div className="w-full" style={{ height: '460px' }}>
+      <div className="w-full shadow-[0_18px_36px_-18px_rgba(15,23,42,0.45)] border border-gray-200 dark:border-gray-800 rounded-2xl" style={{ height: '460px' }}>
         <PieChart
           data={violationsByTypeData}
           title="Violation Types Distribution"
@@ -51,7 +51,7 @@ export function ChartsSection({
       {/* Violation Ranking and Apprehending Officers Row - Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Violation Ranking Chart - Left Side */}
-        <div style={{ height: '450px' }}>
+        <div style={{ height: '450px' }} className="shadow-[0_12px_30px_-15px_rgba(15,23,42,0.35)] border border-gray-200 dark:border-gray-800 rounded-2xl">
           <ViolationRanking
             displayData={displayData}
             loading={loading}
@@ -59,7 +59,7 @@ export function ChartsSection({
         </div>
 
         {/* Apprehending Officers Chart - Right Side */}
-        <div style={{ height: '450px' }}>
+        <div style={{ height: '450px' }} className="shadow-[0_12px_30px_-15px_rgba(15,23,42,0.35)] border border-gray-200 dark:border-gray-800 rounded-2xl">
           <BarChart
             data={displayData?.topOfficers || []}
             title="Apprehending Officers"

@@ -88,7 +88,7 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
 
   if (loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-4 h-full flex flex-col">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-transparent dark:border-gray-700 p-4 h-full flex flex-col">
         <div className="animate-pulse">
           <div className="flex items-center space-x-3 mb-6">
             <div className={`w-12 h-12 bg-gradient-to-br ${iconGradient} rounded-xl flex items-center justify-center`}>
