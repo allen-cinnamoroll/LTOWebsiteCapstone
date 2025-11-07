@@ -560,9 +560,9 @@ export function ViolationMonitoring({ analyticsData }) {
   }
 
   return (
-    <div className="mt-8 border-2 border-red-300/80 dark:border-red-900/70 rounded-2xl shadow-xl bg-gradient-to-br from-red-200/80 via-red-300/70 to-red-400/70 dark:from-red-950/40 dark:via-red-950/30 dark:to-red-950/40 backdrop-blur-sm">
+    <div className="mt-8 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl bg-white dark:bg-black backdrop-blur-sm">
       {/* Header */}
-      <div className="px-4 py-3 border-b-2 border-red-300/70 dark:border-red-800/60 bg-gradient-to-r from-red-500/20 via-red-500/10 to-red-400/10 dark:from-red-900/40 dark:via-red-900/30 dark:to-red-900/20">
+      <div className="px-4 py-3 border-b-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-md shadow-red-500/30">
@@ -576,7 +576,7 @@ export function ViolationMonitoring({ analyticsData }) {
                 Real-time monitoring of violations to track trends, identify patterns, and support data-driven traffic management decisions.
               </p>
               <div className="mt-2 flex items-center gap-2">
-                <div className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/60 dark:to-red-900/40 text-red-800 dark:text-red-200 border border-red-200/50 dark:border-red-800/50 shadow-sm">
+                <div className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm">
                   {viewMode === 'daily'
                     ? (selectedYear && selectedMonth ? `Monitoring ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : 'Select Year and Month')
                     : viewMode === 'monthly' 
@@ -842,13 +842,25 @@ export function ViolationMonitoring({ analyticsData }) {
                       <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                         <defs>
                           <linearGradient id="colorViolationsDaily" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
-                            <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                            <stop offset="0%" stopColor="#f87171" stopOpacity={0.35} />
+                            <stop offset="25%" stopColor="#fb7185" stopOpacity={0.25} />
+                            <stop offset="60%" stopColor="#fda4af" stopOpacity={0.12} />
+                            <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.04} />
                           </linearGradient>
+                          <filter id="shadowViolationsDaily" x="-20%" y="-20%" width="140%" height="180%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+                            <feOffset in="blur" dx="0" dy="6" result="offsetBlur" />
+                            <feFlood floodColor="#f87171" floodOpacity="0.15" result="color" />
+                            <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
+                            <feMerge>
+                              <feMergeNode in="shadow" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
                         </defs>
-                        <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
-                        <XAxis dataKey="day" stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} />
-                        <YAxis stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+                        <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
+                        <XAxis dataKey="day" stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} />
+                        <YAxis stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
                         <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
                         <Area
@@ -857,6 +869,10 @@ export function ViolationMonitoring({ analyticsData }) {
                           stroke="none"
                           fill="url(#colorViolationsDaily)"
                           fillOpacity={1}
+                          connectNulls
+                          isAnimationActive
+                          animationDuration={900}
+                          filter="url(#shadowViolationsDaily)"
                         />
                         <Line
                           type="monotone"
@@ -865,8 +881,10 @@ export function ViolationMonitoring({ analyticsData }) {
                           strokeWidth={3}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          dot={{ r: 4, fill: '#E15759', stroke: '#fff', strokeWidth: 2 }}
-                          activeDot={{ r: 7, fill: '#E15759', stroke: '#fff', strokeWidth: 3, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                          dot={{ r: 5, fill: '#ffffff', stroke: '#E15759', strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(225,87,89,0.35))' }}
+                          activeDot={{ r: 7, fill: '#ffffff', stroke: '#E15759', strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(225,87,89,0.35))' }}
+                          isAnimationActive
+                          animationDuration={900}
                           name="Violations"
                         />
                       </LineChart>
@@ -878,14 +896,26 @@ export function ViolationMonitoring({ analyticsData }) {
                   ) : viewMode === 'monthly' ? (
                     <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <defs>
-                        <linearGradient id="colorViolationsMonthly" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                      <linearGradient id="colorViolationsMonthly" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f87171" stopOpacity={0.35} />
+                        <stop offset="25%" stopColor="#fb7185" stopOpacity={0.25} />
+                        <stop offset="60%" stopColor="#fda4af" stopOpacity={0.12} />
+                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.04} />
                         </linearGradient>
+                      <filter id="shadowViolationsMonthly" x="-20%" y="-20%" width="140%" height="180%">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+                        <feOffset in="blur" dx="0" dy="6" result="offsetBlur" />
+                        <feFlood floodColor="#f87171" floodOpacity="0.15" result="color" />
+                        <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
+                        <feMerge>
+                          <feMergeNode in="shadow" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
                       </defs>
-                      <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
-                      <XAxis dataKey="month" stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} />
-                      <YAxis stroke="#E15759" fontSize={12} fontWeight="600" tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+                      <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
+                      <XAxis dataKey="month" stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} />
+                      <YAxis stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
                       <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
                       <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
                       <Area
@@ -894,6 +924,10 @@ export function ViolationMonitoring({ analyticsData }) {
                         stroke="none"
                         fill="url(#colorViolationsMonthly)"
                         fillOpacity={1}
+                        connectNulls
+                        isAnimationActive
+                        animationDuration={900}
+                        filter="url(#shadowViolationsMonthly)"
                       />
                       <Line
                         type="monotone"
@@ -902,17 +936,19 @@ export function ViolationMonitoring({ analyticsData }) {
                         strokeWidth={3}
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        dot={{ r: 5, fill: '#E15759', stroke: '#fff', strokeWidth: 2 }}
-                        activeDot={{ r: 8, fill: '#E15759', stroke: '#fff', strokeWidth: 3, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                        dot={{ r: 5, fill: '#ffffff', stroke: '#E15759', strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(225,87,89,0.35))' }}
+                        activeDot={{ r: 8, fill: '#ffffff', stroke: '#E15759', strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(225,87,89,0.35))' }}
+                        isAnimationActive
+                        animationDuration={900}
                         name="Violations"
                       />
                     </LineChart>
                   ) : (
                     yearlyChartType === 'bar' ? (
                     <BarChart data={chartData} margin={{ top: 10, right: 15, left: 10, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
-                        <XAxis dataKey="year" stroke="#E15759" fontSize={12} fontWeight={"600"} tick={{ fill: '#E15759', fontSize: 12 }} />
-                        <YAxis stroke="#E15759" fontSize={12} fontWeight={"600"} tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+                      <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
+                        <XAxis dataKey="year" stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} />
+                        <YAxis stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
                       <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F28E2B', fillOpacity: 0.1 }} />
                       <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
                       <Bar dataKey="violations" name="Violations" fill="#E15759" />
@@ -921,13 +957,25 @@ export function ViolationMonitoring({ analyticsData }) {
                       <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                         <defs>
                           <linearGradient id="colorViolationsYearly" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#E15759" stopOpacity={0.2}/>
-                            <stop offset="95%" stopColor="#E15759" stopOpacity={0.03}/>
+                            <stop offset="0%" stopColor="#f87171" stopOpacity={0.35} />
+                            <stop offset="25%" stopColor="#fb7185" stopOpacity={0.25} />
+                            <stop offset="60%" stopColor="#fda4af" stopOpacity={0.12} />
+                            <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.04} />
                           </linearGradient>
+                          <filter id="shadowViolationsYearly" x="-20%" y="-20%" width="140%" height="180%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
+                            <feOffset in="blur" dx="0" dy="6" result="offsetBlur" />
+                            <feFlood floodColor="#f87171" floodOpacity="0.15" result="color" />
+                            <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
+                            <feMerge>
+                              <feMergeNode in="shadow" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
                         </defs>
-                        <CartesianGrid strokeDasharray="2 4" stroke="#E15759" strokeOpacity={0.2} vertical={false} />
-                        <XAxis dataKey="year" stroke="#E15759" fontSize={12} fontWeight={"600"} tick={{ fill: '#E15759', fontSize: 12 }} />
-                        <YAxis stroke="#E15759" fontSize={12} fontWeight={"600"} tick={{ fill: '#E15759', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
+                        <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
+                        <XAxis dataKey="year" stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} />
+                        <YAxis stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
                         <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
                         <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
                         <Area
@@ -936,6 +984,10 @@ export function ViolationMonitoring({ analyticsData }) {
                           stroke="none"
                           fill="url(#colorViolationsYearly)"
                           fillOpacity={1}
+                          connectNulls
+                          isAnimationActive
+                          animationDuration={900}
+                          filter="url(#shadowViolationsYearly)"
                         />
                         <Line
                           type="monotone"
@@ -944,8 +996,10 @@ export function ViolationMonitoring({ analyticsData }) {
                           strokeWidth={3}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          dot={{ r: 5, fill: '#E15759', stroke: '#fff', strokeWidth: 2 }}
-                          activeDot={{ r: 8, fill: '#E15759', stroke: '#fff', strokeWidth: 3, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                          dot={{ r: 5, fill: '#ffffff', stroke: '#E15759', strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(225,87,89,0.35))' }}
+                          activeDot={{ r: 8, fill: '#ffffff', stroke: '#E15759', strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(225,87,89,0.35))' }}
+                          isAnimationActive
+                          animationDuration={900}
                           name="Violations"
                         />
                       </LineChart>
