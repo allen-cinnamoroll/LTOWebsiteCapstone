@@ -8,12 +8,12 @@ import {
 } from 'recharts';
 
 const COLORS = [
-  '#4F46E5', // indigo
-  '#0EA5E9', // sky
-  '#10B981', // emerald
-  '#F97316', // orange
-  '#EF4444', // red
-  '#6366F1'  // indigo accent (used for "Others")
+  '#3b82f6', // blue
+  '#6366f1', // indigo
+  '#14b8a6', // teal
+  '#8b5cf6', // violet
+  '#f97316', // orange
+  '#22d3ee'  // cyan accent (used for "Others")
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -85,7 +85,7 @@ export function PieChart({ data, title, loading }) {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 h-full flex flex-col justify-center">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-6 h-full flex flex-col justify-center">
         <div className="animate-pulse space-y-5">
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
           <div className="h-56 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
@@ -101,7 +101,7 @@ export function PieChart({ data, title, loading }) {
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 h-full flex flex-col items-center justify-center text-center">
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-6 h-full flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
           <svg className="w-8 h-8 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
@@ -116,9 +116,10 @@ export function PieChart({ data, title, loading }) {
   const activeSlice = activeIndex >= 0 ? chartData[activeIndex] : null;
 
   return (
-    <div className="bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 space-y-5 h-full flex flex-col">
-      <div className="px-4 py-3 rounded-xl bg-blue-100/70 dark:bg-blue-900/30 border border-blue-200/70 dark:border-blue-800/60 shadow-sm flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-md">
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-5 space-y-5 h-full flex flex-col">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white flex items-center justify-center shadow-sm">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
             <path
               d="M12 3a9 9 0 019 9h-7.5a1.5 1.5 0 01-1.5-1.5V3Z"
@@ -148,10 +149,15 @@ export function PieChart({ data, title, loading }) {
               opacity="0.35"
             />
           </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Distribution of violations by type</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
-          <p className="text-xs font-medium text-blue-700/80 dark:text-blue-300/90">Distribution of violations by type</p>
+        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span>Total types: {chartData.length}</span>
         </div>
       </div>
 
@@ -162,7 +168,7 @@ export function PieChart({ data, title, loading }) {
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Total Violations
               </p>
-              <p className="text-3xl font-black text-gray-900 dark:text-white">
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">
                 {total.toLocaleString()}
               </p>
               {activeSlice ? (
@@ -224,10 +230,10 @@ export function PieChart({ data, title, loading }) {
             <div
               key={item.key}
               onMouseEnter={() => setActiveIndex(index)}
-              className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 transition-all duration-200 cursor-pointer ${
+              className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-all duration-200 cursor-pointer ${
                 index === activeIndex
-                  ? 'border-blue-400/70 dark:border-blue-600 bg-blue-50/70 dark:bg-blue-900/30 shadow-lg'
-                  : 'border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/60 hover:border-blue-300/80 hover:shadow-sm'
+                  ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-500'
               }`}
             >
               <div className="flex items-center gap-3 min-w-0">
@@ -239,16 +245,16 @@ export function PieChart({ data, title, loading }) {
                   <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                     {item.name}
                   </p>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {item.percentage.toFixed(1)}% of total
                   </p>
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="text-sm font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
                   {item.value.toLocaleString()}
                 </p>
-                <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   violations
                 </p>
               </div>
