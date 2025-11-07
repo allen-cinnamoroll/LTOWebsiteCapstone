@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight, X, Calendar, FileText, BarChart3, Target, Shield, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight, X, Calendar, ClipboardList, BarChart3, Target, Shield, TrendingUp } from 'lucide-react';
 import { useTheme } from '@/components/theme/theme-provider';
 import { getViolations } from '@/api/violationAnalytics';
 
@@ -488,8 +488,8 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
         <div className={`px-6 py-4 border-b-2 ${isDarkMode ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-800/30' : 'border-blue-200/50 bg-gradient-to-r from-blue-50/30 to-indigo-50/20'}`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl ${isDarkMode ? 'bg-blue-900/30 border border-blue-800/50' : 'bg-blue-100 border border-blue-200/50'} shadow-md`}>
-                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className={`p-2 rounded-xl bg-blue-600 border border-blue-500 shadow-md`}>
+                <ClipboardList className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h2 className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
