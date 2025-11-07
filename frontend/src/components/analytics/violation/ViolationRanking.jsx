@@ -149,7 +149,7 @@ export function ViolationRanking({
                       fontSize={11}
                       fontWeight={600}
                       width={140}
-                      tick={{ fill: '#EF4444' }}
+                      tick={{ fill: '#111827' }}
                       axisLine={{ stroke: '#EF4444', strokeWidth: 2 }}
                       tickLine={{ stroke: '#EF4444' }}
                     />
