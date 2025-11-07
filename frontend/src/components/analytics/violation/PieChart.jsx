@@ -107,7 +107,7 @@ export function PieChart({ data, title, loading }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
             </svg>
           </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">No violation type distribution data available</p>
       </div>
     );
@@ -150,7 +150,7 @@ export function PieChart({ data, title, loading }) {
           </svg>
         </div>
         <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white">{title}</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
           <p className="text-xs font-medium text-blue-700/80 dark:text-blue-300/90">Distribution of violations by type</p>
         </div>
       </div>

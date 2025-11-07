@@ -471,7 +471,7 @@ export function ViolationPrescriptionTable({ displayData, loading, totalViolatio
   if (!displayData || !displayData.monthlyTrends || displayData.monthlyTrends.length === 0) {
     return (
       <div className={`${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl shadow-xl p-8 mb-8`}>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           Violation Prescription & Action Plan
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-center py-12">

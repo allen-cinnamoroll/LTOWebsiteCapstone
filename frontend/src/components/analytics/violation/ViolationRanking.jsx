@@ -95,7 +95,7 @@ export function ViolationRanking({
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-0.5">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5">
           Top Violations Ranking
         </h3>
                 <p className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center space-x-2">

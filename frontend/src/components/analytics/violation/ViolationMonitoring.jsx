@@ -571,7 +571,7 @@ export function ViolationMonitoring({ analyticsData }) {
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Violation Monitoring</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Violation Monitoring</h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
                 Real-time monitoring of violations to track trends, identify patterns, and support data-driven traffic management decisions.
               </p>
@@ -599,7 +599,7 @@ export function ViolationMonitoring({ analyticsData }) {
             <div className="relative rounded-xl p-3 sm:p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-red-100/60 dark:border-red-900/40 shadow-xl overflow-hidden">
               <div className="mb-3 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight">
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">
                     {viewMode === 'daily' ? 'Daily Trend' : viewMode === 'monthly' ? 'Monthly Trend' : 'Yearly Trend'}
                   </h4>
               </div>
