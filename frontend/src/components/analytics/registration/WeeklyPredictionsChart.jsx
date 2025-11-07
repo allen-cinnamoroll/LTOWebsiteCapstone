@@ -859,7 +859,7 @@ const WeeklyPredictionsChart = () => {
       </div>
 
       {/* Chart Container */}
-      <div className="h-80 w-full min-h-[320px] flex-1 mb-6">
+      <div className="h-80 w-full min-h-[320px] flex-1 mb-0">
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -885,7 +885,7 @@ const WeeklyPredictionsChart = () => {
                   top: 10, 
                   right: 20, 
                   left: 0, 
-                  bottom: 20
+                  bottom: 5
                 }}
               >
                 <defs>
@@ -931,7 +931,7 @@ const WeeklyPredictionsChart = () => {
                   top: 10, 
                   right: 20, 
                   left: 0, 
-                  bottom: 20
+                  bottom: 5
                 }}
               >
                 <defs>
@@ -979,7 +979,7 @@ const WeeklyPredictionsChart = () => {
                   top: 10, 
                   right: 20, 
                   left: 0, 
-                  bottom: 20
+                  bottom: 5
                 }}
               >
                 <defs>
@@ -1042,7 +1042,7 @@ const WeeklyPredictionsChart = () => {
 
       {/* Legend */}
       {currentData.length > 0 && !loading && (
-        <div className="flex flex-wrap justify-center gap-4 mb-6" style={{ 
+        <div className="flex flex-wrap justify-center gap-4 mb-6 -mt-2" style={{ 
           fontSize: '12px', 
           fontWeight: '500',
           textAlign: 'center'
