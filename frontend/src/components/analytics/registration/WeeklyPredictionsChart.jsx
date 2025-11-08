@@ -858,6 +858,118 @@ const WeeklyPredictionsChart = () => {
         </div>
       </div>
 
+      {/* KPI Cards - Show for all views */}
+      {kpiMetrics && !loading && !error && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Total Predicted Registrations */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Total Predicted
+              </h3>
+              <div className="w-8 h-8 flex items-center justify-center bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
+                <BarChart2 className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
+              {kpiMetrics.total.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.periodCount} {kpiMetrics.periodLabel}{kpiMetrics.periodCount !== 1 ? 's' : ''} • Avg: {kpiMetrics.avg.toFixed(0)}/{kpiMetrics.periodLabel}
+            </p>
+          </div>
+
+          {/* Trend Direction */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Trend Direction
+              </h3>
+              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
+                kpiMetrics.trendDirection === 'increasing' 
+                  ? 'bg-green-500/10 dark:bg-green-400/10' 
+                  : kpiMetrics.trendDirection === 'decreasing'
+                  ? 'bg-red-500/10 dark:bg-red-400/10'
+                  : 'bg-gray-500/10 dark:bg-gray-400/10'
+              }`}>
+                {React.createElement(kpiMetrics.trendIcon, {
+                  className: `w-5 h-5 ${kpiMetrics.trendColor}`,
+                  strokeWidth: 2
+                })}
+              </div>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <p className={`text-2xl font-bold ${kpiMetrics.trendColor}`}>
+                {kpiMetrics.trendDirection.charAt(0).toUpperCase() + kpiMetrics.trendDirection.slice(1)}
+              </p>
+            </div>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.percentageChange > 0 ? '+' : ''}{kpiMetrics.percentageChange.toFixed(1)}% vs first {kpiMetrics.periodLabel}
+            </p>
+          </div>
+
+          {/* Peak Period */}
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Peak {viewType === 'weekly' ? 'Week' : viewType === 'monthly' ? 'Month' : 'Year'}
+              </h3>
+              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 rounded-lg">
+                <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-amber-900 dark:text-amber-200">
+              {kpiMetrics.peakPeriod}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.peakValue.toLocaleString()} vehicles (highest)
+            </p>
+          </div>
+
+          {/* Risk Flags / Volatility */}
+          <div className={`bg-gradient-to-br ${
+            kpiMetrics.coefficientOfVariation > 25 
+              ? 'from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-red-200 dark:border-red-700'
+              : kpiMetrics.coefficientOfVariation > 15
+              ? 'from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700'
+              : 'from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border-green-200 dark:border-green-700'
+          } border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow`}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Volatility
+              </h3>
+              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
+                kpiMetrics.coefficientOfVariation > 25 
+                  ? 'bg-red-500/10 dark:bg-red-400/10'
+                  : kpiMetrics.coefficientOfVariation > 15
+                  ? 'bg-amber-500/10 dark:bg-amber-400/10'
+                  : 'bg-green-500/10 dark:bg-green-400/10'
+              }`}>
+                {kpiMetrics.coefficientOfVariation > 25 ? (
+                  <AlertTriangle className={`w-5 h-5 ${
+                    kpiMetrics.coefficientOfVariation > 25 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'
+                  }`} strokeWidth={2} />
+                ) : (
+                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
+                )}
+              </div>
+            </div>
+            <p className={`text-2xl font-bold ${
+              kpiMetrics.coefficientOfVariation > 25 
+                ? 'text-red-900 dark:text-red-200'
+                : kpiMetrics.coefficientOfVariation > 15
+                ? 'text-amber-900 dark:text-amber-200'
+                : 'text-green-900 dark:text-green-200'
+            }`}>
+              {kpiMetrics.coefficientOfVariation.toFixed(0)}%
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              {kpiMetrics.coefficientOfVariation > 25 ? 'High variability' : kpiMetrics.coefficientOfVariation > 15 ? 'Moderate variability' : 'Low variability'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Chart Container */}
       <div className="h-80 w-full min-h-[320px] flex-1 mb-0">
         {loading ? (
@@ -1064,118 +1176,6 @@ const WeeklyPredictionsChart = () => {
                 <span>Weekly Predictions</span>
               </>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* KPI Cards - Show for all views */}
-      {kpiMetrics && !loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Total Predicted Registrations */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Total Predicted
-              </h3>
-              <div className="w-8 h-8 flex items-center justify-center bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
-                <BarChart2 className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
-              {kpiMetrics.total.toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {kpiMetrics.periodCount} {kpiMetrics.periodLabel}{kpiMetrics.periodCount !== 1 ? 's' : ''} • Avg: {kpiMetrics.avg.toFixed(0)}/{kpiMetrics.periodLabel}
-            </p>
-          </div>
-
-          {/* Trend Direction */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Trend Direction
-              </h3>
-              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
-                kpiMetrics.trendDirection === 'increasing' 
-                  ? 'bg-green-500/10 dark:bg-green-400/10' 
-                  : kpiMetrics.trendDirection === 'decreasing'
-                  ? 'bg-red-500/10 dark:bg-red-400/10'
-                  : 'bg-gray-500/10 dark:bg-gray-400/10'
-              }`}>
-                {React.createElement(kpiMetrics.trendIcon, {
-                  className: `w-5 h-5 ${kpiMetrics.trendColor}`,
-                  strokeWidth: 2
-                })}
-              </div>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <p className={`text-2xl font-bold ${kpiMetrics.trendColor}`}>
-                {kpiMetrics.trendDirection.charAt(0).toUpperCase() + kpiMetrics.trendDirection.slice(1)}
-              </p>
-            </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {kpiMetrics.percentageChange > 0 ? '+' : ''}{kpiMetrics.percentageChange.toFixed(1)}% vs first {kpiMetrics.periodLabel}
-            </p>
-          </div>
-
-          {/* Peak Period */}
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Peak {viewType === 'weekly' ? 'Week' : viewType === 'monthly' ? 'Month' : 'Year'}
-              </h3>
-              <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 rounded-lg">
-                <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-amber-900 dark:text-amber-200">
-              {kpiMetrics.peakPeriod}
-            </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {kpiMetrics.peakValue.toLocaleString()} vehicles (highest)
-            </p>
-          </div>
-
-          {/* Risk Flags / Volatility */}
-          <div className={`bg-gradient-to-br ${
-            kpiMetrics.coefficientOfVariation > 25 
-              ? 'from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-red-200 dark:border-red-700'
-              : kpiMetrics.coefficientOfVariation > 15
-              ? 'from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700'
-              : 'from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 border-green-200 dark:border-green-700'
-          } border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow`}>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Volatility
-              </h3>
-              <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
-                kpiMetrics.coefficientOfVariation > 25 
-                  ? 'bg-red-500/10 dark:bg-red-400/10'
-                  : kpiMetrics.coefficientOfVariation > 15
-                  ? 'bg-amber-500/10 dark:bg-amber-400/10'
-                  : 'bg-green-500/10 dark:bg-green-400/10'
-              }`}>
-                {kpiMetrics.coefficientOfVariation > 25 ? (
-                  <AlertTriangle className={`w-5 h-5 ${
-                    kpiMetrics.coefficientOfVariation > 25 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'
-                  }`} strokeWidth={2} />
-                ) : (
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
-                )}
-              </div>
-            </div>
-            <p className={`text-2xl font-bold ${
-              kpiMetrics.coefficientOfVariation > 25 
-                ? 'text-red-900 dark:text-red-200'
-                : kpiMetrics.coefficientOfVariation > 15
-                ? 'text-amber-900 dark:text-amber-200'
-                : 'text-green-900 dark:text-green-200'
-            }`}>
-              {kpiMetrics.coefficientOfVariation.toFixed(0)}%
-            </p>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {kpiMetrics.coefficientOfVariation > 25 ? 'High variability' : kpiMetrics.coefficientOfVariation > 15 ? 'Moderate variability' : 'Low variability'}
-            </p>
           </div>
         </div>
       )}
