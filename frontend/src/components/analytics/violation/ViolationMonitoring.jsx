@@ -30,6 +30,19 @@ export function ViolationMonitoring({ analyticsData }) {
   const minYear = 2000;
   const maxYear = 2025;
 
+  const axisColor = '#94A3B8';
+  const tickColor = '#64748B';
+  const gridColor = '#E2E8F0';
+  const gridDash = '4 6';
+  const gridOpacity = 0.9;
+  const lineStrokeColor = '#F43F5E';
+  const gradientStops = {
+    top: '#FB7185',
+    mid: '#F43F5E',
+    low: '#F87171',
+    base: '#FECDD3'
+  };
+
   // Close export menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -842,15 +855,15 @@ export function ViolationMonitoring({ analyticsData }) {
                       <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                         <defs>
                           <linearGradient id="colorViolationsDaily" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#f87171" stopOpacity={0.35} />
-                            <stop offset="25%" stopColor="#fb7185" stopOpacity={0.25} />
-                            <stop offset="60%" stopColor="#fda4af" stopOpacity={0.12} />
-                            <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.04} />
+                            <stop offset="0%" stopColor={gradientStops.top} stopOpacity={0.55} />
+                            <stop offset="30%" stopColor={gradientStops.mid} stopOpacity={0.35} />
+                            <stop offset="65%" stopColor={gradientStops.low} stopOpacity={0.18} />
+                            <stop offset="100%" stopColor={gradientStops.base} stopOpacity={0.06} />
                           </linearGradient>
                           <filter id="shadowViolationsDaily" x="-20%" y="-20%" width="140%" height="180%">
                             <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
                             <feOffset in="blur" dx="0" dy="6" result="offsetBlur" />
-                            <feFlood floodColor="#f87171" floodOpacity="0.15" result="color" />
+                            <feFlood floodColor={gradientStops.mid} floodOpacity="0.2" result="color" />
                             <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
                             <feMerge>
                               <feMergeNode in="shadow" />
@@ -858,11 +871,11 @@ export function ViolationMonitoring({ analyticsData }) {
                             </feMerge>
                           </filter>
                         </defs>
-                        <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
-                        <XAxis dataKey="day" stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} />
-                        <YAxis stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
-                        <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
+                        <CartesianGrid strokeDasharray={gridDash} stroke={gridColor} strokeOpacity={gridOpacity} />
+                        <XAxis dataKey="day" stroke={axisColor} fontSize={12} fontWeight="600" tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} />
+                        <YAxis stroke={axisColor} fontSize={12} fontWeight="600" tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} tickFormatter={(value) => value.toLocaleString()} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: lineStrokeColor, strokeWidth: 1, strokeDasharray: '3 3', strokeOpacity: 0.45 }} />
+                        <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: lineStrokeColor, paddingTop: '10px' }} />
                         <Area
                           type="monotone"
                           dataKey="violations"
@@ -877,12 +890,12 @@ export function ViolationMonitoring({ analyticsData }) {
                         <Line
                           type="monotone"
                           dataKey="violations"
-                          stroke="#E15759"
+                          stroke={lineStrokeColor}
                           strokeWidth={3}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          dot={{ r: 5, fill: '#ffffff', stroke: '#E15759', strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(225,87,89,0.35))' }}
-                          activeDot={{ r: 7, fill: '#ffffff', stroke: '#E15759', strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(225,87,89,0.35))' }}
+                          dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(244,63,94,0.35))' }}
+                          activeDot={{ r: 7, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(244,63,94,0.4))' }}
                           isAnimationActive
                           animationDuration={900}
                           name="Violations"
@@ -894,18 +907,18 @@ export function ViolationMonitoring({ analyticsData }) {
                       </div>
                     )
                   ) : viewMode === 'monthly' ? (
-                    <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <defs>
                       <linearGradient id="colorViolationsMonthly" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f87171" stopOpacity={0.35} />
-                        <stop offset="25%" stopColor="#fb7185" stopOpacity={0.25} />
-                        <stop offset="60%" stopColor="#fda4af" stopOpacity={0.12} />
-                        <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.04} />
+                        <stop offset="0%" stopColor={gradientStops.top} stopOpacity={0.55} />
+                        <stop offset="30%" stopColor={gradientStops.mid} stopOpacity={0.35} />
+                        <stop offset="65%" stopColor={gradientStops.low} stopOpacity={0.18} />
+                        <stop offset="100%" stopColor={gradientStops.base} stopOpacity={0.06} />
                         </linearGradient>
                       <filter id="shadowViolationsMonthly" x="-20%" y="-20%" width="140%" height="180%">
                         <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
                         <feOffset in="blur" dx="0" dy="6" result="offsetBlur" />
-                        <feFlood floodColor="#f87171" floodOpacity="0.15" result="color" />
+                        <feFlood floodColor={gradientStops.mid} floodOpacity="0.2" result="color" />
                         <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
                         <feMerge>
                           <feMergeNode in="shadow" />
@@ -913,11 +926,11 @@ export function ViolationMonitoring({ analyticsData }) {
                         </feMerge>
                       </filter>
                       </defs>
-                      <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
-                      <XAxis dataKey="month" stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} />
-                      <YAxis stroke="#1F2937" fontSize={12} fontWeight="600" tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
-                      <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
+                      <CartesianGrid strokeDasharray={gridDash} stroke={gridColor} strokeOpacity={gridOpacity} />
+                      <XAxis dataKey="month" stroke={axisColor} fontSize={12} fontWeight="600" tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} />
+                      <YAxis stroke={axisColor} fontSize={12} fontWeight="600" tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} tickFormatter={(value) => value.toLocaleString()} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ stroke: lineStrokeColor, strokeWidth: 1, strokeDasharray: '3 3', strokeOpacity: 0.45 }} />
+                      <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: lineStrokeColor, paddingTop: '10px' }} />
                       <Area
                         type="monotone"
                         dataKey="violations"
@@ -932,12 +945,12 @@ export function ViolationMonitoring({ analyticsData }) {
                       <Line
                         type="monotone"
                         dataKey="violations"
-                        stroke="#E15759"
+                        stroke={lineStrokeColor}
                         strokeWidth={3}
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        dot={{ r: 5, fill: '#ffffff', stroke: '#E15759', strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(225,87,89,0.35))' }}
-                        activeDot={{ r: 8, fill: '#ffffff', stroke: '#E15759', strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(225,87,89,0.35))' }}
+                        dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(244,63,94,0.35))' }}
+                        activeDot={{ r: 8, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(244,63,94,0.4))' }}
                         isAnimationActive
                         animationDuration={900}
                         name="Violations"
@@ -946,26 +959,26 @@ export function ViolationMonitoring({ analyticsData }) {
                   ) : (
                     yearlyChartType === 'bar' ? (
                     <BarChart data={chartData} margin={{ top: 10, right: 15, left: 10, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
-                        <XAxis dataKey="year" stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} />
-                        <YAxis stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: '#F28E2B', fillOpacity: 0.1 }} />
-                      <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
-                      <Bar dataKey="violations" name="Violations" fill="#E15759" />
+                      <CartesianGrid strokeDasharray={gridDash} stroke={gridColor} strokeOpacity={gridOpacity} />
+                        <XAxis dataKey="year" stroke={axisColor} fontSize={12} fontWeight={"600"} tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} />
+                        <YAxis stroke={axisColor} fontSize={12} fontWeight={"600"} tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} tickFormatter={(value) => value.toLocaleString()} />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: lineStrokeColor, fillOpacity: 0.12 }} />
+                      <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: lineStrokeColor, paddingTop: '10px' }} />
+                      <Bar dataKey="violations" name="Violations" fill={lineStrokeColor} />
                     </BarChart>
                     ) : (
                       <LineChart data={chartData} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
                         <defs>
                           <linearGradient id="colorViolationsYearly" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#f87171" stopOpacity={0.35} />
-                            <stop offset="25%" stopColor="#fb7185" stopOpacity={0.25} />
-                            <stop offset="60%" stopColor="#fda4af" stopOpacity={0.12} />
-                            <stop offset="100%" stopColor="#fecdd3" stopOpacity={0.04} />
+                            <stop offset="0%" stopColor={gradientStops.top} stopOpacity={0.55} />
+                            <stop offset="30%" stopColor={gradientStops.mid} stopOpacity={0.35} />
+                            <stop offset="65%" stopColor={gradientStops.low} stopOpacity={0.18} />
+                            <stop offset="100%" stopColor={gradientStops.base} stopOpacity={0.06} />
                           </linearGradient>
                           <filter id="shadowViolationsYearly" x="-20%" y="-20%" width="140%" height="180%">
                             <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur" />
                             <feOffset in="blur" dx="0" dy="6" result="offsetBlur" />
-                            <feFlood floodColor="#f87171" floodOpacity="0.15" result="color" />
+                            <feFlood floodColor={gradientStops.mid} floodOpacity="0.2" result="color" />
                             <feComposite in="color" in2="offsetBlur" operator="in" result="shadow" />
                             <feMerge>
                               <feMergeNode in="shadow" />
@@ -973,11 +986,11 @@ export function ViolationMonitoring({ analyticsData }) {
                             </feMerge>
                           </filter>
                         </defs>
-                        <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
-                        <XAxis dataKey="year" stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} />
-                        <YAxis stroke="#1F2937" fontSize={12} fontWeight={"600"} tick={{ fill: '#1F2937', fontSize: 12 }} tickFormatter={(value) => value.toLocaleString()} />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#F28E2B', strokeWidth: 1, strokeDasharray: '3 3' }} />
-                        <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: '#E15759', paddingTop: '10px' }} />
+                        <CartesianGrid strokeDasharray={gridDash} stroke={gridColor} strokeOpacity={gridOpacity} />
+                        <XAxis dataKey="year" stroke={axisColor} fontSize={12} fontWeight={"600"} tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} />
+                        <YAxis stroke={axisColor} fontSize={12} fontWeight={"600"} tick={{ fill: tickColor, fontSize: 12, fontWeight: 600 }} tickFormatter={(value) => value.toLocaleString()} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: lineStrokeColor, strokeWidth: 1, strokeDasharray: '3 3', strokeOpacity: 0.45 }} />
+                        <Legend wrapperStyle={{ fontSize: '13px', fontWeight: '600', color: lineStrokeColor, paddingTop: '10px' }} />
                         <Area
                           type="monotone"
                           dataKey="violations"
@@ -992,12 +1005,12 @@ export function ViolationMonitoring({ analyticsData }) {
                         <Line
                           type="monotone"
                           dataKey="violations"
-                          stroke="#E15759"
+                          stroke={lineStrokeColor}
                           strokeWidth={3}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          dot={{ r: 5, fill: '#ffffff', stroke: '#E15759', strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(225,87,89,0.35))' }}
-                          activeDot={{ r: 8, fill: '#ffffff', stroke: '#E15759', strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(225,87,89,0.35))' }}
+                          dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(244,63,94,0.35))' }}
+                          activeDot={{ r: 8, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(244,63,94,0.4))' }}
                           isAnimationActive
                           animationDuration={900}
                           name="Violations"
