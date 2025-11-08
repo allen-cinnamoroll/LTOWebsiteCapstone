@@ -1,118 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/components/theme/theme-provider';
 
-// Counter animation hook - starts animation when data is available
-const useCounterAnimation = (end, duration = 2000, shouldAnimate = true) => {
-  const [count, setCount] = useState(0);
+const useAnimationProgress = (duration = 2000, shouldAnimate = true, trigger = 0) => {
+  const [progress, setProgress] = useState(0);
   const animationRef = useRef(null);
-  
-  useEffect(() => {
-    // Reset count when animation should not run
-    if (!shouldAnimate) {
-      setCount(0);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-      return;
-    }
-    
-    // Reset to 0 and start animation
-    setCount(0);
-    
-    // Small delay to ensure all animations start together
-    const timeoutId = setTimeout(() => {
-      let startTime = null;
-      const startValue = 0;
-      
-      const animate = (currentTime) => {
-        if (!startTime) startTime = currentTime;
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const currentCount = Math.floor(startValue + (end - startValue) * easeOutQuart);
-        
-        setCount(currentCount);
-        
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        } else {
-          setCount(end);
-          animationRef.current = null;
-        }
-      };
-      
-      animationRef.current = requestAnimationFrame(animate);
-    }, 50); // Small delay to synchronize all animations
-    
-    return () => {
-      clearTimeout(timeoutId);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-    };
-  }, [end, duration, shouldAnimate]);
-  
-  return count;
-};
 
-// Progress bar animation hook - synchronized with counter animation (same pattern)
-const useProgressBarAnimation = (targetPercentage, duration = 2000, shouldAnimate = true) => {
-  const [width, setWidth] = useState(0);
-  const animationRef = useRef(null);
-  
   useEffect(() => {
-    // Reset width when animation should not run
     if (!shouldAnimate) {
-      setWidth(0);
+      setProgress(0);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
       }
       return;
     }
-    
-    // Reset to 0 and start animation
-    setWidth(0);
-    
-    // Small delay to ensure all animations start together
-    const timeoutId = setTimeout(() => {
-      let startTime = null;
-      const startValue = 0;
-      
-      const animate = (currentTime) => {
-        if (!startTime) startTime = currentTime;
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-        
-        // Same easing function as counter animation - easeOutQuart
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const currentWidth = startValue + (targetPercentage - startValue) * easeOutQuart;
-        
-        setWidth(currentWidth);
-        
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        } else {
-          setWidth(targetPercentage);
-          animationRef.current = null;
-        }
-      };
-      
-      animationRef.current = requestAnimationFrame(animate);
-    }, 50); // Small delay to synchronize all animations
-    
+
+    let startTime = null;
+
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const rawProgress = Math.min((currentTime - startTime) / duration, 1);
+      const easeOutQuart = 1 - Math.pow(1 - rawProgress, 4);
+
+      setProgress(easeOutQuart);
+
+      if (rawProgress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        animationRef.current = null;
+      }
+    };
+
+    setProgress(0);
+    animationRef.current = requestAnimationFrame(animate);
+
     return () => {
-      clearTimeout(timeoutId);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
       }
     };
-  }, [targetPercentage, duration, shouldAnimate]);
-  
-  return width;
+  }, [duration, shouldAnimate, trigger]);
+
+  return progress;
 };
 
 export function KPICards({ displayData, loading, totalViolations, totalTrafficViolators, mostCommonViolation }) {
@@ -141,14 +71,18 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   // Determine if we should animate - all animations start together when data is loaded
   const shouldAnimate = !loading && animationTrigger > 0;
   
-  // Counter animations - all start simultaneously when data is available
-  const violationsAnimated = useCounterAnimation(totalViolations || 0, 2000, shouldAnimate);
-  const violatorsAnimated = useCounterAnimation(totalTrafficViolators || 0, 2000, shouldAnimate);
-  const commonViolationCountAnimated = useCounterAnimation(mostCommonViolation?.count || 0, 2000, shouldAnimate);
-  
-  // Progress bar animations - synchronized with counter animations, all start together
-  const violationsBarWidth = useProgressBarAnimation(100, 2000, shouldAnimate);
-  const violatorsBarWidth = useProgressBarAnimation(100, 2000, shouldAnimate);
+  const animationProgress = useAnimationProgress(2000, shouldAnimate, animationTrigger);
+
+  const animateNumber = (targetValue = 0) => Math.round(targetValue * (shouldAnimate ? animationProgress : 0));
+
+  const animateWidth = (targetWidth = 0) => (shouldAnimate ? animationProgress * targetWidth : 0);
+
+  const violationsAnimated = animateNumber(totalViolations || 0);
+  const violatorsAnimated = animateNumber(totalTrafficViolators || 0);
+  const commonViolationCountAnimated = animateNumber(mostCommonViolation?.count || 0);
+
+  const violationsBarWidth = animateWidth(100);
+  const violatorsBarWidth = animateWidth(100);
   
   // Calculate percentage for most common violation
   const violationsByTypeData = displayData?.violationsByType || [];
@@ -156,11 +90,11 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   const mostCommonViolationPercentage = totalViolationsByType > 0 
     ? ((mostCommonViolation?.count || 0) / totalViolationsByType * 100).toFixed(1)
     : '0.0';
-  const commonViolationBarWidth = useProgressBarAnimation(
-    Math.min(((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100, 100),
-    2000,
-    shouldAnimate
-  );
+  const commonViolationTargetWidth = Math.min(
+    ((mostCommonViolation?.count || 0) / ((mostCommonViolation?.count || 0) + ((mostCommonViolation?.count || 0) * 0.7))) * 100,
+    100
+  ) || 0;
+  const commonViolationBarWidth = animateWidth(commonViolationTargetWidth);
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
@@ -207,9 +141,10 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
           </div>
           <div className="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-1.5 overflow-hidden backdrop-blur-sm">
             <div 
-              className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 h-1.5 rounded-full shadow-lg shadow-orange-500/50 transition-all duration-500"
+              className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 h-1.5 rounded-full shadow-lg shadow-orange-500/50"
               style={{ 
-                width: `${violationsBarWidth}%`
+                width: `${violationsBarWidth}%`,
+                transition: 'none'
               }}
             ></div>
           </div>
@@ -238,9 +173,10 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
           </div>
           <div className="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-1.5 overflow-hidden backdrop-blur-sm">
             <div 
-              className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 h-1.5 rounded-full shadow-lg shadow-green-500/50 transition-all duration-500"
+              className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 h-1.5 rounded-full shadow-lg shadow-green-500/50"
               style={{ 
-                width: `${violatorsBarWidth}%`
+                width: `${violatorsBarWidth}%`,
+                transition: 'none'
               }}
             ></div>
           </div>
@@ -279,9 +215,10 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
           </div>
           <div className="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-1.5 overflow-hidden backdrop-blur-sm">
             <div 
-              className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 h-1.5 rounded-full shadow-lg shadow-red-500/50 transition-all duration-500"
+              className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 h-1.5 rounded-full shadow-lg shadow-red-500/50"
               style={{ 
-                width: `${commonViolationBarWidth}%`
+                width: `${commonViolationBarWidth}%`,
+                transition: 'none'
               }}
             ></div>
           </div>
