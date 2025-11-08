@@ -1229,14 +1229,17 @@ const WeeklyPredictionsChart = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  vs. Previous {viewType === 'weekly' ? `${weeksToPredict}-Week` : viewType === 'monthly' ? 'Month' : 'Year'} Period
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  Historical data not available for comparison
-                </p>
-              </div>
+              // Only show "not available" message for weekly view
+              viewType === 'weekly' && (
+                <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    vs. Previous {viewType === 'weekly' ? `${weeksToPredict}-Week` : viewType === 'monthly' ? 'Month' : 'Year'} Period
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Historical data not available for comparison
+                  </p>
+                </div>
+              )
             )}
 
             {comparativeAnalysis.previousYearTotal !== null ? (
@@ -1261,14 +1264,17 @@ const WeeklyPredictionsChart = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  vs. Same Period Last Year
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  Historical data not available for comparison
-                </p>
-              </div>
+              // Only show "not available" message for weekly view
+              viewType === 'weekly' && (
+                <div className="bg-white/60 dark:bg-gray-800/60 rounded-md p-3 border border-slate-200 dark:border-slate-600">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    vs. Same Period Last Year
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Historical data not available for comparison
+                  </p>
+                </div>
+              )
             )}
 
             {/* Analytical Insights */}
@@ -1326,8 +1332,8 @@ const WeeklyPredictionsChart = () => {
               </div>
             )}
 
-            {/* Note about data availability */}
-            {(comparativeAnalysis.previousPeriodTotal === null || comparativeAnalysis.previousYearTotal === null) && (
+            {/* Note about data availability - Only show for weekly view */}
+            {(comparativeAnalysis.previousPeriodTotal === null || comparativeAnalysis.previousYearTotal === null) && viewType === 'weekly' && (
               <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
                 <p className="text-xs text-gray-500 dark:text-gray-400 italic flex items-center gap-1">
                   <Info className="w-3 h-3" />
