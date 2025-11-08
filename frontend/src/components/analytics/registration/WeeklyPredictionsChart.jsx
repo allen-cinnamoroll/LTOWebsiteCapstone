@@ -1277,61 +1277,6 @@ const WeeklyPredictionsChart = () => {
               )
             )}
 
-            {/* Analytical Insights */}
-            {comparativeAnalysis.insights.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Analytical Insights
-                </p>
-                <ul className="space-y-2">
-                  {comparativeAnalysis.insights.map((insight, index) => {
-                    let icon = Info;
-                    let iconColor = 'text-blue-600 dark:text-blue-400';
-                    let bgColor = 'bg-blue-50 dark:bg-blue-900/20';
-                    let borderColor = 'border-blue-200 dark:border-blue-800';
-                    
-                    if (insight.type === 'positive') {
-                      icon = CheckCircle2;
-                      iconColor = 'text-green-600 dark:text-green-400';
-                      bgColor = 'bg-green-50 dark:bg-green-900/20';
-                      borderColor = 'border-green-200 dark:border-green-800';
-                    } else if (insight.type === 'negative') {
-                      icon = AlertCircle;
-                      iconColor = 'text-red-600 dark:text-red-400';
-                      bgColor = 'bg-red-50 dark:bg-red-900/20';
-                      borderColor = 'border-red-200 dark:border-red-800';
-                    }
-                    
-                    return (
-                      <li 
-                        key={index}
-                        className={`flex items-start gap-2 p-2 rounded-md ${bgColor} border ${borderColor}`}
-                      >
-                        {React.createElement(icon, {
-                          className: `w-4 h-4 mt-0.5 flex-shrink-0 ${iconColor}`,
-                          strokeWidth: 2
-                        })}
-                        <span className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                          {insight.text}
-                          {insight.context && (
-                            <span className={`ml-1 font-medium ${
-                              insight.context === 'exceptional' 
-                                ? 'text-green-700 dark:text-green-300'
-                                : insight.context === 'concerning'
-                                ? 'text-red-700 dark:text-red-300'
-                                : 'text-gray-600 dark:text-gray-400'
-                            }`}>
-                              ({insight.context})
-                            </span>
-                          )}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-
             {/* Note about data availability - Only show for weekly view */}
             {(comparativeAnalysis.previousPeriodTotal === null || comparativeAnalysis.previousYearTotal === null) && viewType === 'weekly' && (
               <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
