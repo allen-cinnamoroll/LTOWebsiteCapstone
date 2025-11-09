@@ -150,9 +150,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           description: `Renewal date added for ${vehicleData.plateNo}`,
         });
             
-        // Notify parent component to refresh the vehicle list
-        if (onVehicleUpdated) {
-          onVehicleUpdated();
+            // Notify parent component to refresh the vehicle list
+            if (onVehicleUpdated) {
+              onVehicleUpdated();
         }
       } else {
         setErrorMessage(data.message || "Failed to update renewal date");
@@ -671,12 +671,12 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             }
             return (
               <>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Are you sure you want to renew this vehicle?
-                </p>
-                <p className="mt-1 text-gray-600 dark:text-gray-300">
-                  Please review the details below before confirming.
-                </p>
+          <p className="text-gray-600 dark:text-gray-300">
+            Are you sure you want to renew this vehicle?
+          </p>
+          <p className="mt-1 text-gray-600 dark:text-gray-300">
+            Please review the details below before confirming.
+          </p>
               </>
             );
           })()}

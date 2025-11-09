@@ -287,33 +287,33 @@ export function RegistrationAnalytics() {
       ) : (
         /* Metrics Section - Individual Cards */
         <div className="registration-analytics-fade-in animate-in slide-in-from-bottom-5 fade-in duration-700">
-        <div className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="mb-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-1">
             {/* Registered Vehicles Card */}
-            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-transparent dark:!border-gray-700 hover:border-red-300 dark:hover:border-red-600 overflow-hidden">
-              {/* Bubble effect */}
-              <div className="absolute -top-8 -right-8 w-24 h-24 bg-pink-100 dark:bg-pink-900/30 rounded-full opacity-60"></div>
-              <div className="absolute -top-4 -right-4 w-16 h-16 bg-red-200 dark:bg-red-800/40 rounded-full opacity-40"></div>
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <div className="relative z-10 flex items-center justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">REGISTERED VEHICLES</h3>
+            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-red-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden`}>
+              {/* Gradient shading effect */}
+              <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-red-600/10 bg-gradient-to-br from-red-500/15 to-red-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
+              <div className="absolute top-4 right-4">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
+                  <circle cx="7" cy="17" r="2"></circle>
+                  <path d="M9 17h6"></path>
+                  <circle cx="17" cy="17" r="2"></circle>
+                </svg>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 pr-10">
+                    <div className="mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">REGISTERED VEHICLES</h3>
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                      {loading ? '...' : vehiclesTotal}
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
-                    {loading ? '...' : vehiclesTotal}
-                  </div>
-                </div>
-                <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-red-500 group-hover:text-red-600 transition-colors duration-300" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
-                    <circle cx="7" cy="17" r="2"></circle>
-                    <path d="M9 17h6"></path>
-                    <circle cx="17" cy="17" r="2"></circle>
-                  </svg>
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
@@ -344,27 +344,27 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Registered Owners Card */}
-            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-transparent dark:!border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 overflow-hidden">
-              {/* Bubble effect */}
-              <div className="absolute -top-8 -right-8 w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full opacity-60"></div>
-              <div className="absolute -top-4 -right-4 w-16 h-16 bg-blue-200 dark:bg-blue-800/40 rounded-full opacity-40"></div>
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <div className="relative z-10 flex items-center justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">REGISTERED OWNERS</h3>
+            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden`}>
+              {/* Gradient shading effect */}
+              <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-blue-600/10 bg-gradient-to-br from-blue-500/15 to-blue-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
+              <div className="absolute top-4 right-4">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 pr-10">
+                    <div className="mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">REGISTERED OWNERS</h3>
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                      {loading ? '...' : driversTotal}
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
-                    {loading ? '...' : driversTotal}
-                  </div>
-                </div>
-                <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-blue-500 group-hover:text-blue-600 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
@@ -395,34 +395,34 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Plate Classification Card */}
-            <div className="group relative bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:-translate-y-1 transition-all duration-300 dark:!bg-transparent dark:!border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 overflow-hidden">
-              {/* Bubble effect */}
-              <div className="absolute -top-8 -right-8 w-24 h-24 bg-purple-100 dark:bg-purple-900/30 rounded-full opacity-60"></div>
-              <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-200 dark:bg-purple-800/40 rounded-full opacity-40"></div>
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <div className="relative z-10 flex items-center justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">PLATE CLASSIFICATION</h3>
+            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-purple-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden`}>
+              {/* Gradient shading effect */}
+              <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-purple-600/10 bg-gradient-to-br from-purple-500/15 to-purple-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
+              <div className="absolute top-4 right-4">
+                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>
+                  <rect x="4" y="8" width="16" height="8" rx="1" ry="1"/>
+                  <path d="M8 10h2"/>
+                  <path d="M12 10h2"/>
+                  <path d="M16 10h2"/>
+                  <path d="M8 12h2"/>
+                  <path d="M12 12h2"/>
+                  <path d="M16 12h2"/>
+                </svg>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 pr-10">
+                    <div className="mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">PLATE CLASSIFICATION</h3>
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                      {loading ? '...' : platesTotal}
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
-                    {loading ? '...' : platesTotal}
-                  </div>
-                </div>
-                <div className="w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <svg className="w-6 h-6 text-purple-500 group-hover:text-purple-600 transition-colors duration-300" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>
-                    <rect x="4" y="8" width="16" height="8" rx="1" ry="1"/>
-                    <path d="M8 10h2"/>
-                    <path d="M12 10h2"/>
-                    <path d="M16 10h2"/>
-                    <path d="M8 12h2"/>
-                    <path d="M12 12h2"/>
-                    <path d="M16 12h2"/>
-                  </svg>
                 </div>
               </div>
               <div className="relative z-10 flex items-center text-xs text-gray-600 dark:text-gray-400 mb-3">
