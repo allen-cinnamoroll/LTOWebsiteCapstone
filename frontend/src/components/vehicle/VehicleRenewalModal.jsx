@@ -406,7 +406,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
         });
         return {
           valid: false,
-          message: `Vehicle can only be renewed once per year. A renewal already exists on ${existingRenewalDate} (${newRenewalYear}). You cannot renew again in ${newRenewalYear} unless you are renewing within the 2-month advance window.`
+          message: `Vehicle can only be renewed once per year. A renewal already exists on ${existingRenewalDate} (${newRenewalYear}). You cannot renew again in ${newRenewalYear} unless you are renewing within the 2-month advance.`
         };
       }
       // If within advance window, allow it (renewing early for next expiration cycle)

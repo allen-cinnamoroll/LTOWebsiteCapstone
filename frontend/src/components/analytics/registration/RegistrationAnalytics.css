@@ -287,3 +287,157 @@
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
+
+/* Enhanced Animations for Registration Analytics */
+
+/* Staggered fade-in animation for cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    width: 0;
+  }
+}
+
+/* Staggered animation classes */
+.animate-stagger-1 {
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+  opacity: 0;
+}
+
+.animate-stagger-2 {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+  opacity: 0;
+}
+
+.animate-stagger-3 {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+  opacity: 0;
+}
+
+.animate-stagger-4 {
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+  opacity: 0;
+}
+
+.animate-stagger-5 {
+  animation: fadeInUp 0.6s ease-out 0.5s both;
+  opacity: 0;
+}
+
+.animate-stagger-6 {
+  animation: fadeInUp 0.6s ease-out 0.6s both;
+  opacity: 0;
+}
+
+/* Chart entrance animations */
+.chart-fade-in {
+  animation: fadeInUp 0.8s ease-out 0.3s both;
+  opacity: 0;
+}
+
+.chart-scale-in {
+  animation: scaleIn 0.8s ease-out 0.4s both;
+  opacity: 0;
+}
+
+/* Section animations */
+.section-fade-in {
+  animation: fadeInUp 0.8s ease-out both;
+  opacity: 0;
+}
+
+/* Progress bar animation */
+@keyframes progressFill {
+  from {
+    width: 0;
+  }
+}
+
+.progress-bar-animate {
+  animation: progressFill 1.5s ease-out both;
+}
+
+/* Pulse animation for icons */
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.icon-pulse {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Number counting animation */
+@keyframes numberCount {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.number-animate {
+  animation: numberCount 0.5s ease-out both;
+}

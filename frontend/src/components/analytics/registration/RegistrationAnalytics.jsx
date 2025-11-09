@@ -290,11 +290,11 @@ export function RegistrationAnalytics() {
         <div className="mb-0">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-1">
             {/* Registered Vehicles Card */}
-            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-red-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden`}>
+            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-red-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-1`}>
               {/* Gradient shading effect */}
               <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-red-600/10 bg-gradient-to-br from-red-500/15 to-red-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
               <div className="absolute top-4 right-4">
-                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400 icon-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
                   <circle cx="7" cy="17" r="2"></circle>
                   <path d="M9 17h6"></path>
@@ -310,7 +310,7 @@ export function RegistrationAnalytics() {
                         <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">REGISTERED VEHICLES</h3>
                       </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 number-animate">
                       {loading ? '...' : vehiclesTotal}
                     </div>
                   </div>
@@ -344,11 +344,11 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Registered Owners Card */}
-            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden`}>
+            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-2`}>
               {/* Gradient shading effect */}
               <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-blue-600/10 bg-gradient-to-br from-blue-500/15 to-blue-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
               <div className="absolute top-4 right-4">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 icon-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
@@ -361,7 +361,7 @@ export function RegistrationAnalytics() {
                         <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">REGISTERED OWNERS</h3>
                       </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 number-animate">
                       {loading ? '...' : driversTotal}
                     </div>
                   </div>
@@ -395,11 +395,11 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Plate Classification Card */}
-            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-purple-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden`}>
+            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-purple-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-3`}>
               {/* Gradient shading effect */}
               <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-purple-600/10 bg-gradient-to-br from-purple-500/15 to-purple-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
               <div className="absolute top-4 right-4">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400 icon-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>
                   <rect x="4" y="8" width="16" height="8" rx="1" ry="1"/>
                   <path d="M8 10h2"/>
@@ -419,7 +419,7 @@ export function RegistrationAnalytics() {
                         <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">PLATE CLASSIFICATION</h3>
                       </div>
                     </div>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 number-animate">
                       {loading ? '...' : platesTotal}
                     </div>
                   </div>
@@ -455,10 +455,10 @@ export function RegistrationAnalytics() {
           
           {/* Charts Row - Vehicle Trend Chart and Municipality Chart */}
           <div className="flex flex-col gap-6 mb-6">
-            <div className="w-full">
+            <div className="w-full chart-fade-in">
               <VehicleTrendChart />
             </div>
-            <div className="w-full">
+            <div className="w-full chart-fade-in" style={{ animationDelay: '0.2s' }}>
               <MunicipalityChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
@@ -469,14 +469,14 @@ export function RegistrationAnalytics() {
           
           {/* Vehicle Classification Chart and Owner Municipality Chart */}
           <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1 lg:flex-1">
+            <div className="flex-1 lg:flex-[0.7] chart-scale-in">
               <VehicleClassificationChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
                 loading={loading}
               />
             </div>
-            <div className="flex-1 lg:flex-1">
+            <div className="flex-1 lg:flex-[1.3] chart-scale-in" style={{ animationDelay: '0.1s' }}>
               <OwnerMunicipalityChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
@@ -489,7 +489,9 @@ export function RegistrationAnalytics() {
       )}
 
       {/* Predictive Analytics Container */}
-      <PredictiveAnalytics />
+      <div className="section-fade-in" style={{ animationDelay: '0.3s' }}>
+        <PredictiveAnalytics />
+      </div>
 
     </div>
   );

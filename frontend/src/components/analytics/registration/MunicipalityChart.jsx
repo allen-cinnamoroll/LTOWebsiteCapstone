@@ -393,7 +393,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                         margin={{ top: 10, right: 10, left: 5, bottom: 20 }}
                         barCategoryGap="5%"
                       >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.7} vertical={false} />
+                        <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
                         <XAxis 
                           dataKey="name" 
                           stroke="#6b7280"
@@ -604,7 +604,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                   margin={{ top: 20, right: 10, left: 10, bottom: 60 }}
                   barCategoryGap="5%"
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                  <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
                   <XAxis 
                     dataKey="name" 
                     stroke="#6b7280"
