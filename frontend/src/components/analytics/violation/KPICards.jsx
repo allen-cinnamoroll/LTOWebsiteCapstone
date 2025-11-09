@@ -133,7 +133,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
               <div className="mb-2">
                 <p className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Total Violations</p>
               </div>
-              <div className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-400 dark:to-orange-500 bg-clip-text text-transparent">
+              <div className="text-3xl font-extrabold text-black dark:text-white mb-2">
                 {loading ? '...' : violationsAnimated.toLocaleString()}
               </div>
               <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 mb-0.5">All time recorded violations</p>
@@ -165,7 +165,7 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
               <div className="mb-2">
                 <p className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Traffic Violators</p>
               </div>
-              <div className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 bg-gradient-to-r from-green-600 to-green-700 dark:from-green-400 dark:to-green-500 bg-clip-text text-transparent">
+              <div className="text-3xl font-extrabold text-black dark:text-white mb-2">
                 {loading ? '...' : violatorsAnimated.toLocaleString()}
               </div>
               <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-0.5">People</p>

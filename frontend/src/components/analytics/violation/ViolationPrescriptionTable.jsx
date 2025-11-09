@@ -1,863 +1,577 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, TrendingDown, ChevronLeft, ChevronRight, X, Calendar, ClipboardList, BarChart3, Target, Shield, TrendingUp } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ClipboardList,
+  Info,
+  TrendingUp,
+  MapPin,
+  GraduationCap,
+  Megaphone,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
 import { useTheme } from '@/components/theme/theme-provider';
 import { getViolations } from '@/api/violationAnalytics';
 
-// Function to get recommended action based on violation type
-const getViolationAction = (violationName) => {
-  const violation = violationName?.toUpperCase() || '';
-  const violationLower = violationName?.toLowerCase() || '';
-  
-  // License and Documentation Violations
-  if (violation.includes('1A') || violation.includes("NO DRIVER'S LICENSE") || violation.includes("CONDUCTOR PERMIT")) {
-    return 'Conduct mandatory license verification checkpoints at strategic locations. Implement driver education programs for unlicensed drivers. Increase penalties and mandatory license acquisition before vehicle release. Establish mobile licensing units in rural areas.';
-  }
-  
-  if (violation.includes('1I') || violation.includes('FAILURE TO CARRY') || violationLower.includes('carry driver')) {
-    return 'Launch awareness campaigns on importance of carrying valid documents. Implement digital license verification system. Conduct regular document checks at checkpoints. Provide reminders through mobile apps and SMS notifications.';
-  }
-  
-  if (violation.includes('4-8') || violation.includes('UNAUTHORIZED/NO-LICENSE DRIVER')) {
-    return 'Strengthen commercial vehicle operator verification. Require mandatory background checks for drivers. Implement real-time driver license verification system. Increase penalties for operators hiring unlicensed drivers.';
-  }
-  
-  // Criminal Activity Violations
-  if (violation.includes('1B') || violation.includes('DRIVING DURING CRIME')) {
-    return 'Enhance coordination with law enforcement agencies. Implement immediate vehicle impoundment protocols. Strengthen background checks for vehicle registration. Establish rapid response units for criminal activity reports.';
-  }
-  
-  if (violation.includes('1C') || violation.includes('CRIME DURING APPREHENSION')) {
-    return 'Provide specialized training for traffic enforcers on handling dangerous situations. Implement body camera requirement for all enforcers. Establish emergency response protocols. Strengthen coordination with police departments.';
-  }
-  
-  // DUI and Substance Abuse
-  if (violation.includes('1D') || violation.includes('DRIVING UNDER THE INFLUENCE') || violation.includes('ALCOHOL') || violation.includes('DRUGS')) {
-    return 'Implement zero-tolerance policy with immediate vehicle impoundment. Increase random breathalyzer and drug testing checkpoints. Launch nationwide anti-DUI campaigns. Mandatory alcohol/drug education programs for offenders. Establish rehabilitation programs for repeat offenders.';
-  }
-  
-  // Reckless Driving
-  if (violation.includes('1E') || violation.includes('RECKLESS DRIVING')) {
-    return 'Increase penalties for reckless driving with mandatory license suspension. Implement mandatory defensive driving courses for repeat offenders. Deploy more traffic enforcers in high-risk areas. Install speed cameras and traffic monitoring systems.';
-  }
-  
-  if (violation.includes('4-7') || violation.includes('RECKLESS/INSOLENT/ARROGANT DRIVER')) {
-    return 'Implement behavior modification programs for commercial drivers. Strengthen penalties for insolent behavior. Require customer service training for public utility vehicle drivers. Establish complaint hotlines for passenger reports.';
-  }
-  
-  // Fake Documents
-  if (violation.includes('1F') || violation.includes('FAKE DOCUMENTS')) {
-    return 'Implement document verification system with QR codes. Strengthen document authentication training for enforcers. Increase penalties for document forgery. Establish partnership with printing companies to prevent counterfeiting.';
-  }
-  
-  if (violation.includes('1J40') || violation.includes('4-6') || violation.includes('FRAUDULENT DOCS')) {
-    return 'Implement digital verification system for all documents. Strengthen document issuance security features. Conduct regular audits of document authenticity. Increase penalties and criminal charges for document fraud.';
-  }
-  
-  // Seatbelt Violations
-  if (violation.includes('1G1') || violation.includes('NO SEATBELT (DRIVER/FRONT')) {
-    return 'Launch seatbelt awareness campaigns emphasizing driver and front passenger safety. Install seatbelt reminder systems in vehicles. Increase enforcement at checkpoints. Conduct educational programs in schools and communities.';
-  }
-  
-  if (violation.includes('1G2') || violation.includes('NO SEATBELT (PASSENGER')) {
-    return 'Strengthen seatbelt enforcement for rear passengers. Launch public awareness campaigns on passenger safety. Require seatbelt installation in all vehicle seats. Increase penalties for non-compliance.';
-  }
-  
-  // Helmet Violations
-  if (violation.includes('1H') || violation.includes('N1') || violation.includes('NOT WEARING HELMET')) {
-    return 'Launch comprehensive helmet safety awareness campaigns. Distribute free or subsidized ICC-certified helmets in collaboration with motorcycle dealers. Enforce strict helmet laws at all checkpoints. Conduct helmet safety education programs in schools and communities.';
-  }
-  
-  if (violation.includes('R.A 10054') || violation.includes('SUBSTANDARD HELMET') || violation.includes('NO ICC')) {
-    return 'Launch awareness campaigns on ICC-certified helmet standards. Establish partnerships with helmet manufacturers for quality assurance. Conduct market inspections to remove substandard helmets. Provide subsidies for ICC-certified helmet purchases.';
-  }
-  
-  if (violation.includes('N5-1') || violation.includes('FLIPFLOPS') || violation.includes('SANDALS') || violation.includes('SLIPPERS')) {
-    return 'Launch footwear safety awareness campaigns for motorcycle riders. Emphasize proper protective footwear requirements. Increase enforcement at checkpoints. Provide educational materials on proper riding gear.';
-  }
-  
-  // Parking Violations
-  if (violation.includes('1J1') || violation.includes('ILLEGAL PARKING')) {
-    return 'Improve parking infrastructure and signage in high-traffic areas. Implement smart parking systems with mobile payment. Increase enforcement in no-parking zones. Establish designated parking areas with clear markings.';
-  }
-  
-  // Traffic Sign Violations
-  if (violation.includes('1J2') || violation.includes('DISREGARDING TRAFFIC SIGNS')) {
-    return 'Improve visibility and maintenance of traffic signs. Launch awareness campaigns on traffic sign recognition. Increase enforcement at intersections with traffic violations. Conduct driver education on traffic sign importance.';
-  }
-  
-  // Default action for unrecognized violations
-  return 'Increase enforcement and public awareness campaigns. Conduct regular review of violation patterns. Implement targeted interventions based on violation trends. Strengthen coordination between enforcement units.';
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+
+const formatMonthKey = (key) => {
+  if (!key || typeof key !== 'string') return '';
+  const [year, month] = key.split('-');
+  const monthIndex = Number(month) - 1;
+  if (Number.isNaN(monthIndex) || monthIndex < 0 || monthIndex > 11) return key;
+  return `${MONTH_NAMES[monthIndex]} ${year}`;
 };
 
-// Month Detail Modal Component
-const MonthDetailModal = ({ isOpen, onClose, monthData, year, monthName, violationsData, loading }) => {
-  const { theme } = useTheme();
-  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+const parseViolations = (record) => {
+  const raw =
+    record?.violations ??
+    record?.violation ??
+    record?.violationType ??
+    record?.violationName ??
+    record?.offense ??
+    '';
 
-  if (!isOpen) return null;
-
-  // Group violations by type and count occurrences
-  const violationCounts = {};
-  if (violationsData && violationsData.length > 0) {
-    violationsData.forEach(violation => {
-      const violations = Array.isArray(violation.violations) 
-        ? violation.violations 
-        : (typeof violation.violations === 'string' 
-            ? violation.violations.split(',').map(v => v.trim()).filter(v => v)
-            : []);
-      
-      violations.forEach(v => {
-        const violationName = v.trim();
-        if (violationName) {
-          violationCounts[violationName] = (violationCounts[violationName] || 0) + 1;
-        }
-      });
-    });
-  }
-
-  // Convert to array and sort by count
-  const violationsList = Object.entries(violationCounts)
-    .map(([name, count]) => ({
-      name,
-      count,
-      percentage: monthData?.totalViolations > 0 ? (count / monthData.totalViolations) * 100 : 0,
-      action: getViolationAction(name)
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  const totalViolations = monthData?.totalViolations || 0;
-  const uniqueViolationTypes = violationsList.length;
-  const topViolation = violationsList[0];
-
-  return (
-    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className={`${isDarkMode ? 'bg-gray-900' : 'bg-white'} rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-        {/* Header */}
-        <div className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800 to-gray-800' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} px-8 py-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-transparent'}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${isDarkMode ? 'bg-gray-700' : 'bg-white/40'}`}>
-                <Calendar className="h-7 w-7 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-1">
-                  {monthName} {year} - Violations Analysis
-                </h2>
-                <div className="flex items-center gap-4 text-sm text-blue-100">
-                  <span>Total Violations: <span className="font-bold text-white">{totalViolations.toLocaleString()}</span></span>
-                  <span>•</span>
-                  <span>Violation Types: <span className="font-bold text-white">{uniqueViolationTypes}</span></span>
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className={`p-2.5 rounded-xl ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white/30 hover:bg-white/40'} transition-colors`}
-            >
-              <X className="h-5 w-5 text-white" />
-            </button>
-          </div>
-        </div>
-
-        {/* Stats Summary Bar */}
-        {!loading && violationsList.length > 0 && (
-          <div className={`${isDarkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-blue-50 border-b border-blue-100'} px-8 py-4`}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Top Violation</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
-                    {topViolation?.name || 'N/A'}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <AlertTriangle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Highest Occurrence</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">
-                    {topViolation?.count.toLocaleString() || '0'} violations
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                  <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Percentage Share</div>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white">
-                    {topViolation?.percentage.toFixed(2) || '0.00'}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-16 px-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                Loading violations data...
-              </div>
-            </div>
-          ) : violationsList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 px-6">
-              <div className={`p-4 rounded-full ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} mb-4`}>
-                <FileText className="h-8 w-8 text-gray-400" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 font-medium">
-                No violations found for this month.
-              </p>
-            </div>
-          ) : (
-            <div className="p-6">
-              <div className={`overflow-hidden rounded-xl border ${isDarkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className={`${isDarkMode ? 'bg-gray-800 border-b border-gray-700' : 'bg-gray-50 border-b border-gray-200'}`}>
-                        <th className={`text-left py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Violation Type
-                        </th>
-                        <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Occurrences
-                        </th>
-                        <th className={`text-center py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Percentage
-                        </th>
-                        <th className={`text-left py-4 px-6 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Recommended Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {violationsList.map((violation, index) => {
-                        const isHighPriority = violation.percentage >= 50;
-                        const isMediumPriority = violation.percentage >= 25 && violation.percentage < 50;
-                        return (
-                          <tr
-                            key={index}
-                            className={`${isDarkMode ? 'hover:bg-gray-800/50' : 'hover:bg-blue-50/30'} transition-colors`}
-                          >
-                            <td className="py-4 px-6">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-2 h-2 rounded-full ${
-                                  isHighPriority ? 'bg-red-500' : isMediumPriority ? 'bg-yellow-500' : 'bg-green-500'
-                                }`}></div>
-                                <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                                  {violation.name}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <div className="flex flex-col items-center">
-                                <span className="text-base font-bold text-gray-900 dark:text-white">
-                                  {violation.count.toLocaleString()}
-                                </span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                  occurrences
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <div className="flex flex-col items-center gap-2">
-                                <span className="text-base font-bold text-gray-900 dark:text-white">
-                                  {violation.percentage.toFixed(2)}%
-                                </span>
-                                <div className={`w-full max-w-[100px] h-2.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                                  <div
-                                    className={`h-full transition-all duration-700 ${
-                                      isHighPriority
-                                        ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
-                                        : isMediumPriority
-                                        ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
-                                        : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
-                                    }`}
-                                    style={{ width: `${Math.min(violation.percentage, 100)}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <div className="text-xs text-gray-700 dark:text-gray-300 max-w-lg leading-relaxed">
-                                {violation.action}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Summary */}
-        {!loading && violationsList.length > 0 && (
-          <div className={`${isDarkMode ? 'bg-gray-800 border-t border-gray-700' : 'bg-gray-50 border-t border-gray-200'} px-8 py-4`}>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-6 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Low (&lt;25%)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">Moderate (25-50%)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                  <span className="text-gray-600 dark:text-gray-400">High (≥50%)</span>
-                </div>
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Showing {violationsList.length} violation type(s) for {monthName} {year}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  if (Array.isArray(raw)) return raw.map((entry) => entry?.trim?.() || '').filter(Boolean);
+  if (typeof raw === 'string') return raw.split(',').map((entry) => entry.trim()).filter(Boolean);
+  return [];
 };
 
-export function ViolationPrescriptionTable({ displayData, loading, totalViolations }) {
-  const { theme } = useTheme();
-  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  
-  // Year filter state
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [monthViolations, setMonthViolations] = useState([]);
-  const [loadingMonthData, setLoadingMonthData] = useState(false);
-  
-  const currentYear = new Date().getFullYear();
-  const minYear = 2000;
-  const maxYear = 2025;
-  
-  // Get available years
-  const getAvailableYears = () => {
-    const years = [];
-    for (let year = minYear; year <= maxYear; year++) {
-      years.push(year.toString());
+const summarizeRepeatMonths = (entries) => {
+  if (!entries?.length) return '—';
+  return entries
+    .slice(0, 3)
+    .map(([key, count]) => `${formatMonthKey(key)} (${count})`)
+    .join(', ');
+};
+
+const deriveRecommendations = (records, planningYear) => {
+  const defaultRows = [
+    {
+      category: 'Checkpoints',
+      recommendations: [
+        `Maintain monthly checkpoints across priority corridors throughout ${planningYear}.`,
+        'Schedule manpower two weeks before special events or market days.',
+        'Capture detailed field reports to refine next-year targeting.'
+      ],
+      basis: [
+        'No high-density months detected in current dataset.',
+        'Checkpoint playbook remains on routine rotation until new data is ingested.',
+        'Continue monitoring violation uploads for fresh spikes.'
+      ]
+    },
+    {
+      category: 'Seminar',
+      recommendations: [
+        'Keep seminars optional while monitoring repeat violations.',
+        'Use SMS reminders for drivers due for license renewal.',
+        'Coordinate with schools and cooperatives for quarterly refreshers.'
+      ],
+      basis: [
+        'Seminar trigger rule: ≥4 cases across ≥2 years with ≥2 repeat months (each ≥2 cases).',
+        'Current dataset shows no violation type meeting the repetition threshold.',
+        'Quarterly review recommended to reassess mandatory seminar coverage.'
+      ]
+    },
+    {
+      category: 'Awareness Campaign',
+      recommendations: [
+        'Maintain broad “safe and legal driving” messaging on social media.',
+        'Partner with barangays for rotating community briefings.',
+        'Leverage radio spots during morning drive hours.'
+      ],
+      basis: [
+        'Awareness spike rule: monthly count ≥ max(1.5× average, average + 2) with ≥3 cases.',
+        'No violation type breached the spike threshold in the current dataset.',
+        `Re-evaluate awareness focus before Q2 ${planningYear}.`
+      ]
     }
-    return years.sort((a, b) => parseInt(b) - parseInt(a));
-  };
+  ];
 
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-  const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-  // Get monthly data for selected year
-  const getMonthlyData = () => {
-    if (!displayData?.monthlyTrends || displayData.monthlyTrends.length === 0) {
-      return [];
-    }
-
-    const selectedYearNum = parseInt(selectedYear);
-    const monthlyData = [];
-
-    // Initialize all months with 0
-    for (let i = 1; i <= 12; i++) {
-      monthlyData.push({
-        month: i,
-        monthName: monthNames[i - 1],
-        monthNameShort: monthNamesShort[i - 1],
-        totalViolations: 0
-      });
-    }
-
-    // Fill in actual data
-    displayData.monthlyTrends.forEach(trend => {
-      if (trend._id?.year === selectedYearNum) {
-        const month = trend._id?.month || 0;
-        if (month >= 1 && month <= 12) {
-          monthlyData[month - 1].totalViolations = trend.count || 0;
-        }
-      }
-    });
-
-    // Calculate total for the year
-    const yearTotal = monthlyData.reduce((sum, month) => sum + month.totalViolations, 0);
-
-    // Calculate percentage and priority for each month
-    const monthlyDataWithPercentage = monthlyData.map(month => {
-      const percentage = yearTotal > 0 ? (month.totalViolations / yearTotal) * 100 : 0;
-    const isHighPriority = percentage >= 50;
-    
+  if (!Array.isArray(records) || !records.length) {
     return {
-        ...month,
-        percentage: Math.round(percentage * 100) / 100,
-        isHighPriority
+      rows: defaultRows,
+      meta: {
+        datasetSize: 0,
+        topMonths: [],
+        uniqueViolations: 0,
+        heuristics: [
+          'Checkpoint priority months = top 3 months by total individual violations.',
+          'Seminar requirement = violation type with ≥4 cases across ≥2 years and ≥2 repeat months (each ≥2 cases).',
+          'Awareness spike = monthly count ≥ max(1.5× average, average + 2) and ≥3 cases.'
+        ],
+        dominantViolation: null,
+        keyMonths: []
+      }
+    };
+  }
+
+  const monthBuckets = MONTH_NAMES.map(() => ({
+    totalViolations: 0,
+    recordCount: 0,
+    yearCounts: new Map(),
+    violationCounts: new Map()
+  }));
+
+  const typeStats = new Map();
+
+  records.forEach((record) => {
+    if (!record?.dateOfApprehension) return;
+    const date = new Date(record.dateOfApprehension);
+    if (Number.isNaN(date.getTime())) return;
+
+    const monthIndex = date.getMonth();
+    const year = date.getFullYear();
+    const bucket = monthBuckets[monthIndex];
+
+    let violationList = parseViolations(record);
+    if (!violationList.length && record?.violationType) {
+      violationList = [record.violationType];
+    }
+
+    const violationCountForMonth = violationList.length || 1;
+    bucket.totalViolations += violationCountForMonth;
+    bucket.recordCount += 1;
+    bucket.yearCounts.set(year, (bucket.yearCounts.get(year) || 0) + violationCountForMonth);
+
+    violationList.forEach((violationRaw) => {
+      const label = violationRaw?.trim?.();
+      if (!label) return;
+      const key = label.toLowerCase();
+
+      if (!bucket.violationCounts.has(key)) {
+        bucket.violationCounts.set(key, { label, count: 0 });
+      }
+      bucket.violationCounts.get(key).count += 1;
+
+      if (!typeStats.has(key)) {
+        typeStats.set(key, {
+          key,
+          name: label,
+          total: 0,
+          yearCounts: new Map(),
+          monthCounts: new Map()
+        });
+      }
+      const stat = typeStats.get(key);
+      stat.total += 1;
+      stat.yearCounts.set(year, (stat.yearCounts.get(year) || 0) + 1);
+
+      const monthKey = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+      stat.monthCounts.set(monthKey, (stat.monthCounts.get(monthKey) || 0) + 1);
+    });
+  });
+
+  const monthSummaries = monthBuckets
+    .map((bucket, index) => {
+      if (bucket.totalViolations === 0) return null;
+      const violationEntries = Array.from(bucket.violationCounts.values()).sort((a, b) => b.count - a.count);
+      const topViolationEntry = violationEntries[0] || null;
+      const yearEntries = Array.from(bucket.yearCounts.entries()).sort((a, b) => b[1] - a[1]);
+      const peakYearEntry = yearEntries[0] || null;
+
+      return {
+        monthIndex: index,
+        monthName: MONTH_NAMES[index],
+        totalViolations: bucket.totalViolations,
+        topViolation: topViolationEntry?.label ?? null,
+        peakYear: peakYearEntry ? peakYearEntry[0] : null,
+        peakYearCount: peakYearEntry ? peakYearEntry[1] : 0
+      };
+    })
+    .filter(Boolean);
+
+  if (!monthSummaries.length) {
+    return {
+      rows: defaultRows,
+      meta: {
+        datasetSize: records.length,
+        topMonths: [],
+        uniqueViolations: typeStats.size,
+        heuristics: [
+          'Checkpoint priority months = top 3 months by total individual violations.',
+          'Seminar requirement = violation type with ≥4 cases across ≥2 years and ≥2 repeat months (each ≥2 cases).',
+          'Awareness spike = monthly count ≥ max(1.5× average, average + 2) and ≥3 cases.'
+        ],
+        dominantViolation: null,
+        keyMonths: []
+      }
+    };
+  }
+
+  const grandTotal = monthSummaries.reduce((sum, summary) => sum + summary.totalViolations, 0);
+  const monthSummariesWithShare = monthSummaries
+    .map((summary) => ({
+      ...summary,
+      share: grandTotal > 0 ? (summary.totalViolations / grandTotal) * 100 : 0
+    }))
+    .sort((a, b) => b.share - a.share);
+
+  const topMonths = monthSummariesWithShare.slice(0, 3);
+  const focusThemes = [...new Set(topMonths.map((month) => month.topViolation).filter(Boolean))];
+  const dominantViolation = focusThemes[0] || topMonths[0]?.topViolation || null;
+  const keyMonths = topMonths.map((month) => month.monthName);
+
+  const checkpointRecommendations = topMonths.length
+    ? topMonths.map(
+        (month) => `Prioritize checkpoints in ${month.monthName} ${planningYear}, aligning manpower and equipment with the dominant issue: ${dominantViolation || 'top violations'}.`
+      )
+    : defaultRows[0].recommendations;
+
+  const checkpointBasis = topMonths.length
+    ? topMonths.map(
+        (month) =>
+          `${month.monthName}: ${month.totalViolations} violations (${month.share.toFixed(1)}% of total, peak ${month.peakYear ?? '—'} at ${month.peakYearCount || 0} cases).`
+      )
+    : defaultRows[0].basis;
+
+  const typeStatsArray = Array.from(typeStats.values()).map((stat) => {
+    const monthlyEntries = Array.from(stat.monthCounts.entries());
+    const monthlyCounts = monthlyEntries.map(([, count]) => count);
+    const totalMonthly = monthlyCounts.reduce((sum, count) => sum + count, 0);
+    const avgMonthly = monthlyEntries.length ? totalMonthly / monthlyEntries.length : 0;
+    const repeatMonths = monthlyEntries
+      .filter(([, count]) => count >= 2)
+      .sort((a, b) => b[1] - a[1]);
+    const spikeEntries = monthlyEntries
+      .filter(([, count]) => {
+        if (count < 3) return false;
+        const dynamicThreshold = Math.max(avgMonthly * 1.5, avgMonthly + 2);
+        return count >= dynamicThreshold || avgMonthly === 0;
+      })
+      .sort((a, b) => b[1] - a[1]);
+
+    return {
+      ...stat,
+      uniqueYears: stat.yearCounts.size,
+      repeatMonths,
+      spikeEntries,
+      avgMonthly
     };
   });
-  
-    // Return in chronological order (January to December)
-    return monthlyDataWithPercentage;
+
+  const seminarCandidates = typeStatsArray
+    .filter((stat) => stat.total >= 4 && (stat.uniqueYears >= 2 || stat.repeatMonths.length >= 2))
+    .sort((a, b) => {
+      const scoreA = a.total + a.repeatMonths.length * 2 + a.uniqueYears;
+      const scoreB = b.total + b.repeatMonths.length * 2 + b.uniqueYears;
+      return scoreB - scoreA;
+    })
+    .slice(0, 3);
+
+  const seminarRecommendations = seminarCandidates.length
+    ? seminarCandidates.map((stat) => {
+        const hotspot = stat.repeatMonths[0] ? formatMonthKey(stat.repeatMonths[0][0]) : 'identified repeat months';
+        return `Mandate remedial seminars and issue ${planningYear} warnings for ${stat.name}, focusing on hotspots such as ${hotspot}.`;
+      })
+    : defaultRows[1].recommendations;
+
+  const seminarBasis = seminarCandidates.length
+    ? seminarCandidates.map(
+        (stat) =>
+          `${stat.name}: ${stat.total} cases across ${stat.uniqueYears} year(s); repeat months – ${summarizeRepeatMonths(stat.repeatMonths)}.`
+      )
+    : defaultRows[1].basis;
+
+  const surgeScore = (stat) => {
+    if (!stat.spikeEntries.length) return 0;
+    const maxCount = Math.max(...stat.spikeEntries.map(([, count]) => count));
+    const avg = stat.avgMonthly || 0;
+    return (maxCount - avg) + stat.spikeEntries.length;
   };
 
-  const monthlyData = getMonthlyData();
-  const yearTotal = monthlyData.reduce((sum, month) => sum + month.totalViolations, 0);
-  const highPriorityCount = monthlyData.filter(m => m.isHighPriority).length;
-  
-  // Find the month with the highest priority percentage
-  const highestPriorityMonth = monthlyData.length > 0 
-    ? monthlyData.reduce((max, month) => 
-        month.percentage > max.percentage ? month : max, 
-        monthlyData[0]
-      )
-    : null;
+  const awarenessCandidates = typeStatsArray
+    .filter((stat) => stat.spikeEntries.length > 0)
+    .sort((a, b) => surgeScore(b) - surgeScore(a))
+    .slice(0, 3);
 
-  // Fetch violations for selected month
-  const fetchMonthViolations = async (year, month) => {
-    try {
-      setLoadingMonthData(true);
-      const response = await getViolations();
-      const violations = response.data || response;
-      
-      // Filter violations for the selected month and year
-      const filteredViolations = violations.filter(violation => {
-        if (!violation.dateOfApprehension) return false;
-        const violationDate = new Date(violation.dateOfApprehension);
-        return violationDate.getFullYear() === year && violationDate.getMonth() + 1 === month;
-      });
-      
-      setMonthViolations(filteredViolations);
-      setSelectedMonth({ year, month, monthName: monthNames[month - 1] });
-    } catch (error) {
-      console.error('Error fetching month violations:', error);
-      setMonthViolations([]);
-    } finally {
-      setLoadingMonthData(false);
+  const awarenessRecommendations = awarenessCandidates.length
+    ? awarenessCandidates.map((stat) => {
+        const leadSpike = stat.spikeEntries[0] ? formatMonthKey(stat.spikeEntries[0][0]) : 'identified spike months';
+        return `Launch a targeted awareness blitz for ${stat.name} ahead of ${leadSpike} ${planningYear} to pre-empt recurring spikes.`;
+      })
+    : defaultRows[2].recommendations;
+
+  const awarenessBasis = awarenessCandidates.length
+    ? awarenessCandidates.map(
+        (stat) =>
+          `${stat.name}: surge months – ${summarizeRepeatMonths(stat.spikeEntries)}; historical monthly average ${(stat.avgMonthly || 0).toFixed(1)}.`
+      )
+    : defaultRows[2].basis;
+
+  const rows = [
+    {
+      category: 'Checkpoints',
+      recommendations: checkpointRecommendations,
+      basis: checkpointBasis
+    },
+    {
+      category: 'Seminar',
+      recommendations: seminarRecommendations,
+      basis: seminarBasis
+    },
+    {
+      category: 'Awareness Campaign',
+      recommendations: awarenessRecommendations,
+      basis: awarenessBasis
+    }
+  ];
+
+  const heuristics = [
+    'Checkpoint priority months = top 3 months by total individual violations (not just record count).',
+    'Seminar requirement = violation type with ≥4 cases across ≥2 years and ≥2 repeat months (each ≥2 cases).',
+    'Awareness spike = monthly count ≥ max(1.5× average, average + 2) and ≥3 cases in that same month.'
+  ];
+
+  return {
+    rows,
+    meta: {
+      datasetSize: records.length,
+      topMonths,
+      uniqueViolations: typeStats.size,
+      heuristics,
+      dominantViolation,
+      keyMonths
+    }
+  };
+};
+
+export function ViolationPrescriptionTable({ loading }) {
+  const { theme } = useTheme();
+  const prefersDark = useMemo(() => {
+    if (theme === 'dark') return true;
+    if (theme === 'light') return false;
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  }, [theme]);
+
+  const [historicalLoading, setHistoricalLoading] = useState(true);
+  const [historicalError, setHistoricalError] = useState(null);
+  const [records, setRecords] = useState([]);
+
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const planningYear = currentYear + 1;
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setHistoricalLoading(true);
+        const response = await getViolations();
+        const dataset = Array.isArray(response) ? response : response?.data || [];
+        setRecords(dataset);
+      } catch (error) {
+        console.error('Failed to load violation records', error);
+        setHistoricalError('Unable to load historical violation records.');
+      } finally {
+        setHistoricalLoading(false);
+      }
+    };
+
+    load();
+  }, []);
+
+  const busy = loading || historicalLoading;
+
+  const { rows, meta } = useMemo(() => deriveRecommendations(records, planningYear), [records, planningYear]);
+  const [expanded, setExpanded] = useState({
+    Checkpoints: false,
+    Seminar: false,
+    Awareness: false
+  });
+
+  const toggleExpanded = (category) => {
+    setExpanded((prev) => ({ ...prev, [category]: !prev[category] }));
+  };
+
+  const keyMonthList = Array.isArray(meta.keyMonths) ? meta.keyMonths.slice(0, 3) : [];
+  const summaryMessage = meta.topMonths?.length
+    ? `Most violations: ${meta.dominantViolation || meta.topMonths[0].topViolation || 'General compliance'} — peaks in ${meta.topMonths[0].monthName} (${meta.topMonths[0].totalViolations} cases). Recommended focus: Checkpoints · Seminars · Awareness during ${keyMonthList.join(', ') || 'priority months'} ${planningYear}.`
+    : 'Awaiting additional violation data. Maintain standard enforcement posture while monitoring new records.';
+
+  if (busy) {
+    return (
+      <div className={`${prefersDark ? 'bg-gray-950/60 border-gray-800' : 'bg-white border-gray-200'} border rounded-2xl shadow-xl p-8 mb-8 animate-pulse space-y-6`}>
+        <div className="h-6 w-64 bg-gray-300 dark:bg-gray-700 rounded" />
+        <div className="h-48 bg-gray-200 dark:bg-gray-800 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (historicalError) {
+    return (
+      <div className={`${prefersDark ? 'bg-gray-950/60 border-red-800 text-red-200' : 'bg-red-50 border-red-200 text-red-700'} border rounded-2xl shadow-md p-6 mb-8 text-sm`}>
+        {historicalError}
+      </div>
+    );
+  }
+
+  const categoryMeta = {
+    Checkpoints: {
+      icon: MapPin,
+      gradient: prefersDark ? 'from-blue-600/25 via-slate-950/60 to-slate-950' : 'from-blue-100 via-white to-white',
+      chip: prefersDark ? 'bg-blue-400/20 text-blue-100' : 'bg-blue-100 text-blue-700'
+    },
+    Seminar: {
+      icon: GraduationCap,
+      gradient: prefersDark ? 'from-amber-500/25 via-slate-950/60 to-slate-950' : 'from-amber-100 via-white to-white',
+      chip: prefersDark ? 'bg-amber-400/20 text-amber-100' : 'bg-amber-100 text-amber-700'
+    },
+    Awareness: {
+      icon: Megaphone,
+      gradient: prefersDark ? 'from-emerald-500/25 via-slate-950/60 to-slate-950' : 'from-emerald-100 via-white to-white',
+      chip: prefersDark ? 'bg-emerald-400/20 text-emerald-100' : 'bg-emerald-100 text-emerald-700'
     }
   };
 
-  const handleMonthClick = (month) => {
-    fetchMonthViolations(parseInt(selectedYear), month);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedMonth(null);
-    setMonthViolations([]);
-  };
-  
-  if (loading) {
-    return (
-      <div className={`${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl shadow-xl p-8 mb-8`}>
-        <div className="animate-pulse">
-          <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-80 mb-6"></div>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!displayData || !displayData.monthlyTrends || displayData.monthlyTrends.length === 0) {
-    return (
-      <div className={`${isDarkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl shadow-xl p-8 mb-8`}>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-          Violation Prescription & Action Plan
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400 text-center py-12">
-          No violation data available
-        </p>
-      </div>
-    );
-  }
-  
   return (
-    <>
-      <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-gray-700' : 'bg-gradient-to-br from-blue-200/90 via-blue-300/80 to-indigo-300/80 border-blue-300'} border-2 rounded-2xl shadow-xl overflow-hidden mb-6 backdrop-blur-sm`}>
-        {/* Header Section */}
-        <div className={`px-6 py-4 border-b-2 ${isDarkMode ? 'border-gray-700/50 bg-gradient-to-r from-gray-800/60 to-gray-800/40' : 'border-blue-300/60 bg-gradient-to-r from-blue-500/15 via-blue-500/10 to-indigo-500/10'}`}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className={`${prefersDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'} border rounded-3xl shadow-[0_35px_80px_-40px_rgba(30,41,59,0.5)] mb-8 overflow-hidden`}>
+      <header className={`${prefersDark ? 'bg-slate-950' : 'bg-white'} px-6 py-6 md:px-8 md:py-8 border-b ${prefersDark ? 'border-slate-900' : 'border-slate-200'}`}>
+        <div className="flex flex-col gap-5">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-xl bg-blue-600 border border-blue-500 shadow-md`}>
-                <ClipboardList className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h2 className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            Violation Prescription & Action Plan
-          </h2>
-                <p className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Comprehensive monthly violation analysis with strategic recommendations
-                </p>
+              <div className={`${prefersDark ? 'bg-slate-900 border border-slate-800 text-slate-200' : 'bg-blue-500 text-white'} rounded-2xl p-2.5`}>
+                <ClipboardList className="w-6 h-6" />
+          </div>
+          <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{planningYear} Prescriptive Analytics</h1>
+                <p className="text-sm text-slate-500 dark:text-slate-300">Clean, rule-based directives for LTO planners.</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              {/* Year Filter */}
-              <div className="flex items-center gap-2">
-                <label className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Year:
-                </label>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border-2 ${isDarkMode ? 'bg-gray-800/80 border-gray-600 text-gray-200 hover:bg-gray-700 focus:ring-blue-500/50' : 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50 focus:ring-blue-500'} focus:outline-none focus:ring-2 transition-all cursor-pointer shadow-sm hover:shadow-md`}
-                >
-                  {getAvailableYears().map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className={`px-3 py-2 rounded-lg border-2 shadow-sm ${isDarkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-600' : 'bg-gradient-to-br from-white to-gray-50 border-gray-300'}`}>
-                <div className={`text-[10px] font-semibold mb-0.5 uppercase tracking-wider ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Violations</div>
-                <div className={`text-lg font-extrabold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{yearTotal.toLocaleString()}</div>
-              </div>
+            <div className={`${prefersDark ? 'bg-slate-900/80 border border-slate-800 text-slate-200' : 'bg-slate-50 border border-slate-200 text-slate-600'} text-xs rounded-2xl px-4 py-3 flex items-center gap-2`}>
+              <Info className="w-4 h-4 shrink-0" />
+              <span>
+                Dataset evaluated: {meta.datasetSize} record{meta.datasetSize === 1 ? '' : 's'} · {meta.uniqueViolations} violation theme{meta.uniqueViolations === 1 ? '' : 's'}
+              </span>
+          </div>
         </div>
+          <div className={`${prefersDark ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-blue-50 border border-blue-100 text-slate-700'} rounded-2xl px-5 py-4 text-sm leading-relaxed`}>
+            <span className="font-semibold text-slate-900 dark:text-white">Summary at a glance: </span>
+            {summaryMessage}
+          </div>
+         </div>
+      </header>
+
+      <section className={`${prefersDark ? 'bg-slate-950/40' : 'bg-slate-50'} px-6 md:px-8 py-6 border-b ${prefersDark ? 'border-slate-900' : 'border-slate-200'}`}>
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Historical Violation Overview</h3>
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-300">
+            <TrendingUp className="w-4 h-4 text-rose-500" />
+            <span className="text-rose-600 dark:text-rose-300 font-medium">
+              Dominant violation: {meta.dominantViolation ?? meta.topMonths?.[0]?.topViolation ?? 'N/A'}
+            </span>
+          </div>
         </div>
-      </div>
-      
-        {/* KPI Section */}
-        {highestPriorityMonth && yearTotal > 0 && highestPriorityMonth.totalViolations > 0 && (
-          <div className="mt-5 mb-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
-              {/* KPI 1: Highest Priority Month */}
-              <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-gray-700' : 'bg-gradient-to-br from-red-50 via-red-50/80 to-red-100/60 border-red-200'} border-2 rounded-xl shadow-lg p-3 hover:shadow-xl transition-all duration-300`}>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/40 border border-red-800/50' : 'bg-red-100 border border-red-200/50'} shadow-sm`}>
-                    <TrendingUp className={`h-4 w-4 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
-                  </div>
+        {meta.topMonths?.length ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            {meta.topMonths.map((month) => (
+              <div
+                key={month.monthIndex}
+                className={`${prefersDark ? 'bg-slate-950 border border-slate-900' : 'bg-white border border-slate-200'} rounded-2xl px-5 py-5 space-y-3 shadow-sm`}
+              >
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      Highest Priority Month
-                    </h3>
-                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-500">
-                      {selectedYear}
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <Calendar className={`h-3 w-3 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
-                    <div>
-                      <div className="text-xs font-bold text-gray-900 dark:text-white">
-                        {highestPriorityMonth.monthName}
-                      </div>
-                      <div className="text-[10px] text-gray-600 dark:text-gray-400">
-                        {highestPriorityMonth.totalViolations.toLocaleString()} violations
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
-                        Priority Percentage
-                      </span>
-                      <span className={`text-xs font-bold ${
-                        highestPriorityMonth.isHighPriority 
-                          ? 'text-red-600 dark:text-red-400' 
-                          : highestPriorityMonth.percentage >= 25
-                          ? 'text-yellow-600 dark:text-yellow-400'
-                          : 'text-green-600 dark:text-green-400'
-                      }`}>
-                        {highestPriorityMonth.percentage.toFixed(2)}%
-                      </span>
-                    </div>
-                    <div className={`w-full h-1 rounded-full mt-1 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                      <div
-                        className={`h-full transition-all duration-700 ${
-                          highestPriorityMonth.isHighPriority
-                            ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
-                            : highestPriorityMonth.percentage >= 25
-                            ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
-                            : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
-                        }`}
-                        style={{ width: `${Math.min(highestPriorityMonth.percentage, 100)}%` }}
-                      ></div>
-                    </div>
-        </div>
-        </div>
-      </div>
-      
-              {/* KPI 2: Checkpoint Recommendation */}
-              <div className={`${isDarkMode ? 'bg-gradient-to-br from-gray-800/90 to-gray-900/90 border-gray-700' : 'bg-gradient-to-br from-orange-50 via-orange-50/80 to-amber-50/60 border-orange-200'} border-2 rounded-xl shadow-lg p-3 hover:shadow-xl transition-all duration-300`}>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/40 border border-orange-800/50' : 'bg-orange-100 border border-orange-200/50'} shadow-sm`}>
-                    <Shield className={`h-4 w-4 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                      Recommended Action
-                    </h3>
-                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-500">
-                      Priority Checkpoint
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-        <div className="flex items-start gap-2">
-                    <AlertTriangle className={`h-3 w-3 mt-0.5 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'} flex-shrink-0`} />
-                    <div>
-                      <div className="text-xs font-bold text-gray-900 dark:text-white mb-1">
-                        Prioritize Checkpoints in {highestPriorityMonth.monthName}
-                      </div>
-                      <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-relaxed">
-                        This month has the highest violation rate ({highestPriorityMonth.percentage.toFixed(2)}%) for {selectedYear}. 
-                        It is recommended to <strong className="text-orange-600 dark:text-orange-400">prioritize conducting checkpoints</strong> during this period 
-                        as it is when people mostly violate traffic rules on roads. Increase enforcement presence and implement stricter monitoring 
-                        to reduce violations and improve road safety.
-                      </p>
-                    </div>
-                  </div>
-                  <div className={`mt-2 p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/30 border border-orange-800/50' : 'bg-orange-100/80 border border-orange-200/50'} shadow-sm`}>
-                    <div className="flex items-center gap-1.5">
-                      <Target className={`h-3 w-3 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} />
-                      <span className="text-[10px] font-semibold text-orange-800 dark:text-orange-300">
-                        Focus enforcement efforts during {highestPriorityMonth.monthName} to maximize impact
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{month.monthName}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-300">Share {month.share.toFixed(1)}%</p>
+              </div>
+                  <span className={`${prefersDark ? 'bg-blue-500/20 text-blue-100 border border-blue-400/40' : 'bg-blue-50 text-blue-600 border border-blue-200'} px-3 py-1 rounded-full text-xs font-semibold`}>{month.totalViolations} cases</span>
+              </div>
+                <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1">
+                  <p>
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">Peak year:</span> {month.peakYear ?? '—'} ({month.peakYearCount || 0} cases)
+                  </p>
+                  <p>
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">Dominant violation:</span> {month.topViolation ?? 'General compliance'}
+                  </p>
               </div>
             </div>
+          ))}
+        </div>
+        ) : (
+          <div className={`${prefersDark ? 'bg-slate-900/60 border border-slate-800 text-slate-300' : 'bg-white border border-slate-200 text-slate-600'} rounded-2xl px-4 py-6 text-sm`}>
+            Insufficient historical data to visualise monthly trend.
           </div>
         )}
-      
-        {/* Priority Alert Section */}
-        {highPriorityCount > 0 && (
-          <div className={`mx-6 mt-5 p-3 ${isDarkMode ? 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-red-800/50' : 'bg-gradient-to-r from-red-50 to-red-50/80 border-red-200'} border-2 rounded-xl shadow-md`}>
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-red-900/40 border border-red-800/50' : 'bg-red-100 border border-red-200/50'} shadow-sm`}>
-                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-              </div>
-              <div className="flex-1">
-                <div className="font-bold text-sm text-red-900 dark:text-red-300 mb-1">
-                  Immediate Action Required
-                </div>
-                <div className="text-xs font-medium text-red-800 dark:text-red-400 leading-relaxed">
-                  <strong>{highPriorityCount}</strong> month(s) marked as <strong>HIGH</strong> (≥50% violation rate) require immediate attention from LTO. Click on any month to view detailed violations and recommended actions.
-                </div>
-              </div>
-        </div>
-      </div>
-        )}
+      </section>
 
-        {/* Info Banner */}
-        <div className={`mx-6 mt-3 mb-5 p-2 ${isDarkMode ? 'bg-gradient-to-r from-green-900/30 to-emerald-900/20 border-green-800/50' : 'bg-gradient-to-r from-green-50 to-emerald-50/80 border-green-200'} border-2 rounded-lg shadow-sm`}>
-          <div className="flex items-center gap-1.5">
-            <div className={`p-1 rounded-md ${isDarkMode ? 'bg-green-900/40' : 'bg-green-100'}`}>
-              <Target className="h-2.5 w-2.5 text-green-600 dark:text-green-400 flex-shrink-0" />
-            </div>
-            <div className="text-[10px] font-medium text-green-800 dark:text-green-300">
-              <strong>Note:</strong> Click on any month row to view detailed violation breakdown, occurrences, and specific recommended actions for that period.
-          </div>
-        </div>
-      </div>
-      
-        {/* Table Section */}
-        <div className="px-6 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* First Table - First 6 months */}
-            <div className={`overflow-hidden rounded-lg border-2 shadow-md ${isDarkMode ? 'border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/90' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50/50'}`}>
-              <div className="p-5">
-                {/* Table Header */}
-                <div className={`mb-3 pb-3 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
-                  <div className={`grid grid-cols-4 gap-2 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <div className="text-left">Month</div>
-                    <div className="text-center">Violations</div>
-                    <div className="text-center">Percentage</div>
-                    <div className="text-center">Severity</div>
-                  </div>
-                </div>
-                
-                {/* Table Rows */}
-                <div className="space-y-2">
-                  {monthlyData.slice(0, 6).map((month) => (
-                    <div
-                      key={month.month}
-                      onClick={() => handleMonthClick(month.month)}
-                      className={`grid grid-cols-4 gap-2 items-center py-3 px-3 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
-                          <Calendar className={`h-3 w-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-white text-xs">
-                            {month.monthNameShort}
-                          </div>
-                        </div>
-                  </div>
-                      <div className="text-center">
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">
-                          {month.totalViolations.toLocaleString()}
-                  </span>
+      <section className="px-6 md:px-8 py-8">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-4">{planningYear} Prescriptive Actions</h3>
+        <div className="grid gap-4 md:grid-cols-3">
+          {rows.map((row) => {
+            const metaKey = row.category.startsWith('Awareness') ? 'Awareness' : row.category;
+            const config = categoryMeta[metaKey] || categoryMeta.Checkpoints;
+            const actions = row.recommendations.slice(0, 3).filter(Boolean);
+            const basis = row.basis.slice(0, 3).filter(Boolean);
+            const Icon = config.icon;
+            return (
+              <div key={row.category} className={`relative overflow-hidden rounded-3xl border ${prefersDark ? 'border-slate-800 bg-slate-950' : 'border-transparent'} shadow-xl`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${config.gradient}`} />
+                <div className="relative p-6 space-y-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`${config.chip} inline-flex items-center justify-center w-10 h-10 rounded-2xl`}>
+                        <Icon className="w-5 h-5" />
                       </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="text-xs font-bold text-gray-900 dark:text-white">
-                          {month.percentage.toFixed(1)}%
-                    </span>
-                        <div className={`w-full max-w-[60px] h-1.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                          <div
-                            className={`h-full transition-all duration-700 ${
-                              month.isHighPriority
-                                ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
-                                : month.percentage >= 25
-                                ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
-                                : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
-                            }`}
-                            style={{ width: `${Math.min(month.percentage, 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                      <div className="text-center">
-                        {month.isHighPriority ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
-                            <AlertTriangle className="h-2.5 w-2.5" />
-                      HIGH
-                    </span>
-                        ) : month.percentage >= 25 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
-                            <AlertTriangle className="h-2.5 w-2.5" />
-                            MODERATE
-                    </span>
-                  ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
-                            <CheckCircle className="h-2.5 w-2.5" />
-                            LOW
-                    </span>
-                  )}
-                      </div>
-                  </div>
-            ))}
-                </div>
-              </div>
-      </div>
-      
-            {/* Second Table - Last 6 months */}
-            <div className={`overflow-hidden rounded-lg border-2 shadow-md ${isDarkMode ? 'border-gray-700 bg-gradient-to-br from-gray-800/90 to-gray-900/90' : 'border-gray-200 bg-gradient-to-br from-white to-gray-50/50'}`}>
-              <div className="p-5">
-                {/* Table Header */}
-                <div className={`mb-3 pb-3 border-b-2 ${isDarkMode ? 'border-gray-700/50' : 'border-gray-200/50'}`}>
-                  <div className={`grid grid-cols-4 gap-2 text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <div className="text-left">Month</div>
-                    <div className="text-center">Violations</div>
-                    <div className="text-center">Percentage</div>
-                    <div className="text-center">Severity</div>
-          </div>
-            </div>
-            
-                {/* Table Rows */}
-                <div className="space-y-2">
-                  {monthlyData.slice(6, 12).map((month) => (
-                    <div
-                      key={month.month}
-                      onClick={() => handleMonthClick(month.month)}
-                      className={`grid grid-cols-4 gap-2 items-center py-3 px-3 rounded-md ${isDarkMode ? 'hover:bg-gray-700/50 border-gray-700/50' : 'hover:bg-blue-50/70 border-gray-200/50'} transition-all duration-300 cursor-pointer group border shadow-sm hover:shadow-md`}
-                    >
-            <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-md ${isDarkMode ? 'bg-gray-700/50 group-hover:bg-gray-600 border border-gray-600/50' : 'bg-blue-50 group-hover:bg-blue-100 border border-blue-200/50'} transition-colors`}>
-                          <Calendar className={`h-3 w-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-white text-xs">
-                            {month.monthNameShort}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">
-                          {month.totalViolations.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="text-xs font-bold text-gray-900 dark:text-white">
-                          {month.percentage.toFixed(1)}%
-                        </span>
-                        <div className={`w-full max-w-[60px] h-1.5 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                          <div
-                            className={`h-full transition-all duration-700 ${
-                              month.isHighPriority
-                                ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-700'
-                                : month.percentage >= 25
-                                ? 'bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600'
-                                : 'bg-gradient-to-r from-green-400 via-green-500 to-green-600'
-                            }`}
-                            style={{ width: `${Math.min(month.percentage, 100)}%` }}
-                          ></div>
-          </div>
-        </div>
-                      <div className="text-center">
-                        {month.isHighPriority ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-red-100 to-red-50 text-red-700 dark:from-red-900/40 dark:to-red-800/40 dark:text-red-300 border border-red-300 dark:border-red-700">
-                            <AlertTriangle className="h-2.5 w-2.5" />
-                            HIGH
-                          </span>
-                        ) : month.percentage >= 25 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 dark:from-yellow-900/40 dark:to-yellow-800/40 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
-                            <AlertTriangle className="h-2.5 w-2.5" />
-                            MODERATE
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-gradient-to-r from-green-100 to-green-50 text-green-700 dark:from-green-900/40 dark:to-green-800/40 dark:text-green-300 border border-green-300 dark:border-green-700">
-                            <CheckCircle className="h-2.5 w-2.5" />
-                            LOW
-                    </span>
-                        )}
+                      <div>
+                        <span className="block text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">{row.category.replace('Awareness Campaign', 'Awareness')}</span>
+                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">Focus {planningYear}</h4>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-300">PRIORITY {planningYear}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">What to do</p>
+                    <ul className="mt-2 space-y-2 text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
+                      {actions.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+          </div>
+                  <button
+                     type="button"
+                     onClick={() => toggleExpanded(row.category)}
+                    className={`${prefersDark ? 'bg-slate-950/70 border border-slate-800 text-slate-300' : 'bg-white/80 border border-slate-100 text-slate-500'} rounded-xl px-3 py-2 text-[11px] flex items-center justify-between w-full transition-colors`}
+                   >
+                    <span className="font-medium">{expanded[row.category] ? 'Hide basis' : 'View basis'}</span>
+                    {expanded[row.category] ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </button>
+                  {expanded[row.category] ? (
+                    <div className={`${prefersDark ? 'bg-slate-950/70 border border-slate-800' : 'bg-white/80 border border-slate-100'} rounded-2xl p-4`}>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">Basis</p>
+                      <ul className="mt-2 space-y-2 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {basis.map((item, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className={`${prefersDark ? 'text-blue-200' : 'text-blue-500'}`}>•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+          </div>
+                  ) : null}
+          </div>
               </div>
-            </div>
-          </div>
-            </div>
-            
-        {/* Summary Footer */}
-        <div className={`${isDarkMode ? 'bg-gradient-to-r from-gray-800/60 to-gray-900/60 border-t-2 border-gray-700/50' : 'bg-gradient-to-r from-gray-50 to-blue-50/30 border-t-2 border-gray-200/50'} px-6 py-3 shadow-inner`}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm border border-green-600/30"></div>
-                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Low (&lt;25%)</span>
-          </div>
-          <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-sm border border-yellow-600/30"></div>
-                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">Moderate (25-50%)</span>
-            </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm border border-red-600/30"></div>
-                <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300">High (≥50%)</span>
-          </div>
-              </div>
-            <div className="text-[10px] font-semibold text-gray-600 dark:text-gray-400">
-              Showing {monthlyData.length} months for {selectedYear}
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
+      </section>
 
-      {/* Month Detail Modal */}
-      {selectedMonth && (
-        <MonthDetailModal
-          isOpen={!!selectedMonth}
-          onClose={handleCloseModal}
-          monthData={monthlyData.find(m => m.month === selectedMonth.month)}
-          year={selectedMonth.year}
-          monthName={selectedMonth.monthName}
-          violationsData={monthViolations}
-          loading={loadingMonthData}
-        />
-      )}
-    </>
+    </div>
   );
 }
+
