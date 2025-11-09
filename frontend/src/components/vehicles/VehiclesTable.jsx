@@ -61,6 +61,8 @@ const VehiclesTable = ({
     pageSize: 9, // 9 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+  const [hoveredRowId, setHoveredRowId] = React.useState(null);
   // Define the columns where you want to apply the global filter
   const filterColumns = filters;
 
@@ -158,45 +160,61 @@ const VehiclesTable = ({
                 ))}
               </TableHeader>
               <TableBody className="text-xs bg-white dark:bg-transparent">
-                {loading ? (
-                  <TableSkeleton
-                    rowCount={5}
-                    cellCount={table.getAllColumns().length}
-                  />
-                ) : table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      onClick={() => onRowClick(row.original)}
-                      data-state={row.getIsSelected() && "selected"}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-3 py-2 text-gray-800 dark:text-gray-200 text-left">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
+                  {loading ? (
+                    <TableSkeleton
+                      rowCount={5}
+                      cellCount={table.getAllColumns().length}
+                    />
+                  ) : table.getRowModel().rows?.length ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        onClick={() => onRowClick(row.original)}
+                        onMouseEnter={() => setHoveredRowId(row.id)}
+                        onMouseLeave={() => setHoveredRowId(null)}
+                        onMouseMove={(e) => {
+                          setMousePosition({ x: e.clientX, y: e.clientY });
+                        }}
+                        data-state={row.getIsSelected() && "selected"}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="px-3 py-2 text-gray-800 dark:text-gray-200 text-left">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell
+                        colSpan={table.getVisibleLeafColumns().length || 5}
+                        className="h-32 text-center text-muted-foreground"
+                      >
+                        <div className="flex flex-col items-center justify-center">
+                          <p className="text-sm text-gray-600">No results found</p>
+                          <p className="text-xs text-gray-400">
+                            Try adjusting your filters or add new data.
+                          </p>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell
-                      colSpan={table.getVisibleLeafColumns().length || 5}
-                      className="h-32 text-center text-muted-foreground"
-                    >
-                      <div className="flex flex-col items-center justify-center">
-                        <p className="text-sm text-gray-600">No results found</p>
-                        <p className="text-xs text-gray-400">
-                          Try adjusting your filters or add new data.
-                        </p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
+                  )}
+                </TableBody>
+              {hoveredRowId && (
+                <div
+                  className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
+                  style={{
+                    left: `${mousePosition.x + 10}px`,
+                    top: `${mousePosition.y - 10}px`,
+                  }}
+                >
+                  Click to view details
+                </div>
+              )}
             </Table>
           </div>
         </div>

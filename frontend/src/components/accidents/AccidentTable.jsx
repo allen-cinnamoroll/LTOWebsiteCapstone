@@ -44,6 +44,8 @@ const AccidentTable = ({
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [containerHeight, setContainerHeight] = React.useState(0);
+  const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
+  const [hoveredRowId, setHoveredRowId] = React.useState(null);
   const filterColumns = filters;
   const containerRef = React.useRef(null);
 
@@ -171,6 +173,11 @@ const AccidentTable = ({
                       <TableRow
                         key={row.id}
                         onClick={() => onRowClick(row.original)}
+                        onMouseEnter={() => setHoveredRowId(row.id)}
+                        onMouseLeave={() => setHoveredRowId(null)}
+                        onMouseMove={(e) => {
+                          setMousePosition({ x: e.clientX, y: e.clientY });
+                        }}
                         data-state={row.getIsSelected() && "selected"}
                         className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
                       >
@@ -212,6 +219,17 @@ const AccidentTable = ({
                 )}
               </TableBody>
             </Table>
+              {hoveredRowId && (
+                <div
+                  className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
+                  style={{
+                    left: `${mousePosition.x + 10}px`,
+                    top: `${mousePosition.y - 10}px`,
+                  }}
+                >
+                  Click to view details
+                </div>
+              )}
           </div>
         </div>
       </div>
