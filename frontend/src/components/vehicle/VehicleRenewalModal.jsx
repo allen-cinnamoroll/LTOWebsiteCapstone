@@ -40,7 +40,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import DatePicker from "@/components/calendar/DatePicker";
 import { toast } from "sonner";
-import { validateRenewalWindow } from "@/util/expirationCalculator";
 
 const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated }) => {
   const [newRenewalDate, setNewRenewalDate] = useState(null);
@@ -51,8 +50,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [loadingOwner, setLoadingOwner] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const { token } = useAuth();
 
   useEffect(() => {
@@ -61,7 +60,6 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       setNewRenewalDate(new Date());
       setUpdateSuccess(false);
       setError("");
-      setSuccessModalOpen(false);
       
       // Fetch owner data
       if (vehicleData.driverId) {
@@ -96,8 +94,8 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     setOwnerData(null);
     setConfirmOpen(false);
     setErrorModalOpen(false);
-    setSuccessModalOpen(false);
     setErrorMessage("");
+    setSuccessModalOpen(false);
     onOpenChange(false);
   };
 
@@ -108,52 +106,28 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       return;
     }
 
-    // Prevent using the same date as the latest current renewal
-    const currentDates = vehicleData.dateOfRenewal || [];
-    const datesArray = Array.isArray(currentDates) ? currentDates : [currentDates].filter(Boolean);
-    const latestRaw = datesArray.length ? datesArray[datesArray.length - 1] : null;
-    const latestDate = latestRaw && typeof latestRaw === 'object' && latestRaw.date ? latestRaw.date : latestRaw;
-    const isSameDay = (a, b) => {
-      if (!a || !b) return false;
-      const da = new Date(a); const db = new Date(b);
-      return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
-    };
-    if (latestDate && isSameDay(newRenewalDate, latestDate)) {
-      setErrorMessage("The selected date matches the current renewal date. Please choose a different date.");
+    // Get current expiration date (calculated from plate number and latest renewal date)
+    const currentExpirationDate = getCurrentExpirationDate();
+    if (!currentExpirationDate) {
+      setErrorMessage("Vehicle must have a current expiration date to renew.");
       setErrorModalOpen(true);
       return;
     }
 
-    // Prevent renewing in the same year - vehicles can only be renewed once per year
-    if (latestDate) {
-      const latestDateObj = new Date(latestDate);
-      const newDateObj = new Date(newRenewalDate);
-      if (latestDateObj.getFullYear() === newDateObj.getFullYear()) {
-        setErrorMessage(`A vehicle can only be renewed once per year. The current renewal date is in ${latestDateObj.getFullYear()}. Please select a date in a different year.`);
-        setErrorModalOpen(true);
-        return;
-      }
-
-      // Validate renewal window - vehicles can only be renewed 2 months in advance
-      const vehicleStatusType = vehicleData.vehicleStatusType || "Old";
-      const validation = validateRenewalWindow(
-        vehicleData.plateNo,
-        latestDate,
-        newRenewalDate,
-        vehicleStatusType
-      );
-
-      if (!validation.isValid) {
-        setErrorMessage(validation.message);
-        setErrorModalOpen(true);
-        return;
-      }
+    // Validate renewal date using new validation rules
+    const validation = validateRenewalDate(newRenewalDate, currentExpirationDate);
+    if (!validation.valid) {
+      setErrorMessage(validation.message);
+      setErrorModalOpen(true);
+      return;
     }
 
     setUpdating(true);
 
     try {
       // Build updated array using existing entries, append new one; backend will normalize and attach processedBy
+      const currentDates = vehicleData.dateOfRenewal || [];
+      const datesArray = Array.isArray(currentDates) ? currentDates : [currentDates].filter(Boolean);
       const normalized = datesArray.map(d => (d && typeof d === 'object' && d.date ? d.date : d)).filter(Boolean);
       const updatedDates = [...normalized, newRenewalDate.toISOString()];
 
@@ -171,13 +145,10 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
 
       if (data.success) {
         setUpdateSuccess(true);
+        setSuccessModalOpen(true);
         toast.success("Vehicle Renewed Successfully", {
           description: `Renewal date added for ${vehicleData.plateNo}`,
         });
-        
-        // Close the main renewal modal and open success modal
-        onOpenChange(false);
-        setSuccessModalOpen(true);
             
         // Notify parent component to refresh the vehicle list
         if (onVehicleUpdated) {
@@ -216,6 +187,233 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     const latestRaw = dateArray[dateArray.length - 1];
     const latest = latestRaw && typeof latestRaw === 'object' && latestRaw.date ? latestRaw.date : latestRaw;
     return latest ? new Date(latest) : null;
+  };
+
+  // Calculate expiration date based on plate number and renewal date
+  const calculateExpirationDate = (plateNo, renewalDate, vehicleStatusType = "Old") => {
+    if (!plateNo) return null;
+
+    // Extract last two digits from plate number
+    const digits = plateNo.replace(/\D/g, '');
+    if (digits.length < 2) return null;
+
+    const lastTwoDigits = digits.slice(-2);
+    const secondToLastDigit = lastTwoDigits[0];
+    const lastDigit = lastTwoDigits[1];
+
+    // Week lookup table
+    const WEEK_LOOKUP = {
+      '1': 'first', '2': 'first', '3': 'first',
+      '4': 'second', '5': 'second', '6': 'second',
+      '7': 'third', '8': 'third',
+      '9': 'last', '0': 'last'
+    };
+
+    // Month lookup table (last digit maps to month index)
+    const MONTH_LOOKUP = {
+      '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5,
+      '7': 6, '8': 7, '9': 8, '0': 9
+    };
+
+    const week = WEEK_LOOKUP[secondToLastDigit];
+    const monthIndex = MONTH_LOOKUP[lastDigit];
+
+    if (!week || monthIndex === null) return null;
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    let expirationYear, expirationMonth;
+
+    if (vehicleStatusType === "New") {
+      // New vehicles: 3 years from renewal date
+      if (renewalDate) {
+        expirationYear = renewalDate.getFullYear() + 3;
+        expirationMonth = monthIndex;
+      } else {
+        expirationYear = currentYear + 3;
+        expirationMonth = monthIndex;
+      }
+    } else {
+      // Old vehicles: expires yearly based on plate number
+      if (renewalDate) {
+        const renewalYear = renewalDate.getFullYear();
+        if (renewalYear === currentYear) {
+          expirationYear = currentYear + 1;
+          expirationMonth = monthIndex;
+        } else {
+          expirationYear = currentYear;
+          expirationMonth = monthIndex;
+        }
+      } else {
+        expirationYear = currentYear;
+        expirationMonth = monthIndex;
+      }
+    }
+
+    // Calculate week end date
+    let weekEndDate;
+    switch (week) {
+      case 'first':
+        weekEndDate = new Date(expirationYear, expirationMonth, 7);
+        break;
+      case 'second':
+        weekEndDate = new Date(expirationYear, expirationMonth, 14);
+        break;
+      case 'third':
+        weekEndDate = new Date(expirationYear, expirationMonth, 21);
+        break;
+      case 'last':
+        weekEndDate = new Date(expirationYear, expirationMonth + 1, 0);
+        break;
+      default:
+        return null;
+    }
+
+    // Set expiration to midnight of the next day after the week ends
+    const expirationDate = new Date(weekEndDate);
+    expirationDate.setDate(expirationDate.getDate() + 1);
+    expirationDate.setHours(0, 0, 0, 0);
+
+    return expirationDate;
+  };
+
+  const getCurrentExpirationDate = () => {
+    const latestRenewalDate = getLatestRenewalDate();
+    if (!latestRenewalDate || !vehicleData?.plateNo) return null;
+    
+    const vehicleStatusType = vehicleData.vehicleStatusType || "Old";
+    return calculateExpirationDate(vehicleData.plateNo, latestRenewalDate, vehicleStatusType);
+  };
+
+  // Get the expiration month from plate number (for validation purposes)
+  const getExpirationMonthFromPlate = () => {
+    if (!vehicleData?.plateNo) return null;
+    
+    const digits = vehicleData.plateNo.replace(/\D/g, '');
+    if (digits.length < 1) return null;
+    
+    const lastDigit = digits.slice(-1);
+    const MONTH_LOOKUP = {
+      '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5,
+      '7': 6, '8': 7, '9': 8, '0': 9
+    };
+    
+    const monthIndex = MONTH_LOOKUP[lastDigit];
+    if (monthIndex === undefined) return null;
+    
+    // Calculate expiration year based on latest renewal date
+    const latestRenewalDate = getLatestRenewalDate();
+    if (!latestRenewalDate) return null;
+    
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const renewalYear = latestRenewalDate.getFullYear();
+    const vehicleStatusType = vehicleData.vehicleStatusType || "Old";
+    
+    let expirationYear;
+    if (vehicleStatusType === "New") {
+      expirationYear = renewalYear + 3;
+    } else {
+      if (renewalYear === currentYear) {
+        expirationYear = currentYear + 1;
+      } else {
+        expirationYear = currentYear;
+      }
+    }
+    
+    return { month: monthIndex, year: expirationYear };
+  };
+
+  const validateRenewalDate = (newDate, currentExpirationDate) => {
+    if (!newDate || !currentExpirationDate) {
+      return { valid: false, message: "Please select a renewal date and ensure vehicle has a current expiration date." };
+    }
+
+    const newDateObj = new Date(newDate);
+    const expirationDateObj = new Date(currentExpirationDate);
+    const newRenewalYear = newDateObj.getFullYear();
+
+    // FIRST: Check the 2-month advance rule
+    // This rule ALWAYS applies, regardless of whether there's a renewal in the same year or not
+    // Rule: You can renew up to 2 months before the EXPIRATION MONTH (from plate number, not the calculated date)
+    // Example: If expiration month is January (plate ends in "1"), you can renew starting in November (2 months before January)
+    // Example: If expiration month is October (plate ends in "0"), you can renew starting in August (2 months before October)
+    
+    const expirationMonthInfo = getExpirationMonthFromPlate();
+    if (!expirationMonthInfo) {
+      return { valid: false, message: "Could not determine expiration month from plate number." };
+    }
+    
+    const expirationMonth = expirationMonthInfo.month; // 0-11 (0=January, 11=December)
+    const expirationYear = expirationMonthInfo.year;
+    const renewalMonth = newDateObj.getMonth(); // 0-11
+    const renewalYear = newDateObj.getFullYear();
+    
+    // Calculate the difference in months between expiration MONTH and renewal MONTH
+    // Positive means renewal month is after expiration month, negative means before
+    const monthsDifference = (renewalYear - expirationYear) * 12 + (renewalMonth - expirationMonth);
+    
+    // If renewing before expiration month (negative months difference)
+    if (monthsDifference < 0) {
+      const monthsBefore = Math.abs(monthsDifference);
+      // Check if renewing more than 2 months in advance (3 months or more)
+      if (monthsBefore >= 3) {
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const expirationMonthName = monthNames[expirationMonth];
+        return {
+          valid: false,
+          message: `Vehicles can only be renewed up to 2 months in advance of their expiration month. The expiration month is ${expirationMonthName} ${expirationYear}, and you are trying to renew ${monthsBefore} month(s) in advance.`
+        };
+      }
+      // Renewing 1 or 2 months before expiration month is allowed (2-month rule passes)
+      // Continue to check the "once per year" rule below
+    } else if (monthsDifference >= 0) {
+      // If renewing in the same month or after expiration month, it's allowed
+      // Continue to check the "once per year" rule below
+    }
+
+    // SECOND: Check if renewing in the same year as any existing renewal
+    // Vehicle can only be renewed once per year, EXCEPT if renewing within the 2-month advance window
+    // This allows early renewal in the advance window even if there was a renewal earlier in the year
+    const currentDates = vehicleData.dateOfRenewal || [];
+    const datesArray = Array.isArray(currentDates) ? currentDates : [currentDates].filter(Boolean);
+    const normalizedDates = datesArray.map(d => {
+      const date = d && typeof d === 'object' && d.date ? d.date : d;
+      if (!date) return null;
+      const parsedDate = new Date(date);
+      // Check if date is valid
+      if (isNaN(parsedDate.getTime())) return null;
+      return parsedDate;
+    }).filter(Boolean);
+
+    // Check if new renewal date is in the same year as any existing renewal
+    const sameYearRenewal = normalizedDates.find(existingDate => {
+      if (!existingDate || isNaN(existingDate.getTime())) return false;
+      return existingDate.getFullYear() === newRenewalYear;
+    });
+
+    if (sameYearRenewal) {
+      // If there's a renewal in the same year, check if the new renewal is within the 2-month advance window
+      // If it is, allow it (user is renewing early for the next expiration cycle)
+      // If not, block it (trying to renew twice in the same year outside the advance window)
+      const isWithinAdvanceWindow = monthsDifference < 0 && monthsDifference >= -2;
+      
+      if (!isWithinAdvanceWindow) {
+        const existingRenewalDate = sameYearRenewal.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        return {
+          valid: false,
+          message: `Vehicle can only be renewed once per year. A renewal already exists on ${existingRenewalDate} (${newRenewalYear}). You cannot renew again in ${newRenewalYear} unless you are renewing within the 2-month advance window.`
+        };
+      }
+      // If within advance window, allow it (renewing early for next expiration cycle)
+    }
+
+    // Both rules passed
+    return { valid: true, message: "" };
   };
 
   const getStatusBadge = (status) => {
@@ -387,45 +585,26 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                       onClick={() => {
                         // Validate before opening confirmation
                         setError("");
-                        const currentDates = vehicleData.dateOfRenewal || [];
-                        const datesArray = Array.isArray(currentDates) ? currentDates : [currentDates].filter(Boolean);
-                        const latestRaw = datesArray.length ? datesArray[datesArray.length - 1] : null;
-                        const latestDate = latestRaw && typeof latestRaw === 'object' && latestRaw.date ? latestRaw.date : latestRaw;
-                        const isSameDay = (a, b) => {
-                          if (!a || !b) return false;
-                          const da = new Date(a); const db = new Date(b);
-                          return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
-                        };
-                        if (latestDate && isSameDay(newRenewalDate, latestDate)) {
-                          setErrorMessage("The selected date matches the current renewal date. Please choose a different date.");
+                        if (!newRenewalDate) {
+                          setErrorMessage("Please select a renewal date");
                           setErrorModalOpen(true);
                           return;
                         }
-                        // Prevent renewing in the same year - vehicles can only be renewed once per year
-                        if (latestDate) {
-                          const latestDateObj = new Date(latestDate);
-                          const newDateObj = new Date(newRenewalDate);
-                          if (latestDateObj.getFullYear() === newDateObj.getFullYear()) {
-                            setErrorMessage(`A vehicle can only be renewed once per year. The current renewal date is in ${latestDateObj.getFullYear()}. Please select a date in a different year.`);
-                            setErrorModalOpen(true);
-                            return;
-                          }
 
-                          // Validate renewal window - vehicles can only be renewed 2 months in advance
-                          const vehicleStatusType = vehicleData.vehicleStatusType || "Old";
-                          const validation = validateRenewalWindow(
-                            vehicleData.plateNo,
-                            latestDate,
-                            newRenewalDate,
-                            vehicleStatusType
-                          );
-
-                          if (!validation.isValid) {
-                            setErrorMessage(validation.message);
-                            setErrorModalOpen(true);
-                            return;
-                          }
+                        const currentExpirationDate = getCurrentExpirationDate();
+                        if (!currentExpirationDate) {
+                          setErrorMessage("Vehicle must have a current expiration date to renew.");
+                          setErrorModalOpen(true);
+                          return;
                         }
+
+                        const validation = validateRenewalDate(newRenewalDate, currentExpirationDate);
+                        if (!validation.valid) {
+                          setErrorMessage(validation.message);
+                          setErrorModalOpen(true);
+                          return;
+                        }
+
                         setConfirmOpen(true);
                       }}
                       disabled={updating || !newRenewalDate}
@@ -457,12 +636,50 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           </DialogTitle>
         </DialogHeader>
         <div className="pt-2 pb-3">
-          <p className="text-gray-600 dark:text-gray-300">
-            Are you sure you want to renew this vehicle?
-          </p>
-          <p className="mt-1 text-gray-600 dark:text-gray-300">
-            Please review the details below before confirming.
-          </p>
+          {(() => {
+            // Check if this is an advance renewal
+            const expirationMonthInfo = getExpirationMonthFromPlate();
+            if (expirationMonthInfo && newRenewalDate) {
+              const newDateObj = new Date(newRenewalDate);
+              const expirationMonth = expirationMonthInfo.month;
+              const expirationYear = expirationMonthInfo.year;
+              const renewalMonth = newDateObj.getMonth();
+              const renewalYear = newDateObj.getFullYear();
+              const monthsDifference = (renewalYear - expirationYear) * 12 + (renewalMonth - expirationMonth);
+              
+              // If renewing before expiration month (negative months difference), it's an advance renewal
+              const isAdvanceRenewal = monthsDifference < 0;
+              
+              if (isAdvanceRenewal) {
+                const monthsBefore = Math.abs(monthsDifference);
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const expirationMonthName = monthNames[expirationMonth];
+                return (
+                  <>
+                    <p className="text-gray-600 dark:text-gray-300 font-medium">
+                      Are you sure you want to renew this vehicle in advance?
+                    </p>
+                    <p className="mt-1 text-gray-600 dark:text-gray-300">
+                      This renewal is {monthsBefore} month(s) before the expiration month ({expirationMonthName} {expirationYear}).
+                    </p>
+                    <p className="mt-2 text-gray-600 dark:text-gray-300">
+                      Please review the details below before confirming.
+                    </p>
+                  </>
+                );
+              }
+            }
+            return (
+              <>
+                <p className="text-gray-600 dark:text-gray-300">
+                  Are you sure you want to renew this vehicle?
+                </p>
+                <p className="mt-1 text-gray-600 dark:text-gray-300">
+                  Please review the details below before confirming.
+                </p>
+              </>
+            );
+          })()}
           <p className="mt-3 text-gray-600 dark:text-gray-300"><span className="font-medium">File Number:</span> {vehicleData.fileNo || 'N/A'}</p>
           <p className="text-gray-600 dark:text-gray-300"><span className="font-medium">Renewal Date:</span> {newRenewalDate ? new Date(newRenewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
         </div>
@@ -510,19 +727,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           <p className="text-gray-600 dark:text-gray-300">
             Vehicle renewed successfully!
           </p>
-          {vehicleData && (
-            <div className="mt-3 space-y-1">
-              <p className="text-gray-600 dark:text-gray-300">
-                <span className="font-medium">Plate Number:</span> {vehicleData.plateNo || 'N/A'}
-              </p>
-              <p className="text-gray-600 dark:text-gray-300">
-                <span className="font-medium">File Number:</span> {vehicleData.fileNo || 'N/A'}
-              </p>
-              <p className="text-gray-600 dark:text-gray-300">
-                <span className="font-medium">New Renewal Date:</span> {newRenewalDate ? new Date(newRenewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}
-              </p>
-            </div>
-          )}
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Renewal date has been updated for {vehicleData?.plateNo || 'this vehicle'}.
+          </p>
         </div>
         <DialogFooter className="flex justify-end gap-3">
           <Button 
