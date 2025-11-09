@@ -165,21 +165,25 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const value = payload[0].value;
-      const percentage = sortedMunicipalities.length > 0 
-        ? ((value / Math.max(...sortedMunicipalities.map(m => m.vehicles))) * 100).toFixed(1)
-        : 0;
       
       return (
         <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-            <div>
-              <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
-              <p className="text-blue-600 dark:text-blue-400 text-xs">
-                <span className="font-semibold text-lg">{value.toLocaleString()}</span> vehicles
-              </p>
-              <p className="text-gray-500 dark:text-gray-400 text-xs">
-                {percentage}% of highest
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+              <div>
+                <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
+                <p className="text-blue-600 dark:text-blue-400 text-xs">
+                  <span className="font-semibold text-lg">{value.toLocaleString()}</span> vehicles
+                </p>
+              </div>
+            </div>
+            <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+                Click to view barangay ranking
               </p>
             </div>
           </div>
@@ -206,165 +210,352 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
     setSelectedMunicipality(null);
   };
 
+  // Convert string to title case
+  const toTitleCase = (str) => {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(word => {
+      if (word.length === 0) return '';
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+  };
+
+  // Abbreviate municipality names
+  const abbreviateMunicipalityName = (name) => {
+    const abbreviations = {
+      'CITY OF MATI': 'Mati City',
+      'GOVERNOR GENEROSO': 'GovGen',
+      'BANAYBANAY': 'Banay...',
+      // Add more abbreviations as needed
+    };
+
+    // Check if there's a specific abbreviation
+    if (abbreviations[name.toUpperCase()]) {
+      return abbreviations[name.toUpperCase()];
+    }
+
+    // General abbreviation logic for long names
+    if (name.length > 12) {
+      // If it contains "CITY OF", replace with "City"
+      if (name.toUpperCase().includes('CITY OF')) {
+        const cityName = name.replace(/CITY OF\s*/i, '').trim();
+        return `${toTitleCase(cityName)} City`;
+      }
+      
+      // If it's two words, take first 4 chars of each
+      const words = name.split(' ');
+      if (words.length === 2) {
+        const abbrev = words[0].substring(0, 4) + words[1].substring(0, 4);
+        return toTitleCase(abbrev);
+      }
+      
+      // Otherwise, take first 8 characters and add ellipsis
+      return toTitleCase(name.substring(0, 8)) + '...';
+    }
+
+    return toTitleCase(name);
+  };
+
+  // Calculate KPIs
+  const calculateKPIs = () => {
+    if (sortedMunicipalities.length === 0) {
+      return {
+        totalRegionalVehicles: 0,
+        topMunicipality: null,
+        topMunicipalityCount: 0,
+        lowestPerforming: []
+      };
+    }
+
+    // Total Regional Vehicles: Sum of all municipality vehicles
+    const totalRegionalVehicles = sortedMunicipalities.reduce((sum, m) => sum + (m.vehicles || 0), 0);
+
+    // Top Municipality: Highest performing (first in descending order, or last in ascending)
+    const topMunicipalityData = sortOrder === 'desc' 
+      ? sortedMunicipalities[0] 
+      : sortedMunicipalities[sortedMunicipalities.length - 1];
+    const topMunicipality = topMunicipalityData ? toTitleCase(topMunicipalityData.municipality) : null;
+    const topMunicipalityCount = topMunicipalityData?.vehicles || 0;
+
+    // Lowest Performing Municipalities: Top 3 municipalities with lowest performance
+    // When sorted descending, the last 3 are lowest performing
+    // When sorted ascending, the first 3 are lowest performing
+    const lowestPerforming = sortOrder === 'desc'
+      ? sortedMunicipalities.slice(-3).reverse().map(m => ({
+          name: toTitleCase(m.municipality),
+          count: m.vehicles
+        }))
+      : sortedMunicipalities.slice(0, 3).map(m => ({
+          name: toTitleCase(m.municipality),
+          count: m.vehicles
+        }));
+
+    return {
+      totalRegionalVehicles,
+      topMunicipality,
+      topMunicipalityCount,
+      lowestPerforming
+    };
+  };
+
+  const kpis = calculateKPIs();
+
   return (
     <>
       {/* Municipality Chart Container */}
-       <div className="bg-white border border-gray-200 rounded-xl p-3 w-full max-w-4xl mx-auto h-fit shadow-sm dark:!bg-transparent dark:!border-gray-700 min-h-[400px] flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 flex items-center justify-center">
-              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
+       <div className="border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl bg-white dark:bg-black backdrop-blur-sm">
+        {/* Header */}
+        <div className="px-4 py-3 border-b-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-md shadow-orange-500/30">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Top Municipalities by Vehicle Registration</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                  Top performing municipalities by vehicle registration volume
+                </p>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    {(() => {
+                      // Both month and year are selected (not "All")
+                      if (selectedMonth && selectedMonth !== 'All' && selectedYear && selectedYear !== 'All') {
+                        return `${selectedMonth} ${selectedYear}`;
+                      }
+                      // Only month is selected (year is "All" or not selected)
+                      if (selectedMonth && selectedMonth !== 'All' && (!selectedYear || selectedYear === 'All')) {
+                        return `${selectedMonth} across all years`;
+                      }
+                      // Only year is selected (month is "All" or not selected)
+                      if (selectedYear && selectedYear !== 'All' && (!selectedMonth || selectedMonth === 'All')) {
+                        return `All months in ${selectedYear}`;
+                      }
+                      // Default: All Time
+                      return 'All Time';
+                    })()}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <h2 className="text-sm font-bold text-foreground">
-                DavOr Vehicle Registration Rankings
-                {selectedYear === 'All' && selectedMonth && selectedMonth !== 'All' && (
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
-                    ({selectedMonth} across all years)
-                  </span>
-                )}
-                {selectedMonth === 'All' && selectedYear && selectedYear !== 'All' && (
-                  <span className="text-sm font-normal text-muted-foreground ml-2">
-                    (All months in {selectedYear})
-                  </span>
-                )}
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                Top performing municipalities by vehicle registration volume
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors flex items-center gap-1"
-              title={`Sort ${sortOrder === 'asc' ? 'Highest to Lowest' : 'Lowest to Highest'}`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {sortOrder === 'asc' ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                )}
-              </svg>
-              {sortOrder === 'asc' ? '↑' : '↓'}
-            </button>
-            <button
-              onClick={() => setShowAllModal(true)}
-              className="px-3 py-1.5 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-md transition-colors"
-            >
-              View All
-            </button>
           </div>
         </div>
 
-        {/* Chart Container */}
-        <div className="h-80 w-full min-h-[320px] flex-1">
-          {loading || parentLoading ? (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        {/* Main Content - Responsive layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-1 h-full">
+          {/* Left: Charts area */}
+          <div className="xl:col-span-4 p-3 sm:p-4 pr-2">
+            <div className="space-y-3">
+              {/* Charts Area */}
+              <div className="relative rounded-xl p-3 sm:p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-orange-100/60 dark:border-orange-900/40 shadow-xl overflow-hidden">
+                <div className="mb-3 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                      Municipality Rankings
+                    </h4>
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="px-2.5 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-orange-400 dark:hover:border-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md flex items-center gap-1"
+                      title={`Sort ${sortOrder === 'asc' ? 'Highest to Lowest' : 'Lowest to Highest'}`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {sortOrder === 'asc' ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                        )}
+                      </svg>
+                      {sortOrder === 'asc' ? '↑' : '↓'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Chart Container */}
+                <div className="w-full min-h-[320px] h-[400px]">
+                  {loading || parentLoading ? (
+                    <div className="flex items-center justify-center w-full h-full">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                    </div>
+                  ) : error ? (
+                    <div className="flex items-center justify-center w-full h-full text-red-500">
+                      <p>{error}</p>
+                    </div>
+                  ) : sortedMunicipalities.length === 0 ? (
+                    <div className="flex items-center justify-center w-full h-full text-gray-500 dark:text-gray-400">
+                      <p>No data available</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%" minHeight={320}>
+                      <BarChart
+                        data={formatChartData(sortedMunicipalities)}
+                        margin={{ top: 10, right: 10, left: 5, bottom: 20 }}
+                        barCategoryGap="5%"
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.7} vertical={false} />
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="#6b7280"
+                          fontSize={9}
+                          height={20}
+                          interval={0}
+                          tick={{ fill: '#6b7280', fontWeight: 500 }}
+                          tickFormatter={(value) => abbreviateMunicipalityName(value)}
+                        />
+                        <YAxis 
+                          stroke="#6b7280"
+                          fontSize={9}
+                          tickFormatter={(value) => value.toLocaleString()}
+                          tick={{ fill: '#6b7280', fontWeight: 500 }}
+                          width={50}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar 
+                          dataKey="vehicles" 
+                          radius={[6, 6, 0, 0]}
+                          onClick={(data) => handleMunicipalityClick(data.name)}
+                          style={{ cursor: 'pointer' }}
+                          maxBarSize={80}
+                        >
+                          {formatChartData(sortedMunicipalities).map((entry, index) => {
+                            const originalColor = getBarColor(entry.index, entry.totalCount);
+                            
+                            return (
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={originalColor}
+                                stroke={originalColor}
+                                strokeWidth={2}
+                                style={{ 
+                                  filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))',
+                                  transition: 'all 0.3s ease',
+                                  cursor: 'pointer'
+                                }}
+                              />
+                            );
+                          })}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+                
+                {/* Chart Legend */}
+                {sortedMunicipalities.length > 0 && !loading && !parentLoading && (
+                  <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400 mt-3" style={{ 
+                    fontSize: isMobile ? '10px' : '12px', 
+                    fontWeight: '500',
+                    paddingTop: '0px',
+                    paddingBottom: '0px',
+                    textAlign: 'center'
+                  }}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-700"></div>
+                      <span>High</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span>Medium-high</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span>Medium</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                      <span>Low</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                      <span>Lowest</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          ) : error ? (
-            <div className="flex items-center justify-center w-full h-full text-red-500">
-              <p>{error}</p>
+          </div>
+
+          {/* Right: KPI Cards */}
+          <div className="xl:col-span-1 p-3 sm:p-4 pl-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3 h-full">
+              {/* Total Regional Vehicles */}
+              {!loading && !parentLoading && sortedMunicipalities.length > 0 && (
+                <>
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-950/30 shadow-md border-2 border-blue-100/60 dark:border-blue-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm shadow-blue-500/30 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Total Regional Vehicles</span>
+                    </div>
+                    <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5">
+                      {kpis.totalRegionalVehicles.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                      Sum of all municipality registration volumes
+                    </div>
+                  </div>
+
+                  {/* Top Municipality */}
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-white to-green-50/30 dark:from-gray-800 dark:to-green-950/30 shadow-md border-2 border-green-100/60 dark:border-green-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm shadow-green-500/30 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Top Municipality</span>
+                    </div>
+                    <div className="w-full">
+                      <div className="text-sm font-bold text-gray-900 dark:text-white mb-1 truncate" title={kpis.topMunicipality || 'N/A'}>
+                        {kpis.topMunicipality || 'N/A'}
+                      </div>
+                      <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mb-0.5">
+                        {kpis.topMunicipalityCount.toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                      Highest-performing municipality
+                    </div>
+                  </div>
+
+                  {/* Lowest Performance */}
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-white to-orange-50/30 dark:from-gray-800 dark:to-orange-950/30 shadow-md border-2 border-orange-100/60 dark:border-orange-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm shadow-orange-500/30 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Lowest Performance</span>
+                    </div>
+                    <div className="space-y-1.5 w-full">
+                      {kpis.lowestPerforming.length > 0 ? (
+                        kpis.lowestPerforming.map((municipality, index) => (
+                          <div key={index} className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-semibold text-gray-900 dark:text-white truncate flex-1">
+                              {index + 1}. {municipality.name}
+                            </p>
+                            <p className="text-xs font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">
+                              {municipality.count.toLocaleString()}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">No data available</p>
+                      )}
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-2">
+                      Top 3 municipalities with lowest registration volume
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-          ) : top5Municipalities.length === 0 ? (
-            <div className="flex items-center justify-center w-full h-full text-muted-foreground">
-              <p>No data available</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%" minHeight={320}>
-              <BarChart
-                data={formatChartData(top5Municipalities)}
-                margin={{ top: 10, right: 10, left: 5, bottom: 20 }}
-                barCategoryGap="10%"
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#6b7280"
-                  fontSize={9}
-                  height={20}
-                  interval={0}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  tickFormatter={(value) => {
-                    // Truncate long municipality names to prevent overlap
-                    if (value.length > 12) {
-                      return value.substring(0, 12) + '...';
-                    }
-                    return value;
-                  }}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  fontSize={9}
-                  tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
-                  width={50}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar 
-                  dataKey="vehicles" 
-                  radius={[8, 8, 0, 0]}
-                  onClick={(data) => handleMunicipalityClick(data.name)}
-                  style={{ cursor: 'pointer' }}
-                  maxBarSize={120}
-                >
-                  {formatChartData(top5Municipalities).map((entry, index) => {
-                    const originalColor = getBarColor(entry.index, entry.totalCount);
-                    
-                    return (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={originalColor}
-                        stroke={originalColor}
-                        strokeWidth={2}
-                        style={{ 
-                          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))',
-                          transition: 'all 0.3s ease'
-                        }}
-                      />
-                    );
-                  })}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-          
-          {/* Chart Legend */}
-          {top5Municipalities.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400" style={{ 
-              fontSize: isMobile ? '10px' : '12px', 
-              fontWeight: '500',
-              paddingTop: '0px',
-              paddingBottom: '0px',
-              textAlign: 'center'
-            }}>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-700"></div>
-                <span>High</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                <span>Medium-high</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span>Medium</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <span>Low</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span>Lowest</span>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 

@@ -453,17 +453,17 @@ export function RegistrationAnalytics() {
             </div>
           </div>
           
-          {/* Charts Row - Municipality Chart and Vehicle Trend Chart */}
-          <div className="flex flex-col lg:flex-row gap-6 mb-6">
-            <div className="flex-1 lg:flex-1">
+          {/* Charts Row - Vehicle Trend Chart and Municipality Chart */}
+          <div className="flex flex-col gap-6 mb-6">
+            <div className="w-full">
+              <VehicleTrendChart />
+            </div>
+            <div className="w-full">
               <MunicipalityChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
                 loading={loading}
               />
-            </div>
-            <div className="flex-1 lg:flex-1">
-              <VehicleTrendChart />
             </div>
           </div>
           

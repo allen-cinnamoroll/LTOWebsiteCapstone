@@ -40,6 +40,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import DatePicker from "@/components/calendar/DatePicker";
 import { toast } from "sonner";
+import { validateRenewalWindow } from "@/util/expirationCalculator";
 
 const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated }) => {
   const [newRenewalDate, setNewRenewalDate] = useState(null);
@@ -50,6 +51,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [loadingOwner, setLoadingOwner] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { token } = useAuth();
 
@@ -59,6 +61,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       setNewRenewalDate(new Date());
       setUpdateSuccess(false);
       setError("");
+      setSuccessModalOpen(false);
       
       // Fetch owner data
       if (vehicleData.driverId) {
@@ -93,6 +96,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     setOwnerData(null);
     setConfirmOpen(false);
     setErrorModalOpen(false);
+    setSuccessModalOpen(false);
     setErrorMessage("");
     onOpenChange(false);
   };
@@ -120,6 +124,32 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       return;
     }
 
+    // Prevent renewing in the same year - vehicles can only be renewed once per year
+    if (latestDate) {
+      const latestDateObj = new Date(latestDate);
+      const newDateObj = new Date(newRenewalDate);
+      if (latestDateObj.getFullYear() === newDateObj.getFullYear()) {
+        setErrorMessage(`A vehicle can only be renewed once per year. The current renewal date is in ${latestDateObj.getFullYear()}. Please select a date in a different year.`);
+        setErrorModalOpen(true);
+        return;
+      }
+
+      // Validate renewal window - vehicles can only be renewed 2 months in advance
+      const vehicleStatusType = vehicleData.vehicleStatusType || "Old";
+      const validation = validateRenewalWindow(
+        vehicleData.plateNo,
+        latestDate,
+        newRenewalDate,
+        vehicleStatusType
+      );
+
+      if (!validation.isValid) {
+        setErrorMessage(validation.message);
+        setErrorModalOpen(true);
+        return;
+      }
+    }
+
     setUpdating(true);
 
     try {
@@ -144,10 +174,14 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
         toast.success("Vehicle Renewed Successfully", {
           description: `Renewal date added for ${vehicleData.plateNo}`,
         });
+        
+        // Close the main renewal modal and open success modal
+        onOpenChange(false);
+        setSuccessModalOpen(true);
             
-            // Notify parent component to refresh the vehicle list
-            if (onVehicleUpdated) {
-              onVehicleUpdated();
+        // Notify parent component to refresh the vehicle list
+        if (onVehicleUpdated) {
+          onVehicleUpdated();
         }
       } else {
         setErrorMessage(data.message || "Failed to update renewal date");
@@ -347,12 +381,6 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                       </Popover>
                     </div>
                   </div>
-                
-                {updateSuccess && (
-                  <div className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-md">
-                    <p className="text-sm text-green-600 dark:text-green-400">Vehicle renewed successfully!</p>
-                  </div>
-                )}
                   
                   <div className="flex justify-end">
                     <Button 
@@ -372,6 +400,31 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                           setErrorMessage("The selected date matches the current renewal date. Please choose a different date.");
                           setErrorModalOpen(true);
                           return;
+                        }
+                        // Prevent renewing in the same year - vehicles can only be renewed once per year
+                        if (latestDate) {
+                          const latestDateObj = new Date(latestDate);
+                          const newDateObj = new Date(newRenewalDate);
+                          if (latestDateObj.getFullYear() === newDateObj.getFullYear()) {
+                            setErrorMessage(`A vehicle can only be renewed once per year. The current renewal date is in ${latestDateObj.getFullYear()}. Please select a date in a different year.`);
+                            setErrorModalOpen(true);
+                            return;
+                          }
+
+                          // Validate renewal window - vehicles can only be renewed 2 months in advance
+                          const vehicleStatusType = vehicleData.vehicleStatusType || "Old";
+                          const validation = validateRenewalWindow(
+                            vehicleData.plateNo,
+                            latestDate,
+                            newRenewalDate,
+                            vehicleStatusType
+                          );
+
+                          if (!validation.isValid) {
+                            setErrorMessage(validation.message);
+                            setErrorModalOpen(true);
+                            return;
+                          }
                         }
                         setConfirmOpen(true);
                       }}
@@ -438,6 +491,46 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             variant="outline" 
             onClick={() => setErrorModalOpen(false)} 
             className="min-w-[80px] bg-white dark:bg-gray-800 border-gray-300 dark:border-[#424242] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
+            OK
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    {/* Success Modal */}
+    <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
+      <DialogContent className="max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 animate-in fade-in-0 zoom-in-95 duration-300">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <CheckCircle2Icon className="h-5 w-5 text-green-600 dark:text-green-400" />
+            Success
+          </DialogTitle>
+        </DialogHeader>
+        <div className="pt-2 pb-3">
+          <p className="text-gray-600 dark:text-gray-300">
+            Vehicle renewed successfully!
+          </p>
+          {vehicleData && (
+            <div className="mt-3 space-y-1">
+              <p className="text-gray-600 dark:text-gray-300">
+                <span className="font-medium">Plate Number:</span> {vehicleData.plateNo || 'N/A'}
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                <span className="font-medium">File Number:</span> {vehicleData.fileNo || 'N/A'}
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                <span className="font-medium">New Renewal Date:</span> {newRenewalDate ? new Date(newRenewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}
+              </p>
+            </div>
+          )}
+        </div>
+        <DialogFooter className="flex justify-end gap-3">
+          <Button 
+            onClick={() => {
+              setSuccessModalOpen(false);
+              handleClose();
+            }} 
+            className="min-w-[80px] bg-green-600 hover:bg-green-700 text-white"
           >
             OK
           </Button>

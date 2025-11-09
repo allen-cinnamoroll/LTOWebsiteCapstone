@@ -272,10 +272,10 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
           </div>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto flex-1 scrollbar-hide overflow-x-hidden min-h-0">
+        {/* Content - Scrollable Body */}
+        <div className="flex-1 min-h-0 flex flex-col">
           <div 
-            className={`transition-all duration-500 ease-in-out ${
+            className={`flex-1 overflow-y-auto overflow-x-hidden transition-all duration-500 ease-in-out custom-scrollbar ${
               isTransitioning 
                 ? slideDirection === 'left' 
                   ? 'opacity-0 transform translate-x-6 scale-98' 
@@ -298,7 +298,7 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
             ) : (
               <div>
                 {/* Barangay Table */}
-                <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden min-h-[400px] overflow-x-auto">
+                <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl border border-gray-200/50 dark:border-gray-700/30 overflow-hidden overflow-x-auto">
                   <table className="w-full min-w-[600px]">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700">
                     <tr>
