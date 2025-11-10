@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   BarChart as RechartsBarChart, 
   Bar, 
@@ -12,6 +12,7 @@ import {
 
 export function BarChart({ data, title, type, loading, totalCount, allOfficersData }) {
   const [showModal, setShowModal] = useState(false);
+  const [sortDirection, setSortDirection] = useState('desc');
   // Format data for Recharts
   const formatData = () => {
     if (!data || data.length === 0) return [];
@@ -31,7 +32,7 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const colorClass = type === 'officers' ? 'text-violet-600 dark:text-violet-400' : 'text-violet-600 dark:text-violet-400';
+      const colorClass = type === 'officers' ? 'text-emerald-600 dark:text-emerald-400' : 'text-violet-600 dark:text-violet-400';
       return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg px-4 py-3 shadow-lg min-w-[180px]">
           <div className="text-center">
@@ -57,17 +58,24 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
   };
 
   // Sort all officers by count (highest to lowest) for the modal
-  const sortedOfficers = allOfficersData && type === 'officers' 
-    ? [...allOfficersData].sort((a, b) => (b.count || b.violationCount || 0) - (a.count || a.violationCount || 0))
-    : [];
+  const sortedOfficers = useMemo(() => {
+    if (!allOfficersData || type !== 'officers') return [];
+    const copy = [...allOfficersData];
+    copy.sort((a, b) => {
+      const countA = a.count || a.violationCount || 0;
+      const countB = b.count || b.violationCount || 0;
+      return sortDirection === 'asc' ? countA - countB : countB - countA;
+    });
+    return copy;
+  }, [allOfficersData, type, sortDirection]);
 
   // Determine colors based on type
   const iconGradient = type === 'officers' 
-    ? 'from-violet-500 to-fuchsia-500' 
+    ? 'from-emerald-500 to-teal-500' 
     : 'from-purple-600 to-pink-500';
-  const barGradientId = type === 'officers' ? 'violetGradient' : 'violetPinkGradient';
+  const barGradientId = type === 'officers' ? 'emeraldGradient' : 'violetPinkGradient';
   const barGradientColors = type === 'officers' 
-    ? { start: '#8b5cf6', mid: '#7c3aed', end: '#6d28d9' }
+    ? { start: '#10b981', mid: '#059669', end: '#047857' }
     : { start: '#6366f1', mid: '#8b5cf6', end: '#a855f7' };
 
   // Icon component based on type
@@ -156,13 +164,16 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
             </div>
           </div>
           {type === 'officers' && allOfficersData && allOfficersData.length > 0 && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="px-3 py-1.5 text-sm font-medium text-violet-600 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors dark:text-violet-300 dark:bg-violet-900/30 dark:border-violet-700"
-            >
-              View More
-            </button>
-          )}
+             <button
+               onClick={() => setShowModal(true)}
+               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-colors dark:text-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700"
+             >
+               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M3 12h18M3 19h18" />
+               </svg>
+               View Full List
+             </button>
+           )}
         </div>
 
       {/* Recharts Bar Chart */}
@@ -220,10 +231,10 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
       {type === 'officers' && showModal && (
         <div className="fixed inset-0 z-50 bg-gray-950/90 backdrop-blur-[3px] flex items-center justify-center px-4 py-8" onClick={() => setShowModal(false)}>
           <div 
-            className="w-full max-w-4xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.35)] overflow-hidden"
+            className="w-full max-w-4xl bg-white dark:bg-gray-950 border border-emerald-200 dark:border-emerald-800 rounded-2xl shadow-[0_20px_60px_rgba(72,187,120,0.28)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <header className="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-violet-900 via-slate-900 to-violet-900">
+            <header className="flex items-center justify-between px-6 py-5 border-b border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-700 via-emerald-900 to-emerald-700">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center border border-white/20">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
@@ -232,62 +243,64 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Apprehending Officers Details</h3>
-                  <p className="text-xs text-violet-100/80">Official tally of apprehensions per officer</p>
+                  <p className="text-xs text-emerald-100/80">Official tally of apprehensions per officer</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-violet-100 hover:text-white px-3 py-1.5 rounded-md border border-white/20 hover:bg-white/10 transition"
+                className="text-emerald-100 hover:text-white px-3 py-1.5 rounded-md border border-white/20 hover:bg-white/10 transition"
               >
                 Close
               </button>
             </header>
 
-            <div className="px-6 py-5 max-h-[70vh] overflow-y-auto bg-gray-50/60 dark:bg-gray-950">
+            <div className="px-6 py-5 max-h-[70vh] overflow-y-auto bg-emerald-50/40 dark:bg-gray-950 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h4 className="text-sm font-semibold text-emerald-700 dark:text-emerald-200">All Apprehending Officers</h4>
+                <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-200">
+                  <span>Sort:</span>
+                  <button
+                    onClick={() => setSortDirection('desc')}
+                    className={`px-3 py-1 rounded-md border ${sortDirection === 'desc' ? 'bg-emerald-600 text-white border-emerald-700' : 'border-emerald-300 text-emerald-600 hover:bg-emerald-100 dark:text-emerald-200/80'}`}
+                  >
+                    Highest → Lowest
+                  </button>
+                  <button
+                    onClick={() => setSortDirection('asc')}
+                    className={`px-3 py-1 rounded-md border ${sortDirection === 'asc' ? 'bg-emerald-600 text-white border-emerald-700' : 'border-emerald-300 text-emerald-600 hover:bg-emerald-100 dark:text-emerald-200/80'}`}
+                  >
+                    Lowest → Highest
+                  </button>
+                </div>
+              </div>
+
               {sortedOfficers.length > 0 ? (
-                <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 text-sm">
+                <div className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-950">
+                  <table className="min-w-full text-sm">
                     <thead className="bg-gray-100 dark:bg-gray-900/80 text-gray-700 dark:text-gray-300 uppercase tracking-wide text-xs">
                       <tr>
-                        <th className="px-5 py-3 text-left font-semibold">Rank</th>
+                        <th className="px-4 py-3 text-left font-semibold w-12">#</th>
                         <th className="px-5 py-3 text-left font-semibold">Officer</th>
                         <th className="px-5 py-3 text-right font-semibold">Apprehensions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-900">
-                      {sortedOfficers.map((officer, index) => {
-                        const rank = index + 1;
-                        const totalApprehensions = officer.count || officer.violationCount || 0;
-                        const getBadge = (rank) => {
-                          if (rank === 1) return 'bg-violet-900 text-white';
-                          if (rank === 2) return 'bg-slate-800 text-white';
-                          if (rank === 3) return 'bg-slate-700 text-white';
-                          return 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
-                        };
-
-                        return (
-                          <tr key={officer._id || officer.officerName || index} className="hover:bg-violet-50/60 dark:hover:bg-violet-950/40 transition">
-                            <td className="px-5 py-3">
-                              <span className={`inline-flex items-center justify-center w-9 h-9 rounded-md text-xs font-semibold ${getBadge(rank)}`}>
-                                {rank}
-                              </span>
-                            </td>
-                            <td className="px-5 py-3 text-gray-800 dark:text-gray-100 font-medium">
-                              {officer.officerName || 'Unknown Officer'}
-                            </td>
-                            <td className="px-5 py-3 text-right">
-                              <span className="inline-flex items-center px-3 py-1.5 rounded-md bg-violet-100 text-violet-800 font-semibold dark:bg-violet-900/40 dark:text-violet-200">
-                                {totalApprehensions.toLocaleString()}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                       </tr>
+                     </thead>
+                     <tbody className="divide-y divide-gray-100 dark:divide-gray-900">
+                      {sortedOfficers.map((officer, index) => (
+                        <tr key={officer._id || officer.officerName || index} className="hover:bg-emerald-50/60 dark:hover:bg-emerald-900/30 transition">
+                          <td className="px-4 py-3 text-emerald-700 dark:text-emerald-200 font-semibold">{index + 1}</td>
+                          <td className="px-5 py-3 text-gray-800 dark:text-gray-100 font-medium">
+                            {officer.officerName || 'Unknown Officer'}
+                          </td>
+                          <td className="px-5 py-3 text-right font-semibold text-emerald-700 dark:text-emerald-200">
+                            {(officer.count || officer.violationCount || 0).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <div className="py-16 text-center text-sm text-gray-500 dark:text-gray-400">
+                <div className="py-16 text-center text-sm text-emerald-500 dark:text-emerald-200/80">
                   No officer data available.
                 </div>
               )}

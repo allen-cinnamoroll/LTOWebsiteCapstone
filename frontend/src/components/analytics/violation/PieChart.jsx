@@ -8,12 +8,12 @@ import {
 } from 'recharts';
 
 const COLORS = [
-  '#3b82f6', // blue
-  '#6366f1', // indigo
-  '#14b8a6', // teal
-  '#8b5cf6', // violet
-  '#f97316', // orange
-  '#22d3ee'  // cyan accent (used for "Others")
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#3b82f6',
+  '#a855f7',
+  '#14b8a6'
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -114,6 +114,7 @@ export function PieChart({ data, title, loading }) {
   }
 
   const activeSlice = activeIndex >= 0 ? chartData[activeIndex] : null;
+  const topLegendItems = chartData.slice(0, 3);
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-5 space-y-5 h-full flex flex-col">
@@ -161,108 +162,92 @@ export function PieChart({ data, title, loading }) {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-5 flex-1 min-h-[320px]">
-        <div className="relative flex-1 min-w-[240px]">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                Total Violations
-              </p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {total.toLocaleString()}
-              </p>
-              {activeSlice ? (
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-300 mt-1">
-                  {activeSlice.name} · {activeSlice.percentage.toFixed(1)}%
-                </p>
-              ) : (
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-300 mt-1">
-                  Across {chartData.length} types
-                </p>
-              )}
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 min-h-[320px]">
+        <div className="flex w-full flex-col md:flex-row items-center justify-center gap-6">
+          <div className="relative w-full max-w-[260px] aspect-square">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center space-y-1">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Violations</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{total.toLocaleString()}</p>
+                {activeSlice ? (
+                  <p className="text-xs font-semibold text-blue-600 dark:text-blue-300">
+                    {activeSlice.name} · {activeSlice.percentage.toFixed(1)}%
+                  </p>
+                ) : null}
+              </div>
             </div>
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <defs>
+                  {chartData.map((slice, idx) => (
+                    <radialGradient key={slice.key} id={`slice-gradient-${idx}`} cx="50%" cy="50%" r="70%">
+                      <stop offset="0%" stopColor={slice.color} stopOpacity={0.65} />
+                      <stop offset="95%" stopColor={slice.color} stopOpacity={1} />
+                    </radialGradient>
+                  ))}
+                </defs>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius="58%"
+                  outerRadius="100%"
+                  paddingAngle={chartData.length > 1 ? 4 : 0}
+                  cornerRadius={10}
+                  onMouseEnter={(_, index) => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex((prev) => prev)}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={entry.key}
+                      fill={`url(#slice-gradient-${index})`}
+                      stroke={index === activeIndex ? '#ffffff' : 'transparent'}
+                      strokeWidth={index === activeIndex ? 3 : 1}
+                      opacity={index === activeIndex ? 1 : 0.9}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+              </RechartsPieChart>
+            </ResponsiveContainer>
           </div>
 
-          <ResponsiveContainer width="100%" height="100%">
-            <RechartsPieChart>
-            <defs>
-                {chartData.map((slice, idx) => (
-                  <radialGradient
-                    key={slice.key}
-                    id={`slice-gradient-${idx}`}
-                    cx="50%"
-                    cy="50%"
-                    r="65%"
-                  >
-                    <stop offset="0%" stopColor={slice.color} stopOpacity={0.85} />
-                    <stop offset="95%" stopColor={slice.color} stopOpacity={1} />
-              </radialGradient>
-                ))}
-            </defs>
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius="62%"
-                outerRadius="94%"
-                paddingAngle={chartData.length > 1 ? 3 : 0}
-                cornerRadius={8}
-                onMouseEnter={(_, index) => setActiveIndex(index)}
-                onMouseLeave={() => setActiveIndex((prev) => prev)}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={entry.key}
-                    fill={`url(#slice-gradient-${index})`}
-                    stroke={index === activeIndex ? '#ffffff' : 'transparent'}
-                    strokeWidth={index === activeIndex ? 3 : 1}
-                    opacity={index === activeIndex ? 1 : 0.88}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-            </RechartsPieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="flex-1 min-w-[220px] space-y-3 overflow-y-auto pr-1">
-          {chartData.map((item, index) => (
-            <div
-              key={item.key}
-              onMouseEnter={() => setActiveIndex(index)}
-              className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-all duration-200 cursor-pointer ${
-                index === activeIndex
-                  ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-500'
-              }`}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span
-                  className="w-3.5 h-3.5 rounded-full flex-shrink-0 shadow-sm"
-                  style={{ backgroundColor: item.color }}
-                />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {item.percentage.toFixed(1)}% of total
-                  </p>
-                </div>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {item.value.toLocaleString()}
-                </p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  violations
-                </p>
-              </div>
+          <div className="w-full max-w-sm space-y-3">
+            <div className="space-y-2">
+              {topLegendItems.map((item, index) => (
+                <button
+                  key={item.key}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onClick={() => setActiveIndex(index)}
+                  className={`w-full flex items-center justify-between gap-3 rounded-xl border px-3 py-2 transition shadow-sm ${
+                    index === activeIndex
+                      ? 'border-blue-400 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-900/30'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-500'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white truncate" title={item.name}>
+                      {item.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    {item.value.toLocaleString()} · {item.percentage.toFixed(1)}%
+                  </span>
+                </button>
+              ))}
             </div>
-          ))}
+            {chartData.length > 3 && (
+              <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                + {chartData.length - 3} more violation type{chartData.length - 3 === 1 ? '' : 's'} included in totals
+              </div>
+            )}
+          </div>
         </div>
       </div>
-      
     </div>
   );
 }

@@ -398,9 +398,6 @@ export function ViolationPrescriptionTable({ loading }) {
   };
 
   const keyMonthList = Array.isArray(meta.keyMonths) ? meta.keyMonths.slice(0, 3) : [];
-  const summaryMessage = meta.topMonths?.length
-    ? `Most violations: ${meta.dominantViolation || meta.topMonths[0].topViolation || 'General compliance'} — peaks in ${meta.topMonths[0].monthName} (${meta.topMonths[0].totalViolations} cases). Recommended focus: Checkpoints · Seminars · Awareness during ${keyMonthList.join(', ') || 'priority months'} ${planningYear}.`
-    : 'Awaiting additional violation data. Maintain standard enforcement posture while monitoring new records.';
 
   if (busy) {
     return (
@@ -458,11 +455,7 @@ export function ViolationPrescriptionTable({ loading }) {
               </span>
           </div>
         </div>
-          <div className={`${prefersDark ? 'bg-slate-900 border border-slate-800 text-slate-100' : 'bg-blue-50 border border-blue-100 text-slate-700'} rounded-2xl px-5 py-4 text-sm leading-relaxed`}>
-            <span className="font-semibold text-slate-900 dark:text-white">Summary at a glance: </span>
-            {summaryMessage}
-          </div>
-         </div>
+        </div>
       </header>
 
       <section className={`${prefersDark ? 'bg-slate-950/40' : 'bg-slate-50'} px-6 md:px-8 py-6 border-b ${prefersDark ? 'border-slate-900' : 'border-slate-200'}`}>
