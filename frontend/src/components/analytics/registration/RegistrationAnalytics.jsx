@@ -72,10 +72,22 @@ export function RegistrationAnalytics() {
 
 
   const handleMonthSelect = (month) => {
+    // Add click animation
+    const trigger = document.querySelector('[data-month-select]');
+    if (trigger) {
+      trigger.classList.add('click-pulse');
+      setTimeout(() => trigger.classList.remove('click-pulse'), 200);
+    }
     setSelectedMonth(month);
   };
 
   const handleYearSelect = (year) => {
+    // Add click animation
+    const trigger = document.querySelector('[data-year-select]');
+    if (trigger) {
+      trigger.classList.add('click-pulse');
+      setTimeout(() => trigger.classList.remove('click-pulse'), 200);
+    }
     setSelectedYear(year);
   };
 
@@ -168,20 +180,20 @@ export function RegistrationAnalytics() {
 
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen rounded-lg">
+    <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen rounded-lg page-container">
       <div className="registration-analytics-header">
-        <div>
-          <h1 className="registration-analytics-title animate-in slide-in-from-top-5 fade-in duration-700 flex items-center gap-2">
-            <FileText className="h-8 w-8 text-blue-500 animate-pulse" />
+        <div className="header-fade-in">
+          <h1 className="registration-analytics-title flex items-center gap-2 smooth-transition">
+            <FileText className="h-8 w-8 text-blue-500 icon-pulse" />
             Registration Analytics
           </h1>
-          <p className="registration-analytics-subtitle">
+          <p className="registration-analytics-subtitle subtitle-fade-in">
             Vehicle and Owners Registration Analytics
           </p>
         </div>
         
           {loading ? (
-          <div className="registration-analytics-controls">
+          <div className="registration-analytics-controls controls-fade-in loading-fade">
             <div className="animate-pulse">
               <div className="h-8 bg-muted rounded w-32"></div>
             </div>
@@ -190,15 +202,15 @@ export function RegistrationAnalytics() {
             </div>
           </div>
         ) : (
-          <div className="registration-analytics-controls">
+          <div className="registration-analytics-controls controls-fade-in smooth-transition">
             {/* Month Dropdown */}
             <Select value={selectedMonth || ''} onValueChange={handleMonthSelect}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] smooth-transition hover-smooth" data-month-select>
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
               <SelectContent>
                 {months.map((month) => (
-                  <SelectItem key={month} value={month}>
+                  <SelectItem key={month} value={month} className="smooth-transition">
                     {month}
                   </SelectItem>
                 ))}
@@ -207,12 +219,12 @@ export function RegistrationAnalytics() {
 
             {/* Year Dropdown */}
             <Select value={selectedYear || ''} onValueChange={handleYearSelect}>
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[120px] smooth-transition hover-smooth" data-year-select>
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
                 {years.map((year) => (
-                  <SelectItem key={year} value={year}>
+                  <SelectItem key={year} value={year} className="smooth-transition">
                     {year}
                   </SelectItem>
                 ))}
@@ -232,9 +244,9 @@ export function RegistrationAnalytics() {
 
       {/* Loading State */}
       {loading ? (
-        <div className="space-y-6">
+        <div className="space-y-6 loading-fade smooth-transition">
           {/* Loading Controls */}
-          <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg">
+          <div className="flex flex-wrap items-center gap-4 p-4 bg-card border border-border rounded-lg smooth-transition">
             <div className="animate-pulse">
               <div className="h-6 bg-muted rounded w-32 mb-2"></div>
               <div className="h-8 bg-muted rounded w-24"></div>
@@ -248,7 +260,7 @@ export function RegistrationAnalytics() {
           {/* Loading Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-card border border-border rounded-xl p-6">
+              <div key={i} className="bg-card border border-border rounded-xl p-6 smooth-transition">
                 <div className="animate-pulse">
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -267,7 +279,7 @@ export function RegistrationAnalytics() {
           {/* Loading Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-card border border-border rounded-lg p-6">
+              <div key={i} className="bg-card border border-border rounded-lg p-6 smooth-transition">
                 <div className="animate-pulse">
                   <div className="h-6 bg-muted rounded w-48 mb-4"></div>
                   <div className="h-64 bg-muted rounded"></div>
@@ -277,7 +289,7 @@ export function RegistrationAnalytics() {
           </div>
 
           {/* Loading Additional Chart */}
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div className="bg-card border border-border rounded-lg p-6 smooth-transition">
             <div className="animate-pulse">
               <div className="h-6 bg-muted rounded w-40 mb-4"></div>
               <div className="h-96 bg-muted rounded"></div>
@@ -285,9 +297,11 @@ export function RegistrationAnalytics() {
           </div>
         </div>
       ) : (
-        /* Metrics Section - Individual Cards */
-        <div className="registration-analytics-fade-in animate-in slide-in-from-bottom-5 fade-in duration-700">
-        <div className="mb-0">
+        // Metrics Section - Individual Cards
+        <div 
+          key={`${selectedMonth}-${selectedYear}`}
+          className={`mb-0 content-appear smooth-transition ${loading ? 'loading-fade' : 'data-reload filter-change'}`}
+        >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-1">
             {/* Registered Vehicles Card */}
             <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-red-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-1`}>
@@ -454,11 +468,11 @@ export function RegistrationAnalytics() {
           </div>
           
           {/* Charts Row - Vehicle Trend Chart and Municipality Chart */}
-          <div className="flex flex-col gap-6 mb-6">
-            <div className="w-full chart-fade-in">
+          <div className="flex flex-col gap-6 mb-6 smooth-transition">
+            <div className="w-full chart-fade-in smooth-transition">
               <VehicleTrendChart />
             </div>
-            <div className="w-full chart-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="w-full chart-fade-in smooth-transition" style={{ animationDelay: '0.2s' }}>
               <MunicipalityChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
@@ -468,15 +482,15 @@ export function RegistrationAnalytics() {
           </div>
           
           {/* Vehicle Classification Chart and Owner Municipality Chart */}
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1 lg:flex-[0.7] chart-scale-in">
+          <div className="flex flex-col lg:flex-row gap-6 smooth-transition">
+            <div className="flex-1 lg:flex-[0.7] chart-scale-in smooth-transition">
               <VehicleClassificationChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
                 loading={loading}
               />
             </div>
-            <div className="flex-1 lg:flex-[1.3] chart-scale-in" style={{ animationDelay: '0.1s' }}>
+            <div className="flex-1 lg:flex-[1.3] chart-scale-in smooth-transition" style={{ animationDelay: '0.1s' }}>
               <OwnerMunicipalityChart 
                 selectedMonth={selectedMonth} 
                 selectedYear={selectedYear} 
@@ -485,11 +499,10 @@ export function RegistrationAnalytics() {
             </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* Predictive Analytics Container */}
-      <div className="section-fade-in" style={{ animationDelay: '0.3s' }}>
+      <div className="section-fade-in smooth-transition" style={{ animationDelay: '0.3s' }}>
         <PredictiveAnalytics />
       </div>
 

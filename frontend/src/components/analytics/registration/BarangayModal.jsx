@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getBarangayRegistrationTotals } from '../../../api/registrationAnalytics.js';
 import './RegistrationAnalytics.css';
 
@@ -29,14 +30,31 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
     }
   }, [isOpen, municipality, selectedMonth, selectedYear]);
 
-  // Handle modal open animation
+  // Handle modal open animation and prevent body scroll
   useEffect(() => {
     if (isOpen) {
       setIsModalOpen(true);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+      
+      // Handle ESC key to close modal
+      const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      };
+      document.addEventListener('keydown', handleEsc);
+      
+      return () => {
+        document.body.style.overflow = 'unset';
+        document.removeEventListener('keydown', handleEsc);
+      };
     } else {
       setIsModalOpen(false);
+      // Restore body scroll when modal is closed
+      document.body.style.overflow = 'unset';
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   const fetchBarangayData = async (targetMunicipality = municipality) => {
     try {
@@ -137,11 +155,37 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className={`bg-gray-100 border border-gray-200/50 rounded-2xl p-4 sm:p-6 w-full max-w-4xl h-[90vh] sm:h-[85vh] overflow-hidden dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] dark:!border-[#2A2A3E]/50 dark:!shadow-2xl flex flex-col transition-all duration-500 ease-out transform ${
-        isModalOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
-      }`}>
+  return createPortal(
+    <div 
+      className="fixed inset-0 bg-black/75 backdrop-blur-lg flex items-center justify-center z-[99999] p-2 sm:p-4"
+      style={{ 
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        overflow: 'hidden',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        className={`bg-gray-100 border border-gray-200/50 rounded-2xl p-4 sm:p-6 w-full max-w-4xl h-[90vh] sm:h-[85vh] overflow-hidden dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] dark:!border-[#2A2A3E]/50 dark:!shadow-2xl flex flex-col transition-all duration-500 ease-out transform mx-auto my-auto ${
+          isModalOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          zIndex: 100000
+        }}
+      >
         <div className="bg-gray-100 dark:!bg-gradient-to-br dark:!from-[#1a1a2e] dark:!via-[#16213e] dark:!to-[#0f3460] border-b border-gray-200/50 dark:border-gray-700/30 pb-4 mb-4 flex-shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -399,7 +443,8 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
