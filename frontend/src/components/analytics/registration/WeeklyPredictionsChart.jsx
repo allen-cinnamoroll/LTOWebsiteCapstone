@@ -1460,43 +1460,65 @@ const WeeklyPredictionsChart = () => {
 
             {/* Caravan Priority Municipalities column */}
             {!selectedMunicipality && (
-              <div className="w-full lg:w-1/2 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border border-red-200 dark:border-red-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="w-full lg:w-1/2 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 border border-pink-200 dark:border-pink-700 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 flex items-center justify-center bg-pink-100 dark:bg-pink-900/40 rounded-lg">
+                    <Users className="w-5 h-5 text-pink-600 dark:text-pink-400" strokeWidth={2} />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                     Caravan Priority Municipalities (Urgent)
                   </h3>
-                  <div className="w-8 h-8 flex items-center justify-center bg-red-500/10 dark:bg-red-400/10 rounded-lg">
-                    <Users className="w-5 h-5 text-red-600 dark:text-red-400" strokeWidth={2} />
-                  </div>
                 </div>
                 {priorityLoading ? (
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Loading priorities...
-                  </p>
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Loading priorities...
+                    </p>
+                  </div>
                 ) : priorityMunicipalities.length === 0 ? (
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    No caravan priorities identified for this horizon.
-                  </p>
+                  <div className="flex items-center justify-center py-8">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      No caravan priorities identified for this horizon.
+                    </p>
+                  </div>
                 ) : (
-                  <div className="space-y-1">
-                    {priorityMunicipalities.map((item, index) => {
-                      const label =
-                        municipalities.find(m => m.value === item.municipality)?.label ||
-                        item.municipality;
-                      return (
-                        <div key={item.municipality} className="flex items-center justify-between text-xs">
-                          <span className="text-gray-700 dark:text-gray-200">
-                            {index + 1}. {label}
-                          </span>
-                          <span className="text-gray-500 dark:text-gray-300">
-                            {item.total.toLocaleString()} vehicles
-                          </span>
-                        </div>
-                      );
-                    })}
+                  <div className="overflow-hidden rounded-lg border border-pink-200 dark:border-pink-800 bg-white dark:bg-gray-800/50">
+                    {/* Table Header */}
+                    <div className="grid grid-cols-2 gap-4 bg-pink-50 dark:bg-pink-900/30 px-4 py-3 border-b border-pink-200 dark:border-pink-800">
+                      <div className="font-semibold text-sm text-gray-900 dark:text-white">
+                        Municipalities
+                      </div>
+                      <div className="font-semibold text-sm text-gray-900 dark:text-white text-right">
+                        Predicted Registrations
+                      </div>
+                    </div>
+                    {/* Scrollable Table Body */}
+                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                      {priorityMunicipalities.map((item, index) => {
+                        const label =
+                          municipalities.find(m => m.value === item.municipality)?.label ||
+                          item.municipality;
+                        return (
+                          <div 
+                            key={item.municipality} 
+                            className="grid grid-cols-2 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 hover:bg-pink-50/50 dark:hover:bg-pink-900/10 transition-colors duration-150"
+                          >
+                            <div className="flex items-center text-sm text-gray-700 dark:text-gray-200">
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 text-xs font-medium mr-2 flex-shrink-0">
+                                {index + 1}
+                              </span>
+                              <span className="truncate">{label}</span>
+                            </div>
+                            <div className="flex items-center justify-end text-sm font-medium text-gray-900 dark:text-white">
+                              {item.total.toLocaleString()}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 leading-relaxed">
                   Lower forecasted volumes indicate municipalities that should be prioritized for mobile/caravan services to avoid under-served areas.
                 </p>
               </div>

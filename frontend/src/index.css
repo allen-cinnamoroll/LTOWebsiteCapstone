@@ -148,6 +148,43 @@
     background: hsl(var(--muted-foreground) / 0.5);
   }
   
+  /* Custom scrollbar for caravan priority table */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(236, 72, 153, 0.3) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(236, 72, 153, 0.3);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(236, 72, 153, 0.5);
+  }
+  
+  .dark .custom-scrollbar {
+    scrollbar-color: rgba(244, 114, 182, 0.3) transparent;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(244, 114, 182, 0.3);
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(244, 114, 182, 0.5);
+  }
+  
   /* Header specific background - theme compatible */
   .header-bg-white {
     background-color: white !important;
