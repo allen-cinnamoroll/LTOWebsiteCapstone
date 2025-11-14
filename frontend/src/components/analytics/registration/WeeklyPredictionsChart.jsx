@@ -440,6 +440,8 @@ const WeeklyPredictionsChart = () => {
       ? data.map(item => item.totalPredicted)
       : data.map(item => item.totalPredicted);
     
+    const hasAnyData = values.some(val => val > 0);
+    
     const total = values.reduce((sum, val) => sum + val, 0);
     const avg = total / values.length;
     
@@ -478,7 +480,8 @@ const WeeklyPredictionsChart = () => {
     const mean = avg;
     const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
     const stdDev = Math.sqrt(variance);
-    const coefficientOfVariation = mean !== 0 ? (stdDev / mean) * 100 : 0;
+    // If we have no meaningful data (all zeros), treat volatility as undefined/high-risk rather than 0%.
+    const coefficientOfVariation = mean !== 0 ? (stdDev / mean) * 100 : (hasAnyData ? 0 : 100);
     
     // Determine peak period label
     let peakLabel = 'N/A';
@@ -513,7 +516,8 @@ const WeeklyPredictionsChart = () => {
       lowValue: minValue,
       coefficientOfVariation,
       periodCount: values.length,
-      periodLabel
+      periodLabel,
+      noData: !hasAnyData
     };
   };
 
@@ -522,7 +526,31 @@ const WeeklyPredictionsChart = () => {
     if (!kpiMetrics) return [];
     
     const recommendations = [];
-    const { total, avg, trendDirection, percentageChange, peakPeriod, peakValue, lowPeriod, lowValue, coefficientOfVariation, periodLabel } = kpiMetrics;
+    const { total, avg, trendDirection, percentageChange, peakPeriod, peakValue, lowPeriod, lowValue, coefficientOfVariation, periodLabel, noData } = kpiMetrics;
+    
+    // If we have no meaningful prediction data (all zeros), surface high-priority warnings
+    if (noData) {
+      recommendations.push({
+        type: 'risk',
+        category: 'Low Activity',
+        priority: 'high',
+        title: 'Very Low Renewal Activity',
+        description: 'This municipality shows almost no forecasted renewals for the selected period. Treat it as a low-demand area and ensure that at least minimal service capacity is available to handle occasional renewals.',
+        icon: AlertTriangle,
+        color: 'red'
+      });
+      
+      recommendations.push({
+        type: 'operational',
+        category: 'Monitoring',
+        priority: 'medium',
+        title: 'Closely Monitor This Municipality',
+        description: 'Because there are almost no forecasted registrations, flag this municipality for manual monitoring. Coordinate with the local LTO office to track any changes in renewal behavior and respond quickly if demand increases.',
+        icon: Info,
+        color: 'amber'
+      });
+      return recommendations;
+    }
     
     // Operational Planning Recommendations
     if (viewType === 'weekly') {
@@ -1020,7 +1048,9 @@ const WeeklyPredictionsChart = () => {
 
           {/* Risk Flags / Volatility */}
           <div className={`bg-gradient-to-br ${
-            kpiMetrics.coefficientOfVariation > 25 
+            kpiMetrics.noData
+              ? 'from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-red-200 dark:border-red-700'
+              : kpiMetrics.coefficientOfVariation > 25 
               ? 'from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-red-200 dark:border-red-700'
               : kpiMetrics.coefficientOfVariation > 15
               ? 'from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-amber-200 dark:border-amber-700'
@@ -1031,32 +1061,47 @@ const WeeklyPredictionsChart = () => {
                 Volatility
               </h3>
               <div className={`w-8 h-8 flex items-center justify-center rounded-lg ${
-                kpiMetrics.coefficientOfVariation > 25 
+                kpiMetrics.noData
+                  ? 'bg-red-500/10 dark:bg-red-400/10'
+                  : kpiMetrics.coefficientOfVariation > 25 
                   ? 'bg-red-500/10 dark:bg-red-400/10'
                   : kpiMetrics.coefficientOfVariation > 15
                   ? 'bg-amber-500/10 dark:bg-amber-400/10'
                   : 'bg-green-500/10 dark:bg-green-400/10'
               }`}>
-                {kpiMetrics.coefficientOfVariation > 25 ? (
-                  <AlertTriangle className={`w-5 h-5 ${
-                    kpiMetrics.coefficientOfVariation > 25 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'
-                  }`} strokeWidth={2} />
+                {kpiMetrics.noData || kpiMetrics.coefficientOfVariation > 25 ? (
+                  <AlertTriangle
+                    className={`w-5 h-5 ${
+                      kpiMetrics.noData || kpiMetrics.coefficientOfVariation > 25
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-amber-600 dark:text-amber-400'
+                    }`}
+                    strokeWidth={2}
+                  />
                 ) : (
                   <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" strokeWidth={2} />
                 )}
               </div>
             </div>
             <p className={`text-2xl font-bold ${
-              kpiMetrics.coefficientOfVariation > 25 
+              kpiMetrics.noData
+                ? 'text-red-900 dark:text-red-200'
+                : kpiMetrics.coefficientOfVariation > 25 
                 ? 'text-red-900 dark:text-red-200'
                 : kpiMetrics.coefficientOfVariation > 15
                 ? 'text-amber-900 dark:text-amber-200'
                 : 'text-green-900 dark:text-green-200'
             }`}>
-              {kpiMetrics.coefficientOfVariation.toFixed(0)}%
+              {kpiMetrics.noData ? 'No Data' : `${kpiMetrics.coefficientOfVariation.toFixed(0)}%`}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-              {kpiMetrics.coefficientOfVariation > 25 ? 'High variability' : kpiMetrics.coefficientOfVariation > 15 ? 'Moderate variability' : 'Low variability'}
+              {kpiMetrics.noData
+                ? 'Forecast indicates very low renewal volume. Treat this as a low-demand municipality and focus on targeted awareness and basic service coverage.'
+                : kpiMetrics.coefficientOfVariation > 25
+                ? 'High variability'
+                : kpiMetrics.coefficientOfVariation > 15
+                ? 'Moderate variability'
+                : 'Low variability'}
             </p>
           </div>
         </div>
