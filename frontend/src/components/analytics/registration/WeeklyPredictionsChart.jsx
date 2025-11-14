@@ -13,7 +13,7 @@ import {
   ComposedChart
 } from 'recharts';
 import { getWeeklyPredictions } from '../../../api/predictionApi.js';
-import { TrendingUp, TrendingDown, Minus, Award, BarChart2, AlertCircle, CheckCircle2, Info, Users, Calendar, Target, Lightbulb, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, BarChart2, AlertCircle, CheckCircle2, Info, Users, Calendar, Target, Lightbulb, AlertTriangle, ArrowUpRight, ArrowDownRight, Megaphone } from 'lucide-react';
 
 const WeeklyPredictionsChart = () => {
   const [rawWeeklyData, setRawWeeklyData] = useState([]); // Store raw weekly predictions
@@ -1460,10 +1460,10 @@ const WeeklyPredictionsChart = () => {
 
             {/* Caravan Priority Municipalities column */}
             {!selectedMunicipality && (
-              <div className="w-full lg:w-1/2 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 border border-pink-200 dark:border-pink-700 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-full lg:w-1/2 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 border border-red-300 dark:border-red-700 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-pink-100 dark:bg-pink-900/40 rounded-lg">
-                    <Users className="w-5 h-5 text-pink-600 dark:text-pink-400" strokeWidth={2} />
+                  <div className="w-10 h-10 flex items-center justify-center bg-red-200 dark:bg-red-900/50 rounded-lg">
+                    <Megaphone className="w-5 h-5 text-red-700 dark:text-red-400" strokeWidth={2} />
                   </div>
                   <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                     Caravan Priority Municipalities (Urgent)
@@ -1482,9 +1482,9 @@ const WeeklyPredictionsChart = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-hidden rounded-lg border border-pink-200 dark:border-pink-800 bg-white dark:bg-gray-800/50">
+                  <div className="overflow-hidden rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-gray-800/50">
                     {/* Table Header */}
-                    <div className="grid grid-cols-2 gap-4 bg-pink-50 dark:bg-pink-900/30 px-4 py-3 border-b border-pink-200 dark:border-pink-800">
+                    <div className="grid grid-cols-2 gap-4 bg-red-100 dark:bg-red-900/40 px-4 py-3 border-b border-red-300 dark:border-red-800">
                       <div className="font-semibold text-sm text-gray-900 dark:text-white">
                         Municipalities
                       </div>
@@ -1493,7 +1493,7 @@ const WeeklyPredictionsChart = () => {
                       </div>
                     </div>
                     {/* Scrollable Table Body */}
-                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                    <div className="max-h-[288px] overflow-y-auto custom-scrollbar">
                       {priorityMunicipalities.map((item, index) => {
                         const label =
                           municipalities.find(m => m.value === item.municipality)?.label ||
@@ -1501,10 +1501,10 @@ const WeeklyPredictionsChart = () => {
                         return (
                           <div 
                             key={item.municipality} 
-                            className="grid grid-cols-2 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 hover:bg-pink-50/50 dark:hover:bg-pink-900/10 transition-colors duration-150"
+                            className="grid grid-cols-2 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors duration-150"
                           >
                             <div className="flex items-center text-sm text-gray-700 dark:text-gray-200">
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 text-xs font-medium mr-2 flex-shrink-0">
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-200 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-medium mr-2 flex-shrink-0">
                                 {index + 1}
                               </span>
                               <span className="truncate">{label}</span>
