@@ -31,6 +31,8 @@ const WeeklyPredictionsChart = () => {
   const [modelUsed, setModelUsed] = useState(null); // Track which model was used
   const [isMunicipalitySpecific, setIsMunicipalitySpecific] = useState(false); // Track if municipality-specific model was used
   const [availableMunicipalityModels, setAvailableMunicipalityModels] = useState([]); // Track available municipality models
+  const [priorityMunicipalities, setPriorityMunicipalities] = useState([]); // Low-volume municipalities for caravan planning
+  const [priorityLoading, setPriorityLoading] = useState(false);
 
   // Davao Oriental municipalities
   const municipalities = [
@@ -141,6 +143,49 @@ const WeeklyPredictionsChart = () => {
       setAvailableMunicipalityModels([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Compute caravan priority municipalities (lowest predicted totals) for "All Municipalities"
+  const fetchPriorityMunicipalities = async () => {
+    // Only compute when viewing all municipalities
+    if (selectedMunicipality) {
+      setPriorityMunicipalities([]);
+      return;
+    }
+    
+    try {
+      setPriorityLoading(true);
+      const muniValues = municipalities
+        .map(m => m.value)
+        .filter(Boolean); // exclude "All Municipalities" (null)
+      
+      const results = await Promise.all(
+        muniValues.map(async (munValue) => {
+          try {
+            const res = await getWeeklyPredictions(weeksToPredict, munValue);
+            if (res.success && res.data?.weekly_predictions) {
+              const total = res.data.weekly_predictions.reduce((sum, p) => {
+                const val = p.predicted_count || p.predicted || p.total_predicted || 0;
+                return sum + val;
+              }, 0);
+              return { municipality: munValue, total };
+            }
+          } catch (e) {
+            console.error('Error fetching priority data for', munValue, e);
+            return null;
+          }
+          return null;
+        })
+      );
+      
+      const cleaned = results.filter(Boolean);
+      // Sort ascending by total predicted (lowest first)
+      cleaned.sort((a, b) => a.total - b.total);
+      // Take top 3 low-volume municipalities
+      setPriorityMunicipalities(cleaned.slice(0, 3));
+    } finally {
+      setPriorityLoading(false);
     }
   };
 
@@ -303,6 +348,11 @@ const WeeklyPredictionsChart = () => {
   // Load data on mount and when weeksToPredict or municipality changes
   useEffect(() => {
     fetchPredictions();
+  }, [weeksToPredict, selectedMunicipality]);
+
+  // Recompute caravan priority municipalities when horizon or "All Municipalities" selection changes
+  useEffect(() => {
+    fetchPriorityMunicipalities();
   }, [weeksToPredict, selectedMunicipality]);
 
   // Custom tooltip component for different views
@@ -996,7 +1046,7 @@ const WeeklyPredictionsChart = () => {
 
       {/* KPI Cards - Show for all views */}
       {kpiMetrics && !loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {/* Total Predicted Registrations */}
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
@@ -1120,6 +1170,50 @@ const WeeklyPredictionsChart = () => {
                 : 'Low variability.'}
             </p>
           </div>
+
+          {/* Caravan Priority Municipalities */}
+          {!selectedMunicipality && (
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Caravan Priority Municipalities
+                </h3>
+                <div className="w-8 h-8 flex items-center justify-center bg-purple-500/10 dark:bg-purple-400/10 rounded-lg">
+                  <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" strokeWidth={2} />
+                </div>
+              </div>
+              {priorityLoading ? (
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Loading priorities...
+                </p>
+              ) : priorityMunicipalities.length === 0 ? (
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  No caravan priorities identified for this horizon.
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {priorityMunicipalities.map((item, index) => {
+                    const label =
+                      municipalities.find(m => m.value === item.municipality)?.label ||
+                      item.municipality;
+                    return (
+                      <div key={item.municipality} className="flex items-center justify-between text-xs">
+                        <span className="text-gray-700 dark:text-gray-200">
+                          {index + 1}. {label}
+                        </span>
+                        <span className="text-gray-500 dark:text-gray-300">
+                          {item.total.toLocaleString()} vehicles
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2">
+                Lower forecasted volumes indicate better candidates for mobile/caravan services.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
