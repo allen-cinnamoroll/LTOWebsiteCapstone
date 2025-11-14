@@ -29,6 +29,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sarima_model_optimized import OptimizedSARIMAModel
 from data_preprocessor_daily import DailyDataPreprocessor
+from barangay_predictor import BarangayPredictor
 from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES, MIN_WEEKS_FOR_MUNICIPALITY_MODEL
 
 # Set up logging
@@ -101,10 +102,11 @@ def after_request(response):
 aggregated_model = None  # Main aggregated model (always used)
 municipality_models = {}  # Dictionary of per-municipality models (when enabled)
 preprocessor = None
+barangay_predictor = None  # Barangay-level predictor
 
 def initialize_model():
     """Initialize the Optimized SARIMA model(s) and preprocessor with daily data"""
-    global aggregated_model, municipality_models, preprocessor
+    global aggregated_model, municipality_models, preprocessor, barangay_predictor
     try:
         # Get the directory paths
         base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -131,6 +133,10 @@ def initialize_model():
         # Initialize daily preprocessor
         csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
         preprocessor = DailyDataPreprocessor(csv_path)
+        
+        # Initialize barangay predictor
+        barangay_predictor = BarangayPredictor(csv_path)
+        logger.info("Barangay predictor initialized")
         
         # Initialize aggregated model (always needed) - using optimized version
         logger.info("Initializing optimized aggregated model...")
@@ -497,6 +503,49 @@ def predict_registrations():
         formatted_predictions['is_municipality_specific'] = model_used_name.startswith('optimized_municipality_')
         formatted_predictions['available_municipality_models'] = list(municipality_models.keys()) if municipality_models else []
         
+        # Add barangay predictions if municipality is specified and barangay_predictor is available
+        if municipality and barangay_predictor:
+            try:
+                # Prepare municipality predictions for barangay distribution
+                mun_predictions = {}
+                for week_pred in formatted_predictions['weekly_predictions']:
+                    mun = municipality_upper
+                    date = week_pred.get('date') or week_pred.get('week_start')
+                    count = week_pred.get('predicted_count') or week_pred.get('total_predicted') or week_pred.get('predicted') or 0
+                    
+                    if mun not in mun_predictions:
+                        mun_predictions[mun] = {}
+                    mun_predictions[mun][date] = count
+                
+                # Distribute to barangays
+                barangay_predictions = barangay_predictor.predict_barangay_registrations(
+                    mun_predictions,
+                    municipality=municipality_upper
+                )
+                
+                if barangay_predictions:
+                    # Group by barangay for summary
+                    barangay_summary = {}
+                    for pred in barangay_predictions:
+                        brgy = pred['barangay']
+                        if brgy not in barangay_summary:
+                            barangay_summary[brgy] = {
+                                'total_predicted': 0,
+                                'weekly_predictions': []
+                            }
+                        barangay_summary[brgy]['total_predicted'] += pred['predicted_count']
+                        barangay_summary[brgy]['weekly_predictions'].append({
+                            'date': pred['date'],
+                            'predicted_count': pred['predicted_count']
+                        })
+                    
+                    formatted_predictions['barangay_predictions'] = barangay_predictions
+                    formatted_predictions['barangay_summary'] = barangay_summary
+                    logger.info(f"Added barangay predictions for {municipality_upper}: {len(barangay_predictions)} predictions across {len(barangay_summary)} barangays")
+            except Exception as e:
+                logger.warning(f"Could not generate barangay predictions: {str(e)}")
+                # Don't fail the request if barangay predictions fail
+        
         return jsonify({
             'success': True,
             'data': formatted_predictions
@@ -504,6 +553,136 @@ def predict_registrations():
         
     except Exception as e:
         logger.error(f"Error generating predictions: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
+
+@app.route('/api/predict/registrations/barangay', methods=['GET'])
+def predict_barangay_registrations():
+    """
+    Get barangay-level vehicle registration predictions
+    
+    Query Parameters:
+    - weeks (int, optional): Number of weeks to predict (default: 4, max: 52)
+    - municipality (str, optional): Specific municipality name (e.g., "CITY OF MATI", "LUPON")
+      If not provided, returns predictions for all municipalities
+    
+    Returns:
+    - barangay_predictions: List of barangay-level predictions
+    - municipality_summary: Summary per municipality
+    - prediction_dates: List of dates for predictions
+    """
+    try:
+        if aggregated_model is None or barangay_predictor is None:
+            return jsonify({
+                'success': False,
+                'error': 'Model or barangay predictor not initialized'
+            }), 500
+        
+        # Get parameters
+        weeks = request.args.get('weeks', default=4, type=int)
+        municipality = request.args.get('municipality', default=None, type=str)
+        
+        # Validate weeks parameter
+        if weeks < 1 or weeks > 52:
+            return jsonify({
+                'success': False,
+                'error': 'Weeks must be between 1 and 52'
+            }), 400
+        
+        # Get municipality-level predictions first
+        days = weeks * 7
+        municipality_upper = municipality.upper().strip() if municipality else None
+        
+        # Determine which model to use
+        model_to_use = aggregated_model
+        if municipality_upper and municipality_upper in municipality_models:
+            model_to_use = municipality_models[municipality_upper]
+        
+        # Generate municipality predictions
+        result = model_to_use.predict(days=days)
+        
+        if not result or 'daily_predictions' not in result:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to generate municipality predictions'
+            }), 500
+        
+        # Convert daily predictions to weekly for barangay distribution
+        daily_preds = result['daily_predictions']
+        
+        # Group by week (Sunday to Saturday)
+        weekly_predictions = {}
+        for pred in daily_preds:
+            date = pd.to_datetime(pred['date'])
+            # Get the Sunday of that week (weekday: 0=Monday, 6=Sunday)
+            # Calculate days to subtract to get to Sunday
+            days_to_sunday = (date.weekday() + 1) % 7
+            week_start = date - pd.Timedelta(days=days_to_sunday)
+            week_key = week_start.strftime('%Y-%m-%d')
+            
+            if week_key not in weekly_predictions:
+                weekly_predictions[week_key] = {
+                    'municipality': municipality_upper or 'ALL',
+                    'date': week_key,
+                    'predicted_count': 0
+                }
+            
+            weekly_predictions[week_key]['predicted_count'] += pred.get('predicted_count', 0)
+        
+        # Prepare municipality predictions for barangay distribution
+        mun_predictions = {}
+        for week_key, week_pred in weekly_predictions.items():
+            mun = week_pred['municipality']
+            if mun not in mun_predictions:
+                mun_predictions[mun] = {}
+            mun_predictions[mun][week_key] = week_pred['predicted_count']
+        
+        # If municipality specified, only predict for that municipality
+        if municipality_upper:
+            mun_predictions = {m: v for m, v in mun_predictions.items() if m == municipality_upper or m == 'ALL'}
+        
+        # Distribute to barangays
+        barangay_predictions = barangay_predictor.predict_barangay_registrations(
+            mun_predictions,
+            municipality=municipality_upper
+        )
+        
+        # Group by municipality and barangay for summary
+        municipality_summary = {}
+        for pred in barangay_predictions:
+            mun = pred['municipality']
+            brgy = pred['barangay']
+            
+            if mun not in municipality_summary:
+                municipality_summary[mun] = {}
+            if brgy not in municipality_summary[mun]:
+                municipality_summary[mun][brgy] = {
+                    'total_predicted': 0,
+                    'weekly_predictions': []
+                }
+            
+            municipality_summary[mun][brgy]['total_predicted'] += pred['predicted_count']
+            municipality_summary[mun][brgy]['weekly_predictions'].append({
+                'date': pred['date'],
+                'predicted_count': pred['predicted_count']
+            })
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'barangay_predictions': barangay_predictions,
+                'municipality_summary': municipality_summary,
+                'prediction_dates': list(weekly_predictions.keys()),
+                'weeks': weeks,
+                'municipality': municipality_upper
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error predicting barangay registrations: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e),

@@ -52,11 +52,21 @@ export function PredictiveAnalytics() {
       ? 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300'
       : 'bg-orange-100 dark:bg-orange-900/40 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300';
     
+    // Get additional context
+    const getContext = () => {
+      if (accuracy.percent >= 90) return 'Excellent - Ready for production use';
+      if (accuracy.percent >= 80) return 'Good - Suitable for planning decisions';
+      if (accuracy.percent >= 70) return 'Acceptable - Use with caution';
+      return 'Needs improvement - Collect more data';
+    };
+    
     return {
       percent: accuracy.percent.toFixed(2),
       level: accuracy.level,
       colorClass,
-      source: accuracy.isTestSet ? 'Test Set' : 'Training Set'
+      source: accuracy.isTestSet ? 'Test Set' : 'Training Set',
+      context: getContext(),
+      mape: accuracy.mape.toFixed(2)
     };
   };
 
@@ -79,11 +89,14 @@ export function PredictiveAnalytics() {
                 {accuracyLoading ? (
                   <span className="text-xs text-gray-500 dark:text-gray-400">Loading accuracy...</span>
                 ) : accuracyDisplay ? (
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md border ${accuracyDisplay.colorClass}`}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md border ${accuracyDisplay.colorClass}`} title={`MAPE: ${accuracyDisplay.mape}% | ${accuracyDisplay.context}`}>
                       <span className="text-xs font-semibold">
                         Model Accuracy: {accuracyDisplay.percent}% ({accuracyDisplay.source})
                       </span>
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
+                      • {accuracyDisplay.context}
                     </span>
                   </div>
                 ) : null}
