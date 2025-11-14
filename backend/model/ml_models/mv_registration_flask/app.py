@@ -358,6 +358,8 @@ def predict_registrations():
         formatted_predictions['per_municipality_enabled'] = ENABLE_PER_MUNICIPALITY
         formatted_predictions['model_type'] = 'optimized_sarima_daily'
         formatted_predictions['municipality'] = municipality.upper().strip() if municipality else None
+        formatted_predictions['is_municipality_specific'] = model_used_name.startswith('optimized_municipality_')
+        formatted_predictions['available_municipality_models'] = list(municipality_models.keys()) if municipality_models else []
         
         return jsonify({
             'success': True,

@@ -29,6 +29,8 @@ const WeeklyPredictionsChart = () => {
     return localStorage.getItem('predictionMunicipality') || null;
   });
   const [modelUsed, setModelUsed] = useState(null); // Track which model was used
+  const [isMunicipalitySpecific, setIsMunicipalitySpecific] = useState(false); // Track if municipality-specific model was used
+  const [availableMunicipalityModels, setAvailableMunicipalityModels] = useState([]); // Track available municipality models
 
   // Davao Oriental municipalities
   const municipalities = [
@@ -95,6 +97,12 @@ const WeeklyPredictionsChart = () => {
         if (response.data.model_used) {
           setModelUsed(response.data.model_used);
         }
+        if (response.data.is_municipality_specific !== undefined) {
+          setIsMunicipalitySpecific(response.data.is_municipality_specific);
+        }
+        if (response.data.available_municipality_models) {
+          setAvailableMunicipalityModels(response.data.available_municipality_models);
+        }
         
         // Process data for all three views
         processAllViews(response.data.weekly_predictions);
@@ -106,6 +114,8 @@ const WeeklyPredictionsChart = () => {
         setMonthlyData([]);
         setYearlyData([]);
         setModelUsed(null);
+        setIsMunicipalitySpecific(false);
+        setAvailableMunicipalityModels([]);
       }
     } catch (err) {
       console.error('Error fetching weekly predictions:', err);
@@ -126,6 +136,9 @@ const WeeklyPredictionsChart = () => {
       setWeeklyData([]);
       setMonthlyData([]);
       setYearlyData([]);
+      setModelUsed(null);
+      setIsMunicipalitySpecific(false);
+      setAvailableMunicipalityModels([]);
     } finally {
       setLoading(false);
     }
@@ -842,9 +855,14 @@ const WeeklyPredictionsChart = () => {
                   • {municipalities.find(m => m.value === selectedMunicipality)?.label || selectedMunicipality}
                 </span>
               )}
-              {modelUsed && modelUsed.includes('municipality') && (
+              {selectedMunicipality && isMunicipalitySpecific && (
                 <span className="ml-2 text-green-600 dark:text-green-400 text-[10px]" title="Using municipality-specific model">
                   ✓ Municipality Model
+                </span>
+              )}
+              {selectedMunicipality && !isMunicipalitySpecific && (
+                <span className="ml-2 text-amber-600 dark:text-amber-400 text-[10px]" title={`Municipality-specific model not available for ${municipalities.find(m => m.value === selectedMunicipality)?.label || selectedMunicipality}. Using aggregated model (same predictions for all municipalities). Train a model for this municipality to get specific predictions.`}>
+                  ⚠ Using Aggregated Model
                 </span>
               )}
             </p>
