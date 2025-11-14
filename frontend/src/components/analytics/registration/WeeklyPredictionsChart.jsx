@@ -230,7 +230,16 @@ const WeeklyPredictionsChart = () => {
       if (a.year !== b.year) return a.year - b.year;
       return a.monthIndex - b.monthIndex;
     });
-    setMonthlyData(monthlyProcessed);
+    
+    // Filter out baseline training month (e.g., July) with zero predictions
+    // so that the chart starts at the first actual forecast month (August).
+    const filteredMonthly = monthlyProcessed.filter((month, index) => {
+      const isZeroMonth = month.totalPredicted === 0 || !Number.isFinite(month.totalPredicted);
+      const isJuly = month.monthShort === 'Jul';
+      return !(isZeroMonth && isJuly && index === 0);
+    });
+
+    setMonthlyData(filteredMonthly);
 
     // Process Yearly View
     const yearlyGrouped = {};
