@@ -1460,67 +1460,81 @@ const WeeklyPredictionsChart = () => {
 
             {/* Caravan Priority Municipalities column */}
             {!selectedMunicipality && (
-              <div className="w-full lg:w-1/2 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 border border-red-300 dark:border-red-700 rounded-lg p-5 shadow-sm hover:shadow-md transition-all duration-300">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-red-200 dark:bg-red-900/50 rounded-lg">
-                    <Megaphone className="w-5 h-5 text-red-700 dark:text-red-400" strokeWidth={2} />
+              <div className="w-full lg:w-1/2 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/40 dark:to-gray-900/40 border border-slate-200 dark:border-slate-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-800 dark:to-red-900 px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                      <Megaphone className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white leading-tight">
+                        Caravan Priority Municipalities
+                      </h3>
+                      <p className="text-xs text-red-100 font-medium mt-0.5">
+                        Urgent Action Required
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                    Caravan Priority Municipalities (Urgent)
-                  </h3>
                 </div>
-                {priorityLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Loading priorities...
-                    </p>
-                  </div>
-                ) : priorityMunicipalities.length === 0 ? (
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      No caravan priorities identified for this horizon.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="overflow-hidden rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-gray-800/50">
-                    {/* Table Header */}
-                    <div className="grid grid-cols-2 gap-4 bg-red-100 dark:bg-red-900/40 px-4 py-3 border-b border-red-300 dark:border-red-800">
-                      <div className="font-semibold text-sm text-gray-900 dark:text-white">
-                        Municipalities
+                
+                {/* Content Section */}
+                <div className="p-5">
+                  {priorityLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                        Loading priorities...
+                      </p>
+                    </div>
+                  ) : priorityMunicipalities.length === 0 ? (
+                    <div className="flex items-center justify-center py-12">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                        No caravan priorities identified for this horizon.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 shadow-sm">
+                      {/* Table Header */}
+                      <div className="grid grid-cols-2 gap-4 bg-slate-100 dark:bg-slate-800/90 px-5 py-3.5 border-b-2 border-slate-200 dark:border-slate-700">
+                        <div className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                          Municipality
+                        </div>
+                        <div className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 text-right">
+                          Predicted Registrations
+                        </div>
                       </div>
-                      <div className="font-semibold text-sm text-gray-900 dark:text-white text-right">
-                        Predicted Registrations
+                      {/* Scrollable Table Body */}
+                      <div className="max-h-[288px] overflow-y-auto custom-scrollbar">
+                        {priorityMunicipalities.map((item, index) => {
+                          const label =
+                            municipalities.find(m => m.value === item.municipality)?.label ||
+                            item.municipality;
+                          return (
+                            <div 
+                              key={item.municipality} 
+                              className="grid grid-cols-2 gap-4 px-5 py-3.5 border-b border-slate-100 dark:border-slate-700/50 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors duration-200"
+                            >
+                              <div className="flex items-center">
+                                <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-md bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold mr-3 flex-shrink-0">
+                                  {index + 1}
+                                </span>
+                                <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{label}</span>
+                              </div>
+                              <div className="flex items-center justify-end">
+                                <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                                  {item.total.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                    {/* Scrollable Table Body */}
-                    <div className="max-h-[288px] overflow-y-auto custom-scrollbar">
-                      {priorityMunicipalities.map((item, index) => {
-                        const label =
-                          municipalities.find(m => m.value === item.municipality)?.label ||
-                          item.municipality;
-                        return (
-                          <div 
-                            key={item.municipality} 
-                            className="grid grid-cols-2 gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors duration-150"
-                          >
-                            <div className="flex items-center text-sm text-gray-700 dark:text-gray-200">
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-200 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-medium mr-2 flex-shrink-0">
-                                {index + 1}
-                              </span>
-                              <span className="truncate">{label}</span>
-                            </div>
-                            <div className="flex items-center justify-end text-sm font-medium text-gray-900 dark:text-white">
-                              {item.total.toLocaleString()}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 leading-relaxed">
-                  Lower forecasted volumes indicate municipalities that should be prioritized for mobile/caravan services to avoid under-served areas.
-                </p>
+                  )}
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-4 leading-relaxed font-normal">
+                    Lower forecasted volumes indicate municipalities that should be prioritized for mobile/caravan services to avoid under-served areas.
+                  </p>
+                </div>
               </div>
             )}
           </div>

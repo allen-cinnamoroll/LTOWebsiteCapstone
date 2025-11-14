@@ -151,11 +151,11 @@
   /* Custom scrollbar for caravan priority table */
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(220, 38, 38, 0.4) transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
   }
   
   .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 7px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -164,25 +164,25 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(220, 38, 38, 0.4);
+    background: rgba(148, 163, 184, 0.4);
     border-radius: 4px;
     transition: background 0.2s ease;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(220, 38, 38, 0.6);
+    background: rgba(148, 163, 184, 0.6);
   }
   
   .dark .custom-scrollbar {
-    scrollbar-color: rgba(248, 113, 113, 0.4) transparent;
+    scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
   }
   
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(248, 113, 113, 0.4);
+    background: rgba(100, 116, 139, 0.5);
   }
   
   .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(248, 113, 113, 0.6);
+    background: rgba(100, 116, 139, 0.7);
   }
   
   /* Header specific background - theme compatible */
