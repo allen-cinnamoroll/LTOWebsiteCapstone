@@ -1,82 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import WeeklyPredictionsChart from './WeeklyPredictionsChart.jsx';
-import { getWeeklyPredictions } from '../../../api/predictionApi.js';
+import { getModelAccuracy } from '../../../api/predictionApi.js';
 
 export function PredictiveAnalytics() {
-  const [confidence, setConfidence] = useState(null);
-  const [confidenceLoading, setConfidenceLoading] = useState(true);
+  const [accuracy, setAccuracy] = useState(null);
+  const [accuracyLoading, setAccuracyLoading] = useState(true);
 
   useEffect(() => {
-    const fetchConfidence = async () => {
+    const fetchAccuracy = async () => {
       try {
-        setConfidenceLoading(true);
-        // Fetch predictions to calculate confidence from intervals
-        const response = await getWeeklyPredictions(12, null); // Get 12 weeks, all municipalities
+        setAccuracyLoading(true);
+        const response = await getModelAccuracy();
         
-        if (response.success && response.data?.weekly_predictions) {
-          const predictions = response.data.weekly_predictions;
+        if (response.success && response.data) {
+          // Use test set (out-of-sample) accuracy if available, otherwise use training (in-sample)
+          const testMetrics = response.data.out_of_sample || response.data.test_accuracy_metrics;
+          const trainingMetrics = response.data.in_sample || response.data;
           
-          if (predictions.length > 0) {
-            // Calculate average confidence interval width as percentage of prediction
-            let totalConfidenceScore = 0;
-            let validPredictions = 0;
+          // Prefer test set metrics as they're more reliable
+          const mape = testMetrics?.mape ?? trainingMetrics?.mape;
+          
+          if (mape !== null && mape !== undefined) {
+            // Calculate accuracy: 100 - MAPE (same as shown in modal)
+            const accuracyPercent = Math.max(0, Math.min(100, 100 - mape));
+            const isTestSet = !!testMetrics?.mape;
             
-            predictions.forEach(pred => {
-              const predicted = pred.predicted_count || pred.predicted || 0;
-              const lower = pred.lower_bound || 0;
-              const upper = pred.upper_bound || 0;
-              
-              if (predicted > 0) {
-                // Calculate interval width as percentage of prediction
-                const intervalWidth = upper - lower;
-                const widthPercent = (intervalWidth / predicted) * 100;
-                
-                // Convert to confidence score: narrower intervals = higher confidence
-                // If width is 20% of prediction, confidence is ~80%
-                // If width is 100% of prediction, confidence is ~0%
-                // Formula: confidence = max(0, 100 - widthPercent)
-                const confidenceScore = Math.max(0, Math.min(100, 100 - widthPercent));
-                totalConfidenceScore += confidenceScore;
-                validPredictions++;
-              }
+            setAccuracy({
+              percent: accuracyPercent,
+              mape: mape,
+              isTestSet: isTestSet,
+              level: accuracyPercent >= 80 ? 'High' : accuracyPercent >= 60 ? 'Moderate' : 'Low'
             });
-            
-            if (validPredictions > 0) {
-              const avgConfidence = totalConfidenceScore / validPredictions;
-              setConfidence({
-                percent: avgConfidence,
-                level: avgConfidence >= 80 ? 'High' : avgConfidence >= 60 ? 'Moderate' : 'Low'
-              });
-            }
           }
         }
       } catch (error) {
-        console.error('Error fetching prediction confidence:', error);
+        console.error('Error fetching model accuracy:', error);
       } finally {
-        setConfidenceLoading(false);
+        setAccuracyLoading(false);
       }
     };
 
-    fetchConfidence();
+    fetchAccuracy();
   }, []);
 
-  const getConfidenceDisplay = () => {
-    if (!confidence) return null;
+  const getAccuracyDisplay = () => {
+    if (!accuracy) return null;
     
-    const colorClass = confidence.percent >= 80 
+    const colorClass = accuracy.percent >= 80 
       ? 'bg-green-100 dark:bg-green-900/40 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-      : confidence.percent >= 60
+      : accuracy.percent >= 60
       ? 'bg-yellow-100 dark:bg-yellow-900/40 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300'
       : 'bg-orange-100 dark:bg-orange-900/40 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300';
     
     return {
-      percent: confidence.percent.toFixed(1),
-      level: confidence.level,
-      colorClass
+      percent: accuracy.percent.toFixed(2),
+      level: accuracy.level,
+      colorClass,
+      source: accuracy.isTestSet ? 'Test Set' : 'Training Set'
     };
   };
 
-  const confidenceDisplay = getConfidenceDisplay();
+  const accuracyDisplay = getAccuracyDisplay();
 
   return (
     <div className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg">
@@ -92,13 +76,13 @@ export function PredictiveAnalytics() {
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
-                {confidenceLoading ? (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">Loading confidence...</span>
-                ) : confidenceDisplay ? (
+                {accuracyLoading ? (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Loading accuracy...</span>
+                ) : accuracyDisplay ? (
                   <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md border ${confidenceDisplay.colorClass}`}>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md border ${accuracyDisplay.colorClass}`}>
                       <span className="text-xs font-semibold">
-                        Prediction Confidence: {confidenceDisplay.percent}% ({confidenceDisplay.level})
+                        Model Accuracy: {accuracyDisplay.percent}% ({accuracyDisplay.source})
                       </span>
                     </span>
                   </div>
