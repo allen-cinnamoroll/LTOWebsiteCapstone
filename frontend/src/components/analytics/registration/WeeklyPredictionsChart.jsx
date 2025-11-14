@@ -152,27 +152,9 @@ const WeeklyPredictionsChart = () => {
       setYearlyData([]);
       return;
     }
-    
-    // For weekly view, drop leading zero weeks before the first non-zero prediction
-    // (e.g., July weeks from the training period) so charts start where forecasts begin.
-    let cleanedWeekly = [...weeklyPredictions];
-    const firstNonZero = weeklyPredictions.find((prediction) => {
-      const val = prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0;
-      return val > 0;
-    });
-    if (firstNonZero) {
-      const firstNonZeroDate = new Date(firstNonZero.date || firstNonZero.week_start);
-      cleanedWeekly = weeklyPredictions.filter((prediction) => {
-        const dateStr = prediction.date || prediction.week_start;
-        const date = new Date(dateStr);
-        const val = prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0;
-        // Keep all non-zero points and any zeroes that occur after forecasts have started
-        return val > 0 || date >= firstNonZeroDate;
-      });
-    }
 
     // Process Weekly View
-    const weeklyProcessed = cleanedWeekly.map((prediction, index) => {
+    const weeklyProcessed = weeklyPredictions.map((prediction, index) => {
       // Handle both 'date' and 'week_start' fields for compatibility
       const dateStr = prediction.date || prediction.week_start;
       const date = new Date(dateStr);
@@ -200,7 +182,7 @@ const WeeklyPredictionsChart = () => {
 
     // Process Monthly View
     const monthlyGrouped = {};
-    cleanedWeekly.forEach((prediction) => {
+    weeklyPredictions.forEach((prediction) => {
       const date = new Date(prediction.date);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -1353,7 +1335,7 @@ const WeeklyPredictionsChart = () => {
             </h3>
           </div>
           
-          <div className="flex flex-col gap-4 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {recommendations.map((rec, index) => {
               const colorClasses = {
                 blue: {
