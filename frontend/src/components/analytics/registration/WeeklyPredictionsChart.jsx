@@ -466,6 +466,14 @@ const WeeklyPredictionsChart = () => {
       trendColor = 'text-red-600 dark:text-red-400';
     }
     
+    // Special handling for cases like Boston with almost no activity:
+    // show "Low Activity" instead of "Stable" so LTO knows it's a quiet area.
+    if (!hasAnyData) {
+      trendDirection = 'low activity';
+      trendIcon = AlertTriangle;
+      trendColor = 'text-red-600 dark:text-red-400';
+    }
+    
     // Find peak period
     const maxValue = Math.max(...values);
     const maxIndex = values.indexOf(maxValue);
@@ -1096,12 +1104,12 @@ const WeeklyPredictionsChart = () => {
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {kpiMetrics.noData
-                ? 'Forecast indicates very low renewal volume. Treat this as a low-demand municipality and focus on targeted awareness and basic service coverage.'
+                ? 'Very low renewal volume.'
                 : kpiMetrics.coefficientOfVariation > 25
-                ? 'High variability'
+                ? 'High variability.'
                 : kpiMetrics.coefficientOfVariation > 15
-                ? 'Moderate variability'
-                : 'Low variability'}
+                ? 'Moderate variability.'
+                : 'Low variability.'}
             </p>
           </div>
         </div>
