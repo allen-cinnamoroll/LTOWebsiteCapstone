@@ -356,6 +356,20 @@ def predict_registrations():
             weekly_aggregated = {}
             prediction_start_date = None
             
+            # Determine the global first week start date (Sunday on or after next_month_start)
+            # to ensure we do NOT include any weeks from the training month (e.g., July).
+            next_month_start_weekday = next_month_start.weekday()  # Monday=0, Sunday=6
+            days_until_sunday = (6 - next_month_start_weekday) % 7
+            if days_until_sunday == 0 and next_month_start_weekday != 6:
+                days_until_sunday = 7
+            global_first_week_start = next_month_start + timedelta(days=days_until_sunday)
+            global_first_week_start_str = global_first_week_start.strftime('%Y-%m-%d')
+            
+            logger.info(
+                f"Global first prediction week start (aggregated from municipalities): "
+                f"{global_first_week_start_str}"
+            )
+            
             for mun_name, mun_model in municipality_models.items():
                 try:
                     logger.info(f"Generating predictions for municipality: {mun_name}")
@@ -374,6 +388,10 @@ def predict_registrations():
                     # Use 'date' (week_start) as the key; fall back to 'week_start' if needed
                     date_key = week.get('date') or week.get('week_start')
                     if not date_key:
+                        continue
+                    
+                    # Skip any weeks that start before the global first prediction week
+                    if date_key < global_first_week_start_str:
                         continue
                     
                     if date_key not in weekly_aggregated:
