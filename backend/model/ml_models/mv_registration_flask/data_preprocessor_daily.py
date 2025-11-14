@@ -28,13 +28,14 @@ class DailyDataPreprocessor:
         # Philippine holidays for exogenous variable creation
         self.ph_holidays = holidays.Philippines()
     
-    def load_and_process_daily_data(self, fill_missing_days=True, fill_method='forward'):
+    def load_and_process_daily_data(self, fill_missing_days=True, fill_method='forward', municipality=None):
         """
         Load CSV data and process it into daily time series format
         
         Args:
             fill_missing_days: If True, fill missing days with 0 or forward-fill
             fill_method: 'zero' to fill with 0, 'forward' to forward-fill last value
+            municipality: Specific municipality name to filter by (None for all municipalities)
         
         Returns:
             tuple: (daily_data DataFrame with DateTime index, exogenous_vars DataFrame, processing_info dict)
@@ -102,10 +103,21 @@ class DailyDataPreprocessor:
         davao_mask = df['municipality_upper'].isin(self.davao_oriental_municipalities)
         df_filtered = df[davao_mask].copy()
         
-        print(f"Filtered to {len(df_filtered)} rows from Davao Oriental municipalities")
+        # Filter by specific municipality if provided
+        if municipality:
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper not in self.davao_oriental_municipalities:
+                raise ValueError(f"Municipality '{municipality}' not found in Davao Oriental. Available municipalities: {', '.join(self.davao_oriental_municipalities)}")
+            df_filtered = df_filtered[df_filtered['municipality_upper'] == municipality_upper].copy()
+            print(f"Filtered to {len(df_filtered)} rows from {municipality_upper}")
+        else:
+            print(f"Filtered to {len(df_filtered)} rows from Davao Oriental municipalities")
         
         if len(df_filtered) == 0:
-            raise ValueError("No data found for Davao Oriental municipalities")
+            if municipality:
+                raise ValueError(f"No data found for municipality '{municipality}'")
+            else:
+                raise ValueError("No data found for Davao Oriental municipalities")
         
         # Parse dateOfRenewal
         df_filtered['dateOfRenewal_parsed'] = pd.to_datetime(
@@ -199,7 +211,8 @@ class DailyDataPreprocessor:
                 'start': str(actual_min_date),
                 'end': str(actual_max_date)
             },
-            'fill_method': fill_method if fill_missing_days else None
+            'fill_method': fill_method if fill_missing_days else None,
+            'municipality': municipality.upper().strip() if municipality else None
         }
         
         return daily_data[['count']], exogenous_vars, processing_info

@@ -3,7 +3,7 @@ Configuration file for SARIMA prediction API
 """
 
 # Feature Flags
-ENABLE_PER_MUNICIPALITY = False  # Set to True when you have 6+ months of data per municipality
+ENABLE_PER_MUNICIPALITY = True  # Enable per-municipality predictions
 
 # Minimum data requirements for per-municipality models
 MIN_WEEKS_FOR_MUNICIPALITY_MODEL = 12  # Minimum weeks with registrations needed

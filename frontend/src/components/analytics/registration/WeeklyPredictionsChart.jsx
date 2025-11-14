@@ -24,6 +24,27 @@ const WeeklyPredictionsChart = () => {
   const [error, setError] = useState(null);
   const [weeksToPredict, setWeeksToPredict] = useState(12); // Default to 12 weeks (about 3 months)
   const [viewType, setViewType] = useState('monthly'); // 'weekly', 'monthly', 'yearly'
+  const [selectedMunicipality, setSelectedMunicipality] = useState(() => {
+    // Load saved municipality from localStorage, default to null (all municipalities)
+    return localStorage.getItem('predictionMunicipality') || null;
+  });
+  const [modelUsed, setModelUsed] = useState(null); // Track which model was used
+
+  // Davao Oriental municipalities
+  const municipalities = [
+    { value: null, label: 'All Municipalities' },
+    { value: 'BAGANGA', label: 'Baganga' },
+    { value: 'BANAYBANAY', label: 'Banaybanay' },
+    { value: 'BOSTON', label: 'Boston' },
+    { value: 'CARAGA', label: 'Caraga' },
+    { value: 'CATEEL', label: 'Cateel' },
+    { value: 'GOVERNOR GENEROSO', label: 'Governor Generoso' },
+    { value: 'LUPON', label: 'Lupon' },
+    { value: 'MANAY', label: 'Manay' },
+    { value: 'SAN ISIDRO', label: 'San Isidro' },
+    { value: 'TARRAGONA', label: 'Tarragona' },
+    { value: 'CITY OF MATI', label: 'City of Mati' }
+  ];
 
   // Color palette for different months
   const monthColors = {
@@ -64,11 +85,16 @@ const WeeklyPredictionsChart = () => {
       setLoading(true);
       setError(null);
       
-      const response = await getWeeklyPredictions(weeksToPredict);
+      const response = await getWeeklyPredictions(weeksToPredict, selectedMunicipality);
       
       if (response.success && response.data?.weekly_predictions) {
         // Store raw weekly data
         setRawWeeklyData(response.data.weekly_predictions);
+        
+        // Store model information
+        if (response.data.model_used) {
+          setModelUsed(response.data.model_used);
+        }
         
         // Process data for all three views
         processAllViews(response.data.weekly_predictions);
@@ -79,6 +105,7 @@ const WeeklyPredictionsChart = () => {
         setWeeklyData([]);
         setMonthlyData([]);
         setYearlyData([]);
+        setModelUsed(null);
       }
     } catch (err) {
       console.error('Error fetching weekly predictions:', err);
@@ -232,10 +259,21 @@ const WeeklyPredictionsChart = () => {
     setYearlyData(yearlyProcessed);
   };
 
-  // Load data on mount and when weeksToPredict changes
+  // Handle municipality change
+  const handleMunicipalityChange = (municipality) => {
+    setSelectedMunicipality(municipality);
+    // Save to localStorage
+    if (municipality) {
+      localStorage.setItem('predictionMunicipality', municipality);
+    } else {
+      localStorage.removeItem('predictionMunicipality');
+    }
+  };
+
+  // Load data on mount and when weeksToPredict or municipality changes
   useEffect(() => {
     fetchPredictions();
-  }, [weeksToPredict]);
+  }, [weeksToPredict, selectedMunicipality]);
 
   // Custom tooltip component for different views
   const CustomTooltip = ({ active, payload, label }) => {
@@ -799,12 +837,39 @@ const WeeklyPredictionsChart = () => {
             </h2>
             <p className="text-xs text-gray-600 dark:text-gray-400">
               {getChartDescription()}
+              {selectedMunicipality && (
+                <span className="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                  • {municipalities.find(m => m.value === selectedMunicipality)?.label || selectedMunicipality}
+                </span>
+              )}
+              {modelUsed && modelUsed.includes('municipality') && (
+                <span className="ml-2 text-green-600 dark:text-green-400 text-[10px]" title="Using municipality-specific model">
+                  ✓ Municipality Model
+                </span>
+              )}
             </p>
           </div>
         </div>
         
         {/* Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          {/* Municipality Selector */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-600 dark:text-gray-400 font-medium">Municipality:</label>
+            <select
+              value={selectedMunicipality || ''}
+              onChange={(e) => handleMunicipalityChange(e.target.value || null)}
+              className="px-3 py-1.5 text-sm border border-blue-200 dark:border-blue-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm min-w-[180px]"
+              title="Select municipality for predictions"
+            >
+              {municipalities.map((mun) => (
+                <option key={mun.value || 'all'} value={mun.value || ''}>
+                  {mun.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
           {/* View Type Toggle */}
           <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button

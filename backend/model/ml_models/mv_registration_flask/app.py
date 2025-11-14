@@ -29,7 +29,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sarima_model_optimized import OptimizedSARIMAModel
 from data_preprocessor_daily import DailyDataPreprocessor
-from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES
+from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES, MIN_WEEKS_FOR_MUNICIPALITY_MODEL
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -160,12 +160,53 @@ def initialize_model():
             )
         
         # Initialize per-municipality models if enabled
-        # Note: Per-municipality models are not yet implemented for optimized version
-        # This would require updating DailyDataPreprocessor to support per-municipality
         if ENABLE_PER_MUNICIPALITY:
-            logger.warning("Per-municipality mode is not yet fully implemented for optimized daily model.")
-            logger.info("Using aggregated model for all predictions.")
-            municipality_models = {}  # Keep empty for now
+            logger.info("Initializing per-municipality models...")
+            municipality_models = {}
+            
+            for municipality in DAVAO_ORIENTAL_MUNICIPALITIES:
+                try:
+                    logger.info(f"Initializing model for {municipality}...")
+                    mun_model = OptimizedSARIMAModel(
+                        model_dir=model_dir,
+                        municipality=municipality,
+                        use_normalization=False,
+                        scaler_type='minmax'
+                    )
+                    
+                    if mun_model.model_exists():
+                        logger.info(f"Loading existing model for {municipality}...")
+                        mun_model.load_model()
+                        municipality_models[municipality.upper()] = mun_model
+                        logger.info(f"✓ Model loaded for {municipality}")
+                    else:
+                        # Try to train if data is available
+                        try:
+                            daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
+                                fill_missing_days=True,
+                                fill_method='zero',
+                                municipality=municipality
+                            )
+                            
+                            # Check if we have enough data
+                            if len(daily_data) >= MIN_WEEKS_FOR_MUNICIPALITY_MODEL * 7:  # Convert weeks to days
+                                logger.info(f"Training new model for {municipality}...")
+                                mun_model.train(
+                                    data=daily_data,
+                                    exogenous=exogenous_vars[['is_weekend_or_holiday']],
+                                    force=False,
+                                    processing_info=processing_info
+                                )
+                                municipality_models[municipality.upper()] = mun_model
+                                logger.info(f"✓ Model trained for {municipality}")
+                            else:
+                                logger.warning(f"Insufficient data for {municipality} ({len(daily_data)} days, need {MIN_WEEKS_FOR_MUNICIPALITY_MODEL * 7}). Will use aggregated model.")
+                        except Exception as e:
+                            logger.warning(f"Could not train model for {municipality}: {str(e)}. Will use aggregated model.")
+                except Exception as e:
+                    logger.warning(f"Error initializing model for {municipality}: {str(e)}. Will use aggregated model.")
+            
+            logger.info(f"Initialized {len(municipality_models)} municipality-specific models")
         else:
             logger.info("Per-municipality mode disabled. Using aggregated optimized model only.")
         
@@ -183,12 +224,15 @@ def predict_registrations():
     
     Query Parameters:
     - weeks (int, optional): Number of weeks to predict (default: 4, max: 52)
-    - municipality (str, optional): Specific municipality (not yet supported for optimized model)
+    - municipality (str, optional): Specific municipality name (e.g., "CITY OF MATI", "LUPON")
+      If provided and a municipality-specific model exists, uses that model. Otherwise uses aggregated model.
     
     Returns:
     - weekly_predictions: List of weekly predictions (aggregated from daily predictions)
     - monthly_aggregation: Aggregated monthly prediction
     - prediction_dates: List of dates for predictions
+    - municipality: Municipality name if municipality-specific model was used
+    - model_used: Name of the model used for predictions
     """
     try:
         if aggregated_model is None:
@@ -211,9 +255,19 @@ def predict_registrations():
         # Convert weeks to days for optimized model (which uses daily data)
         days = weeks * 7
         
-        # Note: Per-municipality models not yet implemented for optimized version
+        # Determine which model to use
+        model_to_use = aggregated_model
+        model_used_name = 'optimized_aggregated'
+        
         if municipality:
-            logger.warning(f"Municipality filter '{municipality}' requested but not yet supported for optimized model. Using aggregated model.")
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper in municipality_models:
+                model_to_use = municipality_models[municipality_upper]
+                model_used_name = f'optimized_municipality_{municipality_upper}'
+                logger.info(f"Using municipality-specific model for {municipality_upper}")
+            else:
+                logger.warning(f"Municipality-specific model not available for '{municipality_upper}'. Using aggregated model.")
+                logger.info(f"Available municipality models: {list(municipality_models.keys())}")
         
         # Generate future exogenous variables for prediction period
         # CRITICAL: Use the same date logic as the model's predict() method
@@ -221,28 +275,28 @@ def predict_registrations():
         actual_last_date = None
         
         # Priority 1: Use actual_last_date if available (from freshly trained model)
-        if hasattr(aggregated_model, 'actual_last_date') and aggregated_model.actual_last_date is not None:
-            actual_last_date = pd.to_datetime(aggregated_model.actual_last_date)
+        if hasattr(model_to_use, 'actual_last_date') and model_to_use.actual_last_date is not None:
+            actual_last_date = pd.to_datetime(model_to_use.actual_last_date)
             logger.info(f"Using actual last registration date: {actual_last_date}")
         # Priority 2: Check if we have metadata with actual_last_date (from loaded model)
-        elif (hasattr(aggregated_model, '_metadata') and 
-              aggregated_model._metadata and 
-              'actual_last_date' in aggregated_model._metadata):
-            actual_last_date = pd.to_datetime(aggregated_model._metadata['actual_last_date'])
+        elif (hasattr(model_to_use, '_metadata') and 
+              model_to_use._metadata and 
+              'actual_last_date' in model_to_use._metadata):
+            actual_last_date = pd.to_datetime(model_to_use._metadata['actual_last_date'])
             logger.info(f"Using actual last registration date from metadata: {actual_last_date}")
         # Priority 3: Fallback to last date from all_data
-        elif aggregated_model.all_data is not None and len(aggregated_model.all_data) > 0:
-            actual_last_date = pd.to_datetime(aggregated_model.all_data.index.max())
+        elif model_to_use.all_data is not None and len(model_to_use.all_data) > 0:
+            actual_last_date = pd.to_datetime(model_to_use.all_data.index.max())
             logger.warning(f"Warning: Using last date from daily data (may be incorrect): {actual_last_date}")
         # Priority 4: Fallback to metadata's last_data_date
-        elif (hasattr(aggregated_model, '_metadata') and 
-              aggregated_model._metadata and 
-              'last_data_date' in aggregated_model._metadata):
-            actual_last_date = pd.to_datetime(aggregated_model._metadata['last_data_date'])
+        elif (hasattr(model_to_use, '_metadata') and 
+              model_to_use._metadata and 
+              'last_data_date' in model_to_use._metadata):
+            actual_last_date = pd.to_datetime(model_to_use._metadata['last_data_date'])
             logger.warning(f"Warning: Using last_data_date from metadata (may be incorrect): {actual_last_date}")
         # Priority 5: Final fallback to training data
         else:
-            actual_last_date = pd.to_datetime(aggregated_model.training_data.index.max())
+            actual_last_date = pd.to_datetime(model_to_use.training_data.index.max())
             logger.warning(f"Warning: Using last date from training data (fallback): {actual_last_date}")
         
         if actual_last_date is None:
@@ -272,14 +326,14 @@ def predict_registrations():
         future_exog = preprocessor._create_exogenous_variables(future_dates)
         future_exog = future_exog[['is_weekend_or_holiday']]  # Use only the combined indicator
         
-        # Make predictions using optimized model (returns daily, weekly, and monthly aggregations)
-        logger.info(f"Making predictions for {days} days ({weeks} weeks)")
+        # Make predictions using the selected model (returns daily, weekly, and monthly aggregations)
+        logger.info(f"Making predictions for {days} days ({weeks} weeks) using {model_used_name}")
         logger.info(f"Actual last registration date: {actual_last_date}")
         logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
         logger.info(f"Exogenous variables shape: {future_exog.shape}")
         logger.info(f"Weekend/holiday days in future period: {(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}")
         
-        predictions = aggregated_model.predict(days=days, exogenous=future_exog)
+        predictions = model_to_use.predict(days=days, exogenous=future_exog)
         
         # Debug: Log prediction summary
         if predictions.get('weekly_predictions'):
@@ -300,9 +354,10 @@ def predict_registrations():
         }
         
         # Add metadata about which model was used
-        formatted_predictions['model_used'] = 'optimized_aggregated'
-        formatted_predictions['per_municipality_enabled'] = False  # Not yet supported
+        formatted_predictions['model_used'] = model_used_name
+        formatted_predictions['per_municipality_enabled'] = ENABLE_PER_MUNICIPALITY
         formatted_predictions['model_type'] = 'optimized_sarima_daily'
+        formatted_predictions['municipality'] = municipality.upper().strip() if municipality else None
         
         return jsonify({
             'success': True,
@@ -336,33 +391,46 @@ def get_model_accuracy():
                 'error': 'Model not initialized'
             }), 500
         
-        # Get municipality parameter (not yet supported for optimized model)
+        # Get municipality parameter
         municipality = request.args.get('municipality', default=None, type=str)
+        
+        # Determine which model to use
+        model_to_use = aggregated_model
+        model_used_name = 'optimized_aggregated'
+        
         if municipality:
-            logger.warning(f"Municipality filter '{municipality}' requested but not yet supported for optimized model.")
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper in municipality_models:
+                model_to_use = municipality_models[municipality_upper]
+                model_used_name = f'optimized_municipality_{municipality_upper}'
+                logger.info(f"Getting accuracy for municipality-specific model: {municipality_upper}")
+            else:
+                logger.warning(f"Municipality-specific model not available for '{municipality_upper}'. Using aggregated model.")
         
         # Build accuracy response with all optimized metrics
         accuracy_data = {
-            'mae': aggregated_model.accuracy_metrics.get('mae') if aggregated_model.accuracy_metrics else None,
-            'rmse': aggregated_model.accuracy_metrics.get('rmse') if aggregated_model.accuracy_metrics else None,
-            'mape': aggregated_model.accuracy_metrics.get('mape') if aggregated_model.accuracy_metrics else None,
-            'r2': aggregated_model.accuracy_metrics.get('r2') if aggregated_model.accuracy_metrics else None,
-            'model_parameters': aggregated_model.model_params,
-            'in_sample': aggregated_model.accuracy_metrics,
-            'out_of_sample': aggregated_model.test_accuracy_metrics,
-            'cross_validation': aggregated_model.cv_results,
-            'diagnostics': aggregated_model.diagnostics,
+            'mae': model_to_use.accuracy_metrics.get('mae') if model_to_use.accuracy_metrics else None,
+            'rmse': model_to_use.accuracy_metrics.get('rmse') if model_to_use.accuracy_metrics else None,
+            'mape': model_to_use.accuracy_metrics.get('mape') if model_to_use.accuracy_metrics else None,
+            'r2': model_to_use.accuracy_metrics.get('r2') if model_to_use.accuracy_metrics else None,
+            'model_parameters': model_to_use.model_params,
+            'in_sample': model_to_use.accuracy_metrics,
+            'out_of_sample': model_to_use.test_accuracy_metrics,
+            'cross_validation': model_to_use.cv_results,
+            'diagnostics': model_to_use.diagnostics,
             'model_type': 'optimized_sarima_daily',
-            'per_municipality_enabled': False
+            'per_municipality_enabled': ENABLE_PER_MUNICIPALITY,
+            'model_used': model_used_name,
+            'municipality': municipality_upper if municipality else None
         }
         
         # Add test metrics for backward compatibility
-        if aggregated_model.test_accuracy_metrics:
+        if model_to_use.test_accuracy_metrics:
             accuracy_data['test_accuracy_metrics'] = {
-                'mae': aggregated_model.test_accuracy_metrics.get('mae'),
-                'rmse': aggregated_model.test_accuracy_metrics.get('rmse'),
-                'mape': aggregated_model.test_accuracy_metrics.get('mape'),
-                'r2': aggregated_model.test_accuracy_metrics.get('r2')
+                'mae': model_to_use.test_accuracy_metrics.get('mae'),
+                'rmse': model_to_use.test_accuracy_metrics.get('rmse'),
+                'mape': model_to_use.test_accuracy_metrics.get('mape'),
+                'r2': model_to_use.test_accuracy_metrics.get('r2')
             }
         
         if accuracy_data['mae'] is None:
@@ -502,48 +570,107 @@ def retrain_model():
         # Get request body
         data = request.get_json() or {}
         force = data.get('force', False)
-        municipality = data.get('municipality', None)  # Not yet supported for optimized model
+        municipality = data.get('municipality', None)
         
         if municipality:
-            logger.warning(f"Municipality-specific retraining not yet supported for optimized model. Retraining aggregated model.")
-        
-        # Check if model exists and force is required
-        if aggregated_model.model_exists() and not force:
+            # Retrain municipality-specific model
+            municipality_upper = municipality.upper().strip()
+            if municipality_upper not in DAVAO_ORIENTAL_MUNICIPALITIES:
+                return jsonify({
+                    'success': False,
+                    'error': f"Invalid municipality '{municipality}'. Available municipalities: {', '.join(DAVAO_ORIENTAL_MUNICIPALITIES)}"
+                }), 400
+            
+            logger.info(f"Retraining municipality-specific model for {municipality_upper}...")
+            
+            # Get or create municipality model
+            if municipality_upper not in municipality_models:
+                municipality_models[municipality_upper] = OptimizedSARIMAModel(
+                    model_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../trained'),
+                    municipality=municipality_upper,
+                    use_normalization=False,
+                    scaler_type='minmax'
+                )
+            
+            mun_model = municipality_models[municipality_upper]
+            
+            # Check if model exists and force is required
+            if mun_model.model_exists() and not force:
+                return jsonify({
+                    'success': False,
+                    'error': f'Model for {municipality_upper} already exists. Use force=true to retrain.',
+                    'message': 'Set "force": true in request body to retrain existing model'
+                }), 400
+            
+            # Load and process municipality-specific data
+            daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
+                fill_missing_days=True,
+                fill_method='zero',
+                municipality=municipality_upper
+            )
+            
+            training_info = mun_model.train(
+                data=daily_data,
+                exogenous=exogenous_vars[['is_weekend_or_holiday']],
+                force=force,
+                processing_info=processing_info
+            )
+            
+            # Add processing info to training results
+            if training_info:
+                training_info['processing_info'] = processing_info
+                training_info['model_type'] = 'optimized_sarima_daily'
+                training_info['municipality'] = municipality_upper
+            
+            # Convert NumPy/pandas types to native Python types for JSON serialization
+            training_info_serializable = convert_to_native_types(training_info) if training_info else None
+            
             return jsonify({
-                'success': False,
-                'error': 'Model already exists. Use force=true to retrain.',
-                'message': 'Set "force": true in request body to retrain existing model'
-            }), 400
-        
-        # Retrain aggregated optimized model
-        logger.info("Retraining optimized aggregated model...")
-        daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
-            fill_missing_days=True,
-            fill_method='zero'
-        )
-        
-        training_info = aggregated_model.train(
-            data=daily_data,
-            exogenous=exogenous_vars[['is_weekend_or_holiday']],  # Use combined indicator
-            force=force,
-            processing_info=processing_info
-        )
-        
-        # Add processing info to training results
-        if training_info:
-            training_info['processing_info'] = processing_info
-            training_info['model_type'] = 'optimized_sarima_daily'
-        
-        # Convert NumPy/pandas types to native Python types for JSON serialization
-        training_info_serializable = convert_to_native_types(training_info) if training_info else None
-        
-        return jsonify({
-            'success': True,
-            'message': 'Optimized model retrained successfully',
-            'data': {
-                'aggregated': training_info_serializable
-            }
-        }), 200
+                'success': True,
+                'message': f'Municipality-specific model for {municipality_upper} retrained successfully',
+                'data': {
+                    'municipality': municipality_upper,
+                    'training_info': training_info_serializable
+                }
+            }), 200
+        else:
+            # Retrain aggregated optimized model
+            # Check if model exists and force is required
+            if aggregated_model.model_exists() and not force:
+                return jsonify({
+                    'success': False,
+                    'error': 'Model already exists. Use force=true to retrain.',
+                    'message': 'Set "force": true in request body to retrain existing model'
+                }), 400
+            
+            logger.info("Retraining optimized aggregated model...")
+            daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
+                fill_missing_days=True,
+                fill_method='zero'
+            )
+            
+            training_info = aggregated_model.train(
+                data=daily_data,
+                exogenous=exogenous_vars[['is_weekend_or_holiday']],  # Use combined indicator
+                force=force,
+                processing_info=processing_info
+            )
+            
+            # Add processing info to training results
+            if training_info:
+                training_info['processing_info'] = processing_info
+                training_info['model_type'] = 'optimized_sarima_daily'
+            
+            # Convert NumPy/pandas types to native Python types for JSON serialization
+            training_info_serializable = convert_to_native_types(training_info) if training_info else None
+            
+            return jsonify({
+                'success': True,
+                'message': 'Optimized aggregated model retrained successfully',
+                'data': {
+                    'aggregated': training_info_serializable
+                }
+            }), 200
         
     except Exception as e:
         logger.error(f"Error retraining model: {str(e)}")
@@ -564,7 +691,7 @@ def health_check():
         'model_type': 'optimized_sarima_daily',
         'aggregated_model_initialized': aggregated_model is not None,
         'aggregated_model_trained': aggregated_model.model_exists() if aggregated_model else False,
-        'per_municipality_enabled': False,  # Not yet implemented for optimized model
+        'per_municipality_enabled': ENABLE_PER_MUNICIPALITY,
         'municipality_models_count': municipality_models_count,
         'available_municipality_models': list(municipality_models.keys()) if municipality_models else [],
         'timestamp': datetime.now().isoformat()

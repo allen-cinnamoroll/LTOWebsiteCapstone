@@ -35,13 +35,54 @@ ssh root@your-vps-ip
 apt update && apt upgrade -y
 ```
 
-### Create a non-root user (recommended)
+### Check if user already exists (OPTIONAL)
+
+**Before creating a user, check if it already exists:**
 
 ```bash
+# Check if 'lto' user exists
+id lto
+
+# OR list all users
+cat /etc/passwd | grep lto
+
+# OR check current user
+whoami
+```
+
+**What the output means:**
+
+- If you see user info (like `uid=1001(lto) gid=1001(lto) groups=...`), the user **already exists** - skip the creation step below
+- If you see `id: 'lto': no such user`, the user **doesn't exist** - proceed with creation
+- `whoami` shows your current username (might be `root` or `lto`)
+
+### Create a non-root user (OPTIONAL but recommended)
+
+**Why create a non-root user?**
+
+- Better security (reduces risk if account is compromised)
+- Best practice for production servers
+- Prevents accidental system damage
+
+**If you want to skip this step:** You can continue as `root` and remove `sudo` from commands below.
+
+**If you want to create a non-root user:**
+
+```bash
+# Only run this if the user doesn't exist (check above first!)
 adduser lto
 usermod -aG sudo lto
 su - lto
 ```
+
+**If the user already exists and you want to use it:**
+
+```bash
+# Just switch to the existing user
+su - lto
+```
+
+**Note:** After switching to the `lto` user, you'll need to use `sudo` for commands that require root privileges. If you stay as `root`, you can skip `sudo` in most commands.
 
 ### Configure firewall
 
@@ -345,7 +386,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # Important: Allow large file uploads through the proxy
         client_max_body_size 10M;
         proxy_read_timeout 300;
