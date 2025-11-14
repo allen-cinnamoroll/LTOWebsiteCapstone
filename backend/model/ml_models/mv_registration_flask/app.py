@@ -256,17 +256,23 @@ def predict_registrations():
         days = weeks * 7
         
         # Determine which model to use
+        # Default: aggregated model (used for date logic and as fallback)
         model_to_use = aggregated_model
         model_used_name = 'optimized_aggregated'
         
-        if municipality:
-            municipality_upper = municipality.upper().strip()
+        municipality_upper = municipality.upper().strip() if municipality else None
+        
+        # If a specific municipality is requested, try to use its dedicated model
+        if municipality_upper:
             if municipality_upper in municipality_models:
                 model_to_use = municipality_models[municipality_upper]
                 model_used_name = f'optimized_municipality_{municipality_upper}'
                 logger.info(f"Using municipality-specific model for {municipality_upper}")
             else:
-                logger.warning(f"Municipality-specific model not available for '{municipality_upper}'. Using aggregated model.")
+                logger.warning(
+                    f"Municipality-specific model not available for '{municipality_upper}'. "
+                    f"Using aggregated model for this request."
+                )
                 logger.info(f"Available municipality models: {list(municipality_models.keys())}")
         
         # Generate future exogenous variables for prediction period
@@ -326,20 +332,132 @@ def predict_registrations():
         future_exog = preprocessor._create_exogenous_variables(future_dates)
         future_exog = future_exog[['is_weekend_or_holiday']]  # Use only the combined indicator
         
-        # Make predictions using the selected model (returns daily, weekly, and monthly aggregations)
-        logger.info(f"Making predictions for {days} days ({weeks} weeks) using {model_used_name}")
-        logger.info(f"Actual last registration date: {actual_last_date}")
-        logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
-        logger.info(f"Exogenous variables shape: {future_exog.shape}")
-        logger.info(f"Weekend/holiday days in future period: {(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}")
+        # Decide how to generate predictions:
+        # 1. If a municipality is specified, use its model (or aggregated fallback).
+        # 2. If no municipality is specified AND per-municipality is enabled with available models,
+        #    compute the regional total by summing all municipality-specific predictions.
+        # 3. Otherwise, fall back to the aggregated model.
         
-        predictions = model_to_use.predict(days=days, exogenous=future_exog)
+        use_municipality_aggregation = (
+            municipality_upper is None and
+            ENABLE_PER_MUNICIPALITY and
+            municipality_models and
+            len(municipality_models) > 0
+        )
         
-        # Debug: Log prediction summary
-        if predictions.get('weekly_predictions'):
-            weekly_totals = [w.get('total_predicted', 0) for w in predictions['weekly_predictions']]
-            logger.info(f"DEBUG: Weekly prediction totals: {weekly_totals}")
-            logger.info(f"DEBUG: Total monthly prediction: {predictions.get('monthly_aggregation', {}).get('total_predicted', 0)}")
+        if use_municipality_aggregation:
+            # Aggregate predictions from all municipality-specific models
+            logger.info(
+                "No municipality specified and per-municipality mode is enabled. "
+                "Computing regional predictions by summing all municipality models."
+            )
+            model_used_name = 'aggregated_from_municipalities'
+            
+            weekly_aggregated = {}
+            prediction_start_date = None
+            
+            for mun_name, mun_model in municipality_models.items():
+                try:
+                    logger.info(f"Generating predictions for municipality: {mun_name}")
+                    mun_predictions = mun_model.predict(days=days, exogenous=future_exog)
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to generate predictions for municipality '{mun_name}': {str(e)}"
+                    )
+                    continue
+                
+                # Track earliest prediction_start_date for informational purposes
+                if not prediction_start_date:
+                    prediction_start_date = mun_predictions.get('prediction_start_date')
+                
+                for week in mun_predictions.get('weekly_predictions', []):
+                    # Use 'date' (week_start) as the key; fall back to 'week_start' if needed
+                    date_key = week.get('date') or week.get('week_start')
+                    if not date_key:
+                        continue
+                    
+                    if date_key not in weekly_aggregated:
+                        weekly_aggregated[date_key] = {
+                            'date': date_key,
+                            'week_start': date_key,
+                            'days': [],
+                            'total_predicted': 0,
+                            'predicted_count': 0,
+                            'predicted': 0,
+                            'lower_bound': 0,
+                            'upper_bound': 0,
+                        }
+                    
+                    entry = weekly_aggregated[date_key]
+                    
+                    value = (
+                        week.get('total_predicted') or
+                        week.get('predicted_count') or
+                        week.get('predicted') or
+                        0
+                    )
+                    
+                    entry['total_predicted'] += value
+                    entry['predicted_count'] += value
+                    entry['predicted'] += value
+                    entry['lower_bound'] += week.get('lower_bound', 0)
+                    entry['upper_bound'] += week.get('upper_bound', 0)
+            
+            # Convert aggregated weekly dict to sorted list
+            weekly_predictions = [
+                weekly_aggregated[key]
+                for key in sorted(weekly_aggregated.keys())
+            ]
+            
+            # Compute overall monthly aggregation as the sum of weekly totals
+            total_predicted = sum(w.get('total_predicted', 0) for w in weekly_predictions)
+            lower_bound = sum(w.get('lower_bound', 0) for w in weekly_predictions)
+            upper_bound = sum(w.get('upper_bound', 0) for w in weekly_predictions)
+            
+            predictions = {
+                'weekly_predictions': weekly_predictions,
+                'monthly_aggregation': {
+                    'total_predicted': int(round(total_predicted)),
+                    'lower_bound': int(round(lower_bound)),
+                    'upper_bound': int(round(upper_bound)),
+                },
+                'prediction_dates': [w['date'] for w in weekly_predictions],
+                'prediction_start_date': (
+                    prediction_start_date
+                    if prediction_start_date is not None and weekly_predictions
+                    else (weekly_predictions[0]['date'] if weekly_predictions else next_month_start.strftime('%Y-%m-%d'))
+                ),
+            }
+            
+            # Debug: Log aggregated prediction summary
+            if predictions.get('weekly_predictions'):
+                weekly_totals = [w.get('total_predicted', 0) for w in predictions['weekly_predictions']]
+                logger.info(f"DEBUG (aggregated from municipalities): Weekly prediction totals: {weekly_totals}")
+                logger.info(
+                    f"DEBUG (aggregated from municipalities): Total period prediction: "
+                    f"{predictions.get('monthly_aggregation', {}).get('total_predicted', 0)}"
+                )
+        else:
+            # Make predictions using the selected single model (aggregated or municipality-specific)
+            logger.info(f"Making predictions for {days} days ({weeks} weeks) using {model_used_name}")
+            logger.info(f"Actual last registration date: {actual_last_date}")
+            logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
+            logger.info(f"Exogenous variables shape: {future_exog.shape}")
+            logger.info(
+                f"Weekend/holiday days in future period: "
+                f"{(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}"
+            )
+            
+            predictions = model_to_use.predict(days=days, exogenous=future_exog)
+            
+            # Debug: Log prediction summary
+            if predictions.get('weekly_predictions'):
+                weekly_totals = [w.get('total_predicted', 0) for w in predictions['weekly_predictions']]
+                logger.info(f"DEBUG: Weekly prediction totals: {weekly_totals}")
+                logger.info(
+                    f"DEBUG: Total monthly prediction: "
+                    f"{predictions.get('monthly_aggregation', {}).get('total_predicted', 0)}"
+                )
         
         # Format response to match expected API format (backward compatibility)
         # The optimized model already provides weekly_predictions and monthly_aggregation
