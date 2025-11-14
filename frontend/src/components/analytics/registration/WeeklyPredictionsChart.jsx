@@ -178,7 +178,15 @@ const WeeklyPredictionsChart = () => {
         month: date.getMonth() + 1,
       };
     });
-    setWeeklyData(weeklyProcessed);
+
+    // For "All Municipalities" in weekly view, hide July points (training month)
+    // so that the series starts from the first forecast month (August).
+    let finalWeekly = weeklyProcessed;
+    if (!selectedMunicipality && weeklyProcessed.length > 0) {
+      finalWeekly = weeklyProcessed.filter((week) => week.month !== 7);
+    }
+
+    setWeeklyData(finalWeekly);
 
     // Process Monthly View
     const monthlyGrouped = {};
@@ -1370,7 +1378,7 @@ const WeeklyPredictionsChart = () => {
               return (
                 <div 
                   key={index}
-                  className={`${colors.bg} ${colors.border} border rounded-lg p-4 hover:shadow-md transition-shadow`}
+                  className={`${colors.bg} ${colors.border} border rounded-lg p-4 hover:shadow-md transition-shadow w-1/2`}
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 flex items-center justify-center rounded-lg ${colors.bg} flex-shrink-0`}>
