@@ -235,8 +235,8 @@ const HomePage = () => {
           {/* Online Users Panel - Only for admin and superadmin */}
           {(userData?.role === "0" || userData?.role === "1") && (
             <section className="w-full">
-              <OnlineUsersPanel />
-            </section>
+                <OnlineUsersPanel />
+          </section>
           )}
         </>
       )}

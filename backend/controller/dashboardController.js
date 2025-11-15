@@ -315,7 +315,7 @@ export const getDashboardStats = async (req, res) => {
       try {
         // Request predictions for enough weeks to cover the current month
         // Calculate weeks needed: at least 4-5 weeks to cover a month
-        const weeksToPredict = 5;
+        const weeksToPredict = 52;
         predictionResponse = await fetch(
           `${predictionApiUrl}/api/predict/registrations?weeks=${weeksToPredict}`,
           {
@@ -417,7 +417,7 @@ export const getDashboardStats = async (req, res) => {
       try {
         // Request predictions for enough weeks to cover the current month
         // Calculate weeks needed: at least 4-5 weeks to cover a month
-        const weeksToPredict = 5;
+        const weeksToPredict = 52;
         predictionResponse = await fetch(
           `${predictionApiUrl}/api/predict/registrations?weeks=${weeksToPredict}`,
           {
