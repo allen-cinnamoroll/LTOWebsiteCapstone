@@ -63,11 +63,11 @@ function App() {
             <Route path="analytics/violation" element={<ViolationAnalyticsPage />} />
             <Route path="analytics/accident" element={<AccidentAnalyticsPage />} />
 
-            {/* Driver routes - accessible to all authenticated users */}
-            <Route path="driver" element={<DriverPage />} />
-            <Route path="driver/inactive" element={<DeactivatedDriversPage />} />
-            <Route path="driver/:id" element={<DriverProfile />} />
-            <Route path="driver/:id/edit" element={<EditDriverForm />} />
+            {/* Owner routes - accessible to all authenticated users */}
+            <Route path="owner" element={<DriverPage />} />
+            <Route path="owner/inactive" element={<DeactivatedDriversPage />} />
+            <Route path="owner/:id" element={<DriverProfile />} />
+            <Route path="owner/:id/edit" element={<EditDriverForm />} />
 
             {/* Vehicle routes - accessible to all authenticated users */}
             <Route path="vehicle" element={<VehiclesPage />} />

@@ -10,8 +10,8 @@ dashboardRouter.get("/stats", authenticate, getDashboardStats);
 // Get chart data with time period filter (Authenticated Users)
 dashboardRouter.get("/chart", authenticate, getChartData);
 
-// Get driver-specific chart data with time period filter (Authenticated Users)
-dashboardRouter.get("/driver-chart", authenticate, getDriverChartData);
+// Get owner-specific chart data with time period filter (Authenticated Users)
+dashboardRouter.get("/owner-chart", authenticate, getDriverChartData);
 
 // Get registration analytics data (Authenticated Users)
 dashboardRouter.get("/registration-analytics", authenticate, getRegistrationAnalytics);

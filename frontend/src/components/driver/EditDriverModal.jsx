@@ -293,8 +293,8 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
           description: "The owner information has been updated."
         });
         
-        // Navigate to drivers page after successful update
-        navigate('/driver');
+        // Navigate to owners page after successful update
+        navigate('/owner');
       }
     } catch (error) {
       console.error('Error updating driver:', error);
@@ -523,8 +523,8 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
             variant="outline"
             onClick={() => {
               setShowNoChanges(false);
-              // Navigate to drivers table
-              navigate('/driver');
+              // Navigate to owners table
+              navigate('/owner');
             }}
             className="min-w-[100px] bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
           >
