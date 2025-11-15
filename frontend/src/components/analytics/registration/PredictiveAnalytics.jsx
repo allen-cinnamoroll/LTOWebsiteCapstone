@@ -34,7 +34,7 @@ export function PredictiveAnalytics() {
           }
         }
       } catch (error) {
-        console.error('Error fetching model accuracy:', error);
+        // Error handled silently
       } finally {
         setAccuracyLoading(false);
       }

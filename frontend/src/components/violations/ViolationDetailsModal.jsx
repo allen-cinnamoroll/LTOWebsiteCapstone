@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -340,9 +341,9 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 Violation Details
               </DialogTitle>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <DialogDescription className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Comprehensive violation information including apprehension details, violations committed, and confiscated items
-              </p>
+              </DialogDescription>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1">
                 <Hash className="h-3 w-3 text-red-500" />
                 TOP Number: <span className="font-semibold text-red-600">{violationData?.topNo || "N/A"}</span>

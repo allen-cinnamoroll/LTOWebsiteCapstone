@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { 
@@ -80,6 +83,10 @@ const ViolationInformationModal = ({ open, onOpenChange, violationData, allViola
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl h-[80vh] bg-gradient-to-br from-slate-50 to-orange-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl w-full p-0 overflow-hidden flex flex-col [&>button]:hidden">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Violator Information</DialogTitle>
+          <DialogDescription>View all violations assigned to this violator</DialogDescription>
+        </DialogHeader>
         {/* Header */}
         <div className="bg-white dark:bg-transparent px-6 py-4 border-b dark:border-[#424242]">
           <div className="flex items-center gap-3">

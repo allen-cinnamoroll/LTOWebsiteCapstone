@@ -147,7 +147,6 @@ const VehicleTrendChart = () => {
         setTrendData([]);
       }
     } catch (err) {
-      console.error('Error fetching yearly trend data:', err);
       setError('Error loading yearly trend data');
     } finally {
       setLoading(false);
@@ -179,7 +178,7 @@ const VehicleTrendChart = () => {
                }
              }
            } catch (err) {
-             console.log('Could not fetch previous year data for January growth calculation:', err);
+             // Previous year data not available, continue without it
            }
          }
          
@@ -228,7 +227,6 @@ const VehicleTrendChart = () => {
         setTrendData([]);
       }
     } catch (err) {
-      console.error('Error fetching monthly trend data:', err);
       setError(`Error loading monthly trend data: ${err.message || 'Unknown error'}`);
       setTrendData([]);
     } finally {
@@ -345,7 +343,6 @@ const VehicleTrendChart = () => {
       setShowMonthModal(false);
       fetchMonthlyData(yearNum, selectedMunicipality);
     } catch (err) {
-      console.error('Error in handleMonthYearSelect:', err);
       setError('An error occurred while selecting the year. Please try again.');
     }
   };
@@ -593,7 +590,6 @@ const VehicleTrendChart = () => {
       };
     }
     } catch (err) {
-      console.error('Error calculating KPIs:', err);
       return viewType === 'month' 
         ? {
             monthlyGrowthRate: null,
@@ -678,7 +674,6 @@ const VehicleTrendChart = () => {
         );
       }
     } catch (err) {
-      console.error('Error rendering tooltip:', err);
       return null;
     }
     return null;

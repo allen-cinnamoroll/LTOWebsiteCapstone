@@ -43,10 +43,6 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
   });
 
   const onSubmit = async (formData) => {
-    // Debug: Log the received form data
-    console.log('Received form data in AddVehicleModal:', formData);
-    console.log('Owner name:', formData.ownerName);
-    
     // Show confirmation modal instead of submitting directly
     setConfirmationData(formData);
     setShowConfirmation(true);
@@ -58,10 +54,6 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
     
     try {
       const formData = confirmationData;
-      
-      // Debug: Log the form data to see if vehicleStatusType is present
-      console.log('Form data in handleConfirmSubmission:', formData);
-      console.log('vehicleStatusType in formData:', formData.vehicleStatusType);
       
       const content = {
         plateNo: formData.plateNo,
@@ -80,14 +72,6 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
       if (formData.dateOfRenewal) {
         content.dateOfRenewal = formData.dateOfRenewal;
       }
-
-      // Debug: Log the content being sent to API
-      console.log('Content being sent to API:', content);
-      console.log('vehicleStatusType in content:', content.vehicleStatusType);
-      console.log('driverId in content:', content.driverId);
-      console.log('driverId type:', typeof content.driverId);
-      console.log('plateNo in content:', content.plateNo);
-      console.log('fileNo in content:', content.fileNo);
 
       const { data } = await apiClient.post("/vehicle", content, {
         headers: {
@@ -121,7 +105,6 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
         }
       }
     } catch (error) {
-      console.log(error);
       const message = error.response?.data?.message || "Failed to add vehicle";
       toast.error(message, {
         description: date,
@@ -204,7 +187,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
             Confirm Vehicle Information
           </DialogTitle>
           <DialogDescription>
-            Please review the vehicle information before submitting.
+            Please review the vehicle information before submitting
           </DialogDescription>
         </DialogHeader>
 

@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -463,9 +464,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
                 <Car className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Vehicle Renewal</span>
               </DialogTitle>
-              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+              <DialogDescription className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                 Update renewal date for vehicle registration
-              </p>
+              </DialogDescription>
               <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 flex items-center gap-1">
                 <FileText className="h-3 w-3 text-blue-500 dark:text-blue-400" />
                 File Number: <span className="font-semibold text-blue-600 dark:text-blue-400 ml-1">{vehicleData.fileNo || "N/A"}</span>
@@ -634,6 +635,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             <CalendarCheck2Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             Renewal Confirmation
           </DialogTitle>
+          <DialogDescription>
+            Please review the renewal details before confirming
+          </DialogDescription>
         </DialogHeader>
         <div className="pt-2 pb-3">
           {(() => {
@@ -697,6 +701,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             <CircleAlert className="h-5 w-5 text-red-600 dark:text-red-400" />
             Error
           </DialogTitle>
+          <DialogDescription>
+            An error occurred while processing the renewal
+          </DialogDescription>
         </DialogHeader>
         <div className="pt-2 pb-3">
           <p className="text-gray-600 dark:text-gray-300">
@@ -722,6 +729,9 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             <CheckCircle2Icon className="h-5 w-5 text-green-600 dark:text-green-400" />
             Success
           </DialogTitle>
+          <DialogDescription>
+            Vehicle renewal has been completed successfully
+          </DialogDescription>
         </DialogHeader>
         <div className="pt-2 pb-3">
           <p className="text-gray-600 dark:text-gray-300">

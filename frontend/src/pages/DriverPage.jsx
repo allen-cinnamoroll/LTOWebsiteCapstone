@@ -43,7 +43,6 @@ const DriverPage = () => {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      console.log('=== FETCHING OWNERS ===');
       
       const { data } = await apiClient.get("/owner", {
         headers: {
@@ -51,13 +50,7 @@ const DriverPage = () => {
         },
       });
 
-      console.log('=== OWNERS API RESPONSE ===');
-      console.log('Response success:', data.success);
-      console.log('Total owners received:', data.data?.length || 0);
-      console.log('First owner sample:', data.data?.[0]);
-
       if (!data.data || !Array.isArray(data.data)) {
-        console.error('API response does not contain data array:', data);
         setDriverData([]);
         return;
       }
@@ -94,23 +87,13 @@ const DriverPage = () => {
         };
       });
 
-      console.log('=== PROCESSED OWNERS ===');
-      console.log('Total processed:', driverData.length);
-      console.log('Active owners:', driverData.filter(d => d.isActive).length);
-      console.log('Inactive owners:', driverData.filter(d => !d.isActive).length);
-
       // Show only active owners by default (you can change this if you want to show all)
       const active = driverData.filter((data) => data.isActive);
-      console.log('Setting active owners in state:', active.length);
       
       setDriverData(active);
 
       setLoading(false);
     } catch (error) {
-      console.error('=== ERROR FETCHING OWNERS ===');
-      console.error('Error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
       setDriverData([]);
       setLoading(false);
     }
@@ -123,18 +106,12 @@ const DriverPage = () => {
   };
 
   const onEdit = (driverId) => {
-    console.log('=== ONEDIT FUNCTION ===');
-    console.log('Driver ID:', driverId);
-    console.log('Driver data array:', driverData);
-    
     const driver = driverData.find(d => d._id === driverId);
-    console.log('Found driver:', driver);
     
     if (driver) {
       setSelectedDriver(driver);
       setEditDriverModalOpen(true);
     } else {
-      console.error('Owner not found with ID:', driverId);
       toast.error("Owner not found", {
         description: "The selected owner could not be found."
       });
@@ -167,7 +144,6 @@ const DriverPage = () => {
   const handleDriverUpdated = (updatedDriver) => {
     // Ensure updatedDriver has the required structure
     if (!updatedDriver || !updatedDriver._id) {
-      console.error('Invalid updated driver data:', updatedDriver);
       toast.error("Failed to update owner data", {
         description: "The updated owner information is invalid."
       });

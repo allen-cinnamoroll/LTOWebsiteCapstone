@@ -218,7 +218,6 @@ export function AccidentAnalytics() {
       setError(null);
       
       const timestamp = Date.now(); // Add timestamp to bypass cache
-      console.log(`Fetching analytics data for period: ${timePeriod} at ${new Date(timestamp).toISOString()}`);
       
       const [analyticsResponse, riskResponse] = await Promise.all([
         apiClient.get(`/accident/analytics/summary?period=${timePeriod}&_t=${timestamp}`, {
@@ -230,8 +229,6 @@ export function AccidentAnalytics() {
       ]);
 
       if (analyticsResponse.data.success) {
-        console.log('Frontend received analytics data:', analyticsResponse.data.data);
-        console.log('Municipality data:', analyticsResponse.data.data.distributions?.municipality);
         setAnalyticsData(analyticsResponse.data.data);
       }
       
@@ -239,7 +236,6 @@ export function AccidentAnalytics() {
         setRiskData(riskResponse.data.data);
       }
     } catch (err) {
-      console.error('Error fetching accident analytics:', err);
       setError('Failed to load accident analytics data');
     } finally {
       setLoading(false);
@@ -264,7 +260,6 @@ export function AccidentAnalytics() {
     return trends.map(trend => {
       // Validate trend structure
       if (!trend || !trend._id || trend._id.year === undefined || trend._id.month === undefined) {
-        console.warn('Invalid trend data:', trend);
         return null;
       }
       
@@ -275,7 +270,6 @@ export function AccidentAnalytics() {
       // Validate date string
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        console.warn('Invalid date created:', dateString);
         return null;
       }
       
@@ -512,7 +506,6 @@ export function AccidentAnalytics() {
   };
 
   const formatMunicipalityData = (municipalityData) => {
-    console.log('formatMunicipalityData input:', municipalityData);
     const formatted = municipalityData.map(item => ({
       name: item._id || 'Unknown',
       accidents: item.count,
@@ -520,7 +513,6 @@ export function AccidentAnalytics() {
       percentage: municipalityData.length > 0 ? 
         ((item.count / municipalityData.reduce((sum, m) => sum + m.count, 0)) * 100).toFixed(1) : 0
     })).sort((a, b) => b.accidents - a.accidents); // Ensure proper sorting by accident count
-    console.log('formatMunicipalityData output:', formatted);
     return formatted;
   };
 

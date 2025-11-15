@@ -35,7 +35,6 @@ const VehiclesPage = () => {
   const fetchVehicles = async () => {
     try {
       setLoading(true);
-      console.log('=== FETCHING VEHICLES ===');
       
       // Fetch all vehicles by using fetchAll parameter
       const { data } = await apiClient.get("/vehicle?fetchAll=true", {
@@ -44,17 +43,7 @@ const VehiclesPage = () => {
         },
       });
 
-      console.log('=== API RESPONSE ===');
-      console.log('Response success:', data.success);
-      console.log('Total vehicles received:', data.data?.length || 0);
-      console.log('Pagination info:', data.pagination);
-      console.log('Pagination total in DB:', data.pagination?.total);
-      console.log('FetchAll mode:', data.pagination?.fetchAll);
-      console.log('First vehicle sample:', data.data?.[0]);
-      console.log('Last vehicle sample:', data.data?.[data.data?.length - 1]);
-
       if (!data.data || !Array.isArray(data.data)) {
-        console.error('API response does not contain data array:', data);
         setVehicleData([]);
         return;
       }
@@ -87,19 +76,8 @@ const VehiclesPage = () => {
         };
       });
 
-      console.log('=== PROCESSED VEHICLES ===');
-      console.log('Total processed:', vehicleData.length);
-      console.log('Vehicles with plateNo:', vehicleData.filter(v => v.plateNo).length);
-      console.log('Vehicles with fileNo:', vehicleData.filter(v => v.fileNo).length);
-      console.log('Vehicles with status:', vehicleData.filter(v => v.status).length);
-      console.log('Sample processed vehicle:', vehicleData[0]);
-
       setVehicleData(vehicleData);
     } catch (error) {
-      console.error('=== ERROR FETCHING VEHICLES ===');
-      console.error('Error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
       setVehicleData([]);
     } finally {
       setLoading(false);
@@ -112,9 +90,6 @@ const VehiclesPage = () => {
 
   //open vehicle details modal
   const onRowClick = (data) => {
-    console.log('=== VEHICLE ROW CLICKED ===');
-    console.log('Vehicle data:', data);
-    console.log('DriverId:', data?.driverId);
     setSelectedVehicle(data);
     setDetailsModalOpen(true);
   };

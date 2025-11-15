@@ -120,8 +120,6 @@ const WeeklyPredictionsChart = () => {
         setAvailableMunicipalityModels([]);
       }
     } catch (err) {
-      console.error('Error fetching weekly predictions:', err);
-      
       // Provide more specific error messages
       let errorMessage = 'Error loading predictions';
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
@@ -317,7 +315,6 @@ const WeeklyPredictionsChart = () => {
               return { municipality: munValue, total };
             }
           } catch (e) {
-            console.error('Error fetching priority data for', munValue, e);
             return null;
           }
           return null;

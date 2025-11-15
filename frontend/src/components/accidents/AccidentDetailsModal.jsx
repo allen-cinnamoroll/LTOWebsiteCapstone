@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -278,6 +279,10 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Loading Incident Details</DialogTitle>
+            <DialogDescription>Please wait while we fetch the incident information</DialogDescription>
+          </DialogHeader>
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
@@ -300,9 +305,9 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent">
                 Incident Details
               </DialogTitle>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <DialogDescription className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Comprehensive incident information including case details, location, and status
-              </p>
+              </DialogDescription>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1">
                 <Hash className="h-3 w-3 text-red-500" />
                 Blotter No: <span className="font-semibold text-red-600">{accidentData?.blotterNo || "N/A"}</span>

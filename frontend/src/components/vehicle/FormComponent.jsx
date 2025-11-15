@@ -75,11 +75,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
             headers: { Authorization: token }
           });
           if (data.success) {
-            // Debug: Log the search results to see what data is being received
-            console.log('Owner search results:', data.data);
-            console.log('First owner address:', data.data[0]?.address);
-            console.log('Municipality:', data.data[0]?.address?.municipality);
-            console.log('Barangay:', data.data[0]?.address?.barangay);
             setSearchResults(data.data);
             // Show "no results" option if no owners found and search term is long enough
             if (data.data.length === 0 && searchTerm.length >= 3) {
@@ -87,7 +82,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
             }
           }
         } catch (error) {
-          console.error("Error searching owners:", error);
           setSearchResults([]);
           if (searchTerm.length >= 3) {
             setShowNoResults(true);
@@ -177,10 +171,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   return (
     <Form {...form}>
       <form id="vehicle-form" onSubmit={form.handleSubmit((data) => {
-        // Debug: Log the selectedOwner and form data
-        console.log('Selected owner:', selectedDriver);
-        console.log('Form data:', data);
-        
         // Handle owner field properly for edit mode
         let driverId = data.driver;
         if (isEditMode && !isOwnerEditable && !selectedDriver) {
@@ -203,7 +193,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
           driver: driverId,
           ownerName: ownerName
         };
-        console.log('Form data with owner:', formDataWithOwner);
         onSubmit(formDataWithOwner);
       })}>
         <div className="space-y-3">

@@ -87,14 +87,6 @@ const ViolationPage = () => {
         },
       });
       
-      // Debug: Log the first violation to see what fields are available
-      if (data.data && data.data.length > 0) {
-        console.log("Sample violation data from API:", data.data[0]);
-        console.log("Available fields:", Object.keys(data.data[0]));
-        console.log("CreatedAt:", data.data[0].createdAt);
-        console.log("UpdatedAt:", data.data[0].updatedAt);
-      }
-      
       const violationData = data.data.map((vData) => ({
         _id: vData._id,
         topNo: vData.topNo || "N/A",
@@ -118,7 +110,7 @@ const ViolationPage = () => {
       }));
       setViolationData(violationData);
     } catch (error) {
-      console.log(error);
+      // Error handled silently
     } finally {
       setLoading(false);
     }

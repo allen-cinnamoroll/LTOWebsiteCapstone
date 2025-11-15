@@ -64,7 +64,6 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
         setOwnerData([]);
       }
     } catch (err) {
-      console.error('Error fetching owner municipality data:', err);
       setError('Error loading owner municipality data');
     } finally {
       setLoading(false);

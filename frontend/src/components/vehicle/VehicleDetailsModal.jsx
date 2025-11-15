@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -641,9 +642,9 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Vehicle Details
               </DialogTitle>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <DialogDescription className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Comprehensive vehicle information including registration details, specifications, and current status
-              </p>
+              </DialogDescription>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-1">
                 <FileText className="h-3 w-3 text-blue-500" />
                 File Number: <span className="font-semibold text-blue-600">{vehicleData?.fileNo || "N/A"}</span>

@@ -3,7 +3,6 @@ import {
   PieChart, 
   Pie, 
   Cell, 
-  ResponsiveContainer,
   Legend,
   Tooltip,
   Label
@@ -51,21 +50,7 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
         yearValue = selectedYear;
       }
       
-      
       const response = await getVehicleClassificationData(monthNumber, yearValue);
-      
-      // Debug: Log the raw data to check for FOR HRE entries
-      if (response.success && response.data) {
-        console.log('Raw classification data:', response.data);
-        const forHreEntries = response.data.filter(item => 
-          item.classification && item.classification.toUpperCase() === "FOR HRE"
-        );
-        if (forHreEntries.length > 0) {
-          console.warn('Found FOR HRE entries in data:', forHreEntries);
-        } else {
-          console.log('No FOR HRE entries found in data - filtering working correctly');
-        }
-      }
       
       if (response.success) {
         setClassificationData(response.data);
@@ -74,7 +59,6 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
         setClassificationData([]);
       }
     } catch (err) {
-      console.error('Error fetching vehicle classification data:', err);
       setError('Error loading vehicle classification data');
     } finally {
       setLoading(false);
@@ -103,12 +87,10 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
 
   // Format data for Recharts with strict data normalization
   const formatChartData = (data) => {
-    console.log('formatChartData - Input data:', data);
     // Normalize the data and filter out invalid entries
     const normalizedData = {};
     
     data.forEach((item) => {
-      console.log('Processing item:', item);
       // Skip any "FOR HRE" entries completely (case-insensitive)
       if (item.classification && item.classification.toUpperCase() === "FOR HRE") {
         return; // Skip this entry entirely
@@ -141,7 +123,6 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
       percentage: totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0
     }));
     
-    console.log('formatChartData - Final result:', result);
     return result;
   };
 
@@ -357,74 +338,72 @@ const VehicleClassificationChart = ({ selectedMonth, selectedYear, loading: pare
              ) : (
                <div className="flex items-center justify-center h-full">
                  <div className="flex-shrink-0 animate-fade-in">
-                   <ResponsiveContainer width={isMobile ? 180 : 220} height={isMobile ? 180 : 220}>
-                     <PieChart>
-                       <Pie
-                         data={formatChartData(classificationData)}
-                         cx="50%"
-                         cy="50%"
-                         labelLine={false}
-                         outerRadius={isMobile ? 70 : 85}
-                         innerRadius={isMobile ? 20 : 30}
-                         fill="#8884d8"
-                         dataKey="value"
-                         animationBegin={0}
-                         animationDuration={1800}
-                         animationEasing="ease-out"
-                         stroke="#ffffff"
-                         strokeWidth={2}
-                         startAngle={90}
-                         endAngle={450}
-                       >
-                         {formatChartData(classificationData).map((entry, index) => {
-                           const isSelected = selectedSegment === entry.name;
-                           const baseColor = getColorForClassification(entry.name);
-                           return (
-                             <Cell 
-                               key={`cell-${entry.name}`} 
-                               fill={isSelected ? baseColor : baseColor}
-                               stroke="#ffffff"
-                               strokeWidth={isSelected ? 3 : 2}
-                               style={{
-                                 filter: isSelected 
+                   <PieChart width={isMobile ? 180 : 220} height={isMobile ? 180 : 220}>
+                     <Pie
+                       data={formatChartData(classificationData)}
+                       cx="50%"
+                       cy="50%"
+                       labelLine={false}
+                       outerRadius={isMobile ? 70 : 85}
+                       innerRadius={isMobile ? 20 : 30}
+                       fill="#8884d8"
+                       dataKey="value"
+                       animationBegin={0}
+                       animationDuration={1800}
+                       animationEasing="ease-out"
+                       stroke="#ffffff"
+                       strokeWidth={2}
+                       startAngle={90}
+                       endAngle={450}
+                     >
+                       {formatChartData(classificationData).map((entry, index) => {
+                         const isSelected = selectedSegment === entry.name;
+                         const baseColor = getColorForClassification(entry.name);
+                         return (
+                           <Cell 
+                             key={`cell-${entry.name}`} 
+                             fill={isSelected ? baseColor : baseColor}
+                             stroke="#ffffff"
+                             strokeWidth={isSelected ? 3 : 2}
+                             style={{
+                               filter: isSelected 
+                                 ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(1.1)' 
+                                 : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))',
+                               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                               transformOrigin: 'center',
+                               opacity: selectedSegment && !isSelected ? 0.5 : 1
+                             }}
+                             onMouseEnter={(e) => {
+                               if (!selectedSegment || isSelected) {
+                                 e.target.style.filter = 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25)) brightness(1.05)';
+                                 e.target.style.transform = 'scale(1.02)';
+                               }
+                             }}
+                             onMouseLeave={(e) => {
+                               if (!selectedSegment || isSelected) {
+                                 e.target.style.filter = isSelected 
                                    ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(1.1)' 
-                                   : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))',
-                                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                 transformOrigin: 'center',
-                                 opacity: selectedSegment && !isSelected ? 0.5 : 1
-                               }}
-                               onMouseEnter={(e) => {
-                                 if (!selectedSegment || isSelected) {
-                                   e.target.style.filter = 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25)) brightness(1.05)';
-                                   e.target.style.transform = 'scale(1.02)';
-                                 }
-                               }}
-                               onMouseLeave={(e) => {
-                                 if (!selectedSegment || isSelected) {
-                                   e.target.style.filter = isSelected 
-                                     ? 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) brightness(1.1)' 
-                                     : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))';
-                                   e.target.style.transform = 'scale(1)';
-                                 }
-                               }}
-                               onClick={() => {
-                                 if (selectedSegment === entry.name) {
-                                   setSelectedSegment(null);
-                                 } else {
-                                   setSelectedSegment(entry.name);
-                                 }
-                               }}
-                             />
-                           );
-                         })}
-                       </Pie>
-                       <Tooltip 
-                         content={<CustomTooltip />}
-                         position={{ x: 0, y: 0 }}
-                         offset={20}
-                       />
-                     </PieChart>
-                   </ResponsiveContainer>
+                                   : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))';
+                                 e.target.style.transform = 'scale(1)';
+                               }
+                             }}
+                             onClick={() => {
+                               if (selectedSegment === entry.name) {
+                                 setSelectedSegment(null);
+                               } else {
+                                 setSelectedSegment(entry.name);
+                               }
+                             }}
+                           />
+                         );
+                       })}
+                     </Pie>
+                     <Tooltip 
+                       content={<CustomTooltip />}
+                       position={{ x: 0, y: 0 }}
+                       offset={20}
+                     />
+                   </PieChart>
                  </div>
                </div>
              )}

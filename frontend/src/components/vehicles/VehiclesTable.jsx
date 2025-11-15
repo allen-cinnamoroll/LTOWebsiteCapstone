@@ -66,17 +66,6 @@ const VehiclesTable = ({
   // Define the columns where you want to apply the global filter
   const filterColumns = filters;
 
-  // DEBUG: Log data received by table component
-  React.useEffect(() => {
-    console.log('=== VEHICLES TABLE DEBUG ===');
-    console.log('Data prop received:', data);
-    console.log('Data length:', data?.length || 0);
-    console.log('Data is array:', Array.isArray(data));
-    console.log('Loading state:', loading);
-    console.log('First 3 vehicles:', data?.slice(0, 3));
-    console.log('=== END TABLE DEBUG ===');
-  }, [data, loading]);
-
   const table = useReactTable({
     data,
     columns: tableColumn(onEdit, onRenew, submitting),

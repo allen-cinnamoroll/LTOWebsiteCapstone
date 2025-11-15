@@ -35,7 +35,6 @@ export const getWeeklyPredictions = async (weeks = 12, municipality = null) => {
     }
     
     const url = `${MV_PREDICTION_API_BASE}/api/predict/registrations?${params.toString()}`;
-    console.log('Fetching predictions from:', url);
     
     // Create AbortController for timeout
     const controller = new AbortController();
@@ -65,8 +64,6 @@ export const getWeeklyPredictions = async (weeks = 12, municipality = null) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching weekly predictions:', error);
-    
     // Re-throw with more context if it's a network error
     if (error.name === 'AbortError' || error.message.includes('timeout')) {
       throw new Error('Request timed out. The server may be slow or unreachable.');
@@ -103,7 +100,6 @@ export const getModelAccuracy = async (municipality = null) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching model accuracy:', error);
     throw error;
   }
 };

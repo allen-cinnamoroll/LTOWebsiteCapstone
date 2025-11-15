@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,24 +36,19 @@ const OwnerDetailsModal = ({ open, onOpenChange, ownerId }) => {
 
   const fetchOwnerData = async () => {
     if (!ownerId) {
-      console.log('No ownerId found, skipping fetch');
       return;
     }
     
     setLoading(true);
     try {
-      console.log(`Fetching owner data for ID: ${ownerId}`);
       const { data } = await apiClient.get(`/owner/${ownerId}`, {
         headers: {
           Authorization: token,
         },
       });
-      console.log('Owner data received:', data);
       setOwnerData(data.data);
     } catch (error) {
-      console.error("Error fetching owner data:", error);
-      console.error("Error response:", error.response?.data);
-      console.error("Error status:", error.response?.status);
+      // Error handled silently
     } finally {
       setLoading(false);
     }
@@ -177,9 +173,9 @@ const OwnerDetailsModal = ({ open, onOpenChange, ownerId }) => {
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Owner Information
               </DialogTitle>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <DialogDescription className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                 Comprehensive owner information including contact details, license status, and address
-              </p>
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
