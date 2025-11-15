@@ -17017,3 +17017,329 @@ Saving model...
 2025-11-15 22:17:35,601 - __main__ - INFO - DEBUG (aggregated from municipalities): Weekly prediction totals: [694, 354, 345, 336, 36]
 2025-11-15 22:17:35,601 - __main__ - INFO - DEBUG (aggregated from municipalities): Total period prediction: 1765
 2025-11-15 22:17:35,601 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 22:17:35] "GET /api/predict/registrations?weeks=5 HTTP/1.1" 200 -
+2025-11-15 22:18:25,377 - __main__ - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,378 - __main__ - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,378 - __main__ - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,379 - __main__ - INFO - Generating exogenous variables for dates starting from: 2025-07-01 00:00:00
+2025-11-15 22:18:25,392 - __main__ - INFO - No municipality specified and per-municipality mode is enabled. Computing regional predictions by summing all municipality models.
+2025-11-15 22:18:25,392 - __main__ - INFO - Global first prediction week start (aggregated from municipalities): 2025-07-06
+2025-11-15 22:18:25,393 - __main__ - INFO - Generating predictions for municipality: BAGANGA
+2025-11-15 22:18:25,393 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:25,394 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,394 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,395 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,395 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:25,413 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:25,414 - sarima_model_optimized - INFO -   Min: -0.31, Max: 1.26, Mean: 0.16
+2025-11-15 22:18:25,416 - sarima_model_optimized - INFO -   Negative values: 10 out of 35
+2025-11-15 22:18:25,417 - sarima_model_optimized - INFO -   Values < 1: 34 out of 35
+2025-11-15 22:18:25,418 - sarima_model_optimized - INFO -   First 5 forecast values: [0.2732388410914525, 0.5911942184944342, 0.45920767938153284, 0.4408653299979699, -0.1547316071866676]
+2025-11-15 22:18:25,502 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:25,503 - sarima_model_optimized - INFO -   Total predicted: 6 registrations
+2025-11-15 22:18:25,504 - sarima_model_optimized - INFO -   Confidence interval: [0, 92]
+2025-11-15 22:18:25,506 - __main__ - INFO - Generating predictions for municipality: BANAYBANAY
+2025-11-15 22:18:25,506 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:25,506 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,507 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,507 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,507 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:25,527 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:25,528 - sarima_model_optimized - INFO -   Min: 0.03, Max: 7.24, Mean: 4.87
+2025-11-15 22:18:25,529 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:25,529 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:25,531 - sarima_model_optimized - INFO -   First 5 forecast values: [5.424511474227835, 6.388198432795091, 7.176446281789267, 6.594768911944259, 4.5944850405649245]
+2025-11-15 22:18:25,599 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:25,600 - sarima_model_optimized - INFO -   Total predicted: 170 registrations
+2025-11-15 22:18:25,600 - sarima_model_optimized - INFO -   Confidence interval: [0, 427]
+2025-11-15 22:18:25,601 - __main__ - INFO - Generating predictions for municipality: BOSTON
+2025-11-15 22:18:25,601 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:25,601 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-23 00:00:00
+2025-11-15 22:18:25,602 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-23 00:00:00
+2025-11-15 22:18:25,602 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,602 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:25,648 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:25,649 - sarima_model_optimized - INFO -   Min: -0.00, Max: 0.00, Mean: -0.00
+2025-11-15 22:18:25,651 - sarima_model_optimized - INFO -   Negative values: 24 out of 35
+2025-11-15 22:18:25,652 - sarima_model_optimized - INFO -   Values < 1: 35 out of 35
+2025-11-15 22:18:25,653 - sarima_model_optimized - INFO -   First 5 forecast values: [1.9719486042636037e-06, 1.9719486042636037e-06, -5.169865593566622e-18, 4.625639539672275e-26, -1.9719486042636037e-06]
+2025-11-15 22:18:25,710 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:25,710 - sarima_model_optimized - INFO -   Total predicted: 0 registrations
+2025-11-15 22:18:25,710 - sarima_model_optimized - INFO -   Confidence interval: [0, 0]
+2025-11-15 22:18:25,711 - __main__ - INFO - Generating predictions for municipality: CARAGA
+2025-11-15 22:18:25,711 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:25,711 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,712 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,712 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,713 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:25,735 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:25,736 - sarima_model_optimized - INFO -   Min: 0.54, Max: 3.83, Mean: 1.88
+2025-11-15 22:18:25,737 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:25,737 - sarima_model_optimized - INFO -   Values < 1: 8 out of 35
+2025-11-15 22:18:25,738 - sarima_model_optimized - INFO -   First 5 forecast values: [3.8341189210187894, 2.216088152626962, 2.5374697154265258, 2.5293761756246047, 1.3787631769803823]
+2025-11-15 22:18:25,797 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:25,798 - sarima_model_optimized - INFO -   Total predicted: 66 registrations
+2025-11-15 22:18:25,798 - sarima_model_optimized - INFO -   Confidence interval: [0, 164]
+2025-11-15 22:18:25,799 - __main__ - INFO - Generating predictions for municipality: CATEEL
+2025-11-15 22:18:25,799 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:25,799 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-26 00:00:00
+2025-11-15 22:18:25,799 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-26 00:00:00
+2025-11-15 22:18:25,800 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,800 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:25,814 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:25,815 - sarima_model_optimized - INFO -   Min: -0.04, Max: 0.76, Mean: 0.06
+2025-11-15 22:18:25,859 - sarima_model_optimized - INFO -   Negative values: 4 out of 35
+2025-11-15 22:18:25,860 - sarima_model_optimized - INFO -   Values < 1: 35 out of 35
+2025-11-15 22:18:25,862 - sarima_model_optimized - INFO -   First 5 forecast values: [0.025914010318756515, 0.002771037012023903, 0.0008706064116905329, 0.7572073849972244, 0.3333860977415623]
+2025-11-15 22:18:25,928 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:25,929 - sarima_model_optimized - INFO -   Total predicted: 2 registrations
+2025-11-15 22:18:25,929 - sarima_model_optimized - INFO -   Confidence interval: [0, 44]
+2025-11-15 22:18:25,929 - __main__ - INFO - Generating predictions for municipality: GOVERNOR GENEROSO
+2025-11-15 22:18:25,930 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:25,930 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,930 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:25,931 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:25,931 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:25,946 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:25,947 - sarima_model_optimized - INFO -   Min: -1.32, Max: 7.65, Mean: 2.73
+2025-11-15 22:18:25,948 - sarima_model_optimized - INFO -   Negative values: 7 out of 35
+2025-11-15 22:18:25,948 - sarima_model_optimized - INFO -   Values < 1: 10 out of 35
+2025-11-15 22:18:25,949 - sarima_model_optimized - INFO -   First 5 forecast values: [7.649716786715187, 5.8389261474271725, 3.8368632822964557, 3.0036670059312742, 0.8530582328414633]
+2025-11-15 22:18:26,002 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:26,003 - sarima_model_optimized - INFO -   Total predicted: 95 registrations
+2025-11-15 22:18:26,003 - sarima_model_optimized - INFO -   Confidence interval: [0, 342]
+2025-11-15 22:18:26,004 - __main__ - INFO - Generating predictions for municipality: LUPON
+2025-11-15 22:18:26,004 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:26,004 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,004 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,005 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:26,005 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:26,019 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:26,020 - sarima_model_optimized - INFO -   Min: -1.12, Max: 11.21, Mean: 6.64
+2025-11-15 22:18:26,021 - sarima_model_optimized - INFO -   Negative values: 5 out of 35
+2025-11-15 22:18:26,022 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:26,022 - sarima_model_optimized - INFO -   First 5 forecast values: [7.525889356024893, 10.703208228649665, 10.253378829514102, 11.210092253843552, 5.809127438855626]
+2025-11-15 22:18:26,080 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:26,081 - sarima_model_optimized - INFO -   Total predicted: 232 registrations
+2025-11-15 22:18:26,081 - sarima_model_optimized - INFO -   Confidence interval: [0, 711]
+2025-11-15 22:18:26,082 - __main__ - INFO - Generating predictions for municipality: MANAY
+2025-11-15 22:18:26,082 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:26,083 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,083 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,083 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:26,083 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:26,100 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:26,101 - sarima_model_optimized - INFO -   Min: 0.15, Max: 3.09, Mean: 1.96
+2025-11-15 22:18:26,102 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:26,103 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:26,103 - sarima_model_optimized - INFO -   First 5 forecast values: [1.9732668518978154, 2.6435330941270863, 2.3016493775389404, 2.87965743622735, 1.9802907430685701]
+2025-11-15 22:18:26,164 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:26,164 - sarima_model_optimized - INFO -   Total predicted: 69 registrations
+2025-11-15 22:18:26,164 - sarima_model_optimized - INFO -   Confidence interval: [0, 197]
+2025-11-15 22:18:26,165 - __main__ - INFO - Generating predictions for municipality: SAN ISIDRO
+2025-11-15 22:18:26,165 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:26,166 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,166 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,166 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:26,166 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:26,183 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:26,184 - sarima_model_optimized - INFO -   Min: -0.33, Max: 5.02, Mean: 2.85
+2025-11-15 22:18:26,185 - sarima_model_optimized - INFO -   Negative values: 10 out of 35
+2025-11-15 22:18:26,186 - sarima_model_optimized - INFO -   Values < 1: 10 out of 35
+2025-11-15 22:18:26,186 - sarima_model_optimized - INFO -   First 5 forecast values: [4.049228971969696, 4.70778274712777, 5.0224141786141, 3.9693204957261825, -0.14996437950706842]
+2025-11-15 22:18:26,244 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:26,244 - sarima_model_optimized - INFO -   Total predicted: 100 registrations
+2025-11-15 22:18:26,245 - sarima_model_optimized - INFO -   Confidence interval: [0, 315]
+2025-11-15 22:18:26,245 - __main__ - INFO - Generating predictions for municipality: TARRAGONA
+2025-11-15 22:18:26,246 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:26,246 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,246 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,246 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:26,247 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:26,263 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:26,265 - sarima_model_optimized - INFO -   Min: 0.16, Max: 2.34, Mean: 1.41
+2025-11-15 22:18:26,266 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:26,266 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:26,267 - sarima_model_optimized - INFO -   First 5 forecast values: [1.401999394802138, 2.1918925323435543, 1.7055282368895432, 1.0320509714281811, 1.6533355440725275]
+2025-11-15 22:18:26,317 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:26,318 - sarima_model_optimized - INFO -   Total predicted: 49 registrations
+2025-11-15 22:18:26,318 - sarima_model_optimized - INFO -   Confidence interval: [0, 150]
+2025-11-15 22:18:26,319 - __main__ - INFO - Generating predictions for municipality: CITY OF MATI
+2025-11-15 22:18:26,319 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:26,319 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,320 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:26,320 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:26,320 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:26,338 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:26,340 - sarima_model_optimized - INFO -   Min: -1.46, Max: 42.68, Mean: 27.52
+2025-11-15 22:18:26,341 - sarima_model_optimized - INFO -   Negative values: 5 out of 35
+2025-11-15 22:18:26,343 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:26,344 - sarima_model_optimized - INFO -   First 5 forecast values: [38.32597036559767, 41.020034715352345, 42.68341925127076, 40.02393337473357, 20.51183156130947]
+2025-11-15 22:18:26,412 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:26,413 - sarima_model_optimized - INFO -   Total predicted: 963 registrations
+2025-11-15 22:18:26,413 - sarima_model_optimized - INFO -   Confidence interval: [0, 2406]
+2025-11-15 22:18:26,413 - __main__ - INFO - DEBUG (aggregated from municipalities): Weekly prediction totals: [694, 354, 345, 336, 36]
+2025-11-15 22:18:26,414 - __main__ - INFO - DEBUG (aggregated from municipalities): Total period prediction: 1765
+2025-11-15 22:18:26,415 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 22:18:26] "GET /api/predict/registrations?weeks=5 HTTP/1.1" 200 -
+2025-11-15 22:18:30,377 - __main__ - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,378 - __main__ - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,378 - __main__ - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,378 - __main__ - INFO - Generating exogenous variables for dates starting from: 2025-07-01 00:00:00
+2025-11-15 22:18:30,390 - __main__ - INFO - No municipality specified and per-municipality mode is enabled. Computing regional predictions by summing all municipality models.
+2025-11-15 22:18:30,391 - __main__ - INFO - Global first prediction week start (aggregated from municipalities): 2025-07-06
+2025-11-15 22:18:30,391 - __main__ - INFO - Generating predictions for municipality: BAGANGA
+2025-11-15 22:18:30,391 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,391 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,392 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,392 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,392 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,409 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,410 - sarima_model_optimized - INFO -   Min: -0.31, Max: 1.26, Mean: 0.16
+2025-11-15 22:18:30,411 - sarima_model_optimized - INFO -   Negative values: 10 out of 35
+2025-11-15 22:18:30,412 - sarima_model_optimized - INFO -   Values < 1: 34 out of 35
+2025-11-15 22:18:30,412 - sarima_model_optimized - INFO -   First 5 forecast values: [0.2732388410914525, 0.5911942184944342, 0.45920767938153284, 0.4408653299979699, -0.1547316071866676]
+2025-11-15 22:18:30,469 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,469 - sarima_model_optimized - INFO -   Total predicted: 6 registrations
+2025-11-15 22:18:30,469 - sarima_model_optimized - INFO -   Confidence interval: [0, 92]
+2025-11-15 22:18:30,470 - __main__ - INFO - Generating predictions for municipality: BANAYBANAY
+2025-11-15 22:18:30,470 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,470 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,471 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,471 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,471 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,487 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,487 - sarima_model_optimized - INFO -   Min: 0.03, Max: 7.24, Mean: 4.87
+2025-11-15 22:18:30,489 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:30,490 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:30,491 - sarima_model_optimized - INFO -   First 5 forecast values: [5.424511474227835, 6.388198432795091, 7.176446281789267, 6.594768911944259, 4.5944850405649245]
+2025-11-15 22:18:30,547 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,547 - sarima_model_optimized - INFO -   Total predicted: 170 registrations
+2025-11-15 22:18:30,548 - sarima_model_optimized - INFO -   Confidence interval: [0, 427]
+2025-11-15 22:18:30,548 - __main__ - INFO - Generating predictions for municipality: BOSTON
+2025-11-15 22:18:30,548 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,549 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-23 00:00:00
+2025-11-15 22:18:30,549 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-23 00:00:00
+2025-11-15 22:18:30,549 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,549 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,566 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,566 - sarima_model_optimized - INFO -   Min: -0.00, Max: 0.00, Mean: -0.00
+2025-11-15 22:18:30,567 - sarima_model_optimized - INFO -   Negative values: 24 out of 35
+2025-11-15 22:18:30,568 - sarima_model_optimized - INFO -   Values < 1: 35 out of 35
+2025-11-15 22:18:30,568 - sarima_model_optimized - INFO -   First 5 forecast values: [1.9719486042636037e-06, 1.9719486042636037e-06, -5.169865593566622e-18, 4.625639539672275e-26, -1.9719486042636037e-06]
+2025-11-15 22:18:30,619 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,619 - sarima_model_optimized - INFO -   Total predicted: 0 registrations
+2025-11-15 22:18:30,620 - sarima_model_optimized - INFO -   Confidence interval: [0, 0]
+2025-11-15 22:18:30,620 - __main__ - INFO - Generating predictions for municipality: CARAGA
+2025-11-15 22:18:30,620 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,621 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,621 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,621 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,621 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,635 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,636 - sarima_model_optimized - INFO -   Min: 0.54, Max: 3.83, Mean: 1.88
+2025-11-15 22:18:30,637 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:30,638 - sarima_model_optimized - INFO -   Values < 1: 8 out of 35
+2025-11-15 22:18:30,638 - sarima_model_optimized - INFO -   First 5 forecast values: [3.8341189210187894, 2.216088152626962, 2.5374697154265258, 2.5293761756246047, 1.3787631769803823]
+2025-11-15 22:18:30,690 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,690 - sarima_model_optimized - INFO -   Total predicted: 66 registrations
+2025-11-15 22:18:30,690 - sarima_model_optimized - INFO -   Confidence interval: [0, 164]
+2025-11-15 22:18:30,691 - __main__ - INFO - Generating predictions for municipality: CATEEL
+2025-11-15 22:18:30,691 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,692 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-26 00:00:00
+2025-11-15 22:18:30,692 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-26 00:00:00
+2025-11-15 22:18:30,692 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,692 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,706 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,706 - sarima_model_optimized - INFO -   Min: -0.04, Max: 0.76, Mean: 0.06
+2025-11-15 22:18:30,707 - sarima_model_optimized - INFO -   Negative values: 4 out of 35
+2025-11-15 22:18:30,708 - sarima_model_optimized - INFO -   Values < 1: 35 out of 35
+2025-11-15 22:18:30,708 - sarima_model_optimized - INFO -   First 5 forecast values: [0.025914010318756515, 0.002771037012023903, 0.0008706064116905329, 0.7572073849972244, 0.3333860977415623]
+2025-11-15 22:18:30,758 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,759 - sarima_model_optimized - INFO -   Total predicted: 2 registrations
+2025-11-15 22:18:30,759 - sarima_model_optimized - INFO -   Confidence interval: [0, 44]
+2025-11-15 22:18:30,759 - __main__ - INFO - Generating predictions for municipality: GOVERNOR GENEROSO
+2025-11-15 22:18:30,760 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,760 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,760 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,760 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,760 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,774 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,774 - sarima_model_optimized - INFO -   Min: -1.32, Max: 7.65, Mean: 2.73
+2025-11-15 22:18:30,775 - sarima_model_optimized - INFO -   Negative values: 7 out of 35
+2025-11-15 22:18:30,776 - sarima_model_optimized - INFO -   Values < 1: 10 out of 35
+2025-11-15 22:18:30,776 - sarima_model_optimized - INFO -   First 5 forecast values: [7.649716786715187, 5.8389261474271725, 3.8368632822964557, 3.0036670059312742, 0.8530582328414633]
+2025-11-15 22:18:30,825 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,825 - sarima_model_optimized - INFO -   Total predicted: 95 registrations
+2025-11-15 22:18:30,826 - sarima_model_optimized - INFO -   Confidence interval: [0, 342]
+2025-11-15 22:18:30,826 - __main__ - INFO - Generating predictions for municipality: LUPON
+2025-11-15 22:18:30,826 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,827 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,827 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,827 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,828 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,843 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,844 - sarima_model_optimized - INFO -   Min: -1.12, Max: 11.21, Mean: 6.64
+2025-11-15 22:18:30,844 - sarima_model_optimized - INFO -   Negative values: 5 out of 35
+2025-11-15 22:18:30,845 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:30,846 - sarima_model_optimized - INFO -   First 5 forecast values: [7.525889356024893, 10.703208228649665, 10.253378829514102, 11.210092253843552, 5.809127438855626]
+2025-11-15 22:18:30,893 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,893 - sarima_model_optimized - INFO -   Total predicted: 232 registrations
+2025-11-15 22:18:30,893 - sarima_model_optimized - INFO -   Confidence interval: [0, 711]
+2025-11-15 22:18:30,894 - __main__ - INFO - Generating predictions for municipality: MANAY
+2025-11-15 22:18:30,894 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,894 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,894 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,895 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,895 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,908 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,909 - sarima_model_optimized - INFO -   Min: 0.15, Max: 3.09, Mean: 1.96
+2025-11-15 22:18:30,910 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:30,910 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:30,911 - sarima_model_optimized - INFO -   First 5 forecast values: [1.9732668518978154, 2.6435330941270863, 2.3016493775389404, 2.87965743622735, 1.9802907430685701]
+2025-11-15 22:18:30,959 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:30,959 - sarima_model_optimized - INFO -   Total predicted: 69 registrations
+2025-11-15 22:18:30,959 - sarima_model_optimized - INFO -   Confidence interval: [0, 197]
+2025-11-15 22:18:30,960 - __main__ - INFO - Generating predictions for municipality: SAN ISIDRO
+2025-11-15 22:18:30,960 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:30,960 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,960 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:30,961 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:30,961 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:30,975 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:30,976 - sarima_model_optimized - INFO -   Min: -0.33, Max: 5.02, Mean: 2.85
+2025-11-15 22:18:30,977 - sarima_model_optimized - INFO -   Negative values: 10 out of 35
+2025-11-15 22:18:30,977 - sarima_model_optimized - INFO -   Values < 1: 10 out of 35
+2025-11-15 22:18:30,978 - sarima_model_optimized - INFO -   First 5 forecast values: [4.049228971969696, 4.70778274712777, 5.0224141786141, 3.9693204957261825, -0.14996437950706842]
+2025-11-15 22:18:31,028 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:31,029 - sarima_model_optimized - INFO -   Total predicted: 100 registrations
+2025-11-15 22:18:31,029 - sarima_model_optimized - INFO -   Confidence interval: [0, 315]
+2025-11-15 22:18:31,030 - __main__ - INFO - Generating predictions for municipality: TARRAGONA
+2025-11-15 22:18:31,030 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:31,030 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:31,031 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:31,031 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:31,032 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:31,047 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:31,048 - sarima_model_optimized - INFO -   Min: 0.16, Max: 2.34, Mean: 1.41
+2025-11-15 22:18:31,049 - sarima_model_optimized - INFO -   Negative values: 0 out of 35
+2025-11-15 22:18:31,049 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:31,050 - sarima_model_optimized - INFO -   First 5 forecast values: [1.401999394802138, 2.1918925323435543, 1.7055282368895432, 1.0320509714281811, 1.6533355440725275]
+2025-11-15 22:18:31,098 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:31,098 - sarima_model_optimized - INFO -   Total predicted: 49 registrations
+2025-11-15 22:18:31,099 - sarima_model_optimized - INFO -   Confidence interval: [0, 150]
+2025-11-15 22:18:31,099 - __main__ - INFO - Generating predictions for municipality: CITY OF MATI
+2025-11-15 22:18:31,099 - sarima_model_optimized - INFO - Generating predictions for 35 days...
+2025-11-15 22:18:31,100 - sarima_model_optimized - INFO - Using actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:31,100 - sarima_model_optimized - INFO - Actual last registration date: 2025-06-30 00:00:00
+2025-11-15 22:18:31,100 - sarima_model_optimized - INFO - First day of next month: 2025-07-01 00:00:00
+2025-11-15 22:18:31,100 - sarima_model_optimized - INFO - Prediction start date: 2025-07-01 00:00:00
+2025-11-15 22:18:31,113 - sarima_model_optimized - INFO - DEBUG: Forecast statistics:
+2025-11-15 22:18:31,114 - sarima_model_optimized - INFO -   Min: -1.46, Max: 42.68, Mean: 27.52
+2025-11-15 22:18:31,115 - sarima_model_optimized - INFO -   Negative values: 5 out of 35
+2025-11-15 22:18:31,115 - sarima_model_optimized - INFO -   Values < 1: 5 out of 35
+2025-11-15 22:18:31,116 - sarima_model_optimized - INFO -   First 5 forecast values: [38.32597036559767, 41.020034715352345, 42.68341925127076, 40.02393337473357, 20.51183156130947]
+2025-11-15 22:18:31,164 - sarima_model_optimized - INFO - Predictions generated successfully
+2025-11-15 22:18:31,165 - sarima_model_optimized - INFO -   Total predicted: 963 registrations
+2025-11-15 22:18:31,165 - sarima_model_optimized - INFO -   Confidence interval: [0, 2406]
+2025-11-15 22:18:31,166 - __main__ - INFO - DEBUG (aggregated from municipalities): Weekly prediction totals: [694, 354, 345, 336, 36]
+2025-11-15 22:18:31,166 - __main__ - INFO - DEBUG (aggregated from municipalities): Total period prediction: 1765
+2025-11-15 22:18:31,167 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 22:18:31] "GET /api/predict/registrations?weeks=5 HTTP/1.1" 200 -
