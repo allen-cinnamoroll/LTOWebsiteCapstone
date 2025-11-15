@@ -42,7 +42,18 @@ const HomePage = () => {
       });
       
       if (data.success) {
-        setStats(data.data);
+        // Merge with default stats to ensure all properties exist
+        setStats(prev => ({
+          ...prev,
+          ...data.data,
+          userStats: data.data.userStats || prev.userStats,
+          kpi: data.data.kpi || prev.kpi,
+          vehicles: data.data.vehicles || prev.vehicles,
+          drivers: data.data.drivers || prev.drivers,
+          violations: data.data.violations || prev.violations,
+          accidents: data.data.accidents || prev.accidents,
+          trends: data.data.trends || prev.trends,
+        }));
       }
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
@@ -53,32 +64,32 @@ const HomePage = () => {
 
   // Calculate advanced metrics
   const calculateMetrics = () => {
-    const violationsPerDriver = stats.drivers.total > 0 
-      ? (stats.violations.total / stats.drivers.total).toFixed(2)
+    const violationsPerDriver = (stats.drivers?.total || 0) > 0 
+      ? ((stats.violations?.total || 0) / (stats.drivers?.total || 1)).toFixed(2)
       : 0;
     
-    const violationsPerVehicle = stats.vehicles.total > 0
-      ? (stats.violations.total / stats.vehicles.total).toFixed(2)
+    const violationsPerVehicle = (stats.vehicles?.total || 0) > 0
+      ? ((stats.violations?.total || 0) / (stats.vehicles?.total || 1)).toFixed(2)
       : 0;
     
-    const accidentsPerDriver = stats.drivers.total > 0
-      ? (stats.accidents.total / stats.drivers.total).toFixed(2)
+    const accidentsPerDriver = (stats.drivers?.total || 0) > 0
+      ? ((stats.accidents?.total || 0) / (stats.drivers?.total || 1)).toFixed(2)
       : 0;
     
-    const activeVehicleRate = stats.vehicles.total > 0
-      ? ((stats.vehicles.active / stats.vehicles.total) * 100).toFixed(1)
+    const activeVehicleRate = (stats.vehicles?.total || 0) > 0
+      ? (((stats.vehicles?.active || 0) / (stats.vehicles?.total || 1)) * 100).toFixed(1)
       : 0;
     
-    const expiredVehicleRate = stats.vehicles.total > 0
-      ? ((stats.vehicles.expired / stats.vehicles.total) * 100).toFixed(1)
+    const expiredVehicleRate = (stats.vehicles?.total || 0) > 0
+      ? (((stats.vehicles?.expired || 0) / (stats.vehicles?.total || 1)) * 100).toFixed(1)
       : 0;
     
-    const violationGrowthRate = stats.violations.recent > 0 && stats.violations.total > 0
-      ? (((stats.violations.recent / 30) / (stats.violations.total / 365)) * 100 - 100).toFixed(1)
+    const violationGrowthRate = (stats.violations?.recent || 0) > 0 && (stats.violations?.total || 0) > 0
+      ? ((((stats.violations?.recent || 0) / 30) / ((stats.violations?.total || 1) / 365)) * 100 - 100).toFixed(1)
       : 0;
     
-    const accidentToViolationRatio = stats.violations.total > 0
-      ? ((stats.accidents.total / stats.violations.total) * 100).toFixed(2)
+    const accidentToViolationRatio = (stats.violations?.total || 0) > 0
+      ? (((stats.accidents?.total || 0) / (stats.violations?.total || 1)) * 100).toFixed(2)
       : 0;
     
     const safetyScore = Math.max(0, Math.min(100, 
@@ -149,26 +160,26 @@ const HomePage = () => {
           <section className="max-h-full w-full grid grid-flow-row lg:grid-flow-col grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-4">
             <StatCard
               name={"Registered Vehicles"}
-              value={stats.vehicles.total.toString()}
+              value={(stats.vehicles?.total || 0).toString()}
               icon={Car}
               statuses={[
-                { label: `${stats.vehicles.active} Active`, color: "#047857", bgColor: "#d1fae5" }, // Green
-                { label: `${stats.vehicles.expired} Expired`, color: "#dc2626", bgColor: "#fee2e2" }, // Red
+                { label: `${stats.vehicles?.active || 0} Active`, color: "#047857", bgColor: "#d1fae5" }, // Green
+                { label: `${stats.vehicles?.expired || 0} Expired`, color: "#dc2626", bgColor: "#fee2e2" }, // Red
               ]}
             />
             <StatCard
               name={"Registered Owners"}
-              value={stats.drivers.total.toString()}
+              value={(stats.drivers?.total || 0).toString()}
               icon={Users}
             />
             <StatCard 
               name={"Violations"} 
-              value={stats.violations.total.toString()} 
+              value={(stats.violations?.total || 0).toString()} 
               icon={ChartSpline} 
             />
             <StatCard 
               name={"Accidents"} 
-              value={stats.accidents.total.toString()} 
+              value={(stats.accidents?.total || 0).toString()} 
               icon={ChartPie} 
             />
           </section>
@@ -177,55 +188,55 @@ const HomePage = () => {
           <section className="max-h-full w-full grid grid-flow-row lg:grid-flow-col grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-5">
             <CircularKpi
               label="System Users"
-              value={stats.userStats.total.toString()}
-              subtitle={`${stats.userStats.employees} Employees, ${stats.userStats.admins} Admins`}
+              value={(stats.userStats?.total || 0).toString()}
+              subtitle={`${stats.userStats?.employees || 0} Employees, ${stats.userStats?.admins || 0} Admins`}
               icon={UserCog}
               tone="info"
-              ariaLabel={`System Users: ${stats.userStats.total} total (${stats.userStats.employees} employees, ${stats.userStats.admins} admins)`}
+              ariaLabel={`System Users: ${stats.userStats?.total || 0} total (${stats.userStats?.employees || 0} employees, ${stats.userStats?.admins || 0} admins)`}
             />
             <CircularKpi
               label="Expiring Registrations"
-              value={stats.kpi.expiringRegistrations.toString()}
+              value={(stats.kpi?.expiringRegistrations || 0).toString()}
               subtitle="Next 30 days"
               icon={Calendar}
               tone="warning"
-              ariaLabel={`Expiring Registrations: ${stats.kpi.expiringRegistrations} vehicles expiring in the next 30 days`}
+              ariaLabel={`Expiring Registrations: ${stats.kpi?.expiringRegistrations || 0} vehicles expiring in the next 30 days`}
             />
             <CircularKpi
               label="Pending Violations"
-              value={stats.kpi.pendingViolations.toString()}
+              value={(stats.kpi?.pendingViolations || 0).toString()}
               subtitle="Awaiting Resolution"
               icon={AlertCircle}
               tone="danger"
-              trendLabel={stats.kpi.pendingViolations > 100 ? "High backlog" : stats.kpi.pendingViolations > 50 ? "Moderate" : "Normal"}
-              trendVariant={stats.kpi.pendingViolations > 100 ? "negative" : stats.kpi.pendingViolations > 50 ? "neutral" : "positive"}
-              ariaLabel={`Pending Violations: ${stats.kpi.pendingViolations} violations awaiting resolution`}
+              trendLabel={(stats.kpi?.pendingViolations || 0) > 100 ? "High backlog" : (stats.kpi?.pendingViolations || 0) > 50 ? "Moderate" : "Normal"}
+              trendVariant={(stats.kpi?.pendingViolations || 0) > 100 ? "negative" : (stats.kpi?.pendingViolations || 0) > 50 ? "neutral" : "positive"}
+              ariaLabel={`Pending Violations: ${stats.kpi?.pendingViolations || 0} violations awaiting resolution`}
             />
             <CircularKpi
               label="Today's Registrations"
-              value={stats.kpi.todaysRegistrations.toString()}
+              value={(stats.kpi?.todaysRegistrations || 0).toString()}
               subtitle="So far today"
               icon={FileCheck}
               tone="success"
-              ariaLabel={`Today's Registrations: ${stats.kpi.todaysRegistrations} registrations created today`}
+              ariaLabel={`Today's Registrations: ${stats.kpi?.todaysRegistrations || 0} registrations created today`}
             />
             <CircularKpi
               label="Forecasted Registrations"
-              value={stats.kpi.forecastedRegistrationsNext30Days.toString()}
+              value={(stats.kpi?.forecastedRegistrationsNext30Days || 0).toString()}
               subtitle="Next 30 days (forecast)"
               icon={BarChart3}
-              tone={stats.kpi.percentageChange !== null && stats.kpi.percentageChange < 0 ? "danger" : "success"}
+              tone={stats.kpi?.percentageChange !== null && stats.kpi?.percentageChange !== undefined && stats.kpi.percentageChange < 0 ? "danger" : "success"}
               trendLabel={
-                stats.kpi.percentageChange !== null 
+                stats.kpi?.percentageChange !== null && stats.kpi?.percentageChange !== undefined
                   ? `${stats.kpi.percentageChange > 0 ? '↑' : '↓'} ${Math.abs(stats.kpi.percentageChange).toFixed(1)}% vs last 30 days`
                   : undefined
               }
               trendVariant={
-                stats.kpi.percentageChange !== null
+                stats.kpi?.percentageChange !== null && stats.kpi?.percentageChange !== undefined
                   ? stats.kpi.percentageChange > 0 ? "positive" : "negative"
                   : "neutral"
               }
-              ariaLabel={`Forecasted Registrations: ${stats.kpi.forecastedRegistrationsNext30Days} predicted for next 30 days${stats.kpi.percentageChange !== null ? ` (${stats.kpi.percentageChange > 0 ? '+' : ''}${stats.kpi.percentageChange.toFixed(1)}% vs last 30 days)` : ''}`}
+              ariaLabel={`Forecasted Registrations: ${stats.kpi?.forecastedRegistrationsNext30Days || 0} predicted for next 30 days${stats.kpi?.percentageChange !== null && stats.kpi?.percentageChange !== undefined ? ` (${stats.kpi.percentageChange > 0 ? '+' : ''}${stats.kpi.percentageChange.toFixed(1)}% vs last 30 days)` : ''}`}
             />
           </section>
 
@@ -257,12 +268,12 @@ const HomePage = () => {
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Violations</span>
                           <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            {stats.violations.total.toLocaleString()}
+                            {(stats.violations?.total || 0).toLocaleString()}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                           <span className="text-gray-600 dark:text-gray-400">Last 30 days:</span>
-                          <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.violations.recent}</span>
+                          <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.violations?.recent || 0}</span>
                           {parseFloat(metrics.violationGrowthRate) !== 0 && (
                             <span className={`flex items-center gap-1 ${parseFloat(metrics.violationGrowthRate) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                               {parseFloat(metrics.violationGrowthRate) > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -283,15 +294,15 @@ const HomePage = () => {
                         </div>
                       </div>
 
-                      {stats.violations.byType.length > 0 && (
+                      {(stats.violations?.byType || []).length > 0 && (
                         <div className="pt-3 border-t border-blue-200 dark:border-blue-800">
                           <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase">Top Violation Types</p>
                           <div className="space-y-2">
-                            {stats.violations.byType
+                            {(stats.violations?.byType || [])
                               .sort((a, b) => b.count - a.count)
                               .slice(0, 3)
                               .map((type, index) => {
-                                const percentage = ((type.count / stats.violations.total) * 100).toFixed(1);
+                                const percentage = ((type.count / (stats.violations?.total || 1)) * 100).toFixed(1);
                                 return (
                                   <div key={index} className="space-y-1">
                                     <div className="flex items-center justify-between text-xs">
@@ -325,7 +336,7 @@ const HomePage = () => {
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Accidents</span>
                           <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                            {stats.accidents.total.toLocaleString()}
+                            {(stats.accidents?.total || 0).toLocaleString()}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
@@ -342,8 +353,8 @@ const HomePage = () => {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-700 dark:text-gray-300">Per 1000 Vehicles</span>
                           <span className="font-bold text-gray-900 dark:text-white">
-                            {stats.vehicles.total > 0 
-                              ? ((stats.accidents.total / stats.vehicles.total) * 1000).toFixed(2)
+                            {(stats.vehicles?.total || 0) > 0 
+                              ? (((stats.accidents?.total || 0) / (stats.vehicles?.total || 1)) * 1000).toFixed(2)
                               : '0'
                             }
                           </span>
@@ -466,13 +477,13 @@ const HomePage = () => {
                             <div className="flex items-center justify-between">
                               <span className="text-gray-600 dark:text-gray-400">Owners per Vehicle</span>
                               <span className="font-bold text-gray-900 dark:text-white">
-                                {stats.vehicles.total > 0 ? (stats.drivers.total / stats.vehicles.total).toFixed(2) : '0'}
+                                {(stats.vehicles?.total || 0) > 0 ? (((stats.drivers?.total || 0) / (stats.vehicles?.total || 1))).toFixed(2) : '0'}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
                               <span className="text-gray-600 dark:text-gray-400">Violations per 100 Owners</span>
                               <span className="font-bold text-gray-900 dark:text-white">
-                                {stats.drivers.total > 0 ? ((stats.violations.total / stats.drivers.total) * 100).toFixed(1) : '0'}
+                                {(stats.drivers?.total || 0) > 0 ? (((stats.violations?.total || 0) / (stats.drivers?.total || 1)) * 100).toFixed(1) : '0'}
                               </span>
                             </div>
                           </div>
@@ -505,12 +516,12 @@ const HomePage = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Violations</span>
                     <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {stats.violations.total.toLocaleString()}
+                      {(stats.violations?.total || 0).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className="text-gray-600 dark:text-gray-400">Last 30 days:</span>
-                    <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.violations.recent}</span>
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">{stats.violations?.recent || 0}</span>
                     {parseFloat(metrics.violationGrowthRate) !== 0 && (
                       <span className={`flex items-center gap-1 ${parseFloat(metrics.violationGrowthRate) > 0 ? 'text-red-600' : 'text-green-600'}`}>
                         {parseFloat(metrics.violationGrowthRate) > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
@@ -531,15 +542,15 @@ const HomePage = () => {
                   </div>
                 </div>
 
-                {stats.violations.byType.length > 0 && (
+                {(stats.violations?.byType || []).length > 0 && (
                   <div className="pt-3 border-t border-blue-200 dark:border-blue-800">
                     <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase">Top Violation Types</p>
                     <div className="space-y-2">
-                      {stats.violations.byType
+                      {(stats.violations?.byType || [])
                         .sort((a, b) => b.count - a.count)
                         .slice(0, 3)
                         .map((type, index) => {
-                          const percentage = ((type.count / stats.violations.total) * 100).toFixed(1);
+                          const percentage = ((type.count / (stats.violations?.total || 1)) * 100).toFixed(1);
                           return (
                             <div key={index} className="space-y-1">
                               <div className="flex items-center justify-between text-xs">
@@ -573,7 +584,7 @@ const HomePage = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Accidents</span>
                     <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      {stats.accidents.total.toLocaleString()}
+                      {(stats.accidents?.total || 0).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
@@ -590,8 +601,8 @@ const HomePage = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-700 dark:text-gray-300">Per 1000 Vehicles</span>
                     <span className="font-bold text-gray-900 dark:text-white">
-                      {stats.vehicles.total > 0 
-                        ? ((stats.accidents.total / stats.vehicles.total) * 1000).toFixed(2)
+                      {(stats.vehicles?.total || 0) > 0 
+                        ? (((stats.accidents?.total || 0) / (stats.vehicles?.total || 1)) * 1000).toFixed(2)
                         : '0'
                       }
                     </span>
@@ -714,13 +725,13 @@ const HomePage = () => {
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Owners per Vehicle</span>
                         <span className="font-bold text-gray-900 dark:text-white">
-                          {stats.vehicles.total > 0 ? (stats.drivers.total / stats.vehicles.total).toFixed(2) : '0'}
+                          {(stats.vehicles?.total || 0) > 0 ? (((stats.drivers?.total || 0) / (stats.vehicles?.total || 1))).toFixed(2) : '0'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-600 dark:text-gray-400">Violations per 100 Owners</span>
                         <span className="font-bold text-gray-900 dark:text-white">
-                          {stats.drivers.total > 0 ? ((stats.violations.total / stats.drivers.total) * 100).toFixed(1) : '0'}
+                          {(stats.drivers?.total || 0) > 0 ? (((stats.violations?.total || 0) / (stats.drivers?.total || 1)) * 100).toFixed(1) : '0'}
                         </span>
                       </div>
                     </div>
