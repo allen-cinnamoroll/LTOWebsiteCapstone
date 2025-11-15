@@ -29,19 +29,6 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const { token } = useAuth();
 
   useEffect(() => {
-    // DEBUG: Log vehicle data to check metadata fields
-    if (open && vehicleData) {
-      console.log('=== VEHICLE DETAILS MODAL DEBUG ===');
-      console.log('Full vehicleData:', vehicleData);
-      console.log('createdBy:', vehicleData.createdBy);
-      console.log('createdBy type:', typeof vehicleData.createdBy);
-      console.log('createdAt:', vehicleData.createdAt);
-      console.log('updatedBy:', vehicleData.updatedBy);
-      console.log('updatedBy type:', typeof vehicleData.updatedBy);
-      console.log('updatedAt:', vehicleData.updatedAt);
-      console.log('=== END DEBUG ===');
-    }
-    
     if (open && vehicleData?.driverId) {
       fetchOwnerData();
     }
@@ -51,26 +38,17 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   }, [open, vehicleData]);
 
   const fetchOwnerData = async () => {
-    console.log('=== FETCHING OWNER DATA ===');
-    console.log('vehicleData:', vehicleData);
-    console.log('driverId:', vehicleData?.driverId);
-    console.log('driverId type:', typeof vehicleData?.driverId);
-    console.log('driverId value:', vehicleData?.driverId);
-    
     if (!vehicleData?.driverId) {
-      console.log('No ownerId found, skipping fetch');
       return;
     }
     
     setLoading(true);
     try {
-      console.log(`Fetching owner data for ID: ${vehicleData.driverId}`);
       const { data } = await apiClient.get(`/owner/${vehicleData.driverId}`, {
         headers: {
           Authorization: token,
         },
       });
-      console.log('Owner data received:', data);
       setOwnerData(data.data);
     } catch (error) {
       console.error("Error fetching owner data:", error);

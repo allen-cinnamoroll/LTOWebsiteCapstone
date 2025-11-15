@@ -413,3 +413,124 @@ const getLogTypeLabel = (logType) => {
   };
   return logTypes[logType] || logType;
 };
+
+// Get online users based on role
+export const getOnlineUsers = async (req, res) => {
+  try {
+    const currentUser = await UserModel.findById(req.user.userId);
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Define online threshold: 2 minutes (to handle cases where browser is closed without logout)
+    // Users are considered online if they have lastSeenAt set and it's within the last 2 minutes
+    const ONLINE_THRESHOLD_MINUTES = 2;
+    const thresholdTime = new Date(Date.now() - ONLINE_THRESHOLD_MINUTES * 60 * 1000);
+
+    // SUPERADMIN: Can see names of online admins and employees
+    if (currentUser.role === "0") {
+      const onlineAdmins = await UserModel.find({
+        role: "1",
+        lastSeenAt: { $ne: null, $gte: thresholdTime }
+      })
+        .select("_id firstName middleName lastName")
+        .lean();
+
+      const onlineEmployees = await UserModel.find({
+        role: "2",
+        lastSeenAt: { $ne: null, $gte: thresholdTime }
+      })
+        .select("_id firstName middleName lastName")
+        .lean();
+
+      // Format names
+      const formatName = (user) => {
+        return `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim();
+      };
+
+      const admins = onlineAdmins.map(admin => ({
+        id: admin._id.toString(),
+        name: formatName(admin)
+      }));
+
+      const employees = onlineEmployees.map(emp => ({
+        id: emp._id.toString(),
+        name: formatName(emp)
+      }));
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          admins,
+          employees
+        }
+      });
+    }
+
+    // ADMIN: Can see names of online employees
+    if (currentUser.role === "1") {
+      const onlineEmployees = await UserModel.find({
+        role: "2",
+        lastSeenAt: { $ne: null, $gte: thresholdTime }
+      })
+        .select("_id firstName middleName lastName")
+        .lean();
+
+      // Format names
+      const formatName = (user) => {
+        return `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim();
+      };
+
+      const employees = onlineEmployees.map(emp => ({
+        id: emp._id.toString(),
+        name: formatName(emp)
+      }));
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          employees
+        }
+      });
+    }
+
+    // EMPLOYEE: Limited access (just return minimal info)
+    return res.status(200).json({
+      success: true,
+      data: {
+        online: true
+      }
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// Heartbeat endpoint to update lastSeenAt
+export const updateHeartbeat = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    await UserModel.findByIdAndUpdate(
+      userId,
+      { lastSeenAt: new Date() },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Heartbeat updated",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};

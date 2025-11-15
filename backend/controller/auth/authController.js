@@ -137,6 +137,11 @@ export const login = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
+      // Update lastSeenAt and lastLoginAt
+      user.lastSeenAt = new Date();
+      user.lastLoginAt = new Date();
+      await user.save();
+
       // Log the successful login activity
       await logUserActivity({
         userId: user._id,
@@ -167,14 +172,29 @@ export const login = async (req, res) => {
       const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
       user.otp = otp;
       user.otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // OTP expires in 5 minutes
+      
+      try {
       await user.save();
+      } catch (saveError) {
+        console.error('Error saving user OTP:', saveError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to generate OTP. Please try again.",
+        });
+      }
 
       // Send OTP via email
-      const emailSent = await sendOTPEmail(user.email, otp);
+      let emailSent = false;
+      try {
+        emailSent = await sendOTPEmail(user.email, otp);
+      } catch (emailError) {
+        console.error('Error in sendOTPEmail:', emailError);
+        // Continue to log the failure
+      }
       
       if (!emailSent) {
-        // Log failed OTP send
-        await logUserActivity({
+        // Log failed OTP send (don't await to avoid blocking)
+        logUserActivity({
           userId: user._id,
           userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
           email: user.email,
@@ -183,17 +203,17 @@ export const login = async (req, res) => {
           ipAddress: getClientIP(req),
           userAgent: getUserAgent(req),
           status: "failed",
-          details: "Failed to send OTP email"
-        });
+          details: "Failed to send OTP email - email service not configured or error occurred"
+        }).catch(err => console.error('Error logging failed OTP send:', err));
 
         return res.status(500).json({
           success: false,
-          message: "Failed to send OTP email. Please try again.",
+          message: "Failed to send OTP email. Please check your email configuration or contact support.",
         });
       }
 
-      // Log successful OTP send
-      await logUserActivity({
+      // Log successful OTP send (don't await to avoid blocking response)
+      logUserActivity({
         userId: user._id,
         userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
         email: user.email,
@@ -207,7 +227,7 @@ export const login = async (req, res) => {
         actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
         actorEmail: user.email,
         actorRole: user.role
-      });
+      }).catch(err => console.error('Error logging successful OTP send:', err));
 
       // Generate JWT token with isOtpVerified: false for users who need OTP
       const token = jwt.sign(
@@ -248,6 +268,11 @@ export const login = async (req, res) => {
       });
     } else {
       // User is already OTP verified, allow direct login
+      // Update lastSeenAt and lastLoginAt
+      user.lastSeenAt = new Date();
+      user.lastLoginAt = new Date();
+      await user.save();
+      
       // Log the successful login activity
       await logUserActivity({
         userId: user._id,
@@ -303,9 +328,15 @@ export const login = async (req, res) => {
     }
 
   } catch (err) {
+    console.error('Login error:', err);
+    console.error('Error stack:', err.stack);
+    
+    // Return a user-friendly error message
+    const errorMessage = err.message || "An unexpected error occurred during login. Please try again.";
+    
     return res.status(500).json({
       success: false,
-      message: err.message,
+      message: errorMessage,
     });
   }
 };
@@ -314,7 +345,33 @@ export const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
 
   try {
-    const user = await UserModel.findOne({ email });
+    // Validate required fields
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required",
+      });
+    }
+
+    // Validate OTP format (should be 6 digits)
+    if (typeof otp !== 'string' && typeof otp !== 'number') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP format",
+      });
+    }
+
+    // Convert OTP to string for comparison
+    const otpString = String(otp).trim();
+
+    if (otpString.length !== 6 || !/^\d{6}$/.test(otpString)) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP must be a 6-digit number",
+      });
+    }
+
+    const user = await UserModel.findOne({ email: email.trim() });
 
     if (!user) {
       return res.status(404).json({
@@ -323,17 +380,27 @@ export const verifyOTP = async (req, res) => {
       });
     }
 
-    if (user.otp !== otp) {
+    // Check if user has an OTP
+    if (!user.otp) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP found. Please request a new OTP.",
+      });
+    }
+
+    // Compare OTP (both as strings to ensure consistency)
+    if (String(user.otp) !== otpString) {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP",
       });
     }
 
-    if (user.otpExpiresAt < new Date()) {
+    // Check if OTP has expired
+    if (!user.otpExpiresAt || new Date(user.otpExpiresAt) < new Date()) {
       return res.status(400).json({
         success: false,
-        message: "OTP has expired",
+        message: "OTP has expired. Please request a new OTP.",
       });
     }
 
@@ -341,6 +408,8 @@ export const verifyOTP = async (req, res) => {
     user.otp = undefined;
     user.otpExpiresAt = undefined;
     user.isOtpVerified = true;
+    user.lastSeenAt = new Date();
+    user.lastLoginAt = new Date();
     await user.save();
 
     // Generate JWT token after successful OTP verification with updated status
@@ -412,9 +481,12 @@ export const verifyOTP = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.error('OTP verification error:', err);
+    console.error('Error stack:', err.stack);
+    
     return res.status(500).json({
       success: false,
-      message: err.message,
+      message: err.message || "An unexpected error occurred during OTP verification. Please try again.",
     });
   }
 };
@@ -491,6 +563,10 @@ export const logout = async (req, res) => {
     const user = await UserModel.findById(userId);
     
     if (user) {
+      // Clear lastSeenAt to mark user as offline
+      user.lastSeenAt = null;
+      await user.save();
+      
       // Log the logout activity
       await logUserActivity({
         userId: user._id,

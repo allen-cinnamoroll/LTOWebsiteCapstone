@@ -1,11 +1,17 @@
 import express from "express";
-import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById } from "../controller/userController.js";
+import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat } from "../controller/userController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
 
 const userRouter = express.Router();
 
 // Get user profile
 userRouter.get("/profile", authenticate, findUser);
+
+// Get online users (role-based)
+userRouter.get("/online-users", authenticate, getOnlineUsers);
+
+// Heartbeat endpoint
+userRouter.post("/me/heartbeat", authenticate, updateHeartbeat);
 
 // Get all users (admin and superadmin only)
 userRouter.get("/all", authenticate, authorizeRole("admin", "superadmin"), getAllUsers);

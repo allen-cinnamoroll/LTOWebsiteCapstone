@@ -2,7 +2,8 @@ import VehicleModel from "../model/VehicleModel.js";
 import OwnerModel from "../model/OwnerModel.js";
 import ViolationModel from "../model/ViolationModel.js";
 import AccidentModel from "../model/AccidentModel.js";
-import { getVehicleStatus } from "../util/plateStatusCalculator.js";
+import UserModel from "../model/UserModel.js";
+import { getVehicleStatus, calculateExpirationDate } from "../util/plateStatusCalculator.js";
 import { getLatestRenewalDate } from "../util/vehicleHelpers.js";
 
 /**
@@ -245,6 +246,145 @@ export const getDashboardStats = async (req, res) => {
       }
     ]);
 
+    // Get user statistics by role
+    const totalUsers = await UserModel.countDocuments();
+    const employeeCount = await UserModel.countDocuments({ role: "2" });
+    const adminCount = await UserModel.countDocuments({ role: "1" });
+
+    // Calculate expiring registrations (vehicles expiring within next 30 days)
+    const now = new Date();
+    const thirtyDaysFromNow = new Date(now);
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    
+    const allVehicles = await VehicleModel.find({}).select('plateNo dateOfRenewal vehicleStatusType').lean();
+    let expiringCount = 0;
+    
+    for (const vehicle of allVehicles) {
+      const latestRenewalDate = getLatestRenewalDate(vehicle.dateOfRenewal);
+      const expirationDate = calculateExpirationDate(
+        vehicle.plateNo,
+        latestRenewalDate,
+        vehicle.vehicleStatusType || "Old"
+      );
+      
+      if (expirationDate) {
+        // Check if expiration is within the next 30 days and not already expired
+        if (expirationDate >= now && expirationDate <= thirtyDaysFromNow) {
+          expiringCount++;
+        }
+      }
+    }
+
+    // Get pending violations count (all violations are considered pending)
+    const pendingViolationsCount = totalViolations;
+
+    // Get today's registrations count (vehicles created today)
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(now);
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    const todaysRegistrations = await VehicleModel.countDocuments({
+      createdAt: {
+        $gte: todayStart,
+        $lte: todayEnd
+      }
+    });
+
+    // Get forecasted registrations for next 30 days from Flask prediction API
+    let forecastedRegistrationsNext30Days = 0;
+    let previous30DaysRegistrations = 0;
+    let percentageChange = null;
+
+    try {
+      // Get actual registrations from last 30 days for comparison
+      const thirtyDaysAgoStart = new Date(now);
+      thirtyDaysAgoStart.setDate(thirtyDaysAgoStart.getDate() - 30);
+      thirtyDaysAgoStart.setHours(0, 0, 0, 0);
+      
+      previous30DaysRegistrations = await VehicleModel.countDocuments({
+        createdAt: {
+          $gte: thirtyDaysAgoStart,
+          $lt: todayStart
+        }
+      });
+
+      // Call Flask prediction API to get forecasts for next 30 days (5 weeks to cover 30 days)
+      const predictionApiUrl = process.env.MV_PREDICTION_API_URL || 'http://localhost:5002';
+      const weeksToPredict = 5; // 5 weeks = 35 days, covers 30 days
+      
+      // Create timeout controller for fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      let predictionResponse;
+      try {
+        predictionResponse = await fetch(
+          `${predictionApiUrl}/api/predict/registrations?weeks=${weeksToPredict}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal
+          }
+        );
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.warn('Prediction API request timed out after 10 seconds');
+          predictionResponse = null;
+        } else {
+          throw fetchError;
+        }
+      }
+
+      if (predictionResponse && predictionResponse.ok) {
+        const predictionData = await predictionResponse.json();
+        
+        if (predictionData.success && predictionData.data) {
+          // Sum daily predictions for next 30 days
+          if (predictionData.data.daily_predictions && Array.isArray(predictionData.data.daily_predictions)) {
+            // Get predictions for next 30 days only
+            const next30DaysPredictions = predictionData.data.daily_predictions.slice(0, 30);
+            forecastedRegistrationsNext30Days = next30DaysPredictions.reduce((sum, day) => {
+              const value = day.predicted || day.predicted_count || day.value || 0;
+              return sum + (typeof value === 'number' ? value : 0);
+            }, 0);
+          } else if (predictionData.data.weekly_predictions && Array.isArray(predictionData.data.weekly_predictions)) {
+            // If only weekly predictions available, estimate daily average and multiply by 30
+            const weeklyTotal = predictionData.data.weekly_predictions.slice(0, 5).reduce((sum, week) => {
+              const value = week.predicted_count || week.total_predicted || week.predicted || 0;
+              return sum + (typeof value === 'number' ? value : 0);
+            }, 0);
+            // Estimate: (weekly total / 35 days) * 30 days
+            forecastedRegistrationsNext30Days = Math.round((weeklyTotal / 35) * 30);
+          } else if (predictionData.data.monthly_aggregation) {
+            // If only monthly aggregation available, estimate for 30 days
+            const monthlyTotal = predictionData.data.monthly_aggregation.total_predicted || 
+                                predictionData.data.monthly_aggregation.predicted || 0;
+            // Estimate: (monthly total / 30 days) * 30 days (assuming 30-day month)
+            forecastedRegistrationsNext30Days = Math.round(monthlyTotal);
+          }
+          
+          // Round to nearest integer
+          forecastedRegistrationsNext30Days = Math.round(forecastedRegistrationsNext30Days);
+        }
+      } else {
+        console.warn('Prediction API returned non-OK status:', predictionResponse.status);
+      }
+    } catch (error) {
+      // Log error but don't fail the entire dashboard request
+      console.error('Error fetching forecasted registrations:', error.message);
+      // forecastedRegistrationsNext30Days remains 0
+    }
+
+    // Calculate percentage change if we have both values
+    if (previous30DaysRegistrations > 0 && forecastedRegistrationsNext30Days > 0) {
+      percentageChange = ((forecastedRegistrationsNext30Days - previous30DaysRegistrations) / previous30DaysRegistrations) * 100;
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -266,6 +406,19 @@ export const getDashboardStats = async (req, res) => {
         },
         trends: {
           monthlyViolations: monthlyViolations
+        },
+        userStats: {
+          total: totalUsers,
+          employees: employeeCount,
+          admins: adminCount
+        },
+        kpi: {
+          expiringRegistrations: expiringCount,
+          pendingViolations: pendingViolationsCount,
+          todaysRegistrations: todaysRegistrations,
+          forecastedRegistrationsNext30Days: forecastedRegistrationsNext30Days,
+          previous30DaysRegistrations: previous30DaysRegistrations,
+          percentageChange: percentageChange
         }
       }
     });
@@ -953,7 +1106,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
     
     if (Object.keys(dateFilter).length > 0) {
       // If we have a date filter, find drivers whose vehicles match the date criteria
-      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'driver').distinct('driver');
+      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'driverId').distinct('driverId');
       const validDriverIds = vehiclesInDateRange.filter(id => id !== null);
       
       if (validDriverIds.length > 0) {
@@ -1014,7 +1167,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
         }
       ];
       
-      driverData = await DriverModel.aggregate(driverAggregation);
+      driverData = await OwnerModel.aggregate(driverAggregation);
     }
     
     console.log(`Municipality endpoint - Driver data found: ${driverData.length} municipalities`);

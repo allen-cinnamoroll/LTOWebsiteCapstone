@@ -65,9 +65,11 @@ export function LoginForm({ className, ...props }) {
         localStorage.removeItem("rememberedEmail");
       }
       
-      const { data } = await apiClient.post("/auth/login", formData);
-      if (data) {
-        setIsSubmitting(false);
+      const response = await apiClient.post("/auth/login", formData);
+      
+      // Only proceed if response is successful (2xx status)
+      if (response.data && response.status >= 200 && response.status < 300) {
+        const data = response.data;
         
         // Check if OTP is required
         if (data.requiresOTP) {
@@ -77,6 +79,7 @@ export function LoginForm({ className, ...props }) {
           if (data.token) {
             login(data.token);
           }
+          setIsSubmitting(false);
           return;
         }
         
@@ -86,29 +89,45 @@ export function LoginForm({ className, ...props }) {
           // Navigate to dashboard for direct login
           navigate("/");
         }
+        
+        setIsSubmitting(false);
+      } else {
+        // Unexpected response format
+        throw new Error("Unexpected response from server");
       }
     } catch (error) {
       console.error("Login error:", error);
       
+      setIsSubmitting(false);
+      
       // Clear any previous form errors but keep form values
       form.clearErrors();
       
-      const errorType =
-        error.response?.data?.message === "Password is incorrect" ? "0" : "1";
-
-      if (errorType === "0") {
+      // Get error message from backend response
+      const errorMessage = error.response?.data?.message || error.message || "An error occurred during login. Please try again.";
+      
+      // Show error toast
+      toast.error(errorMessage);
+      
+      // Set form field errors based on error type
+      if (errorMessage === "Password is incorrect") {
         form.setError("password", {
           type: "manual",
           message: "Password is incorrect",
         });
-      } else {
+      } else if (errorMessage === "Email is incorrect" || errorMessage.includes("Email") || errorMessage.includes("license")) {
         form.setError("email", {
           type: "manual",
           message: "Email or license number is incorrect",
         });
+      } else {
+        // For other errors (like email sending failures), show general error
+        setErrorMessage(errorMessage);
+        form.setError("root", {
+          type: "manual",
+          message: errorMessage,
+        });
       }
-
-      setIsSubmitting(false);
     }
   };
 
@@ -135,6 +154,13 @@ export function LoginForm({ className, ...props }) {
                 <h1 className="text-4xl font-bold text-[#1e3a8a] mb-1">LTO SYSTEM</h1>
                 <p className="text-sm text-gray-600">Land Transportation Management System</p>
               </div>
+              
+              {/* Error Message Display */}
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                  {errorMessage}
+                </div>
+              )}
               
               {/* Form Fields */}
               <div className="flex flex-col gap-4">

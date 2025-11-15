@@ -19,6 +19,19 @@ export const authenticate = (req, res, next) => {
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded; // Attach user information to the request object
+    
+    // Update lastSeenAt as a heartbeat (non-blocking)
+    if (decoded.userId) {
+      UserModel.findByIdAndUpdate(
+        decoded.userId,
+        { lastSeenAt: new Date() },
+        { new: true }
+      ).catch(err => {
+        // Silently fail - don't block the request if heartbeat fails
+        console.error("Heartbeat update failed:", err);
+      });
+    }
+    
     next();
   } catch (err) {
     return res.status(403).json({ success: false, message: err.message });
