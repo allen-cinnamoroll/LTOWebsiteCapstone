@@ -73,7 +73,7 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     
     setLoadingOwner(true);
     try {
-      const { data } = await apiClient.get(`/driver/${vehicleData.driverId}`, {
+      const { data } = await apiClient.get(`/owner/${vehicleData.driverId}`, {
         headers: {
           Authorization: token,
         },

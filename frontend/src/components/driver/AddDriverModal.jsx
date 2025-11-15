@@ -199,14 +199,14 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
       console.log('Address object:', content.address);
       console.log('=== END SERVER DATA ===');
 
-      const { data } = await apiClient.post("/driver", content, {
+      const { data } = await apiClient.post("/owner", content, {
         headers: {
           Authorization: token,
         },
       });
 
       if (data.success) {
-        toast.success("Driver has been added", {
+        toast.success("Owner has been added", {
           description: date,
         });
 
@@ -235,7 +235,7 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
       }
     } catch (error) {
       console.log(error);
-      const message = error.response?.data?.message || "Failed to add driver";
+      const message = error.response?.data?.message || "Failed to add owner";
       toast.error(message, {
         description: date,
       });
@@ -278,10 +278,10 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Add New Driver
+              Add New Owner
             </DialogTitle>
             <DialogDescription>
-              Fill in the required fields to add a new driver record to the system.
+              Fill in the required fields to add a new owner record to the system.
             </DialogDescription>
           </DialogHeader>
 
@@ -312,7 +312,7 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
               className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
             >
               {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-              {submitting ? "Adding..." : "Add Driver"}
+              {submitting ? "Adding..." : "Add Owner"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -330,10 +330,10 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Confirm Driver Information
+            Confirm Owner Information
           </DialogTitle>
           <DialogDescription>
-            Please review the driver information before submitting.
+            Please review the owner information before submitting.
           </DialogDescription>
         </DialogHeader>
 
@@ -431,7 +431,7 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
             className="flex items-center gap-2 min-w-[120px] bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white shadow-lg border border-blue-600 relative overflow-hidden"
           >
             {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-            {submitting ? "Adding..." : "Confirm & Add Driver"}
+            {submitting ? "Adding..." : "Confirm & Add Owner"}
             {/* Page fold detail */}
             <div className="absolute top-0 right-0 w-4 h-4 bg-gradient-to-br from-blue-300 to-blue-500 transform rotate-45 translate-x-2 -translate-y-2 opacity-60"></div>
           </Button>

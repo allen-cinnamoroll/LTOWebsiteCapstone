@@ -152,7 +152,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{driverData.ownerRepresentativeName}</h2>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Driver Profile</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Owner Profile</p>
               </div>
             </div>
           </div>
@@ -390,7 +390,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                 className="text-xs"
               >
                 <Edit className="h-3 w-3 mr-1" />
-                Edit Driver
+                Edit Owner
               </Button>
             </div>
           </div>

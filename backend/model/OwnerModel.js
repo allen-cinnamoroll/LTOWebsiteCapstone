@@ -15,7 +15,7 @@ const addressSchema = new mongoose.Schema({
 //   province: { type: String },
 // });
 
-const driverSchema = new mongoose.Schema(
+const ownerSchema = new mongoose.Schema(
   {
     ownerRepresentativeName: {
       type: String,
@@ -92,7 +92,7 @@ const driverSchema = new mongoose.Schema(
 );
 
 // Ensure createdBy defaults to superadmin when not provided
-driverSchema.pre("save", async function (next) {
+ownerSchema.pre("save", async function (next) {
   try {
     if (!this.createdBy) {
       const User = mongoose.model("Users");
@@ -109,14 +109,14 @@ driverSchema.pre("save", async function (next) {
 });
 
 // Prevent updatedAt from being set on initial creation
-driverSchema.post("save", async function (doc, next) {
+ownerSchema.post("save", async function (doc, next) {
   try {
     // If updatedAt exists and equals createdAt (within 1 second margin), it means it was just created
     if (doc.updatedAt && doc.createdAt) {
       const timeDiff = Math.abs(doc.updatedAt.getTime() - doc.createdAt.getTime());
       // If updatedAt equals createdAt (within 1 second), it's a new document - unset updatedAt
       if (timeDiff < 1000 && !doc.updatedBy) {
-        await DriverModel.updateOne({ _id: doc._id }, { $unset: { updatedAt: "" } });
+        await OwnerModel.updateOne({ _id: doc._id }, { $unset: { updatedAt: "" } });
         doc.updatedAt = undefined;
       }
     }
@@ -127,10 +127,11 @@ driverSchema.post("save", async function (doc, next) {
 });
 
 // Virtual for full name
-driverSchema.virtual("fullname").get(function () {
+ownerSchema.virtual("fullname").get(function () {
   return this.ownerRepresentativeName;
 });
 
-const DriverModel = mongoose.model("Drivers", driverSchema);
+const OwnerModel = mongoose.model("Owners", ownerSchema);
 
-export default DriverModel;
+export default OwnerModel;
+

@@ -323,7 +323,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
 
   const tabs = [
     { id: "violation", label: "Violation Details", icon: FileText },
-    { id: "violations", label: "Driver Violations", icon: AlertTriangle },
+    { id: "violations", label: "Owner Violations", icon: AlertTriangle },
   ];
 
   return (

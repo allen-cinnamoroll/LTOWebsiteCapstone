@@ -8,7 +8,7 @@ const driverLogSchema = new mongoose.Schema(
   {
     driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Drivers",
+      ref: "Owners",
       required: true,
     },
     type: {

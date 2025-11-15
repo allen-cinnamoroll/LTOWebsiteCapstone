@@ -22,7 +22,7 @@ const DriverProfile = () => {
 
   const fetchDriver = async () => {
     try {
-      const { data } = await apiClient.get(`/driver/${params.id}`, {
+      const { data } = await apiClient.get(`/owner/${params.id}`, {
         headers: {
           Authorization: token,
         },

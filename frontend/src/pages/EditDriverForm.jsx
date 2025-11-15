@@ -58,7 +58,7 @@ const EditDriverForm = () => {
   const fetchData = async () => {
     const driverId = params.id;
     try {
-      const { data } = await apiClient.get(`/driver/${driverId}`, {
+      const { data } = await apiClient.get(`/owner/${driverId}`, {
         headers: {
           Authorization: token,
         },
@@ -104,14 +104,14 @@ const EditDriverForm = () => {
         birthDate: formData.birthDate,
       };
 
-      const { data } = await apiClient.patch(`/driver/${params.id}`, content, {
+      const { data } = await apiClient.patch(`/owner/${params.id}`, content, {
         headers: {
           Authorization: token,
         },
       });
 
       if (data.success) {
-        toast.success("Driver updated", {
+        toast.success("Owner updated", {
           description: date,
         });
         navigate(-1);
@@ -133,10 +133,10 @@ const EditDriverForm = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl md:text-3xl font-bold">
-            Edit Driver
+            Edit Owner
           </CardTitle>
           <CardDescription>
-            Fill in required fields to edit driver.
+            Fill in required fields to edit owner.
           </CardDescription>
         </CardHeader>
         <CardContent>

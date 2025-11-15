@@ -132,7 +132,7 @@ const HomePage = () => {
               ]}
             />
             <StatCard
-              name={"Registered Drivers"}
+              name={"Registered Owners"}
               value={stats.drivers.total.toString()}
               icon={Users}
             />
@@ -186,7 +186,7 @@ const HomePage = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-700 dark:text-gray-300">Per Driver</span>
+                    <span className="text-gray-700 dark:text-gray-300">Per Owner</span>
                     <span className="font-bold text-gray-900 dark:text-white">{metrics.violationsPerDriver}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -248,7 +248,7 @@ const HomePage = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-700 dark:text-gray-300">Per Driver</span>
+                    <span className="text-gray-700 dark:text-gray-300">Per Owner</span>
                     <span className="font-bold text-gray-900 dark:text-white">{metrics.accidentsPerDriver}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -376,13 +376,13 @@ const HomePage = () => {
                     <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Key Ratios</p>
                     <div className="space-y-1.5 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Drivers per Vehicle</span>
+                        <span className="text-gray-600 dark:text-gray-400">Owners per Vehicle</span>
                         <span className="font-bold text-gray-900 dark:text-white">
                           {stats.vehicles.total > 0 ? (stats.drivers.total / stats.vehicles.total).toFixed(2) : '0'}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Violations per 100 Drivers</span>
+                        <span className="text-gray-600 dark:text-gray-400">Violations per 100 Owners</span>
                         <span className="font-bold text-gray-900 dark:text-white">
                           {stats.drivers.total > 0 ? ((stats.violations.total / stats.drivers.total) * 100).toFixed(1) : '0'}
                         </span>

@@ -1,6 +1,6 @@
 import express from "express";
 import userRoutes from "./user.js";
-import driverRoutes from "./driver.js";
+import ownerRoutes from "./owner.js";
 import vehicleRoutes from "./vehicle.js";
 import violationRoutes from "./violation.js";
 import accidentRoutes from "./accident.js";
@@ -11,7 +11,7 @@ import accountRoutes from "./account.js";
 
 const router = express.Router();
 
-router.use("/driver", driverRoutes);
+router.use("/owner", ownerRoutes);
 router.use("/user", userRoutes);
 router.use("/vehicle", vehicleRoutes);
 router.use("/violations", violationRoutes);

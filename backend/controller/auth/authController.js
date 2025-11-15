@@ -1,4 +1,4 @@
-import DriverModel from "../../model/DriverModel.js";
+import OwnerModel from "../../model/OwnerModel.js";
 import UserModel from "../../model/UserModel.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -74,7 +74,7 @@ export const login = async (req, res) => {
 
   try {
     // Check if email is a license number (Driver)
-    const driver = await DriverModel.findOne({ licenseNo: email, isActive:true });
+    const driver = await OwnerModel.findOne({ licenseNo: email, isActive:true });
 
     let user;
 

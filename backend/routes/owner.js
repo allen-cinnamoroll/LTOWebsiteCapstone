@@ -6,11 +6,11 @@ import {
   getDrivers,
   updateDriver,
   searchDrivers,
-} from "../controller/driversController.js";
+} from "../controller/ownersController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
-const driverRouter = express.Router();
+const ownerRouter = express.Router();
 
-driverRouter.post(
+ownerRouter.post(
   "/",
   authenticate,
   express.json(),
@@ -19,9 +19,10 @@ driverRouter.post(
   createDriver
 );
 
-driverRouter.get("/", authenticate, getDrivers);
-driverRouter.get("/search", authenticate, searchDrivers);
-driverRouter.get("/:id", authenticate, findDriver);
+ownerRouter.get("/", authenticate, getDrivers);
+ownerRouter.get("/search", authenticate, searchDrivers);
+ownerRouter.get("/:id", authenticate, findDriver);
 
-driverRouter.patch("/:id", authenticate, express.json(), updateDriver);
-export default driverRouter;
+ownerRouter.patch("/:id", authenticate, express.json(), updateDriver);
+export default ownerRouter;
+

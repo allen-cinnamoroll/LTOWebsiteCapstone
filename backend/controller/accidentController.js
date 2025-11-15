@@ -1,5 +1,5 @@
 import AccidentModel from "../model/AccidentModel.js";
-import DriverModel from "../model/DriverModel.js";
+import OwnerModel from "../model/OwnerModel.js";
 import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";

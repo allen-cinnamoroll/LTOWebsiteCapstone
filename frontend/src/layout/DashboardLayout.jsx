@@ -31,7 +31,7 @@ const DashboardLayout = () => {
     
     // Handle dynamic routes with patterns
     if (path.includes('/driver/') && path.includes('/edit')) {
-      return 'Edit Driver';
+      return 'Edit Owner';
     }
     if (path.includes('/vehicle/') && path.includes('/edit')) {
       return 'Edit Vehicle';
@@ -52,7 +52,7 @@ const DashboardLayout = () => {
       case '/':
         return 'Overview';
       case '/driver':
-        return 'Drivers';
+        return 'Owners';
       case '/vehicle':
         return 'Vehicles';
       case '/violation':

@@ -52,7 +52,7 @@ const DriverLogs = () => {
   return (
     <Card className="lg:col-span-3  border md:shadow-none">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">Driver Logs</CardTitle>
+        <CardTitle className="text-2xl font-bold">Owner Logs</CardTitle>
       </CardHeader>
       <CardContent>
         <TableComponent tableColumn={driverLogs} data={logData} />

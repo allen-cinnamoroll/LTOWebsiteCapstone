@@ -1,5 +1,5 @@
 import VehicleModel from "../model/VehicleModel.js";
-import DriverModel from "../model/DriverModel.js";
+import OwnerModel from "../model/OwnerModel.js";
 import ViolationModel from "../model/ViolationModel.js";
 import AccidentModel from "../model/AccidentModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
@@ -159,7 +159,7 @@ export const getDashboardStats = async (req, res) => {
     const expiredVehicles = await VehicleModel.countDocuments({ status: "0" });
 
     // Get driver statistics (no active/expired status for drivers - drivers don't have expiration status)
-    const totalDrivers = await DriverModel.countDocuments();
+    const totalDrivers = await OwnerModel.countDocuments();
 
     // Get violation statistics - count actual violations from arrays, not documents
     const totalViolationsResult = await ViolationModel.aggregate([
@@ -529,7 +529,7 @@ export const getRegistrationAnalytics = async (req, res) => {
       ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
@@ -667,7 +667,7 @@ export const getMunicipalityAnalytics = async (req, res) => {
       ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
@@ -813,7 +813,7 @@ export const getMunicipalityAnalytics = async (req, res) => {
       }
     ];
 
-    const driverData = await DriverModel.aggregate(driverAggregation);
+    const driverData = await OwnerModel.aggregate(driverAggregation);
 
     // Combine and normalize the data
     const municipalityData = {};
@@ -905,7 +905,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
     const vehicleAggregation = [
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
@@ -985,7 +985,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
           }
         ];
         
-        driverData = await DriverModel.aggregate(driverAggregation);
+        driverData = await OwnerModel.aggregate(driverAggregation);
       }
     } else {
       // No date filter - get all drivers
@@ -1086,7 +1086,7 @@ export const getDriverChartData = async (req, res) => {
     }
     
     // First, get the driver's plate number
-    const driver = await DriverModel.findById(driverId);
+    const driver = await OwnerModel.findById(driverId);
     if (!driver) {
       return res.status(404).json({
         success: false,
@@ -1350,7 +1350,7 @@ export const getOwnerMunicipalityData = async (req, res) => {
     const ownerAggregation = [
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
@@ -1512,7 +1512,7 @@ export const getBarangayRegistrationTotals = async (req, res) => {
       ...(Object.keys(dateFilter).length > 0 ? [{ $match: dateFilter }] : []),
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
@@ -1621,7 +1621,7 @@ export const getYearlyVehicleTrends = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
@@ -1776,7 +1776,7 @@ export const getMonthlyVehicleTrends = async (req, res) => {
       },
       {
         $lookup: {
-          from: 'drivers',
+          from: 'owners',
           localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'

@@ -212,8 +212,8 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       // Validate required data before proceeding
       if (!driverData || !driverData._id) {
         console.error('Invalid driver data:', driverData);
-        toast.error("Invalid driver data", {
-          description: "Driver information is missing or invalid."
+        toast.error("Invalid owner data", {
+          description: "Owner information is missing or invalid."
         });
         return;
       }
@@ -221,7 +221,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       if (!confirmationData) {
         console.error('No confirmation data available');
         toast.error("No data to update", {
-          description: "Please try editing the driver again."
+          description: "Please try editing the owner again."
         });
         return;
       }
@@ -253,7 +253,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       console.log('Driver ID:', driverData._id);
       console.log('=== END SERVER DATA ===');
 
-      const { data } = await apiClient.patch(`/driver/${driverData._id}`, content, {
+      const { data } = await apiClient.patch(`/owner/${driverData._id}`, content, {
         headers: {
           Authorization: token,
         },
@@ -289,8 +289,8 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
         onOpenChange(false);
         
         // Show success message
-        toast.success("Driver updated successfully", {
-          description: "The driver information has been updated."
+        toast.success("Owner updated successfully", {
+          description: "The owner information has been updated."
         });
         
         // Navigate to drivers page after successful update
@@ -301,7 +301,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
       console.error('Error response:', error.response);
       console.error('Error response data:', error.response?.data);
       
-      let message = "Failed to update driver";
+      let message = "Failed to update owner";
       if (error.response?.data?.message) {
         message = error.response.data.message;
       } else if (error.message) {
@@ -348,10 +348,10 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" />
-              Edit Driver
+              Edit Owner
             </DialogTitle>
             <DialogDescription>
-              Update the driver information. Plate number and file number cannot be modified.
+              Update the owner information. Plate number and file number cannot be modified.
             </DialogDescription>
           </DialogHeader>
 
@@ -373,7 +373,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
               className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
             >
               {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-              {submitting ? "Updating..." : "Update Driver"}
+              {submitting ? "Updating..." : "Update Owner"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -492,7 +492,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
             className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
           >
             {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-            {submitting ? "Updating..." : "Confirm & Update Driver"}
+            {submitting ? "Updating..." : "Confirm & Update Owner"}
           </Button>
         </DialogFooter>
       </DialogContent>

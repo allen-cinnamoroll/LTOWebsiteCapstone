@@ -42,7 +42,7 @@ const OwnerDetailsModal = ({ open, onOpenChange, ownerId }) => {
     setLoading(true);
     try {
       console.log(`Fetching owner data for ID: ${ownerId}`);
-      const { data } = await apiClient.get(`/driver/${ownerId}`, {
+      const { data } = await apiClient.get(`/owner/${ownerId}`, {
         headers: {
           Authorization: token,
         },

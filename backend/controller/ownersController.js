@@ -1,4 +1,4 @@
-import DriverModel from "../model/DriverModel.js";
+import OwnerModel from "../model/OwnerModel.js";
 import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
@@ -8,7 +8,7 @@ export const createDriver = async (req, res) => {
   try {
     // Check if driver with drivers license number already exists
     if (driversLicenseNumber) {
-      const existingDriver = await DriverModel.findOne({ driversLicenseNumber });
+      const existingDriver = await OwnerModel.findOne({ driversLicenseNumber });
       if (existingDriver) {
         return res.status(400).json({
           success: false,
@@ -19,7 +19,7 @@ export const createDriver = async (req, res) => {
 
     // Check if driver with email already exists (only if email is provided)
     if (emailAddress && emailAddress.trim() !== '') {
-      const existingEmailDriver = await DriverModel.findOne({ emailAddress });
+      const existingEmailDriver = await OwnerModel.findOne({ emailAddress });
       if (existingEmailDriver) {
         return res.status(400).json({
           success: false,
@@ -65,7 +65,7 @@ export const createDriver = async (req, res) => {
       updatedBy: null // Only set when actually updated
     };
     
-    const newDriver = await DriverModel.create(userTrackingData);
+    const newDriver = await OwnerModel.create(userTrackingData);
 
     // Populate driver and user information
     await newDriver.populate([
@@ -114,7 +114,7 @@ export const getDrivers = async (req, res) => {
     console.log('=== GET DRIVERS API DEBUG ===');
     console.log('Fetching all drivers from database...');
     
-    const drivers = await DriverModel.find()
+    const drivers = await OwnerModel.find()
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
       .populate('createdBy', 'firstName middleName lastName')
@@ -162,7 +162,7 @@ export const getDrivers = async (req, res) => {
 export const findDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
-    const driver = await DriverModel.findById(driverId)
+    const driver = await OwnerModel.findById(driverId)
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal')
       .populate('createdBy', 'firstName middleName lastName')
@@ -222,7 +222,7 @@ export const updateDriver = async (req, res) => {
       updatedBy: userId
     };
     
-    const driver = await DriverModel.findByIdAndUpdate(
+    const driver = await OwnerModel.findByIdAndUpdate(
       driverId, 
       updateDataWithUser,
       { new: true, runValidators: true }
@@ -277,7 +277,7 @@ export const updateDriver = async (req, res) => {
 export const deleteDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
-    const driver = await DriverModel.findById(driverId);
+    const driver = await OwnerModel.findById(driverId);
     
     if (!driver) {
       return res.status(404).json({
@@ -309,7 +309,7 @@ export const deleteDriver = async (req, res) => {
       }
     }
 
-    await DriverModel.findByIdAndDelete(driverId);
+    await OwnerModel.findByIdAndDelete(driverId);
 
     res.status(200).json({
       success: true,
@@ -340,7 +340,7 @@ export const searchDrivers = async (req, res) => {
     }
 
     console.log('Querying database for:', name.trim());
-    const drivers = await DriverModel.find({
+    const drivers = await OwnerModel.find({
       ownerRepresentativeName: { $regex: name.trim(), $options: 'i' }
     }).lean();
 

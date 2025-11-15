@@ -36,7 +36,7 @@ const DeactivatedDriversPage = () => {
 
   const fetchDrivers = async () => {
     try {
-      const { data } = await apiClient.get("/driver", {
+      const { data } = await apiClient.get("/owner", {
         headers: {
           Authorization: token,
         },
@@ -88,7 +88,7 @@ const DeactivatedDriversPage = () => {
     const promise = async () => {
       try {
         const response = await apiClient.patch(
-          `/driver/${currentDriver}`,
+          `/owner/${currentDriver}`,
           {
             isActive: data,
           },
@@ -110,14 +110,14 @@ const DeactivatedDriversPage = () => {
 
     toast.promise(promise(), {
       loading: "Loading...",
-      success: `Driver activated`,
-      error: (error) => error.message || "Failed to update driver",
+      success: `Owner activated`,
+      error: (error) => error.message || "Failed to update owner",
     });
   };
   return (
     <div className="p-4">
       <header className="text-xl md:text-3xl font-bold mb-5">
-        Deleted Drivers
+        Deleted Owners
       </header>
       <div className=" pt-4 md:px-0 md:pt-0">
         <Button
@@ -132,7 +132,7 @@ const DeactivatedDriversPage = () => {
       <section>
         <TableComponent
           data={driverData}
-          searchPlaceholder={"Search Driver..."}
+          searchPlaceholder={"Search Owner..."}
           filters={["fullname", "plateNo", "ownerRepresentativeName"]}
           tableColumn={deactivatedDriverColumns}
           loading={loading}
@@ -146,7 +146,7 @@ const DeactivatedDriversPage = () => {
         confirm={confirmActivate}
         title={"Are you sure?"}
         description={
-          "This action cannot be undone. This will activate the driver."
+          "This action cannot be undone. This will activate the owner."
         }
       />
     </div>

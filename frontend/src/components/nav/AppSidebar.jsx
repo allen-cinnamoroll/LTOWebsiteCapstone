@@ -223,7 +223,7 @@ export function AppSidebar(props) {
               <SidebarMenuButton isActive={location.pathname === "/driver"} asChild>
                 <Link to="/driver">
                   <Users />
-                  <span>Manage Drivers</span>
+                  <span>Manage Owners</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
