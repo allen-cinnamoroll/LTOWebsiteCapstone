@@ -251,67 +251,61 @@ export const getDashboardStats = async (req, res) => {
     const employeeCount = await UserModel.countDocuments({ role: "2" });
     const adminCount = await UserModel.countDocuments({ role: "1" });
 
-    // Calculate expiring registrations (vehicles expiring within next 30 days)
+    // Calculate vehicles renewed this month (current)
     const now = new Date();
-    const thirtyDaysFromNow = new Date(now);
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const currentMonth = now.getMonth(); // 0-11
+    const currentYear = now.getFullYear();
+    const monthStart = new Date(currentYear, currentMonth, 1);
+    const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
     
-    const allVehicles = await VehicleModel.find({}).select('plateNo dateOfRenewal vehicleStatusType').lean();
-    let expiringCount = 0;
-    
-    for (const vehicle of allVehicles) {
-      const latestRenewalDate = getLatestRenewalDate(vehicle.dateOfRenewal);
-      const expirationDate = calculateExpirationDate(
-        vehicle.plateNo,
-        latestRenewalDate,
-        vehicle.vehicleStatusType || "Old"
-      );
-      
-      if (expirationDate) {
-        // Check if expiration is within the next 30 days and not already expired
-        if (expirationDate >= now && expirationDate <= thirtyDaysFromNow) {
-          expiringCount++;
-        }
-      }
-    }
-
-    // Get pending violations count (all violations are considered pending)
-    const pendingViolationsCount = totalViolations;
-
-    // Get today's registrations count (vehicles created today)
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(now);
-    todayEnd.setHours(23, 59, 59, 999);
-    
-    const todaysRegistrations = await VehicleModel.countDocuments({
-      createdAt: {
-        $gte: todayStart,
-        $lte: todayEnd
+    // Count vehicles that have been renewed this month
+    const renewalCountThisMonth = await VehicleModel.countDocuments({
+      $expr: {
+        $gt: [
+          {
+            $size: {
+              $filter: {
+                input: { $ifNull: ["$dateOfRenewal", []] },
+                as: "renewal",
+                cond: {
+                  $let: {
+                    vars: {
+                      renewalDate: {
+                        $cond: {
+                          if: { $eq: [{ $type: "$$renewal" }, "object"] },
+                          then: "$$renewal.date",
+                          else: {
+                            $cond: {
+                              if: { $eq: [{ $type: "$$renewal" }, "date"] },
+                              then: "$$renewal",
+                              else: null
+                            }
+                          }
+                        }
+                      }
+                    },
+                    in: {
+                      $and: [
+                        { $ne: ["$$renewalDate", null] },
+                        { $gte: ["$$renewalDate", monthStart] },
+                        { $lte: ["$$renewalDate", monthEnd] }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          0
+        ]
       }
     });
 
-    // Get forecasted registrations for next 30 days from Flask prediction API
-    let forecastedRegistrationsNext30Days = 0;
-    let previous30DaysRegistrations = 0;
-    let percentageChange = null;
-
+    // Get predicted vehicle renewals/registrations for this month from MV Registration Analytics API
+    // This will be used as the target for vehicle renewal KPI
+    let predictedRenewalsThisMonth = 0;
     try {
-      // Get actual registrations from last 30 days for comparison
-      const thirtyDaysAgoStart = new Date(now);
-      thirtyDaysAgoStart.setDate(thirtyDaysAgoStart.getDate() - 30);
-      thirtyDaysAgoStart.setHours(0, 0, 0, 0);
-      
-      previous30DaysRegistrations = await VehicleModel.countDocuments({
-        createdAt: {
-          $gte: thirtyDaysAgoStart,
-          $lt: todayStart
-        }
-      });
-
-      // Call Flask prediction API to get forecasts for next 30 days (5 weeks to cover 30 days)
       const predictionApiUrl = process.env.MV_PREDICTION_API_URL || 'http://localhost:5002';
-      const weeksToPredict = 5; // 5 weeks = 35 days, covers 30 days
       
       // Create timeout controller for fetch
       const controller = new AbortController();
@@ -319,6 +313,9 @@ export const getDashboardStats = async (req, res) => {
       
       let predictionResponse;
       try {
+        // Request predictions for enough weeks to cover the current month
+        // Calculate weeks needed: at least 4-5 weeks to cover a month
+        const weeksToPredict = 5;
         predictionResponse = await fetch(
           `${predictionApiUrl}/api/predict/registrations?weeks=${weeksToPredict}`,
           {
@@ -344,46 +341,249 @@ export const getDashboardStats = async (req, res) => {
         const predictionData = await predictionResponse.json();
         
         if (predictionData.success && predictionData.data) {
-          // Sum daily predictions for next 30 days
+          // Priority 1: Use daily predictions filtered for current month (most accurate)
           if (predictionData.data.daily_predictions && Array.isArray(predictionData.data.daily_predictions)) {
-            // Get predictions for next 30 days only
-            const next30DaysPredictions = predictionData.data.daily_predictions.slice(0, 30);
-            forecastedRegistrationsNext30Days = next30DaysPredictions.reduce((sum, day) => {
+            const currentMonthPredictions = predictionData.data.daily_predictions.filter(day => {
+              const predictionDate = new Date(day.date || day.predicted_date || day.predictedDate);
+              return predictionDate >= monthStart && predictionDate <= monthEnd;
+            });
+            predictedRenewalsThisMonth = currentMonthPredictions.reduce((sum, day) => {
               const value = day.predicted || day.predicted_count || day.value || 0;
               return sum + (typeof value === 'number' ? value : 0);
             }, 0);
-          } else if (predictionData.data.weekly_predictions && Array.isArray(predictionData.data.weekly_predictions)) {
-            // If only weekly predictions available, estimate daily average and multiply by 30
-            const weeklyTotal = predictionData.data.weekly_predictions.slice(0, 5).reduce((sum, week) => {
+            predictedRenewalsThisMonth = Math.round(predictedRenewalsThisMonth);
+          } 
+          // Priority 2: Use weekly predictions filtered for current month
+          else if (predictionData.data.weekly_predictions && Array.isArray(predictionData.data.weekly_predictions)) {
+            const currentMonthWeeklyPredictions = predictionData.data.weekly_predictions.filter(week => {
+              const weekDate = new Date(week.date || week.week_start || week.weekStart);
+              // Check if the week falls within the current month
+              return weekDate >= monthStart && weekDate <= monthEnd;
+            });
+            const weeklyTotal = currentMonthWeeklyPredictions.reduce((sum, week) => {
               const value = week.predicted_count || week.total_predicted || week.predicted || 0;
               return sum + (typeof value === 'number' ? value : 0);
             }, 0);
-            // Estimate: (weekly total / 35 days) * 30 days
-            forecastedRegistrationsNext30Days = Math.round((weeklyTotal / 35) * 30);
-          } else if (predictionData.data.monthly_aggregation) {
-            // If only monthly aggregation available, estimate for 30 days
-            const monthlyTotal = predictionData.data.monthly_aggregation.total_predicted || 
-                                predictionData.data.monthly_aggregation.predicted || 0;
-            // Estimate: (monthly total / 30 days) * 30 days (assuming 30-day month)
-            forecastedRegistrationsNext30Days = Math.round(monthlyTotal);
+            // If we have weekly predictions for current month, use them directly
+            if (currentMonthWeeklyPredictions.length > 0) {
+              predictedRenewalsThisMonth = Math.round(weeklyTotal);
+            } else {
+              // Fallback: estimate from all weekly predictions
+              // Calculate average per week and multiply by weeks in current month
+              const allWeeklyTotal = predictionData.data.weekly_predictions.slice(0, 5).reduce((sum, week) => {
+                const value = week.predicted_count || week.total_predicted || week.predicted || 0;
+                return sum + (typeof value === 'number' ? value : 0);
+              }, 0);
+              const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+              predictedRenewalsThisMonth = Math.round((allWeeklyTotal / 35) * daysInMonth);
+            }
           }
-          
-          // Round to nearest integer
-          forecastedRegistrationsNext30Days = Math.round(forecastedRegistrationsNext30Days);
+          // Priority 3: Use monthly aggregation (may be for next month, so use as fallback)
+          else if (predictionData.data.monthly_aggregation && predictionData.data.monthly_aggregation.total_predicted) {
+            predictedRenewalsThisMonth = Math.round(predictionData.data.monthly_aggregation.total_predicted);
+          }
         }
       } else {
-        console.warn('Prediction API returned non-OK status:', predictionResponse.status);
+        console.warn('Prediction API returned non-OK status:', predictionResponse?.status);
       }
     } catch (error) {
       // Log error but don't fail the entire dashboard request
-      console.error('Error fetching forecasted registrations:', error.message);
-      // forecastedRegistrationsNext30Days remains 0
+      console.error('Error fetching predicted vehicle renewals:', error.message);
+      // predictedRenewalsThisMonth remains 0
+    }
+    
+    // Use the monthly prediction as the target for renewals
+    // If prediction is not available, fallback to 0 (will show as "No target" in UI)
+    const vehiclesNeedingRenewalThisMonth = predictedRenewalsThisMonth;
+
+    // Calculate vehicles registered this month (current)
+    const vehiclesRegisteredThisMonth = await VehicleModel.countDocuments({
+      createdAt: {
+        $gte: monthStart,
+        $lte: monthEnd
+      }
+    });
+
+    // Get predicted vehicle registrations for this month from MV Registration Analytics API
+    let predictedVehiclesThisMonth = 0;
+    try {
+      const predictionApiUrl = process.env.MV_PREDICTION_API_URL || 'http://localhost:5002';
+      
+      // Create timeout controller for fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      let predictionResponse;
+      try {
+        // Request predictions for enough weeks to cover the current month
+        // Calculate weeks needed: at least 4-5 weeks to cover a month
+        const weeksToPredict = 5;
+        predictionResponse = await fetch(
+          `${predictionApiUrl}/api/predict/registrations?weeks=${weeksToPredict}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal
+          }
+        );
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.warn('Prediction API request timed out after 10 seconds');
+          predictionResponse = null;
+        } else {
+          throw fetchError;
+        }
+      }
+
+      if (predictionResponse && predictionResponse.ok) {
+        const predictionData = await predictionResponse.json();
+        
+        if (predictionData.success && predictionData.data) {
+          // Priority 1: Use daily predictions filtered for current month (most accurate)
+          if (predictionData.data.daily_predictions && Array.isArray(predictionData.data.daily_predictions)) {
+            const currentMonthPredictions = predictionData.data.daily_predictions.filter(day => {
+              const predictionDate = new Date(day.date || day.predicted_date || day.predictedDate);
+              return predictionDate >= monthStart && predictionDate <= monthEnd;
+            });
+            predictedVehiclesThisMonth = currentMonthPredictions.reduce((sum, day) => {
+              const value = day.predicted || day.predicted_count || day.value || 0;
+              return sum + (typeof value === 'number' ? value : 0);
+            }, 0);
+            predictedVehiclesThisMonth = Math.round(predictedVehiclesThisMonth);
+          } 
+          // Priority 2: Use weekly predictions filtered for current month
+          else if (predictionData.data.weekly_predictions && Array.isArray(predictionData.data.weekly_predictions)) {
+            const currentMonthWeeklyPredictions = predictionData.data.weekly_predictions.filter(week => {
+              const weekDate = new Date(week.date || week.week_start || week.weekStart);
+              // Check if the week falls within the current month
+              return weekDate >= monthStart && weekDate <= monthEnd;
+            });
+            const weeklyTotal = currentMonthWeeklyPredictions.reduce((sum, week) => {
+              const value = week.predicted_count || week.total_predicted || week.predicted || 0;
+              return sum + (typeof value === 'number' ? value : 0);
+            }, 0);
+            // If we have weekly predictions for current month, use them directly
+            if (currentMonthWeeklyPredictions.length > 0) {
+              predictedVehiclesThisMonth = Math.round(weeklyTotal);
+            } else {
+              // Fallback: estimate from all weekly predictions
+              const allWeeklyTotal = predictionData.data.weekly_predictions.slice(0, 5).reduce((sum, week) => {
+                const value = week.predicted_count || week.total_predicted || week.predicted || 0;
+                return sum + (typeof value === 'number' ? value : 0);
+              }, 0);
+              const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+              predictedVehiclesThisMonth = Math.round((allWeeklyTotal / 35) * daysInMonth);
+            }
+          }
+          // Priority 3: Use monthly aggregation (may be for next month, so use as fallback)
+          else if (predictionData.data.monthly_aggregation && predictionData.data.monthly_aggregation.total_predicted) {
+            predictedVehiclesThisMonth = Math.round(predictionData.data.monthly_aggregation.total_predicted);
+          }
+        }
+      } else {
+        console.warn('Prediction API returned non-OK status:', predictionResponse?.status);
+      }
+    } catch (error) {
+      // Log error but don't fail the entire dashboard request
+      console.error('Error fetching predicted vehicle registrations:', error.message);
+      // predictedVehiclesThisMonth remains 0
     }
 
-    // Calculate percentage change if we have both values
-    if (previous30DaysRegistrations > 0 && forecastedRegistrationsNext30Days > 0) {
-      percentageChange = ((forecastedRegistrationsNext30Days - previous30DaysRegistrations) / previous30DaysRegistrations) * 100;
+    // Vehicle count (total vehicles) - keep for backward compatibility
+    const vehicleCount = totalVehicles;
+
+    // Calculate accidents this month (current)
+    const accidentsThisMonth = await AccidentModel.countDocuments({
+      dateCommited: {
+        $gte: monthStart,
+        $lte: monthEnd
+      }
+    });
+
+    // Calculate predicted accidents for this month using linear regression on historical monthly data
+    // Similar to the frontend's buildYearlyPredictionComparison logic
+    let predictedAccidentsThisMonth = 0;
+    try {
+      // Get monthly accident trends for the last 12 months (excluding current month)
+      // Calculate 12 months back from the start of current month
+      const twelveMonthsAgo = new Date(currentYear, currentMonth - 12, 1);
+      const monthlyAccidents = await AccidentModel.aggregate([
+        {
+          $match: {
+            dateCommited: {
+              $gte: twelveMonthsAgo,
+              $lt: monthStart
+            }
+          }
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$dateCommited" },
+              month: { $month: "$dateCommited" }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { "_id.year": 1, "_id.month": 1 }
+        }
+      ]);
+
+      console.log(`Found ${monthlyAccidents.length} months of accident data for prediction`);
+      console.log('Monthly accidents:', monthlyAccidents.map(m => ({ month: `${m._id.year}-${m._id.month}`, count: m.count })));
+
+      if (monthlyAccidents.length >= 2) {
+        // Calculate linear regression: y = mx + b
+        // Use 0-based indexing like the frontend (x: index)
+        const n = monthlyAccidents.length;
+        let sumX = 0;
+        let sumY = 0;
+        let sumXY = 0;
+        let sumX2 = 0;
+
+        monthlyAccidents.forEach((item, index) => {
+          const x = index; // 0-based like frontend
+          const y = item.count || 0;
+          sumX += x;
+          sumY += y;
+          sumXY += x * y;
+          sumX2 += x * x;
+        });
+
+        const denominator = n * sumX2 - sumX * sumX;
+        const slope = denominator !== 0 ? (n * sumXY - sumX * sumY) / denominator : 0;
+        const intercept = n !== 0 ? (sumY - slope * sumX) / n : 0;
+
+        console.log(`Linear regression: slope=${slope}, intercept=${intercept}, n=${n}`);
+
+        // Predict for the current month (next month in the sequence)
+        // After n data points (0 to n-1), the next point is at x = n
+        const x = n;
+        const predicted = slope * x + intercept;
+        predictedAccidentsThisMonth = Math.max(0, Math.round(predicted));
+        
+        console.log(`Predicted accidents for current month (x=${x}): ${predictedAccidentsThisMonth}`);
+      } else if (monthlyAccidents.length > 0) {
+        // If not enough data for regression, use average of available months
+        const totalAccidents = monthlyAccidents.reduce((sum, item) => sum + (item.count || 0), 0);
+        predictedAccidentsThisMonth = Math.round(totalAccidents / monthlyAccidents.length);
+        console.log(`Using average (not enough data for regression): ${predictedAccidentsThisMonth}`);
+      } else {
+        console.log('No historical accident data available for prediction');
+      }
+    } catch (error) {
+      console.error('Error calculating predicted accidents:', error.message);
+      console.error(error.stack);
+      // predictedAccidentsThisMonth remains 0
     }
+
+    // Accidents count (total accidents) - keep for backward compatibility
+    const accidentsCount = totalAccidents;
 
     res.status(200).json({
       success: true,
@@ -413,12 +613,18 @@ export const getDashboardStats = async (req, res) => {
           admins: adminCount
         },
         kpi: {
-          expiringRegistrations: expiringCount,
-          pendingViolations: pendingViolationsCount,
-          todaysRegistrations: todaysRegistrations,
-          forecastedRegistrationsNext30Days: forecastedRegistrationsNext30Days,
-          previous30DaysRegistrations: previous30DaysRegistrations,
-          percentageChange: percentageChange
+          renewal: {
+            current: renewalCountThisMonth,
+            target: vehiclesNeedingRenewalThisMonth
+          },
+          vehicle: {
+            current: vehiclesRegisteredThisMonth,
+            target: predictedVehiclesThisMonth
+          },
+          accidents: {
+            current: accidentsThisMonth,
+            target: predictedAccidentsThisMonth
+          }
         }
       }
     });

@@ -8,10 +8,12 @@ const CircularKpi = ({
   subtitle, 
   icon: Icon, 
   loading = false,
-  tone = "primary", // primary, success, warning, danger, info
+  tone = "primary", // primary, success, warning, danger, info, orange, yellow
   trendLabel,
   trendVariant = "neutral", // positive, negative, neutral
-  ariaLabel
+  ariaLabel,
+  target, // Optional target value to display inside circle
+  targetLabel // Optional label for target (e.g., "need to renew this month")
 }) => {
   // Enhanced color schemes with gradients
   const colorSchemes = {
@@ -38,6 +40,22 @@ const CircularKpi = ({
       border: "border-orange-300/50 dark:border-orange-700/50",
       shadow: "shadow-orange-200/50 dark:shadow-orange-900/30",
       shadowHover: "shadow-orange-300/60 dark:shadow-orange-800/40"
+    },
+    orange: {
+      gradient: "from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40",
+      text: "text-orange-700 dark:text-orange-300",
+      icon: "text-orange-600 dark:text-orange-400",
+      border: "border-orange-300/50 dark:border-orange-700/50",
+      shadow: "shadow-orange-200/50 dark:shadow-orange-900/30",
+      shadowHover: "shadow-orange-300/60 dark:shadow-orange-800/40"
+    },
+    yellow: {
+      gradient: "from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-800/40",
+      text: "text-yellow-700 dark:text-yellow-300",
+      icon: "text-yellow-600 dark:text-yellow-400",
+      border: "border-yellow-300/50 dark:border-yellow-700/50",
+      shadow: "shadow-yellow-200/50 dark:shadow-yellow-900/30",
+      shadowHover: "shadow-yellow-300/60 dark:shadow-yellow-800/40"
     },
     danger: {
       gradient: "from-red-100 to-rose-100 dark:from-red-900/40 dark:to-rose-900/40",
@@ -130,6 +148,18 @@ const CircularKpi = ({
           `}>
             {value}
           </p>
+          {target !== undefined && target !== null && (
+            <div className="mt-1">
+              <p className={`
+                text-[10px] md:text-xs
+                font-medium
+                ${colors.text}
+                opacity-80
+              `}>
+                Target: {target} {targetLabel || ''}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
