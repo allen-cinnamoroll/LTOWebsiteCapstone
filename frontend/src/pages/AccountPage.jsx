@@ -158,7 +158,7 @@ const AccountPage = () => {
 
         // Close modal after a short delay to allow state to update
         setTimeout(() => {
-          setIsEditModalOpen(false);
+        setIsEditModalOpen(false);
         }, 100);
 
         toast.success('Profile updated successfully!', {
