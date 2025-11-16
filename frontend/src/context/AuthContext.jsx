@@ -6,6 +6,13 @@ import apiClient from "@/api/axios";
 
 const AuthContext = createContext(null);
 
+// Get backend base URL for avatar images
+const getBackendBaseURL = () => {
+  const apiBaseURL = import.meta.env.VITE_BASE_URL || 'https://ltodatamanager.com/api';
+  // Remove /api suffix to get the backend base URL
+  return apiBaseURL.replace(/\/api$/, '');
+};
+
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -44,8 +51,7 @@ export const AuthProvider = ({ children }) => {
               
               // Ensure avatar URL is properly constructed
               if (userData && userData.avatar && !userData.avatar.startsWith('http')) {
-                const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
-                const backendURL = baseURL.replace('/api', '');
+                const backendURL = getBackendBaseURL();
                 userData.avatar = `${backendURL}/${userData.avatar}`;
               }
               
@@ -98,11 +104,7 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
-      avatar: decoded.avatar ? (() => {
-        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
-        const backendURL = baseURL.replace('/api', '');
-        return `${backendURL}/${decoded.avatar}`;
-      })() : '',
+      avatar: decoded.avatar ? `${getBackendBaseURL()}/${decoded.avatar}` : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };
@@ -134,11 +136,7 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
-      avatar: decoded.avatar ? (() => {
-        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
-        const backendURL = baseURL.replace('/api', '');
-        return `${backendURL}/${decoded.avatar}`;
-      })() : '',
+      avatar: decoded.avatar ? `${getBackendBaseURL()}/${decoded.avatar}` : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };

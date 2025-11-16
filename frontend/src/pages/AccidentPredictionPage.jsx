@@ -56,7 +56,18 @@ export default function AccidentPredictionPage() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Try to read response as text first to see what we got
+        const text = await response.text();
+        console.error('Failed to fetch model info', response.status, text);
+        throw new Error(`HTTP ${response.status}: Server returned non-OK response. Check if the Flask API is running on the correct port.`);
+      }
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response received:', text.substring(0, 200));
+        throw new Error('Server returned HTML instead of JSON. The Flask API may not be running or the URL is incorrect.');
       }
 
       const data = await response.json();
