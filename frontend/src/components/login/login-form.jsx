@@ -19,6 +19,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ltoLogo from "@/assets/lto_logo.png";
+import { useTheme } from "@/components/theme/theme-provider.jsx";
 
 export function LoginForm({ className, ...props }) {
   const [showPass, setShowPass] = useState(false);
@@ -27,6 +28,7 @@ export function LoginForm({ className, ...props }) {
   const [rememberMe, setRememberMe] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { setTheme } = useTheme();
 
   // Note: Navigation is handled by ProtectedRoutes when using modal approach
   // No need to navigate here as it can cause conflicts with OTP modal
@@ -43,14 +45,17 @@ export function LoginForm({ className, ...props }) {
     },
   });
 
-  // Load remembered email on component mount
+  // On mount, force theme to light and load remembered email
   useEffect(() => {
+    // Ensure login screen always starts in light mode
+    setTheme("light");
+
     const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail) {
       setRememberMe(true);
       form.setValue("email", rememberedEmail);
     }
-  }, [form]);
+  }, [form, setTheme]);
 
   const onSubmit = async (formData) => {
     
