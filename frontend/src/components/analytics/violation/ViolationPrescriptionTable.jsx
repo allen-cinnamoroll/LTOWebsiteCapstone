@@ -527,64 +527,40 @@ export function ViolationPrescriptionTable({ loading }) {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div
-              className={`${
-                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-              } border rounded-2xl px-4 py-4 space-y-2`}
-            >
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Strategic objective
-              </h4>
-              <p className="text-sm text-slate-800 dark:text-slate-100">
-                Reduce repeat cases of {meta.dominantViolation ?? 'the most frequent violation'} across the peak months (
-                {meta.keyMonths?.length ? meta.keyMonths.join(', ') : 'identified high-volume months'}) while keeping checkpoint presence predictable and
-                fair.
+          {/* Short, dashboard-friendly prescription */}
+          <div
+            className={`${
+              prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+            } border rounded-2xl px-4 py-4 space-y-3 text-sm`}
+          >
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Recommended actions
               </p>
-            </div>
-
-            <div
-              className={`${
-                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-              } border rounded-2xl px-4 py-4 space-y-2`}
-            >
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Enforcement focus
-              </h4>
-              <p className="text-sm text-slate-800 dark:text-slate-100">
-                Align weekly operations plans so at least one checkpoint cycle per week explicitly targets documentation-related violations (e.g. 1A, 1H,
-                11) in routes that historically show the highest counts.
-              </p>
-            </div>
-
-            <div
-              className={`${
-                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-              } border rounded-2xl px-4 py-4 space-y-2`}
-            >
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Citizen experience
-              </h4>
-              <p className="text-sm text-slate-800 dark:text-slate-100">
-                Publish simple public advisories two weeks before the key months, clarifying common violations, documentary requirements, and the
-                schedule of intensified checkpoints to support transparency and voluntary compliance.
-              </p>
-            </div>
-
-            <div
-              className={`${
-                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-              } border rounded-2xl px-4 py-4 space-y-2`}
-            >
-              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Monitoring and review
-              </h4>
-              <p className="text-sm text-slate-800 dark:text-slate-100">
-                At the end of each peak month, compare apprehension counts and seminar attendance with the same period last year, and adjust next
-                month&apos;s checkpoint locations and messaging based on the updated analytics.
-              </p>
+              <ol className="list-decimal list-inside space-y-1 text-slate-800 dark:text-slate-100">
+                <li>
+                  Weekly checkpoints in peak months, prioritising documentation checks (1A, 1H, 11).
+                </li>
+                <li>
+                  Require licensing orientation for 1A violators before penalty clearance.
+                </li>
+                <li>
+                  Release public reminders 2 weeks before each peak month on licensing requirements.
+                </li>
+                <li>
+                  Coordinate with LGUs and transport groups for SP/License assistance drives.
+                </li>
+                <li>
+                  Track repeat violators and escalate penalties for second offence.
+                </li>
+              </ol>
             </div>
           </div>
+
+          {/* Ultra‑condensed text for potential tooltips / copy use */}
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            Ultra‑condensed: Target 1A in peak months via weekly checkpoints, pre‑peak advisories, mandatory licensing orientation, and focused tracking of repeat offences.
+          </p>
         </div>
       </section>
 
