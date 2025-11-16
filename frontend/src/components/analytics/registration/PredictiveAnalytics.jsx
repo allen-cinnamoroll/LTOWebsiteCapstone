@@ -34,7 +34,7 @@ export function PredictiveAnalytics() {
           }
         }
       } catch (error) {
-        // Error handled silently
+        console.error('Error fetching model accuracy:', error);
       } finally {
         setAccuracyLoading(false);
       }
@@ -85,7 +85,7 @@ export function PredictiveAnalytics() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
                 {accuracyLoading ? (
                   <span className="text-xs text-gray-500 dark:text-gray-400">Loading accuracy...</span>
                 ) : accuracyDisplay ? (

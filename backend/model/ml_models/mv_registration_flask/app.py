@@ -32,16 +32,6 @@ from data_preprocessor_daily import DailyDataPreprocessor
 from barangay_predictor import BarangayPredictor
 from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES, MIN_WEEKS_FOR_MUNICIPALITY_MODEL
 
-# Define ASCII-safe symbols for Windows console compatibility
-# Windows console (cp1252) can't encode Unicode checkmarks/warning symbols
-if os.name == "nt":  # Windows
-    OK_SYMBOL = "[OK]"
-    WARNING_SYMBOL = "[!]"
-else:
-    # Unix terminals usually handle UTF-8 fine
-    OK_SYMBOL = "✓"
-    WARNING_SYMBOL = "⚠️"
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -194,7 +184,7 @@ def initialize_model():
                         logger.info(f"Loading existing model for {municipality}...")
                         mun_model.load_model()
                         municipality_models[municipality.upper()] = mun_model
-                        logger.info(f"{OK_SYMBOL} Model loaded for {municipality}")
+                        logger.info(f"✓ Model loaded for {municipality}")
                     else:
                         # Try to train if data is available
                         try:
@@ -214,7 +204,7 @@ def initialize_model():
                                     processing_info=processing_info
                                 )
                                 municipality_models[municipality.upper()] = mun_model
-                                logger.info(f"{OK_SYMBOL} Model trained for {municipality}")
+                                logger.info(f"✓ Model trained for {municipality}")
                             else:
                                 logger.warning(f"Insufficient data for {municipality} ({len(daily_data)} days, need {MIN_WEEKS_FOR_MUNICIPALITY_MODEL * 7}). Will use aggregated model.")
                         except Exception as e:
@@ -1075,14 +1065,14 @@ if __name__ == '__main__':
         logger.info("Optimized model initialized successfully!")
         logger.info("Starting Flask server...")
         if debug_mode:
-            logger.warning(f"{WARNING_SYMBOL}  DEBUG MODE ENABLED - Auto-reload is ON (not recommended for production)")
+            logger.warning("⚠️  DEBUG MODE ENABLED - Auto-reload is ON (not recommended for production)")
         # Run on all interfaces, port 5002 
         # Frontend expects port 5002
         try:
             app.run(host='0.0.0.0', port=5002, debug=debug_mode)
         except OSError as e:
             if "Address already in use" in str(e):
-                logger.error(f"\n{WARNING_SYMBOL}  Port 5002 is in use. Error: {str(e)}")
+                logger.error(f"\n⚠️  Port 5002 is in use. Error: {str(e)}")
                 logger.error("To kill the process on port 5002, run: sudo lsof -i :5002 && kill -9 <PID>")
                 sys.exit(1)
             else:
