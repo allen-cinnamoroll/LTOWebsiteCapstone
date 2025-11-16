@@ -115,8 +115,8 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
   };
 
   const ViolationDetailsTab = () => (
-    <div className="space-y-2">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <div className="space-y-2 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
             <Hash className="h-3 w-3" />
@@ -287,7 +287,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
   );
 
   const DriverViolationsTab = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <div className="flex items-center gap-2 mb-4">
         <AlertTriangle className="h-5 w-5 text-red-500" />
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -330,14 +330,14 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-2xl max-h-[80vh] bg-gradient-to-br from-slate-50 to-red-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col"
+        className="max-w-2xl h-[80vh] bg-gradient-to-br from-slate-50 to-red-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col overflow-hidden p-6"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         {/* Fixed Header */}
         <DialogHeader className="pb-3 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="w-full">
               <DialogTitle className="text-lg font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 Violation Details
               </DialogTitle>
@@ -352,7 +352,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
           </div>
         </DialogHeader>
         
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           {/* Fixed Tab Navigation */}
           <div className="flex-shrink-0 mb-3">
             <div className="flex space-x-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
@@ -378,13 +378,15 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
           </div>
 
           {/* Scrollable Tab Content */}
-          <div className="flex-1 overflow-y-auto bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-            {activeTab === "violation" && <ViolationDetailsTab />}
-            {activeTab === "violations" && <DriverViolationsTab />}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-h-0">
+            <div className="w-full">
+              {activeTab === "violation" && <ViolationDetailsTab />}
+              {activeTab === "violations" && <DriverViolationsTab />}
+            </div>
           </div>
 
          {/* Footer with Edit Button */}
-           <div className="flex-shrink-0 pt-4 border-t border-gray-200 dark:border-gray-700">
+           <div className="flex-shrink-0 pt-4 mt-3 border-t border-gray-200 dark:border-gray-700">
              <div className="flex items-center justify-end">
                <Button
                  onClick={() => {
@@ -392,7 +394,7 @@ const ViolationDetailsModal = ({ open, onOpenChange, violationData }) => {
                    // Trigger edit modal instead of navigation
                    window.dispatchEvent(new CustomEvent('editViolation', { detail: violationData?._id }));
                  }}
-                 className="mt-2 sm:mt-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 text-sm font-semibold"
+                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 text-sm font-semibold"
                >
                  <Edit className="h-4 w-4 mr-2" />
                  Edit Violation
