@@ -35,12 +35,12 @@ export function ViolationMonitoring({ analyticsData }) {
   const gridColor = '#E2E8F0';
   const gridDash = '4 6';
   const gridOpacity = 0.9;
-  const lineStrokeColor = '#F43F5E';
+  const lineStrokeColor = '#10B981';
   const gradientStops = {
-    top: '#FB7185',
-    mid: '#F43F5E',
-    low: '#F87171',
-    base: '#FECDD3'
+    top: '#34D399',
+    mid: '#10B981',
+    low: '#059669',
+    base: '#D1FAE5'
   };
 
   // Close export menu when clicking outside
@@ -458,17 +458,17 @@ export function ViolationMonitoring({ analyticsData }) {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-red-200 dark:border-red-700 rounded-lg shadow-lg max-w-xs">
-          <p className="text-sm font-bold text-red-800 dark:text-red-300 mb-2 text-center">
+        <div className="bg-white dark:bg-gray-800 p-3 border border-green-200 dark:border-green-700 rounded-lg shadow-lg max-w-xs">
+          <p className="text-sm font-bold text-green-800 dark:text-green-300 mb-2 text-center">
             {viewMode === 'daily' ? `${label} ${currentMonthNames[parseInt(selectedMonth || '1') - 1]} ${selectedYear}` : viewMode === 'monthly' ? `${label} ${selectedYear}` : label}
           </p>
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-xs text-gray-700 dark:text-gray-300">Violations</span>
               </div>
-              <span className="text-xs font-medium text-red-600 dark:text-red-400">
+              <span className="text-xs font-medium text-green-600 dark:text-green-400">
                 {payload[0]?.value?.toLocaleString() || 0}
               </span>
             </div>
@@ -578,7 +578,7 @@ export function ViolationMonitoring({ analyticsData }) {
       <div className="px-4 py-3 border-b-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-md shadow-red-500/30">
+            <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-md shadow-green-500/30">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
@@ -609,7 +609,7 @@ export function ViolationMonitoring({ analyticsData }) {
         <div className="xl:col-span-4 p-3 sm:p-4">
           <div className="space-y-3">
             {/* Charts Area */}
-            <div className="relative rounded-xl p-3 sm:p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-red-100/60 dark:border-red-900/40 shadow-xl overflow-hidden">
+            <div className="relative rounded-xl p-3 sm:p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-green-100/60 dark:border-green-900/40 shadow-xl overflow-hidden">
               <div className="mb-3 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">
@@ -631,7 +631,7 @@ export function ViolationMonitoring({ analyticsData }) {
                         <select
                           value={selectedYear}
                           onChange={(e) => setSelectedYear(e.target.value)}
-                          className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-red-400 dark:hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 dark:focus:border-red-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                          className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-green-400 dark:hover:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 dark:focus:border-green-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
                           style={{ minWidth: '160px' }}
                         >
                           {viewMode === 'monthly' && (
@@ -663,7 +663,7 @@ export function ViolationMonitoring({ analyticsData }) {
                         <select
                           value={selectedMonth}
                           onChange={(e) => setSelectedMonth(e.target.value)}
-                          className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-red-400 dark:hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 dark:focus:border-red-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                          className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-green-400 dark:hover:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 dark:focus:border-green-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
                           style={{ minWidth: '120px' }}
                         >
                           <option value="" disabled>Select month</option>
@@ -691,7 +691,7 @@ export function ViolationMonitoring({ analyticsData }) {
                             <select
                               value={yearlyStartYear}
                               onChange={(e) => setYearlyStartYear(parseInt(e.target.value))}
-                              className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-red-400 dark:hover:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500 dark:focus:border-red-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
+                              className="px-2.5 pr-8 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-green-400 dark:hover:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 dark:focus:border-green-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md appearance-none"
                               style={{ minWidth: '140px' }}
                             >
                               {getFiveYearStartYears().map((start) => (
@@ -814,7 +814,7 @@ export function ViolationMonitoring({ analyticsData }) {
                           <div className="py-1.5">
                             <button
                               onClick={() => exportData('csv')}
-                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition-colors duration-150"
+                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-2.5 transition-colors duration-150"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -823,7 +823,7 @@ export function ViolationMonitoring({ analyticsData }) {
                             </button>
                             <button
                               onClick={() => exportData('json')}
-                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition-colors duration-150"
+                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-2.5 transition-colors duration-150"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -832,7 +832,7 @@ export function ViolationMonitoring({ analyticsData }) {
                             </button>
                             <button
                               onClick={() => exportData('excel')}
-                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition-colors duration-150"
+                              className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-2.5 transition-colors duration-150"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -894,8 +894,8 @@ export function ViolationMonitoring({ analyticsData }) {
                           strokeWidth={3}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(244,63,94,0.35))' }}
-                          activeDot={{ r: 7, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(244,63,94,0.4))' }}
+                          dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(16,185,129,0.35))' }}
+                          activeDot={{ r: 7, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(16,185,129,0.4))' }}
                           isAnimationActive
                           animationDuration={900}
                           name="Violations"
@@ -949,8 +949,8 @@ export function ViolationMonitoring({ analyticsData }) {
                         strokeWidth={3}
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(244,63,94,0.35))' }}
-                        activeDot={{ r: 8, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(244,63,94,0.4))' }}
+                        dot={{ r: 5, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 2, filter: 'drop-shadow(0 1px 2px rgba(16,185,129,0.35))' }}
+                        activeDot={{ r: 8, fill: '#ffffff', stroke: lineStrokeColor, strokeWidth: 3, filter: 'drop-shadow(0 3px 6px rgba(16,185,129,0.4))' }}
                         isAnimationActive
                         animationDuration={900}
                         name="Violations"
@@ -1028,9 +1028,9 @@ export function ViolationMonitoring({ analyticsData }) {
         <div className="xl:col-span-1 p-3 sm:p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3">
             {/* Total Violations */}
-            <div className="p-3 rounded-xl bg-gradient-to-br from-white to-red-50/30 dark:from-gray-800 dark:to-red-950/30 shadow-md border-2 border-red-100/60 dark:border-red-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-white to-green-50/30 dark:from-gray-800 dark:to-green-950/30 shadow-md border-2 border-green-100/60 dark:border-green-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
               <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-red-500 to-red-600 shadow-sm shadow-red-500/30 flex items-center justify-center">
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm shadow-green-500/30 flex items-center justify-center">
                   <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
