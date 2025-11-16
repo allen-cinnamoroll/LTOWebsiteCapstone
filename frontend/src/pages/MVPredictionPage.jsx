@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle } from 'lucide-react';
+import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle, Calendar } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 
@@ -1552,226 +1552,235 @@ export default function MVPredictionPage() {
                       : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
                   }`}
                 >
-                  <div className="space-y-4 py-4">
-                    {/* Training Information */}
-                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="font-semibold text-base flex items-center gap-2">
-                  <Info className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                  Training Information
-                </h3>
-                <div className="grid grid-cols-2 gap-3 text-base">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">
-                      {trainingData.training_days ? 'Training Days:' : 'Training Weeks:'}
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {trainingData.training_days 
-                        ? `${trainingData.training_days} days (${Math.round(trainingData.training_days / 7)} weeks)`
-                        : trainingData.training_weeks || 'N/A'}
-                    </span>
-                    <TooltipProvider>
-                      <Tooltip delayDuration={300}>
-                        <TooltipTrigger asChild>
-                          <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                          <div className="space-y-2">
-                            <p className="font-semibold">{trainingData.training_days ? 'Training Days' : 'Training Weeks'}</p>
-                            <div className="text-xs space-y-1">
-                              <p><strong>What it is:</strong> The number of {trainingData.training_days ? 'days' : 'weeks'} of historical data used to train the model (80% of total data).</p>
-                              <p><strong>What it means:</strong> More training data generally leads to better pattern recognition, but requires sufficient data quality.</p>
-                              <p><strong>What it helps with:</strong> Understanding how much historical data the model learned from, which affects prediction reliability.</p>
-                  </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  {(trainingData.test_days || trainingData.test_weeks) && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-700 dark:text-gray-300 font-medium">
-                        {trainingData.test_days ? 'Test Days:' : 'Test Weeks:'}
-                      </span>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {trainingData.test_days 
-                          ? `${trainingData.test_days} days (${Math.round(trainingData.test_days / 7)} weeks)`
-                          : trainingData.test_weeks}
-                      </span>
-                      <TooltipProvider>
-                        <Tooltip delayDuration={300}>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                            <div className="space-y-2">
-                              <p className="font-semibold">Test Weeks</p>
-                              <div className="text-xs space-y-1">
-                                <p><strong>What it is:</strong> The number of weeks reserved for testing model accuracy (20% of total data, most recent).</p>
-                                <p><strong>What it means:</strong> Out-of-sample data the model hasn't seen during training, used to validate true prediction performance.</p>
-                                <p><strong>What it helps with:</strong> Provides realistic accuracy estimates for future predictions, ensuring the model works on unseen data.</p>
-                              </div>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  )}
-                  <div className="col-span-2">
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">Training Date Range: </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {trainingData.date_range?.start 
-                        ? formatDate(trainingData.date_range.start)
-                        : 'N/A'} - {trainingData.date_range?.end 
-                        ? formatDate(trainingData.date_range.end)
-                        : 'N/A'}
-                    </span>
-                  </div>
-                  {trainingData.test_date_range && (
-                    <div className="col-span-2">
-                      <span className="text-gray-700 dark:text-gray-300 font-medium">Test Date Range: </span>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {formatDate(trainingData.test_date_range.start)} - {formatDate(trainingData.test_date_range.end)}
-                      </span>
-                    </div>
-                  )}
-                  {trainingData.processing_info && (
-                    <>
-                      <div>
-                        <span className="text-gray-700 dark:text-gray-300 font-medium">CSV Files Combined:</span>
-                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                          {trainingData.processing_info.total_csv_files || 'N/A'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-700 dark:text-gray-300 font-medium">Total Registrations:</span>
-                        <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                          {trainingData.processing_info.total_registrations?.toLocaleString() || 'N/A'}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  {/* Model Summary (AIC, BIC) */}
-                  {(trainingData.aic !== undefined || trainingData.bic !== undefined) && (
-                    <div className="col-span-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center gap-2 mb-2">
-                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Model Information Criteria:</p>
+                  <div className="space-y-6 py-4">
+                    {/* KPI Cards Grid - 4 columns */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {/* Training Days KPI Card */}
+                      <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg border border-blue-200 dark:border-blue-800 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">Training Days</p>
+                          <BarChart3 className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                        </div>
+                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-1">
+                          {trainingData.training_days 
+                            ? `${trainingData.training_days}`
+                            : trainingData.training_weeks 
+                              ? `${trainingData.training_weeks * 7}`
+                              : 'N/A'}
+                        </p>
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                          {trainingData.training_days 
+                            ? `${Math.round(trainingData.training_days / 7)} weeks`
+                            : trainingData.training_weeks 
+                              ? `${trainingData.training_weeks} weeks`
+                              : ''}
+                        </p>
                         <TooltipProvider>
                           <Tooltip delayDuration={300}>
                             <TooltipTrigger asChild>
-                              <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
+                              <HelpCircle className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 cursor-help mt-2" />
                             </TooltipTrigger>
                             <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
                               <div className="space-y-2">
-                                <p className="font-semibold">Information Criteria</p>
+                                <p className="font-semibold">Training Days</p>
                                 <div className="text-xs space-y-1">
-                                  <p><strong>What it is:</strong> Statistical measures (AIC/BIC) that balance model accuracy with complexity.</p>
-                                  <p><strong>What it means:</strong> Lower values indicate better models. Penalizes overly complex models to prevent overfitting.</p>
-                                  <p><strong>What it helps with:</strong> Helps select the optimal model configuration that generalizes well without being too simple or too complex.</p>
-                </div>
-                    </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                  </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        {trainingData.aic !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-700 dark:text-gray-300 font-medium">AIC:</span>
-                            <span className="font-mono font-semibold text-gray-900 dark:text-white">
-                              {trainingData.aic.toFixed(2)}
-                            </span>
-                            <TooltipProvider>
-                              <Tooltip delayDuration={300}>
-                                <TooltipTrigger asChild>
-                                  <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                                  <div className="space-y-2">
-                                    <p className="font-semibold">AIC (Akaike Information Criterion)</p>
-                                    <div className="text-xs space-y-1">
-                                      <p><strong>What it is:</strong> A measure that balances model fit quality with model complexity.</p>
-                                      <p><strong>What it means:</strong> Lower AIC = better model. Penalizes extra parameters to prevent overfitting.</p>
-                                      <p><strong>What it helps with:</strong> Guides automatic parameter selection to find the best trade-off between accuracy and simplicity.</p>
-                                    </div>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        )}
-                        {trainingData.bic !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-700 dark:text-gray-300 font-medium">BIC:</span>
-                            <span className="font-mono font-semibold text-gray-900 dark:text-white">
-                              {trainingData.bic.toFixed(2)}
-                            </span>
-                            <TooltipProvider>
-                              <Tooltip delayDuration={300}>
-                                <TooltipTrigger asChild>
-                                  <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                                  <div className="space-y-2">
-                                    <p className="font-semibold">BIC (Bayesian Information Criterion)</p>
-                                    <div className="text-xs space-y-1">
-                                      <p><strong>What it is:</strong> Similar to AIC but with a stronger penalty for model complexity.</p>
-                                      <p><strong>What it means:</strong> Lower BIC = better model. Favors simpler models more than AIC does.</p>
-                                      <p><strong>What it helps with:</strong> Prefers simpler models, useful when you want to avoid overfitting with limited data.</p>
-                                    </div>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                        Lower AIC/BIC values indicate better model fit (with penalty for complexity)
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Cross-Validation Results */}
-                  {(trainingData.cv_results || trainingData.cross_validation) && (
-                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-base flex items-center gap-2">
-                          <TrendingUp className="w-5 h-5 text-teal-600 dark:text-teal-400" />
-                          Cross-Validation Results (TimeSeriesSplit)
-                        </h3>
-                        <TooltipProvider>
-                          <Tooltip delayDuration={300}>
-                            <TooltipTrigger asChild>
-                              <HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400 cursor-help hover:text-gray-700 dark:hover:text-gray-300" />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
-                              <div className="space-y-2">
-                                <p className="font-semibold">TimeSeriesSplit Cross-Validation</p>
-                                <div className="text-xs space-y-1">
-                                  <p><strong>What it is:</strong> A validation method that splits data chronologically and tests the model on future periods.</p>
-                                  <p><strong>What it means:</strong> Simulates real-world prediction scenarios where you predict future data based on past data.</p>
-                                  <p><strong>What it helps with:</strong> Provides more realistic accuracy estimates than single train-test split, ensuring the model performs well across different time periods.</p>
+                                  <p><strong>What it is:</strong> The number of days of historical data used to train the model (80% of total data).</p>
+                                  <p><strong>What it means:</strong> More training data generally leads to better pattern recognition, but requires sufficient data quality.</p>
+                                  <p><strong>What it helps with:</strong> Understanding how much historical data the model learned from, which affects prediction reliability.</p>
                                 </div>
                               </div>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </div>
-                      <div className="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+
+                      {/* Test Days KPI Card */}
+                      {(trainingData.test_days || trainingData.test_weeks) && (
+                        <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg border border-green-200 dark:border-green-800 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Test Days</p>
+                            <BarChart3 className="w-4 h-4 text-green-500 dark:text-green-400" />
+                          </div>
+                          <p className="text-2xl font-bold text-green-900 dark:text-green-100 mb-1">
+                            {trainingData.test_days 
+                              ? `${trainingData.test_days}`
+                              : trainingData.test_weeks 
+                                ? `${trainingData.test_weeks * 7}`
+                                : 'N/A'}
+                          </p>
+                          <p className="text-xs text-green-700 dark:text-green-300">
+                            {trainingData.test_days 
+                              ? `${Math.round(trainingData.test_days / 7)} weeks`
+                              : trainingData.test_weeks 
+                                ? `${trainingData.test_weeks} weeks`
+                                : ''}
+                          </p>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-3.5 h-3.5 text-green-500 dark:text-green-400 cursor-help mt-2" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                <div className="space-y-2">
+                                  <p className="font-semibold">Test Days</p>
+                                  <div className="text-xs space-y-1">
+                                    <p><strong>What it is:</strong> The number of days reserved for testing model accuracy (20% of total data, most recent).</p>
+                                    <p><strong>What it means:</strong> Out-of-sample data the model hasn't seen during training, used to validate true prediction performance.</p>
+                                    <p><strong>What it helps with:</strong> Provides realistic accuracy estimates for future predictions, ensuring the model works on unseen data.</p>
+                                  </div>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      )}
+
+                      {/* Total Registrations KPI Card */}
+                      {trainingData.processing_info?.total_registrations && (
+                        <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg border border-purple-200 dark:border-purple-800 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide">Total Registrations</p>
+                            <File className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                          </div>
+                          <p className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-1">
+                            {trainingData.processing_info.total_registrations?.toLocaleString() || 'N/A'}
+                          </p>
+                          <p className="text-xs text-purple-700 dark:text-purple-300">Records processed</p>
+                        </div>
+                      )}
+
+                      {/* CSV Files Combined KPI Card */}
+                      {trainingData.processing_info?.total_csv_files && (
+                        <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg border border-orange-200 dark:border-orange-800 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wide">CSV Files</p>
+                            <File className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                          </div>
+                          <p className="text-2xl font-bold text-orange-900 dark:text-orange-100 mb-1">
+                            {trainingData.processing_info.total_csv_files || 'N/A'}
+                          </p>
+                          <p className="text-xs text-orange-700 dark:text-orange-300">Files combined</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Date Ranges - Two Column Layout with Calendar Icons */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Training Date Range */}
+                      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Training Date Range</p>
+                        </div>
+                        <p className="text-sm text-gray-900 dark:text-white font-medium">
+                          {trainingData.date_range?.start 
+                            ? formatDate(trainingData.date_range.start)
+                            : 'N/A'} – {trainingData.date_range?.end 
+                            ? formatDate(trainingData.date_range.end)
+                            : 'N/A'}
+                        </p>
+                      </div>
+
+                      {/* Test Date Range */}
+                      {trainingData.test_date_range && (
+                        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Test Date Range</p>
+                          </div>
+                          <p className="text-sm text-gray-900 dark:text-white font-medium">
+                            {formatDate(trainingData.test_date_range.start)} – {formatDate(trainingData.test_date_range.end)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* AIC and BIC - Two Smaller KPI Cards */}
+                    {(trainingData.aic !== undefined || trainingData.bic !== undefined) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {trainingData.aic !== undefined && (
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <div className="p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg border border-indigo-200 dark:border-indigo-800 shadow-sm hover:shadow-md transition-shadow cursor-help">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">AIC</p>
+                                    <Info className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100 font-mono">
+                                    {trainingData.aic.toFixed(2)}
+                                  </p>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                <p className="text-sm">Lower values indicate better model fit (with penalty for complexity).</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        {trainingData.bic !== undefined && (
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <div className="p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 rounded-lg border border-indigo-200 dark:border-indigo-800 shadow-sm hover:shadow-md transition-shadow cursor-help">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">BIC</p>
+                                    <Info className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                                  </div>
+                                  <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100 font-mono">
+                                    {trainingData.bic.toFixed(2)}
+                                  </p>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                <p className="text-sm">Lower values indicate better model fit (with penalty for complexity).</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Cross-Validation Results - Single Large Card */}
+                    {(trainingData.cv_results || trainingData.cross_validation) && (
+                      <div className="p-5 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800 shadow-sm">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-semibold text-base flex items-center gap-2 text-green-900 dark:text-green-100">
+                            <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                            Cross-Validation (TimeSeriesSplit)
+                          </h3>
+                          <TooltipProvider>
+                            <Tooltip delayDuration={300}>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="w-4 h-4 text-green-600 dark:text-green-400 cursor-help hover:text-green-700 dark:hover:text-green-300" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
+                                <div className="space-y-2">
+                                  <p className="font-semibold">TimeSeriesSplit Cross-Validation</p>
+                                  <div className="text-xs space-y-1">
+                                    <p><strong>What it is:</strong> A validation method that splits data chronologically and tests the model on future periods.</p>
+                                    <p><strong>What it means:</strong> Simulates real-world prediction scenarios where you predict future data based on past data.</p>
+                                    <p><strong>What it helps with:</strong> Provides more realistic accuracy estimates than single train-test split, ensuring the model performs well across different time periods.</p>
+                                  </div>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                         {(() => {
                           const cvData = trainingData.cv_results || trainingData.cross_validation;
                           return (
-                            <div className="flex flex-col md:flex-row gap-4 md:gap-6 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               {cvData.mean_mape !== undefined && cvData.mean_mape !== null && (
-                                <div className="flex-1 flex items-center gap-2">
-                                  <span className="text-gray-700 dark:text-gray-300 font-medium">Mean MAPE:</span>
-                                  <span className="font-semibold text-lg text-teal-900 dark:text-teal-300">
+                                <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3 border border-green-200 dark:border-green-700">
+                                  <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Mean MAPE</p>
+                                  <p className="text-xl font-bold text-green-900 dark:text-green-100">
                                     {cvData.mean_mape.toFixed(2)}%
-                                  </span>
+                                  </p>
                                   <TooltipProvider>
                                     <Tooltip delayDuration={300}>
                                       <TooltipTrigger asChild>
-                                        <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                        <HelpCircle className="w-3 h-3 text-green-600 dark:text-green-400 cursor-help mt-1" />
                                       </TooltipTrigger>
                                       <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
                                         <div className="space-y-2">
@@ -1788,15 +1797,15 @@ export default function MVPredictionPage() {
                                 </div>
                               )}
                               {cvData.std_mape !== undefined && cvData.std_mape !== null && (
-                                <div className="flex-1 flex items-center gap-2">
-                                  <span className="text-gray-700 dark:text-gray-300 font-medium">Std MAPE:</span>
-                                  <span className="font-semibold text-lg text-teal-900 dark:text-teal-300">
+                                <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3 border border-green-200 dark:border-green-700">
+                                  <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Std MAPE</p>
+                                  <p className="text-xl font-bold text-green-900 dark:text-green-100">
                                     {cvData.std_mape.toFixed(2)}%
-                                  </span>
+                                  </p>
                                   <TooltipProvider>
                                     <Tooltip delayDuration={300}>
                                       <TooltipTrigger asChild>
-                                        <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                        <HelpCircle className="w-3 h-3 text-green-600 dark:text-green-400 cursor-help mt-1" />
                                       </TooltipTrigger>
                                       <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
                                         <div className="space-y-2">
@@ -1813,15 +1822,15 @@ export default function MVPredictionPage() {
                                 </div>
                               )}
                               {cvData.n_splits && (
-                                <div className="flex-1 flex items-center gap-2">
-                                  <span className="text-gray-700 dark:text-gray-300 font-medium">Folds:</span>
-                                  <span className="font-semibold text-lg text-teal-900 dark:text-teal-300">
+                                <div className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3 border border-green-200 dark:border-green-700">
+                                  <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Folds</p>
+                                  <p className="text-xl font-bold text-green-900 dark:text-green-100">
                                     {cvData.n_splits}
-                                  </span>
+                                  </p>
                                   <TooltipProvider>
                                     <Tooltip delayDuration={300}>
                                       <TooltipTrigger asChild>
-                                        <HelpCircle className="w-3.5 h-3.5 text-teal-500 dark:text-teal-400 cursor-help hover:text-teal-700 dark:hover:text-teal-300" />
+                                        <HelpCircle className="w-3 h-3 text-green-600 dark:text-green-400 cursor-help mt-1" />
                                       </TooltipTrigger>
                                       <TooltipContent className="max-w-sm bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-3">
                                         <div className="space-y-2">
@@ -1840,14 +1849,11 @@ export default function MVPredictionPage() {
                             </div>
                           );
                         })()}
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-4 pt-3 border-t border-teal-200 dark:border-teal-800">
+                        <p className="text-xs text-green-700 dark:text-green-300 mt-4 pt-3 border-t border-green-200 dark:border-green-700">
                           Walk-forward validation across multiple time periods for robust model evaluation
                         </p>
                       </div>
-                    </div>
-                  )}
-                </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
