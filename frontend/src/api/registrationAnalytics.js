@@ -1,5 +1,12 @@
 import apiClient from './axios.js';
 
+const getFilenameFromHeaders = (headers, fallback) => {
+  const disposition = headers['content-disposition'] || headers['Content-Disposition'];
+  if (!disposition) return fallback;
+  const match = disposition.match(/filename="?(?<filename>[^"]+)"?/);
+  return match?.groups?.filename || fallback;
+};
+
 // Get registration analytics data
 export const getRegistrationAnalytics = async (month = null, year = null) => {
   try {
@@ -129,4 +136,26 @@ export const getVehicleClassificationData = async (month = null, year = null) =>
   } catch (error) {
     throw error;
   }
+};
+
+export const exportRegistrationReportPdf = async (payload) => {
+  const response = await apiClient.post('/reports/registration/pdf', payload, {
+    responseType: 'blob'
+  });
+  const filename = getFilenameFromHeaders(
+    response.headers,
+    `registration-report-${payload.scope || 'monthly'}.pdf`
+  );
+  return { blob: response.data, filename };
+};
+
+export const exportRegistrationReportCsv = async (payload) => {
+  const response = await apiClient.post('/reports/registration/csv', payload, {
+    responseType: 'blob'
+  });
+  const filename = getFilenameFromHeaders(
+    response.headers,
+    `registration-data-${payload.scope || 'monthly'}.csv`
+  );
+  return { blob: response.data, filename };
 };

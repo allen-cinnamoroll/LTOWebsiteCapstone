@@ -8,6 +8,7 @@ import authRoutes from "./auth.js";
 import logRoutes from "./logs.js";
 import dashboardRoutes from "./dashboard.js";
 import accountRoutes from "./account.js";
+import reportRoutes from "./report.js";
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.use("/accident", accidentRoutes);
 router.use("/auth", authRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/account", accountRoutes);
+router.use("/reports", reportRoutes);
 //log routes for admin and driver
 router.use("/logs", logRoutes);
 
