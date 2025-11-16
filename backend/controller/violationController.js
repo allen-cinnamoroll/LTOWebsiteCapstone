@@ -376,8 +376,7 @@ export const getViolationAnalytics = async (req, res) => {
 
         const topOfficers = Object.entries(officerCounts)
             .map(([officer, count]) => ({ officerName: officer, violationCount: count }))
-            .sort((a, b) => b.violationCount - a.violationCount)
-            .slice(0, 10);
+            .sort((a, b) => b.violationCount - a.violationCount);
 
         // Get violations by type
         const violationsByType = {};
