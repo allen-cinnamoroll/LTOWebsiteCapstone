@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Users, UserCheck, Loader2, AlertCircle } from "lucide-react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
@@ -76,171 +74,79 @@ const OnlineUsersPanel = () => {
 
   if (loading) {
     return (
-      <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-            <Users className="h-4 w-4 text-blue-500" />
-            Online Users
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-            <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Loading...</span>
-          </div>
-        </CardContent>
-      </Card>
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold mb-1">
+          <Users className="h-4 w-4 text-blue-500" />
+          Online Users
+        </div>
+        <div className="text-xs text-gray-500 mb-3">Currently logged in users</div>
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+          <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">Loading...</span>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-            <Users className="h-4 w-4 text-blue-500" />
-            Online Users
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2 py-4 text-sm text-red-600 dark:text-red-400">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </div>
-        </CardContent>
-      </Card>
+      <div>
+        <div className="flex items-center gap-2 text-sm font-semibold mb-1">
+          <Users className="h-4 w-4 text-blue-500" />
+          Online Users
+        </div>
+        <div className="text-xs text-gray-500 mb-3">Currently logged in users</div>
+        <div className="flex items-center gap-2 py-2 text-sm text-red-600 dark:text-red-400">
+          <AlertCircle className="h-4 w-4" />
+          {error}
+        </div>
+      </div>
     );
   }
 
-  // SUPERADMIN: Show names of online admins and employees
-  if (userData.role === "0") {
-    const admins = onlineData?.admins || [];
-    const employees = onlineData?.employees || [];
+  // Single-card layout for both superadmin and admin
+  const admins = onlineData?.admins || [];
+  const employees = onlineData?.employees || [];
 
-    return (
-      <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-            <Users className="h-4 w-4 text-blue-500" />
-            Online Users
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Currently logged in users
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Online Admins */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
-                <UserCheck className="h-3 w-3 text-blue-500" />
-                Online Admins
-              </h3>
-              <Badge variant="outline" className="text-xs">
-                {admins.length}
-              </Badge>
+  return (
+    <div>
+      <div className="flex items-center gap-2 text-sm font-semibold mb-1">
+        <Users className="h-4 w-4 text-blue-500" />
+        Online Users
+      </div>
+      <div className="text-xs text-gray-500 mb-3">Currently logged in users</div>
+
+      <div className="space-y-4">
+        {/* Admins row */}
+        <div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-blue-500" />
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Online Admins</span>
             </div>
-            {admins.length > 0 ? (
-              <ul className="space-y-1.5">
-                {admins.map((admin) => (
-                  <li
-                    key={admin.id}
-                    className="text-xs text-gray-600 dark:text-gray-400 pl-4 flex items-center gap-2"
-                  >
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    {admin.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-gray-500 dark:text-gray-500 pl-4">
-                No admins online
-              </p>
-            )}
+            <span className="text-xs px-2 py-0.5 rounded-full border">{admins.length}</span>
           </div>
+          {admins.length === 0 && (
+            <div className="text-[11px] text-gray-500 mt-1">No admins online</div>
+          )}
+        </div>
 
-          {/* Online Employees */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
-                <UserCheck className="h-3 w-3 text-green-500" />
-                Online Employees
-              </h3>
-              <Badge variant="outline" className="text-xs">
-                {employees.length}
-              </Badge>
+        {/* Employees row */}
+        <div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-green-500" />
+              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Online Employees</span>
             </div>
-            {employees.length > 0 ? (
-              <ul className="space-y-1.5">
-                {employees.map((emp) => (
-                  <li
-                    key={emp.id}
-                    className="text-xs text-gray-600 dark:text-gray-400 pl-4 flex items-center gap-2"
-                  >
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    {emp.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-gray-500 dark:text-gray-500 pl-4">
-                No employees online
-              </p>
-            )}
+            <span className="text-xs px-2 py-0.5 rounded-full border">{employees.length}</span>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // ADMIN: Show names of online employees
-  if (userData.role === "1") {
-    const employees = onlineData?.employees || [];
-
-    return (
-      <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-            <Users className="h-4 w-4 text-blue-500" />
-            Online Employees
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Currently logged in employees
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
-                <UserCheck className="h-3 w-3 text-green-500" />
-                Online Employees
-              </h3>
-              <Badge variant="outline" className="text-xs">
-                {employees.length}
-              </Badge>
-            </div>
-            {employees.length > 0 ? (
-              <ul className="space-y-1.5">
-                {employees.map((emp) => (
-                  <li
-                    key={emp.id}
-                    className="text-xs text-gray-600 dark:text-gray-400 pl-4 flex items-center gap-2"
-                  >
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    {emp.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-gray-500 dark:text-gray-500 pl-4">
-                No employees online
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+          {employees.length === 0 && (
+            <div className="text-[11px] text-gray-500 mt-1">No employees online</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 
   return null;
 };

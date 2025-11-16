@@ -283,21 +283,49 @@ export const getViolationCount = async (req, res) => {
 // Get comprehensive violation analytics
 export const getViolationAnalytics = async (req, res) => {
     try {
-        const { year } = req.query;
+        const { year, month } = req.query;
         
-        // Build filter for year if provided
+        console.log('Violation Analytics - Received params:', { year, month });
+        
+        // Build filter for year/month if provided
         let filter = {};
         if (year && year !== 'All') {
-            const startDate = new Date(`${year}-01-01`);
-            const endDate = new Date(`${year}-12-31`);
-            filter.dateOfApprehension = {
-                $gte: startDate,
-                $lte: endDate
-            };
+            if (month && month !== 'All') {
+                // Filter by specific month and year
+                const monthNum = parseInt(month);
+                const yearNum = parseInt(year);
+                const startDate = new Date(yearNum, monthNum - 1, 1);
+                const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+                filter.dateOfApprehension = {
+                    $gte: startDate,
+                    $lte: endDate
+                };
+                console.log('Filtering by month/year:', { startDate, endDate });
+            } else {
+                // Filter by year only
+                const startDate = new Date(`${year}-01-01`);
+                const endDate = new Date(`${year}-12-31`);
+                filter.dateOfApprehension = {
+                    $gte: startDate,
+                    $lte: endDate
+                };
+                console.log('Filtering by year only:', { startDate, endDate });
+            }
         }
+
+        console.log('Final filter:', JSON.stringify(filter, null, 2));
 
         // Get all violations with filter
         const violations = await ViolationModel.find(filter);
+        
+        console.log(`Found ${violations.length} violations matching filter`);
+        if (violations.length > 0) {
+            console.log('Sample violation dates:', violations.slice(0, 3).map(v => ({
+                date: v.dateOfApprehension,
+                type: v.violationType,
+                officer: v.apprehendingOfficer
+            })));
+        }
         
         // Count total individual violations across all records
         let totalViolations = 0;

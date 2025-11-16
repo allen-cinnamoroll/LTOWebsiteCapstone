@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
-import StatCard from "@/components/home/StatCard";
-import CircularKpi from "@/components/home/CircularKpi";
 import OnlineUsersPanel from "@/components/home/OnlineUsersPanel";
-import { Users, Car, ChartSpline, ChartPie, UserCog, Calendar, AlertCircle, TrendingUp, TrendingDown, AlertTriangle, Shield, Activity, Target } from "lucide-react";
-import { ViolationsChart } from "@/components/home/ViolationsChart";
 import { Progress } from "@/components/ui/progress";
+import VehicleRenewalGauge from "@/components/home/VehicleRenewalGauge";
+import Top3Municipality from "@/components/home/charts/Top3Municipality";
+import Top5Violation from "@/components/home/charts/Top5Violation";
+import Top3BottomMunicipality from "@/components/home/charts/Top3BottomMunicipality";
+import Top3Officer from "@/components/home/charts/Top3Officer";
+import Top5MunicipalityAccident from "@/components/home/charts/Top5MunicipalityAccident";
+import WeeklyAccidentPattern from "@/components/home/charts/WeeklyAccidentPattern";
+import ViolationTypeDistribution from "@/components/home/charts/ViolationTypeDistribution";
+import { useDashboardCharts } from "@/api/dashboardCharts";
 
 const HomePage = () => {
   const [loading, setLoading] = useState(true);
@@ -24,6 +29,7 @@ const HomePage = () => {
     }
   });
   const { token, userData } = useAuth();
+  const charts = useDashboardCharts();
 
   useEffect(() => {
     fetchDashboardStats();
@@ -133,111 +139,190 @@ const HomePage = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-6 bg-white dark:bg-black min-h-screen space-y-4 md:space-y-6 rounded-lg">
-      <section className="text-2xl md:text-3xl font-bold">Dashboard</section>
+      <section className="text-2xl md:text-3xl font-bold">
+        {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+      </section>
       
       {loading ? (
-        <div className="space-y-4">
-          {/* Loading Rectangular Stat Cards - Top Row */}
-          <section className="max-h-full w-full grid grid-flow-row lg:grid-flow-col grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-5">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-card shadow-sm border border-border overflow-hidden rounded-xl p-6">
-                <div className="animate-pulse">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="h-4 bg-muted rounded w-32"></div>
-                    <div className="w-5 h-5 bg-muted rounded"></div>
-                  </div>
-                  <div className="h-8 bg-muted rounded w-16 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-20"></div>
-                </div>
+        <>
+          {/* Skeleton Grid matching final layout */}
+          <section className="w-full grid grid-cols-12 gap-4">
+            {/* div1: Vehicle Renewal (lg:3) */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-40 bg-muted rounded mb-4"></div>
+                <div className="w-full aspect-[4/3] bg-muted rounded"></div>
+                <div className="h-3 w-28 bg-muted rounded mt-3"></div>
               </div>
-            ))}
-          </section>
-
-          {/* Loading Circular KPIs - Second Row */}
-          <section className="max-h-full w-full grid grid-flow-row lg:grid-flow-col grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-2">
-            {[1, 2].map((i) => (
-              <div key={i} className="flex flex-col items-center justify-center">
-                <div className="animate-pulse">
-                  <div className="w-24 h-24 md:w-28 md:h-28 bg-muted rounded-full mb-4"></div>
-                  <div className="h-4 bg-muted rounded w-32 mb-1"></div>
-                  <div className="h-3 bg-muted rounded w-24"></div>
-                </div>
-              </div>
-            ))}
-          </section>
-
-          {/* Loading Chart */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <div className="animate-pulse">
-              <div className="h-6 bg-muted rounded w-48 mb-4"></div>
-              <div className="h-64 bg-muted rounded"></div>
             </div>
-          </div>
+            {/* div2: Top 3 Municipality (lg:4) */}
+            <div className="col-span-12 lg:col-span-4">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-44 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
+            {/* div3: Top 5 Violation (lg:5) */}
+            <div className="col-span-12 lg:col-span-5">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-44 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
 
-        </div>
+            {/* div4: Online Users (lg:3) */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-36 bg-muted rounded mb-2"></div>
+                <div className="h-3 w-40 bg-muted rounded mb-4"></div>
+                <div className="h-3 w-48 bg-muted rounded mb-2"></div>
+                <div className="h-3 w-48 bg-muted rounded"></div>
+              </div>
+            </div>
+            {/* div5: Top 3 Bottom Municipality (lg:3) */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-56 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
+            {/* div6: Violation Type Distribution (lg:3) */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-64 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
+            {/* div7: Top 3 Officer (lg:3) */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-44 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
+
+            {/* Bottom row */}
+            {/* div8: Top 5 Municipality Accident (lg:6) */}
+            <div className="col-span-12 lg:col-span-6">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-64 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
+            {/* div9: Weekly Accident Pattern (lg:6) */}
+            <div className="col-span-12 lg:col-span-6">
+              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+                <div className="h-5 w-64 bg-muted rounded mb-4"></div>
+                <div className="h-56 bg-muted rounded"></div>
+              </div>
+            </div>
+          </section>
+        </>
       ) : (
         <>
-          {/* Vehicle Renewal KPI - Featured at Top */}
-          <section className="w-full flex justify-center">
-            <div className="w-full max-w-md">
-              <CircularKpi
-                label="Vehicle Renewal"
-                value={(stats.kpi?.renewal?.current || 0).toString()}
-                subtitle="Renewed this month"
-                icon={Calendar}
-                tone={getRenewalTone()}
-                target={stats.kpi?.renewal?.target || 0}
-                ariaLabel={`Vehicle Renewal: ${stats.kpi?.renewal?.current || 0} renewed this month out of ${stats.kpi?.renewal?.target || 0} predicted (based on Monthly Registration Prediction)`}
-              />
+          {/* Dashboard Grid Layout */}
+          <section className="w-full grid grid-cols-12 gap-4">
+            {/* div1: Vehicle Renewal */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="w-full">
+                <VehicleRenewalGauge
+                  actual={stats.kpi?.renewal?.current || 0}
+                  target={stats.kpi?.renewal?.target || 0}
+                  title="Vehicle Renewal KPI"
+                />
+              </div>
+            </div>
+            {/* div2: Top 3 Municipality */}
+            <div className="col-span-12 lg:col-span-4">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <Top3Municipality data={charts.municipalityTop3 || []} />
+              )}
+            </div>
+            {/* div3: Top 5 Violation */}
+            <div className="col-span-12 lg:col-span-5">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <Top5Violation data={charts.violationsTop5 || []} />
+              )}
+            </div>
+
+            {/* div4: Online Users */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <div className="rounded-xl shadow-md bg-white border p-4 h-full overflow-hidden">
+                {(userData?.role === "0" || userData?.role === "1") ? (
+                  <OnlineUsersPanel />
+                ) : (
+                  <div className="p-4 text-sm text-muted-foreground">Online Users (admins only)</div>
+                )}
+              </div>
+            </div>
+            {/* div5: Top 3 Bottom Municipality */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <Top3BottomMunicipality data={charts.bottomMunicipalityTop3 || []} />
+              )}
+            </div>
+            {/* div6: Violation Type distribution */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <ViolationTypeDistribution data={charts.violationTypeDistribution || []} />
+              )}
+            </div>
+            {/* div7: Top 3 Officer */}
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <Top3Officer data={charts.topOfficersTop3 || []} />
+              )}
+            </div>
+
+            {/* Bottom row */}
+            {/* div8: Top 5 Municipality Accident */}
+            <div className="col-span-12 lg:col-span-6">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <Top5MunicipalityAccident data={charts.accidentMunicipalityTop5 || []} />
+              )}
+            </div>
+            {/* div9: Weekly Accident Pattern */}
+            <div className="col-span-12 lg:col-span-6">
+              {charts.loading ? (
+                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
+                  <div className="h-48 bg-muted rounded"></div>
+                </div>
+              ) : (
+                <WeeklyAccidentPattern data={charts.weeklyAccidentPattern || []} />
+              )}
             </div>
           </section>
-
-          {/* Rectangular Stat Cards - Overview Statistics */}
-          <section className="max-h-full w-full grid grid-flow-row lg:grid-flow-col grid-cols-1 gap-4 md:gap-5 md:grid-cols-2 lg:grid-cols-5">
-            <StatCard
-              name={"Registered Vehicles"}
-              value={(stats.vehicles?.total || 0).toString()}
-              icon={Car}
-              statuses={[
-                { label: `${stats.vehicles?.active || 0} Active`, color: "#047857", bgColor: "#d1fae5" }, // Green
-                { label: `${stats.vehicles?.expired || 0} Expired`, color: "#dc2626", bgColor: "#fee2e2" }, // Red
-              ]}
-            />
-            <StatCard
-              name={"Registered Owners"}
-              value={(stats.drivers?.total || 0).toString()}
-              icon={Users}
-            />
-            <StatCard 
-              name={"Violations"} 
-              value={(stats.violations?.total || 0).toString()} 
-              icon={ChartSpline} 
-            />
-            <StatCard 
-              name={"Accidents"} 
-              value={(stats.accidents?.total || 0).toString()} 
-              icon={ChartPie} 
-            />
-            <StatCard
-              name={"System Users"}
-              value={(stats.userStats?.total || 0).toString()}
-              icon={UserCog}
-              statuses={[
-                { label: `${stats.userStats?.employees || 0} Employees`, color: "#0369a1", bgColor: "#dbeafe" }, // Blue
-                { label: `${stats.userStats?.admins || 0} Admins`, color: "#7c3aed", bgColor: "#ede9fe" }, // Purple
-              ]}
-            />
-          </section>
-
-          {/* Violations Chart */}
-          <ViolationsChart />
-          
-          {/* Online Users Panel - Only for admin and superadmin */}
-          {(userData?.role === "0" || userData?.role === "1") && (
-            <section className="w-full">
-                <OnlineUsersPanel />
-          </section>
-          )}
         </>
       )}
     </div>

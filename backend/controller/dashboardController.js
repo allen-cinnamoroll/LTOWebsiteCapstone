@@ -654,7 +654,10 @@ export const getChartData = async (req, res) => {
       case 'week':
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 7);
-        matchStage = { dateOfApprehension: { $gte: startDate } };
+        matchStage = { 
+          dateOfApprehension: { $gte: startDate },
+          $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] }
+        };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },
@@ -670,7 +673,10 @@ export const getChartData = async (req, res) => {
       case '3months':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 3);
-        matchStage = { dateOfApprehension: { $gte: startDate } };
+        matchStage = { 
+          dateOfApprehension: { $gte: startDate },
+          $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] }
+        };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },
@@ -685,7 +691,10 @@ export const getChartData = async (req, res) => {
       case '6months':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 6);
-        matchStage = { dateOfApprehension: { $gte: startDate } };
+        matchStage = { 
+          dateOfApprehension: { $gte: startDate },
+          $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] }
+        };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },
@@ -700,7 +709,10 @@ export const getChartData = async (req, res) => {
       case 'months':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 12); // Last 12 months
-        matchStage = { dateOfApprehension: { $gte: startDate } };
+        matchStage = { 
+          dateOfApprehension: { $gte: startDate },
+          $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] }
+        };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },
@@ -715,7 +727,10 @@ export const getChartData = async (req, res) => {
       case 'year':
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 1); // Last 1 year
-        matchStage = { dateOfApprehension: { $gte: startDate } };
+        matchStage = { 
+          dateOfApprehension: { $gte: startDate },
+          $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] }
+        };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },
@@ -730,7 +745,10 @@ export const getChartData = async (req, res) => {
       case 'years':
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 5); // Last 5 years
-        matchStage = { dateOfApprehension: { $gte: startDate } };
+        matchStage = { 
+          dateOfApprehension: { $gte: startDate },
+          $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] }
+        };
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" }
@@ -744,7 +762,7 @@ export const getChartData = async (req, res) => {
       case 'all':
       default:
         // All time - no date filter
-        matchStage = {}; // No date filtering
+        matchStage = { $expr: { $eq: [ { $type: "$dateOfApprehension" }, "date" ] } }; // Ensure valid date
         groupStage = {
           _id: {
             year: { $year: "$dateOfApprehension" },
@@ -769,10 +787,13 @@ export const getChartData = async (req, res) => {
     let accidentData = [];
     try {
       // Build accident match stage - use accident_date instead of dateOfApprehension
-      let accidentMatchStage = {};
+      let accidentMatchStage = { $expr: { $eq: [ { $type: "$accident_date" }, "date" ] } };
       if (Object.keys(matchStage).length > 0 && matchStage.dateOfApprehension) {
         accidentMatchStage = { 
-          accident_date: matchStage.dateOfApprehension 
+          $and: [
+            { $expr: { $eq: [ { $type: "$accident_date" }, "date" ] } },
+            { accident_date: matchStage.dateOfApprehension }
+          ]
         };
       }
       

@@ -1,0 +1,48 @@
+{
+  "model_type": "RandomForestRegressor",
+  "training_date": "2025-11-16T02:10:32.504566",
+  "feature_count": 10,
+  "feature_columns": [
+    "year",
+    "month",
+    "month_sin",
+    "month_cos",
+    "year_normalized",
+    "municipality_encoded",
+    "barangay_encoded",
+    "accident_count_lag1",
+    "accident_count_rolling_mean_3",
+    "accident_count_rolling_std_3"
+  ],
+  "training_samples": 201,
+  "test_samples": 51,
+  "metrics": {
+    "train_rmse": 0.46188723909436874,
+    "train_mae": 0.19678646450288242,
+    "train_r2": 0.7573576337479402,
+    "train_mape": 12.432668117274549,
+    "train_accuracy_pct": 87.56733188272545,
+    "train_accuracy_20pct": 81.59203980099502,
+    "train_accuracy_30pct": 87.06467661691542,
+    "test_rmse": 0.5371715661555801,
+    "test_mae": 0.2518639122315593,
+    "test_r2": -0.11685582017140894,
+    "test_mape": 18.76305114638448,
+    "test_accuracy_pct": 81.23694885361552,
+    "test_accuracy_20pct": 72.54901960784314,
+    "test_accuracy_30pct": 80.3921568627451,
+    "cv_r2_mean": 0.2054548961228722,
+    "cv_r2_std": 0.4281043370540532
+  },
+  "year_range": [
+    2023,
+    2024
+  ],
+  "model_params": {
+    "n_estimators": 100,
+    "max_depth": 20,
+    "min_samples_split": 5,
+    "min_samples_leaf": 2,
+    "random_state": 42
+  }
+}

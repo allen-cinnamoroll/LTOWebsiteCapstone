@@ -1,0 +1,22 @@
+"use client";
+
+import React from "react";
+import BarCard from "./BarCard";
+
+const Top3BottomMunicipality = ({ data = [] }) => {
+	return (
+		<BarCard
+			title="Top 3 Bottom Municipality"
+			data={data}
+			xKey="name"
+			barKey="value"
+			color="#10b981"
+			horizontal={false}
+			xLabel="Municipality"
+		/>
+	);
+};
+
+export default Top3BottomMunicipality;
+
+

@@ -165,9 +165,16 @@ export function AccidentAnalytics() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [predLoading, setPredLoading] = useState(false);
   const [error, setError] = useState(null);
   const [chartType, setChartType] = useState('area');
   const [isMobile, setIsMobile] = useState(false);
+  const [predictions, setPredictions] = useState([]);
+  const [predError, setPredError] = useState(null);
+  const now = new Date();
+  const [predYear, setPredYear] = useState(now.getFullYear());
+  const [predMonth, setPredMonth] = useState(now.getMonth() + 1);
+  const [predScope, setPredScope] = useState('barangay'); // 'barangay' | 'municipality'
   const { token } = useAuth();
 
   // Detect theme (light/dark mode)
@@ -242,6 +249,91 @@ export function AccidentAnalytics() {
     }
   };
 
+  // Aggregate predictions by municipality when scope is 'municipality'
+  const scopedPredictions = useMemo(() => {
+    if (!predictions || predictions.length === 0) return [];
+    if (predScope === 'barangay') return predictions.slice().sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0));
+    // aggregate by municipality
+    const map = new Map();
+    predictions.forEach(p => {
+      const key = p.municipality || 'Unknown';
+      const current = map.get(key) || { municipality: key, predicted_count: 0 };
+      const add = typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count || 0);
+      current.predicted_count += add;
+      map.set(key, current);
+    });
+    return Array.from(map.values()).sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0));
+  }, [predictions, predScope]);
+
+  // Fetch predictions from Flask API
+  const fetchAccidentPredictions = async () => {
+    try {
+      setPredLoading(true);
+      setPredError(null);
+      const baseUrl = import.meta?.env?.VITE_ACCIDENT_PRED_API || 'http://localhost:5004';
+      const healthUrl = `${baseUrl}/api/accidents/health`;
+      const url = `${baseUrl}/api/accidents/predict/all?year=${predYear}&month=${predMonth}`;
+
+      // helper with timeout
+      const fetchWithTimeout = (resource, options = {}, timeout = 10000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+        return fetch(resource, { ...options, signal: controller.signal })
+          .finally(() => clearTimeout(id));
+      };
+
+      // optional health check (non-blocking)
+      try {
+        await fetchWithTimeout(healthUrl, { headers: { 'Content-Type': 'application/json' } }, 5000);
+      } catch (_) {
+        // ignore health failures, proceed to main request (will handle below)
+      }
+
+      // retry logic for transient network errors like ECONNRESET
+      let attempt = 0;
+      let lastErr = null;
+      while (attempt < 2) {
+        try {
+          const res = await fetchWithTimeout(url, {
+            headers: { 'Content-Type': 'application/json' }
+          }, 12000);
+          if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || `Failed to fetch predictions (HTTP ${res.status})`);
+          }
+          const data = await res.json();
+          if (!data.success) {
+            throw new Error(data.error || 'Prediction API returned an error');
+          }
+          setPredictions(Array.isArray(data.predictions) ? data.predictions : []);
+          lastErr = null;
+          break;
+        } catch (e) {
+          lastErr = e;
+          // small backoff before retry
+          await new Promise(r => setTimeout(r, 500));
+          attempt += 1;
+        }
+      }
+      if (lastErr) {
+        throw lastErr;
+      }
+    } catch (e) {
+      // Normalize common network error messages
+      const msg = (e && e.message ? String(e.message) : 'Request failed').toLowerCase();
+      if (msg.includes('aborted') || msg.includes('timeout')) {
+        setPredError('Prediction request timed out. Please try again.');
+      } else if (msg.includes('econnreset') || msg.includes('network') || msg.includes('failed to fetch')) {
+        setPredError('Cannot reach prediction service. Ensure the Flask API is running and accessible.');
+      } else {
+        setPredError(e.message || 'Failed to fetch predictions');
+      }
+      setPredictions([]);
+    } finally {
+      setPredLoading(false);
+    }
+  };
+
   const getPeriodLabel = (period) => {
     switch (period) {
       case 'week': return 'Last Week';
@@ -257,7 +349,7 @@ export function AccidentAnalytics() {
   const formatMonthlyTrends = (trends) => {
     if (!trends || !Array.isArray(trends)) return [];
     
-    return trends.map(trend => {
+    const formatted = trends.map(trend => {
       // Validate trend structure
       if (!trend || !trend._id || trend._id.year === undefined || trend._id.month === undefined) {
         return null;
@@ -278,6 +370,13 @@ export function AccidentAnalytics() {
         accidents: trend.count || 0
       };
     }).filter(item => item !== null);
+    
+    // Sort by date to ensure chronological order
+    return formatted.sort((a, b) => {
+      const dateA = new Date(a.month);
+      const dateB = new Date(b.month);
+      return dateA.getTime() - dateB.getTime();
+    });
   };
 
   const formatSeverityData = (severityData) => {
@@ -752,7 +851,7 @@ export function AccidentAnalytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Enhanced Monthly Trends */}
         {analyticsData && analyticsData.trends.monthly.length > 0 && (
-          <Card className="group hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left-5 fade-in duration-700">
+          <Card className="order-1 lg:col-span-2 group hover:shadow-lg transition-all duration-300 animate-in slide-in-from-left-5 fade-in duration-700">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -829,7 +928,9 @@ export function AccidentAnalytics() {
                     <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
                     <Tooltip 
                       labelFormatter={(value) => {
+                        if (!value) return '';
                         const date = new Date(value);
+                        if (isNaN(date.getTime())) return value;
                         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                       }}
                       contentStyle={{
@@ -867,7 +968,9 @@ export function AccidentAnalytics() {
                     <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
                     <Tooltip 
                       labelFormatter={(value) => {
+                        if (!value) return '';
                         const date = new Date(value);
+                        if (isNaN(date.getTime())) return value;
                         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                       }}
                       contentStyle={{
@@ -902,7 +1005,9 @@ export function AccidentAnalytics() {
                     <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
                     <Tooltip 
                       labelFormatter={(value) => {
+                        if (!value) return '';
                         const date = new Date(value);
+                        if (isNaN(date.getTime())) return value;
                         return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
                       }}
                       contentStyle={{
@@ -936,79 +1041,9 @@ export function AccidentAnalytics() {
           </Card>
         )}
 
-        {/* Offense Type Distribution (ML Target Variable) */}
-        {analyticsData && analyticsData.distributions.offenseType && analyticsData.distributions.offenseType.length > 0 && (
-          <Card className="animate-in slide-in-from-right-5 fade-in duration-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-red-500 animate-pulse" />
-                Offense Type Distribution
-              </CardTitle>
-              <CardDescription>
-                Prediction Target - Crimes Against Persons vs Property
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={formatOffenseTypeData(analyticsData.distributions.offenseType)}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name.split(' ').slice(-1)[0]} ${(percent * 100).toFixed(1)}%`}
-                    outerRadius={90}
-                    innerRadius={50}
-                    fill="currentColor"
-                    dataKey="value"
-                    animationDuration={1500}
-                    animationEasing="ease-out"
-                  >
-                    {formatOffenseTypeData(analyticsData.distributions.offenseType).map((entry, index) => {
-                      const colors = getColors();
-                      const offenseColorMap = {
-                        'Crimes Against Persons': colors[0],   // Red - High priority
-                        'Crimes Against Property': colors[3]    // Blue - Lower priority
-                      };
-                      return (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={offenseColorMap[entry.name] || colors[index % colors.length]} 
-                        />
-                      );
-                    })}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="mt-4 space-y-2">
-                {formatOffenseTypeData(analyticsData.distributions.offenseType).map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                    <span className="text-sm font-medium">{item.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold">{item.value}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({(item.value / analyticsData.summary.totalAccidents * 100).toFixed(1)}%)
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Day of Week Distribution */}
         {analyticsData && analyticsData.distributions.dayOfWeek && analyticsData.distributions.dayOfWeek.length > 0 && (
-          <Card className="group hover:shadow-lg transition-all duration-300">
+          <Card className="order-3 group hover:shadow-lg transition-all duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-green-500" />
@@ -1086,7 +1121,7 @@ export function AccidentAnalytics() {
 
         {/* Enhanced Municipality Distribution */}
         {analyticsData && analyticsData.distributions.municipality.length > 0 && (
-          <Card className="group hover:shadow-lg transition-all duration-300">
+          <Card className="order-2 group hover:shadow-lg transition-all duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-orange-500" />
@@ -1191,164 +1226,141 @@ export function AccidentAnalytics() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Predictive Risk Forecast */}
-          {analyticsData && analyticsData.distributions.offenseType && (
-            <Card className="border-yellow-200 dark:border-yellow-900">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5 text-yellow-500" />
-                  Risk Prediction Model
-                </CardTitle>
-                <CardDescription>
-                  ML model predicting high-risk accident types (65.7% accuracy)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={formatOffenseTypeData(analyticsData.distributions.offenseType)}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, value, percent }) => `${name.includes('Persons') ? 'Persons' : 'Property'}: ${value} (${(percent * 100).toFixed(1)}%)`}
-                      outerRadius={90}
-                      innerRadius={50}
-                      fill="currentColor"
-                      dataKey="value"
-                      animationDuration={1500}
-                    >
-                      {formatOffenseTypeData(analyticsData.distributions.offenseType).map((entry, index) => {
-                        const colors = getColors();
-                        return (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.name.includes('Persons') ? colors[0] : colors[3]}
-                          />
-                        );
-                      })}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="mt-4 space-y-3">
-                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-red-700 dark:text-red-300">Crimes Against Persons</span>
-                      <Badge variant="destructive">HIGH PRIORITY</Badge>
-                    </div>
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                      56% of cases - Requires immediate response & medical units
-                    </p>
-                  </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Crimes Against Property</span>
-                      <Badge variant="outline">STANDARD</Badge>
-                    </div>
-                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                      44% of cases - Documentation & insurance focus
-                    </p>
-                  </div>
+          {/* Predicted Accidents per Barangay */}
+          <Card className="border-yellow-200 dark:border-yellow-900">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-yellow-500" />
+                Predicted Accidents
+              </CardTitle>
+              <CardDescription>
+                Random Forest regression predictions for selected month
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-muted-foreground">Year</label>
+                  <Select value={String(predYear)} onValueChange={(v) => setPredYear(Number(v))}>
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[predYear - 1, predYear, predYear + 1].map(y => (
+                        <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-muted-foreground">Month</label>
+                  <Select value={String(predMonth)} onValueChange={(v) => setPredMonth(Number(v))}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[
+                        { v: 1, n: 'January' }, { v: 2, n: 'February' }, { v: 3, n: 'March' },
+                        { v: 4, n: 'April' }, { v: 5, n: 'May' }, { v: 6, n: 'June' },
+                        { v: 7, n: 'July' }, { v: 8, n: 'August' }, { v: 9, n: 'September' },
+                        { v: 10, n: 'October' }, { v: 11, n: 'November' }, { v: 12, n: 'December' }
+                      ].map(m => (
+                        <SelectItem key={m.v} value={String(m.v)}>{m.n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-muted-foreground">Scope</label>
+                  <Select value={predScope} onValueChange={setPredScope}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="barangay">Barangay</SelectItem>
+                      <SelectItem value="municipality">Municipality</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <button
+                  onClick={fetchAccidentPredictions}
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-yellow-500 text-white hover:bg-yellow-600 h-9 px-4 py-2"
+                  disabled={predLoading}
+                >
+                  {predLoading ? 'Predicting…' : 'Predict'}
+                </button>
+              </div>
 
-          {/* Yearly Prediction Comparison */}
-          {yearlyPredictionData.length > 0 && (
-            <Card className="lg:col-span-2 border-blue-200 dark:border-blue-900">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-blue-500" />
-                  Accident Forecast Comparison
-                </CardTitle>
-                <CardDescription>
-                  Historical trend (last 12 months) versus projected 2026 accident rate
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
-                  <LineChart data={yearlyPredictionData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
-                    <XAxis 
-                      dataKey="month"
-                      stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
-                      fontSize={11}
-                    />
-                    <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                        border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        color: isDarkMode ? '#f9fafb' : '#111827'
-                      }}
-                    />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="actual" 
-                      name="Actual (Last 12 Months)"
-                      stroke={getColors()[3]}
-                      strokeWidth={isMobile ? 2 : 3}
-                      dot={{ r: isMobile ? 2 : 3 }}
-                      activeDot={{ r: isMobile ? 4 : 5 }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="prediction2026" 
-                      name="Forecast 2026"
-                      stroke={getColors()[0]}
-                      strokeWidth={isMobile ? 2 : 3}
-                      strokeDasharray="6 3"
-                      dot={{ r: isMobile ? 2 : 3 }}
-                      activeDot={{ r: isMobile ? 5 : 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              {predError && (
+                <div className="p-3 rounded border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 text-sm text-red-700 dark:text-red-300 mb-3">
+                  {predError}
+                </div>
+              )}
 
-                {yearlyPredictionSummary && (
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20">
-                      <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                        Actual (Last 12 Months)
-                      </div>
-                      <div className="text-xl font-bold text-blue-900 dark:text-blue-100">
-                        {yearlyPredictionSummary.actualTotal.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-blue-600 dark:text-blue-400">
-                        Reported accidents
-                      </div>
-                    </div>
-                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
-                      <div className="text-sm font-medium text-red-700 dark:text-red-300">
-                        Predicted 2026
-                      </div>
-                      <div className="text-xl font-bold text-red-900 dark:text-red-100">
-                        {yearlyPredictionSummary.predictedTotal.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-red-600 dark:text-red-400">
-                        Forecasted accidents
-                      </div>
-                    </div>
-                    <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20">
-                      <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                        Projected Change
-                      </div>
-                      <div className={`text-xl font-bold ${yearlyPredictionSummary.growth >= 0 ? 'text-purple-900 dark:text-purple-100' : 'text-green-900 dark:text-green-100'}`}>
-                        {yearlyPredictionSummary.growth >= 0 ? '+' : ''}
-                        {yearlyPredictionSummary.growth.toFixed(1)}%
-                      </div>
-                      <div className="text-xs text-purple-600 dark:text-purple-400">
-                        Compared to recent year
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              <div className="max-h-80 overflow-auto border border-border rounded-md">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-2">#</th>
+                      {predScope === 'barangay' ? (
+                        <>
+                          <th className="text-left p-2">Municipality</th>
+                          <th className="text-left p-2">Barangay</th>
+                        </>
+                      ) : (
+                        <th className="text-left p-2">Municipality</th>
+                      )}
+                      <th className="text-right p-2">Predicted Accidents</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {predLoading && (
+                      <tr>
+                        <td className="p-3 text-center text-muted-foreground" colSpan={4}>
+                          Loading predictions...
+                        </td>
+                      </tr>
+                    )}
+                    {!predLoading && scopedPredictions.length === 0 && (
+                      <tr>
+                        <td className="p-3 text-center text-muted-foreground" colSpan={4}>
+                          No predictions yet. Select a month and click Predict.
+                        </td>
+                      </tr>
+                    )}
+                    {!predLoading && scopedPredictions.slice(0, 12).map((p, idx) => (
+                      <tr key={`${p.municipality || 'ALL'}-${p.barangay || 'AGG'}-${idx}`} className="border-t">
+                        <td className="p-2">{idx + 1}</td>
+                        {predScope === 'barangay' ? (
+                          <>
+                            <td className="p-2">{p.municipality}</td>
+                            <td className="p-2">{p.barangay}</td>
+                          </>
+                        ) : (
+                          <td className="p-2">{p.municipality}</td>
+                        )}
+                        <td className="p-2 text-right font-semibold">
+                          {typeof p.predicted_count === 'number'
+                            ? p.predicted_count
+                            : Number(p.predicted_count)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {scopedPredictions.length > 0 && (
+                <div className="text-xs text-muted-foreground mt-2">
+                  {predScope === 'barangay'
+                    ? `Showing top ${Math.min(12, scopedPredictions.length)} of ${scopedPredictions.length} barangays`
+                    : `Showing top ${Math.min(12, scopedPredictions.length)} of ${scopedPredictions.length} municipalities`}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          
+          
 
           {/* Temporal Risk Prediction */}
           {analyticsData && analyticsData.distributions.hourly && (
@@ -1623,133 +1635,62 @@ export function AccidentAnalytics() {
             </Card>
           )}
 
-          {/* Public Outreach Campaigns */}
-          {analyticsData && analyticsData.distributions.offenseType && (
+          {/* Recommended Interventions (AI-Prescribed) */}
+          {predictions && predictions.length > 0 && (
             <Card className="border-green-200 dark:border-green-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-green-500" />
-                  Recommended Interventions
+                  <Activity className="h-5 w-5 text-green-500" />
+                  Recommended Interventions (AI-Prescribed)
                 </CardTitle>
                 <CardDescription>
-                  Evidence-based public outreach and enforcement strategies
+                  Rule-based interventions per barangay derived from predicted accident counts and PNP SOP guidance
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {formatOffenseTypeData(analyticsData.distributions.offenseType).map((offense, index) => (
-                    <div key={index} className={`p-4 rounded-lg ${
-                      offense.name.includes('Persons') 
-                        ? 'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800' 
-                        : 'bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800'
-                    }`}>
-                      <h5 className="font-bold mb-2 flex items-center justify-between">
-                        {offense.name}
-                        <span className="text-sm">({offense.value} cases)</span>
-                      </h5>
-                      {offense.name.includes('Persons') ? (
-                        <div className="space-y-1 text-sm text-red-600 dark:text-red-400">
-                          <p>🏥 <strong>Medical Response:</strong> Pre-position ambulances</p>
-                          <p>🚦 <strong>Infrastructure:</strong> Install traffic lights at top 3 intersections</p>
-                          <p>📢 <strong>Campaign:</strong> "Helmet Saves Lives" targeting motorcyclists</p>
-                          <p>🍺 <strong>Enforcement:</strong> Weekend DUI checkpoints</p>
-                          <p className="font-medium mt-2 text-red-700 dark:text-red-300">
-                            Target: 20-30% reduction in 6 months
-                          </p>
+                  {predictions.slice(0, 6).map((p, idx) => (
+                    <div key={`${p.municipality}-${p.barangay}-${idx}`} className="p-3 rounded border border-border">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-semibold">
+                          {p.municipality} • {p.barangay}
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            Pred: {typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count)}
+                            {p.predicted_count_raw !== undefined && (
+                              <span className="ml-1 text-[10px] text-muted-foreground">(raw {p.predicted_count_raw})</span>
+                            )}
+                          </span>
                         </div>
-                      ) : (
-                        <div className="space-y-1 text-sm text-blue-600 dark:text-blue-400">
-                          <p>📄 <strong>Documentation:</strong> Monthly vehicle registration checks</p>
-                          <p>🛡️ <strong>Insurance:</strong> Compliance verification campaigns</p>
-                          <p>📢 <strong>Campaign:</strong> "Protect Your Assets" education</p>
-                          <p>✅ <strong>Enforcement:</strong> License validity monitoring</p>
-                          <p className="font-medium mt-2 text-blue-700 dark:text-blue-300">
-                            Target: 15-20% reduction in 6 months
-                          </p>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                          p?.prescription?.level === 'CRITICAL' ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300' :
+                          p?.prescription?.level === 'HIGH' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' :
+                          p?.prescription?.level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300' :
+                          p?.prescription?.level === 'LOW' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-300' :
+                          'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300'
+                        }`}>
+                          {p?.prescription?.level || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground space-y-1">
+                        {(p?.prescription?.actions || []).slice(0, 3).map((a, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span>•</span>
+                            <span className="leading-snug">{a}</span>
+                          </div>
+                        ))}
+                        {(p?.prescription?.actions || []).length === 0 && (
+                          <div className="text-muted-foreground">No actions available</div>
+                        )}
+                      </div>
+                      {p?.predicted_high_risk_ranges && (
+                        <div className="mt-2 text-[11px]">
+                          <span className="px-2 py-0.5 rounded bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                            High-Risk Times: {p.predicted_high_risk_ranges}
+                          </span>
                         </div>
                       )}
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Expected Impact Dashboard */}
-          {analyticsData && (
-            <Card className="border-green-200 dark:border-green-900 lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-green-500" />
-                  Expected Impact of Interventions
-                </CardTitle>
-                <CardDescription>
-                  Projected accident reduction if recommendations are implemented
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-lg">
-                    <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">
-                      10-15%
-                    </div>
-                    <div className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
-                      1 Month Impact
-                    </div>
-                    <div className="text-xs text-green-600 dark:text-green-400">
-                      Quick wins from immediate actions
-                    </div>
-                    <div className="mt-3 text-2xl font-bold text-green-700 dark:text-green-300">
-                      ~{Math.ceil(analyticsData.summary.totalAccidents * 0.125)} fewer accidents
-                    </div>
-                  </div>
-
-                  <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 rounded-lg">
-                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                      15-20%
-                    </div>
-                    <div className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
-                      3 Month Impact
-                    </div>
-                    <div className="text-xs text-blue-600 dark:text-blue-400">
-                      Sustained enforcement + campaigns
-                    </div>
-                    <div className="mt-3 text-2xl font-bold text-blue-700 dark:text-blue-300">
-                      ~{Math.ceil(analyticsData.summary.totalAccidents * 0.175)} fewer accidents
-                    </div>
-                  </div>
-
-                  <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20 rounded-lg">
-                    <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                      20-30%
-                    </div>
-                    <div className="text-sm font-medium text-purple-700 dark:text-purple-300 mb-1">
-                      6 Month Impact
-                    </div>
-                    <div className="text-xs text-purple-600 dark:text-purple-400">
-                      Full implementation + infrastructure
-                    </div>
-                    <div className="mt-3 text-2xl font-bold text-purple-700 dark:text-purple-300">
-                      ~{Math.ceil(analyticsData.summary.totalAccidents * 0.25)} fewer accidents
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h5 className="font-bold text-yellow-800 dark:text-yellow-200 mb-1">
-                        Implementation Priority
-                      </h5>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        1. Deploy patrol units at rush hours (Immediate) • 
-                        2. Setup DUI checkpoints on weekends (Week 1) • 
-                        3. Launch "Helmet Saves Lives" campaign (Month 1) • 
-                        4. Install traffic lights at top 3 intersections (Month 2-3)
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
