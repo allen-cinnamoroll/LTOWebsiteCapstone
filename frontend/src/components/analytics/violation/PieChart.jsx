@@ -102,8 +102,8 @@ export function PieChart({ data, title, loading }) {
   if (chartData.length === 0) {
     return (
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-6 h-full flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
-          <svg className="w-8 h-8 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
             </svg>
           </div>
@@ -120,7 +120,7 @@ export function PieChart({ data, title, loading }) {
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-5 space-y-5 h-full flex flex-col">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center shadow-sm">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
             <path
               d="M12 3a9 9 0 019 9h-7.5a1.5 1.5 0 01-1.5-1.5V3Z"
@@ -157,7 +157,7 @@ export function PieChart({ data, title, loading }) {
           </div>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
-          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+          <span className="w-2 h-2 rounded-full bg-red-500"></span>
           <span>Total types: {chartData.length}</span>
         </div>
       </div>
@@ -170,7 +170,7 @@ export function PieChart({ data, title, loading }) {
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Violations</p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{total.toLocaleString()}</p>
                 {activeSlice ? (
-                  <p className="text-xs font-semibold text-blue-600 dark:text-blue-300">
+                  <p className="text-xs font-semibold text-red-600 dark:text-red-300">
                     {activeSlice.name} · {activeSlice.percentage.toFixed(1)}%
                   </p>
                 ) : null}
@@ -221,8 +221,8 @@ export function PieChart({ data, title, loading }) {
                   onClick={() => setActiveIndex(index)}
                   className={`w-full flex items-center justify-between gap-3 rounded-xl border px-3 py-2 transition shadow-sm ${
                     index === activeIndex
-                      ? 'border-blue-400 dark:border-blue-500 bg-blue-50/70 dark:bg-blue-900/30'
-                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-500'
+                      ? 'border-red-400 dark:border-red-500 bg-red-50/70 dark:bg-red-900/30'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-red-300 dark:hover:border-red-500'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
