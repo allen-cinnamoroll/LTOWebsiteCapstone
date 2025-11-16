@@ -339,27 +339,25 @@ const deriveRecommendations = (records, planningYear) => {
     'Awareness campaigns: triggered when we see a sudden increase in a specific violation type in a month.'
   ];
 
-  // Calculate yearly quota estimate based on historical average
-  const recentYears = Array.from(new Set(records.map(r => {
+  // Calculate yearly quota estimate based on most recent year
+  const allYears = Array.from(new Set(records.map(r => {
     if (!r?.dateOfApprehension) return null;
     return new Date(r.dateOfApprehension).getFullYear();
-  }))).filter(Boolean).sort((a, b) => b - a).slice(0, 3);
+  }))).filter(Boolean).sort((a, b) => b - a);
   
-  const yearlyApprehensions = recentYears.map(year => {
-    return records.filter(r => {
-      if (!r?.dateOfApprehension) return false;
-      return new Date(r.dateOfApprehension).getFullYear() === year;
-    }).length;
-  });
-  
-  const avgYearlyApprehensions = yearlyApprehensions.length > 0
-    ? Math.round(yearlyApprehensions.reduce((a, b) => a + b, 0) / yearlyApprehensions.length)
+  // Use the most recent year's count as the quota target
+  const mostRecentYear = allYears.length > 0 ? allYears[0] : null;
+  const yearlyQuotaEstimate = mostRecentYear
+    ? records.filter(r => {
+        if (!r?.dateOfApprehension) return false;
+        return new Date(r.dateOfApprehension).getFullYear() === mostRecentYear;
+      }).length
     : records.length;
   
   // Calculate monthly quota distribution based on peak months
   const monthlyQuotaDistribution = monthSummariesWithShare.map(month => ({
     month: month.monthName,
-    targetQuota: Math.round((avgYearlyApprehensions * (month.share / 100)) * 1.1), // 10% buffer
+    targetQuota: Math.round((yearlyQuotaEstimate * (month.share / 100)) * 1.1), // 10% buffer
     share: month.share,
     isPeakMonth: topMonths.some(tm => tm.monthName === month.monthName)
   }));
@@ -386,11 +384,12 @@ const deriveRecommendations = (records, planningYear) => {
       keyMonths,
       top3Violations: top3Violations.length > 0 ? top3Violations : [dominantViolation].filter(Boolean),
       // New rule-based metrics
-      yearlyQuotaEstimate: avgYearlyApprehensions,
+      yearlyQuotaEstimate: yearlyQuotaEstimate,
       monthlyQuotaDistribution,
       terminalBriefingMonths,
       caravanPriorityMonths,
-      avgYearlyApprehensions
+      avgYearlyApprehensions: yearlyQuotaEstimate,
+      mostRecentYear: mostRecentYear
     }
   };
 };
@@ -478,59 +477,56 @@ export function ViolationPrescriptionTable({ loading }) {
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Priority Months KPI */}
-            <div className={`${prefersDark ? 'bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700' : 'bg-gradient-to-br from-white to-slate-50 border-slate-200'} border rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300`}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1 pr-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className={`${prefersDark ? 'bg-blue-500/20' : 'bg-blue-50'} rounded-lg p-1.5`}>
-                      <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Priority Months
-                    </p>
-                  </div>
-                  <div className="space-y-1">
-                    {meta.keyMonths?.length ? (
-                      meta.keyMonths.map((month, idx) => (
-                        <p key={idx} className="text-lg font-bold text-blue-700 dark:text-blue-300 leading-tight">
-                          {month}
-                        </p>
-                      ))
-                    ) : (
-                      <p className="text-lg font-bold text-blue-700 dark:text-blue-300">February, May, March</p>
-                    )}
-                  </div>
+            <div className={`${prefersDark ? 'bg-white/5 border-slate-700' : 'bg-white border-slate-200'} border rounded-xl p-5 shadow-sm`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`${prefersDark ? 'bg-blue-500/20' : 'bg-blue-50'} rounded-lg p-2`}>
+                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                 </div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  Priority Months
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                {meta.keyMonths?.length ? (
+                  meta.keyMonths.map((month, idx) => (
+                    <React.Fragment key={idx}>
+                      <span className="text-base font-bold text-blue-600 dark:text-blue-400">
+                        {month}
+                      </span>
+                      {idx < meta.keyMonths.length - 1 && (
+                        <span className="text-slate-400 dark:text-slate-500 mx-1">·</span>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <p className="text-base font-bold text-blue-600 dark:text-blue-400">No data available</p>
+                )}
               </div>
             </div>
 
             {/* Yearly Quota Target KPI */}
-            <div className={`${prefersDark ? 'bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700' : 'bg-gradient-to-br from-white to-slate-50 border-slate-200'} border rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300`}>
-              <div className="flex items-start justify-between">
-                <div className="flex-1 pr-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className={`${prefersDark ? 'bg-emerald-500/20' : 'bg-emerald-50'} rounded-lg p-1.5`}>
-                      <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Yearly Quota Target
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 leading-none mb-1">
-                      {meta.yearlyQuotaEstimate?.toLocaleString() ?? 'N/A'}
-                    </p>
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mt-2">
-                      Apprehensions
-                    </p>
-                  </div>
+            <div className={`${prefersDark ? 'bg-white/5 border-slate-700' : 'bg-white border-slate-200'} border rounded-xl p-5 shadow-sm`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className={`${prefersDark ? 'bg-emerald-500/20' : 'bg-emerald-50'} rounded-lg p-2`}>
+                  <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  Yearly Quota Target
+                </p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 leading-tight mb-1">
+                  {meta.yearlyQuotaEstimate?.toLocaleString() ?? 'N/A'}
+                </p>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                  Apprehensions
+                </p>
               </div>
             </div>
           </div>
