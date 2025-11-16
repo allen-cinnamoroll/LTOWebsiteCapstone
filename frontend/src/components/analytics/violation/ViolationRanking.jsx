@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { getViolations } from '../../../api/violationAnalytics.js';
 import {
   BarChart,
   Bar,
@@ -15,9 +16,82 @@ export function ViolationRanking({
 }) {
   const [showModal, setShowModal] = useState(false);
   const [sortDirection, setSortDirection] = useState('desc');
+  const [selectedYear, setSelectedYear] = useState('All');
+  const [rawViolations, setRawViolations] = useState([]);
+  const [yearDataLoading, setYearDataLoading] = useState(false);
+
+  // Fetch all violations once for local year-based filtering (Top Violations only)
+  useEffect(() => {
+    const fetchViolations = async () => {
+      try {
+        setYearDataLoading(true);
+        const response = await getViolations();
+        // API returns { success, data }
+        if (response && response.success && Array.isArray(response.data)) {
+          setRawViolations(response.data);
+        } else if (Array.isArray(response)) {
+          // Fallback if API returns array directly
+          setRawViolations(response);
+        }
+      } catch (error) {
+        console.error('Error fetching violations for Top Violations year filter:', error);
+      } finally {
+        setYearDataLoading(false);
+      }
+    };
+
+    fetchViolations();
+  }, []);
+
+  const yearOptions = useMemo(
+    () => ['All', ...Array.from({ length: 26 }, (_, i) => (2000 + i).toString())],
+    []
+  );
+
+  // Build violations list depending on selected year
+  const allViolations = useMemo(() => {
+    // Default: use backend-precomputed most common violations (All Time)
+    if (!selectedYear || selectedYear === 'All') {
+      return displayData?.mostCommonViolations || [];
+    }
+
+    if (!rawViolations || rawViolations.length === 0) {
+      return [];
+    }
+
+    const counts = {};
+
+    rawViolations.forEach((violation) => {
+      if (!violation.dateOfApprehension) return;
+
+      const violationYear = new Date(violation.dateOfApprehension).getFullYear();
+      if (violationYear.toString() !== selectedYear) return;
+
+      let violationsArray = [];
+
+      if (Array.isArray(violation.violations)) {
+        violationsArray = violation.violations;
+      } else if (typeof violation.violations === 'string') {
+        violationsArray = violation.violations
+          .split(',')
+          .map((v) => v.trim())
+          .filter((v) => v);
+      }
+
+      violationsArray.forEach((violationItem) => {
+        const violationText = violationItem.toString().trim();
+        if (violationText) {
+          counts[violationText] = (counts[violationText] || 0) + 1;
+        }
+      });
+    });
+
+    return Object.entries(counts)
+      .map(([violationName, count]) => ({ _id: violationName, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [selectedYear, rawViolations, displayData?.mostCommonViolations]);
 
   // Get top 5 violations for the chart
-  const allViolations = displayData?.mostCommonViolations || [];
   const top5Violations = allViolations.slice(0, 5).map((violation, index) => ({
     name: violation._id || 'Unknown Violation',
     occurrences: violation.count || 0,
@@ -95,18 +169,45 @@ export function ViolationRanking({
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Violations</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Top 5 violations by occurrences</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Top 5 violations by occurrences
+                  {selectedYear && selectedYear !== 'All' && (
+                    <span className="ml-1 text-[10px] text-rose-600 dark:text-rose-300 font-semibold">
+                      • Year {selectedYear}
+                    </span>
+                  )}
+                  {(!selectedYear || selectedYear === 'All') && (
+                    <span className="ml-1 text-[10px] text-rose-600 dark:text-rose-300 font-semibold">
+                      • All Time
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
-            <button
-               onClick={() => setShowModal(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-md hover:bg-rose-100 transition-colors dark:text-rose-300 dark:bg-rose-900/30 dark:border-rose-700"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M3 12h18M3 19h18" />
-              </svg>
-              View Full List
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="pl-2 pr-6 py-1.5 text-[11px] rounded-md border border-rose-200 bg-white text-rose-700 dark:bg-rose-900/40 dark:border-rose-700 dark:text-rose-100 focus:outline-none focus:ring-1 focus:ring-rose-400"
+                >
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year === 'All' ? 'All Time' : year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => setShowModal(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-md hover:bg-rose-100 transition-colors dark:text-rose-300 dark:bg-rose-900/30 dark:border-rose-700"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M3 12h18M3 19h18" />
+                </svg>
+                View Full List
+              </button>
+            </div>
           </div>
 
           {/* Chart Section */}
