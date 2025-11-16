@@ -281,41 +281,47 @@ def predict_registrations():
                 )
                 logger.info(f"Available municipality models: {list(municipality_models.keys())}")
         
-        # Generate future exogenous variables for prediction period
-        # CRITICAL: Use the same date logic as the model's predict() method
-        # Get actual last registration date (same logic as in OptimizedSARIMAModel.predict())
+        # CRITICAL FIX: Always use the aggregated model's actual_last_date for consistency
+        # Municipality-specific models may have been trained with different data ranges (e.g., June 30),
+        # but we want ALL predictions to start from the same month (after the LATEST training data).
+        # The aggregated model should have the most recent training data (e.g., July 31).
         actual_last_date = None
         
-        # Priority 1: Use actual_last_date if available (from freshly trained model)
-        if hasattr(model_to_use, 'actual_last_date') and model_to_use.actual_last_date is not None:
-            actual_last_date = pd.to_datetime(model_to_use.actual_last_date)
-            logger.info(f"Using actual last registration date: {actual_last_date}")
-        # Priority 2: Check if we have metadata with actual_last_date (from loaded model)
-        elif (hasattr(model_to_use, '_metadata') and 
-              model_to_use._metadata and 
-              'actual_last_date' in model_to_use._metadata):
-            actual_last_date = pd.to_datetime(model_to_use._metadata['actual_last_date'])
-            logger.info(f"Using actual last registration date from metadata: {actual_last_date}")
-        # Priority 3: Fallback to last date from all_data
-        elif model_to_use.all_data is not None and len(model_to_use.all_data) > 0:
-            actual_last_date = pd.to_datetime(model_to_use.all_data.index.max())
-            logger.warning(f"Warning: Using last date from daily data (may be incorrect): {actual_last_date}")
-        # Priority 4: Fallback to metadata's last_data_date
-        elif (hasattr(model_to_use, '_metadata') and 
-              model_to_use._metadata and 
-              'last_data_date' in model_to_use._metadata):
-            actual_last_date = pd.to_datetime(model_to_use._metadata['last_data_date'])
-            logger.warning(f"Warning: Using last_data_date from metadata (may be incorrect): {actual_last_date}")
-        # Priority 5: Final fallback to training data
-        else:
-            actual_last_date = pd.to_datetime(model_to_use.training_data.index.max())
-            logger.warning(f"Warning: Using last date from training data (fallback): {actual_last_date}")
+        # Priority 1: Use aggregated model's actual_last_date (most recent training data)
+        if aggregated_model is not None:
+            if hasattr(aggregated_model, 'actual_last_date') and aggregated_model.actual_last_date is not None:
+                actual_last_date = pd.to_datetime(aggregated_model.actual_last_date)
+                logger.info(f"Using aggregated model's actual_last_date: {actual_last_date}")
+            elif (hasattr(aggregated_model, '_metadata') and 
+                  aggregated_model._metadata and 
+                  'actual_last_date' in aggregated_model._metadata):
+                actual_last_date = pd.to_datetime(aggregated_model._metadata['actual_last_date'])
+                logger.info(f"Using aggregated model's actual_last_date from metadata: {actual_last_date}")
+            elif aggregated_model.all_data is not None and len(aggregated_model.all_data) > 0:
+                actual_last_date = pd.to_datetime(aggregated_model.all_data.index.max())
+                logger.info(f"Using aggregated model's last date from daily data: {actual_last_date}")
+        
+        # Priority 2: Fallback to selected model's date only if aggregated model not available
+        if actual_last_date is None:
+            if hasattr(model_to_use, 'actual_last_date') and model_to_use.actual_last_date is not None:
+                actual_last_date = pd.to_datetime(model_to_use.actual_last_date)
+                logger.warning(f"Fallback: Using selected model's actual_last_date: {actual_last_date}")
+            elif (hasattr(model_to_use, '_metadata') and 
+                  model_to_use._metadata and 
+                  'actual_last_date' in model_to_use._metadata):
+                actual_last_date = pd.to_datetime(model_to_use._metadata['actual_last_date'])
+                logger.warning(f"Fallback: Using selected model's actual_last_date from metadata: {actual_last_date}")
+            elif model_to_use.all_data is not None and len(model_to_use.all_data) > 0:
+                actual_last_date = pd.to_datetime(model_to_use.all_data.index.max())
+                logger.warning(f"Fallback: Using selected model's last date from daily data: {actual_last_date}")
         
         if actual_last_date is None:
             return jsonify({
                 'success': False,
                 'error': 'Cannot determine last data date for predictions'
             }), 500
+        
+        logger.info(f"Final actual_last_date to use for ALL models: {actual_last_date}")
         
         # Calculate the first day of the next month (same logic as in OptimizedSARIMAModel.predict())
         if actual_last_date.month == 12:
