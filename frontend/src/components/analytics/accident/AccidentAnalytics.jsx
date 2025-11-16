@@ -272,36 +272,6 @@ export function AccidentAnalytics() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [predYear, predMonth, predScope]);
 
-  // Get Accident Prediction API base URL (validates port numbers in production)
-  const getAccidentPredictionAPIBase = () => {
-    const envUrl = import.meta?.env?.VITE_ACCIDENT_PRED_API;
-    
-    if (envUrl) {
-      // In production (HTTPS), reject URLs with ports (must use nginx proxy)
-      if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-        // If env var contains a port number, ignore it and use nginx proxy path
-        if (envUrl.match(/:\d{4,5}/)) {
-          console.warn('VITE_ACCIDENT_PRED_API contains port number. Using nginx proxy path instead.');
-          return '/accident-prediction-api';
-        }
-        // If env var is a full URL without port, check if it's the proxy path
-        if (envUrl.includes('/accident-prediction-api')) {
-          return envUrl;
-        }
-        // Otherwise, use relative path for nginx proxy
-        return '/accident-prediction-api';
-      }
-      // In development or HTTP, use the env var as-is
-      return envUrl;
-    }
-    
-    if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
-      return 'http://localhost:5004';
-    }
-    
-    return '/accident-prediction-api';
-  };
-
   // Fetch predictions from Flask API
   const fetchAccidentPredictions = async () => {
     try {
@@ -309,7 +279,7 @@ export function AccidentAnalytics() {
       setPredError(null);
       // Clear previous predictions so loading spinner shows consistently
       setPredictions([]);
-      const baseUrl = getAccidentPredictionAPIBase();
+      const baseUrl = import.meta?.env?.VITE_ACCIDENT_PRED_API || 'http://localhost:5004';
       const healthUrl = `${baseUrl}/api/accidents/health`;
       const url = `${baseUrl}/api/accidents/predict/all?year=${predYear}&month=${predMonth}`;
 
