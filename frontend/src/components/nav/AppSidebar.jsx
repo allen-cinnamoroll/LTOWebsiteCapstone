@@ -130,7 +130,6 @@ export function AppSidebar(props) {
   // State for managing collapsible sections
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isTrainedModelsOpen, setIsTrainedModelsOpen] = useState(false);
-  const [isVehicleModelOpen, setIsVehicleModelOpen] = useState(false);
   const [isManageAccountOpen, setIsManageAccountOpen] = useState(false);
   
   // Check if sidebar is collapsed
@@ -151,10 +150,6 @@ export function AppSidebar(props) {
       setIsAnalyticsOpen(false);
       setIsManageAccountOpen(false);
     }
-  };
-  
-  const handleVehicleModelChange = (open) => {
-    setIsVehicleModelOpen(open);
   };
   
   const handleManageAccountChange = (open) => {
@@ -343,7 +338,7 @@ export function AppSidebar(props) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right" align="start" className="w-48">
                     <DropdownMenuItem asChild>
-                      <Link to="/trained-models/vehicle" className="flex items-center gap-2">
+                      <Link to="/trained-models/vehicle/mv-prediction" className="flex items-center gap-2">
                         <Car className="h-4 w-4" />
                         <span>Vehicle Model</span>
                       </Link>
@@ -370,29 +365,14 @@ export function AppSidebar(props) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {/* Vehicle Model - with nested sub-menu */}
+                      {/* Vehicle Model - direct link */}
                       <SidebarMenuSubItem>
-                        <Collapsible className="group/nested-collapsible" open={isVehicleModelOpen} onOpenChange={handleVehicleModelChange}>
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuSubButton>
-                              <Car />
-                              <span>Vehicle Model</span>
-                              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/nested-collapsible:rotate-90" />
-                            </SidebarMenuSubButton>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <SidebarMenuSub className="ml-4">
-                              <SidebarMenuSubItem>
-                                <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/mv-prediction"} asChild>
-                                  <Link to="/trained-models/vehicle/mv-prediction">
-                                    <TrendingUp />
-                                    <span>MV Prediction</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </Collapsible>
+                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/mv-prediction"} asChild>
+                          <Link to="/trained-models/vehicle/mv-prediction">
+                            <Car />
+                            <span>Vehicle Model</span>
+                          </Link>
+                        </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton isActive={location.pathname === "/trained-models/accident"} asChild>

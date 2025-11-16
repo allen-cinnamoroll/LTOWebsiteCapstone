@@ -29,6 +29,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AccountPage from "./pages/AccountPage";
 import MVPredictionPage from "./pages/MVPredictionPage";
+import AccidentPredictionPage from "./pages/AccidentPredictionPage";
 
 function App() {
   return (
@@ -103,6 +104,11 @@ function App() {
             <Route path="trained-models/vehicle/mv-prediction" element={
               <RoleBasedRoute allowedRoles={["superadmin"]}>
                 <MVPredictionPage />
+              </RoleBasedRoute>
+            } />
+            <Route path="trained-models/accident" element={
+              <RoleBasedRoute allowedRoles={["superadmin"]}>
+                <AccidentPredictionPage />
               </RoleBasedRoute>
             } />
           </Route>
