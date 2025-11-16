@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ClipboardList, Info, TrendingUp, Sparkles, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ClipboardList, Info, TrendingUp, Sparkles } from 'lucide-react';
 import { useTheme } from '@/components/theme/theme-provider';
 import { getViolations } from '@/api/violationAnalytics';
 
@@ -380,8 +380,6 @@ export function ViolationPrescriptionTable({ loading }) {
 
   const { meta } = useMemo(() => deriveRecommendations(records, planningYear), [records, planningYear]);
 
-  const keyMonthList = Array.isArray(meta.keyMonths) ? meta.keyMonths.slice(0, 3) : [];
-
   const dominantMonth = meta.topMonths?.[0];
   const peakYear = dominantMonth?.peakYear ?? null;
 
@@ -407,11 +405,11 @@ export function ViolationPrescriptionTable({ loading }) {
       <header className={`${prefersDark ? 'bg-slate-950' : 'bg-white'} px-6 py-6 md:px-8 md:py-8 border-b ${prefersDark ? 'border-slate-900' : 'border-slate-200'}`}>
         <div className="flex flex-col gap-5">
           <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
               <div className={`${prefersDark ? 'bg-slate-900 border border-slate-800 text-slate-200' : 'bg-blue-500 text-white'} rounded-2xl p-2.5`}>
                 <ClipboardList className="w-6 h-6" />
-              </div>
-              <div>
+          </div>
+          <div>
                 <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
                   {planningYear} Enforcement Intelligence Brief
                 </h1>
@@ -425,8 +423,8 @@ export function ViolationPrescriptionTable({ loading }) {
               <span>
                 Dataset evaluated: {meta.datasetSize} record{meta.datasetSize === 1 ? '' : 's'} · {meta.uniqueViolations} violation theme{meta.uniqueViolations === 1 ? '' : 's'}
               </span>
-            </div>
           </div>
+        </div>
 
           {/* Executive KPI strip */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
@@ -462,75 +460,42 @@ export function ViolationPrescriptionTable({ loading }) {
       <section className={`${prefersDark ? 'bg-slate-950/40' : 'bg-slate-50'} px-6 md:px-8 py-6 border-b ${prefersDark ? 'border-slate-900' : 'border-slate-200'}`}>
         <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Highest violation months — volume trend
+            Highest violation months
           </h3>
           <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-300">
             <TrendingUp className="w-4 h-4 text-rose-500" />
-            <span>Fast overview of where violations cluster in the year.</span>
+            <span>Top months by violation volume.</span>
           </div>
         </div>
 
         {meta.topMonths?.length ? (
-          <>
-            {/* Mini trend strip (acts like a simple sparkline) */}
-            <div className="mb-4 overflow-hidden rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 px-3 py-2">
-              <div className="flex items-end gap-2 h-12">
-                {meta.topMonths.map((month, idx) => {
-                  const height = Math.max(12, Math.min(40, (month.share || 0) * 0.6));
-                  return (
-                    <div key={month.monthIndex} className="flex-1 flex flex-col items-center justify-end gap-1">
-                      <div
-                        className={`${prefersDark ? 'bg-rose-500/70' : 'bg-rose-400'} rounded-full w-2`}
-                        style={{ height }}
-                      />
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-[60px]">
-                        {month.monthName}
-                      </span>
-                    </div>
-                  );
-                })}
+          <div className="grid gap-4 md:grid-cols-3">
+            {meta.topMonths.map((month) => (
+              <div
+                key={month.monthIndex}
+                className={`${prefersDark ? 'bg-slate-950 border border-slate-900' : 'bg-white border border-slate-200'} rounded-2xl px-4 py-4 space-y-2 shadow-sm`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{month.monthName}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-300">
+                      {month.totalViolations.toLocaleString()} cases · {month.share.toFixed(1)}% share
+                    </p>
               </div>
+                  <span
+                    className={`${
+                      prefersDark ? 'bg-slate-900/80 text-slate-100 border-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200'
+                    } border px-2.5 py-1 rounded-full text-[10px] font-medium`}
+                  >
+                    Peak {month.peakYear ?? '—'} ({month.peakYearCount || 0})
+                  </span>
+              </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                  Dominant violation: <span className="font-semibold">{month.topViolation ?? 'General compliance'}</span>
+                </p>
             </div>
-
-            {/* Compact month cards */}
-            <div className="grid gap-4 md:grid-cols-3">
-              {meta.topMonths.map((month) => (
-                <div
-                  key={month.monthIndex}
-                  className={`${prefersDark ? 'bg-slate-950 border border-slate-900' : 'bg-white border border-slate-200'} rounded-2xl px-4 py-4 space-y-2 shadow-sm`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">📅</span>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{month.monthName}</p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-300">
-                          {month.totalViolations.toLocaleString()} cases · {month.share.toFixed(1)}% share
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={`${
-                        prefersDark ? 'bg-slate-900/80 text-slate-100 border-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200'
-                      } border px-2.5 py-1 rounded-full text-[10px] font-medium inline-flex items-center gap-1`}
-                    >
-                      {month.peakYear ?? '—'} peak
-                      {month.peakYearCount > 0 ? (
-                        <ArrowUpRight className="w-3 h-3 text-emerald-500" />
-                      ) : (
-                        <ArrowDownRight className="w-3 h-3 text-slate-400" />
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300 mt-1">
-                    <span className="font-semibold">
-                      📌 {month.topViolation ?? 'General compliance'}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
+          ))}
+        </div>
         ) : (
           <div
             className={`${
@@ -539,104 +504,87 @@ export function ViolationPrescriptionTable({ loading }) {
                 : 'bg-white border border-slate-200 text-slate-600'
             } rounded-2xl px-4 py-6 text-sm`}
           >
-            Insufficient historical data to visualise monthly trend.
+            Insufficient historical data to summarise monthly patterns.
           </div>
         )}
       </section>
 
+      {/* Rule-based model prescription */}
       <section className="px-6 md:px-8 pb-8">
         <div
           className={`${
-            prefersDark ? 'bg-slate-950 border-slate-900' : 'bg-slate-50 border-slate-200'
+            prefersDark ? 'bg-slate-950 border-slate-900' : 'bg-white border-slate-200'
           } border rounded-3xl p-6 md:p-7 space-y-4`}
         >
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                {planningYear} Enforcement Playbook
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                Based on top violation ({meta.dominantViolation ?? '1A – NO DRIVER&apos;S LICENSE/CONDUCTOR PERMIT'}) and peak months (
-                {meta.keyMonths?.length ? meta.keyMonths.join(', ') : 'key spike months'}).
+          <div className="flex flex-col gap-1 mb-2">
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+              {planningYear} Rule‑based enforcement brief
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              High-level prescription generated using a transparent rule-based analytics model, based on {meta.datasetSize.toLocaleString()} historical
+              record{meta.datasetSize === 1 ? '' : 's'} and the dominant violation (
+              {meta.dominantViolation ?? '1A – NO DRIVER&apos;S LICENSE/CONDUCTOR PERMIT'}).
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div
+              className={`${
+                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+              } border rounded-2xl px-4 py-4 space-y-2`}
+            >
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Strategic objective
+              </h4>
+              <p className="text-sm text-slate-800 dark:text-slate-100">
+                Reduce repeat cases of {meta.dominantViolation ?? 'the most frequent violation'} across the peak months (
+                {meta.keyMonths?.length ? meta.keyMonths.join(', ') : 'identified high-volume months'}) while keeping checkpoint presence predictable and
+                fair.
               </p>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-full border border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+
+            <div
+              className={`${
+                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+              } border rounded-2xl px-4 py-4 space-y-2`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Policy-ready summary
-            </button>
-          </div>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Enforcement focus
+              </h4>
+              <p className="text-sm text-slate-800 dark:text-slate-100">
+                Align weekly operations plans so at least one checkpoint cycle per week explicitly targets documentation-related violations (e.g. 1A, 1H,
+                11) in routes that historically show the highest counts.
+              </p>
+            </div>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60">
-            <table className="w-full text-xs md:text-sm">
-              <thead
-                className={`${
-                  prefersDark ? 'bg-slate-900 text-slate-200' : 'bg-slate-100 text-slate-700'
-                } uppercase tracking-wide text-[10px] md:text-xs`}
-              >
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold w-40">Strategy</th>
-                  <th className="px-4 py-3 text-left font-semibold">Description</th>
-                </tr>
-              </thead>
-              <tbody className={`${prefersDark ? 'divide-slate-900' : 'divide-slate-100'} divide-y`}>
-                <tr>
-                  <td className="px-4 py-3 align-top font-semibold text-slate-900 dark:text-white">
-                    <span className="flex items-center gap-2">
-                      <span className="text-base">🚧</span>
-                      Targeted Checkpoints
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                    Early in the month, run reminder-focused checkpoints; towards month end, shift to apprehension-focused operations in the top
-                    violation months to meet quotas without surprising compliant drivers.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 align-top font-semibold text-slate-900 dark:text-white">
-                    <span className="flex items-center gap-2">
-                      <span className="text-base">🎯</span>
-                      Focused Enforcement
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                    Prioritise violations 1A, 1H, and 11 in high-risk routes. Ensure all apprehensions are fully documented so operations, legal, and
-                    planning teams see the same data.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 align-top font-semibold text-slate-900 dark:text-white">
-                    <span className="flex items-center gap-2">
-                      <span className="text-base">📝</span>
-                      Corrective Seminars
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                    Link SP issuance/renewal and post-apprehension processes to short seminars for repeat offenders, using real local data and cases
-                    from the identified high months.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 align-top font-semibold text-slate-900 dark:text-white">
-                    <span className="flex items-center gap-2">
-                      <span className="text-base">🤝</span>
-                      LGU Coordination
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
-                    Work with LGUs, barangays, and local traffic offices to roll out pre-emptive campaigns (helmets, licences, OR/CR) 2–4 weeks before
-                    the peak periods, so enforcement feels planned and not sudden.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <div
+              className={`${
+                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+              } border rounded-2xl px-4 py-4 space-y-2`}
+            >
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Citizen experience
+              </h4>
+              <p className="text-sm text-slate-800 dark:text-slate-100">
+                Publish simple public advisories two weeks before the key months, clarifying common violations, documentary requirements, and the
+                schedule of intensified checkpoints to support transparency and voluntary compliance.
+              </p>
+            </div>
 
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Heuristics used: {meta.heuristics?.join(' · ')}
-          </p>
+            <div
+              className={`${
+                prefersDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+              } border rounded-2xl px-4 py-4 space-y-2`}
+            >
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Monitoring and review
+              </h4>
+              <p className="text-sm text-slate-800 dark:text-slate-100">
+                At the end of each peak month, compare apprehension counts and seminar attendance with the same period last year, and adjust next
+                month&apos;s checkpoint locations and messaging based on the updated analytics.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
