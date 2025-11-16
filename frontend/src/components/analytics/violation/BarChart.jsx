@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   BarChart as RechartsBarChart, 
   Bar, 
@@ -9,15 +9,83 @@ import {
   ResponsiveContainer,
   Cell
 } from 'recharts';
+import { getViolations } from '../../../api/violationAnalytics.js';
 
 export function BarChart({ data, title, type, loading, totalCount, allOfficersData }) {
   const [showModal, setShowModal] = useState(false);
   const [sortDirection, setSortDirection] = useState('desc');
+  const [selectedYear, setSelectedYear] = useState('All');
+  const [rawViolations, setRawViolations] = useState([]);
+  const [yearDataLoading, setYearDataLoading] = useState(false);
+
+  // Fetch all violations once (only for officers chart) for local year-based filtering
+  useEffect(() => {
+    if (type !== 'officers') return;
+
+    const fetchViolations = async () => {
+      try {
+        setYearDataLoading(true);
+        const response = await getViolations();
+        if (response && response.success && Array.isArray(response.data)) {
+          setRawViolations(response.data);
+        } else if (Array.isArray(response)) {
+          setRawViolations(response);
+        }
+      } catch (error) {
+        console.error('Error fetching violations for Apprehending Officers year filter:', error);
+      } finally {
+        setYearDataLoading(false);
+      }
+    };
+
+    fetchViolations();
+  }, [type]);
+
+  const yearOptions = useMemo(
+    () => ['All', ...Array.from({ length: 26 }, (_, i) => (2000 + i).toString())],
+    []
+  );
+
+  // Build officer data depending on selected year (only for officers chart)
+  const officerData = useMemo(() => {
+    if (type !== 'officers') return [];
+
+    // All time: use existing aggregated data from backend
+    if (!selectedYear || selectedYear === 'All') {
+      if (allOfficersData && allOfficersData.length > 0) {
+        return allOfficersData;
+      }
+      return data || [];
+    }
+
+    if (!rawViolations || rawViolations.length === 0) {
+      return [];
+    }
+
+    const counts = {};
+
+    rawViolations.forEach((violation) => {
+      if (!violation.dateOfApprehension) return;
+
+      const violationYear = new Date(violation.dateOfApprehension).getFullYear();
+      if (violationYear.toString() !== selectedYear) return;
+
+      const officer = (violation.apprehendingOfficer || '').trim();
+      if (!officer) return;
+
+      counts[officer] = (counts[officer] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .map(([officerName, count]) => ({ officerName, violationCount: count }))
+      .sort((a, b) => (b.violationCount || b.count || 0) - (a.violationCount || a.count || 0));
+  }, [type, selectedYear, rawViolations, allOfficersData, data]);
   // Format data for Recharts
   const formatData = () => {
-    if (!data || data.length === 0) return [];
+    const source = type === 'officers' ? officerData : data;
+    if (!source || source.length === 0) return [];
     
-    return data.slice(0, 5).map((item, index) => ({
+    return source.slice(0, 5).map((item, index) => ({
       name: type === 'officers' 
         ? (item.officerName || 'Unknown Officer')
         : (item._id || 'Unknown Item'),
@@ -59,8 +127,10 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
 
   // Sort all officers by count (highest to lowest) for the modal
   const sortedOfficers = useMemo(() => {
-    if (!allOfficersData || type !== 'officers') return [];
-    const copy = [...allOfficersData];
+    if (type !== 'officers') return [];
+    const source = officerData;
+    if (!source || source.length === 0) return [];
+    const copy = [...source];
     copy.sort((a, b) => {
       const countA = a.count || a.violationCount || 0;
       const countB = b.count || b.violationCount || 0;
@@ -127,7 +197,7 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
     );
   }
 
-  if (!data || data.length === 0) {
+  if ((!data || data.length === 0) && (type !== 'officers' || officerData.length === 0)) {
     return (
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-transparent dark:border-gray-700 p-4 h-full flex flex-col">
         <div className="flex items-center space-x-3 mb-6">
@@ -160,20 +230,48 @@ export function BarChart({ data, title, type, loading, totalCount, allOfficersDa
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Performance Rankings</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Performance Rankings
+                {type === 'officers' && selectedYear && selectedYear !== 'All' && (
+                  <span className="ml-1 text-[10px] text-emerald-600 dark:text-emerald-300 font-semibold">
+                    • Year {selectedYear}
+                  </span>
+                )}
+                {type === 'officers' && (!selectedYear || selectedYear === 'All') && (
+                  <span className="ml-1 text-[10px] text-emerald-600 dark:text-emerald-300 font-semibold">
+                    • All Time
+                  </span>
+                )}
+              </p>
             </div>
           </div>
-          {type === 'officers' && allOfficersData && allOfficersData.length > 0 && (
-             <button
-               onClick={() => setShowModal(true)}
-               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-colors dark:text-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700"
-             >
-               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M3 12h18M3 19h18" />
-               </svg>
-               View Full List
-             </button>
-           )}
+          {type === 'officers' && (
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                disabled={yearDataLoading}
+                className="pl-2 pr-6 py-1.5 text-[11px] rounded-md border border-emerald-200 bg-white text-emerald-700 dark:bg-emerald-900/40 dark:border-emerald-700 dark:text-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+              >
+                {yearOptions.map((year) => (
+                  <option key={year} value={year}>
+                    {year === 'All' ? 'All Time' : year}
+                  </option>
+                ))}
+              </select>
+              {officerData && officerData.length > 0 && (
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-md hover:bg-emerald-100 transition-colors dark:text-emerald-300 dark:bg-emerald-900/30 dark:border-emerald-700"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M3 12h18M3 19h18" />
+                  </svg>
+                  View Full List
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
       {/* Recharts Bar Chart */}
