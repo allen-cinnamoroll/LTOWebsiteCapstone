@@ -178,12 +178,33 @@ const AccountPage = () => {
           if (finalAvatarURL) {
             fetch(finalAvatarURL, { method: 'HEAD', cache: 'no-cache' })
               .then(response => {
+                const contentType = response.headers.get('content-type') || '';
+                
                 if (response.ok) {
-                  console.log('✅ Avatar image is accessible:', {
-                    url: finalAvatarURL,
-                    status: response.status,
-                    contentType: response.headers.get('content-type')
-                  });
+                  // Check if we actually got an image, not HTML
+                  if (contentType.includes('image/')) {
+                    console.log('✅ Avatar image is accessible:', {
+                      url: finalAvatarURL,
+                      status: response.status,
+                      contentType: contentType
+                    });
+                  } else {
+                    // Got 200 but content-type is not an image (likely HTML fallback)
+                    console.error('❌ PRODUCTION ISSUE: Server returned HTML instead of image!', {
+                      url: finalAvatarURL,
+                      status: response.status,
+                      contentType: contentType,
+                      issue: 'Nginx may be serving index.html instead of the image file',
+                      possibleCauses: [
+                        'File does not exist at /var/www/LTOWebsiteCapstone/backend/uploads/avatars/...',
+                        'Nginx /uploads location block not configured or not reloaded',
+                        'File permissions preventing nginx from reading the file',
+                        'Location block order in nginx config (root location catching before /uploads)'
+                      ],
+                      solution: 'SSH into server and verify: ls -la /var/www/LTOWebsiteCapstone/backend/uploads/avatars/',
+                      nginxCheck: 'Verify nginx config has /uploads location before root location and reload: sudo nginx -s reload'
+                    });
+                  }
                 } else {
                   console.error('❌ Avatar image returned error status:', {
                     url: finalAvatarURL,
@@ -301,15 +322,27 @@ const AccountPage = () => {
                           if (failedURL && !failedURL.startsWith('data:')) {
                             try {
                               const response = await fetch(failedURL, { method: 'HEAD', cache: 'no-cache' });
+                              const contentType = response.headers.get('content-type') || '';
+                              
                               console.error('Avatar fetch details:', {
                                 url: failedURL,
                                 status: response.status,
                                 statusText: response.statusText,
                                 headers: {
-                                  'content-type': response.headers.get('content-type'),
+                                  'content-type': contentType,
                                   'content-length': response.headers.get('content-length')
                                 }
                               });
+                              
+                              // Detect if nginx is serving HTML instead of image (common production issue)
+                              if (response.status === 200 && contentType.includes('text/html')) {
+                                console.error('❌ PRODUCTION ISSUE: Nginx is serving HTML instead of image file!', {
+                                  url: failedURL,
+                                  issue: 'File may not exist on server, or nginx /uploads location is not configured correctly',
+                                  solution: 'Check if file exists at: /var/www/LTOWebsiteCapstone/backend/uploads/avatars/...',
+                                  nginxConfig: 'Ensure /uploads location block comes before root location in nginx config'
+                                });
+                              }
                             } catch (fetchError) {
                               console.error('Avatar fetch error:', {
                                 url: failedURL,
