@@ -1,39 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './RegistrationAnalytics.css';
-import {
-  getRegistrationAnalytics,
-  getMonthNumber,
-  exportRegistrationReportPdf,
-  exportRegistrationReportCsv
-} from '../../../api/registrationAnalytics.js';
+import { getRegistrationAnalytics, getMonthName, getMonthNumber } from '../../../api/registrationAnalytics.js';
 import MunicipalityChart from './MunicipalityChart.jsx';
 import VehicleTrendChart from './VehicleTrendChart.jsx';
 import OwnerMunicipalityChart from './OwnerMunicipalityChart.jsx';
 import VehicleClassificationChart from './VehicleClassificationChart.jsx';
 import { PredictiveAnalytics } from './PredictiveAnalytics.jsx';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { RegistrationExportDialog } from './RegistrationExportDialog.jsx';
-import { FileText, Download } from 'lucide-react';
-import dayjs from 'dayjs';
-import { toast } from 'sonner';
-
-const downloadBlob = (blob, filename) => {
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-};
+import { FileText } from 'lucide-react';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -70,8 +50,6 @@ export function RegistrationAnalytics() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [exportDefaults, setExportDefaults] = useState(null);
 
   // Counter animations - must be called at top level
   const vehiclesTotal = useCounterAnimation(analyticsData?.vehicles?.total || 0);
@@ -178,41 +156,6 @@ export function RegistrationAnalytics() {
     }
   };
 
-  const handleOpenExportDialog = () => {
-    const now = dayjs();
-    const monthNumber =
-      selectedMonth && selectedMonth !== 'All'
-        ? getMonthNumber(selectedMonth)
-        : now.month() + 1;
-    const yearValue =
-      selectedYear && selectedYear !== 'All' ? selectedYear : now.year().toString();
-
-    setExportDefaults({
-      scope: 'monthly',
-      month: monthNumber,
-      year: yearValue,
-      municipality: 'ALL',
-      vehicleType: 'all',
-      licenseStatus: 'all'
-    });
-    setExportDialogOpen(true);
-  };
-
-  const handleGenerateReport = async (payload) => {
-    try {
-      const [pdfResponse, csvResponse] = await Promise.all([
-        exportRegistrationReportPdf(payload),
-        exportRegistrationReportCsv(payload)
-      ]);
-      downloadBlob(pdfResponse.blob, pdfResponse.filename);
-      downloadBlob(csvResponse.blob, csvResponse.filename);
-      toast.success('Registration reports generated successfully.');
-    } catch (err) {
-      toast.error('Failed to generate registration reports.');
-      throw err;
-    }
-  };
-
 
 
 
@@ -237,7 +180,7 @@ export function RegistrationAnalytics() {
 
   return (
     <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen rounded-lg page-container">
-      <div className="registration-analytics-header flex flex-wrap items-center justify-between gap-4">
+      <div className="registration-analytics-header">
         <div className="header-fade-in">
           <h1 className="registration-analytics-title flex items-center gap-2 smooth-transition">
             <FileText className="h-8 w-8 text-blue-500 icon-pulse" />
@@ -247,57 +190,47 @@ export function RegistrationAnalytics() {
             Vehicle and Owners Registration Analytics
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={handleOpenExportDialog}
-          >
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
+        
           {loading ? (
-            <div className="registration-analytics-controls controls-fade-in loading-fade">
-              <div className="animate-pulse">
-                <div className="h-8 bg-muted rounded w-32"></div>
-              </div>
-              <div className="animate-pulse">
-                <div className="h-8 bg-muted rounded w-32"></div>
-              </div>
+          <div className="registration-analytics-controls controls-fade-in loading-fade">
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-32"></div>
             </div>
-          ) : (
-            <div className="registration-analytics-controls controls-fade-in smooth-transition">
-              {/* Month Dropdown */}
-              <Select value={selectedMonth || ''} onValueChange={handleMonthSelect}>
-                <SelectTrigger className="w-[140px] smooth-transition hover-smooth" data-month-select>
-                  <SelectValue placeholder="Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((month) => (
-                    <SelectItem key={month} value={month} className="smooth-transition">
-                      {month}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-32"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="registration-analytics-controls controls-fade-in smooth-transition">
+            {/* Month Dropdown */}
+            <Select value={selectedMonth || ''} onValueChange={handleMonthSelect}>
+              <SelectTrigger className="w-[140px] smooth-transition hover-smooth" data-month-select>
+                <SelectValue placeholder="Month" />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map((month) => (
+                  <SelectItem key={month} value={month} className="smooth-transition">
+                    {month}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              {/* Year Dropdown */}
-              <Select value={selectedYear || ''} onValueChange={handleYearSelect}>
-                <SelectTrigger className="w-[120px] smooth-transition hover-smooth" data-year-select>
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year} className="smooth-transition">
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
+            {/* Year Dropdown */}
+            <Select value={selectedYear || ''} onValueChange={handleYearSelect}>
+              <SelectTrigger className="w-[120px] smooth-transition hover-smooth" data-year-select>
+                <SelectValue placeholder="Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((year) => (
+                  <SelectItem key={year} value={year} className="smooth-transition">
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
       
       
@@ -572,12 +505,6 @@ export function RegistrationAnalytics() {
         <PredictiveAnalytics />
       </div>
 
-      <RegistrationExportDialog
-        open={exportDialogOpen}
-        onOpenChange={setExportDialogOpen}
-        defaultFilters={exportDefaults}
-        onGenerate={handleGenerateReport}
-      />
     </div>
   );
 }
