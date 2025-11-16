@@ -27,6 +27,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/api/axios';
 import { toast } from 'sonner';
+import { getAvatarURL } from '@/utils/urlUtils';
 
 const AccountPage = () => {
   const { userData, setUserData } = useAuth();
@@ -105,12 +106,9 @@ const AccountPage = () => {
       });
 
       if (response.data.success) {
-        const baseURL = import.meta.env.VITE_BASE_URL || 'http://72.60.198.244:5000/api';
-        const backendURL = baseURL.replace('/api', '');
-
-        // Add cache-busting timestamp to force image reload
+        // Construct avatar URL with cache-busting to force image reload
         const avatarURL = response.data.user.avatar
-          ? `${backendURL}/${response.data.user.avatar}?t=${Date.now()}`
+          ? getAvatarURL(response.data.user.avatar, true)
           : '';
 
         console.log('Backend response avatar:', response.data.user.avatar);

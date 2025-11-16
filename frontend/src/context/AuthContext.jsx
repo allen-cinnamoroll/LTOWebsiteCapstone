@@ -3,15 +3,9 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import OTPVerificationModal from "@/components/otp/OTPVerificationModal";
 import apiClient from "@/api/axios";
+import { getAvatarURL } from "@/utils/urlUtils";
 
 const AuthContext = createContext(null);
-
-// Get backend base URL for avatar images
-const getBackendBaseURL = () => {
-  const apiBaseURL = import.meta.env.VITE_BASE_URL || 'https://ltodatamanager.com/api';
-  // Remove /api suffix to get the backend base URL
-  return apiBaseURL.replace(/\/api$/, '');
-};
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
@@ -50,9 +44,8 @@ export const AuthProvider = ({ children }) => {
               setToken(token);
               
               // Ensure avatar URL is properly constructed
-              if (userData && userData.avatar && !userData.avatar.startsWith('http')) {
-                const backendURL = getBackendBaseURL();
-                userData.avatar = `${backendURL}/${userData.avatar}`;
+              if (userData && userData.avatar) {
+                userData.avatar = getAvatarURL(userData.avatar);
               }
               
               setUserData(userData);
@@ -104,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
-      avatar: decoded.avatar ? `${getBackendBaseURL()}/${decoded.avatar}` : '',
+      avatar: decoded.avatar ? getAvatarURL(decoded.avatar) : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };
@@ -136,7 +129,7 @@ export const AuthProvider = ({ children }) => {
       firstName: decoded.firstName,
       middleName: decoded.middleName,
       lastName: decoded.lastName,
-      avatar: decoded.avatar ? `${getBackendBaseURL()}/${decoded.avatar}` : '',
+      avatar: decoded.avatar ? getAvatarURL(decoded.avatar) : '',
       isPasswordChange: decoded.isPasswordChange,
       isOtpVerified: decoded.isOtpVerified
     };

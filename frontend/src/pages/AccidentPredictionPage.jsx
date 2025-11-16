@@ -48,7 +48,10 @@ export default function AccidentPredictionPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${ACCIDENT_PREDICTION_API_BASE}/api/accidents/health`, {
+      const url = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/health`;
+      console.log('[AccidentPredictionPage] Fetching model info from:', url);
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
