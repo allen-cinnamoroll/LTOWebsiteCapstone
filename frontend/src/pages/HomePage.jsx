@@ -149,7 +149,7 @@ const HomePage = () => {
           <section className="w-full grid grid-cols-12 gap-4">
             {/* div1: Vehicle Renewal (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-40 bg-muted rounded mb-4"></div>
                 <div className="w-full aspect-[4/3] bg-muted rounded"></div>
                 <div className="h-3 w-28 bg-muted rounded mt-3"></div>
@@ -157,14 +157,14 @@ const HomePage = () => {
             </div>
             {/* div2: Top 3 Municipality (lg:4) */}
             <div className="col-span-12 lg:col-span-4">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
                   </div>
                 </div>
             {/* div3: Top 5 Violation (lg:5) */}
             <div className="col-span-12 lg:col-span-5">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
@@ -172,7 +172,7 @@ const HomePage = () => {
 
             {/* div4: Online Users (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-36 bg-muted rounded mb-2"></div>
                 <div className="h-3 w-40 bg-muted rounded mb-4"></div>
                 <div className="h-3 w-48 bg-muted rounded mb-2"></div>
@@ -181,21 +181,21 @@ const HomePage = () => {
             </div>
             {/* div5: Top 3 Bottom Municipality (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-56 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
                 </div>
             {/* div6: Violation Type Distribution (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-64 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
             </div>
             {/* div7: Top 3 Officer (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
             </div>
@@ -204,14 +204,14 @@ const HomePage = () => {
             {/* Bottom row */}
             {/* div8: Top 5 Municipality Accident (lg:6) */}
             <div className="col-span-12 lg:col-span-6">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-64 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
             </div>
             {/* div9: Weekly Accident Pattern (lg:6) */}
             <div className="col-span-12 lg:col-span-6">
-              <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
+              <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-64 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
@@ -235,7 +235,7 @@ const HomePage = () => {
             {/* div2: Top 3 Municipality */}
             <div className="col-span-12 lg:col-span-4">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>
@@ -246,7 +246,7 @@ const HomePage = () => {
             {/* div3: Top 5 Violation */}
             <div className="col-span-12 lg:col-span-5">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>
@@ -257,7 +257,7 @@ const HomePage = () => {
 
             {/* div4: Online Users */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl shadow-md bg-white border p-4 h-full overflow-hidden">
+              <div className="rounded-xl shadow-md bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 p-4 h-full overflow-hidden">
                 {(userData?.role === "0" || userData?.role === "1") ? (
                 <OnlineUsersPanel />
                 ) : (
@@ -268,7 +268,7 @@ const HomePage = () => {
             {/* div5: Top 3 Bottom Municipality */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>
@@ -279,7 +279,7 @@ const HomePage = () => {
             {/* div6: Violation Type distribution */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>
@@ -290,7 +290,7 @@ const HomePage = () => {
             {/* div7: Top 3 Officer */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>
@@ -303,7 +303,7 @@ const HomePage = () => {
             {/* div8: Top 5 Municipality Accident */}
             <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>
@@ -314,7 +314,7 @@ const HomePage = () => {
             {/* div9: Weekly Accident Pattern */}
             <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
-                <div className="rounded-xl bg-white shadow-md p-4 h-full animate-pulse">
+                <div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
                   <div className="h-48 bg-muted rounded"></div>
                 </div>

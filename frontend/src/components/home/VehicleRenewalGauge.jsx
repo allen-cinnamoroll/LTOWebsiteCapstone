@@ -87,8 +87,10 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
   ];
  
   return (
-    <div className="rounded-xl shadow-md bg-white border p-4">
-      <div className="text-base font-semibold mb-2">{title}</div>
+    <div className="rounded-xl shadow-md bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 p-4">
+      <div className="text-base font-semibold mb-2 text-gray-900 dark:text-gray-100">
+        {title}
+      </div>
  
       <div className="w-full aspect-[4/3]">
         <svg
@@ -142,8 +144,12 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
  
       {/* Centered values below arc */}
       <div className="mt-1 flex flex-col items-center">
-        <div className="text-2xl font-bold leading-none">{formatInt(actual)}</div>
-        <div className="text-sm text-gray-500">Target: {formatInt(safeTarget)}</div>
+        <div className="text-2xl font-bold leading-none text-gray-900 dark:text-gray-100">
+          {formatInt(actual)}
+        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Target: {formatInt(safeTarget)}
+        </div>
       </div>
     </div>
   );
