@@ -57,3 +57,4 @@ curl "http://localhost:5002/api/predict/registrations?weeks=4" | python3 -m json
 Should show dates starting from `"2025-08-03"` or later, not `"2025-07-28"`.
 
 
+

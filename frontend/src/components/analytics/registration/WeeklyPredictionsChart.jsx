@@ -33,6 +33,10 @@ const WeeklyPredictionsChart = () => {
   const [availableMunicipalityModels, setAvailableMunicipalityModels] = useState([]); // Track available municipality models
   const [priorityMunicipalities, setPriorityMunicipalities] = useState([]); // Low-volume municipalities for caravan planning
   const [priorityLoading, setPriorityLoading] = useState(false);
+  const [hasBarangayData, setHasBarangayData] = useState(false);
+  const [barangayPriority, setBarangayPriority] = useState([]);
+
+  const isBarangayView = Boolean(selectedMunicipality && hasBarangayData);
 
   // Davao Oriental municipalities
   const municipalities = [
@@ -83,6 +87,13 @@ const WeeklyPredictionsChart = () => {
     return d.getUTCFullYear();
   };
 
+  const formatNumber = (value) => {
+    if (value === undefined || value === null || Number.isNaN(value)) {
+      return '0';
+    }
+    return Number(value).toLocaleString();
+  };
+
   // Fetch prediction data
   const fetchPredictions = async () => {
     try {
@@ -107,7 +118,9 @@ const WeeklyPredictionsChart = () => {
         }
         
         // Process data for all three views
-        processAllViews(response.data.weekly_predictions);
+        const barangayPredictions = response.data.barangay_predictions || [];
+        const barangaySummaryData = response.data.barangay_summary || {};
+        processAllViews(response.data.weekly_predictions, barangayPredictions, barangaySummaryData);
       } else {
         const errorMsg = response.error || 'Failed to fetch prediction data';
         setError(`Failed to fetch predictions: ${errorMsg}`);
@@ -118,6 +131,8 @@ const WeeklyPredictionsChart = () => {
         setModelUsed(null);
         setIsMunicipalitySpecific(false);
         setAvailableMunicipalityModels([]);
+        setHasBarangayData(false);
+        setBarangayPriority([]);
       }
     } catch (err) {
       console.error('Error fetching weekly predictions:', err);
@@ -141,13 +156,15 @@ const WeeklyPredictionsChart = () => {
       setModelUsed(null);
       setIsMunicipalitySpecific(false);
       setAvailableMunicipalityModels([]);
+      setHasBarangayData(false);
+      setBarangayPriority([]);
     } finally {
       setLoading(false);
     }
   };
 
   // Process data for all three views (Weekly, Monthly, Yearly)
-  const processAllViews = (weeklyPredictions) => {
+  const buildMunicipalityView = (weeklyPredictions) => {
     if (!weeklyPredictions || weeklyPredictions.length === 0) {
       setWeeklyData([]);
       setMonthlyData([]);
@@ -291,6 +308,88 @@ const WeeklyPredictionsChart = () => {
     setYearlyData(yearlyProcessed);
   };
 
+  const buildBarangayView = (barangayPredictions = [], barangaySummaryData = {}) => {
+    if ((!barangayPredictions || barangayPredictions.length === 0) && (!barangaySummaryData || Object.keys(barangaySummaryData).length === 0)) {
+      setWeeklyData([]);
+      setMonthlyData([]);
+      setYearlyData([]);
+      setBarangayPriority([]);
+      return;
+    }
+
+    const barangayMap = {};
+
+    if (barangaySummaryData && Object.keys(barangaySummaryData).length > 0) {
+      Object.entries(barangaySummaryData).forEach(([barangayName, stats]) => {
+        barangayMap[barangayName] = {
+          name: barangayName,
+          totalPredicted: stats?.total_predicted || 0,
+          weeklyBreakdown: stats?.weekly_predictions || []
+        };
+      });
+    } else {
+      barangayPredictions.forEach((prediction) => {
+        const barangayName = prediction.barangay || 'Unspecified Barangay';
+        const predictedValue = prediction.predicted_count || prediction.predicted || prediction.total_predicted || 0;
+  
+        if (!barangayMap[barangayName]) {
+          barangayMap[barangayName] = {
+            name: barangayName,
+            totalPredicted: 0,
+            weeklyBreakdown: []
+          };
+        }
+  
+        barangayMap[barangayName].totalPredicted += predictedValue;
+        barangayMap[barangayName].weeklyBreakdown.push({
+          date: prediction.date,
+          predicted_count: predictedValue
+        });
+      });
+    }
+
+    const barangayList = Object.values(barangayMap)
+      .map((entry) => ({
+        barangay: entry.name,
+        label: entry.name,
+        weekLabel: entry.name,
+        monthShort: entry.name,
+        yearLabel: entry.name,
+        predicted: entry.totalPredicted,
+        totalPredicted: entry.totalPredicted,
+        weeklyBreakdown: entry.weeklyBreakdown || []
+      }))
+      .sort((a, b) => b.totalPredicted - a.totalPredicted);
+
+    setWeeklyData(barangayList);
+    setMonthlyData(barangayList);
+    setYearlyData(barangayList);
+
+    const priorityList = [...barangayList]
+      .sort((a, b) => a.totalPredicted - b.totalPredicted)
+      .map((entry) => ({
+        barangay: entry.barangay,
+        totalPredicted: entry.totalPredicted
+      }));
+
+    setBarangayPriority(priorityList);
+  };
+
+  const processAllViews = (weeklyPredictions, barangayPredictions = [], barangaySummaryData = {}) => {
+    const hasBarangayPayload =
+      (barangayPredictions && barangayPredictions.length > 0) ||
+      (barangaySummaryData && Object.keys(barangaySummaryData).length > 0);
+
+    if (selectedMunicipality && hasBarangayPayload) {
+      setHasBarangayData(true);
+      buildBarangayView(barangayPredictions, barangaySummaryData);
+    } else {
+      setHasBarangayData(false);
+      setBarangayPriority([]);
+      buildMunicipalityView(weeklyPredictions);
+    }
+  };
+
   // Compute caravan priority municipalities (lowest predicted totals) for "All Municipalities"
   const fetchPriorityMunicipalities = async () => {
     // Only compute when viewing all municipalities
@@ -359,6 +458,32 @@ const WeeklyPredictionsChart = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+
+      if (isBarangayView) {
+        const displayLabel = data.barangay || data.weekLabel || data.monthShort || label;
+        const totalValue = (data.totalPredicted ?? data.predicted ?? 0).toLocaleString();
+        return (
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              {displayLabel}
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: payload[0].color }}
+                ></div>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Predicted registrations: <span className="ml-1 font-medium">{totalValue}</span>
+                </span>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Barangay within {municipalities.find(m => m.value === selectedMunicipality)?.label || selectedMunicipality}
+              </div>
+            </div>
+          </div>
+        );
+      }
       
       if (viewType === 'weekly') {
         return (
@@ -447,29 +572,33 @@ const WeeklyPredictionsChart = () => {
 
   // Get chart title based on view type
   const getChartTitle = () => {
+    const scopePrefix = isBarangayView ? 'Barangay-Level ' : '';
     switch (viewType) {
       case 'weekly':
-        return 'Weekly Registration Predictions';
+        return `${scopePrefix}Weekly Registration Predictions`;
       case 'monthly':
-        return 'Monthly Registration Predictions';
+        return `${scopePrefix}Monthly Registration Predictions`;
       case 'yearly':
-        return 'Yearly Registration Predictions';
+        return `${scopePrefix}Yearly Registration Predictions`;
       default:
-        return 'Registration Predictions';
+        return `${scopePrefix}Registration Predictions`;
     }
   };
 
   // Get chart description based on view type
   const getChartDescription = () => {
+    const scopeContext = isBarangayView
+      ? 'Barangay-level breakdown within the selected municipality. '
+      : '';
     switch (viewType) {
       case 'weekly':
-        return 'Detailed weekly forecast for short-term planning';
+        return `${scopeContext}Detailed weekly forecast for short-term planning`;
       case 'monthly':
-        return 'Monthly totals for mid-term planning and resource allocation';
+        return `${scopeContext}Monthly totals for mid-term planning and resource allocation`;
       case 'yearly':
-        return 'Yearly totals for long-term strategy and budget forecasting';
+        return `${scopeContext}Yearly totals for long-term strategy and budget forecasting`;
       default:
-        return 'Forecasted vehicle registrations using SARIMA model';
+        return `${scopeContext}Forecasted vehicle registrations using SARIMA model`;
     }
   };
 
@@ -478,7 +607,10 @@ const WeeklyPredictionsChart = () => {
     let data = [];
     let periodLabel = '';
     
-    if (viewType === 'weekly' && weeklyData.length > 0) {
+    if (isBarangayView && weeklyData.length > 0) {
+      data = weeklyData;
+      periodLabel = 'barangay';
+    } else if (viewType === 'weekly' && weeklyData.length > 0) {
       data = weeklyData;
       periodLabel = 'week';
     } else if (viewType === 'monthly' && monthlyData.length > 0) {
@@ -492,10 +624,10 @@ const WeeklyPredictionsChart = () => {
     }
 
     // Extract values based on view type
-    const values = viewType === 'weekly' 
+    const values = isBarangayView
+      ? data.map(item => item.totalPredicted ?? item.predicted ?? 0)
+      : viewType === 'weekly' 
       ? data.map(item => item.predicted)
-      : viewType === 'monthly'
-      ? data.map(item => item.totalPredicted)
       : data.map(item => item.totalPredicted);
     
     const hasAnyData = values.some(val => val > 0);
@@ -514,22 +646,44 @@ const WeeklyPredictionsChart = () => {
     let trendIcon = Minus;
     let trendColor = 'text-gray-600 dark:text-gray-400';
     
-    if (percentageChange > 2) {
-      trendDirection = 'increasing';
-      trendIcon = TrendingUp;
-      trendColor = 'text-green-600 dark:text-green-400';
-    } else if (percentageChange < -2) {
-      trendDirection = 'decreasing';
-      trendIcon = TrendingDown;
-      trendColor = 'text-red-600 dark:text-red-400';
-    }
-    
-    // Special handling for cases like Boston with almost no activity:
-    // show "Low Activity" instead of "Stable" so LTO knows it's a quiet area.
-    if (!hasAnyData) {
-      trendDirection = 'low activity';
-      trendIcon = AlertTriangle;
-      trendColor = 'text-red-600 dark:text-red-400';
+    if (isBarangayView) {
+      if (!hasAnyData) {
+        trendDirection = 'low activity';
+        trendIcon = AlertTriangle;
+        trendColor = 'text-red-600 dark:text-red-400';
+      } else if (maxValue >= avg * 1.3) {
+        trendDirection = 'top-heavy';
+        trendIcon = ArrowUpRight;
+        trendColor = 'text-blue-600 dark:text-blue-400';
+        percentageChange = avg ? ((maxValue - avg) / avg) * 100 : 0;
+      } else if (minValue <= avg * 0.7) {
+        trendDirection = 'under-served';
+        trendIcon = ArrowDownRight;
+        trendColor = 'text-amber-600 dark:text-amber-400';
+        percentageChange = avg ? ((avg - minValue) / avg) * 100 : 0;
+      } else {
+        trendDirection = 'balanced';
+        trendIcon = Minus;
+        trendColor = 'text-green-600 dark:text-green-400';
+        percentageChange = 0;
+      }
+    } else {
+      if (percentageChange > 2) {
+        trendDirection = 'increasing';
+        trendIcon = TrendingUp;
+        trendColor = 'text-green-600 dark:text-green-400';
+      } else if (percentageChange < -2) {
+        trendDirection = 'decreasing';
+        trendIcon = TrendingDown;
+        trendColor = 'text-red-600 dark:text-red-400';
+      }
+      
+      // Special handling for cases like Boston with almost no activity:
+      if (!hasAnyData) {
+        trendDirection = 'low activity';
+        trendIcon = AlertTriangle;
+        trendColor = 'text-red-600 dark:text-red-400';
+      }
     }
     
     // Find peak period
@@ -551,7 +705,9 @@ const WeeklyPredictionsChart = () => {
     
     // Determine peak period label
     let peakLabel = 'N/A';
-    if (viewType === 'weekly' && peakPeriod) {
+    if (isBarangayView && peakPeriod) {
+      peakLabel = peakPeriod.barangay || peakPeriod.label || peakPeriod.weekLabel;
+    } else if (viewType === 'weekly' && peakPeriod) {
       peakLabel = `Week ${peakPeriod.week}`;
     } else if (viewType === 'monthly' && peakPeriod) {
       peakLabel = peakPeriod.monthShort || peakPeriod.month;
@@ -561,7 +717,9 @@ const WeeklyPredictionsChart = () => {
     
     // Determine low period label
     let lowLabel = 'N/A';
-    if (viewType === 'weekly' && lowPeriod) {
+    if (isBarangayView && lowPeriod) {
+      lowLabel = lowPeriod.barangay || lowPeriod.label || lowPeriod.weekLabel;
+    } else if (viewType === 'weekly' && lowPeriod) {
       lowLabel = `Week ${lowPeriod.week}`;
     } else if (viewType === 'monthly' && lowPeriod) {
       lowLabel = lowPeriod.monthShort || lowPeriod.month;
@@ -593,6 +751,52 @@ const WeeklyPredictionsChart = () => {
     
     const recommendations = [];
     const { total, avg, trendDirection, percentageChange, peakPeriod, peakValue, lowPeriod, lowValue, coefficientOfVariation, periodLabel, noData } = kpiMetrics;
+
+    if (isBarangayView) {
+      const barangayTotals = monthlyData.length ? monthlyData : weeklyData;
+      if (barangayTotals.length === 0) return recommendations;
+
+      const topBarangay = barangayTotals[0];
+      const lowBarangay = barangayTotals[barangayTotals.length - 1];
+      const share = total > 0 ? (topBarangay.totalPredicted / total) * 100 : 0;
+
+      recommendations.push({
+        type: 'operational',
+        category: 'Focus Area',
+        priority: 'high',
+        title: `Scale Services in ${topBarangay.barangay}`,
+        description: `${topBarangay.barangay} accounts for ${share.toFixed(1)}% of projected renewals (${topBarangay.totalPredicted.toLocaleString()} vehicles). Ensure staffing, systems, and communication plans prioritize this barangay.`,
+        icon: Users,
+        color: 'blue'
+      });
+
+      if (lowBarangay && lowBarangay.totalPredicted < avg * 0.5) {
+        recommendations.push({
+          type: 'strategic',
+          category: 'Outreach',
+          priority: 'medium',
+          title: `Deploy Caravan Support to ${lowBarangay.barangay}`,
+          description: `${lowBarangay.barangay} expects only ${lowBarangay.totalPredicted.toLocaleString()} renewals. Schedule mobile teams or awareness drives to avoid underserved residents.`,
+          icon: Target,
+          color: 'amber'
+        });
+      }
+
+      if (barangayPriority.length >= 3) {
+        const lowNames = barangayPriority.slice(0, 3).map(item => item.barangay).join(', ');
+        recommendations.push({
+          type: 'risk',
+          category: 'Equity',
+          priority: 'medium',
+          title: 'Balance Service Coverage',
+          description: `The following barangays show minimal projected demand: ${lowNames}. Keep them on the radar for caravan scheduling to maintain equitable service.`,
+          icon: AlertCircle,
+          color: 'red'
+        });
+      }
+
+      return recommendations;
+    }
     
     // If we have no meaningful prediction data (all zeros), surface high-priority warnings
     if (noData) {
@@ -740,6 +944,10 @@ const WeeklyPredictionsChart = () => {
 
   // Enhanced comparative analysis for all views
   const calculateComparativeAnalysis = () => {
+    if (isBarangayView) {
+      return null;
+    }
+
     if (!kpiMetrics || (viewType === 'weekly' && weeksToPredict !== 4)) {
       // For weekly, only show when 4 weeks selected
       // For monthly/yearly, show if we have data
@@ -968,6 +1176,15 @@ const WeeklyPredictionsChart = () => {
                   ⚠ Using Aggregated Model
                 </span>
               )}
+              <span
+                className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                  isBarangayView
+                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-200'
+                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200'
+                }`}
+              >
+                {isBarangayView ? 'Barangay View' : 'Municipality View'}
+              </span>
             </p>
           </div>
         </div>
@@ -1098,7 +1315,7 @@ const WeeklyPredictionsChart = () => {
           <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border border-amber-200 dark:border-amber-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Peak {viewType === 'weekly' ? 'Week' : viewType === 'monthly' ? 'Month' : 'Year'}
+                {isBarangayView ? 'Peak Barangay' : `Peak ${viewType === 'weekly' ? 'Week' : viewType === 'monthly' ? 'Month' : 'Year'}`}
               </h3>
               <div className="w-8 h-8 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 rounded-lg">
                 <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
@@ -1363,7 +1580,12 @@ const WeeklyPredictionsChart = () => {
           textAlign: 'center'
         }}>
           <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            {viewType === 'yearly' ? (
+            {isBarangayView ? (
+              <>
+                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                <span>Barangay Total Predictions</span>
+              </>
+            ) : viewType === 'yearly' ? (
               <>
                 <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
                 <span>Yearly Total Predictions</span>
@@ -1533,6 +1755,70 @@ const WeeklyPredictionsChart = () => {
                   )}
                   <p className="text-xs text-slate-600 dark:text-slate-400 mt-4 leading-relaxed font-normal">
                     Lower forecasted volumes indicate municipalities that should be prioritized for mobile/caravan services to avoid under-served areas.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Caravan Priority Barangays column */}
+            {isBarangayView && (
+              <div className="w-full lg:w-1/2 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/30 dark:to-violet-900/30 border border-purple-200 dark:border-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-600 to-violet-600 dark:from-purple-800 dark:to-violet-900 px-5 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-lg border border-white/30">
+                      <Megaphone className="w-6 h-6 text-white" strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white leading-tight">
+                        Caravan Priority Barangays
+                      </h3>
+                      <p className="text-xs text-purple-100 font-medium mt-0.5">
+                        {municipalities.find(m => m.value === selectedMunicipality)?.label || selectedMunicipality}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5">
+                  {barangayPriority.length === 0 ? (
+                    <div className="flex items-center justify-center py-12">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                        Barangay distribution unavailable for this municipality.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 shadow-sm">
+                      <div className="grid grid-cols-2 gap-4 bg-slate-100 dark:bg-slate-800/90 px-5 py-3.5 border-b-2 border-slate-200 dark:border-slate-700">
+                        <div className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                          Barangay
+                        </div>
+                        <div className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300 text-right">
+                          Predicted Registrations
+                        </div>
+                      </div>
+                      <div className="max-h-[288px] overflow-y-auto custom-scrollbar">
+                        {barangayPriority.map((item, index) => (
+                          <div
+                            key={item.barangay}
+                            className="grid grid-cols-2 gap-4 px-5 py-3.5 border-b border-slate-100 dark:border-slate-700/50 last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors duration-200"
+                          >
+                            <div className="flex items-center">
+                              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-200 text-xs font-bold mr-3 flex-shrink-0">
+                                {index + 1}
+                              </span>
+                              <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{item.barangay}</span>
+                            </div>
+                            <div className="flex items-center justify-end">
+                              <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
+                                {item.totalPredicted.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-4 leading-relaxed font-normal">
+                    Low projected counts highlight barangays that can benefit from mobile caravan deployments or targeted outreach.
                   </p>
                 </div>
               </div>
