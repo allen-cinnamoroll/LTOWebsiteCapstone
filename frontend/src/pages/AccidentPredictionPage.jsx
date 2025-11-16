@@ -19,8 +19,26 @@ import { toast } from 'sonner';
 
 // Get Flask API URL from environment variable or use default
 const getAccidentPredictionAPIBase = () => {
-  if (import.meta.env.VITE_ACCIDENT_PRED_API) {
-    return import.meta.env.VITE_ACCIDENT_PRED_API;
+  const envUrl = import.meta.env.VITE_ACCIDENT_PRED_API;
+  
+  // If environment variable is explicitly set, validate it
+  if (envUrl) {
+    // In production (HTTPS), reject URLs with ports (must use nginx proxy)
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      // If env var contains a port number, ignore it and use nginx proxy path
+      if (envUrl.match(/:\d{4,5}/)) {
+        console.warn('VITE_ACCIDENT_PRED_API contains port number. Using nginx proxy path instead.');
+        return '/accident-prediction-api';
+      }
+      // If env var is a full URL without port, check if it's the proxy path
+      if (envUrl.includes('/accident-prediction-api')) {
+        return envUrl;
+      }
+      // Otherwise, use relative path for nginx proxy
+      return '/accident-prediction-api';
+    }
+    // In development or HTTP, use the env var as-is
+    return envUrl;
   }
   
   if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
