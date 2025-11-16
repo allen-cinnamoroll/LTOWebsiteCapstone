@@ -860,10 +860,9 @@ export default function MVPredictionPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
-                        Overall Model Accuracy
                         {trainingData.test_accuracy_metrics?.mape 
-                          ? ' (Test Set - Out-of-Sample)' 
-                          : ' (Training Set - In-Sample)'}
+                          ? 'Forecast Accuracy (Based on MAPE – Out-of-Sample)' 
+                          : 'Overall Model Accuracy (Training Set - In-Sample)'}
                       </p>
                       <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">
                         {trainingData.test_accuracy_metrics?.mape
@@ -871,10 +870,9 @@ export default function MVPredictionPage() {
                           : (100 - trainingData.accuracy_metrics.mape).toFixed(2)}%
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Based on MAPE of {trainingData.test_accuracy_metrics?.mape
-                          ? `${trainingData.test_accuracy_metrics.mape.toFixed(2)}%`
-                          : `${trainingData.accuracy_metrics.mape.toFixed(2)}%`}
-                        {trainingData.test_accuracy_metrics?.mape && ' (Test Set)'}
+                        {trainingData.test_accuracy_metrics?.mape 
+                          ? "Forecast accuracy represents how close the model's predictions are to the actual values. It is calculated as 100% − MAPE (Mean Absolute Percentage Error)."
+                          : `Based on MAPE of ${trainingData.accuracy_metrics.mape.toFixed(2)}%`}
                       </p>
                     </div>
                     <div className="text-4xl">📊</div>
