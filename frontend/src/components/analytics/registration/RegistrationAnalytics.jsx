@@ -303,9 +303,7 @@ export function RegistrationAnalytics() {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-1">
             {/* Registered Vehicles Card */}
-            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-red-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-1`}>
-              {/* Gradient shading effect */}
-              <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-red-500/20 dark:to-red-600/10 bg-gradient-to-br from-red-500/15 to-red-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
+            <div className={`group relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 transform overflow-hidden animate-stagger-1`}>
               <div className="absolute top-4 right-4">
                 <svg className="w-6 h-6 text-red-600 dark:text-red-400 icon-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
@@ -357,9 +355,7 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Registered Owners Card */}
-            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-blue-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-2`}>
-              {/* Gradient shading effect */}
-              <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-blue-500/20 dark:to-blue-600/10 bg-gradient-to-br from-blue-500/15 to-blue-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
+            <div className={`group relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 transform overflow-hidden animate-stagger-2`}>
               <div className="absolute top-4 right-4">
                 <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 icon-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -408,9 +404,7 @@ export function RegistrationAnalytics() {
             </div>
 
             {/* Plate Classification Card */}
-            <div className={`group relative dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 dark:border-gray-700 bg-gradient-to-br from-white to-purple-50/30 border-2 border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 transform overflow-hidden animate-stagger-3`}>
-              {/* Gradient shading effect */}
-              <div className={`absolute top-0 right-0 w-24 h-24 dark:bg-gradient-to-br dark:from-purple-500/20 dark:to-purple-600/10 bg-gradient-to-br from-purple-500/15 to-purple-600/8 rounded-full -translate-y-6 translate-x-6 group-hover:scale-125 transition-transform duration-500 blur-xl`}></div>
+            <div className={`group relative bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md p-4 hover:shadow-lg transition-all duration-300 transform overflow-hidden animate-stagger-3`}>
               <div className="absolute top-4 right-4">
                 <svg className="w-6 h-6 text-purple-600 dark:text-purple-400 icon-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <rect x="2" y="6" width="20" height="12" rx="2" ry="2"/>

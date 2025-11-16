@@ -20,6 +20,9 @@ const getMVPredictionAPIBase = () => {
 
 const MV_PREDICTION_API_BASE = getMVPredictionAPIBase();
 
+// Export the API base URL for use in components
+export const getMVPredictionAPIBaseURL = () => MV_PREDICTION_API_BASE;
+
 /**
  * Fetch weekly vehicle registration predictions
  * @param {number} weeks - Number of weeks to predict (default: 12, max: 52)

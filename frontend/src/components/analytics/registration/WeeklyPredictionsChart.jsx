@@ -12,7 +12,7 @@ import {
   Legend,
   ComposedChart
 } from 'recharts';
-import { getWeeklyPredictions } from '../../../api/predictionApi.js';
+import { getWeeklyPredictions, getMVPredictionAPIBaseURL } from '../../../api/predictionApi.js';
 import { TrendingUp, TrendingDown, Minus, Award, BarChart2, AlertCircle, CheckCircle2, Info, Users, Calendar, Target, Lightbulb, AlertTriangle, ArrowUpRight, ArrowDownRight, Megaphone } from 'lucide-react';
 
 const WeeklyPredictionsChart = () => {
@@ -136,7 +136,7 @@ const WeeklyPredictionsChart = () => {
       // Provide more specific error messages
       let errorMessage = 'Error loading predictions';
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-        const apiBase = import.meta.env.VITE_MV_PREDICTION_API_URL || 'http://72.60.198.244:5002';
+        const apiBase = getMVPredictionAPIBaseURL();
         errorMessage = `Cannot connect to prediction API at ${apiBase}. Please ensure the Flask API server is running.`;
       } else if (err.message.includes('HTTP error')) {
         errorMessage = `Server error: ${err.message}`;
@@ -378,30 +378,55 @@ const WeeklyPredictionsChart = () => {
         .map(m => m.value)
         .filter(Boolean); // exclude "All Municipalities" (null)
       
-      const results = await Promise.all(
-        muniValues.map(async (munValue) => {
-          try {
-            const res = await getWeeklyPredictions(weeksToPredict, munValue);
-            if (res.success && res.data?.weekly_predictions) {
-              const total = res.data.weekly_predictions.reduce((sum, p) => {
-                const val = p.predicted_count || p.predicted || p.total_predicted || 0;
-                return sum + val;
-              }, 0);
-              return { municipality: munValue, total };
-            }
-          } catch (e) {
-            console.error('Error fetching priority data for', munValue, e);
-            return null;
-          }
-          return null;
-        })
-      );
+      // Process municipalities in batches to avoid overwhelming the server
+      // and reduce timeout issues
+      const batchSize = 3; // Process 3 municipalities at a time
+      const results = [];
       
-      const cleaned = results.filter(Boolean);
+      for (let i = 0; i < muniValues.length; i += batchSize) {
+        const batch = muniValues.slice(i, i + batchSize);
+        
+        const batchResults = await Promise.allSettled(
+          batch.map(async (munValue) => {
+            try {
+              const res = await getWeeklyPredictions(weeksToPredict, munValue);
+              if (res.success && res.data?.weekly_predictions) {
+                const total = res.data.weekly_predictions.reduce((sum, p) => {
+                  const val = p.predicted_count || p.predicted || p.total_predicted || 0;
+                  return sum + val;
+                }, 0);
+                return { municipality: munValue, total };
+              }
+              return null;
+            } catch (e) {
+              // Silently handle errors - we'll just skip this municipality
+              console.warn(`Error fetching priority data for ${munValue}:`, e.message);
+              return null;
+            }
+          })
+        );
+        
+        // Extract successful results
+        batchResults.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            results.push(result.value);
+          }
+        });
+        
+        // Add a small delay between batches to avoid overwhelming the server
+        if (i + batchSize < muniValues.length) {
+          await new Promise(resolve => setTimeout(resolve, 200)); // 200ms delay between batches
+        }
+      }
+      
       // Sort ascending by total predicted (lowest first)
-      cleaned.sort((a, b) => a.total - b.total);
+      results.sort((a, b) => a.total - b.total);
       // Show all municipalities, ordered from lowest to highest volume
-      setPriorityMunicipalities(cleaned);
+      setPriorityMunicipalities(results);
+    } catch (error) {
+      console.error('Error in fetchPriorityMunicipalities:', error);
+      // Set empty array on error to avoid showing stale data
+      setPriorityMunicipalities([]);
     } finally {
       setPriorityLoading(false);
     }
