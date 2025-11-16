@@ -1377,7 +1377,6 @@ export function AccidentAnalytics() {
               {predLoading && (!chartData || chartData.items.length === 0) && !predError && (
                 <div className="flex flex-col items-center justify-center w-full py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-3"></div>
-                  <p className="text-sm text-muted-foreground">Loading predictions for top 10 barangays...</p>
                 </div>
               )}
 
