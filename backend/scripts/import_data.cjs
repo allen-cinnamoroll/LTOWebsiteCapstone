@@ -25,7 +25,7 @@ async function importData() {
     }
   }
   
-  const accidentsPath = path.join(__dirname, 'accidents_data.json');
+  const accidentsPath = path.join(__dirname, 'accidents data.json');
   const accidentsData = JSON.parse(fs.readFileSync(accidentsPath, 'utf8'));
 
   // Get superadmin ID for default createdBy
@@ -123,27 +123,4 @@ async function importData() {
   } catch (error) {
     console.log('⚠️  Index may already exist:', error.message);
   }
-
-  // =====================
-  // 🚨 Import Violations
-  // =====================
-  const violationsCollection = db.collection('violations');
-  const violationsPath = path.join(__dirname, 'violations_confiscated.json');
-  const violationsData = JSON.parse(fs.readFileSync(violationsPath, 'utf8'));
-
-  // Clear collection before re-import
-  await violationsCollection.deleteMany({});
-  const transformedViolations = violationsData.map(item => ({
-    ...item,
-    createdAt: item.createdAt ? new Date(item.createdAt) : now,
-    // Don't set updatedAt or updatedBy for new imports (they weren't updated yet)
-    createdBy: item.createdBy || superadminId,
-    updatedBy: null,
-  }));
-  await violationsCollection.insertMany(transformedViolations);
-  console.log(`✅ ${transformedViolations.length} violations imported successfully!`);
-
-  await client.close();
 }
-
-importData().catch(console.error);
