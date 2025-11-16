@@ -300,12 +300,12 @@ export const getViolationAnalytics = async (req, res) => {
                 };
             } else {
                 // Filter by year only
-                const startDate = new Date(`${year}-01-01`);
-                const endDate = new Date(`${year}-12-31`);
-                filter.dateOfApprehension = {
-                    $gte: startDate,
-                    $lte: endDate
-                };
+            const startDate = new Date(`${year}-01-01`);
+            const endDate = new Date(`${year}-12-31`);
+            filter.dateOfApprehension = {
+                $gte: startDate,
+                $lte: endDate
+            };
             }
         }
 
