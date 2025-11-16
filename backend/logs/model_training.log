@@ -1131,3 +1131,44 @@ weighted avg       0.67      0.66      0.63        70
 2025-11-15 21:52:04,425 - INFO - Saving models...
 2025-11-15 21:52:04,452 - INFO - Models saved to ../trained/
 2025-11-15 21:52:04,453 - INFO - Training pipeline completed successfully!
+2025-11-17 00:26:19,580 - INFO - Starting complete training pipeline...
+2025-11-17 00:26:19,581 - INFO - Loading and preparing data...
+2025-11-17 00:26:19,661 - INFO - Data prepared: 277 training samples, 70 test samples
+2025-11-17 00:26:19,661 - INFO - Training Random Forest Classifier...
+2025-11-17 00:26:20,510 - INFO - Random Forest CV Accuracy: 0.6716 (+/- 0.0827)
+2025-11-17 00:26:20,511 - INFO - Evaluating model...
+2025-11-17 00:26:20,546 - INFO - Test Accuracy: 0.6571
+2025-11-17 00:26:20,547 - INFO - Test Precision: 0.6700
+2025-11-17 00:26:20,547 - INFO - Test Recall: 0.6571
+2025-11-17 00:26:20,547 - INFO - Test F1-Score: 0.6332
+2025-11-17 00:26:20,547 - INFO - Classification Report:
+2025-11-17 00:26:20,558 - INFO - 
+              precision    recall  f1-score   support
+
+           1       0.64      0.87      0.74        39
+           2       0.71      0.39      0.50        31
+
+    accuracy                           0.66        70
+   macro avg       0.67      0.63      0.62        70
+weighted avg       0.67      0.66      0.63        70
+
+2025-11-17 00:26:20,563 - INFO - Confusion Matrix:
+[[34  5]
+ [19 12]]
+2025-11-17 00:26:20,589 - INFO - Top 10 Most Important Features:
+2025-11-17 00:26:20,594 - INFO -                 feature  importance
+0                   lat    0.253883
+1                   lng    0.181664
+8  municipality_encoded    0.148297
+9      barangay_encoded    0.124977
+4                   day    0.114201
+3                 month    0.098445
+5           day_of_week    0.053084
+2                  year    0.025449
+6                  hour    0.000000
+7  incidentType_encoded    0.000000
+2025-11-17 00:26:20,597 - INFO - Creating rule-based system...
+2025-11-17 00:26:20,637 - INFO - Rule-based system created successfully
+2025-11-17 00:26:20,637 - INFO - Saving models...
+2025-11-17 00:26:20,662 - INFO - Models saved to ../trained/
+2025-11-17 00:26:20,662 - INFO - Training pipeline completed successfully!

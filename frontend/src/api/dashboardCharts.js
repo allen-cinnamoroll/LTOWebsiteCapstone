@@ -25,7 +25,7 @@ export function useDashboardCharts() {
         setError(null);
         const now = new Date();
         const year = now.getFullYear();
-        const month = 11; // November only
+        const month = now.getMonth() + 1; // use current month (1-12)
 
         // 1) Municipality totals (vehicles + drivers) for November (use totals endpoint)
         const muniRes = await apiClient.get(`/dashboard/municipality-registration-totals?month=${month}&year=${year}`, {
@@ -41,19 +41,14 @@ export function useDashboardCharts() {
         setBottomMunicipalityTop3(muniWithTotals.slice(-3).reverse().map(m => ({ name: m.name, value: m.total })));
 
         // 2) Violation analytics (top violations, top officers, violations by type) for November
-        console.log(`Fetching violations for month=${month}, year=${year}`);
         const vioRes = await apiClient.get(`/violations/analytics?month=${month}&year=${year}`, {
           headers: { Authorization: token },
         });
-        console.log('Violation analytics response:', vioRes?.data);
         
         const mostCommon = vioRes?.data?.data?.mostCommonViolations || [];
         const topOfficers = vioRes?.data?.data?.topOfficers || [];
         const byType = vioRes?.data?.data?.violationsByType || [];
 
-        console.log('Most common violations:', mostCommon);
-        console.log('Top officers:', topOfficers);
-        console.log('Violations by type:', byType);
 
         setViolationsTop5(
           mostCommon.slice(0,5).map(v => ({ violation: v._id, value: v.count }))
@@ -66,7 +61,6 @@ export function useDashboardCharts() {
         const filteredTypes = byType
             .filter(t => ["alarm","confiscated","impounded"].includes(String(t._id).toLowerCase()))
             .map(t => ({ type: typeMap[String(t._id).toLowerCase()] || t._id, value: t.count }));
-        console.log('Filtered violation types:', filteredTypes);
         setViolationTypeDistribution(filteredTypes);
 
         // 3) Accident analytics for November (weekly and municipality)

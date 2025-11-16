@@ -285,8 +285,6 @@ export const getViolationAnalytics = async (req, res) => {
     try {
         const { year, month } = req.query;
         
-        console.log('Violation Analytics - Received params:', { year, month });
-        
         // Build filter for year/month if provided
         let filter = {};
         if (year && year !== 'All') {
@@ -300,7 +298,6 @@ export const getViolationAnalytics = async (req, res) => {
                     $gte: startDate,
                     $lte: endDate
                 };
-                console.log('Filtering by month/year:', { startDate, endDate });
             } else {
                 // Filter by year only
                 const startDate = new Date(`${year}-01-01`);
@@ -309,23 +306,11 @@ export const getViolationAnalytics = async (req, res) => {
                     $gte: startDate,
                     $lte: endDate
                 };
-                console.log('Filtering by year only:', { startDate, endDate });
             }
         }
 
-        console.log('Final filter:', JSON.stringify(filter, null, 2));
-
         // Get all violations with filter
         const violations = await ViolationModel.find(filter);
-        
-        console.log(`Found ${violations.length} violations matching filter`);
-        if (violations.length > 0) {
-            console.log('Sample violation dates:', violations.slice(0, 3).map(v => ({
-                date: v.dateOfApprehension,
-                type: v.violationType,
-                officer: v.apprehendingOfficer
-            })));
-        }
         
         // Count total individual violations across all records
         let totalViolations = 0;
@@ -532,21 +517,10 @@ export const getViolationAnalytics = async (req, res) => {
         violationCombinations.sort((a, b) => b.count - a.count);
 
         // Get all license types with counts from ALL violations
-        console.log('Processing violations for license types...');
-        console.log('Total violations:', violations.length);
-        
         const licenseTypeCounts = {};
         violations.forEach((violation, index) => {
             // Check both possible field names
             const licenseTypeValue = violation.licenseType || violation.licenceType;
-            
-            if (index < 5) { // Log first 5 violations for debugging
-                console.log(`Violation ${index}:`, {
-                    licenseType: violation.licenseType,
-                    licenceType: violation.licenceType,
-                    licenseTypeValue: licenseTypeValue
-                });
-            }
             
             if (licenseTypeValue && 
                 licenseTypeValue !== null && 
@@ -558,18 +532,13 @@ export const getViolationAnalytics = async (req, res) => {
             }
         });
         
-        console.log('License type counts found:', licenseTypeCounts);
-        
         // Convert to array and sort by count
         const confiscatedItemTypesArray = Object.entries(licenseTypeCounts)
             .map(([type, count]) => ({ type, count }))
             .sort((a, b) => b.count - a.count);
         
-        console.log('Final array:', confiscatedItemTypesArray);
-        
         // If no data found, provide sample data for testing
         if (confiscatedItemTypesArray.length === 0) {
-            console.log('No license type data found, providing sample data');
             confiscatedItemTypesArray.push(
                 { type: 'DL', count: 45 },
                 { type: 'SP', count: 32 },

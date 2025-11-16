@@ -25,7 +25,7 @@ async function importData() {
     }
   }
   
-  const accidentsPath = path.join(__dirname, 'accidents_2024_2025_clean.json');
+  const accidentsPath = path.join(__dirname, 'accidents_data.json');
   const accidentsData = JSON.parse(fs.readFileSync(accidentsPath, 'utf8'));
 
   // Get superadmin ID for default createdBy

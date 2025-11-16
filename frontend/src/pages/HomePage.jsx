@@ -160,8 +160,8 @@ const HomePage = () => {
               <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
-              </div>
-            </div>
+                  </div>
+                </div>
             {/* div3: Top 5 Violation (lg:5) */}
             <div className="col-span-12 lg:col-span-5">
               <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
@@ -185,7 +185,7 @@ const HomePage = () => {
                 <div className="h-5 w-56 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
-            </div>
+                </div>
             {/* div6: Violation Type Distribution (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
@@ -198,8 +198,8 @@ const HomePage = () => {
               <div className="rounded-xl bg-white shadow-md border p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
-              </div>
             </div>
+          </div>
 
             {/* Bottom row */}
             {/* div8: Top 5 Municipality Accident (lg:6) */}
@@ -215,7 +215,7 @@ const HomePage = () => {
                 <div className="h-5 w-64 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
               </div>
-            </div>
+        </div>
           </section>
         </>
       ) : (
@@ -227,7 +227,7 @@ const HomePage = () => {
               <div className="w-full">
                 <VehicleRenewalGauge
                   actual={stats.kpi?.renewal?.current || 0}
-                  target={stats.kpi?.renewal?.target || 0}
+                target={stats.kpi?.renewal?.target || 0}
                   title="Vehicle Renewal KPI"
                 />
               </div>
@@ -259,7 +259,7 @@ const HomePage = () => {
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               <div className="rounded-xl shadow-md bg-white border p-4 h-full overflow-hidden">
                 {(userData?.role === "0" || userData?.role === "1") ? (
-                  <OnlineUsersPanel />
+                <OnlineUsersPanel />
                 ) : (
                   <div className="p-4 text-sm text-muted-foreground">Online Users (admins only)</div>
                 )}

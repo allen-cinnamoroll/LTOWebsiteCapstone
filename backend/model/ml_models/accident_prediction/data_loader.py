@@ -192,6 +192,11 @@ class AccidentDataLoader:
         df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
         df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
         
+        # Quarter features for seasonality
+        df['quarter'] = ((df['month'] - 1) // 3) + 1
+        df['quarter_sin'] = np.sin(2 * np.pi * df['quarter'] / 4)
+        df['quarter_cos'] = np.cos(2 * np.pi * df['quarter'] / 4)
+        
         # Create year feature (normalized or as-is)
         df['year_normalized'] = (df['year'] - df['year'].min()) / (df['year'].max() - df['year'].min() + 1)
         
@@ -208,19 +213,41 @@ class AccidentDataLoader:
         df.attrs['municipality_encoder'] = municipality_encoder
         df.attrs['barangay_encoder'] = barangay_encoder
         
-        # Calculate historical statistics per barangay (rolling features)
+        # Sort for rolling features
         df = df.sort_values(['barangay', 'year', 'month'])
         
-        # Add lag features (previous month's accident count)
+        # Barangay-level lag/rolling features
         df['accident_count_lag1'] = df.groupby('barangay')['accident_count'].shift(1).fillna(0)
+        df['accident_count_lag3'] = df.groupby('barangay')['accident_count'].shift(3).fillna(0)
+        df['accident_count_lag6'] = df.groupby('barangay')['accident_count'].shift(6).fillna(0)
+        df['accident_count_lag12'] = df.groupby('barangay')['accident_count'].shift(12).fillna(0)
         
-        # Add rolling mean (3-month average)
         df['accident_count_rolling_mean_3'] = df.groupby('barangay')['accident_count'].transform(
             lambda x: x.rolling(window=3, min_periods=1).mean()
         )
-        
-        # Add rolling std (3-month std)
         df['accident_count_rolling_std_3'] = df.groupby('barangay')['accident_count'].transform(
+            lambda x: x.rolling(window=3, min_periods=1).std().fillna(0)
+        )
+        df['accident_count_rolling_mean_6'] = df.groupby('barangay')['accident_count'].transform(
+            lambda x: x.rolling(window=6, min_periods=1).mean()
+        )
+        df['accident_count_rolling_std_6'] = df.groupby('barangay')['accident_count'].transform(
+            lambda x: x.rolling(window=6, min_periods=1).std().fillna(0)
+        )
+        df['accident_count_rolling_mean_12'] = df.groupby('barangay')['accident_count'].transform(
+            lambda x: x.rolling(window=12, min_periods=1).mean()
+        )
+        df['accident_count_rolling_std_12'] = df.groupby('barangay')['accident_count'].transform(
+            lambda x: x.rolling(window=12, min_periods=1).std().fillna(0)
+        )
+        
+        # Municipality-level aggregates to capture broader trends
+        df = df.sort_values(['municipality', 'year', 'month'])
+        df['muni_count_lag1'] = df.groupby('municipality')['accident_count'].shift(1).fillna(0)
+        df['muni_count_rolling_mean_3'] = df.groupby('municipality')['accident_count'].transform(
+            lambda x: x.rolling(window=3, min_periods=1).mean()
+        )
+        df['muni_count_rolling_std_3'] = df.groupby('municipality')['accident_count'].transform(
             lambda x: x.rolling(window=3, min_periods=1).std().fillna(0)
         )
         
@@ -236,12 +263,25 @@ class AccidentDataLoader:
             'month',
             'month_sin',
             'month_cos',
+            'quarter',
+            'quarter_sin',
+            'quarter_cos',
             'year_normalized',
             'municipality_encoded',
             'barangay_encoded',
             'accident_count_lag1',
+            'accident_count_lag3',
+            'accident_count_lag6',
+            'accident_count_lag12',
             'accident_count_rolling_mean_3',
-            'accident_count_rolling_std_3'
+            'accident_count_rolling_std_3',
+            'accident_count_rolling_mean_6',
+            'accident_count_rolling_std_6',
+            'accident_count_rolling_mean_12',
+            'accident_count_rolling_std_12',
+            'muni_count_lag1',
+            'muni_count_rolling_mean_3',
+            'muni_count_rolling_std_3',
         ]
 
 

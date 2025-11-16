@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import WeeklyPredictionsChart from './WeeklyPredictionsChart.jsx';
 import { getModelAccuracy } from '../../../api/predictionApi.js';
+import { Loader2 } from 'lucide-react';
 
 export function PredictiveAnalytics() {
   const [accuracy, setAccuracy] = useState(null);
@@ -85,9 +86,12 @@ export function PredictiveAnalytics() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
                 {accuracyLoading ? (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">Loading accuracy...</span>
+                  <span className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    Loading model accuracy...
+                  </span>
                 ) : accuracyDisplay ? (
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-md border ${accuracyDisplay.colorClass}`} title={`MAPE: ${accuracyDisplay.mape}% | ${accuracyDisplay.context}`}>

@@ -47,7 +47,8 @@ import {
   Zap,
   Eye,
   Download,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react';
 import apiClient from '@/api/axios';
 import { useAuth } from '@/context/AuthContext';
@@ -265,11 +266,19 @@ export function AccidentAnalytics() {
     return Array.from(map.values()).sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0));
   }, [predictions, predScope]);
 
+  // Auto-fetch predictions whenever year/month/scope changes
+  useEffect(() => {
+    fetchAccidentPredictions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [predYear, predMonth, predScope]);
+
   // Fetch predictions from Flask API
   const fetchAccidentPredictions = async () => {
     try {
       setPredLoading(true);
       setPredError(null);
+      // Clear previous predictions so loading spinner shows consistently
+      setPredictions([]);
       const baseUrl = import.meta?.env?.VITE_ACCIDENT_PRED_API || 'http://localhost:5004';
       const healthUrl = `${baseUrl}/api/accidents/health`;
       const url = `${baseUrl}/api/accidents/predict/all?year=${predYear}&month=${predMonth}`;
@@ -537,6 +546,31 @@ export function AccidentAnalytics() {
       );
     }
     return null;
+  };
+
+  // Custom tooltip for High-Risk Time Prediction to avoid duplicate "accidents" labels
+  const HighRiskTimeTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || payload.length === 0) return null;
+
+    const data = payload[0];
+    const value = data.value ?? 0;
+
+    return (
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg">
+        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+          {label}
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <span
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: data.color || getColors()[3] }}
+          ></span>
+          <span>
+            Accidents: <span className="font-medium">{value}</span>
+          </span>
+        </div>
+      </div>
+    );
   };
 
   // Custom tooltip component for severity distribution with dynamic colors
@@ -1225,7 +1259,7 @@ export function AccidentAnalytics() {
           <Badge variant="outline" className="ml-auto">ML-Powered Forecasting</Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
           {/* Predicted Accidents per Barangay */}
           <Card className="border-yellow-200 dark:border-yellow-900">
             <CardHeader>
@@ -1282,13 +1316,6 @@ export function AccidentAnalytics() {
                     </SelectContent>
                   </Select>
                 </div>
-                <button
-                  onClick={fetchAccidentPredictions}
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-yellow-500 text-white hover:bg-yellow-600 h-9 px-4 py-2"
-                  disabled={predLoading}
-                >
-                  {predLoading ? 'Predicting…' : 'Predict'}
-                </button>
               </div>
 
               {predError && (
@@ -1297,74 +1324,96 @@ export function AccidentAnalytics() {
                 </div>
               )}
 
-              <div className="max-h-80 overflow-auto border border-border rounded-md">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="text-left p-2">#</th>
-                      {predScope === 'barangay' ? (
-                        <>
-                          <th className="text-left p-2">Municipality</th>
-                          <th className="text-left p-2">Barangay</th>
-                        </>
-                      ) : (
-                        <th className="text-left p-2">Municipality</th>
-                      )}
-                      <th className="text-right p-2">Predicted Accidents</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {predLoading && (
-                      <tr>
-                        <td className="p-3 text-center text-muted-foreground" colSpan={4}>
-                          Loading predictions...
-                        </td>
-                      </tr>
-                    )}
-                    {!predLoading && scopedPredictions.length === 0 && (
-                      <tr>
-                        <td className="p-3 text-center text-muted-foreground" colSpan={4}>
-                          No predictions yet. Select a month and click Predict.
-                        </td>
-                      </tr>
-                    )}
-                    {!predLoading && scopedPredictions.slice(0, 12).map((p, idx) => (
-                      <tr key={`${p.municipality || 'ALL'}-${p.barangay || 'AGG'}-${idx}`} className="border-t">
-                        <td className="p-2">{idx + 1}</td>
-                        {predScope === 'barangay' ? (
-                          <>
-                            <td className="p-2">{p.municipality}</td>
-                            <td className="p-2">{p.barangay}</td>
-                          </>
-                        ) : (
-                          <td className="p-2">{p.municipality}</td>
-                        )}
-                        <td className="p-2 text-right font-semibold">
-                          {typeof p.predicted_count === 'number'
-                            ? p.predicted_count
-                            : Number(p.predicted_count)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {scopedPredictions.length > 0 && (
-                <div className="text-xs text-muted-foreground mt-2">
-                  {predScope === 'barangay'
-                    ? `Showing top ${Math.min(12, scopedPredictions.length)} of ${scopedPredictions.length} barangays`
-                    : `Showing top ${Math.min(12, scopedPredictions.length)} of ${scopedPredictions.length} municipalities`}
+              {/* Initial loading state for predictions - match MV Monthly Registration style */}
+              {predLoading && scopedPredictions.length === 0 && !predError && (
+                <div className="flex items-center justify-center w-full py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                 </div>
               )}
+
+              {/* KPI tiles + Bar chart (similar to reference) */}
+              {scopedPredictions.length > 0 && (
+                <>
+                  {(() => {
+                    // compute totals by chosen scope label
+                    const items = scopedPredictions.map(p => ({
+                      label: predScope === 'barangay' ? `${p.municipality} • ${p.barangay}` : p.municipality,
+                      value: typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count || 0)
+                    }));
+                    const total = items.reduce((s, x) => s + (x.value || 0), 0);
+                    const avg = items.length ? total / items.length : 0;
+                    const peak = items.reduce((m, x) => (x.value > (m?.value || 0) ? x : m), null);
+                    const variance = items.length ? items.reduce((s, x) => s + Math.pow((x.value || 0) - avg, 2), 0) / items.length : 0;
+                    const std = Math.sqrt(variance);
+                    const volatility = avg > 0 ? Math.round((std / avg) * 100) : 0;
+
+                    // Trend direction placeholder (we only have one month); use dispersion heuristic
+                    const trendLabel = volatility > 35 ? 'Decreasing' : volatility < 15 ? 'Increasing' : 'Stable';
+                    const trendColor = trendLabel === 'Increasing' ? 'text-green-600' : trendLabel === 'Decreasing' ? 'text-red-600' : 'text-gray-600';
+
+                    // Choose top N for chart to keep clean
+                    const topForChart = items
+                      .slice()
+                      .sort((a, b) => b.value - a.value)
+                      .slice(0, 10)
+                      .map(x => ({ name: x.label, value: x.value }));
+
+                    return (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                          <div className="rounded-lg border bg-blue-50/40 dark:bg-blue-950/10 p-4">
+                            <div className="text-sm text-muted-foreground">Total Predicted</div>
+                            <div className="text-2xl font-bold">{total.toLocaleString()}</div>
+                            <div className="text-xs text-muted-foreground">{items.length} areas • Avg: {Math.round(avg).toLocaleString()}</div>
+                          </div>
+                          <div className="rounded-lg border bg-rose-50/40 dark:bg-rose-950/10 p-4">
+                            <div className="text-sm text-muted-foreground">Trend Direction</div>
+                            <div className={`text-2xl font-bold ${trendColor}`}>{trendLabel}</div>
+                            <div className="text-xs text-muted-foreground">heuristic based on dispersion</div>
+                          </div>
+                          <div className="rounded-lg border bg-yellow-50/40 dark:bg-yellow-950/10 p-4">
+                            <div className="text-sm text-muted-foreground">Peak Area</div>
+                            <div className="text-2xl font-bold truncate" title={peak?.label || ''}>{peak?.label || '—'}</div>
+                            <div className="text-xs text-muted-foreground">{peak ? `${peak.value.toLocaleString()} (highest)` : ''}</div>
+                          </div>
+                          <div className="rounded-lg border bg-red-50/40 dark:bg-red-950/10 p-4">
+                            <div className="text-sm text-muted-foreground">Volatility</div>
+                            <div className="text-2xl font-bold">{volatility}%</div>
+                            <div className="text-xs text-muted-foreground">std/avg across areas</div>
+                          </div>
+                        </div>
+
+                        <div className="w-full">
+                          <ResponsiveContainer width="100%" height={260}>
+                            <BarChart data={topForChart}>
+                              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={60} />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip contentStyle={{ borderRadius: 8, borderColor: '#e5e7eb' }} />
+                              <defs>
+                                <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
+                                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4} />
+                                </linearGradient>
+                              </defs>
+                              <Bar dataKey="value" fill="url(#predGrad)" radius={[6, 6, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                          <div className="mt-2 text-xs text-muted-foreground">Top {topForChart.length} areas – Predicted accidents</div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </>
+              )}
+
+              {/* Table removed as requested */}
             </CardContent>
           </Card>
-          
-          
-          
-
-          {/* Temporal Risk Prediction */}
-          {analyticsData && analyticsData.distributions.hourly && (
-            <Card className="border-yellow-200 dark:border-yellow-900">
+        
+        {/* Temporal Risk Prediction below Predicted Accidents */}
+        {analyticsData && analyticsData.distributions.hourly && (
+          <Card className="border-yellow-200 dark:border-yellow-900">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-yellow-500" />
@@ -1387,7 +1436,7 @@ export function AccidentAnalytics() {
                       height={60}
                     />
                     <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
-                    <Tooltip />
+                    <Tooltip content={<HighRiskTimeTooltip />} />
                     <Area 
                       type="monotone"
                       dataKey="accidents" 
@@ -1506,56 +1555,8 @@ export function AccidentAnalytics() {
                   })()}
                 </div>
               </CardContent>
-            </Card>
-          )}
-
-          {/* Geographic Hotspot Prediction */}
-          {analyticsData && analyticsData.distributions.municipality && (
-            <Card className="border-yellow-200 dark:border-yellow-900 lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-yellow-500" />
-                  Predicted Geographic Hotspots
-                </CardTitle>
-                <CardDescription>
-                  High-risk areas identified by ML model based on historical patterns
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {formatMunicipalityData(analyticsData.distributions.municipality).slice(0, 3).map((muni, index) => {
-                    const riskLevel = index === 0 ? 'CRITICAL' : index === 1 ? 'HIGH' : 'MEDIUM';
-                    const riskColor = index === 0 ? 'red' : index === 1 ? 'orange' : 'yellow';
-                    
-                    return (
-                      <div key={index} className={`p-4 border-2 border-${riskColor}-300 dark:border-${riskColor}-700 rounded-lg bg-${riskColor}-50 dark:bg-${riskColor}-950/20`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-bold text-lg">{muni.name}</h4>
-                          <Badge variant={index === 0 ? "destructive" : "outline"}>{riskLevel}</Badge>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Historical Accidents:</span>
-                            <span className="font-bold">{muni.accidents}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Risk Score:</span>
-                            <span className="font-bold">{muni.percentage}%</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Predicted Next Month:</span>
-                            <span className="font-bold text-red-600 dark:text-red-400">
-                              {Math.ceil(muni.accidents * 1.1)} (+10%)
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          </Card>
+        )}
         </div>
       </div>
 
@@ -1568,92 +1569,81 @@ export function AccidentAnalytics() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Resource Allocation Recommendations */}
-          {analyticsData && analyticsData.distributions.hourly && (
-            <Card className="border-green-200 dark:border-green-900">
+          {/* Recommended Interventions (AI-Prescribed) - fill full width and split in two */}
+          {scopedPredictions && scopedPredictions.length > 0 && (
+            <Card className="border-green-200 dark:border-green-900 lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-green-500" />
-                  Recommended Patrol Schedule
+                  Recommended Interventions
                 </CardTitle>
                 <CardDescription>
-                  Optimized resource deployment based on predicted high-risk periods
+                  {predScope === 'barangay'
+                    ? 'Rule-based interventions per barangay derived from predicted accident counts and PNP SOP guidance'
+                    : 'Rule-based interventions per municipality derived from predicted accident counts and PNP SOP guidance'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {(() => {
-                    const hourlyData = formatHourlyData(analyticsData.distributions.hourly);
-                    const morningRush = hourlyData.slice(7, 10).reduce((sum, h) => sum + h.accidents, 0);
-                    const eveningRush = hourlyData.slice(17, 20).reduce((sum, h) => sum + h.accidents, 0);
-                    
-                    return (
-                      <>
-                        <div className="p-4 border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <h5 className="font-bold text-red-700 dark:text-red-300">Morning Rush (7-9 AM)</h5>
-                            <Badge variant="destructive">CRITICAL</Badge>
-                          </div>
-                          <div className="space-y-1 text-sm text-red-600 dark:text-red-400">
-                            <p>📍 Deploy 2 patrol units at Mati Central</p>
-                            <p>🚑 Position 1 medical response unit</p>
-                            <p>🚦 Activate traffic management team</p>
-                            <p className="font-medium mt-2">Expected Impact: -15% accidents</p>
-                          </div>
-                        </div>
+                    // Build items based on current prediction scope
+                    const baseItems = predScope === 'barangay'
+                      ? scopedPredictions.slice(0, 10)
+                      : scopedPredictions.slice(0, 10).map(p => {
+                          const count = typeof p.predicted_count === 'number'
+                            ? p.predicted_count
+                            : Number(p.predicted_count || 0);
 
-                        <div className="p-4 border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-950/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <h5 className="font-bold text-orange-700 dark:text-orange-300">Evening Rush (5-7 PM)</h5>
-                            <Badge className="bg-orange-500">HIGH PRIORITY</Badge>
-                          </div>
-                          <div className="space-y-1 text-sm text-orange-600 dark:text-orange-400">
-                            <p>📍 Deploy 3 patrol units (main highways)</p>
-                            <p>🚨 Setup DUI checkpoint at key intersections</p>
-                            <p>💡 Verify street lighting operational</p>
-                            <p className="font-medium mt-2">Expected Impact: -20% accidents</p>
-                          </div>
-                        </div>
+                          let level = 'LOW';
+                          const actions = [];
 
-                        <div className="p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/20">
-                          <div className="flex items-center justify-between mb-2">
-                            <h5 className="font-bold text-blue-700 dark:text-blue-300">Off-Peak Hours</h5>
-                            <Badge variant="outline">STANDARD</Badge>
-                          </div>
-                          <div className="space-y-1 text-sm text-blue-600 dark:text-blue-400">
-                            <p>📍 Maintain 1 roving patrol unit</p>
-                            <p>📊 Focus on documentation checks</p>
-                            <p>🎓 Conduct road safety education</p>
-                            <p className="font-medium mt-2">Expected Impact: Maintain current levels</p>
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                          if (count >= 20) {
+                            level = 'CRITICAL';
+                            actions.push(
+                              'Deploy maximum traffic enforcement units during identified high-risk hours.',
+                              'Coordinate with LGU for temporary engineering controls (barriers, signage, speed humps).',
+                              'Conduct intensive information and education campaigns focusing on speeding and drunk driving.'
+                            );
+                          } else if (count >= 12) {
+                            level = 'HIGH';
+                            actions.push(
+                              'Increase PNP checkpoints and roving patrols during peak risk periods.',
+                              'Tighten enforcement of helmet, seatbelt, and speed limit regulations.',
+                              'Engage barangay officials for joint visibility and enforcement operations.'
+                            );
+                          } else if (count >= 5) {
+                            level = 'MEDIUM';
+                            actions.push(
+                              'Maintain regular patrols and random checkpoints.',
+                              'Monitor for emerging hotspots and repeat violators.',
+                              'Enhance signage visibility and road markings where needed.'
+                            );
+                          } else {
+                            level = 'LOW';
+                            actions.push(
+                              'Sustain standard patrol coverage and routine enforcement.',
+                              'Continue safety information campaigns through barangay channels.'
+                            );
+                          }
 
-          {/* Recommended Interventions (AI-Prescribed) */}
-          {predictions && predictions.length > 0 && (
-            <Card className="border-green-200 dark:border-green-900">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-green-500" />
-                  Recommended Interventions (AI-Prescribed)
-                </CardTitle>
-                <CardDescription>
-                  Rule-based interventions per barangay derived from predicted accident counts and PNP SOP guidance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {predictions.slice(0, 6).map((p, idx) => (
+                          return {
+                            ...p,
+                            barangay: null,
+                            predicted_count: count,
+                            prescription: {
+                              level,
+                              actions
+                            }
+                          };
+                        });
+
+                    return baseItems.map((p, idx) => (
                     <div key={`${p.municipality}-${p.barangay}-${idx}`} className="p-3 rounded border border-border">
                       <div className="flex items-center justify-between gap-2">
                         <div className="font-semibold">
-                          {p.municipality} • {p.barangay}
+                          {predScope === 'barangay'
+                            ? `${p.municipality} • ${p.barangay}`
+                            : p.municipality}
                           <span className="ml-2 text-xs text-muted-foreground">
                             Pred: {typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count)}
                             {p.predicted_count_raw !== undefined && (
@@ -1690,7 +1680,8 @@ export function AccidentAnalytics() {
                         </div>
                       )}
                     </div>
-                  ))}
+                    ));
+                  })()}
                 </div>
               </CardContent>
             </Card>
