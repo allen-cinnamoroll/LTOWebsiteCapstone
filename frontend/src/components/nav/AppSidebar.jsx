@@ -349,12 +349,6 @@ export function AppSidebar(props) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/trained-models/violation" className="flex items-center gap-2">
-                        <SquareChartGantt className="h-4 w-4" />
-                        <span>Violation Model</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
                       <Link to="/trained-models/accident" className="flex items-center gap-2">
                         <SquareActivity className="h-4 w-4" />
                         <span>Accident Model</span>
@@ -396,25 +390,9 @@ export function AppSidebar(props) {
                                   </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
-                              <SidebarMenuSubItem>
-                                <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/prescription"} asChild>
-                                  <Link to="/trained-models/vehicle/prescription">
-                                    <ClipboardCheck />
-                                    <span>Prescription</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
                             </SidebarMenuSub>
                           </CollapsibleContent>
                         </Collapsible>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/violation"} asChild>
-                          <Link to="/trained-models/violation">
-                            <SquareChartGantt />
-                            <span>Violation Model</span>
-                          </Link>
-                        </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton isActive={location.pathname === "/trained-models/accident"} asChild>
