@@ -35,7 +35,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   TrendingUp, 
   TrendingDown, 
-  AlertTriangle, 
   Car, 
   MapPin,
   Activity,
@@ -253,7 +252,10 @@ export function AccidentAnalytics() {
   // Aggregate predictions by municipality when scope is 'municipality'
   const scopedPredictions = useMemo(() => {
     if (!predictions || predictions.length === 0) return [];
-    if (predScope === 'barangay') return predictions.slice().sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0));
+    if (predScope === 'barangay') {
+      // Limit to top 10 barangays (already limited by API, but ensure sorting)
+      return predictions.slice().sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0)).slice(0, 10);
+    }
     // aggregate by municipality
     const map = new Map();
     predictions.forEach(p => {
@@ -263,12 +265,55 @@ export function AccidentAnalytics() {
       current.predicted_count += add;
       map.set(key, current);
     });
-    return Array.from(map.values()).sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0));
+    // Sort by predicted count and limit to top 10 municipalities
+    return Array.from(map.values()).sort((a,b)=> (b.predicted_count||0) - (a.predicted_count||0)).slice(0, 10);
   }, [predictions, predScope]);
 
-  // Auto-fetch predictions whenever year/month/scope changes
+  // Memoize chart data computation to avoid recalculating on every render
+  const chartData = useMemo(() => {
+    if (!scopedPredictions || scopedPredictions.length === 0) return null;
+    
+    const items = scopedPredictions.map(p => ({
+      label: predScope === 'barangay' ? `${p.municipality} • ${p.barangay}` : p.municipality,
+      value: typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count || 0)
+    }));
+    
+    const total = items.reduce((s, x) => s + (x.value || 0), 0);
+    const avg = items.length ? total / items.length : 0;
+    const peak = items.reduce((m, x) => (x.value > (m?.value || 0) ? x : m), null);
+    const variance = items.length ? items.reduce((s, x) => s + Math.pow((x.value || 0) - avg, 2), 0) / items.length : 0;
+    const std = Math.sqrt(variance);
+    const volatility = avg > 0 ? Math.round((std / avg) * 100) : 0;
+    const trendLabel = volatility > 35 ? 'Decreasing' : volatility < 15 ? 'Increasing' : 'Stable';
+    const trendColor = trendLabel === 'Increasing' ? 'text-green-600' : trendLabel === 'Decreasing' ? 'text-red-600' : 'text-gray-600';
+    
+    // Choose top N for chart - limit to 10 for both barangay and municipality scope
+    const topForChart = items
+      .slice()
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10)
+      .map(x => ({ name: x.label, value: x.value }));
+    
+    return {
+      items,
+      total,
+      avg,
+      peak,
+      volatility,
+      trendLabel,
+      trendColor,
+      topForChart
+    };
+  }, [scopedPredictions, predScope]);
+
+  // Auto-fetch predictions whenever year/month/scope changes with debouncing
   useEffect(() => {
-    fetchAccidentPredictions();
+    // Debounce to avoid rapid API calls when user changes filters quickly
+    const timeoutId = setTimeout(() => {
+      fetchAccidentPredictions();
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [predYear, predMonth, predScope]);
 
@@ -277,35 +322,36 @@ export function AccidentAnalytics() {
     try {
       setPredLoading(true);
       setPredError(null);
-      // Clear previous predictions so loading spinner shows consistently
-      setPredictions([]);
+      // Don't clear previous predictions immediately - keep them visible while loading
       const baseUrl = import.meta?.env?.VITE_ACCIDENT_PRED_API || 'http://localhost:5004';
       const healthUrl = `${baseUrl}/api/accidents/health`;
-      const url = `${baseUrl}/api/accidents/predict/all?year=${predYear}&month=${predMonth}`;
+      // Limit to top 10 barangays for faster performance (based on historical accident counts)
+      const url = `${baseUrl}/api/accidents/predict/all?year=${predYear}&month=${predMonth}&limit=10`;
 
       // helper with timeout
-      const fetchWithTimeout = (resource, options = {}, timeout = 10000) => {
+      const fetchWithTimeout = (resource, options = {}, timeout = 30000) => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         return fetch(resource, { ...options, signal: controller.signal })
           .finally(() => clearTimeout(id));
       };
 
-      // optional health check (non-blocking)
-      try {
-        await fetchWithTimeout(healthUrl, { headers: { 'Content-Type': 'application/json' } }, 5000);
-      } catch (_) {
-        // ignore health failures, proceed to main request (will handle below)
-      }
+      // optional health check (non-blocking) - skip to speed up
+      // try {
+      //   await fetchWithTimeout(healthUrl, { headers: { 'Content-Type': 'application/json' } }, 3000);
+      // } catch (_) {
+      //   // ignore health failures, proceed to main request
+      // }
 
       // retry logic for transient network errors like ECONNRESET
       let attempt = 0;
       let lastErr = null;
       while (attempt < 2) {
         try {
+          // Timeout set to 15 seconds - predicting top 10 barangays is much faster
           const res = await fetchWithTimeout(url, {
             headers: { 'Content-Type': 'application/json' }
-          }, 12000);
+          }, 15000);
           if (!res.ok) {
             const text = await res.text();
             throw new Error(text || `Failed to fetch predictions (HTTP ${res.status})`);
@@ -320,7 +366,9 @@ export function AccidentAnalytics() {
         } catch (e) {
           lastErr = e;
           // small backoff before retry
-          await new Promise(r => setTimeout(r, 500));
+          if (attempt < 1) {
+            await new Promise(r => setTimeout(r, 500));
+          }
           attempt += 1;
         }
       }
@@ -337,7 +385,10 @@ export function AccidentAnalytics() {
       } else {
         setPredError(e.message || 'Failed to fetch predictions');
       }
-      setPredictions([]);
+      // Only clear predictions on error, not on timeout/network issues
+      if (!msg.includes('timeout') && !msg.includes('network')) {
+        setPredictions([]);
+      }
     } finally {
       setPredLoading(false);
     }
@@ -657,8 +708,7 @@ export function AccidentAnalytics() {
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2 animate-in slide-in-from-top-5 fade-in duration-700">
-                <AlertTriangle className="h-8 w-8 text-red-500 animate-pulse" />
+              <h2 className="text-3xl font-bold tracking-tight animate-in slide-in-from-top-5 fade-in duration-700">
                 Accident Analytics
               </h2>
               <p className="text-muted-foreground">
@@ -744,8 +794,7 @@ export function AccidentAnalytics() {
       <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h2 className="text-3xl font-bold tracking-tight flex items-center gap-2 animate-in slide-in-from-top-5 fade-in duration-700">
-              <AlertTriangle className="h-8 w-8 text-red-500 animate-pulse" />
+            <h2 className="text-3xl font-bold tracking-tight animate-in slide-in-from-top-5 fade-in duration-700">
               Accident Analytics
             </h2>
           <p className="text-muted-foreground">
@@ -1268,7 +1317,7 @@ export function AccidentAnalytics() {
                 Predicted Accidents
               </CardTitle>
               <CardDescription>
-                Random Forest regression predictions for selected month
+                Random Forest regression predictions for top 10 barangays (by historical accident counts) for selected month
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1324,87 +1373,87 @@ export function AccidentAnalytics() {
                 </div>
               )}
 
-              {/* Initial loading state for predictions - match MV Monthly Registration style */}
-              {predLoading && scopedPredictions.length === 0 && !predError && (
-                <div className="flex items-center justify-center w-full py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              {/* Initial loading state for predictions - show skeleton or spinner */}
+              {predLoading && (!chartData || chartData.items.length === 0) && !predError && (
+                <div className="flex flex-col items-center justify-center w-full py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-3"></div>
                 </div>
               )}
 
-              {/* KPI tiles + Bar chart (similar to reference) */}
-              {scopedPredictions.length > 0 && (
-                <>
-                  {(() => {
-                    // compute totals by chosen scope label
-                    const items = scopedPredictions.map(p => ({
-                      label: predScope === 'barangay' ? `${p.municipality} • ${p.barangay}` : p.municipality,
-                      value: typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count || 0)
-                    }));
-                    const total = items.reduce((s, x) => s + (x.value || 0), 0);
-                    const avg = items.length ? total / items.length : 0;
-                    const peak = items.reduce((m, x) => (x.value > (m?.value || 0) ? x : m), null);
-                    const variance = items.length ? items.reduce((s, x) => s + Math.pow((x.value || 0) - avg, 2), 0) / items.length : 0;
-                    const std = Math.sqrt(variance);
-                    const volatility = avg > 0 ? Math.round((std / avg) * 100) : 0;
+              {/* KPI tiles + Bar chart (using memoized chartData) */}
+              {chartData && chartData.items.length > 0 && (
+                <div className="relative">
+                  {/* Show loading overlay on top of existing data when refreshing */}
+                  {predLoading && (
+                    <div className="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-20 rounded-lg backdrop-blur-sm">
+                      <div className="flex flex-col items-center gap-2 bg-white dark:bg-gray-800 px-4 py-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                        <p className="text-xs text-muted-foreground font-medium">Updating predictions...</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div className="rounded-lg border bg-blue-50/40 dark:bg-blue-950/10 p-4">
+                      <div className="text-sm text-muted-foreground">Total Predicted</div>
+                      <div className="text-2xl font-bold">{chartData.total.toLocaleString()}</div>
+                      <div className="text-xs text-muted-foreground">{chartData.items.length} areas • Avg: {Math.round(chartData.avg).toLocaleString()}</div>
+                    </div>
+                    <div className="rounded-lg border bg-rose-50/40 dark:bg-rose-950/10 p-4">
+                      <div className="text-sm text-muted-foreground">Trend Direction</div>
+                      <div className={`text-2xl font-bold ${chartData.trendColor}`}>{chartData.trendLabel}</div>
+                      <div className="text-xs text-muted-foreground">heuristic based on dispersion</div>
+                    </div>
+                    <div className="rounded-lg border bg-yellow-50/40 dark:bg-yellow-950/10 p-4">
+                      <div className="text-sm text-muted-foreground">Peak Area</div>
+                      <div className="text-xl font-bold break-words leading-tight min-h-[2.5rem]" title={chartData.peak?.label || ''}>
+                        {chartData.peak?.label || '—'}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">{chartData.peak ? `${chartData.peak.value.toLocaleString()} (highest)` : ''}</div>
+                    </div>
+                    <div className="rounded-lg border bg-red-50/40 dark:bg-red-950/10 p-4">
+                      <div className="text-sm text-muted-foreground">Volatility</div>
+                      <div className="text-2xl font-bold">{chartData.volatility}%</div>
+                      <div className="text-xs text-muted-foreground">std/avg across areas</div>
+                    </div>
+                  </div>
 
-                    // Trend direction placeholder (we only have one month); use dispersion heuristic
-                    const trendLabel = volatility > 35 ? 'Decreasing' : volatility < 15 ? 'Increasing' : 'Stable';
-                    const trendColor = trendLabel === 'Increasing' ? 'text-green-600' : trendLabel === 'Decreasing' ? 'text-red-600' : 'text-gray-600';
-
-                    // Choose top N for chart to keep clean
-                    const topForChart = items
-                      .slice()
-                      .sort((a, b) => b.value - a.value)
-                      .slice(0, 10)
-                      .map(x => ({ name: x.label, value: x.value }));
-
-                    return (
-                      <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                          <div className="rounded-lg border bg-blue-50/40 dark:bg-blue-950/10 p-4">
-                            <div className="text-sm text-muted-foreground">Total Predicted</div>
-                            <div className="text-2xl font-bold">{total.toLocaleString()}</div>
-                            <div className="text-xs text-muted-foreground">{items.length} areas • Avg: {Math.round(avg).toLocaleString()}</div>
-                          </div>
-                          <div className="rounded-lg border bg-rose-50/40 dark:bg-rose-950/10 p-4">
-                            <div className="text-sm text-muted-foreground">Trend Direction</div>
-                            <div className={`text-2xl font-bold ${trendColor}`}>{trendLabel}</div>
-                            <div className="text-xs text-muted-foreground">heuristic based on dispersion</div>
-                          </div>
-                          <div className="rounded-lg border bg-yellow-50/40 dark:bg-yellow-950/10 p-4">
-                            <div className="text-sm text-muted-foreground">Peak Area</div>
-                            <div className="text-2xl font-bold truncate" title={peak?.label || ''}>{peak?.label || '—'}</div>
-                            <div className="text-xs text-muted-foreground">{peak ? `${peak.value.toLocaleString()} (highest)` : ''}</div>
-                          </div>
-                          <div className="rounded-lg border bg-red-50/40 dark:bg-red-950/10 p-4">
-                            <div className="text-sm text-muted-foreground">Volatility</div>
-                            <div className="text-2xl font-bold">{volatility}%</div>
-                            <div className="text-xs text-muted-foreground">std/avg across areas</div>
-                          </div>
-                        </div>
-
-                        <div className="w-full">
-                          <ResponsiveContainer width="100%" height={260}>
-                            <BarChart data={topForChart}>
-                              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
-                              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={60} />
-                              <YAxis tick={{ fontSize: 10 }} />
-                              <Tooltip contentStyle={{ borderRadius: 8, borderColor: '#e5e7eb' }} />
-                              <defs>
-                                <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
-                                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4} />
-                                </linearGradient>
-                              </defs>
-                              <Bar dataKey="value" fill="url(#predGrad)" radius={[6, 6, 0, 0]} />
-                            </BarChart>
-                          </ResponsiveContainer>
-                          <div className="mt-2 text-xs text-muted-foreground">Top {topForChart.length} areas – Predicted accidents</div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </>
+                  <div className="w-full">
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart data={chartData.topForChart}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                        <XAxis 
+                          dataKey="name" 
+                          tick={{ fontSize: 10 }} 
+                          interval={0} 
+                          angle={-25} 
+                          textAnchor="end" 
+                          height={60}
+                          style={{ textOverflow: 'ellipsis' }}
+                        />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            borderRadius: 8, 
+                            borderColor: isDarkMode ? '#374151' : '#e5e7eb',
+                            backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                            color: isDarkMode ? '#f9fafb' : '#111827'
+                          }} 
+                        />
+                        <defs>
+                          <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.4} />
+                          </linearGradient>
+                        </defs>
+                        <Bar dataKey="value" fill="url(#predGrad)" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Top {chartData.topForChart.length} {predScope === 'municipality' ? 'municipalities' : 'barangays'} – Predicted accidents
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Table removed as requested */}

@@ -219,7 +219,14 @@ export default function AccidentPredictionPage() {
             <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
               <div className="text-sm text-muted-foreground mb-1">Model Type</div>
               <div className="text-lg font-semibold">
-                {modelInfo?.model_type || 'Random Forest Regression'}
+                {modelInfo?.model_type 
+                  ? modelInfo.model_type
+                      .replace('RandomForestRegressor', 'Random Forest')
+                      .replace('Random Forest Regressor', 'Random Forest')
+                      .replace('Regressor', '')
+                      .replace('Regression', '')
+                      .trim() || 'Random Forest'
+                  : 'Random Forest'}
               </div>
             </div>
             

@@ -13,7 +13,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { FileText } from 'lucide-react';
 
 // Counter animation hook
 const useCounterAnimation = (end, duration = 2000) => {
@@ -182,8 +181,7 @@ export function RegistrationAnalytics() {
     <div className="container mx-auto p-6 bg-white dark:bg-transparent min-h-screen rounded-lg page-container">
       <div className="registration-analytics-header">
         <div className="header-fade-in">
-          <h1 className="registration-analytics-title flex items-center gap-2 smooth-transition">
-            <FileText className="h-8 w-8 text-blue-500 icon-pulse" />
+          <h1 className="registration-analytics-title smooth-transition">
             Registration Analytics
           </h1>
           <p className="registration-analytics-subtitle subtitle-fade-in">
