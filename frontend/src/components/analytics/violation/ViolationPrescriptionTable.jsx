@@ -503,15 +503,10 @@ export function ViolationPrescriptionTable({ loading }) {
                     ) : (
                       <p className="text-lg font-bold text-blue-700 dark:text-blue-300">February, May, March</p>
                     )}
-        </div>
-        </div>
-                <div className={`${prefersDark ? 'bg-gradient-to-br from-blue-600/20 to-blue-700/10 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'} rounded-2xl p-4 border flex-shrink-0`}>
-                  <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
             {/* Yearly Quota Target KPI */}
             <div className={`${prefersDark ? 'bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700' : 'bg-gradient-to-br from-white to-slate-50 border-slate-200'} border rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300`}>
@@ -520,7 +515,7 @@ export function ViolationPrescriptionTable({ loading }) {
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`${prefersDark ? 'bg-emerald-500/20' : 'bg-emerald-50'} rounded-lg p-1.5`}>
                       <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -535,12 +530,7 @@ export function ViolationPrescriptionTable({ loading }) {
                       Apprehensions
                     </p>
                   </div>
-              </div>
-                <div className={`${prefersDark ? 'bg-gradient-to-br from-emerald-600/20 to-emerald-700/10 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200'} rounded-2xl p-4 border flex-shrink-0`}>
-                  <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-              </div>
+                </div>
               </div>
             </div>
           </div>
@@ -654,7 +644,7 @@ export function ViolationPrescriptionTable({ loading }) {
                       <td className="py-4 px-4">
                         <p className="font-semibold text-slate-900 dark:text-white mb-1">Caravan Operations</p>
                         <p className="text-xs text-slate-600 dark:text-slate-400">
-                          Coordinate with LGUs/cities for barangay caravans. Provide on-site SP/License assistance.
+                          Coordinate with LGUs/cities for barangay caravans. Include informative and awareness seminars about traffic violations especially the three dominat violations.
                         </p>
                       </td>
                       <td className="py-4 px-4">
