@@ -120,12 +120,16 @@ const WeeklyPredictionsChart = () => {
         
         // Extract and store the last training month from last_data_date
         // This allows us to dynamically filter out the training month, even if new data is added
+        // Each municipality model might have a different last_data_date, so we update it per request
         if (response.data.last_data_date) {
           const lastDate = new Date(response.data.last_data_date);
-          setLastTrainingMonth(lastDate.getMonth()); // 0-indexed (0=Jan, 6=Jul, 7=Aug, etc.)
+          const trainingMonth = lastDate.getMonth(); // 0-indexed (0=Jan, 6=Jul, 7=Aug, etc.)
+          setLastTrainingMonth(trainingMonth);
+          console.log(`[${selectedMunicipality || 'All Municipalities'}] Last training date: ${response.data.last_data_date}, Training month index: ${trainingMonth}`);
         } else {
           // Fallback to July (monthIndex 6) if last_data_date is not provided
           setLastTrainingMonth(6); // July
+          console.warn(`[${selectedMunicipality || 'All Municipalities'}] No last_data_date in response, defaulting to July`);
         }
         
         // Process data for all three views
@@ -203,19 +207,30 @@ const WeeklyPredictionsChart = () => {
       };
     });
 
-    // For "All Municipalities" in weekly view, hide July points (training month)
-    // so that the series starts from the first forecast month (August).
+    // Filter out the training month from weekly view for ALL municipalities
+    // Use the dynamically detected training month from the API response
     let finalWeekly = weeklyProcessed;
-    if (!selectedMunicipality && weeklyProcessed.length > 0) {
-      finalWeekly = weeklyProcessed.filter((week) => week.month !== 7);
+    if (weeklyProcessed.length > 0) {
+      const trainingMonth = lastTrainingMonth !== null ? lastTrainingMonth : 6; // Default to July (6)
+      // Filter out weeks that fall in the training month
+      finalWeekly = weeklyProcessed.filter((week) => week.month !== (trainingMonth + 1)); // week.month is 1-indexed (1-12)
     }
 
     setWeeklyData(finalWeekly);
 
     // Process Monthly View
+    // First, filter out any predictions that fall in the training month
+    // This ensures we don't group training month predictions into monthly data
+    const trainingMonth = lastTrainingMonth !== null ? lastTrainingMonth : 6; // Default to July (6)
+    const filteredWeeklyPredictions = weeklyPredictions.filter((prediction) => {
+      const date = new Date(prediction.date || prediction.week_start);
+      const predictionMonth = date.getMonth(); // 0-indexed (0=Jan, 6=Jul, 7=Aug, etc.)
+      return predictionMonth !== trainingMonth; // Exclude predictions in the training month
+    });
+    
     const monthlyGrouped = {};
-    weeklyPredictions.forEach((prediction) => {
-      const date = new Date(prediction.date);
+    filteredWeeklyPredictions.forEach((prediction) => {
+      const date = new Date(prediction.date || prediction.week_start);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
       
@@ -283,9 +298,10 @@ const WeeklyPredictionsChart = () => {
     setMonthlyData(filteredMonthly);
 
     // Process Yearly View
+    // Use the same filtered predictions (excluding training month)
     const yearlyGrouped = {};
-    weeklyPredictions.forEach((prediction) => {
-      const date = new Date(prediction.date);
+    filteredWeeklyPredictions.forEach((prediction) => {
+      const date = new Date(prediction.date || prediction.week_start);
       const year = date.getFullYear();
       
       if (!yearlyGrouped[year]) {

@@ -338,6 +338,12 @@ def predict_registrations():
         future_exog = preprocessor._create_exogenous_variables(future_dates)
         future_exog = future_exog[['is_weekend_or_holiday']]  # Use only the combined indicator
         
+        # CRITICAL: Ensure future_exog has a DatetimeIndex so the model can use these dates
+        # This ensures all models (aggregated and municipality-specific) use the same prediction dates
+        if not isinstance(future_exog.index, pd.DatetimeIndex):
+            future_exog.index = future_dates
+            logger.info(f"Set DatetimeIndex on future_exog: {future_exog.index[0]} to {future_exog.index[-1]}")
+        
         # Decide how to generate predictions:
         # 1. If a municipality is specified, use its model (or aggregated fallback).
         # 2. If no municipality is specified AND per-municipality is enabled with available models,
@@ -472,7 +478,20 @@ def predict_registrations():
                 f"{(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}"
             )
             
+            # CRITICAL FIX: Temporarily override the model's actual_last_date to ensure
+            # all models (aggregated and municipality-specific) use the same date logic
+            # This ensures predictions always start from the month after the last training data
+            original_actual_last_date = None
+            if hasattr(model_to_use, 'actual_last_date'):
+                original_actual_last_date = model_to_use.actual_last_date
+                model_to_use.actual_last_date = actual_last_date
+                logger.info(f"Temporarily overriding model's actual_last_date to: {actual_last_date}")
+            
             predictions = model_to_use.predict(days=days, exogenous=future_exog)
+            
+            # Restore original actual_last_date if it was overridden
+            if original_actual_last_date is not None:
+                model_to_use.actual_last_date = original_actual_last_date
             
             # Debug: Log prediction summary
             if predictions.get('weekly_predictions'):

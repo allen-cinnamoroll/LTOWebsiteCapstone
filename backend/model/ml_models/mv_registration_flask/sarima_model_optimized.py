@@ -977,12 +977,21 @@ class OptimizedSARIMAModel:
         logger.info(f"First day of next month: {next_month_start}")
         logger.info(f"Prediction start date: {next_month_start}")
         
-        # Generate forecast dates starting from the first day of next month
-        forecast_dates = pd.date_range(
-            start=next_month_start,
-            periods=days,
-            freq='D'
-        )
+        # CRITICAL FIX: If exogenous DataFrame is provided with a DatetimeIndex,
+        # use those dates instead of recalculating. This ensures consistency when
+        # app.py passes dates starting from next_month_start.
+        if exogenous is not None and hasattr(exogenous, 'index') and isinstance(exogenous.index, pd.DatetimeIndex):
+            # Use the dates from the exogenous DataFrame
+            forecast_dates = exogenous.index[:days]  # Take only the requested number of days
+            logger.info(f"Using dates from exogenous DataFrame: {forecast_dates[0]} to {forecast_dates[-1]}")
+        else:
+            # Generate forecast dates starting from the first day of next month
+            forecast_dates = pd.date_range(
+                start=next_month_start,
+                periods=days,
+                freq='D'
+            )
+            logger.info(f"Generated forecast dates: {forecast_dates[0]} to {forecast_dates[-1]}")
         
         # Generate forecasts
         try:
