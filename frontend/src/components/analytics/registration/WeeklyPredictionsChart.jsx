@@ -635,7 +635,7 @@ const WeeklyPredictionsChart = () => {
     // Calculate trend (first vs last period)
     const firstValue = values[0];
     const lastValue = values[values.length - 1];
-    const percentageChange = firstValue !== 0 
+    let percentageChange = firstValue !== 0 
       ? ((lastValue - firstValue) / firstValue) * 100 
       : 0;
     
