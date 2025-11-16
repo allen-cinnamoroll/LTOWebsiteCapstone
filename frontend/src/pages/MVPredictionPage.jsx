@@ -11,26 +11,9 @@ import { toast } from 'sonner';
 // In production, use relative path through nginx proxy (same origin = no CORS issues)
 // In development, use explicit localhost URL or env variable
 const getMVPredictionAPIBase = () => {
-  const envUrl = import.meta.env.VITE_MV_PREDICTION_API_URL;
-  
-  // If environment variable is explicitly set, validate it
-  if (envUrl) {
-    // In production (HTTPS), reject URLs with ports (must use nginx proxy)
-    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-      // If env var contains a port number, ignore it and use nginx proxy path
-      if (envUrl.match(/:\d{4,5}/)) {
-        console.warn('VITE_MV_PREDICTION_API_URL contains port number. Using nginx proxy path instead.');
-        return '/mv-prediction-api';
-      }
-      // If env var is a full URL without port, check if it's the proxy path
-      if (envUrl.includes('/mv-prediction-api')) {
-        return envUrl;
-      }
-      // Otherwise, use relative path for nginx proxy
-      return '/mv-prediction-api';
-    }
-    // In development or HTTP, use the env var as-is
-    return envUrl;
+  // If environment variable is explicitly set, use it (highest priority)
+  if (import.meta.env.VITE_MV_PREDICTION_API_URL) {
+    return import.meta.env.VITE_MV_PREDICTION_API_URL;
   }
   
   // In development mode, use localhost
