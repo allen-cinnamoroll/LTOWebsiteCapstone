@@ -293,7 +293,23 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  // In development with HMR, context might be temporarily null during hot reload
+  // Return a safe default instead of throwing to prevent crashes
   if (!context) {
+    if (import.meta.env.DEV) {
+      console.warn('useAuth called outside AuthProvider - this may be a hot reload issue');
+      // Return a safe default for development
+      return {
+        isAuthenticated: false,
+        isLoading: true,
+        userData: null,
+        token: null,
+        login: () => {},
+        logout: () => {},
+        updateToken: () => {},
+        setUserData: () => {},
+      };
+    }
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

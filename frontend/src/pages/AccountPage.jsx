@@ -42,6 +42,7 @@ const AccountPage = () => {
     avatar: '',
   });
   const [previewAvatar, setPreviewAvatar] = useState('');
+  const [avatarKey, setAvatarKey] = useState(0); // Force re-render when avatar changes
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -55,14 +56,27 @@ const AccountPage = () => {
       console.log('AccountPage - Current userData.avatar:', userData.avatar);
       console.log('AccountPage - Full userData:', userData);
       
+      // Ensure avatar URL is properly formatted
+      const avatarURL = userData.avatar || '';
+      
       setEditData({
         firstName: userData.firstName || '',
         middleName: userData.middleName || '',
         lastName: userData.lastName || '',
         email: userData.email || '',
-        avatar: userData.avatar || '',
+        avatar: avatarURL,
       });
-      setPreviewAvatar(userData.avatar || '');
+      
+      // Only set previewAvatar if it's not a data URL (which means it's a file preview)
+      // If it's a data URL, keep it; otherwise update to the userData avatar
+      setPreviewAvatar(prev => {
+        // Keep data URL previews (user is selecting a new image)
+        if (prev && prev.startsWith('data:')) {
+          return prev;
+        }
+        // Otherwise, use the userData avatar
+        return avatarURL;
+      });
     }
   }, [userData]);
 
@@ -124,18 +138,69 @@ const AccountPage = () => {
           avatar: avatarURL,
         };
 
+        // Update state first
         setUserData(updatedUserData);
         
+        // Save to localStorage
         console.log('Saving to localStorage:', updatedUserData);
         localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
         // Update preview avatar to show the new image immediately
-        setPreviewAvatar(avatarURL);
+        // Use a fresh timestamp to ensure the image reloads
+        const freshAvatarURL = response.data.user.avatar
+          ? getAvatarURL(response.data.user.avatar, true)
+          : '';
+        setPreviewAvatar(freshAvatarURL);
 
-        setIsEditModalOpen(false);
+        // Force avatar component to re-render by incrementing key
+        // This ensures the new image URL is loaded
+        setAvatarKey(prev => prev + 1);
+
+        // Close modal after a short delay to allow state to update
+        setTimeout(() => {
+          setIsEditModalOpen(false);
+        }, 100);
+
         toast.success('Profile updated successfully!', {
           description: new Date().toLocaleString(),
         });
+
+        // Force a small delay to ensure image loads, then verify
+        setTimeout(() => {
+          const finalAvatarURL = updatedUserData.avatar;
+          console.log('Post-save verification:', {
+            userDataAvatar: finalAvatarURL,
+            previewAvatar: freshAvatarURL,
+            localStorageAvatar: JSON.parse(localStorage.getItem('userData') || '{}').avatar
+          });
+          
+          // Verify image is accessible using fetch to get HTTP status
+          if (finalAvatarURL) {
+            fetch(finalAvatarURL, { method: 'HEAD', cache: 'no-cache' })
+              .then(response => {
+                if (response.ok) {
+                  console.log('✅ Avatar image is accessible:', {
+                    url: finalAvatarURL,
+                    status: response.status,
+                    contentType: response.headers.get('content-type')
+                  });
+                } else {
+                  console.error('❌ Avatar image returned error status:', {
+                    url: finalAvatarURL,
+                    status: response.status,
+                    statusText: response.statusText
+                  });
+                }
+              })
+              .catch(error => {
+                console.error('❌ Avatar image fetch failed:', {
+                  url: finalAvatarURL,
+                  error: error.message,
+                  errorType: error.name
+                });
+              });
+          }
+        }, 500);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -219,16 +284,51 @@ const AccountPage = () => {
               <CardContent className="space-y-4 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <Avatar className="h-14 w-14" key={userData?.avatar || 'default'}>
+                    <Avatar className="h-14 w-14" key={`avatar-${avatarKey}-${userData?.avatar || 'default'}`}>
                       <AvatarImage
-                        key={userData?.avatar || 'default-img'}
+                        key={`avatar-img-${avatarKey}-${userData?.avatar || 'default'}`}
                         src={userData?.avatar || ''}
-                        alt={userData?.email}
-                        onError={(e) => {
-                          console.error('Avatar image failed to load:', e.target.src);
+                        alt={userData?.email || 'User avatar'}
+                        onError={async (e) => {
+                          const failedURL = e.target.src;
+                          console.error('Avatar image failed to load:', {
+                            attemptedURL: failedURL,
+                            userDataAvatar: userData?.avatar,
+                            timestamp: new Date().toISOString()
+                          });
+                          
+                          // Check HTTP status to get more details
+                          if (failedURL && !failedURL.startsWith('data:')) {
+                            try {
+                              const response = await fetch(failedURL, { method: 'HEAD', cache: 'no-cache' });
+                              console.error('Avatar fetch details:', {
+                                url: failedURL,
+                                status: response.status,
+                                statusText: response.statusText,
+                                headers: {
+                                  'content-type': response.headers.get('content-type'),
+                                  'content-length': response.headers.get('content-length')
+                                }
+                              });
+                            } catch (fetchError) {
+                              console.error('Avatar fetch error:', {
+                                url: failedURL,
+                                error: fetchError.message,
+                                errorType: fetchError.name
+                              });
+                            }
+                          }
+                          
+                          // Force fallback by hiding image
+                          e.target.style.display = 'none';
                         }}
-                        onLoad={() => {
-                          console.log('Avatar image loaded successfully:', userData?.avatar);
+                        onLoad={(e) => {
+                          console.log('Avatar image loaded successfully:', {
+                            loadedURL: e.target.src,
+                            userDataAvatar: userData?.avatar,
+                            timestamp: new Date().toISOString()
+                          });
+                          e.target.style.display = 'block';
                         }}
                       />
                       <AvatarFallback className="text-lg font-bold">
@@ -381,16 +481,27 @@ const AccountPage = () => {
                 {/* Avatar Section */}
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <Avatar className="h-20 w-20" key={previewAvatar || userData?.avatar || 'default'}>
+                    <Avatar className="h-20 w-20">
                       <AvatarImage
-                        key={`preview-${previewAvatar || userData?.avatar || 'default-img'}`}
                         src={previewAvatar || userData?.avatar || ''}
-                        alt={editData.email || userData?.email}
+                        alt={editData.email || userData?.email || 'User avatar'}
                         onError={(e) => {
-                          console.error('Avatar preview failed to load:', e.target.src);
+                          console.error('Avatar preview failed to load:', {
+                            attemptedURL: e.target.src,
+                            previewAvatar,
+                            userDataAvatar: userData?.avatar,
+                            timestamp: new Date().toISOString()
+                          });
+                          e.target.style.display = 'none';
                         }}
-                        onLoad={() => {
-                          console.log('Avatar preview loaded:', previewAvatar || userData?.avatar);
+                        onLoad={(e) => {
+                          console.log('Avatar preview loaded successfully:', {
+                            loadedURL: e.target.src,
+                            previewAvatar,
+                            userDataAvatar: userData?.avatar,
+                            timestamp: new Date().toISOString()
+                          });
+                          e.target.style.display = 'block';
                         }}
                       />
                       <AvatarFallback className="text-lg font-bold">
