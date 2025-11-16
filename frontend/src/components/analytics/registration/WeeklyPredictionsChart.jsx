@@ -252,12 +252,17 @@ const WeeklyPredictionsChart = () => {
       return a.monthIndex - b.monthIndex;
     });
     
-    // Filter out baseline training month (e.g., July) with zero predictions
-    // so that the chart starts at the first actual forecast month (August).
+    // Filter out the last training month (July) if it appears as the first month
+    // Predictions should start from August (the first month after training data ends)
+    // This ensures we don't show predictions for the month that contains the last training data
+    // Note: We only exclude July if it's the first month, not if it appears later (e.g., July 2026)
     const filteredMonthly = monthlyProcessed.filter((month, index) => {
-      const isZeroMonth = month.totalPredicted === 0 || !Number.isFinite(month.totalPredicted);
-      const isJuly = month.monthShort === 'Jul';
-      return !(isZeroMonth && isJuly && index === 0);
+      // Exclude July (monthIndex 6, 0-indexed) only if it's the first month
+      // This handles the case where last training data is July and predictions should start from August
+      if (index === 0 && month.monthIndex === 6) {
+        return false; // Exclude July if it's the first month
+      }
+      return true; // Include all other months
     });
 
     setMonthlyData(filteredMonthly);
