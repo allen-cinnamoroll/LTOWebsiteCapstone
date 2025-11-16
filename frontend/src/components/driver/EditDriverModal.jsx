@@ -49,21 +49,10 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
 
   // Populate form with driver data when modal opens
   useEffect(() => {
-    console.log('=== EDIT MODAL USEEFFECT ===');
-    console.log('Modal open:', open);
-    console.log('Driver data:', driverData);
-    console.log('Driver data _id:', driverData?._id);
-    
     if (open && driverData) {
       // Extract plate numbers and file numbers from vehicleIds
       const plateNumbers = driverData.vehicleIds?.map(vehicle => vehicle.plateNo).filter(Boolean) || [];
       const fileNumbers = driverData.vehicleIds?.map(vehicle => vehicle.fileNo).filter(Boolean) || [];
-      
-      console.log('=== POPULATING EDIT FORM ===');
-      console.log('Driver data:', driverData);
-      console.log('Address data:', driverData.address);
-      console.log('Plate numbers:', plateNumbers);
-      console.log('File numbers:', fileNumbers);
       
       const formData = {
         plateNo: plateNumbers.length > 0 ? plateNumbers : "",
@@ -80,12 +69,10 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
         birthDate: driverData.birthDate ? new Date(driverData.birthDate) : undefined,
       };
       
-      console.log('Form data being set:', formData);
       form.reset(formData);
       
       // Also set values individually to ensure they're set
       setTimeout(() => {
-        console.log('Form values after reset:', form.getValues());
         if (formData.plateNo) {
           form.setValue("plateNo", formData.plateNo, { shouldValidate: true, shouldDirty: true });
         }
@@ -101,7 +88,6 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
         if (formData.purok) {
           form.setValue("purok", formData.purok, { shouldValidate: true, shouldDirty: true });
         }
-        console.log('Form values after individual set:', form.getValues());
       }, 200);
     }
   }, [open, driverData, form]);
@@ -144,8 +130,6 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
   const onSubmit = async (formData) => {
     // Get the current form values directly
     const currentFormValues = form.getValues();
-    console.log('=== EDIT DRIVER FORM SUBMISSION DEBUG ===');
-    console.log('Form values at submission:', currentFormValues);
     
     // Check if there are any changes
     const hasChanges = checkForChanges(currentFormValues);
@@ -190,7 +174,6 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
     }
     
     if (errors.length > 0) {
-      console.log('Validation errors:', errors);
       toast.error("Please fill in all required fields", {
         description: errors.join(", ")
       });
@@ -211,17 +194,15 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
     try {
       // Validate required data before proceeding
       if (!driverData || !driverData._id) {
-        console.error('Invalid driver data:', driverData);
-        toast.error("Invalid driver data", {
-          description: "Driver information is missing or invalid."
+        toast.error("Invalid owner data", {
+          description: "Owner information is missing or invalid."
         });
         return;
       }
 
       if (!confirmationData) {
-        console.error('No confirmation data available');
         toast.error("No data to update", {
-          description: "Please try editing the driver again."
+          description: "Please try editing the owner again."
         });
         return;
       }
@@ -247,22 +228,13 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
         content.birthDate = currentFormValues.birthDate;
       }
 
-      console.log('=== SENDING TO SERVER ===');
-      console.log('Content being sent:', content);
-      console.log('Address object:', content.address);
-      console.log('Driver ID:', driverData._id);
-      console.log('=== END SERVER DATA ===');
-
-      const { data } = await apiClient.patch(`/driver/${driverData._id}`, content, {
+      const { data } = await apiClient.patch(`/owner/${driverData._id}`, content, {
         headers: {
           Authorization: token,
         },
       });
 
       if (data.success) {
-        console.log('Server response:', data);
-        console.log('Driver data before update:', driverData);
-        
         // Since the server doesn't return the updated driver data,
         // we need to fetch it or use the original driver data with updates
         if (onDriverUpdated) {
@@ -283,25 +255,20 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
             birthDate: confirmationData.birthDate,
           };
           
-          console.log('Updated driver data being passed:', updatedDriver);
           onDriverUpdated(updatedDriver);
         }
         onOpenChange(false);
         
         // Show success message
-        toast.success("Driver updated successfully", {
-          description: "The driver information has been updated."
+        toast.success("Owner updated successfully", {
+          description: "The owner information has been updated."
         });
         
-        // Navigate to drivers page after successful update
-        navigate('/driver');
+        // Navigate to owners page after successful update
+        navigate('/owner');
       }
     } catch (error) {
-      console.error('Error updating driver:', error);
-      console.error('Error response:', error.response);
-      console.error('Error response data:', error.response?.data);
-      
-      let message = "Failed to update driver";
+      let message = "Failed to update owner";
       if (error.response?.data?.message) {
         message = error.response.data.message;
       } else if (error.message) {
@@ -348,10 +315,10 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" />
-              Edit Driver
+              Edit Owner
             </DialogTitle>
             <DialogDescription>
-              Update the driver information. Plate number and file number cannot be modified.
+              Update the owner information. Plate number and file number cannot be modified.
             </DialogDescription>
           </DialogHeader>
 
@@ -373,7 +340,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
               className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
             >
               {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-              {submitting ? "Updating..." : "Update Driver"}
+              {submitting ? "Updating..." : "Update Owner"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -492,7 +459,7 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
             className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
           >
             {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
-            {submitting ? "Updating..." : "Confirm & Update Driver"}
+            {submitting ? "Updating..." : "Confirm & Update Owner"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -523,8 +490,8 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
             variant="outline"
             onClick={() => {
               setShowNoChanges(false);
-              // Navigate to drivers table
-              navigate('/driver');
+              // Navigate to owners table
+              navigate('/owner');
             }}
             className="min-w-[100px] bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
           >

@@ -54,7 +54,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   useEffect(() => {
     if (isEditMode && prePopulatedOwner && prePopulatedOwner.trim() !== '') {
       setSearchTerm(prePopulatedOwner);
-      // If we have a pre-populated owner, set it as selected driver
+      // If we have a pre-populated owner, set it as selected owner
       if (prePopulatedOwner && prePopulatedOwner !== 'Not selected') {
         setSelectedDriver({
           _id: form.getValues('driver') || '',
@@ -64,30 +64,24 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     }
   }, [isEditMode, prePopulatedOwner, form]);
 
-  // Search drivers when search term changes
+  // Search owners when search term changes
   useEffect(() => {
-    const searchDrivers = async () => {
+    const searchOwners = async () => {
       if (searchTerm.length >= 2 && isOwnerEditable) {
         setIsSearching(true);
         setShowNoResults(false);
         try {
-          const { data } = await apiClient.get(`/driver/search?name=${encodeURIComponent(searchTerm)}`, {
+          const { data } = await apiClient.get(`/owner/search?name=${encodeURIComponent(searchTerm)}`, {
             headers: { Authorization: token }
           });
           if (data.success) {
-            // Debug: Log the search results to see what data is being received
-            console.log('Driver search results:', data.data);
-            console.log('First driver address:', data.data[0]?.address);
-            console.log('Municipality:', data.data[0]?.address?.municipality);
-            console.log('Barangay:', data.data[0]?.address?.barangay);
             setSearchResults(data.data);
-            // Show "no results" option if no drivers found and search term is long enough
+            // Show "no results" option if no owners found and search term is long enough
             if (data.data.length === 0 && searchTerm.length >= 3) {
               setShowNoResults(true);
             }
           }
         } catch (error) {
-          console.error("Error searching drivers:", error);
           setSearchResults([]);
           if (searchTerm.length >= 3) {
             setShowNoResults(true);
@@ -101,7 +95,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
       }
     };
 
-    const timeoutId = setTimeout(searchDrivers, 300); // Debounce search
+    const timeoutId = setTimeout(searchOwners, 300); // Debounce search
     return () => clearTimeout(timeoutId);
   }, [searchTerm, token, isOwnerEditable]);
 
@@ -125,7 +119,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     form.setValue("driver", driver._id);
     setSearchTerm(driver.ownerRepresentativeName);
     setSearchResults([]);
-    setShowNoResults(false); // Hide "Add new driver" option when driver is selected
+    setShowNoResults(false); // Hide "Add new owner" option when owner is selected
     setIsOwnerEditable(false); // Return to read-only state after selection
   };
 
@@ -147,29 +141,29 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     // Get current vehicle form data
     const currentFormData = form.getValues();
     
-    // Store vehicle data in sessionStorage to pass to driver form
+    // Store vehicle data in sessionStorage to pass to owner form
     sessionStorage.setItem('vehicleFormData', JSON.stringify({
       plateNo: currentFormData.plateNo || '',
       fileNo: currentFormData.fileNo || '',
       ownerRepresentativeName: currentFormData.ownerRepresentativeName || searchTerm || ''
     }));
     
-    // Open the add driver modal
+    // Open the add owner modal
     setAddDriverModalOpen(true);
   };
 
   const handleDriverAdded = (newDriver) => {
-    // Set the newly created driver as selected
+    // Set the newly created owner as selected
     setSelectedDriver(newDriver);
     form.setValue("driver", newDriver._id);
     setSearchTerm(newDriver.ownerRepresentativeName);
     setSearchResults([]);
-    setShowNoResults(false); // Hide the "Add new driver" option
+    setShowNoResults(false); // Hide the "Add new owner" option
     setAddDriverModalOpen(false);
     setIsOwnerEditable(false); // Return to read-only state after selection
     
-    toast.success("Driver added successfully", {
-      description: "The driver has been selected for this vehicle."
+    toast.success("Owner added successfully", {
+      description: "The owner has been selected for this vehicle."
     });
   };
 
@@ -177,20 +171,16 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   return (
     <Form {...form}>
       <form id="vehicle-form" onSubmit={form.handleSubmit((data) => {
-        // Debug: Log the selectedDriver and form data
-        console.log('Selected driver:', selectedDriver);
-        console.log('Form data:', data);
-        
-        // Handle driver field properly for edit mode
+        // Handle owner field properly for edit mode
         let driverId = data.driver;
         if (isEditMode && !isOwnerEditable && !selectedDriver) {
-          // If in edit mode and driver field is not editable, keep the original driver
+          // If in edit mode and owner field is not editable, keep the original owner
           driverId = data.driver || form.getValues('driver');
         } else if (selectedDriver) {
-          // If a new driver is selected, use their ID
+          // If a new owner is selected, use their ID
           driverId = selectedDriver._id;
-        } else if (isEditMode && prePopulatedOwner && prePopulatedOwner !== 'No driver assigned') {
-          // If we have a pre-populated owner, preserve the existing driver ID
+        } else if (isEditMode && prePopulatedOwner && prePopulatedOwner !== 'No owner assigned') {
+          // If we have a pre-populated owner, preserve the existing owner ID
           driverId = form.getValues('driver') || data.driver;
         }
         
@@ -203,7 +193,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
           driver: driverId,
           ownerName: ownerName
         };
-        console.log('Form data with owner:', formDataWithOwner);
         onSubmit(formDataWithOwner);
       })}>
         <div className="space-y-3">
@@ -574,9 +563,9 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
             </div>
           </div>
 
-          {/* Driver/Owner Search Section */}
+          {/* Owner Search Section */}
           <div>
-            <Label>Driver/Owner Information</Label>
+            <Label>Owner Information</Label>
             <div className="mt-1">
               <FormField
                 control={form.control}
@@ -584,7 +573,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-muted-foreground mb-0">
-                      Search and Select Driver/Owner
+                      Search and Select Owner
                     </FormLabel>
                     <p className="text-xs text-gray-500 mb-2">
                       Format: Surname Suffix (Optional), FirstName, Middle Initial
@@ -594,7 +583,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         <div className="flex-1 relative">
                           <Input
                             ref={searchInputRef}
-                            placeholder="Type driver/owner name to search..."
+                            placeholder="Type owner name to search..."
                             value={searchTerm}
                             onChange={(e) => {
                               const capitalizedValue = e.target.value.toUpperCase();
@@ -674,24 +663,24 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                             </div>
                           ))}
                           
-                          {/* Add Driver Option - only show when no results and not already selected */}
+                          {/* Add Owner Option - only show when no results and not already selected */}
                           {showNoResults && searchResults.length === 0 && !selectedDriver && (
                             <div
                               className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 bg-accent/50 transition-colors"
                               onClick={handleAddDriver}
                             >
                               <div className="text-sm font-medium text-primary">
-                                + Add "{searchTerm}" as new driver
+                                + Add "{searchTerm}" as new owner
                               </div>
                               <div className="text-xs text-muted-foreground mt-1">
-                                Click to create a new driver record
+                                Click to create a new owner record
                               </div>
                             </div>
                           )}
                         </div>
                       )}
 
-                      {/* Selected Driver Display */}
+                      {/* Selected Owner Display */}
                       {selectedDriver && !isOwnerEditable && (
                         <div className="mt-2 p-2 bg-green-50 dark:bg-[#18181B] border border-green-200 dark:border-[#424242] rounded-md">
                           <div className="flex items-center justify-between">
@@ -739,7 +728,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
         </div>
       </form>
       
-      {/* Add Driver Modal */}
+      {/* Add Owner Modal */}
       <AddDriverModal
         open={addDriverModalOpen}
         onOpenChange={setAddDriverModalOpen}

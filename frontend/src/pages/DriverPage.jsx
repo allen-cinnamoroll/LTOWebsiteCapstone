@@ -43,21 +43,14 @@ const DriverPage = () => {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      console.log('=== FETCHING DRIVERS ===');
       
-      const { data } = await apiClient.get("/driver", {
+      const { data } = await apiClient.get("/owner", {
         headers: {
           Authorization: token,
         },
       });
 
-      console.log('=== DRIVERS API RESPONSE ===');
-      console.log('Response success:', data.success);
-      console.log('Total drivers received:', data.data?.length || 0);
-      console.log('First driver sample:', data.data?.[0]);
-
       if (!data.data || !Array.isArray(data.data)) {
-        console.error('API response does not contain data array:', data);
         setDriverData([]);
         return;
       }
@@ -94,23 +87,13 @@ const DriverPage = () => {
         };
       });
 
-      console.log('=== PROCESSED DRIVERS ===');
-      console.log('Total processed:', driverData.length);
-      console.log('Active drivers:', driverData.filter(d => d.isActive).length);
-      console.log('Inactive drivers:', driverData.filter(d => !d.isActive).length);
-
-      // Show only active drivers by default (you can change this if you want to show all)
+      // Show only active owners by default (you can change this if you want to show all)
       const active = driverData.filter((data) => data.isActive);
-      console.log('Setting active drivers in state:', active.length);
       
       setDriverData(active);
 
       setLoading(false);
     } catch (error) {
-      console.error('=== ERROR FETCHING DRIVERS ===');
-      console.error('Error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
       setDriverData([]);
       setLoading(false);
     }
@@ -123,20 +106,14 @@ const DriverPage = () => {
   };
 
   const onEdit = (driverId) => {
-    console.log('=== ONEDIT FUNCTION ===');
-    console.log('Driver ID:', driverId);
-    console.log('Driver data array:', driverData);
-    
     const driver = driverData.find(d => d._id === driverId);
-    console.log('Found driver:', driver);
     
     if (driver) {
       setSelectedDriver(driver);
       setEditDriverModalOpen(true);
     } else {
-      console.error('Driver not found with ID:', driverId);
-      toast.error("Driver not found", {
-        description: "The selected driver could not be found."
+      toast.error("Owner not found", {
+        description: "The selected owner could not be found."
       });
     }
   };
@@ -167,9 +144,8 @@ const DriverPage = () => {
   const handleDriverUpdated = (updatedDriver) => {
     // Ensure updatedDriver has the required structure
     if (!updatedDriver || !updatedDriver._id) {
-      console.error('Invalid updated driver data:', updatedDriver);
-      toast.error("Failed to update driver data", {
-        description: "The updated driver information is invalid."
+      toast.error("Failed to update owner data", {
+        description: "The updated owner information is invalid."
       });
       return;
     }
@@ -198,8 +174,8 @@ const DriverPage = () => {
     setDriverProfileModalOpen(false);
     
     // Show success message
-    toast.success("Driver updated successfully", {
-      description: "The driver information has been updated in the table."
+    toast.success("Owner updated successfully", {
+      description: "The owner information has been updated in the table."
     });
   };
 
@@ -207,7 +183,7 @@ const DriverPage = () => {
     const promise = async () => {
       try {
         const response = await apiClient.patch(
-          `/driver/${selectedDriver}`,
+          `/owner/${selectedDriver}`,
           {
             isActive: data,
           },
@@ -229,8 +205,8 @@ const DriverPage = () => {
 
     toast.promise(promise(), {
       loading: "Loading...",
-      success: `Driver deactivated`,
-      error: (error) => error.message || "Failed to update driver",
+      success: `Owner deactivated`,
+      error: (error) => error.message || "Failed to update owner",
     });
   };
 
@@ -239,7 +215,7 @@ const DriverPage = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="bg-white dark:bg-transparent rounded-lg shadow-sm border border-gray-200 dark:border-0 px-4 md:px-6 pt-4 md:pt-6 pb-2 flex-1 flex flex-col min-h-0 overflow-hidden">
-        <header className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 flex-shrink-0">Drivers</header>
+        <header className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 flex-shrink-0">Owners</header>
         <div className="flex-1 flex flex-col min-h-0">
           <DriversTable
             data={driverData}
@@ -261,7 +237,7 @@ const DriverPage = () => {
         cancel={cancelDelete}
         title={"Are you sure?"}
         description={
-          "This action cannot be undone. This will deactivate the driver."
+          "This action cannot be undone. This will deactivate the owner."
         }
       />
 

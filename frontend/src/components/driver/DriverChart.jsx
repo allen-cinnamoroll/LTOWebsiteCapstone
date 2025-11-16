@@ -55,7 +55,7 @@ export function DriverChart({ driverId }) {
       setLoading(true);
       setError(null);
       
-      const { data } = await apiClient.get(`/dashboard/driver-chart?period=${timePeriod}&driverId=${driverId}`, {
+      const { data } = await apiClient.get(`/dashboard/owner-chart?period=${timePeriod}&driverId=${driverId}`, {
         headers: {
           Authorization: token,
         },

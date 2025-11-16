@@ -291,10 +291,10 @@ export const AuthProvider = ({ children }) => {
       {children}
       {/* Global OTP Modal */}
       <OTPVerificationModal
-        isOpen={showOTPModal}
+        isOpen={showOTPModal && !!userData?.email}
         onClose={handleOTPClose}
         onSuccess={handleOTPSuccess}
-        userEmail={userData?.email}
+        userEmail={userData?.email || ''}
       />
     </AuthContext.Provider>
   );

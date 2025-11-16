@@ -39,35 +39,16 @@ const AccidentMap = ({ accidents, className = "" }) => {
     const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
     mapboxgl.accessToken = mapboxToken;
 
-    // Initialize map
-    if (!map.current) {
-      try {
-        map.current = new mapboxgl.Map({
-          container: mapContainer.current,
-          style: 'mapbox://styles/mapbox/streets-v12',
-          center: [125.971907, 6.90543], // Default center for Davao Oriental
-          zoom: 9
-        });
-      } catch (error) {
-        console.error('Map initialization error:', error);
-        setMapError(true);
-        return;
-      }
+    // Function to add markers - called only after map loads
+    const addAccidentMarkers = () => {
+      if (!map.current || !map.current.loaded()) return;
 
-      // Add navigation controls
-      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      // Clean up existing markers
+      const existingMarkers = document.querySelectorAll('.accident-marker');
+      existingMarkers.forEach(marker => marker.remove());
 
-      map.current.on('load', () => {
-        setMapLoaded(true);
-      });
-    }
-
-    // Clean up existing markers
-    const existingMarkers = document.querySelectorAll('.accident-marker');
-    existingMarkers.forEach(marker => marker.remove());
-
-    // Add markers for each accident using geocoding
-    accidents.forEach((accident, index) => {
+      // Add markers for each accident using geocoding
+      accidents.forEach((accident, index) => {
       let coordinates = null;
       
       // Get coordinates from municipality/barangay/street using geocoding
@@ -142,48 +123,74 @@ const AccidentMap = ({ accidents, className = "" }) => {
           .setPopup(popup)
           .addTo(map.current);
       }
-    });
+      });
 
-    // Fit map to show all valid markers
-    if (accidents.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      let validAccidentCount = 0;
-      
-      accidents.forEach(accident => {
-        let coordinates = null;
+      // Fit map to show all valid markers
+      if (accidents.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        let validAccidentCount = 0;
         
-        // Get coordinates from municipality using geocoding
-        if (accident.municipality) {
-          const geocodedCoords = getLocationCoordinates(
-            accident.municipality, 
-            accident.barangay, 
-            accident.street
-          );
-          if (geocodedCoords) {
-            coordinates = geocodedCoords;
-          }
-        }
+        accidents.forEach(accident => {
+          let coordinates = null;
           
-        if (coordinates) {
-          bounds.extend([coordinates.lng, coordinates.lat]);
-          validAccidentCount++;
-        } else {
-          console.warn('No valid coordinates for accident:', {
-            id: accident.accident_id,
-            municipality: accident.municipality,
-            reason: 'Municipality not found in geocoding database'
+          // Get coordinates from municipality using geocoding
+          if (accident.municipality) {
+            const geocodedCoords = getLocationCoordinates(
+              accident.municipality, 
+              accident.barangay, 
+              accident.street
+            );
+            if (geocodedCoords) {
+              coordinates = geocodedCoords;
+            }
+          }
+            
+          if (coordinates) {
+            bounds.extend([coordinates.lng, coordinates.lat]);
+            validAccidentCount++;
+          }
+        });
+        
+        if (!bounds.isEmpty()) {
+          map.current.fitBounds(bounds, {
+            padding: 50,
+            maxZoom: 12
           });
         }
-      });
-      
-      console.log(`Valid accidents with geocoded coordinates: ${validAccidentCount} out of ${accidents.length}`);
-      
-      if (!bounds.isEmpty()) {
-        map.current.fitBounds(bounds, {
-          padding: 50,
-          maxZoom: 12
-        });
       }
+    };
+
+    // Initialize map
+    if (!map.current) {
+      try {
+        map.current = new mapboxgl.Map({
+          container: mapContainer.current,
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [125.971907, 6.90543], // Default center for Davao Oriental
+          zoom: 12 // Increased zoom to better show streets
+        });
+      } catch (error) {
+        console.error('Map initialization error:', error);
+        setMapError(true);
+        return;
+      }
+
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+      map.current.on('load', () => {
+        setMapLoaded(true);
+        // All map operations must happen inside the load event
+        addAccidentMarkers();
+      });
+
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setMapError(true);
+      });
+    } else if (map.current.loaded()) {
+      // If map is already loaded, add markers immediately
+      addAccidentMarkers();
     }
 
     return () => {
@@ -193,7 +200,7 @@ const AccidentMap = ({ accidents, className = "" }) => {
         existingMarkers.forEach(marker => marker.remove());
       }
     };
-  }, [accidents, mapLoaded]);
+  }, [accidents]);
 
   const getSeverityColor = (severity) => {
     switch (severity) {

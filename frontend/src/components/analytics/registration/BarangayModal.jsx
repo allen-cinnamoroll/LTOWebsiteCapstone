@@ -85,12 +85,9 @@ const BarangayModal = ({ isOpen, onClose, municipality, selectedMonth, selectedY
       // 3. monthNumber=2, yearValue=2024 -> February 2024 only
       // 4. monthNumber=null, yearValue=null -> All data
       
-      console.log('Fetching barangay data for', targetMunicipality, 'with:', { monthNumber, yearValue, selectedMonth, selectedYear });
-      
       const response = await getBarangayRegistrationTotals(targetMunicipality, monthNumber, yearValue);
       setBarangayData(response.data || []);
     } catch (err) {
-      console.error('Error fetching barangay data:', err);
       setError('Error loading barangay data');
     } finally {
       setLoading(false);

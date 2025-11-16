@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -167,6 +167,7 @@ export function AccidentAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [chartType, setChartType] = useState('area');
+  const [isMobile, setIsMobile] = useState(false);
   const { token } = useAuth();
 
   // Detect theme (light/dark mode)
@@ -194,6 +195,16 @@ export function AccidentAnalytics() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Get theme-appropriate colors
   const getColors = () => isDarkMode ? COLORS.dark : COLORS.light;
 
@@ -207,7 +218,6 @@ export function AccidentAnalytics() {
       setError(null);
       
       const timestamp = Date.now(); // Add timestamp to bypass cache
-      console.log(`Fetching analytics data for period: ${timePeriod} at ${new Date(timestamp).toISOString()}`);
       
       const [analyticsResponse, riskResponse] = await Promise.all([
         apiClient.get(`/accident/analytics/summary?period=${timePeriod}&_t=${timestamp}`, {
@@ -219,8 +229,6 @@ export function AccidentAnalytics() {
       ]);
 
       if (analyticsResponse.data.success) {
-        console.log('Frontend received analytics data:', analyticsResponse.data.data);
-        console.log('Municipality data:', analyticsResponse.data.data.distributions?.municipality);
         setAnalyticsData(analyticsResponse.data.data);
       }
       
@@ -228,7 +236,6 @@ export function AccidentAnalytics() {
         setRiskData(riskResponse.data.data);
       }
     } catch (err) {
-      console.error('Error fetching accident analytics:', err);
       setError('Failed to load accident analytics data');
     } finally {
       setLoading(false);
@@ -253,7 +260,6 @@ export function AccidentAnalytics() {
     return trends.map(trend => {
       // Validate trend structure
       if (!trend || !trend._id || trend._id.year === undefined || trend._id.month === undefined) {
-        console.warn('Invalid trend data:', trend);
         return null;
       }
       
@@ -264,7 +270,6 @@ export function AccidentAnalytics() {
       // Validate date string
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        console.warn('Invalid date created:', dateString);
         return null;
       }
       
@@ -282,6 +287,72 @@ export function AccidentAnalytics() {
       severity: item._id || 'unknown'
     }));
   };
+
+  const buildYearlyPredictionComparison = (trends) => {
+    const formattedTrends = formatMonthlyTrends(trends);
+    if (!formattedTrends || formattedTrends.length === 0) return [];
+
+    const sortedTrends = [...formattedTrends].sort(
+      (a, b) => new Date(a.month) - new Date(b.month)
+    );
+    const lastYearData = sortedTrends.slice(-12);
+    if (lastYearData.length === 0) return [];
+
+    const regressionData = lastYearData.map((item, index) => ({
+      x: index,
+      y: item.accidents || 0
+    }));
+
+    const n = regressionData.length;
+    if (n === 0) return [];
+
+    const sumX = regressionData.reduce((sum, point) => sum + point.x, 0);
+    const sumY = regressionData.reduce((sum, point) => sum + point.y, 0);
+    const sumXY = regressionData.reduce((sum, point) => sum + point.x * point.y, 0);
+    const sumXX = regressionData.reduce((sum, point) => sum + point.x * point.x, 0);
+
+    const denominator = n * sumXX - sumX * sumX;
+    const slope = denominator !== 0 ? (n * sumXY - sumX * sumY) / denominator : 0;
+    const intercept = n !== 0 ? (sumY - slope * sumX) / n : 0;
+
+    const predictions = Array.from({ length: 12 }, (_, index) => {
+      const x = n + index;
+      const value = slope * x + intercept;
+      return value < 0 ? 0 : Math.round(value);
+    });
+
+    return lastYearData.map((item, index) => {
+      const date = new Date(item.month);
+      const monthLabel = isNaN(date.getTime())
+        ? `M${index + 1}`
+        : date.toLocaleString('en-US', { month: 'short' });
+
+      return {
+        month: monthLabel,
+        actual: item.accidents || 0,
+        prediction2026: predictions[index] ?? predictions[predictions.length - 1] ?? 0
+      };
+    });
+  };
+
+  const yearlyPredictionData = useMemo(() => {
+    if (!analyticsData?.trends?.monthly) return [];
+    return buildYearlyPredictionComparison(analyticsData.trends.monthly);
+  }, [analyticsData]);
+
+  const yearlyPredictionSummary = useMemo(() => {
+    if (!yearlyPredictionData.length) return null;
+
+    const actualTotal = yearlyPredictionData.reduce((sum, item) => sum + (item.actual || 0), 0);
+    const predictedTotal = yearlyPredictionData.reduce((sum, item) => sum + (item.prediction2026 || 0), 0);
+    const growth = actualTotal > 0 ? ((predictedTotal - actualTotal) / actualTotal) * 100 : 0;
+
+    return {
+      actualTotal,
+      predictedTotal,
+      growth: Number.isFinite(growth) ? growth : 0
+    };
+  }, [yearlyPredictionData]);
 
   const formatOffenseTypeData = (offenseData) => {
     return offenseData.map(item => ({
@@ -435,7 +506,6 @@ export function AccidentAnalytics() {
   };
 
   const formatMunicipalityData = (municipalityData) => {
-    console.log('formatMunicipalityData input:', municipalityData);
     const formatted = municipalityData.map(item => ({
       name: item._id || 'Unknown',
       accidents: item.count,
@@ -443,7 +513,6 @@ export function AccidentAnalytics() {
       percentage: municipalityData.length > 0 ? 
         ((item.count / municipalityData.reduce((sum, m) => sum + m.count, 0)) * 100).toFixed(1) : 0
     })).sort((a, b) => b.accidents - a.accidents); // Ensure proper sorting by accident count
-    console.log('formatMunicipalityData output:', formatted);
     return formatted;
   };
 
@@ -937,137 +1006,6 @@ export function AccidentAnalytics() {
           </Card>
         )}
 
-        {/* Hourly Distribution - Temporal Pattern Analysis */}
-        {analyticsData && analyticsData.distributions.hourly && analyticsData.distributions.hourly.length > 0 && (
-          <Card className="group hover:shadow-lg transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-purple-500" />
-                Hourly Accident Pattern
-              </CardTitle>
-              <CardDescription>
-                24-hour distribution based on time committed showing peak accident times with enhanced insights
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={formatHourlyData(analyticsData.distributions.hourly)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
-                  <XAxis 
-                    dataKey="label"
-                    stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
-                    fontSize={10}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                  />
-                  <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
-                      border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      color: isDarkMode ? '#f9fafb' : '#111827',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-                    }}
-                    formatter={(value, name) => [`${value} accidents`, 'Count']}
-                    labelFormatter={(label) => `Time: ${label} (based on time committed)`}
-                  />
-                  <Area 
-                    type="monotone"
-                    dataKey="accidents" 
-                    fill={getColors()[3]}
-                    stroke={getColors()[3]}
-                    fillOpacity={0.3}
-                    animationDuration={1500}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="accidents" 
-                    stroke={getColors()[0]} 
-                    strokeWidth={2}
-                    dot={{ fill: getColors()[0], r: 3 }}
-                    activeDot={{ r: 5 }}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-              
-              {/* Enhanced insights below chart */}
-              <div className="mt-4 space-y-3">
-                
-                {/* Peak Hour and Total Accidents */}
-                <div className="grid grid-cols-2 gap-4">
-                  {(() => {
-                    const hourlyData = formatHourlyData(analyticsData.distributions.hourly);
-                    const peakHour = hourlyData.reduce((max, current) => 
-                      current.accidents > max.accidents ? current : max
-                    );
-                    const totalAccidents = hourlyData.reduce((sum, item) => sum + item.accidents, 0);
-                    
-                    return (
-                      <>
-                        <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                          <div className="text-sm font-medium text-green-700 dark:text-green-300">
-                            Peak Hour
-                          </div>
-                          <div className="text-lg font-bold text-green-900 dark:text-green-100">
-                            {peakHour.label}
-                          </div>
-                          <div className="text-xs text-green-600 dark:text-green-400">
-                            {peakHour.accidents} accidents
-                          </div>
-                        </div>
-                        
-                        <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                          <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                            Total Accidents
-                          </div>
-                          <div className="text-lg font-bold text-blue-900 dark:text-blue-100">
-                            {totalAccidents}
-                          </div>
-                          <div className="text-xs text-blue-600 dark:text-blue-400">
-                            Across all hours
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-                
-                {/* Rush Hour Periods */}
-                <div className="grid grid-cols-3 gap-2">
-                  {(() => {
-                    const hourlyData = formatHourlyData(analyticsData.distributions.hourly);
-                    const morningRush = hourlyData.slice(7, 10).reduce((sum, h) => sum + h.accidents, 0);
-                    const eveningRush = hourlyData.slice(17, 20).reduce((sum, h) => sum + h.accidents, 0);
-                    const nightTime = hourlyData.slice(22, 24).concat(hourlyData.slice(0, 6)).reduce((sum, h) => sum + h.accidents, 0);
-                    
-                    return (
-                      <>
-                        <div className="p-2 bg-orange-50 dark:bg-orange-950/20 rounded text-center">
-                          <div className="text-xs font-medium text-orange-700 dark:text-orange-300">Morning Rush</div>
-                          <div className="text-lg font-bold text-orange-900 dark:text-orange-100">{morningRush}</div>
-                          <div className="text-xs text-orange-600 dark:text-orange-400">7-9 AM</div>
-                        </div>
-                        <div className="p-2 bg-red-50 dark:bg-red-950/20 rounded text-center">
-                          <div className="text-xs font-medium text-red-700 dark:text-red-300">Evening Rush</div>
-                          <div className="text-lg font-bold text-red-900 dark:text-red-100">{eveningRush}</div>
-                          <div className="text-xs text-red-600 dark:text-red-400">5-7 PM</div>
-                        </div>
-                        <div className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded text-center">
-                          <div className="text-xs font-medium text-blue-700 dark:text-blue-300">Night Time</div>
-                          <div className="text-lg font-bold text-blue-900 dark:text-blue-100">{nightTime}</div>
-                          <div className="text-xs text-blue-600 dark:text-blue-400">10 PM-6 AM</div>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Day of Week Distribution */}
         {analyticsData && analyticsData.distributions.dayOfWeek && analyticsData.distributions.dayOfWeek.length > 0 && (
           <Card className="group hover:shadow-lg transition-all duration-300">
@@ -1313,6 +1251,101 @@ export function AccidentAnalytics() {
                     </p>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Yearly Prediction Comparison */}
+          {yearlyPredictionData.length > 0 && (
+            <Card className="lg:col-span-2 border-blue-200 dark:border-blue-900">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-blue-500" />
+                  Accident Forecast Comparison
+                </CardTitle>
+                <CardDescription>
+                  Historical trend (last 12 months) versus projected 2026 accident rate
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={isMobile ? 240 : 320}>
+                  <LineChart data={yearlyPredictionData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                    <XAxis 
+                      dataKey="month"
+                      stroke={isDarkMode ? '#9ca3af' : '#6b7280'}
+                      fontSize={11}
+                    />
+                    <YAxis stroke={isDarkMode ? '#9ca3af' : '#6b7280'} />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                        border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        color: isDarkMode ? '#f9fafb' : '#111827'
+                      }}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="actual" 
+                      name="Actual (Last 12 Months)"
+                      stroke={getColors()[3]}
+                      strokeWidth={isMobile ? 2 : 3}
+                      dot={{ r: isMobile ? 2 : 3 }}
+                      activeDot={{ r: isMobile ? 4 : 5 }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="prediction2026" 
+                      name="Forecast 2026"
+                      stroke={getColors()[0]}
+                      strokeWidth={isMobile ? 2 : 3}
+                      strokeDasharray="6 3"
+                      dot={{ r: isMobile ? 2 : 3 }}
+                      activeDot={{ r: isMobile ? 5 : 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+
+                {yearlyPredictionSummary && (
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20">
+                      <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        Actual (Last 12 Months)
+                      </div>
+                      <div className="text-xl font-bold text-blue-900 dark:text-blue-100">
+                        {yearlyPredictionSummary.actualTotal.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400">
+                        Reported accidents
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
+                      <div className="text-sm font-medium text-red-700 dark:text-red-300">
+                        Predicted 2026
+                      </div>
+                      <div className="text-xl font-bold text-red-900 dark:text-red-100">
+                        {yearlyPredictionSummary.predictedTotal.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-red-600 dark:text-red-400">
+                        Forecasted accidents
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20">
+                      <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                        Projected Change
+                      </div>
+                      <div className={`text-xl font-bold ${yearlyPredictionSummary.growth >= 0 ? 'text-purple-900 dark:text-purple-100' : 'text-green-900 dark:text-green-100'}`}>
+                        {yearlyPredictionSummary.growth >= 0 ? '+' : ''}
+                        {yearlyPredictionSummary.growth.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-purple-600 dark:text-purple-400">
+                        Compared to recent year
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -1723,17 +1756,6 @@ export function AccidentAnalytics() {
           )}
         </div>
       </div>
-
-
-
-      {/* Year-over-Year Comparison */}
-      {analyticsData && (
-        <AccidentComparison 
-          analyticsData={analyticsData}
-          className="w-full"
-        />
-      )}
-
       {/* Enhanced Geographic Distribution */}
       {analyticsData && analyticsData.mapData && analyticsData.mapData.length > 0 && (
         <EnhancedAccidentMap 

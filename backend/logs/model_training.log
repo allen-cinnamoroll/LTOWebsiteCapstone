@@ -1008,3 +1008,126 @@ weighted avg       0.67      0.66      0.63        70
 2025-11-05 13:42:42,614 - INFO - Saving models...
 2025-11-05 13:42:42,645 - INFO - Models saved to ../trained/
 2025-11-05 13:42:42,645 - INFO - Training pipeline completed successfully!
+2025-11-15 20:58:50,035 - INFO - Starting complete training pipeline...
+2025-11-15 20:58:50,036 - INFO - Loading and preparing data...
+2025-11-15 20:58:50,113 - INFO - Data prepared: 277 training samples, 70 test samples
+2025-11-15 20:58:50,114 - INFO - Training Random Forest Classifier...
+2025-11-15 20:58:50,854 - INFO - Random Forest CV Accuracy: 0.6716 (+/- 0.0827)
+2025-11-15 20:58:50,854 - INFO - Evaluating model...
+2025-11-15 20:58:50,889 - INFO - Test Accuracy: 0.6571
+2025-11-15 20:58:50,889 - INFO - Test Precision: 0.6700
+2025-11-15 20:58:50,890 - INFO - Test Recall: 0.6571
+2025-11-15 20:58:50,890 - INFO - Test F1-Score: 0.6332
+2025-11-15 20:58:50,891 - INFO - Classification Report:
+2025-11-15 20:58:50,906 - INFO - 
+              precision    recall  f1-score   support
+
+           1       0.64      0.87      0.74        39
+           2       0.71      0.39      0.50        31
+
+    accuracy                           0.66        70
+   macro avg       0.67      0.63      0.62        70
+weighted avg       0.67      0.66      0.63        70
+
+2025-11-15 20:58:50,912 - INFO - Confusion Matrix:
+[[34  5]
+ [19 12]]
+2025-11-15 20:58:50,974 - INFO - Top 10 Most Important Features:
+2025-11-15 20:58:50,984 - INFO -                 feature  importance
+0                   lat    0.253883
+1                   lng    0.181664
+8  municipality_encoded    0.148297
+9      barangay_encoded    0.124977
+4                   day    0.114201
+3                 month    0.098445
+5           day_of_week    0.053084
+2                  year    0.025449
+6                  hour    0.000000
+7  incidentType_encoded    0.000000
+2025-11-15 20:58:50,989 - INFO - Creating rule-based system...
+2025-11-15 20:58:51,055 - INFO - Rule-based system created successfully
+2025-11-15 20:58:51,056 - INFO - Saving models...
+2025-11-15 20:58:51,097 - INFO - Models saved to ../trained/
+2025-11-15 20:58:51,097 - INFO - Training pipeline completed successfully!
+2025-11-15 21:33:11,124 - INFO - Starting complete training pipeline...
+2025-11-15 21:33:11,125 - INFO - Loading and preparing data...
+2025-11-15 21:33:11,178 - INFO - Data prepared: 277 training samples, 70 test samples
+2025-11-15 21:33:11,179 - INFO - Training Random Forest Classifier...
+2025-11-15 21:33:11,986 - INFO - Random Forest CV Accuracy: 0.6716 (+/- 0.0827)
+2025-11-15 21:33:11,986 - INFO - Evaluating model...
+2025-11-15 21:33:12,016 - INFO - Test Accuracy: 0.6571
+2025-11-15 21:33:12,016 - INFO - Test Precision: 0.6700
+2025-11-15 21:33:12,017 - INFO - Test Recall: 0.6571
+2025-11-15 21:33:12,017 - INFO - Test F1-Score: 0.6332
+2025-11-15 21:33:12,017 - INFO - Classification Report:
+2025-11-15 21:33:12,026 - INFO - 
+              precision    recall  f1-score   support
+
+           1       0.64      0.87      0.74        39
+           2       0.71      0.39      0.50        31
+
+    accuracy                           0.66        70
+   macro avg       0.67      0.63      0.62        70
+weighted avg       0.67      0.66      0.63        70
+
+2025-11-15 21:33:12,029 - INFO - Confusion Matrix:
+[[34  5]
+ [19 12]]
+2025-11-15 21:33:12,068 - INFO - Top 10 Most Important Features:
+2025-11-15 21:33:12,071 - INFO -                 feature  importance
+0                   lat    0.253883
+1                   lng    0.181664
+8  municipality_encoded    0.148297
+9      barangay_encoded    0.124977
+4                   day    0.114201
+3                 month    0.098445
+5           day_of_week    0.053084
+2                  year    0.025449
+6                  hour    0.000000
+7  incidentType_encoded    0.000000
+2025-11-15 21:33:12,075 - INFO - Creating rule-based system...
+2025-11-15 21:33:12,130 - INFO - Rule-based system created successfully
+2025-11-15 21:33:12,131 - INFO - Saving models...
+2025-11-15 21:33:12,165 - INFO - Models saved to ../trained/
+2025-11-15 21:33:12,165 - INFO - Training pipeline completed successfully!
+2025-11-15 21:52:03,315 - INFO - Starting complete training pipeline...
+2025-11-15 21:52:03,316 - INFO - Loading and preparing data...
+2025-11-15 21:52:03,372 - INFO - Data prepared: 277 training samples, 70 test samples
+2025-11-15 21:52:03,372 - INFO - Training Random Forest Classifier...
+2025-11-15 21:52:04,285 - INFO - Random Forest CV Accuracy: 0.6716 (+/- 0.0827)
+2025-11-15 21:52:04,286 - INFO - Evaluating model...
+2025-11-15 21:52:04,328 - INFO - Test Accuracy: 0.6571
+2025-11-15 21:52:04,329 - INFO - Test Precision: 0.6700
+2025-11-15 21:52:04,329 - INFO - Test Recall: 0.6571
+2025-11-15 21:52:04,330 - INFO - Test F1-Score: 0.6332
+2025-11-15 21:52:04,330 - INFO - Classification Report:
+2025-11-15 21:52:04,342 - INFO - 
+              precision    recall  f1-score   support
+
+           1       0.64      0.87      0.74        39
+           2       0.71      0.39      0.50        31
+
+    accuracy                           0.66        70
+   macro avg       0.67      0.63      0.62        70
+weighted avg       0.67      0.66      0.63        70
+
+2025-11-15 21:52:04,344 - INFO - Confusion Matrix:
+[[34  5]
+ [19 12]]
+2025-11-15 21:52:04,368 - INFO - Top 10 Most Important Features:
+2025-11-15 21:52:04,372 - INFO -                 feature  importance
+0                   lat    0.253883
+1                   lng    0.181664
+8  municipality_encoded    0.148297
+9      barangay_encoded    0.124977
+4                   day    0.114201
+3                 month    0.098445
+5           day_of_week    0.053084
+2                  year    0.025449
+6                  hour    0.000000
+7  incidentType_encoded    0.000000
+2025-11-15 21:52:04,375 - INFO - Creating rule-based system...
+2025-11-15 21:52:04,425 - INFO - Rule-based system created successfully
+2025-11-15 21:52:04,425 - INFO - Saving models...
+2025-11-15 21:52:04,452 - INFO - Models saved to ../trained/
+2025-11-15 21:52:04,453 - INFO - Training pipeline completed successfully!

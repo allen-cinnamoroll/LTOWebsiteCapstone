@@ -1,6 +1,6 @@
 import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
-import DriverModel from "../model/DriverModel.js";
+import OwnerModel from "../model/OwnerModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
 // import { logger } from "../util/logger.js";
 
@@ -33,7 +33,7 @@ export const createVehicle = async (req, res) => {
     }
 
     // Verify driver exists
-    const driver = await DriverModel.findById(driverId);
+    const driver = await OwnerModel.findById(driverId);
     if (!driver) {
       return res.status(400).json({
         success: false,
@@ -96,7 +96,7 @@ export const createVehicle = async (req, res) => {
     await vehicle.save();
 
     // Update driver's vehicleIds array
-    await DriverModel.findByIdAndUpdate(
+    await OwnerModel.findByIdAndUpdate(
       driverId,
       { $push: { vehicleIds: vehicle._id } },
       { new: true }

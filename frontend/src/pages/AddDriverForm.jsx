@@ -82,14 +82,14 @@ const AddDriverForm = () => {
         birthDate: formData.birthDate,
       };
 
-      const { data } = await apiClient.post("/driver", content, {
+      const { data } = await apiClient.post("/owner", content, {
         headers: {
           Authorization: token,
         },
       });
 
       if (data.success) {
-        toast.success("Driver has been added", {
+        toast.success("Owner has been added", {
           description: date,
         });
 
@@ -108,7 +108,7 @@ const AddDriverForm = () => {
               
               if (missingFields.length > 0) {
                 // If required fields are missing, don't try to create vehicle automatically
-                toast.info("Driver created successfully. Please complete the vehicle registration.", {
+                toast.info("Owner created successfully. Please complete the vehicle registration.", {
                   description: "Some required vehicle information is missing.",
                 });
                 
@@ -133,7 +133,7 @@ const AddDriverForm = () => {
               });
               
               if (vehicleResponse.data.success) {
-                toast.success("Driver and Vehicle added successfully", {
+                toast.success("Owner and Vehicle added successfully", {
                   description: date,
                 });
                 
@@ -149,7 +149,7 @@ const AddDriverForm = () => {
             } catch (vehicleError) {
               console.error("Error creating vehicle:", vehicleError);
               const errorMessage = vehicleError.response?.data?.message || "Unknown error occurred";
-              toast.error("Driver created but failed to create vehicle. Please try again.", {
+              toast.error("Owner created but failed to create vehicle. Please try again.", {
                 description: `Error: ${errorMessage}`,
               });
               
@@ -188,7 +188,7 @@ const AddDriverForm = () => {
       }
     } catch (error) {
       console.log(error);
-      const message = error.response?.data?.message || "An error occurred while creating the driver";
+      const message = error.response?.data?.message || "An error occurred while creating the owner";
 
       toast.error(message, {
         description: `${date}`,
@@ -203,10 +203,10 @@ const AddDriverForm = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl md:text-3xl font-bold">
-            Add Driver
+            Add Owner
           </CardTitle>
           <CardDescription>
-            Fill in required fields to add driver.
+            Fill in required fields to add owner.
           </CardDescription>
         </CardHeader>
         <CardContent>

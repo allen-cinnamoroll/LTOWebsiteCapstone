@@ -479,7 +479,7 @@ export const logs = () => [
   },
   {
     accessorKey: "fullname",
-    header: "Driver",
+    header: "Owner",
     cell: ({ row }) => <div className="">{row.getValue("fullname")}</div>,
   },
   {

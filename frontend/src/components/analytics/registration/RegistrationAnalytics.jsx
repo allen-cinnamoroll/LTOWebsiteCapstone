@@ -150,7 +150,6 @@ export function RegistrationAnalytics() {
         setError('Failed to fetch analytics data');
       }
     } catch (err) {
-      console.error('Error fetching analytics data:', err);
       setError('Error loading analytics data');
     } finally {
       setLoading(false);

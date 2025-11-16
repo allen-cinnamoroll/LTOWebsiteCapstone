@@ -117,7 +117,35 @@ pip install pandas numpy scikit-learn pyyaml joblib
 - `train_models.py` - Main training script
 - `feature_engineering.py` - Feature extraction and preprocessing
 - `model_config.yaml` - Training configuration
+- `train_sarima_registrations.py` - SARIMA trainer for weekly registration forecasts
 - `README.md` - This file
+
+## 📉 Time-Series Forecasting (SARIMA)
+
+We now include a SARIMA training pipeline for vehicle registration forecasting. It uses the historical renewal dataset found at `backend/model/ml_models/mv registration training/DAVOR_data.csv` and produces a weekly time series model suitable for the Flask prediction APIs.
+
+### How to Train the SARIMA Model
+
+```bash
+cd backend/model/ml_models/training
+python train_sarima_registrations.py
+```
+
+This script:
+
+1. Loads the renewal dataset, aggregates weekly counts, and splits the last 20% for evaluation.
+2. Runs a lightweight grid search over SARIMA hyperparameters using AIC.
+3. Evaluates the best candidate on the hold-out set (MAE, RMSE, MAPE).
+4. Refits the best configuration on the full dataset and saves artifacts.
+
+### Output Artifacts
+
+Models and metadata are stored under `backend/model/ml_models/training/models/`:
+
+- `sarima_registrations.pkl` – Serialized SARIMAX results object (load with `joblib.load`).
+- `sarima_registrations_metadata.json` – Training metadata (orders, metrics, sample windows).
+
+These files can be copied or referenced by any Flask microservice that needs registration forecasts (see `mv_registration_flask` for integration patterns).
 
 ## 🎓 Model Output
 

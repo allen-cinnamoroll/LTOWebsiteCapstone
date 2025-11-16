@@ -41,7 +41,7 @@ const DriverCard = () => {
   const navigate = useNavigate();
   const fetchDriver = async () => {
     try {
-      const { data } = await apiClient.get(`/driver/${params.id}`, {
+      const { data } = await apiClient.get(`/owner/${params.id}`, {
         headers: {
           Authorization: token,
         },
@@ -82,7 +82,7 @@ const DriverCard = () => {
     const promise = async () => {
       try {
         const response = await apiClient.patch(
-          `/driver/${driverId}`,
+          `/owner/${driverId}`,
           {
             isActive: data,
           },
@@ -105,8 +105,8 @@ const DriverCard = () => {
 
     toast.promise(promise(), {
       loading: "Loading...",
-      success: `Driver updated successfully`,
-      error: (error) => error.message || "Failed to update driver",
+      success: `Owner updated successfully`,
+      error: (error) => error.message || "Failed to update owner",
     });
   };
 
@@ -196,7 +196,7 @@ const DriverCard = () => {
         confirm={confirmDelete}
         title={"Are you sure?"}
         description={
-          " This action cannot be undone. This will deactivate the driver"
+          " This action cannot be undone. This will deactivate the owner"
         }
       />
     </>

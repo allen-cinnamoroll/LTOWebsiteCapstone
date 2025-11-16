@@ -88,7 +88,7 @@
       },
       driverId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Drivers',
+        ref: 'Owners',
         required: [true, "driverId is required"]
       },
       // User tracking fields

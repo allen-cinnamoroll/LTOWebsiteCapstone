@@ -105,7 +105,7 @@ const DriversTable = ({
         <div className="relative hidden md:inline md:max-w-sm flex-shrink">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
-            placeholder={"Search Driver..."}
+            placeholder={"Search Owner..."}
             value={globalFilter ?? ""}
             onChange={(event) => setGlobalFilter(event.target.value)}
             className={"pl-10 pr-10 bg-white text-black border-gray-300 dark:bg-black dark:text-white dark:border-[#424242]"}

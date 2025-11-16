@@ -86,9 +86,6 @@ export function ViolationAnalytics() {
         yearValue = year;
       }
       
-      console.log('🔍 Fetching violation analytics with filters:', { year, yearValue });
-      console.log('🔍 Token in localStorage:', localStorage.getItem('token') ? 'Present' : 'Missing');
-      
       const response = await getViolationAnalytics({}, yearValue);
 
       // Also fetch total records count to reflect "Traffic Violators" as total records
@@ -105,13 +102,8 @@ export function ViolationAnalytics() {
         setTotalTrafficViolatorsOverride(null);
       }
       
-      console.log('🔍 API Response:', response);
-      console.log('🔍 Response success:', response?.success);
-      console.log('🔍 Response data:', response?.data);
-      
       if (response && response.success) {
         setAnalyticsData(response.data);
-        console.log('Analytics data set:', response.data);
         
         // Check if we have any data for the selected year
         if (year && year !== 'All' && response.data.totalViolations === 0) {
@@ -122,10 +114,8 @@ export function ViolationAnalytics() {
       } else {
         const errorMessage = response?.message || 'Failed to fetch analytics data';
         setError(errorMessage);
-        console.error('API returned error:', errorMessage);
       }
     } catch (err) {
-      console.error('Error fetching analytics data:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Error loading analytics data';
       setError(errorMessage);
     } finally {

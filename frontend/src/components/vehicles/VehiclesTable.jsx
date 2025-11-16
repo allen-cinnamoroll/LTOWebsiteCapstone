@@ -66,17 +66,6 @@ const VehiclesTable = ({
   // Define the columns where you want to apply the global filter
   const filterColumns = filters;
 
-  // DEBUG: Log data received by table component
-  React.useEffect(() => {
-    console.log('=== VEHICLES TABLE DEBUG ===');
-    console.log('Data prop received:', data);
-    console.log('Data length:', data?.length || 0);
-    console.log('Data is array:', Array.isArray(data));
-    console.log('Loading state:', loading);
-    console.log('First 3 vehicles:', data?.slice(0, 3));
-    console.log('=== END TABLE DEBUG ===');
-  }, [data, loading]);
-
   const table = useReactTable({
     data,
     columns: tableColumn(onEdit, onRenew, submitting),
@@ -204,21 +193,21 @@ const VehiclesTable = ({
                     </TableRow>
                   )}
                 </TableBody>
-              {hoveredRowId && (
-                <div
-                  className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
-                  style={{
-                    left: `${mousePosition.x + 10}px`,
-                    top: `${mousePosition.y - 10}px`,
-                  }}
-                >
-                  Click to view details
-                </div>
-              )}
             </Table>
           </div>
         </div>
       </div>
+      {hoveredRowId && (
+        <div
+          className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
+          style={{
+            left: `${mousePosition.x + 10}px`,
+            top: `${mousePosition.y - 10}px`,
+          }}
+        >
+          Click to view details
+        </div>
+      )}
       <div className="mt-2 mb-2 flex-shrink-0">
         <DataTablePagination table={table} />
       </div>

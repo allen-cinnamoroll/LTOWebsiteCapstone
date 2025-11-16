@@ -1,4 +1,4 @@
-import DriverModel from "../model/DriverModel.js";
+import OwnerModel from "../model/OwnerModel.js";
 import DriverLog from "../model/DriverLog.js";
 
 export const getLogs = async (req, res) => {
@@ -35,7 +35,7 @@ export const getLogs = async (req, res) => {
 export const getDriverLogs = async (req, res) => {
   const driverId = req.params.id;
   try {
-    const driver = await DriverModel.findById(driverId);
+    const driver = await OwnerModel.findById(driverId);
 
     if (!driver) {
       return res.status(404).json({

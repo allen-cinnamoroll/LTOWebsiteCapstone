@@ -1,0 +1,33 @@
+{
+  "model_type": "SARIMAX",
+  "frequency": "W-MON",
+  "seasonal_period": 8,
+  "order": [
+    0,
+    0,
+    0
+  ],
+  "seasonal_order": [
+    0,
+    1,
+    1,
+    8
+  ],
+  "training_samples": 16,
+  "test_samples": 5,
+  "best_aic": 4.923076923076923,
+  "mae": 54.000000000000014,
+  "rmse": 69.86844781444626,
+  "mape": 13.598562661247318,
+  "accuracy": 0.8640143733875268,
+  "train_start": "2025-02-10 00:00:00",
+  "train_end": "2025-05-26 00:00:00",
+  "test_start": "2025-06-02 00:00:00",
+  "test_end": "2025-06-30 00:00:00",
+  "log_transform_used": false,
+  "outlier_handling": "none",
+  "validation_strategy": "holdout+rolling_origin",
+  "rolling_cv_mape": 74.8015873015873,
+  "outliers_detected": 0,
+  "data_quality_score": 0.40384615384615385
+}

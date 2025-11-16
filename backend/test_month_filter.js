@@ -39,8 +39,8 @@ async function testMonthFilter() {
       { $match: dateFilter },
       {
         $lookup: {
-          from: 'drivers',
-          localField: 'driver',
+          from: 'owners',
+          localField: 'driverId',
           foreignField: '_id',
           as: 'driverInfo'
         }

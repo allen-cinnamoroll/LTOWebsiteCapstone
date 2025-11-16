@@ -5,13 +5,7 @@ dotenv.config();
 
 // Check if email credentials are present
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.error('Email credentials are missing in .env file');
-    console.log('To set up Gmail SMTP:');
-    console.log('1. Enable 2-Factor Authentication on your Gmail account');
-    console.log('2. Generate an App Password: https://myaccount.google.com/apppasswords');
-    console.log('3. Add to your .env file:');
-    console.log('   EMAIL_USER=your-gmail@gmail.com');
-    console.log('   EMAIL_PASSWORD=your-16-character-app-password');
+    // Email credentials are missing - email sending will fail gracefully
 }
 
 // Gmail SMTP Configuration
@@ -36,6 +30,11 @@ const transporter = nodemailer.createTransport({
 
 export const sendOTPEmail = async (email, otp) => {
     try {
+        // Check if email credentials are configured
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+            return false; // Return false so backend can handle it properly
+        }
+
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
@@ -55,7 +54,6 @@ export const sendOTPEmail = async (email, otp) => {
         await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
-        console.error('Error sending email:', error);
         return false;
     }
 };
@@ -64,8 +62,6 @@ export const sendPasswordResetOTP = async (email, otp) => {
     try {
         // Check if email credentials are configured
         if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-            console.log('Email credentials not configured. OTP for password reset:', otp);
-            console.log('Email would be sent to:', email);
             return true; // Return true for development/testing
         }
 
@@ -89,10 +85,6 @@ export const sendPasswordResetOTP = async (email, otp) => {
         await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
-        console.error('Error sending password reset email:', error);
-        // For development, log the OTP so you can test
-        console.log('DEVELOPMENT MODE: Password reset OTP is:', otp);
-        console.log('Email would be sent to:', email);
         return true; // Return true for development/testing
     }
 };

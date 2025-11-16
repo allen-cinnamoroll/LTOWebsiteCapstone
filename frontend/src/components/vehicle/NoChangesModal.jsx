@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,13 +19,10 @@ const NoChangesModal = ({ open, onOpenChange, onContinue, onCancel }) => {
             <Edit3 className="h-5 w-5" />
             No Changes Detected
           </DialogTitle>
-        </DialogHeader>
-        
-        <div className="py-4">
-          <p className="text-gray-600 dark:text-gray-300">
+          <DialogDescription>
             No changes were made to the vehicle information. Would you like to continue editing?
-          </p>
-        </div>
+          </DialogDescription>
+        </DialogHeader>
 
         <DialogFooter className="flex justify-end gap-3">
           <Button

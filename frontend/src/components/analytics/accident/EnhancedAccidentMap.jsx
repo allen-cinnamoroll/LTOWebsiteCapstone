@@ -77,7 +77,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           container: mapContainer.current,
           style: getMapboxStyle(mapStyle),
           center: [125.971907, 6.90543], // Default center for Davao Oriental
-          zoom: 9
+          zoom: 12 // Increased zoom to better show streets
         });
 
         // Add navigation controls
@@ -110,18 +110,38 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
 
   // Handle style changes separately
   useEffect(() => {
-    if (map.current && mapLoaded && !isChangingStyle) {
+    if (map.current && mapLoaded && !isChangingStyle && map.current.loaded()) {
       setIsChangingStyle(true);
       try {
+        // Remove all existing layers and sources before style change
+        if (map.current.getLayer('clusters')) map.current.removeLayer('clusters');
+        if (map.current.getLayer('cluster-count')) map.current.removeLayer('cluster-count');
+        if (map.current.getLayer('unclustered-point')) map.current.removeLayer('unclustered-point');
+        if (map.current.getLayer('heatmap')) map.current.removeLayer('heatmap');
+        if (map.current.getSource('accidents')) map.current.removeSource('accidents');
+        
         map.current.setStyle(getMapboxStyle(mapStyle));
-        // Re-setup layers after style change
+        
+        // Wait for style to fully load before adding layers
+        // Use 'styledata' event which fires when style is loaded
         map.current.once('styledata', () => {
-          setupMapLayers();
-          setIsChangingStyle(false);
+          // Wait for map to be fully loaded
+          if (map.current.loaded()) {
+            setupMapLayers();
+            setIsChangingStyle(false);
+          } else {
+            map.current.once('load', () => {
+              setupMapLayers();
+              setIsChangingStyle(false);
+            });
+          }
         });
         
-        // Fallback timeout in case styledata event doesn't fire
+        // Fallback timeout in case events don't fire
         setTimeout(() => {
+          if (map.current && map.current.loaded()) {
+            setupMapLayers();
+          }
           setIsChangingStyle(false);
         }, 3000);
       } catch (error) {
@@ -134,36 +154,46 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
 
   // Update map layers when clustering, heatmap, or severity filter changes
   useEffect(() => {
-    if (mapLoaded && map.current) {
+    if (mapLoaded && map.current && map.current.loaded() && !isChangingStyle) {
       setupMapLayers();
     }
-  }, [mapLoaded, showClusters, showHeatmap, selectedSeverity]);
+  }, [mapLoaded, showClusters, showHeatmap, selectedSeverity, isChangingStyle]);
 
   const setupMapLayers = () => {
-    if (!map.current || !mapLoaded) return;
+    if (!map.current || !mapLoaded || !map.current.loaded() || isChangingStyle) return;
 
     // Prepare data for map layers
     const geojsonData = prepareGeojsonData();
     
-    // Remove existing layers and source
-    if (map.current.getLayer('clusters')) map.current.removeLayer('clusters');
-    if (map.current.getLayer('cluster-count')) map.current.removeLayer('cluster-count');
-    if (map.current.getLayer('unclustered-point')) map.current.removeLayer('unclustered-point');
-    if (map.current.getLayer('heatmap')) map.current.removeLayer('heatmap');
-    if (map.current.getSource('accidents')) map.current.removeSource('accidents');
+    // Remove existing layers and source safely
+    try {
+      if (map.current.getLayer('clusters')) map.current.removeLayer('clusters');
+      if (map.current.getLayer('cluster-count')) map.current.removeLayer('cluster-count');
+      if (map.current.getLayer('unclustered-point')) map.current.removeLayer('unclustered-point');
+      if (map.current.getLayer('heatmap')) map.current.removeLayer('heatmap');
+      if (map.current.getSource('accidents')) map.current.removeSource('accidents');
+    } catch (e) {
+      // Ignore errors if layers/sources don't exist
+    }
     
     // Add source
-    map.current.addSource('accidents', {
+    try {
+      map.current.addSource('accidents', {
       type: 'geojson',
       data: geojsonData,
       cluster: showClusters,
       clusterMaxZoom: 14,
       clusterRadius: 50
-    });
+      });
+    } catch (e) {
+      console.error('Error adding source:', e);
+      return;
+    }
 
     // Add cluster circles
     if (showClusters) {
-      map.current.addLayer({
+      try {
+        map.current.addLayer({
         id: 'clusters',
         type: 'circle',
         source: 'accidents',
@@ -184,10 +214,14 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
             30, 25
           ]
         }
-      });
+        });
+      } catch (e) {
+        console.error('Error adding cluster layer:', e);
+      }
 
       // Add cluster count labels
-      map.current.addLayer({
+      try {
+        map.current.addLayer({
         id: 'cluster-count',
         type: 'symbol',
         source: 'accidents',
@@ -197,11 +231,15 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
           'text-size': 12
         }
-      });
+        });
+      } catch (e) {
+        console.error('Error adding cluster count layer:', e);
+      }
     }
 
     // Add individual accident markers
-    map.current.addLayer({
+    try {
+      map.current.addLayer({
       id: 'unclustered-point',
       type: 'circle',
       source: 'accidents',
@@ -219,11 +257,15 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff'
       }
-    });
+      });
+    } catch (e) {
+      console.error('Error adding unclustered point layer:', e);
+    }
 
     // Add heatmap layer
     if (showHeatmap) {
-      map.current.addLayer({
+      try {
+        map.current.addLayer({
         id: 'heatmap',
         type: 'heatmap',
         source: 'accidents',
@@ -279,11 +321,27 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
             15, 0
           ]
         }
-      });
+        });
+      } catch (e) {
+        console.error('Error adding heatmap layer:', e);
+      }
+    }
+
+    // Remove existing event listeners to prevent duplicates
+    try {
+      map.current.off('click', 'clusters');
+      map.current.off('click', 'unclustered-point');
+      map.current.off('mouseenter', 'clusters');
+      map.current.off('mouseleave', 'clusters');
+      map.current.off('mouseenter', 'unclustered-point');
+      map.current.off('mouseleave', 'unclustered-point');
+    } catch (e) {
+      // Ignore errors
     }
 
     // Add click handlers
-    map.current.on('click', 'clusters', (e) => {
+    try {
+      map.current.on('click', 'clusters', (e) => {
       const features = map.current.queryRenderedFeatures(e.point, {
         layers: ['clusters']
       });
@@ -300,9 +358,9 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           });
         }
       );
-    });
+      });
 
-    map.current.on('click', 'unclustered-point', (e) => {
+      map.current.on('click', 'unclustered-point', (e) => {
       const coordinates = e.features[0].geometry.coordinates.slice();
       const properties = e.features[0].properties;
       
@@ -311,24 +369,27 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
         .setLngLat(coordinates)
         .setHTML(createPopupContent(properties))
         .addTo(map.current);
-    });
+      });
 
-    // Change cursor on hover
-    map.current.on('mouseenter', 'clusters', () => {
-      map.current.getCanvas().style.cursor = 'pointer';
-    });
+      // Change cursor on hover
+      map.current.on('mouseenter', 'clusters', () => {
+        map.current.getCanvas().style.cursor = 'pointer';
+      });
 
-    map.current.on('mouseleave', 'clusters', () => {
-      map.current.getCanvas().style.cursor = '';
-    });
+      map.current.on('mouseleave', 'clusters', () => {
+        map.current.getCanvas().style.cursor = '';
+      });
 
-    map.current.on('mouseenter', 'unclustered-point', () => {
-      map.current.getCanvas().style.cursor = 'pointer';
-    });
+      map.current.on('mouseenter', 'unclustered-point', () => {
+        map.current.getCanvas().style.cursor = 'pointer';
+      });
 
-    map.current.on('mouseleave', 'unclustered-point', () => {
-      map.current.getCanvas().style.cursor = '';
-    });
+      map.current.on('mouseleave', 'unclustered-point', () => {
+        map.current.getCanvas().style.cursor = '';
+      });
+    } catch (e) {
+      console.error('Error adding event handlers:', e);
+    }
   };
 
   const prepareGeojsonData = () => {
@@ -417,10 +478,10 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
   };
 
   const resetMapView = () => {
-    if (map.current) {
+    if (map.current && map.current.loaded()) {
       map.current.flyTo({
         center: [125.971907, 6.90543],
-        zoom: 9,
+        zoom: 12, // Increased zoom to better show streets
         duration: 1000
       });
     }

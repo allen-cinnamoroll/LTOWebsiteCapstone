@@ -10,7 +10,6 @@ export const getRegistrationAnalytics = async (month = null, year = null) => {
     const response = await apiClient.get('/dashboard/registration-analytics', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching registration analytics:', error);
     throw error;
   }
 };
@@ -43,7 +42,6 @@ export const getMunicipalityAnalytics = async (month = null, year = null) => {
     const response = await apiClient.get('/dashboard/municipality-analytics', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching municipality analytics:', error);
     throw error;
   }
 };
@@ -59,7 +57,6 @@ export const getMunicipalityRegistrationTotals = async (month = null, year = nul
     // The backend returns the data directly, not wrapped in a data property
     return response.data;
   } catch (error) {
-    console.error('Error fetching municipality registration totals:', error);
     throw error;
   }
 };
@@ -74,7 +71,6 @@ export const getBarangayRegistrationTotals = async (municipality, month = null, 
     const response = await apiClient.get('/dashboard/barangay-registration-totals', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching barangay registration totals:', error);
     throw error;
   }
 };
@@ -90,7 +86,6 @@ export const getYearlyVehicleTrends = async (startYear = null, endYear = null, m
     const response = await apiClient.get('/dashboard/yearly-vehicle-trends', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching yearly vehicle trends:', error);
     throw error;
   }
 };
@@ -104,7 +99,6 @@ export const getMonthlyVehicleTrends = async (year, municipality = null) => {
     const response = await apiClient.get('/dashboard/monthly-vehicle-trends', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching monthly vehicle trends:', error);
     throw error;
   }
 };
@@ -119,7 +113,6 @@ export const getOwnerMunicipalityData = async (month = null, year = null) => {
     const response = await apiClient.get('/dashboard/owner-municipality-data', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching owner municipality data:', error);
     throw error;
   }
 };
@@ -134,7 +127,6 @@ export const getVehicleClassificationData = async (month = null, year = null) =>
     const response = await apiClient.get('/dashboard/vehicle-classification-data', { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching vehicle classification data:', error);
     throw error;
   }
 };

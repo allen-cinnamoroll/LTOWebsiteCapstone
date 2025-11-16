@@ -41,8 +41,16 @@ const OTPVerificationModal = ({ isOpen, onClose, onSuccess, userEmail }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate OTP format
     if (!otp || otp.length !== 6) {
       toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    // Validate email is present
+    if (!userEmail) {
+      toast.error("Email address is missing. Please login again.");
+      onClose();
       return;
     }
 
@@ -50,18 +58,30 @@ const OTPVerificationModal = ({ isOpen, onClose, onSuccess, userEmail }) => {
     
     try {
       const response = await apiClient.post("/auth/verify-otp", {
-        email: userEmail,
-        otp: otp,
+        email: userEmail.trim(),
+        otp: otp.trim(),
       });
 
-      if (response.data.success) {
+      // Only proceed if response is successful (2xx status)
+      if (response.status >= 200 && response.status < 300 && response.data.success) {
         toast.success("OTP verified successfully!");
-        onSuccess(response.data.token);
+        if (response.data.token) {
+          onSuccess(response.data.token);
+        } else {
+          toast.error("Token not received. Please try again.");
+        }
       } else {
-        toast.error(response.data.message || "OTP verification failed");
+        const errorMessage = response.data?.message || "OTP verification failed";
+        toast.error(errorMessage);
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "OTP verification failed";
+      console.error("OTP verification error:", error);
+      
+      // Get error message from backend response
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          "OTP verification failed. Please check your code and try again.";
+      
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

@@ -220,10 +220,10 @@ export function AppSidebar(props) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive={location.pathname === "/driver"} asChild>
-                <Link to="/driver">
+              <SidebarMenuButton isActive={location.pathname === "/owner"} asChild>
+                <Link to="/owner">
                   <Users />
-                  <span>Manage Drivers</span>
+                  <span>Manage Owners</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

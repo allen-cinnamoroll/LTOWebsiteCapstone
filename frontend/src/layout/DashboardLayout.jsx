@@ -30,8 +30,8 @@ const DashboardLayout = () => {
     const path = location.pathname;
     
     // Handle dynamic routes with patterns
-    if (path.includes('/driver/') && path.includes('/edit')) {
-      return 'Edit Driver';
+    if (path.includes('/owner/') && path.includes('/edit')) {
+      return 'Edit Owner';
     }
     if (path.includes('/vehicle/') && path.includes('/edit')) {
       return 'Edit Vehicle';
@@ -43,16 +43,16 @@ const DashboardLayout = () => {
       return 'Edit Accident';
     }
     
-    // Handle driver profile pages (e.g., /driver/123) - return null to hide breadcrumb
-    if (path.match(/^\/driver\/[a-zA-Z0-9]+$/)) {
+    // Handle owner profile pages (e.g., /owner/123) - return null to hide breadcrumb
+    if (path.match(/^\/owner\/[a-zA-Z0-9]+$/)) {
       return null;
     }
     
     switch (path) {
       case '/':
         return 'Overview';
-      case '/driver':
-        return 'Drivers';
+      case '/owner':
+        return 'Owners';
       case '/vehicle':
         return 'Vehicles';
       case '/violation':

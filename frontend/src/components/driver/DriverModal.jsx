@@ -33,19 +33,6 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
 
   // Prefetch names for createdBy / updatedBy
   useEffect(() => {
-    // DEBUG: Log driver data to check metadata fields
-    if (open && driverData) {
-      console.log('=== DRIVER MODAL DEBUG ===');
-      console.log('Full driverData:', driverData);
-      console.log('createdBy:', driverData.createdBy);
-      console.log('createdBy type:', typeof driverData.createdBy);
-      console.log('createdAt:', driverData.createdAt);
-      console.log('updatedBy:', driverData.updatedBy);
-      console.log('updatedBy type:', typeof driverData.updatedBy);
-      console.log('updatedAt:', driverData.updatedAt);
-      console.log('=== END DEBUG ===');
-    }
-    
     if (!open || !driverData) return;
     const ids = [driverData.createdBy, driverData.updatedBy]
       .map(u => (typeof u === 'object' ? u?._id : u))
@@ -117,7 +104,6 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
           setVehicleData(data.data);
         }
       } catch (error) {
-        console.error("Error fetching vehicle data:", error);
         toast.error("Failed to fetch vehicle information");
       } finally {
         setLoadingVehicle(false);
@@ -144,6 +130,10 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl h-[80vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl w-full p-0 overflow-hidden flex flex-col">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Owner Information</DialogTitle>
+            <DialogDescription>View owner profile and assigned vehicles</DialogDescription>
+          </DialogHeader>
           {/* Header */}
           <div className="bg-white dark:bg-transparent px-6 py-4 border-b dark:border-[#424242]">
             <div className="flex items-center gap-3">
@@ -152,7 +142,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{driverData.ownerRepresentativeName}</h2>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Driver Profile</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Owner Profile</p>
               </div>
             </div>
           </div>
@@ -390,7 +380,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                 className="text-xs"
               >
                 <Edit className="h-3 w-3 mr-1" />
-                Edit Driver
+                Edit Owner
               </Button>
             </div>
           </div>

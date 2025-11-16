@@ -77,7 +77,7 @@ const EditVehicleForm = () => {
         setVehicleData(vData);
       }
     } catch (error) {
-      console.log(error);
+      // Error handled silently
     }
   };
 
@@ -111,7 +111,6 @@ const EditVehicleForm = () => {
         navigate(-1);
       }
     } catch (error) {
-      console.log(error);
       const message = error.response?.data?.message || "An error occurred";
 
       toast.error(message, {

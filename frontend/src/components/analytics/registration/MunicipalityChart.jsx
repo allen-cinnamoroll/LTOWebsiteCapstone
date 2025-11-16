@@ -72,7 +72,6 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
         setMunicipalityData([]);
       }
     } catch (err) {
-      console.error('Error fetching municipality data:', err);
       setError('Error loading municipality data');
     } finally {
       setLoading(false);
