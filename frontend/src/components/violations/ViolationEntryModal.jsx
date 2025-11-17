@@ -39,6 +39,21 @@ const ViolationEntryModal = ({ open, onOpenChange, onViolationAdded, initialViol
   const [submitting, setSubmitting] = useState(false);
   const searchInputRef = React.useRef(null);
 
+  const violationOptions = React.useMemo(() => {
+    const unique = new Set();
+    allViolations.forEach((record) => {
+      if (Array.isArray(record?.violations)) {
+        record.violations.forEach((violationName) => {
+          const normalized = (violationName || "").toString().trim();
+          if (normalized.length > 0) {
+            unique.add(normalized);
+          }
+        });
+      }
+    });
+    return Array.from(unique).sort((a, b) => a.localeCompare(b));
+  }, [allViolations]);
+
   const form = useForm({
     resolver: zodResolver(ViolationCreateSchema),
     defaultValues: {
@@ -480,6 +495,7 @@ const ViolationEntryModal = ({ open, onOpenChange, onViolationAdded, initialViol
               onSubmit={onSubmit}
               submitting={submitting}
               isEditMode={false}
+            violationOptions={violationOptions}
             />
           </div>
         </div>
