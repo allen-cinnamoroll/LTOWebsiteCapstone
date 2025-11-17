@@ -63,8 +63,8 @@ export function useDashboardCharts() {
             .map(t => ({ type: typeMap[String(t._id).toLowerCase()] || t._id, value: t.count }));
         setViolationTypeDistribution(filteredTypes);
 
-        // 3) Accident analytics for November (weekly and municipality)
-        const accRes = await apiClient.get(`/accident/analytics/summary?period=months`, {
+        // 3) Accident analytics for current month (weekly and municipality)
+        const accRes = await apiClient.get(`/accident/analytics/summary?period=currentMonth`, {
           headers: { Authorization: token },
         });
         const distributions = accRes?.data?.data?.distributions || {};

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,9 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { AlertTriangle } from "lucide-react";
+import { saveFormData, loadFormData, clearFormData } from "@/util/formPersistence";
+
+const FORM_STORAGE_KEY = 'violation_form_draft';
 
 const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues, searchTerm }) => {
   const [submitting, setIsSubmitting] = useState(false);
@@ -24,9 +27,12 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
   const date = formatDate(Date.now());
 
 
-  const form = useForm({
-    resolver: zodResolver(ViolationCreateSchema),
-    defaultValues: {
+  const getDefaultValues = () => {
+    const savedData = loadFormData(FORM_STORAGE_KEY);
+    if (savedData) {
+      return savedData;
+    }
+    return {
       topNo: "",
       firstName: "",
       middleInitial: "",
@@ -41,8 +47,35 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
       chassisNo: "",
       engineNo: "",
       fileNo: "",
-    },
+    };
+  };
+
+  const form = useForm({
+    resolver: zodResolver(ViolationCreateSchema),
+    defaultValues: getDefaultValues(),
   });
+
+  // Watch form changes and save to localStorage
+  const formValues = form.watch();
+  useEffect(() => {
+    if (open && !submitting) {
+      // Only save if form has some data (not empty)
+      const hasData = Object.values(formValues).some(value => {
+        if (Array.isArray(value)) return value.some(v => v && v !== "");
+        if (value instanceof Date) return true;
+        return value !== "" && value !== undefined && value !== null;
+      });
+      
+      if (hasData) {
+        // Save with current connection status
+        const isOffline = !navigator.onLine;
+        saveFormData(FORM_STORAGE_KEY, formValues, isOffline);
+      } else {
+        // Clear saved data if form is empty (only if online)
+        clearFormData(FORM_STORAGE_KEY, false);
+      }
+    }
+  }, [formValues, open, submitting]);
 
 
   const onSubmit = async (formData) => {
@@ -79,6 +112,9 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
         toast.success("Violation has been added", {
           description: date,
         });
+
+        // Clear saved form data (force clear on successful submission)
+        clearFormData(FORM_STORAGE_KEY, true);
 
         // Reset form
         form.reset({
@@ -117,6 +153,10 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
+      // Only clear saved form data if internet is connected
+      // If internet was disconnected, preserve the data
+      clearFormData(FORM_STORAGE_KEY, false);
+      
       // Reset form when closing modal
       form.reset({
         topNo: "",
@@ -134,7 +174,6 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
         engineNo: "",
         fileNo: "",
       });
-
     }
     onOpenChange(isOpen);
   };
@@ -156,7 +195,10 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
         }
       }
       
-      // Use initialValues if provided, otherwise use parsed searchTerm
+      // Check for saved form data first (unless initialValues or searchTerm is provided)
+      const savedData = loadFormData(FORM_STORAGE_KEY);
+      
+      // Use initialValues if provided, otherwise use parsed searchTerm, otherwise use saved data
       if (initialValues && initialValues.firstName) {
         form.reset({
           topNo: "",
@@ -174,6 +216,8 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
           engineNo: initialValues.engineNo || "",
           fileNo: initialValues.fileNo || "",
         });
+        // Clear saved data when using initialValues (force clear)
+        clearFormData(FORM_STORAGE_KEY, true);
       } else if (searchTerm && firstName) {
         // Use parsed name from searchTerm
         form.reset({
@@ -192,6 +236,11 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
           engineNo: "",
           fileNo: "",
         });
+        // Clear saved data when using searchTerm (force clear)
+        clearFormData(FORM_STORAGE_KEY, true);
+      } else if (savedData) {
+        // Restore saved form data
+        form.reset(savedData);
       } else {
         // Reset to empty form
         form.reset({

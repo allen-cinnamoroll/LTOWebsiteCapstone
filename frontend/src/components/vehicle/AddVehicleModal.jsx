@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,9 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { Car } from "lucide-react";
+import { saveFormData, loadFormData, clearFormData } from "@/util/formPersistence";
+
+const FORM_STORAGE_KEY = 'vehicle_form_draft';
 
 const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
   const [submitting, setIsSubmitting] = useState(false);
@@ -25,9 +28,12 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
   const { token } = useAuth();
   const date = formatDate(Date.now());
 
-  const form = useForm({
-    resolver: zodResolver(VehicleSchema),
-    defaultValues: {
+  const getDefaultValues = () => {
+    const savedData = loadFormData(FORM_STORAGE_KEY);
+    if (savedData) {
+      return savedData;
+    }
+    return {
       plateNo: "",
       fileNo: "",
       engineNo: "",
@@ -39,8 +45,45 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
       dateOfRenewal: undefined,
       vehicleStatusType: "",
       driver: "",
-    },
+    };
+  };
+
+  const form = useForm({
+    resolver: zodResolver(VehicleSchema),
+    defaultValues: getDefaultValues(),
   });
+
+  // Watch form changes and save to localStorage
+  const formValues = form.watch();
+  useEffect(() => {
+    if (open && !submitting) {
+      // Only save if form has some data (not empty)
+      const hasData = Object.values(formValues).some(value => {
+        if (Array.isArray(value)) return value.some(v => v && v !== "");
+        if (value instanceof Date) return true;
+        return value !== "" && value !== undefined && value !== null;
+      });
+      
+      if (hasData) {
+        // Save with current connection status
+        const isOffline = !navigator.onLine;
+        saveFormData(FORM_STORAGE_KEY, formValues, isOffline);
+      } else {
+        // Clear saved data if form is empty (only if online)
+        clearFormData(FORM_STORAGE_KEY, false);
+      }
+    }
+  }, [formValues, open, submitting]);
+
+  // Restore saved data when modal opens
+  useEffect(() => {
+    if (open) {
+      const savedData = loadFormData(FORM_STORAGE_KEY);
+      if (savedData) {
+        form.reset(savedData);
+      }
+    }
+  }, [open, form]);
 
   const onSubmit = async (formData) => {
     // Show confirmation modal instead of submitting directly
@@ -84,6 +127,9 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
           description: date,
         });
 
+        // Clear saved form data (force clear on successful submission)
+        clearFormData(FORM_STORAGE_KEY, true);
+
         // Reset form
         form.reset({
           plateNo: "",
@@ -116,6 +162,10 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
+      // Only clear saved form data if internet is connected
+      // If internet was disconnected, preserve the data
+      clearFormData(FORM_STORAGE_KEY, false);
+      
       // Reset form when closing modal
       form.reset({
         plateNo: "",
@@ -127,6 +177,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
         color: "",
         classification: undefined,
         dateOfRenewal: undefined,
+        vehicleStatusType: "",
         driver: "",
       });
     }

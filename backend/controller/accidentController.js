@@ -223,6 +223,8 @@ export const getAccidentAnalytics = async (req, res) => {
     const now = new Date();
     let startDate;
     
+    let endDate = null;
+    
     switch (period) {
       case 'week':
         startDate = new Date(now);
@@ -231,6 +233,11 @@ export const getAccidentAnalytics = async (req, res) => {
       case 'month':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'currentMonth':
+        // Current month only - from start of current month to end of current month
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
         break;
       case '3months':
         startDate = new Date(now);
@@ -252,10 +259,18 @@ export const getAccidentAnalytics = async (req, res) => {
         startDate.setMonth(now.getMonth() - 6);
     }
 
+    // Build date filter for queries
+    let dateFilter = {};
+    if (startDate && endDate) {
+      // Current month: both start and end dates
+      dateFilter = { dateCommited: { $gte: startDate, $lte: endDate } };
+    } else if (startDate) {
+      // Other periods: only start date
+      dateFilter = { dateCommited: { $gte: startDate } };
+    }
+
     // Get total accidents
-    const totalAccidents = await AccidentModel.countDocuments(
-      startDate ? { dateCommited: { $gte: startDate } } : {}
-    );
+    const totalAccidents = await AccidentModel.countDocuments(dateFilter);
 
     // Get previous period for comparison (skip for alltime)
     let previousTotalAccidents = 0;
@@ -278,9 +293,7 @@ export const getAccidentAnalytics = async (req, res) => {
     // Get incident type distribution
     const incidentTypeDistribution = await AccidentModel.aggregate([
       {
-        $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
-        }
+        $match: dateFilter
       },
       {
         $group: {
@@ -297,7 +310,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const offenseTypeDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {}),
+          ...dateFilter,
           offenseType: { $exists: true, $ne: null }
         }
       },
@@ -316,7 +329,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const caseStatusDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {}),
+          ...dateFilter,
           caseStatus: { $exists: true, $ne: null }
         }
       },
@@ -336,7 +349,7 @@ export const getAccidentAnalytics = async (req, res) => {
     const hourlyDistribution = await AccidentModel.aggregate([
       {
         $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {}),
+          ...dateFilter,
           dateCommited: { $exists: true }
         }
       },
@@ -397,9 +410,7 @@ export const getAccidentAnalytics = async (req, res) => {
     // Get day of week distribution
     const dayOfWeekDistribution = await AccidentModel.aggregate([
       {
-        $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
-        }
+        $match: dateFilter
       },
       {
         $group: {
@@ -415,9 +426,7 @@ export const getAccidentAnalytics = async (req, res) => {
     // Get monthly trends
     const monthlyTrends = await AccidentModel.aggregate([
       {
-        $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
-        }
+        $match: dateFilter
       },
       {
         $group: {
@@ -436,9 +445,7 @@ export const getAccidentAnalytics = async (req, res) => {
     // Get municipality distribution with normalization
     const municipalityDistribution = await AccidentModel.aggregate([
       {
-        $match: {
-          ...(startDate ? { dateCommited: { $gte: startDate } } : {})
-        }
+        $match: dateFilter
       },
       {
         $addFields: {
@@ -471,7 +478,7 @@ export const getAccidentAnalytics = async (req, res) => {
     // Get all accidents for map (using geocoding based on location) with normalized municipality
     const accidentsWithCoordinates = await AccidentModel.aggregate([
       {
-        $match: startDate ? { dateCommited: { $gte: startDate } } : {}
+        $match: dateFilter
       },
       {
         $addFields: {
@@ -547,6 +554,7 @@ export const getAccidentRiskAnalytics = async (req, res) => {
     // Calculate date range
     const now = new Date();
     let startDate;
+    let endDate = null;
     
     switch (period) {
       case 'week':
@@ -556,6 +564,11 @@ export const getAccidentRiskAnalytics = async (req, res) => {
       case 'month':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 1);
+        break;
+      case 'currentMonth':
+        // Current month only - from start of current month to end of current month
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
         break;
       case '3months':
         startDate = new Date(now);
@@ -577,10 +590,18 @@ export const getAccidentRiskAnalytics = async (req, res) => {
         startDate.setMonth(now.getMonth() - 6);
     }
 
+    // Build date filter for queries
+    let dateFilter = {};
+    if (startDate && endDate) {
+      // Current month: both start and end dates
+      dateFilter = { dateCommited: { $gte: startDate, $lte: endDate } };
+    } else if (startDate) {
+      // Other periods: only start date
+      dateFilter = { dateCommited: { $gte: startDate } };
+    }
+
     // Get all accidents in the period
-    const accidents = await AccidentModel.find(
-      startDate ? { dateCommited: { $gte: startDate } } : {}
-    );
+    const accidents = await AccidentModel.find(dateFilter);
 
     // Risk predictions based on offenseType (ML model target) and case status
     // "Crimes Against Persons" = High Risk, "Crimes Against Property" = Medium/Low Risk

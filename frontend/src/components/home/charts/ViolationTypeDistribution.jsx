@@ -201,25 +201,25 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 							.filter((d) => d.type.toLowerCase() === 'impounded')
 							.map((d) => {
 								const originalIndex = data.findIndex((item) => item.type === d.type);
-								const total = data.reduce((s, x) => s + (x.value || 0), 0) || 1;
-								const pct = Math.round(((d.value || 0) / total) * 1000) / 10;
-								return (
-									<div
-										key={d.type}
+						const total = data.reduce((s, x) => s + (x.value || 0), 0) || 1;
+						const pct = Math.round(((d.value || 0) / total) * 1000) / 10;
+						return (
+							<div
+								key={d.type}
 										className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1 bg-white dark:bg-neutral-900/80"
-									>
+							>
 										<div className="flex items-center gap-1.5">
 											<span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colors[originalIndex % colors.length] }}></span>
 											<span className="text-xs capitalize text-gray-800 dark:text-gray-100">
-												{d.type}
-											</span>
-										</div>
+										{d.type}
+									</span>
+								</div>
 										<div className="text-xs text-gray-600 dark:text-gray-300 ml-2">
-											{(d.value || 0).toLocaleString()} · {pct}%
-										</div>
-									</div>
-								);
-							})}
+									{(d.value || 0).toLocaleString()} · {pct}%
+								</div>
+							</div>
+						);
+					})}
 					</div>
 				</div>
 			</div>

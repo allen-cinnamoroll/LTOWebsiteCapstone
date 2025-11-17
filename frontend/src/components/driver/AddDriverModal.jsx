@@ -18,6 +18,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { saveFormData, loadFormData, clearFormData } from "@/util/formPersistence";
+
+const FORM_STORAGE_KEY = 'driver_form_draft';
 
 const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
   const [submitting, setIsSubmitting] = useState(false);
@@ -27,10 +30,12 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
   const date = formatDate(Date.now());
   const navigate = useNavigate();
 
-  const form = useForm({
-    // Temporarily disable schema validation to use manual validation
-    // resolver: zodResolver(CreateDriverSchema),
-    defaultValues: {
+  const getDefaultValues = () => {
+    const savedData = loadFormData(FORM_STORAGE_KEY);
+    if (savedData) {
+      return savedData;
+    }
+    return {
       plateNo: "",
       fileNo: "",
       ownerRepresentativeName: "",
@@ -43,14 +48,44 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
       hasDriversLicense: false,
       driversLicenseNumber: "",
       birthDate: undefined,
-    },
+    };
+  };
+
+  const form = useForm({
+    // Temporarily disable schema validation to use manual validation
+    // resolver: zodResolver(CreateDriverSchema),
+    defaultValues: getDefaultValues(),
     mode: "onChange", // Add this to ensure validation happens on change
   });
+
+  // Watch form changes and save to localStorage
+  const formValues = form.watch();
+  useEffect(() => {
+    if (open && !submitting) {
+      // Only save if form has some data (not empty)
+      const hasData = Object.values(formValues).some(value => {
+        if (Array.isArray(value)) return value.some(v => v && v !== "");
+        if (value instanceof Date) return true;
+        return value !== "" && value !== undefined && value !== null;
+      });
+      
+      if (hasData) {
+        // Save with current connection status
+        const isOffline = !navigator.onLine;
+        saveFormData(FORM_STORAGE_KEY, formValues, isOffline);
+      } else {
+        // Clear saved data if form is empty (only if online)
+        clearFormData(FORM_STORAGE_KEY, false);
+      }
+    }
+  }, [formValues, open, submitting]);
 
   // Populate form with vehicle data when modal opens
   useEffect(() => {
     if (open) {
       const vehicleData = sessionStorage.getItem('vehicleFormData');
+      const savedData = loadFormData(FORM_STORAGE_KEY);
+      
       if (vehicleData) {
         const parsedData = JSON.parse(vehicleData);
         // Set all form values including address defaults
@@ -68,6 +103,11 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
           driversLicenseNumber: '',
           birthDate: undefined,
         });
+        // Clear saved data when using vehicle data (force clear)
+        clearFormData(FORM_STORAGE_KEY, true);
+      } else if (savedData) {
+        // Restore saved form data
+        form.reset(savedData);
       } else {
         // Even without vehicle data, ensure form is properly initialized
         form.reset({
@@ -210,6 +250,9 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
           description: date,
         });
 
+        // Clear saved form data (force clear on successful submission)
+        clearFormData(FORM_STORAGE_KEY, true);
+
         // Reset form
         form.reset({
           plateNo: "",
@@ -246,6 +289,10 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
+      // Only clear saved form data if internet is connected
+      // If internet was disconnected, preserve the data
+      clearFormData(FORM_STORAGE_KEY, false);
+      
       // Reset form when closing modal
       form.reset({
         plateNo: "",

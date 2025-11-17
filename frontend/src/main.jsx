@@ -5,6 +5,7 @@ import { ThemeProvider } from "./components/theme/theme-provider.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import React from "react";
 import "./index.css";
+import { clearFormData } from "./util/formPersistence";
 
 // Global error handler to suppress non-critical errors
 window.addEventListener('error', (event) => {
@@ -28,6 +29,20 @@ window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault();
     return false;
   }
+});
+
+// Clear form drafts on page load/refresh
+// Only clear if they were saved while online (preserve offline drafts)
+const FORM_DRAFT_KEYS = [
+  'violation_form_draft',
+  'vehicle_form_draft',
+  'driver_form_draft',
+  'accident_form_draft'
+];
+
+// Clear all form drafts when page loads (only if they were saved online)
+FORM_DRAFT_KEYS.forEach(key => {
+  clearFormData(key, false); // false = don't force clear, respect offline status
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
