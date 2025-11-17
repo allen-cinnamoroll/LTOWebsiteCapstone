@@ -104,9 +104,10 @@ const OnlineUsersPanel = () => {
     );
   }
 
-  // Single-card layout for both superadmin and admin
+  // Get data based on user role
   const admins = onlineData?.admins || [];
   const employees = onlineData?.employees || [];
+  const isSuperAdmin = userData?.role === "0";
 
   return (
     <div className="relative">
@@ -125,23 +126,33 @@ const OnlineUsersPanel = () => {
       </div>
 
       <div className="space-y-4">
-        {/* Admins row */}
-        <div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-1 rounded bg-blue-500/10">
-                <UserCheck className="h-3.5 w-3.5 text-blue-500" />
+        {/* Admins row - Only show for superadmin */}
+        {isSuperAdmin && (
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-1 rounded bg-blue-500/10">
+                  <UserCheck className="h-3.5 w-3.5 text-blue-500" />
+                </div>
+                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Online Admins</span>
               </div>
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Online Admins</span>
+              <span className="text-xs px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium">{admins.length}</span>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium">{admins.length}</span>
+            {admins.length === 0 ? (
+              <div className="text-[11px] text-gray-500 mt-1">No admins online</div>
+            ) : (
+              <div className="mt-2 space-y-1">
+                {admins.map((admin) => (
+                  <div key={admin.id} className="text-[11px] text-gray-600 dark:text-gray-400 pl-6">
+                    • {admin.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {admins.length === 0 && (
-            <div className="text-[11px] text-gray-500 mt-1">No admins online</div>
-          )}
-        </div>
+        )}
 
-        {/* Employees row */}
+        {/* Employees row - Show for superadmin, admin, and employees */}
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -152,15 +163,21 @@ const OnlineUsersPanel = () => {
             </div>
             <span className="text-xs px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-medium">{employees.length}</span>
           </div>
-          {employees.length === 0 && (
+          {employees.length === 0 ? (
             <div className="text-[11px] text-gray-500 mt-1">No employees online</div>
+          ) : (
+            <div className="mt-2 space-y-1">
+              {employees.map((employee) => (
+                <div key={employee.id} className="text-[11px] text-gray-600 dark:text-gray-400 pl-6">
+                  • {employee.name}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
     </div>
   );
-
-  return null;
 };
 
 export default OnlineUsersPanel;
