@@ -2,6 +2,7 @@ import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
 import OwnerModel from "../model/OwnerModel.js";
 import { getVehicleStatus } from "../util/plateStatusCalculator.js";
+import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 // import { logger } from "../util/logger.js";
 
 // Create a new vehicle
@@ -102,6 +103,27 @@ export const createVehicle = async (req, res) => {
       { new: true }
     );
 
+    // Log the activity
+    if (req.user) {
+      const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+      if (actorUser) {
+        await logUserActivity({
+          userId: actorUser._id,
+          userName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
+          email: actorUser.email,
+          role: actorUser.role,
+          logType: 'add_vehicle',
+          ipAddress: getClientIP(req),
+          userAgent: getUserAgent(req),
+          status: 'success',
+          details: `Added vehicle: ${plateNo} (File No: ${fileNo})`,
+          actorId: actorUser._id,
+          actorName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
+          actorEmail: actorUser.email,
+          actorRole: actorUser.role
+        });
+      }
+    }
 
     // Populate driver and user information
     await vehicle.populate([
@@ -408,6 +430,27 @@ export const updateVehicle = async (req, res) => {
       }
     }
 
+    // Log the activity
+    if (req.user) {
+      const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+      if (actorUser) {
+        await logUserActivity({
+          userId: actorUser._id,
+          userName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
+          email: actorUser.email,
+          role: actorUser.role,
+          logType: 'update_vehicle',
+          ipAddress: getClientIP(req),
+          userAgent: getUserAgent(req),
+          status: 'success',
+          details: `Updated vehicle: ${vehicle.plateNo} (File No: ${vehicle.fileNo})`,
+          actorId: actorUser._id,
+          actorName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
+          actorEmail: actorUser.email,
+          actorRole: actorUser.role
+        });
+      }
+    }
 
     res.json({
       success: true,

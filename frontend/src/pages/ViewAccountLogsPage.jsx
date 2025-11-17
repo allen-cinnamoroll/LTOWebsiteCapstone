@@ -24,11 +24,15 @@ const logTypes = [
   { value: "logout", label: "Logout" },
   { value: "register", label: "Registration" },
   { value: "update", label: "Account Update" },
-  { value: "delete", label: "Delete" },
+  { value: "delete", label: "Delete Account" },
   { value: "password_change", label: "Password Change" },
+  { value: "password_reset", label: "Password Reset" },
+  { value: "password_reset_otp_sent", label: "Password Reset OTP Sent" },
+  { value: "password_reset_otp_verified", label: "Password Reset OTP Verified" },
   { value: "otp_verified", label: "OTP Verification" },
   { value: "otp_sent", label: "OTP Sent" },
   { value: "otp_reset", label: "OTP Reset" },
+  { value: "profile_update", label: "Profile Update" },
   { value: "add_driver", label: "Add Owner" },
   { value: "add_vehicle", label: "Add Vehicle" },
   { value: "add_accident", label: "Add Accident" },
@@ -179,14 +183,24 @@ export default function ViewAccountLogsPage() {
         return "outline";
       case "update":
         return "default";
+      case "delete":
+        return "destructive";
       case "password_change":
         return "destructive";
+      case "password_reset":
+        return "destructive";
+      case "password_reset_otp_sent":
+        return "outline";
+      case "password_reset_otp_verified":
+        return "secondary";
       case "otp_verified":
         return "secondary";
       case "otp_sent":
         return "outline";
       case "otp_reset":
         return "destructive";
+      case "profile_update":
+        return "default";
       case "add_driver":
         return "default";
       case "add_vehicle":
