@@ -10,7 +10,7 @@ const Top3BottomMunicipality = ({ data = [] }) => {
 			data={data}
 			xKey="name"
 			barKey="value"
-			color="#10b981"
+			color="#3b82f6"
 			horizontal={false}
 			xLabel="Municipality"
 		/>

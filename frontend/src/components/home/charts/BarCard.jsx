@@ -64,20 +64,22 @@ const BarCard = ({
 	const tooltipBorder = isDarkMode ? "#374151" : "#e5e7eb";
 	const tooltipColor = isDarkMode ? "#f9fafb" : "#111827";
 
+	const axisTextColor = isDarkMode ? "#9ca3af" : "#94a3b8"; // text-slate-400 equivalent
+
 	return (
-		<div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full">
-			<div className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
+		<div className="rounded-2xl border border-slate-100 bg-white shadow-sm p-5 flex flex-col h-full">
+			<h2 className="text-sm font-semibold text-slate-800 mb-2">
 				{title}
-			</div>
-			<div className="w-full h-64">
+			</h2>
+			<div className="w-full h-64 flex-1">
 				<ResponsiveContainer width="100%" height="100%">
 					<BarChart
 						data={data}
 						layout={horizontal ? "vertical" : "horizontal"}
 						margin={{ top: 8, right: 6, bottom: 24, left: 6 }}
 					>
-						{/* Subtle grid and modern theming */}
-						<CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+						{/* Subtle solid gridlines */}
+						<CartesianGrid strokeDasharray="0" stroke={isDarkMode ? "#374151" : "#e2e8f0"} strokeWidth={1} />
 						{/* Axes */}
 						{horizontal ? (
 							<>
@@ -89,22 +91,25 @@ const BarCard = ({
 													value: xLabel,
 													position: "insideBottom",
 													offset: -12,
+													style: { fontSize: "12px", fill: axisTextColor },
 											  }
 											: undefined
 									}
 									stroke={axisStroke}
+									tick={{ fontSize: 12, fill: axisTextColor }}
 								/>
 								<YAxis
 									type="category"
 									dataKey={xKey}
 									width={70}
-									tick={{ fontSize: 10 }}
+									tick={{ fontSize: 12, fill: axisTextColor }}
 									label={
 										yLabel
 											? {
 													value: yLabel,
 													angle: -90,
 													position: "insideLeft",
+													style: { fontSize: "12px", fill: axisTextColor },
 											  }
 											: undefined
 									}
@@ -116,13 +121,14 @@ const BarCard = ({
 								<XAxis
 									dataKey={xKey}
 									interval={0}
-									tick={{ fontSize: 12 }}
+									tick={{ fontSize: 12, fill: axisTextColor }}
 									label={
 										xLabel
 											? {
 													value: xLabel,
 													position: "insideBottom",
 													offset: -12,
+													style: { fontSize: "12px", fill: axisTextColor },
 											  }
 											: undefined
 									}
@@ -130,13 +136,14 @@ const BarCard = ({
 								/>
 								<YAxis
 									width={28}
-									tick={{ fontSize: 10 }}
+									tick={{ fontSize: 12, fill: axisTextColor }}
 									label={
 										yLabel
 											? {
 													value: yLabel,
 													angle: -90,
 													position: "insideLeft",
+													style: { fontSize: "12px", fill: axisTextColor },
 											  }
 											: undefined
 									}
@@ -155,14 +162,14 @@ const BarCard = ({
 								color: tooltipColor,
 							}}
 						/>
-						{/* Gradient fill */}
+						{/* Solid color fill */}
 						<defs>
 							<linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">
-								<stop offset="5%" stopColor={color} stopOpacity={0.9} />
-								<stop offset="95%" stopColor={color} stopOpacity={0.5} />
+								<stop offset="0%" stopColor={color} stopOpacity={1} />
+								<stop offset="100%" stopColor={color} stopOpacity={0.85} />
 							</linearGradient>
 						</defs>
-						{/* Bars with rounded corners and value labels */}
+						{/* Bars with rounded corners */}
 						<Bar
 							dataKey={barKey}
 							fill={`url(#grad-${color})`}

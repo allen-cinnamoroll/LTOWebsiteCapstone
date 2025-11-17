@@ -44,13 +44,13 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 	const centerLabelBottom = isDarkMode ? "#f9fafb" : "#111827";
 
 	return (
-		<div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full">
-			<div className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
+		<div className="rounded-2xl border border-slate-100 bg-white shadow-sm p-5 flex flex-col h-full">
+			<h2 className="text-sm font-semibold text-slate-800 mb-2">
 				Violation Type Distribution
-			</div>
-			<div className="w-full h-60 flex flex-col items-center">
+			</h2>
+			<div className="w-full h-60 flex flex-col items-center flex-1">
 				{/* Donut */}
-				<div className="w-full h-36">
+				<div className="w-full h-36 flex-1">
 					<ResponsiveContainer width="100%" height="100%">
 						<PieChart>
 							<Tooltip

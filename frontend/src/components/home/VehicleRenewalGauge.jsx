@@ -62,10 +62,10 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
     ].join(" ");
   };
  
-  // Segments: 0-50% red, 50-80% yellow, 80-100% green
+  // Segments: green color scheme
   const segments = [
-    { from: 0, to: 0.5, color: "#ef4444" }, // red (0-50%)
-    { from: 0.5, to: 0.75, color: "#f59e0b" }, // yellow (50-75%)
+    { from: 0, to: 0.5, color: "#86efac" }, // light green (0-50%)
+    { from: 0.5, to: 0.75, color: "#4ade80" }, // medium green (50-75%)
     { from: 0.75, to: 1.0, color: "#22c55e" }, // green (75-100%)
   ];
  
@@ -87,10 +87,10 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
   ];
  
   return (
-    <div className="rounded-xl shadow-md bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 p-4">
-      <div className="text-base font-semibold mb-2 text-gray-900 dark:text-gray-100">
+    <div className="rounded-2xl border border-slate-100 bg-white shadow-sm p-5 flex flex-col">
+      <h2 className="text-sm font-semibold text-slate-800 mb-2">
         {title}
-      </div>
+      </h2>
  
       <div className="w-full aspect-[4/3]">
         <svg
@@ -144,10 +144,10 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
  
       {/* Centered values below arc */}
       <div className="mt-1 flex flex-col items-center">
-        <div className="text-2xl font-bold leading-none text-gray-900 dark:text-gray-100">
+        <div className="text-2xl font-bold leading-none text-slate-900">
           {formatInt(actual)}
         </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-xs text-slate-500">
           Target: {formatInt(safeTarget)}
         </div>
       </div>
