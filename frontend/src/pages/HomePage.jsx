@@ -270,11 +270,7 @@ const HomePage = () => {
               <div className="rounded-xl shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 border border-gray-200 dark:border-gray-700 p-4 h-full overflow-hidden relative">
                 {/* Decorative gradient background */}
                 <div className="absolute top-0 right-0 w-32 h-32 opacity-5 dark:opacity-10 bg-blue-500 rounded-full blur-3xl"></div>
-                {(userData?.role === "0" || userData?.role === "1") ? (
-                  <OnlineUsersPanel />
-                ) : (
-                  <div className="p-4 text-sm text-muted-foreground relative z-10">Active Users (admins only)</div>
-                )}
+                <OnlineUsersPanel />
               </div>
             </div>
             
