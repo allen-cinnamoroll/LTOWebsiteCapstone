@@ -308,7 +308,7 @@ const AccountPage = () => {
                     <Avatar className="h-14 w-14" key={`avatar-${avatarKey}-${userData?.avatar || 'default'}`}>
                       <AvatarImage
                         key={`avatar-img-${avatarKey}-${userData?.avatar || 'default'}`}
-                        src={userData?.avatar || ''}
+                        src={userData?.avatar ? getAvatarURL(userData.avatar) : ''}
                         alt={userData?.email || 'User avatar'}
                         onError={async (e) => {
                           const failedURL = e.target.src;
@@ -516,7 +516,7 @@ const AccountPage = () => {
                   <div className="relative">
                     <Avatar className="h-20 w-20">
                       <AvatarImage
-                        src={previewAvatar || userData?.avatar || ''}
+                        src={previewAvatar ? (previewAvatar.startsWith('data:') ? previewAvatar : getAvatarURL(previewAvatar)) : (userData?.avatar ? getAvatarURL(userData.avatar) : '')}
                         alt={editData.email || userData?.email || 'User avatar'}
                         onError={(e) => {
                           console.error('Avatar preview failed to load:', {

@@ -30,6 +30,7 @@ export const getBackendBaseURL = () => {
 /**
  * Construct a full URL for an avatar image
  * Normalizes paths to ensure proper URL construction
+ * Always uses HTTPS in production to prevent mixed content warnings
  * 
  * @param {string} avatarPath - Relative path from backend root (e.g., 'uploads/avatars/avatar-123.jpg' or '/uploads/avatars/avatar-123.jpg')
  * @param {boolean} addCacheBuster - Whether to add a cache-busting query parameter
@@ -40,14 +41,30 @@ export const getAvatarURL = (avatarPath, addCacheBuster = false) => {
     return '';
   }
   
-  // If already a full URL, handle cache-busting if needed
+  // If already a full URL, normalize it to HTTPS and replace localhost
   if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+    let normalizedURL = avatarPath;
+    
+    // Convert HTTP to HTTPS to prevent mixed content warnings
+    if (normalizedURL.startsWith('http://')) {
+      normalizedURL = normalizedURL.replace('http://', 'https://');
+    }
+    
+    // Replace localhost URLs with production URL
+    if (normalizedURL.includes('localhost:5000') || normalizedURL.includes('localhost:')) {
+      const backendURL = getBackendBaseURL();
+      // Extract the path from the localhost URL
+      const urlObj = new URL(normalizedURL);
+      const path = urlObj.pathname;
+      normalizedURL = `${backendURL}${path}`;
+    }
+    
     if (addCacheBuster) {
       // Remove existing query params and add new cache-buster
-      const urlWithoutQuery = avatarPath.split('?')[0];
+      const urlWithoutQuery = normalizedURL.split('?')[0];
       return `${urlWithoutQuery}?t=${Date.now()}`;
     }
-    return avatarPath;
+    return normalizedURL;
   }
   
   // Get backend base URL
