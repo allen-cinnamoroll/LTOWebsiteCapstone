@@ -1,4 +1,17 @@
 import { body, validationResult } from "express-validator";
+
+const LICENSE_TYPE_OPTIONS = [
+  "SP",
+  "DL",
+  "CL",
+  "PLATE",
+  "SP RECEIPT",
+  "DL RECEIPT",
+  "REFUSE TO SUR.",
+  "DL TEMPORARY",
+  "-",
+  "null"
+];
 //user registration validation rules
 export const registrationValidationRules = () => [
   body("firstName")
@@ -112,14 +125,16 @@ export const validateViolation = [
   // Conditional validation for licenseType (required for confiscated only)
   body("licenseType").custom((value, { req }) => {
     const violationType = req.body.violationType;
+    const isEmpty = value === undefined || value === null || (typeof value === "string" && value.trim() === "");
+    const normalizedValue = typeof value === "string" ? value.trim() : value;
+
     if (violationType === 'confiscated') {
-      if (!value || !["SP", "DL", "CL"].includes(value)) {
-        throw new Error("License type is required and must be SP, DL, or CL for confiscated type");
+      if (isEmpty || !LICENSE_TYPE_OPTIONS.includes(normalizedValue)) {
+        throw new Error("License type is required and must be a valid selection for confiscated type");
       }
-    } else if (violationType === 'alarm') {
-      // For alarm type, licenseType should be null or valid enum
-      if (value && !["SP", "DL", "CL"].includes(value)) {
-        throw new Error("License type must be SP, DL, CL, or null for alarm type");
+    } else {
+      if (!isEmpty && !LICENSE_TYPE_OPTIONS.includes(normalizedValue)) {
+        throw new Error("License type must be a valid selection");
       }
     }
     return true;
