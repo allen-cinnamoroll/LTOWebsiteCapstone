@@ -173,75 +173,6 @@ export default function ViewAccountLogsPage() {
     }
   };
 
-  const getLogTypeBadgeVariant = (logType) => {
-    switch (logType) {
-      case "login":
-        return "default";
-      case "logout":
-        return "secondary";
-      case "register":
-        return "outline";
-      case "update":
-        return "default";
-      case "delete":
-        return "destructive";
-      case "password_change":
-        return "destructive";
-      case "password_reset":
-        return "destructive";
-      case "password_reset_otp_sent":
-        return "outline";
-      case "password_reset_otp_verified":
-        return "secondary";
-      case "otp_verified":
-        return "secondary";
-      case "otp_sent":
-        return "outline";
-      case "otp_reset":
-        return "destructive";
-      case "profile_update":
-        return "default";
-      case "add_driver":
-        return "default";
-      case "add_vehicle":
-        return "default";
-      case "add_accident":
-        return "destructive";
-      case "add_violation":
-        return "destructive";
-      case "update_driver":
-        return "secondary";
-      case "update_vehicle":
-        return "secondary";
-      case "update_accident":
-        return "destructive";
-      case "update_violation":
-        return "destructive";
-      case "delete_driver":
-        return "destructive";
-      case "delete_vehicle":
-        return "destructive";
-      case "delete_accident":
-        return "destructive";
-      case "delete_violation":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
-
-  const getRoleBadgeVariant = (role) => {
-    switch (role) {
-      case "0":
-        return "destructive";
-      case "1":
-        return "default";
-      case "2":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
 
   return (
     <div className="container mx-auto p-4 md:p-6 bg-white dark:bg-black min-h-screen rounded-lg">
@@ -407,9 +338,6 @@ export default function ViewAccountLogsPage() {
                           <TableRow>
                             <TableHead className="min-w-[120px]">Performed By</TableHead>
                             <TableHead className="min-w-[150px]">Timestamp</TableHead>
-                            <TableHead className="min-w-[100px]">User</TableHead>
-                            <TableHead className="min-w-[150px]">Email</TableHead>
-                            <TableHead className="min-w-[80px]">Role</TableHead>
                             <TableHead className="min-w-[100px]">Activity</TableHead>
                             <TableHead className="min-w-[150px]">Details</TableHead>
                             <TableHead className="min-w-[100px]">IP Address</TableHead>
@@ -438,20 +366,9 @@ export default function ViewAccountLogsPage() {
                             {new Date(log.timestamp).toLocaleString()}
                           </TableCell>
                           <TableCell>
-                            {log.userName || "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            {log.email}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={getRoleBadgeVariant(log.role)}>
-                              {roleOptions.find(r => r.value === log.role)?.label || "Unknown"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={getLogTypeBadgeVariant(log.logType)}>
+                            <span className="text-sm">
                               {logTypes.find(t => t.value === log.logType)?.label || log.logType}
-                            </Badge>
+                            </span>
                           </TableCell>
                           <TableCell>
                             <span className="text-sm text-muted-foreground">
@@ -466,7 +383,22 @@ export default function ViewAccountLogsPage() {
                             </span>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={log.status === "success" ? "default" : "destructive"}>
+                            <Badge 
+                              variant={
+                                log.status === "success" 
+                                  ? "default" 
+                                  : log.status === "pending" 
+                                  ? "secondary" 
+                                  : "destructive"
+                              }
+                              className={
+                                log.status === "success" 
+                                  ? "bg-green-500 hover:bg-green-600 text-white" 
+                                  : log.status === "pending" 
+                                  ? "bg-orange-500 hover:bg-orange-600 text-white" 
+                                  : "bg-red-500 hover:bg-red-600 text-white"
+                              }
+                            >
                               {log.status}
                             </Badge>
                           </TableCell>
