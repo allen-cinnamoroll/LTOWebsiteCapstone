@@ -67,12 +67,10 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
       });
       
       if (hasData) {
-        // Save with current connection status
-        const isOffline = !navigator.onLine;
-        saveFormData(FORM_STORAGE_KEY, formValues, isOffline);
+        saveFormData(FORM_STORAGE_KEY, formValues);
       } else {
-        // Clear saved data if form is empty (only if online)
-        clearFormData(FORM_STORAGE_KEY, false);
+        // Clear saved data if form is empty
+        clearFormData(FORM_STORAGE_KEY);
       }
     }
   }, [formValues, open, submitting]);
@@ -113,8 +111,8 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
           description: date,
         });
 
-        // Clear saved form data (force clear on successful submission)
-        clearFormData(FORM_STORAGE_KEY, true);
+        // Clear saved form data
+        clearFormData(FORM_STORAGE_KEY);
 
         // Reset form
         form.reset({
@@ -153,9 +151,8 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
-      // Only clear saved form data if internet is connected
-      // If internet was disconnected, preserve the data
-      clearFormData(FORM_STORAGE_KEY, false);
+      // Clear saved form data when closing modal (user clicked cancel or X)
+      clearFormData(FORM_STORAGE_KEY);
       
       // Reset form when closing modal
       form.reset({
@@ -216,8 +213,8 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
           engineNo: initialValues.engineNo || "",
           fileNo: initialValues.fileNo || "",
         });
-        // Clear saved data when using initialValues (force clear)
-        clearFormData(FORM_STORAGE_KEY, true);
+        // Clear saved data when using initialValues
+        clearFormData(FORM_STORAGE_KEY);
       } else if (searchTerm && firstName) {
         // Use parsed name from searchTerm
         form.reset({
@@ -236,8 +233,8 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
           engineNo: "",
           fileNo: "",
         });
-        // Clear saved data when using searchTerm (force clear)
-        clearFormData(FORM_STORAGE_KEY, true);
+        // Clear saved data when using searchTerm
+        clearFormData(FORM_STORAGE_KEY);
       } else if (savedData) {
         // Restore saved form data
         form.reset(savedData);

@@ -59,21 +59,14 @@ export const deserializeFormData = (jsonString) => {
 };
 
 /**
- * Save form data to localStorage with connection status
+ * Save form data to localStorage
  * @param {string} key - localStorage key
  * @param {Object} formData - Form data object
- * @param {boolean} isOffline - Whether the internet is currently disconnected
  */
-export const saveFormData = (key, formData, isOffline = false) => {
+export const saveFormData = (key, formData) => {
   try {
     const serialized = serializeFormData(formData);
-    // Store form data with metadata about connection status
-    const dataWithMetadata = {
-      formData: serialized,
-      wasOffline: isOffline || !navigator.onLine,
-      timestamp: Date.now()
-    };
-    localStorage.setItem(key, JSON.stringify(dataWithMetadata));
+    localStorage.setItem(key, serialized);
   } catch (error) {
     console.error(`Error saving form data to ${key}:`, error);
   }
@@ -87,20 +80,6 @@ export const saveFormData = (key, formData, isOffline = false) => {
 export const loadFormData = (key) => {
   try {
     const stored = localStorage.getItem(key);
-    if (!stored) return null;
-    
-    // Check if it's the new format with metadata
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed.formData && parsed.wasOffline !== undefined) {
-        // New format with metadata
-        return deserializeFormData(parsed.formData);
-      }
-    } catch (e) {
-      // Old format, try to parse directly
-    }
-    
-    // Old format or direct serialization
     return deserializeFormData(stored);
   } catch (error) {
     console.error(`Error loading form data from ${key}:`, error);
@@ -109,47 +88,11 @@ export const loadFormData = (key) => {
 };
 
 /**
- * Check if form data was saved while offline
- * @param {string} key - localStorage key
- * @returns {boolean} - True if form was saved while offline
- */
-export const wasFormSavedOffline = (key) => {
-  try {
-    const stored = localStorage.getItem(key);
-    if (!stored) return false;
-    
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed.wasOffline !== undefined) {
-        return parsed.wasOffline === true;
-      }
-    } catch (e) {
-      // Old format, assume it was saved online
-    }
-    
-    return false;
-  } catch (error) {
-    return false;
-  }
-};
-
-/**
  * Clear form data from localStorage
  * @param {string} key - localStorage key
- * @param {boolean} force - If true, clear even if form was saved offline
  */
-export const clearFormData = (key, force = false) => {
+export const clearFormData = (key) => {
   try {
-    // If force is false, check if form was saved while offline
-    if (!force) {
-      const wasOffline = wasFormSavedOffline(key);
-      // If form was saved while offline, preserve it (don't clear)
-      // This ensures data is preserved even after connection returns
-      if (wasOffline) {
-        return; // Don't clear if it was saved offline
-      }
-    }
-    
     localStorage.removeItem(key);
   } catch (error) {
     console.error(`Error clearing form data from ${key}:`, error);

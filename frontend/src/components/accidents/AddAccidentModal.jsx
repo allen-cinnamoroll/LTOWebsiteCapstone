@@ -75,12 +75,10 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
       });
       
       if (hasData) {
-        // Save with current connection status
-        const isOffline = !navigator.onLine;
-        saveFormData(FORM_STORAGE_KEY, formValues, isOffline);
+        saveFormData(FORM_STORAGE_KEY, formValues);
       } else {
-        // Clear saved data if form is empty (only if online)
-        clearFormData(FORM_STORAGE_KEY, false);
+        // Clear saved data if form is empty
+        clearFormData(FORM_STORAGE_KEY);
       }
     }
   }, [formValues, open, submitting]);
@@ -133,8 +131,8 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
       if (data.success) {
         toast.success("Incident has been added", { description: date });
 
-        // Clear saved form data (force clear on successful submission)
-        clearFormData(FORM_STORAGE_KEY, true);
+        // Clear saved form data
+        clearFormData(FORM_STORAGE_KEY);
 
         // Reset form
         form.reset({
@@ -181,9 +179,8 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
-      // Only clear saved form data if internet is connected
-      // If internet was disconnected, preserve the data
-      clearFormData(FORM_STORAGE_KEY, false);
+      // Clear saved form data when closing modal (user clicked cancel or X)
+      clearFormData(FORM_STORAGE_KEY);
       
       // Reset form when closing modal
       form.reset({
