@@ -1,4 +1,5 @@
 import ViolationModel from "../model/ViolationModel.js";
+import UserModel from "../model/UserModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 
 // Create a new violation (Only Admin or Superadmin)
@@ -37,22 +38,29 @@ export const createViolation = async (req, res) => {
         const savedViolation = await violation.save();
 
         // Log the activity
-        if (req.user) {
-            await logUserActivity({
-                userId: req.user._id,
-                userName: `${req.user.firstName} ${req.user.lastName}`,
-                email: req.user.email,
-                role: req.user.role,
-                logType: 'add_violation',
-                ipAddress: getClientIP(req),
-                userAgent: getUserAgent(req),
-                status: 'success',
-                details: `Added violation: ${finalTopNo} (Driver: ${firstName} ${lastName}, Vehicle: ${plateNo})`,
-                actorId: req.user._id,
-                actorName: `${req.user.firstName} ${req.user.lastName}`,
-                actorEmail: req.user.email,
-                actorRole: req.user.role
-            });
+        if (req.user && req.user.userId) {
+            // Fetch user details to ensure we have complete information
+            const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+            
+            if (actorUser) {
+                const actorName = `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim();
+                
+                await logUserActivity({
+                    userId: actorUser._id,
+                    userName: actorName,
+                    email: actorUser.email,
+                    role: actorUser.role,
+                    logType: 'add_violation',
+                    ipAddress: getClientIP(req),
+                    userAgent: getUserAgent(req),
+                    status: 'success',
+                    details: `Added violation: ${finalTopNo} (Driver: ${firstName} ${lastName}, Vehicle: ${plateNo})`,
+                    actorId: actorUser._id,
+                    actorName: actorName,
+                    actorEmail: actorUser.email,
+                    actorRole: actorUser.role
+                });
+            }
         }
 
         // Populate and format the response
@@ -188,22 +196,29 @@ export const updateViolation = async (req, res) => {
         }
 
         // Log the activity
-        if (req.user) {
-            await logUserActivity({
-                userId: req.user._id,
-                userName: `${req.user.firstName} ${req.user.lastName}`,
-                email: req.user.email,
-                role: req.user.role,
-                logType: 'update_violation',
-                ipAddress: getClientIP(req),
-                userAgent: getUserAgent(req),
-                status: 'success',
-                details: `Updated violation: ${violation.topNo} (Driver: ${violation.firstName} ${violation.lastName}, Vehicle: ${violation.plateNo})`,
-                actorId: req.user._id,
-                actorName: `${req.user.firstName} ${req.user.lastName}`,
-                actorEmail: req.user.email,
-                actorRole: req.user.role
-            });
+        if (req.user && req.user.userId) {
+            // Fetch user details to ensure we have complete information
+            const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+            
+            if (actorUser) {
+                const actorName = `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim();
+                
+                await logUserActivity({
+                    userId: actorUser._id,
+                    userName: actorName,
+                    email: actorUser.email,
+                    role: actorUser.role,
+                    logType: 'update_violation',
+                    ipAddress: getClientIP(req),
+                    userAgent: getUserAgent(req),
+                    status: 'success',
+                    details: `Updated violation: ${violation.topNo} (Driver: ${violation.firstName} ${violation.lastName}, Vehicle: ${violation.plateNo})`,
+                    actorId: actorUser._id,
+                    actorName: actorName,
+                    actorEmail: actorUser.email,
+                    actorRole: actorUser.role
+                });
+            }
         }
 
         // Transform the response to include formatted createdBy/updatedBy
@@ -615,22 +630,29 @@ export const deleteViolation = async (req, res) => {
         }
 
         // Log the activity before deleting
-        if (req.user) {
-            await logUserActivity({
-                userId: req.user._id,
-                userName: `${req.user.firstName} ${req.user.lastName}`,
-                email: req.user.email,
-                role: req.user.role,
-                logType: 'delete_violation',
-                ipAddress: getClientIP(req),
-                userAgent: getUserAgent(req),
-                status: 'success',
-                details: `Deleted violation: ${violation.topNo} (Driver: ${violation.firstName} ${violation.lastName}, Vehicle: ${violation.plateNo})`,
-                actorId: req.user._id,
-                actorName: `${req.user.firstName} ${req.user.lastName}`,
-                actorEmail: req.user.email,
-                actorRole: req.user.role
-            });
+        if (req.user && req.user.userId) {
+            // Fetch user details to ensure we have complete information
+            const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+            
+            if (actorUser) {
+                const actorName = `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim();
+                
+                await logUserActivity({
+                    userId: actorUser._id,
+                    userName: actorName,
+                    email: actorUser.email,
+                    role: actorUser.role,
+                    logType: 'delete_violation',
+                    ipAddress: getClientIP(req),
+                    userAgent: getUserAgent(req),
+                    status: 'success',
+                    details: `Deleted violation: ${violation.topNo} (Driver: ${violation.firstName} ${violation.lastName}, Vehicle: ${violation.plateNo})`,
+                    actorId: actorUser._id,
+                    actorName: actorName,
+                    actorEmail: actorUser.email,
+                    actorRole: actorUser.role
+                });
+            }
         }
 
         await ViolationModel.findByIdAndDelete(req.params.id);
