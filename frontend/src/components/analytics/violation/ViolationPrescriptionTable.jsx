@@ -600,9 +600,9 @@ export function ViolationPrescriptionTable({ loading }) {
                       </span>
                     </td>
                     <td className="py-4 px-4">
-                      <p className="font-semibold text-slate-900 dark:text-white mb-1">SP Registration Awareness</p>
+                      <p className="font-semibold text-slate-900 dark:text-white mb-1">SP Registration Seminars</p>
                       <p className="text-xs text-slate-600 dark:text-slate-400">
-                        Educate drivers during weekly SP registration/renewal sessions about common violations and compliance requirements.
+                        Educate drivers during weekly SP registration/renewal sessions about common violations and compliance requirements. Highlight and discuss the most dominant violations.  
                       </p>
                     </td>
                     <td className="py-4 px-4">
