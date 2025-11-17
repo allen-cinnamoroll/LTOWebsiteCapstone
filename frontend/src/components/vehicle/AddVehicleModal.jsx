@@ -160,23 +160,8 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
-      // Clear saved form data when closing modal (user clicked cancel or X)
-      clearFormData(FORM_STORAGE_KEY);
-      
-      // Reset form when closing modal
-      form.reset({
-        plateNo: "",
-        fileNo: "",
-        engineNo: "",
-        chassisNo: "",
-        make: "",
-        bodyType: "",
-        color: "",
-        classification: undefined,
-        dateOfRenewal: undefined,
-        vehicleStatusType: "",
-        driver: "",
-      });
+      // Don't clear form data when closing - it will be restored next time
+      // Only reset if user explicitly wants to discard (we'll keep the saved data)
     }
     onOpenChange(isOpen);
   };

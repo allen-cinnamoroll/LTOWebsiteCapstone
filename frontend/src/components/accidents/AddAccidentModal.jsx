@@ -179,35 +179,8 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
-      // Clear saved form data when closing modal (user clicked cancel or X)
-      clearFormData(FORM_STORAGE_KEY);
-      
-      // Reset form when closing modal
-      form.reset({
-        blotterNo: "",
-        vehiclePlateNo: "",
-        vehicleMCPlateNo: "",
-        vehicleChassisNo: "",
-        suspect: "",
-        stageOfFelony: "",
-        offense: "",
-        offenseType: "",
-        narrative: "",
-        caseStatus: "",
-        region: "",
-        province: "",
-        municipality: "",
-        barangay: "",
-        street: "",
-        lat: undefined,
-        lng: undefined,
-        dateEncoded: undefined,
-        dateReported: undefined,
-        timeReported: "",
-        dateCommited: undefined,
-        timeCommited: "",
-        incidentType: "",
-      });
+      // Don't clear form data when closing - it will be restored next time
+      // Only reset if user explicitly wants to discard (we'll keep the saved data)
     }
     onOpenChange(isOpen);
   };

@@ -151,9 +151,6 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
-      // Clear saved form data when closing modal (user clicked cancel or X)
-      clearFormData(FORM_STORAGE_KEY);
-      
       // Reset form when closing modal
       form.reset({
         topNo: "",
@@ -171,6 +168,7 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
         engineNo: "",
         fileNo: "",
       });
+
     }
     onOpenChange(isOpen);
   };
