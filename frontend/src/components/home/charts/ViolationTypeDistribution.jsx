@@ -85,14 +85,14 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 							Violation Categories
 						</div>
 						<p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
-							Distribution of violation types (Alarm, Confiscated, Impounded)
+							Distribution of violation types
 						</p>
 					</div>
 				</div>
 			</div>
-			<div className="w-full h-60 flex flex-col items-center relative z-10">
+			<div className="w-full h-64 flex flex-col items-center relative z-10">
 				{/* Donut */}
-				<div className="w-full h-36">
+				<div className="w-full h-44">
 					<ResponsiveContainer width="100%" height="100%">
 						<PieChart key={isDarkMode ? 'dark' : 'light'}>
 							<Tooltip
@@ -131,7 +131,7 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 													y={viewBox.cy - 8}
 													textAnchor="middle"
 													fontSize="9"
-													fill={centerLabelTop}
+													fill="#000000"
 													fontWeight="600"
 													style={{ 
 														userSelect: 'none',
@@ -148,7 +148,7 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 													textAnchor="middle"
 													fontSize="24"
 													fontWeight="800"
-													fill={centerLabelMiddle}
+													fill="#000000"
 													style={{ 
 														filter: isDarkMode 
 															? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
@@ -167,28 +167,60 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 						</PieChart>
 					</ResponsiveContainer>
 				</div>
-				{/* Legend below */}
-				<div className="w-full max-w-sm mt-3 space-y-2">
-					{data.map((d, i) => {
-						const total = data.reduce((s, x) => s + (x.value || 0), 0) || 1;
-						const pct = Math.round(((d.value || 0) / total) * 1000) / 10;
-						return (
-							<div
-								key={d.type}
-								className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-2 bg-white dark:bg-neutral-900/80"
-							>
-								<div className="flex items-center gap-2">
-									<span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[i % colors.length] }}></span>
-									<span className="text-sm capitalize text-gray-800 dark:text-gray-100">
-										{d.type}
-									</span>
-								</div>
-								<div className="text-sm text-gray-600 dark:text-gray-300">
-									{(d.value || 0).toLocaleString()} · {pct}%
-								</div>
-							</div>
-						);
-					})}
+				{/* Legend below - Custom layout: Alarm and Confiscated on first row, Impounded on second row */}
+				<div className="w-full max-w-sm mt-2 space-y-1.5">
+					{/* First row: Alarm and Confiscated */}
+					<div className="flex items-center gap-2 justify-center">
+						{data
+							.filter((d) => d.type.toLowerCase() === 'alarm' || d.type.toLowerCase() === 'confiscated')
+							.map((d, idx) => {
+								const originalIndex = data.findIndex((item) => item.type === d.type);
+								const total = data.reduce((s, x) => s + (x.value || 0), 0) || 1;
+								const pct = Math.round(((d.value || 0) / total) * 1000) / 10;
+								return (
+									<div
+										key={d.type}
+										className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1 bg-white dark:bg-neutral-900/80"
+									>
+										<div className="flex items-center gap-1.5">
+											<span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colors[originalIndex % colors.length] }}></span>
+											<span className="text-xs capitalize text-gray-800 dark:text-gray-100">
+												{d.type}
+											</span>
+										</div>
+										<div className="text-xs text-gray-600 dark:text-gray-300 ml-2">
+											{(d.value || 0).toLocaleString()} · {pct}%
+										</div>
+									</div>
+								);
+							})}
+					</div>
+					{/* Second row: Impounded */}
+					<div className="flex items-center justify-center">
+						{data
+							.filter((d) => d.type.toLowerCase() === 'impounded')
+							.map((d) => {
+								const originalIndex = data.findIndex((item) => item.type === d.type);
+								const total = data.reduce((s, x) => s + (x.value || 0), 0) || 1;
+								const pct = Math.round(((d.value || 0) / total) * 1000) / 10;
+								return (
+									<div
+										key={d.type}
+										className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1 bg-white dark:bg-neutral-900/80"
+									>
+										<div className="flex items-center gap-1.5">
+											<span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: colors[originalIndex % colors.length] }}></span>
+											<span className="text-xs capitalize text-gray-800 dark:text-gray-100">
+												{d.type}
+											</span>
+										</div>
+										<div className="text-xs text-gray-600 dark:text-gray-300 ml-2">
+											{(d.value || 0).toLocaleString()} · {pct}%
+										</div>
+									</div>
+								);
+							})}
+					</div>
 				</div>
 			</div>
 		</div>
