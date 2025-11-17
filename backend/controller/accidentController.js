@@ -54,18 +54,10 @@ export const createAccident = async (req, res) => {
           const vehicleInfo = vehiclePlateNo || vehicleMCPlateNo || 'N/A';
           await logUserActivity({
             userId: user._id,
-            userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-            email: user.email,
-            role: user.role,
             logType: 'add_accident',
             ipAddress: getClientIP(req),
-            userAgent: getUserAgent(req),
             status: 'success',
-            details: `Accident Added Successfully (Blotter No: ${finalBlotterNo})`,
-            actorId: user._id,
-            actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-            actorEmail: user.email,
-            actorRole: user.role
+            details: `Accident Added Successfully (Blotter No: ${finalBlotterNo})`
           });
         }
       } catch (logError) {
@@ -130,18 +122,10 @@ export const updateAccident = async (req, res) => {
         if (user) {
           await logUserActivity({
             userId: user._id,
-            userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-            email: user.email,
-            role: user.role,
             logType: 'update_accident',
             ipAddress: getClientIP(req),
-            userAgent: getUserAgent(req),
             status: 'success',
-            details: `Accident Updated Successfully (Blotter No: ${accident.blotterNo})`,
-            actorId: user._id,
-            actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-            actorEmail: user.email,
-            actorRole: user.role
+            details: `Accident Updated Successfully (Blotter No: ${accident.blotterNo})`
           });
         }
       } catch (logError) {
@@ -178,18 +162,10 @@ export const deleteAccident = async (req, res) => {
         if (user) {
           await logUserActivity({
             userId: user._id,
-            userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-            email: user.email,
-            role: user.role,
             logType: 'delete_accident',
             ipAddress: getClientIP(req),
-            userAgent: getUserAgent(req),
             status: 'success',
-            details: `Accident Deleted Successfully (Blotter No: ${accident.blotterNo})`,
-            actorId: user._id,
-            actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-            actorEmail: user.email,
-            actorRole: user.role
+            details: `Accident Deleted Successfully (Blotter No: ${accident.blotterNo})`
           });
         }
       } catch (logError) {

@@ -4,18 +4,10 @@ import UserLog from '../model/UserLogModel.js';
  * Log user activity
  * @param {Object} logData - Log data object
  * @param {string} logData.userId - User ID (target user)
- * @param {string} logData.userName - User's full name (target user)
- * @param {string} logData.email - User's email (target user)
- * @param {string} logData.role - User's role (target user)
  * @param {string} logData.logType - Type of activity (login, register, etc.)
  * @param {string} logData.ipAddress - User's IP address
- * @param {string} logData.userAgent - User's browser/device info
  * @param {string} logData.status - Activity status (success, failed, pending)
  * @param {string} logData.details - Additional details
- * @param {string} logData.actorId - Actor's user ID (who performed the action)
- * @param {string} logData.actorName - Actor's full name
- * @param {string} logData.actorEmail - Actor's email
- * @param {string} logData.actorRole - Actor's role
  */
 const logUserActivity = async (logData) => {
   try {
@@ -23,25 +15,13 @@ const logUserActivity = async (logData) => {
     if (!logData.userId) {
       throw new Error('userId is required for user activity logging');
     }
-    
-    if (!logData.userName || !logData.email || !logData.role) {
-      throw new Error('userName, email, and role are required for user activity logging');
-    }
 
     const log = new UserLog({
       userId: logData.userId,
-      userName: logData.userName,
-      email: logData.email,
-      role: logData.role,
       logType: logData.logType,
       ipAddress: logData.ipAddress,
-      userAgent: logData.userAgent,
       status: logData.status,
-      details: logData.details || '',
-      actorId: logData.actorId,
-      actorName: logData.actorName,
-      actorEmail: logData.actorEmail,
-      actorRole: logData.actorRole
+      details: logData.details || ''
     });
 
     await log.save();

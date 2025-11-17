@@ -44,18 +44,11 @@ export const resetAllUsersOTPStatus = async () => {
       try {
         await logUserActivity({
           userId: user._id,
-          userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-          email: user.email,
-          role: user.role,
           logType: "otp_reset",
           ipAddress: "system",
-          userAgent: "scheduler",
           status: "success",
           details: "OTP verification status reset due to weekly schedule",
-          actorId: "system",
-          actorName: "System Scheduler",
-          actorEmail: "system@lto.com",
-          actorRole: "0"
+          actorId: user._id // System action attributed to the user themselves
         });
       } catch (logError) {
         console.error(`Error logging OTP reset for user ${user.email}:`, logError);

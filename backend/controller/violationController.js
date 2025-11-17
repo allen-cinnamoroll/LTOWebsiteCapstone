@@ -47,18 +47,10 @@ export const createViolation = async (req, res) => {
                 
                 await logUserActivity({
                     userId: actorUser._id,
-                    userName: actorName,
-                    email: actorUser.email,
-                    role: actorUser.role,
                     logType: 'add_violation',
                     ipAddress: getClientIP(req),
-                    userAgent: getUserAgent(req),
                     status: 'success',
-                    details: `Violation added successfully (Driver: ${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}${suffix ? ' ' + suffix : ''})`,
-                    actorId: actorUser._id,
-                    actorName: actorName,
-                    actorEmail: actorUser.email,
-                    actorRole: actorUser.role
+                    details: `Violation added successfully (Driver: ${firstName} ${middleInitial ? middleInitial + ' ' : ''}${lastName}${suffix ? ' ' + suffix : ''})`
                 });
             }
         }
@@ -205,18 +197,10 @@ export const updateViolation = async (req, res) => {
                 
                 await logUserActivity({
                     userId: actorUser._id,
-                    userName: actorName,
-                    email: actorUser.email,
-                    role: actorUser.role,
                     logType: 'update_violation',
                     ipAddress: getClientIP(req),
-                    userAgent: getUserAgent(req),
                     status: 'success',
-                    details: `Violation updated successfully (Driver: ${violation.firstName} ${violation.middleInitial ? violation.middleInitial + ' ' : ''}${violation.lastName}${violation.suffix ? ' ' + violation.suffix : ''})`,
-                    actorId: actorUser._id,
-                    actorName: actorName,
-                    actorEmail: actorUser.email,
-                    actorRole: actorUser.role
+                    details: `Violation updated successfully (Driver: ${violation.firstName} ${violation.middleInitial ? violation.middleInitial + ' ' : ''}${violation.lastName}${violation.suffix ? ' ' + violation.suffix : ''})`
                 });
             }
         }
@@ -639,18 +623,10 @@ export const deleteViolation = async (req, res) => {
                 
                 await logUserActivity({
                     userId: actorUser._id,
-                    userName: actorName,
-                    email: actorUser.email,
-                    role: actorUser.role,
                     logType: 'delete_violation',
                     ipAddress: getClientIP(req),
-                    userAgent: getUserAgent(req),
                     status: 'success',
-                    details: `Violation deleted successfully (Driver: ${violation.firstName} ${violation.middleInitial ? violation.middleInitial + ' ' : ''}${violation.lastName}${violation.suffix ? ' ' + violation.suffix : ''})`,
-                    actorId: actorUser._id,
-                    actorName: actorName,
-                    actorEmail: actorUser.email,
-                    actorRole: actorUser.role
+                    details: `Violation deleted successfully (Driver: ${violation.firstName} ${violation.middleInitial ? violation.middleInitial + ' ' : ''}${violation.lastName}${violation.suffix ? ' ' + violation.suffix : ''})`
                 });
             }
         }

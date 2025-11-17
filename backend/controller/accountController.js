@@ -100,18 +100,10 @@ export const updateProfile = async (req, res) => {
     // Log the profile update activity
     await logUserActivity({
       userId: updatedUser._id,
-      userName: `${updatedUser.firstName} ${updatedUser.middleName ? updatedUser.middleName + ' ' : ''}${updatedUser.lastName}`.trim(),
-      email: updatedUser.email,
-      role: updatedUser.role,
       logType: "profile_update",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
-      details: `Profile updated successfully${req.file ? ' with new avatar' : ''}`,
-      actorId: updatedUser._id,
-      actorName: `${updatedUser.firstName} ${updatedUser.middleName ? updatedUser.middleName + ' ' : ''}${updatedUser.lastName}`.trim(),
-      actorEmail: updatedUser.email,
-      actorRole: updatedUser.role
+      details: `Profile updated successfully${req.file ? ' with new avatar' : ''}`
     });
 
     // Return updated user data
@@ -128,18 +120,10 @@ export const updateProfile = async (req, res) => {
     try {
       await logUserActivity({
         userId: req.user.userId,
-        userName: req.user.userName || 'Unknown',
-        email: req.user.email || 'Unknown',
-        role: req.user.role || 'Unknown',
         logType: "profile_update",
         ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
         status: "failed",
-        details: `Profile update failed: ${error.message}`,
-        actorId: req.user.userId,
-        actorName: req.user.userName || 'Unknown',
-        actorEmail: req.user.email || 'Unknown',
-        actorRole: req.user.role || 'Unknown'
+        details: `Profile update failed: ${error.message}`
       });
     } catch (logError) {
       console.error("Failed to log profile update error:", logError);

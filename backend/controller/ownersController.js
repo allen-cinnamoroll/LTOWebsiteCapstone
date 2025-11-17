@@ -80,18 +80,10 @@ export const createDriver = async (req, res) => {
       if (fullUser) {
         await logUserActivity({
           userId: fullUser._id,
-          userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
-          email: fullUser.email,
-          role: fullUser.role,
           logType: 'add_driver',
           ipAddress: getClientIP(req),
-          userAgent: getUserAgent(req),
           status: 'success',
-          details: `Added driver: ${req.body.ownerRepresentativeName} (License: ${driversLicenseNumber || 'N/A'})`,
-          actorId: fullUser._id,
-          actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
-          actorEmail: fullUser.email,
-          actorRole: fullUser.role
+          details: `Added driver: ${req.body.ownerRepresentativeName} (License: ${driversLicenseNumber || 'N/A'})`
         });
       }
     }
@@ -244,18 +236,10 @@ export const updateDriver = async (req, res) => {
       if (fullUser) {
         await logUserActivity({
           userId: fullUser._id,
-          userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
-          email: fullUser.email,
-          role: fullUser.role,
           logType: 'update_driver',
           ipAddress: getClientIP(req),
-          userAgent: getUserAgent(req),
           status: 'success',
-          details: `Updated driver: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`,
-          actorId: fullUser._id,
-          actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
-          actorEmail: fullUser.email,
-          actorRole: fullUser.role
+          details: `Updated driver: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
         });
       }
     }
@@ -291,21 +275,13 @@ export const deleteDriver = async (req, res) => {
       // Fetch full user details from database since JWT only contains userId, role, email
       const fullUser = await UserModel.findById(req.user.userId);
       if (fullUser) {
-        await logUserActivity({
-          userId: fullUser._id,
-          userName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
-          email: fullUser.email,
-          role: fullUser.role,
-          logType: 'delete_driver',
-          ipAddress: getClientIP(req),
-          userAgent: getUserAgent(req),
-          status: 'success',
-          details: `Deleted driver: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`,
-          actorId: fullUser._id,
-          actorName: `${fullUser.firstName} ${fullUser.middleName ? fullUser.middleName + ' ' : ''}${fullUser.lastName}`.trim(),
-          actorEmail: fullUser.email,
-          actorRole: fullUser.role
-        });
+          await logUserActivity({
+            userId: fullUser._id,
+            logType: 'delete_driver',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Deleted driver: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
+          });
       }
     }
 

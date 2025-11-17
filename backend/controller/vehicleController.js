@@ -109,18 +109,10 @@ export const createVehicle = async (req, res) => {
       if (actorUser) {
         await logUserActivity({
           userId: actorUser._id,
-          userName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
-          email: actorUser.email,
-          role: actorUser.role,
           logType: 'add_vehicle',
           ipAddress: getClientIP(req),
-          userAgent: getUserAgent(req),
           status: 'success',
-          details: `Vehicle Added Successfully (File No: ${fileNo})`,
-          actorId: actorUser._id,
-          actorName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
-          actorEmail: actorUser.email,
-          actorRole: actorUser.role
+          details: `Vehicle Added Successfully (File No: ${fileNo})`
         });
       }
     }
@@ -436,18 +428,10 @@ export const updateVehicle = async (req, res) => {
       if (actorUser) {
         await logUserActivity({
           userId: actorUser._id,
-          userName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
-          email: actorUser.email,
-          role: actorUser.role,
           logType: 'update_vehicle',
           ipAddress: getClientIP(req),
-          userAgent: getUserAgent(req),
           status: 'success',
-          details: `Vehicle Updated Successfully (File No: ${vehicle.fileNo})`,
-          actorId: actorUser._id,
-          actorName: `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim(),
-          actorEmail: actorUser.email,
-          actorRole: actorUser.role
+          details: `Vehicle Updated Successfully (File No: ${vehicle.fileNo})`
         });
       }
     }

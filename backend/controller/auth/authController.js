@@ -43,18 +43,11 @@ export const register = async (req, res) => {
     // Log the registration activity
     await logUserActivity({
       userId: newUser._id,
-      userName: `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`.trim(),
-      email: email,
-      role: role || "2",
       logType: "register",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
       details: `User registered with role: ${role || "2"}`,
-      actorId: newUser._id, // Same user for self-registration
-      actorName: `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`.trim(),
-      actorEmail: email,
-      actorRole: role || "2"
+      actorId: newUser._id
     });
 
     res.status(200).json({
@@ -145,18 +138,11 @@ export const login = async (req, res) => {
       // Log the successful login activity
       await logUserActivity({
         userId: user._id,
-        userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        email: user.email,
-        role: user.role,
         logType: "login",
         ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
         status: "success",
         details: "Superadmin direct login (no OTP required)",
-        actorId: user._id, // Same user for self-login
-        actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        actorEmail: user.email,
-        actorRole: user.role
+        actorId: user._id
       });
 
       return res.status(200).json({
@@ -196,14 +182,11 @@ export const login = async (req, res) => {
         // Log failed OTP send (don't await to avoid blocking)
         logUserActivity({
           userId: user._id,
-          userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-          email: user.email,
-          role: user.role,
           logType: "otp_sent",
           ipAddress: getClientIP(req),
-          userAgent: getUserAgent(req),
           status: "failed",
-          details: "Failed to send OTP email - email service not configured or error occurred"
+          details: "Failed to send OTP email - email service not configured or error occurred",
+          actorId: user._id
         }).catch(err => console.error('Error logging failed OTP send:', err));
 
         return res.status(500).json({
@@ -215,18 +198,11 @@ export const login = async (req, res) => {
       // Log successful OTP send (don't await to avoid blocking response)
       logUserActivity({
         userId: user._id,
-        userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        email: user.email,
-        role: user.role,
         logType: "otp_sent",
         ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
         status: "success",
         details: "OTP sent to email for login verification",
-        actorId: user._id, // Same user for self-OTP request
-        actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        actorEmail: user.email,
-        actorRole: user.role
+        actorId: user._id
       }).catch(err => console.error('Error logging successful OTP send:', err));
 
       // Generate JWT token with isOtpVerified: false for users who need OTP
@@ -276,18 +252,11 @@ export const login = async (req, res) => {
       // Log the successful login activity
       await logUserActivity({
         userId: user._id,
-        userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        email: user.email,
-        role: user.role,
         logType: "login",
         ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
         status: "success",
         details: "Direct login (OTP already verified)",
-        actorId: user._id, // Same user for self-login
-        actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        actorEmail: user.email,
-        actorRole: user.role
+        actorId: user._id
       });
 
       // Generate JWT token with isOtpVerified: true for already verified users
@@ -445,34 +414,20 @@ export const verifyOTP = async (req, res) => {
     // Log the successful OTP verification and login
     await logUserActivity({
       userId: user._id,
-      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      email: user.email,
-      role: user.role,
       logType: "otp_verified",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
       details: "OTP verified successfully",
-      actorId: user._id, // Same user for self-OTP verification
-      actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      actorEmail: user.email,
-      actorRole: user.role
+      actorId: user._id
     });
 
     await logUserActivity({
       userId: user._id,
-      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      email: user.email,
-      role: user.role,
       logType: "login",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
       details: "Login successful after OTP verification",
-      actorId: user._id, // Same user for self-login
-      actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      actorEmail: user.email,
-      actorRole: user.role
+      actorId: user._id
     });
 
     res.status(200).json({
@@ -570,18 +525,11 @@ export const logout = async (req, res) => {
       // Log the logout activity
       await logUserActivity({
         userId: user._id,
-        userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        email: user.email,
-        role: user.role,
         logType: "logout",
         ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
         status: "success",
         details: "User logged out successfully",
-        actorId: user._id, // Same user for self-logout
-        actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        actorEmail: user.email,
-        actorRole: user.role
+        actorId: user._id
       });
     }
 
@@ -669,14 +617,11 @@ export const forgotPassword = async (req, res) => {
       // Log failed password reset OTP send
       await logUserActivity({
         userId: user._id,
-        userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-        email: user.email,
-        role: user.role,
         logType: "password_reset_otp_sent",
         ipAddress: getClientIP(req),
-        userAgent: getUserAgent(req),
         status: "failed",
-        details: "Failed to send password reset OTP email"
+        details: "Failed to send password reset OTP email",
+        actorId: user._id
       });
 
       return res.status(500).json({
@@ -688,18 +633,11 @@ export const forgotPassword = async (req, res) => {
     // Log successful password reset OTP send
     await logUserActivity({
       userId: user._id,
-      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      email: user.email,
-      role: user.role,
       logType: "password_reset_otp_sent",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
       details: "Password reset OTP sent to email",
-      actorId: user._id,
-      actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      actorEmail: user.email,
-      actorRole: user.role
+      actorId: user._id
     });
 
     res.status(200).json({
@@ -798,18 +736,11 @@ export const resetPassword = async (req, res) => {
     // Log successful password reset
     await logUserActivity({
       userId: user._id,
-      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      email: user.email,
-      role: user.role,
       logType: "password_reset",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
       details: "Password reset successfully",
-      actorId: user._id,
-      actorName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      actorEmail: user.email,
-      actorRole: user.role
+      actorId: user._id
     });
 
     res.status(200).json({

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import UserModel from "../model/UserModel.js";
 import UserLog from "../model/UserLogModel.js";
 import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
@@ -101,18 +102,10 @@ export const updateUser = async (req, res) => {
     // Log the update activity
     await logUserActivity({
       userId: updatedUser._id,
-      userName: `${updatedUser.firstName} ${updatedUser.middleName ? updatedUser.middleName + ' ' : ''}${updatedUser.lastName}`.trim(),
-      email: updatedUser.email,
-      role: updatedUser.role,
       logType: "update",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
-      details: `User updated by ${req.user.email}`,
-      actorId: req.user.userId, // The user who performed the update
-      actorName: req.user.name || req.user.email, // Use name if available, fallback to email
-      actorEmail: req.user.email,
-      actorRole: req.user.role
+      details: `User updated by ${req.user.email}`
     });
 
     res.status(200).json({
@@ -145,18 +138,10 @@ export const deleteUser = async (req, res) => {
     // Log the delete activity before deleting
     await logUserActivity({
       userId: user._id,
-      userName: `${user.firstName} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName}`.trim(),
-      email: user.email,
-      role: user.role,
       logType: "delete",
       ipAddress: getClientIP(req),
-      userAgent: getUserAgent(req),
       status: "success",
-      details: `User deleted by ${req.user.email}`,
-      actorId: req.user.userId, // The user who performed the delete
-      actorName: req.user.name || req.user.email, // Use name if available, fallback to email
-      actorEmail: req.user.email,
-      actorRole: req.user.role
+      details: `User deleted by ${req.user.email}`
     });
 
     // Delete user
@@ -191,15 +176,80 @@ export const getUserLogs = async (req, res) => {
     // Build filter object
     const filter = {};
     
+    // Collect userIds from different filters
+    let userIds = [];
+    
+    // If filtering by email, first find users with matching email
     if (email) {
-      filter.email = { $regex: email, $options: 'i' };
+      const users = await UserModel.find({ 
+        email: { $regex: email, $options: 'i' } 
+      }).select('_id');
+      const emailUserIds = users.map(user => user._id);
+      if (emailUserIds.length === 0) {
+        // No users found with this email, return empty result
+        return res.status(200).json({
+          success: true,
+          logs: [],
+          totalLogs: 0,
+          totalPages: 0,
+          currentPage: parseInt(page),
+        });
+      }
+      userIds = emailUserIds;
     }
     
+    // If filtering by role, find users with matching role
+    let roleUserIds = [];
     if (role) {
-      filter.role = role;
+      const users = await UserModel.find({ role }).select('_id');
+      roleUserIds = users.map(user => user._id);
+      if (roleUserIds.length === 0) {
+        return res.status(200).json({
+          success: true,
+          logs: [],
+          totalLogs: 0,
+          totalPages: 0,
+          currentPage: parseInt(page),
+        });
+      }
     } else if (roles) {
       const roleArray = roles.split(',');
-      filter.role = { $in: roleArray };
+      const users = await UserModel.find({ role: { $in: roleArray } }).select('_id');
+      roleUserIds = users.map(user => user._id);
+      if (roleUserIds.length === 0) {
+        return res.status(200).json({
+          success: true,
+          logs: [],
+          totalLogs: 0,
+          totalPages: 0,
+          currentPage: parseInt(page),
+        });
+      }
+    }
+    
+    // Combine userIds from different filters
+    if (userIds.length > 0 && roleUserIds.length > 0) {
+      // Intersection: only userIds that match both filters
+      // Convert to strings for comparison
+      const userIdsStr = userIds.map(id => id.toString());
+      const roleUserIdsStr = roleUserIds.map(id => id.toString());
+      userIds = userIds.filter(id => roleUserIdsStr.includes(id.toString()));
+      if (userIds.length === 0) {
+        return res.status(200).json({
+          success: true,
+          logs: [],
+          totalLogs: 0,
+          totalPages: 0,
+          currentPage: parseInt(page),
+        });
+      }
+    } else if (roleUserIds.length > 0) {
+      userIds = roleUserIds;
+    }
+    
+    // Apply userId filter if we have any
+    if (userIds.length > 0) {
+      filter.userId = { $in: userIds };
     }
     
     if (logType && logType !== "all") {
@@ -219,34 +269,32 @@ export const getUserLogs = async (req, res) => {
     // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    // Query real logs from the database
-    let query = UserLog.find(filter).sort({ timestamp: -1 });
+    // Query real logs from the database with populated userId
+    let query = UserLog.find(filter)
+      .populate('userId', 'firstName middleName lastName email role')
+      .sort({ timestamp: -1 });
     
     // Apply pagination
     const totalLogs = await UserLog.countDocuments(filter);
     const totalPages = Math.ceil(totalLogs / parseInt(limit));
     const paginatedLogs = await query.skip(skip).limit(parseInt(limit)).lean();
 
-    // Apply client-side filtering for additional filters
-    let filteredLogs = paginatedLogs;
-    
-    if (filter.email) {
-      filteredLogs = filteredLogs.filter(log => 
-        log.email.toLowerCase().includes(filter.email.$regex.toLowerCase())
-      );
-    }
-    
-    if (filter.role) {
-      if (typeof filter.role === 'string') {
-        filteredLogs = filteredLogs.filter(log => log.role === filter.role);
-      } else if (filter.role.$in) {
-        filteredLogs = filteredLogs.filter(log => filter.role.$in.includes(log.role));
-      }
-    }
-    
-    if (filter.logType && filter.logType !== "all") {
-      filteredLogs = filteredLogs.filter(log => log.logType === filter.logType);
-    }
+    // Transform logs to include user data from populated references
+    let filteredLogs = paginatedLogs.map(log => {
+      const user = log.userId;
+      
+      return {
+        ...log,
+        // User (target) data
+        userName: user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A',
+        email: user?.email || null,
+        role: user?.role || null,
+        // Actor (performer) data - same as user since actorId is removed
+        actorName: user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A',
+        actorEmail: user?.email || null,
+        actorRole: user?.role || null
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -278,15 +326,87 @@ export const exportUserLogs = async (req, res) => {
     // Build filter object (same as getUserLogs)
     const filter = {};
     
+    // Collect userIds from different filters
+    let userIds = [];
+    
+    // If filtering by email, first find users with matching email
     if (email) {
-      filter.email = { $regex: email, $options: 'i' };
+      const users = await UserModel.find({ 
+        email: { $regex: email, $options: 'i' } 
+      }).select('_id');
+      const emailUserIds = users.map(user => user._id);
+      if (emailUserIds.length === 0) {
+        // No users found with this email, return empty Excel
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Account Logs');
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        const filename = `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', excelBuffer.length);
+        return res.send(excelBuffer);
+      }
+      userIds = emailUserIds;
     }
     
+    // If filtering by role, find users with matching role
+    let roleUserIds = [];
     if (role) {
-      filter.role = role;
+      const users = await UserModel.find({ role }).select('_id');
+      roleUserIds = users.map(user => user._id);
+      if (roleUserIds.length === 0) {
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Account Logs');
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        const filename = `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', excelBuffer.length);
+        return res.send(excelBuffer);
+      }
     } else if (roles) {
       const roleArray = roles.split(',');
-      filter.role = { $in: roleArray };
+      const users = await UserModel.find({ role: { $in: roleArray } }).select('_id');
+      roleUserIds = users.map(user => user._id);
+      if (roleUserIds.length === 0) {
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Account Logs');
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        const filename = `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', excelBuffer.length);
+        return res.send(excelBuffer);
+      }
+    }
+    
+    // Combine userIds from different filters
+    if (userIds.length > 0 && roleUserIds.length > 0) {
+      // Intersection: only userIds that match both filters
+      const userIdsStr = userIds.map(id => id.toString());
+      const roleUserIdsStr = roleUserIds.map(id => id.toString());
+      userIds = userIds.filter(id => roleUserIdsStr.includes(id.toString()));
+      if (userIds.length === 0) {
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet([]);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Account Logs');
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        const filename = `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`;
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', excelBuffer.length);
+        return res.send(excelBuffer);
+      }
+    } else if (roleUserIds.length > 0) {
+      userIds = roleUserIds;
+    }
+    
+    // Apply userId filter if we have any
+    if (userIds.length > 0) {
+      filter.userId = { $in: userIds };
     }
     
     if (logType && logType !== "all") {
@@ -303,25 +423,34 @@ export const exportUserLogs = async (req, res) => {
       }
     }
 
-    // Get all logs without pagination for export
-    const logs = await UserLog.find(filter).sort({ timestamp: -1 }).lean();
+    // Get all logs without pagination for export, populate userId
+    const logs = await UserLog.find(filter)
+      .populate('userId', 'firstName middleName lastName email role')
+      .sort({ timestamp: -1 })
+      .lean();
 
     // Transform logs for Excel export
-    const excelData = logs.map(log => ({
-      'Performed By': log.actorName || 'N/A',
-      'Actor Email': log.actorEmail || 'N/A',
-      'Actor Role': getRoleLabel(log.actorRole),
-      'Timestamp': new Date(log.timestamp).toLocaleString(),
-      'User Name': log.userName || 'N/A',
-      'Email': log.email,
-      'Role': getRoleLabel(log.role),
-      'Activity': getLogTypeLabel(log.logType),
-      'Details': log.details || 'N/A',
-      'IP Address': log.ipAddress === '::1' ? '127.0.0.1' : 
-                   log.ipAddress === '::ffff:127.0.0.1' ? '127.0.0.1' :
-                   log.ipAddress || 'N/A',
-      'Status': log.status
-    }));
+    const excelData = logs.map(log => {
+      const user = log.userId;
+      
+      const userName = user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A';
+      
+      return {
+        'Performed By': userName,
+        'Actor Email': user?.email || 'N/A',
+        'Actor Role': getRoleLabel(user?.role),
+        'Timestamp': new Date(log.timestamp).toLocaleString(),
+        'User Name': userName,
+        'Email': user?.email || 'N/A',
+        'Role': getRoleLabel(user?.role),
+        'Activity': getLogTypeLabel(log.logType),
+        'Details': log.details || 'N/A',
+        'IP Address': log.ipAddress === '::1' ? '127.0.0.1' : 
+                     log.ipAddress === '::ffff:127.0.0.1' ? '127.0.0.1' :
+                     log.ipAddress || 'N/A',
+        'Status': log.status
+      };
+    });
 
     // Create workbook and worksheet
     const workbook = XLSX.utils.book_new();
