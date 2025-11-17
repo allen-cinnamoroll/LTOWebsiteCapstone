@@ -496,6 +496,34 @@ export const getDashboardStats = async (req, res) => {
     // Vehicle count (total vehicles) - keep for backward compatibility
     const vehicleCount = totalVehicles;
 
+    // Calculate violations this month (current) - count actual violations from arrays
+    const violationsThisMonthResult = await ViolationModel.aggregate([
+      {
+        $match: {
+          dateOfApprehension: {
+            $gte: monthStart,
+            $lte: monthEnd
+          }
+        }
+      },
+      {
+        $project: {
+          violationsCount: {
+            $size: {
+              $ifNull: ["$violations", []]
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$violationsCount" }
+        }
+      }
+    ]);
+    const violationsThisMonth = violationsThisMonthResult[0]?.total || 0;
+
     // Calculate accidents this month (current)
     const accidentsThisMonth = await AccidentModel.countDocuments({
       dateCommited: {
@@ -624,6 +652,12 @@ export const getDashboardStats = async (req, res) => {
           accidents: {
             current: accidentsThisMonth,
             target: predictedAccidentsThisMonth
+          },
+          violations: {
+            current: violationsThisMonth
+          },
+          systemUsers: {
+            total: totalUsers
           }
         }
       }

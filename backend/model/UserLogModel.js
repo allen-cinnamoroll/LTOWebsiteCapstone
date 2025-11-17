@@ -29,7 +29,7 @@ const userLogSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: false
 });
 
 // Index for better query performance

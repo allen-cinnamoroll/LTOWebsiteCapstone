@@ -12,6 +12,8 @@ import Top5MunicipalityAccident from "@/components/home/charts/Top5MunicipalityA
 import WeeklyAccidentPattern from "@/components/home/charts/WeeklyAccidentPattern";
 import ViolationTypeDistribution from "@/components/home/charts/ViolationTypeDistribution";
 import { useDashboardCharts } from "@/api/dashboardCharts";
+import { AlertTriangle, Car, Users } from "lucide-react";
+import StatCard from "@/components/home/StatCard";
 
 const HomePage = () => {
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,9 @@ const HomePage = () => {
     kpi: { 
       renewal: { current: 0, target: 0 }, 
       vehicle: { current: 0, target: 0 }, 
-      accidents: { current: 0, target: 0 }
+      accidents: { current: 0, target: 0 },
+      violations: { current: 0 },
+      systemUsers: { total: 0 }
     }
   });
   const { token, userData } = useAuth();
@@ -153,6 +157,27 @@ const HomePage = () => {
         <>
           {/* Skeleton Grid matching final layout */}
           <section className="w-full grid grid-cols-12 gap-4">
+            {/* Row 1: Stat Cards Skeleton */}
+            <div className="col-span-12 md:col-span-4">
+              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
+                <div className="h-5 w-32 bg-muted rounded mb-4"></div>
+                <div className="h-8 w-20 bg-muted rounded"></div>
+              </div>
+            </div>
+            <div className="col-span-12 md:col-span-4">
+              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
+                <div className="h-5 w-32 bg-muted rounded mb-4"></div>
+                <div className="h-8 w-20 bg-muted rounded"></div>
+              </div>
+            </div>
+            <div className="col-span-12 md:col-span-4">
+              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
+                <div className="h-5 w-32 bg-muted rounded mb-4"></div>
+                <div className="h-8 w-20 bg-muted rounded"></div>
+              </div>
+            </div>
+
+            {/* Row 2: Vehicle Renewal and Charts Skeleton */}
             {/* div1: Vehicle Renewal (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
@@ -161,15 +186,15 @@ const HomePage = () => {
                 <div className="h-3 w-28 bg-muted rounded mt-3"></div>
               </div>
             </div>
-            {/* div2: Top 3 Municipality (lg:4) */}
-            <div className="col-span-12 lg:col-span-4">
+            {/* div2: Top 3 Municipality (lg:3) */}
+            <div className="col-span-12 lg:col-span-3">
               <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
                   </div>
                 </div>
-            {/* div3: Top 5 Violation (lg:5) */}
-            <div className="col-span-12 lg:col-span-5">
+            {/* div3: Top 5 Violation (lg:6) */}
+            <div className="col-span-12 lg:col-span-6">
               <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                 <div className="h-5 w-44 bg-muted rounded mb-4"></div>
                 <div className="h-56 bg-muted rounded"></div>
@@ -228,7 +253,36 @@ const HomePage = () => {
         <>
           {/* Dashboard Grid Layout - Reorganized for better visual flow */}
           <section className="w-full grid grid-cols-12 gap-4">
-            {/* Row 1: Key Performance Indicators */}
+            {/* Row 1: Stat Cards - Violation Total, Total Accident, System Users */}
+            <div className="col-span-12 md:col-span-4">
+              <StatCard
+                name="Violation Total"
+                icon={AlertTriangle}
+                value={stats.kpi?.violations?.current?.toLocaleString() || 0}
+                color="orange"
+                loading={loading}
+              />
+            </div>
+            <div className="col-span-12 md:col-span-4">
+              <StatCard
+                name="Total Accident"
+                icon={Car}
+                value={stats.kpi?.accidents?.current?.toLocaleString() || 0}
+                color="red"
+                loading={loading}
+              />
+            </div>
+            <div className="col-span-12 md:col-span-4">
+              <StatCard
+                name="System Users"
+                icon={Users}
+                value={stats.kpi?.systemUsers?.total?.toLocaleString() || stats.userStats?.total?.toLocaleString() || 0}
+                color="blue"
+                loading={loading}
+              />
+            </div>
+
+            {/* Row 2: Key Performance Indicators and Charts */}
             {/* Vehicle Renewal KPI */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               <div className="w-full">
@@ -241,7 +295,7 @@ const HomePage = () => {
             </div>
             
             {/* Top Performing Municipalities */}
-            <div className="col-span-12 lg:col-span-4">
+            <div className="col-span-12 lg:col-span-3">
               {charts.loading ? (
                 <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
@@ -253,7 +307,7 @@ const HomePage = () => {
             </div>
             
             {/* Most Common Violations */}
-            <div className="col-span-12 lg:col-span-5">
+            <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
                 <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
                   <div className="h-6 bg-muted rounded w-40 mb-4"></div>
