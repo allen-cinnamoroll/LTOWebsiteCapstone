@@ -261,6 +261,34 @@ def prepare_features(year, month, municipality, barangay, historical_data=None):
     return df
 
 
+@app.route('/api/accidents/reload-model', methods=['POST'])
+def reload_model():
+    """Reload the model after retraining (internal endpoint)"""
+    try:
+        logger.info("Reloading model...")
+        success = initialize_model()
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Model reloaded successfully',
+                'timestamp': datetime.now().isoformat()
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to reload model',
+                'timestamp': datetime.now().isoformat()
+            }), 500
+    except Exception as e:
+        logger.error(f"Error reloading model: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+
 @app.route('/api/accidents/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -388,11 +416,12 @@ def predict_accident_count():
 @app.route('/api/accidents/predict/all', methods=['GET'])
 def predict_all_barangays():
     """
-    Predict accident counts for all barangays for a given month
+    Predict accident counts for barangays for a given month
     
     Query Parameters:
     - year: Year (required)
     - month: Month (1-12, required)
+    - limit: Optional - Number of top barangays to predict (default: all, recommended: 10-20 for faster response)
     """
     def prescribe_actions(predicted_count):
         """
@@ -587,6 +616,9 @@ def predict_all_barangays():
                 'timestamp': datetime.now().isoformat()
             }), 400
         
+        # Get optional limit parameter (default: None means predict all)
+        limit = request.args.get('limit', type=int)
+        
         # Load historical data to get all barangays
         if not data_loader:
             return jsonify({
@@ -609,6 +641,18 @@ def predict_all_barangays():
         
         # Get unique barangays
         unique_locations = historical_data[['municipality', 'barangay']].drop_duplicates()
+        
+        # If limit is specified, optimize by selecting top N barangays by historical accident counts
+        if limit and limit > 0:
+            # Calculate total historical accident counts per barangay
+            barangay_counts = historical_data.groupby(['municipality', 'barangay'])['accident_count'].sum().reset_index()
+            barangay_counts.columns = ['municipality', 'barangay', 'total_historical']
+            
+            # Sort by historical counts (descending) and take top N
+            top_barangays = barangay_counts.nlargest(limit, 'total_historical')[['municipality', 'barangay']]
+            unique_locations = top_barangays
+            
+            logger.info(f"Limiting predictions to top {limit} barangays by historical accident counts")
         
         predictions = []
         for _, row in unique_locations.iterrows():
@@ -656,6 +700,7 @@ def predict_all_barangays():
             'month': month,
             'predictions': convert_to_native_types(predictions),
             'total_barangays': len(predictions),
+            'limit_applied': limit if limit and limit > 0 else None,
             'timestamp': datetime.now().isoformat()
         }), 200
         

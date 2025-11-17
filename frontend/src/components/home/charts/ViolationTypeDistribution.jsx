@@ -64,7 +64,7 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 	const tooltipBg = isDarkMode ? "#111827" : "#ffffff";
 	const tooltipBorder = isDarkMode ? "#374151" : "#e5e7eb";
 	const tooltipColor = isDarkMode ? "#f9fafb" : "#000000";
-	const centerLabelTop = isDarkMode ? "#e5e7eb" : "#1f2937";
+	const centerLabelTop = isDarkMode ? "#e5e7eb" : "#111827";
 	const centerLabelMiddle = isDarkMode ? "#ffffff" : "#000000";
 	const centerLabelBottom = isDarkMode ? "#d1d5db" : "#4b5563";
 
@@ -135,7 +135,8 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 													fontWeight="600"
 													style={{ 
 														userSelect: 'none',
-														letterSpacing: '0.5px'
+														letterSpacing: '0.5px',
+														fontFamily: 'system-ui, -apple-system, sans-serif'
 													}}
 												>
 													TOTAL VIOLATIONS
@@ -151,8 +152,9 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 													style={{ 
 														filter: isDarkMode 
 															? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
-															: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
-														userSelect: 'none'
+															: 'drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15))',
+														userSelect: 'none',
+														fontFamily: 'system-ui, -apple-system, sans-serif'
 													}}
 												>
 													{total.toLocaleString()}

@@ -1,0 +1,13 @@
+[Unit]
+Description=Accident Prediction Model Retraining Service
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction
+Environment="PATH=/var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction/venv/bin/python /var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction/retrain_model.py
+StandardOutput=journal
+StandardError=journal
+

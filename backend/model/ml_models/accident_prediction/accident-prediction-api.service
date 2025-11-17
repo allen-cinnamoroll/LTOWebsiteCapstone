@@ -1,0 +1,20 @@
+[Unit]
+Description=Accident Prediction API (Flask)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction
+Environment="PATH=/var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PORT=5004"
+# Use 'python' or 'python3' - check what's available in your venv: ls venv/bin/python*
+ExecStart=/var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction/venv/bin/python /var/www/LTOWebsiteCapstone/backend/model/ml_models/accident_prediction/app.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
