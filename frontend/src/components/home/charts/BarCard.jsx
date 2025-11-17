@@ -6,7 +6,6 @@ import {
 	Bar,
 	XAxis,
 	YAxis,
-	CartesianGrid,
 	Tooltip,
 	ResponsiveContainer,
 	LabelList,
@@ -16,6 +15,7 @@ import {
  * Generic Bar Chart Card
  * Props:
  * - title: string
+ * - description?: string (optional subtitle/description)
  * - data: Array<Record<string, any>>
  * - xKey: string   (label field)
  * - barKey: string (numeric field)
@@ -23,9 +23,11 @@ import {
  * - horizontal?: boolean (default false; if true, uses layout='vertical')
  * - xLabel?: string
  * - yLabel?: string
+ * - icon?: React component (optional icon)
  */
 const BarCard = ({
 	title,
+	description,
 	data = [],
 	xKey,
 	barKey,
@@ -33,6 +35,7 @@ const BarCard = ({
 	horizontal = false,
 	xLabel,
 	yLabel,
+	icon: Icon,
 }) => {
 	const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -65,19 +68,36 @@ const BarCard = ({
 	const tooltipColor = isDarkMode ? "#f9fafb" : "#111827";
 
 	return (
-		<div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full">
-			<div className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
-				{title}
+		<div className="rounded-xl shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 border border-gray-200 dark:border-gray-700 p-4 h-full relative overflow-hidden">
+			{/* Decorative gradient background */}
+			<div className="absolute top-0 right-0 w-32 h-32 opacity-5 dark:opacity-10" style={{ background: `radial-gradient(circle, ${color} 0%, transparent 70%)` }}></div>
+			
+			<div className="mb-3 relative z-10">
+				<div className="flex items-start gap-2">
+					{Icon && (
+						<div className="p-2 rounded-lg" style={{ backgroundColor: `${color}15` }}>
+							<Icon className="h-5 w-5" style={{ color: color }} />
+						</div>
+					)}
+					<div className="space-y-0">
+						<div className="font-semibold text-gray-900 dark:text-gray-100">
+							{title}
+						</div>
+						{description && (
+							<p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+								{description}
+							</p>
+						)}
+					</div>
+				</div>
 			</div>
-			<div className="w-full h-64">
+			<div className="w-full h-64 relative z-10">
 				<ResponsiveContainer width="100%" height="100%">
 					<BarChart
 						data={data}
 						layout={horizontal ? "vertical" : "horizontal"}
 						margin={{ top: 8, right: 6, bottom: 24, left: 6 }}
 					>
-						{/* Subtle grid and modern theming */}
-						<CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
 						{/* Axes */}
 						{horizontal ? (
 							<>
@@ -147,12 +167,26 @@ const BarCard = ({
 						{/* Custom tooltip with clean numbers */}
 						<Tooltip
 							formatter={(value) => [value, ""]}
-							labelStyle={{ fontWeight: 600 }}
+							labelStyle={{ 
+								fontWeight: 500,
+								fontSize: '11px',
+								marginBottom: '2px'
+							}}
 							contentStyle={{
-								borderRadius: 8,
-								borderColor: tooltipBorder,
+								borderRadius: 6,
+								border: `1px solid ${tooltipBorder}`,
 								backgroundColor: tooltipBg,
 								color: tooltipColor,
+								padding: '6px 10px',
+								fontSize: '12px',
+								boxShadow: isDarkMode 
+									? '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+									: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+							}}
+							itemStyle={{
+								padding: '2px 0',
+								fontSize: '12px',
+								fontWeight: 600
 							}}
 						/>
 						{/* Gradient fill */}

@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
+import { Shield } from "lucide-react";
 import BarCard from "./BarCard";
 
 const Top3Officer = ({ data = [] }) => {
 	return (
 		<BarCard
-			title="Top 3 Officer"
+			title="Top Performing Officers"
+			description="Officers with highest violation enforcement records"
 			data={data}
 			xKey="officer"
 			barKey="value"
-			color="#8b5cf6"
+			color="#3b82f6"
 			horizontal={false}
-			xLabel="Officer"
+			xLabel="Officer Name"
+			icon={Shield}
 		/>
 	);
 };

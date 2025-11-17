@@ -166,26 +166,19 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       const value = payload[0].value;
       
       return (
-        <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-              <div>
-                <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
-                <p className="text-blue-600 dark:text-blue-400 text-xs">
-                  <span className="font-semibold text-lg">{value.toLocaleString()}</span> vehicles
-                </p>
-              </div>
-            </div>
-            <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                </svg>
-                Click to view barangay ranking
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2 shadow-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+            <div>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 text-xs">{label}</p>
+              <p className="text-blue-600 dark:text-blue-400 text-xs font-bold">
+                {value.toLocaleString()} vehicles
               </p>
             </div>
           </div>
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 pt-1.5 border-t border-gray-200 dark:border-gray-700">
+            Click to view barangay ranking
+          </p>
         </div>
       );
     }
@@ -301,24 +294,24 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
   return (
     <>
       {/* Municipality Chart Container */}
-       <div className="border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl bg-white dark:bg-black backdrop-blur-sm">
+       <div className="border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm bg-white dark:bg-neutral-900 backdrop-blur-sm transition-all duration-300 hover:shadow-md">
         {/* Header */}
-        <div className="px-4 py-3 border-b-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-neutral-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center p-2 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-md shadow-orange-500/30">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <div className="flex items-center justify-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                   <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Top Municipalities by Vehicle Registration</h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Top Municipalities by Vehicle Registration</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                   Top performing municipalities by vehicle registration volume
                 </p>
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-medium bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                     {(() => {
                       // Both month and year are selected (not "All")
                       if (selectedMonth && selectedMonth !== 'All' && selectedYear && selectedYear !== 'All') {
@@ -348,15 +341,15 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
           <div className="xl:col-span-4 p-3 sm:p-4 pr-2">
             <div className="space-y-3">
               {/* Charts Area */}
-              <div className="relative rounded-xl p-3 sm:p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-2 border-orange-100/60 dark:border-orange-900/40 shadow-xl overflow-hidden">
+              <div className="relative rounded-lg p-3 sm:p-4 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden transition-all duration-300">
                 <div className="mb-3 flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    <h4 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
                       Municipality Rankings
                     </h4>
                     <button
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="px-2.5 py-1.5 text-[11px] font-semibold bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-md text-gray-900 dark:text-white hover:border-orange-400 dark:hover:border-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-500 dark:focus:border-orange-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md flex items-center gap-1"
+                      className="px-2.5 py-1.5 text-[11px] font-medium bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-500 transition-all duration-200 cursor-pointer shadow-sm hover:shadow flex items-center gap-1"
                       title={`Sort ${sortOrder === 'asc' ? 'Highest to Lowest' : 'Lowest to Highest'}`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,7 +385,6 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                         margin={{ top: 10, right: 10, left: 5, bottom: 20 }}
                         barCategoryGap="5%"
                       >
-                        <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
                         <XAxis 
                           dataKey="name" 
                           stroke="#6b7280"
@@ -427,8 +419,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                                 stroke={originalColor}
                                 strokeWidth={2}
                                 style={{ 
-                                  filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15))',
-                                  transition: 'all 0.3s ease',
+                                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08))',
+                                  transition: 'all 0.2s ease',
                                   cursor: 'pointer'
                                 }}
                               />
@@ -443,30 +435,30 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                 {/* Chart Legend */}
                 {sortedMunicipalities.length > 0 && !loading && !parentLoading && (
                   <div className="flex flex-wrap justify-center gap-4 text-gray-600 dark:text-gray-400 mt-3" style={{ 
-                    fontSize: isMobile ? '10px' : '12px', 
-                    fontWeight: '500',
+                    fontSize: isMobile ? '10px' : '11px', 
+                    fontWeight: '400',
                     paddingTop: '0px',
                     paddingBottom: '0px',
                     textAlign: 'center'
                   }}>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-700"></div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
                       <span>High</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
                       <span>Medium-high</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
                       <span>Medium</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                       <span>Low</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
                       <span>Lowest</span>
                     </div>
                   </div>
@@ -478,67 +470,67 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
           {/* Right: KPI Cards */}
           <div className="xl:col-span-1 p-3 sm:p-4 pl-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3 h-full">
-              {/* Total Regional Vehicles */}
-              {!loading && !parentLoading && sortedMunicipalities.length > 0 && (
+                  {/* Total Regional Vehicles */}
+                  {!loading && !parentLoading && sortedMunicipalities.length > 0 && (
                 <>
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-950/30 shadow-md border-2 border-blue-100/60 dark:border-blue-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+                  <div className="p-3 rounded-lg bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col items-start hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm shadow-blue-500/30 flex items-center justify-center">
-                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                       </div>
-                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Total Regional Vehicles</span>
+                      <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Total Regional Vehicles</span>
                     </div>
                     <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5">
                       {kpis.totalRegionalVehicles.toLocaleString()}
                     </div>
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                    <div className="text-[10px] font-normal text-gray-500 dark:text-gray-400">
                       Sum of all municipality registration volumes
                     </div>
                   </div>
 
                   {/* Top Municipality */}
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-white to-green-50/30 dark:from-gray-800 dark:to-green-950/30 shadow-md border-2 border-green-100/60 dark:border-green-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+                  <div className="p-3 rounded-lg bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col items-start hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-green-500 to-green-600 shadow-sm shadow-green-500/30 flex items-center justify-center">
-                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      <div className="p-1.5 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/50 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                       </div>
-                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Top Municipality</span>
+                      <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Top Municipality</span>
                     </div>
                     <div className="w-full">
-                      <div className="text-sm font-bold text-gray-900 dark:text-white mb-1 truncate" title={kpis.topMunicipality || 'N/A'}>
+                      <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1 truncate" title={kpis.topMunicipality || 'N/A'}>
                         {kpis.topMunicipality || 'N/A'}
                       </div>
                       <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mb-0.5">
                         {kpis.topMunicipalityCount.toLocaleString()}
                       </div>
                     </div>
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+                    <div className="text-[10px] font-normal text-gray-500 dark:text-gray-400">
                       Highest-performing municipality
                     </div>
                   </div>
 
                   {/* Lowest Performance */}
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-white to-orange-50/30 dark:from-gray-800 dark:to-orange-950/30 shadow-md border-2 border-orange-100/60 dark:border-orange-900/40 flex flex-col items-start hover:shadow-lg transition-shadow duration-300">
+                  <div className="p-3 rounded-lg bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col items-start hover:shadow-md transition-all duration-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="p-1.5 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm shadow-orange-500/30 flex items-center justify-center">
-                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      <div className="p-1.5 rounded-md bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/50 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                       </div>
-                      <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Lowest Performance</span>
+                      <span className="text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Lowest Performance</span>
                     </div>
                     <div className="space-y-1.5 w-full">
                       {kpis.lowestPerforming.length > 0 ? (
                         kpis.lowestPerforming.map((municipality, index) => (
                           <div key={index} className="flex items-center justify-between gap-2">
-                            <p className="text-xs font-semibold text-gray-900 dark:text-white truncate flex-1">
+                            <p className="text-xs font-medium text-gray-900 dark:text-white truncate flex-1">
                               {index + 1}. {municipality.name}
                             </p>
-                            <p className="text-xs font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">
+                            <p className="text-xs font-semibold text-orange-600 dark:text-orange-400 whitespace-nowrap">
                               {municipality.count.toLocaleString()}
                             </p>
                           </div>
@@ -547,7 +539,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                         <p className="text-xs text-gray-500 dark:text-gray-400">No data available</p>
                       )}
                     </div>
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-2">
+                    <div className="text-[10px] font-normal text-gray-500 dark:text-gray-400 mt-2">
                       Top 3 municipalities with lowest registration volume
                     </div>
                   </div>
@@ -561,7 +553,7 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
       {/* View All Modal */}
       {showAllModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-           <div className="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl p-4 w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-2xl dark:!bg-transparent dark:!border-[#2A2A3E] dark:!shadow-none dark:!from-transparent dark:!to-transparent">
+           <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-lg">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 flex items-center justify-center">
@@ -603,7 +595,6 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                   margin={{ top: 20, right: 10, left: 10, bottom: 60 }}
                   barCategoryGap="5%"
                 >
-                  <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
                   <XAxis 
                     dataKey="name" 
                     stroke="#6b7280"
@@ -643,8 +634,8 @@ const MunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLoading
                           stroke={originalColor}
                           strokeWidth={1.5}
                           style={{
-                            filter: 'drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12))',
-                            transition: 'all 0.3s ease'
+                            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08))',
+                            transition: 'all 0.2s ease'
                           }}
                         />
                       );

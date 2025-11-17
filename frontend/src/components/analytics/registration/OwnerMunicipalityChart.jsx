@@ -212,27 +212,25 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
       const total = withLicense + withoutLicense;
       
       return (
-        <div className="bg-gray-100/90 dark:bg-gray-700/90 border border-gray-400/40 dark:border-gray-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-sm">
-          <div className="space-y-2">
-            <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">{label}</p>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#10B981' }}></div>
-                <span className="text-green-600 dark:text-green-400 text-xs" style={{ color: '#10B981' }}>
-                  <span className="font-semibold">{withLicense.toLocaleString()}</span> With License
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#EF4444' }}></div>
-                <span className="text-red-600 dark:text-red-400 text-xs" style={{ color: '#EF4444' }}>
-                  <span className="font-semibold">{withoutLicense.toLocaleString()}</span> Without License
-                </span>
-              </div>
-              <div className="border-t border-gray-300 dark:border-gray-600 pt-1">
-                <span className="text-xs font-semibold" style={{ color: '#3B82F6' }}>
-                  Total: {total.toLocaleString()}
-                </span>
-              </div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2 shadow-lg">
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-1.5">{label}</p>
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <span className="text-xs text-gray-700 dark:text-gray-300">
+                With License: <span className="font-bold text-gray-900 dark:text-gray-100">{withLicense.toLocaleString()}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-red-500"></div>
+              <span className="text-xs text-gray-700 dark:text-gray-300">
+                Without License: <span className="font-bold text-gray-900 dark:text-gray-100">{withoutLicense.toLocaleString()}</span>
+              </span>
+            </div>
+            <div className="pt-1 border-t border-gray-200 dark:border-gray-700 mt-1">
+              <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                Total: {total.toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
@@ -342,7 +340,6 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
               }}
               barCategoryGap="3%"
             >
-              <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
               <XAxis 
                 dataKey="name" 
                 stroke="#6b7280"
@@ -459,7 +456,6 @@ const OwnerMunicipalityChart = ({ selectedMonth, selectedYear, loading: parentLo
                           }}
                           barCategoryGap={isMobile ? "3%" : "6%"}
                         >
-                          <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
                           <XAxis 
                             dataKey="name" 
                             stroke="#6b7280"

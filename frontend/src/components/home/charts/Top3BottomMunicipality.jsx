@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
+import { TrendingDown } from "lucide-react";
 import BarCard from "./BarCard";
 
 const Top3BottomMunicipality = ({ data = [] }) => {
 	return (
 		<BarCard
-			title="Top 3 Bottom Municipality"
+			title="Areas Needing Attention"
+			description="Municipalities with lowest registration volumes"
 			data={data}
 			xKey="name"
 			barKey="value"
-			color="#10b981"
+			color="#f59e0b"
 			horizontal={false}
 			xLabel="Municipality"
+			icon={TrendingDown}
 		/>
 	);
 };

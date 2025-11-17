@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
+import { Calendar } from "lucide-react";
 import BarCard from "./BarCard";
 
 const WeeklyAccidentPattern = ({ data = [] }) => {
 	return (
 		<BarCard
-			title="Weekly Accident Pattern"
+			title="Weekly Accident Trends"
+			description="Accident frequency by day of the week"
 			data={data}
 			xKey="weekLabel"
 			barKey="value"
-			color="#0ea5e9"
+			color="#f97316"
 			horizontal={false}
-			xLabel="Week"
+			xLabel="Day of Week"
+			icon={Calendar}
 		/>
 	);
 };

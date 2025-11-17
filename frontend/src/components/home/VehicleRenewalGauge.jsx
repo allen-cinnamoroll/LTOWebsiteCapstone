@@ -1,6 +1,7 @@
 "use client";
  
 import React from "react";
+import { Car } from "lucide-react";
  
 // Helper: clamp a value into a range
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -85,11 +86,31 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
     { p: 0.75, label: null },
     { p: 1.0, label: null },
   ];
- 
+
+  // Determine status color based on progress
+  let statusColor = "#ef4444"; // red (default)
+  if (pct >= 0.75) {
+    statusColor = "#22c55e"; // green
+  } else if (pct >= 0.5) {
+    statusColor = "#f59e0b"; // orange/yellow
+  }
+
   return (
     <div className="rounded-xl shadow-md bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 p-4">
-      <div className="text-base font-semibold mb-2 text-gray-900 dark:text-gray-100">
-        {title}
+      <div className="mb-3">
+        <div className="flex items-start gap-2">
+          <div className="p-2 rounded-lg" style={{ backgroundColor: `${statusColor}15` }}>
+            <Car className="h-5 w-5" style={{ color: statusColor }} />
+          </div>
+          <div className="space-y-0">
+            <div className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              {title}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+              Vehicle renewal progress against target
+            </p>
+          </div>
+        </div>
       </div>
  
       <div className="w-full aspect-[4/3]">

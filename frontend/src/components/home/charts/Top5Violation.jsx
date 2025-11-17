@@ -1,18 +1,21 @@
 "use client";
 
 import React from "react";
+import { AlertTriangle } from "lucide-react";
 import BarCard from "./BarCard";
 
 const Top5Violation = ({ data = [] }) => {
 	return (
 		<BarCard
-			title="Top 5 Violation"
+			title="Most Common Violations"
+			description="Top 5 traffic violations recorded this period"
 			data={data}
 			xKey="violation"
 			barKey="value"
-			color="#f59e0b"
+			color="#ef4444"
 			horizontal={false}
-			xLabel="Violation"
+			xLabel="Violation Type"
+			icon={AlertTriangle}
 		/>
 	);
 };

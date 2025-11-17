@@ -109,22 +109,32 @@ const OnlineUsersPanel = () => {
   const employees = onlineData?.employees || [];
 
   return (
-    <div>
-      <div className="flex items-center gap-2 text-sm font-semibold mb-1">
-        <Users className="h-4 w-4 text-blue-500" />
-        Online Users
+    <div className="relative">
+      <div className="mb-3">
+        <div className="flex items-start gap-2">
+          <div className="p-1.5 rounded-lg bg-blue-500/15">
+            <Users className="h-4 w-4 text-blue-500" />
+          </div>
+          <div className="space-y-0">
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Active Users</span>
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+              Currently logged in system users
+            </p>
+          </div>
+        </div>
       </div>
-      <div className="text-xs text-gray-500 mb-3">Currently logged in users</div>
 
       <div className="space-y-4">
         {/* Admins row */}
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-blue-500" />
+              <div className="p-1 rounded bg-blue-500/10">
+                <UserCheck className="h-3.5 w-3.5 text-blue-500" />
+              </div>
               <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Online Admins</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full border">{admins.length}</span>
+            <span className="text-xs px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-medium">{admins.length}</span>
           </div>
           {admins.length === 0 && (
             <div className="text-[11px] text-gray-500 mt-1">No admins online</div>
@@ -135,10 +145,12 @@ const OnlineUsersPanel = () => {
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-green-500" />
+              <div className="p-1 rounded bg-green-500/10">
+                <UserCheck className="h-3.5 w-3.5 text-green-500" />
+              </div>
               <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Online Employees</span>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full border">{employees.length}</span>
+            <span className="text-xs px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-medium">{employees.length}</span>
           </div>
           {employees.length === 0 && (
             <div className="text-[11px] text-gray-500 mt-1">No employees online</div>

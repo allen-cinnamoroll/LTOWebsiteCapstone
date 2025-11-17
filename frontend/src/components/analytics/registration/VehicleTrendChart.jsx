@@ -632,34 +632,31 @@ const VehicleTrendChart = () => {
         }
         
         return (
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-3 py-2 shadow-lg">
+            <div className="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
               {label || 'N/A'}
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Active: <span className="ml-1 font-medium">
+                <span className="text-xs text-gray-700 dark:text-gray-300">
+                  Active: <span className="ml-1 font-bold text-gray-900 dark:text-gray-100">
                     {typeof value === 'number' ? value.toLocaleString() : String(value)}
                   </span>
                 </span>
               </div>
               {(viewType === 'month' || viewType === 'year') && finalGrowthRate !== undefined && (
-                <div className="flex items-center gap-2 pt-1 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex items-center gap-1.5 pt-1 border-t border-gray-200 dark:border-gray-700">
                   <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Growth Rate: 
+                  <span className="text-xs text-gray-700 dark:text-gray-300">
+                    Growth: 
                     {finalGrowthRate !== null && typeof finalGrowthRate === 'number' ? (
-                      <span className={`ml-1 font-medium ${
+                      <span className={`ml-1 font-bold ${
                         finalGrowthRate >= 0 
                           ? 'text-green-600 dark:text-green-400' 
                           : 'text-red-600 dark:text-red-400'
                       }`}>
-                        {finalGrowthRate >= 0 ? '+' : ''}{finalGrowthRate.toFixed(1)}% 
-                        <span className="ml-1 text-xs">
-                          ({finalGrowthRate >= 0 ? 'Increase' : 'Decrease'})
-                        </span>
+                        {finalGrowthRate >= 0 ? '+' : ''}{finalGrowthRate.toFixed(1)}%
                       </span>
                     ) : (
                       <span className="ml-1 font-medium text-gray-500 dark:text-gray-400">
@@ -834,9 +831,8 @@ const VehicleTrendChart = () => {
                             <feMergeNode in="SourceGraphic" />
                           </feMerge>
                         </filter>
-                      </defs>
-                      <CartesianGrid strokeDasharray="2 4" stroke="#9CA3AF" strokeOpacity={0.25} vertical={false} />
-                      <XAxis 
+                      </defs                      >
+                      <XAxis
                         dataKey={viewType === 'year' ? 'year' : 'month'} 
                         stroke="#1F2937" 
                         fontSize={12} 

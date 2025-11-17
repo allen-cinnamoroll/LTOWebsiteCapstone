@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Label } from "recharts";
+import { PieChart as PieChartIcon } from "lucide-react";
 
 /**
  * Violation Type Distribution - Pie/Donut Chart
@@ -13,7 +14,14 @@ const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"
 
 const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 	// Expect data as [{ type: 'Alarm'|'Confiscated'|'Impounded', value: number }, ...]
-	const [isDarkMode, setIsDarkMode] = useState(false);
+	const [isDarkMode, setIsDarkMode] = useState(() => {
+		if (typeof document === "undefined") return false;
+		const root = document.documentElement;
+		const prefersDark =
+			window.matchMedia &&
+			window.matchMedia("(prefers-color-scheme: dark)").matches;
+		return root.classList.contains("dark") || prefersDark;
+	});
 
 	useEffect(() => {
 		const checkTheme = () => {
@@ -33,34 +41,63 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 				attributes: true,
 				attributeFilter: ["class"],
 			});
-			return () => observer.disconnect();
+			
+			// Also listen to media query changes
+			const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+			if (mediaQuery.addEventListener) {
+				mediaQuery.addEventListener("change", checkTheme);
+			} else if (mediaQuery.addListener) {
+				mediaQuery.addListener(checkTheme);
+			}
+			
+			return () => {
+				observer.disconnect();
+				if (mediaQuery.removeEventListener) {
+					mediaQuery.removeEventListener("change", checkTheme);
+				} else if (mediaQuery.removeListener) {
+					mediaQuery.removeListener(checkTheme);
+				}
+			};
 		}
 	}, []);
 
 	const tooltipBg = isDarkMode ? "#111827" : "#ffffff";
 	const tooltipBorder = isDarkMode ? "#374151" : "#e5e7eb";
-	const tooltipColor = isDarkMode ? "#f9fafb" : "#111827";
-	const centerLabelTop = isDarkMode ? "#9ca3af" : "#6b7280";
-	const centerLabelBottom = isDarkMode ? "#f9fafb" : "#111827";
+	const tooltipColor = isDarkMode ? "#f9fafb" : "#000000";
+	const centerLabelTop = isDarkMode ? "#e5e7eb" : "#1f2937";
+	const centerLabelMiddle = isDarkMode ? "#ffffff" : "#000000";
+	const centerLabelBottom = isDarkMode ? "#d1d5db" : "#4b5563";
 
+	const primaryColor = "#22c55e"; // Green as primary
+	
 	return (
-		<div className="rounded-xl bg-white dark:bg-neutral-900 shadow-md border border-gray-200 dark:border-gray-700 p-4 h-full">
-			<div className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
-				Violation Type Distribution
+		<div className="rounded-xl shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 border border-gray-200 dark:border-gray-700 p-4 h-full relative overflow-hidden">
+			{/* Decorative gradient background */}
+			<div className="absolute top-0 right-0 w-32 h-32 opacity-5 dark:opacity-10" style={{ background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)` }}></div>
+			
+			<div className="mb-3 relative z-10">
+				<div className="flex items-start gap-2">
+					<div className="p-2 rounded-lg" style={{ backgroundColor: `${primaryColor}15` }}>
+						<PieChartIcon className="h-5 w-5" style={{ color: primaryColor }} />
+					</div>
+					<div className="space-y-0">
+						<div className="font-semibold text-gray-900 dark:text-gray-100">
+							Violation Categories
+						</div>
+						<p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+							Distribution of violation types (Alarm, Confiscated, Impounded)
+						</p>
+					</div>
+				</div>
 			</div>
-			<div className="w-full h-60 flex flex-col items-center">
+			<div className="w-full h-60 flex flex-col items-center relative z-10">
 				{/* Donut */}
 				<div className="w-full h-36">
 					<ResponsiveContainer width="100%" height="100%">
-						<PieChart>
+						<PieChart key={isDarkMode ? 'dark' : 'light'}>
 							<Tooltip
-								formatter={(value) => [value, ""]}
-								contentStyle={{
-									borderRadius: 8,
-									borderColor: tooltipBorder,
-									backgroundColor: tooltipBg,
-									color: tooltipColor,
-								}}
+								contentStyle={{ display: 'none' }}
+								active={false}
 							/>
 							<Pie
 								data={data}
@@ -85,24 +122,38 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 											(s, d) => s + (d.value || 0),
 											0,
 										);
+										
 										return (
 											<g>
+												{/* Top line: TOTAL VIOLATIONS */}
 												<text
 													x={viewBox.cx}
-													y={viewBox.cy - 12}
+													y={viewBox.cy - 8}
 													textAnchor="middle"
-													fontSize="10"
+													fontSize="9"
 													fill={centerLabelTop}
+													fontWeight="600"
+													style={{ 
+														userSelect: 'none',
+														letterSpacing: '0.5px'
+													}}
 												>
 													TOTAL VIOLATIONS
 												</text>
+												{/* Middle line: Total number */}
 												<text
 													x={viewBox.cx}
-													y={viewBox.cy + 12}
+													y={viewBox.cy + 14}
 													textAnchor="middle"
-													fontSize="20"
-													fontWeight="700"
-													fill={centerLabelBottom}
+													fontSize="24"
+													fontWeight="800"
+													fill={centerLabelMiddle}
+													style={{ 
+														filter: isDarkMode 
+															? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
+															: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
+														userSelect: 'none'
+													}}
 												>
 													{total.toLocaleString()}
 												</text>
