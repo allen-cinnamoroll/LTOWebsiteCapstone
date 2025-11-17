@@ -10,7 +10,7 @@ const Top5Violation = ({ data = [] }) => {
 			data={data}
 			xKey="violation"
 			barKey="value"
-			color="#f97316"
+			color="#f59e0b"
 			horizontal={false}
 			xLabel="Violation"
 		/>

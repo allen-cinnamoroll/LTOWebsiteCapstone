@@ -10,7 +10,7 @@ const Top3Officer = ({ data = [] }) => {
 			data={data}
 			xKey="officer"
 			barKey="value"
-			color="#a855f7"
+			color="#8b5cf6"
 			horizontal={false}
 			xLabel="Officer"
 		/>
