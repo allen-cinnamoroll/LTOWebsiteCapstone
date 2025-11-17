@@ -497,7 +497,34 @@ export const getOnlineUsers = async (req, res) => {
       });
     }
 
-    // EMPLOYEE: Limited access (just return minimal info)
+    // EMPLOYEE: Can see names of online employees (co-employees)
+    if (currentUser.role === "2") {
+      const onlineEmployees = await UserModel.find({
+        role: "2",
+        lastSeenAt: { $ne: null, $gte: thresholdTime }
+      })
+        .select("_id firstName middleName lastName")
+        .lean();
+
+      // Format names
+      const formatName = (user) => {
+        return `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim();
+      };
+
+      const employees = onlineEmployees.map(emp => ({
+        id: emp._id.toString(),
+        name: formatName(emp)
+      }));
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          employees
+        }
+      });
+    }
+
+    // Default: Limited access (just return minimal info)
     return res.status(200).json({
       success: true,
       data: {

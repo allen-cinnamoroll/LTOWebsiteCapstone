@@ -45,7 +45,7 @@ const OnlineUsersPanel = () => {
 
   // Fetch on mount and set up interval
   useEffect(() => {
-    if (token && (userData?.role === "0" || userData?.role === "1")) {
+    if (token && (userData?.role === "0" || userData?.role === "1" || userData?.role === "2")) {
       // Send initial heartbeat
       sendHeartbeat();
       fetchOnlineUsers();
@@ -67,8 +67,8 @@ const OnlineUsersPanel = () => {
     }
   }, [token, userData?.role]);
 
-  // Don't render for employees
-  if (!userData || (userData.role !== "0" && userData.role !== "1")) {
+  // Only render for superadmin, admin, and employees
+  if (!userData || (userData.role !== "0" && userData.role !== "1" && userData.role !== "2")) {
     return null;
   }
 
