@@ -126,6 +126,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const [availableViolations] = useState(COMMON_VIOLATIONS);
   const [violationSearchTerms, setViolationSearchTerms] = useState({});
   const [openDropdowns, setOpenDropdowns] = useState({});
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   
   // Watch the violationType to conditionally render fields
   const violationType = useWatch({
@@ -716,7 +717,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormItem className="space-y-0">
                   <FormLabel className="text-xs text-gray-600">Date of Apprehension</FormLabel>
                   <FormControl>
-                    <Popover>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -738,7 +739,11 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       <PopoverContent className="w-auto p-0" align="start">
                         <DatePicker
                           fieldValue={field.value}
-                          dateValue={field.onChange}
+                          dateValue={(date) => {
+                            field.onChange(date);
+                            // Close popover after date selection
+                            setDatePickerOpen(false);
+                          }}
                         />
                       </PopoverContent>
                     </Popover>
