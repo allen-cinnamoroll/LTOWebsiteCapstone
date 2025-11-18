@@ -12,7 +12,7 @@ async function importViolations() {
   // 🚨 Import Violations
   // =====================
   const violationsCollection = db.collection('violations');
-  const violationsPath = path.join(__dirname, 'violations_impounded.json');
+  const violationsPath = path.join(__dirname, 'violations_overall_temporary.json');
   const violationsData = JSON.parse(fs.readFileSync(violationsPath, 'utf8'));
 
   // Get superadmin ID for default createdBy
@@ -26,7 +26,7 @@ async function importViolations() {
   const transformedViolations = violationsData.map(item => ({
     ...item,
     // Ensure impounded type is set; the frontend may default missing values to 'confiscated'
-    violationType: item.violationType || "impounded",
+    violationType: item.violationType?.trim().toLowerCase() || "unspecified",
     createdAt: item.createdAt ? new Date(item.createdAt) : now,
     // Don't set updatedAt or updatedBy for new imports (they weren't updated yet)
     createdBy: item.createdBy || superadminId,
