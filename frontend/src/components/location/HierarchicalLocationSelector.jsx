@@ -208,8 +208,8 @@ const HierarchicalLocationSelector = ({
         <label className="text-xs font-medium text-muted-foreground mb-0">
           Province
         </label>
-        <div className="mt-0 p-3 bg-muted rounded-md border">
-          <span className="text-sm font-medium">{davaoOrientalData.region}</span>
+        <div className="mt-0 p-3 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 rounded-md border border-gray-300 dark:border-[#424242]">
+          <span className="text-sm font-medium text-black dark:text-white">{davaoOrientalData.region}</span>
         </div>
       </div>
 

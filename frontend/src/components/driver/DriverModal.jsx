@@ -16,14 +16,12 @@ import { formatSimpleDate } from "@/util/dateFormatter";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Edit, User, MapPin, Phone, Mail, Calendar, Car, FileText, CreditCard, List, UserCheck } from "lucide-react";
 import { toast } from "sonner";
-import EditDriverModal from "./EditDriverModal";
 
-const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriverUpdated }) => {
+const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriverUpdated, onEditClick }) => {
   const params = useParams();
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [vehicleData, setVehicleData] = useState(null);
   const [loadingVehicle, setLoadingVehicle] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
   const [userNameCache, setUserNameCache] = useState({});
   const location = useLocation();
@@ -376,7 +374,12 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setEditModalOpen(true)}
+                onClick={() => {
+                  // Close details modal and trigger edit via parent callback
+                  if (onEditClick && driverData?._id) {
+                    onEditClick(driverData._id);
+                  }
+                }}
                 className="text-xs"
               >
                 <Edit className="h-3 w-3 mr-1" />
@@ -388,14 +391,6 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
           
         </DialogContent>
       </Dialog>
-
-      {/* Edit Driver Modal */}
-      <EditDriverModal
-        open={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        driverData={driverData}
-        onDriverUpdated={onDriverUpdated}
-      />
 
       {/* Vehicle Modal */}
       <Dialog open={vehicleModalOpen} onOpenChange={setVehicleModalOpen}>

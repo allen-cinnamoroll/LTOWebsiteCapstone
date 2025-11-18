@@ -172,7 +172,7 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full text-left font-normal justify-start",
+                              "w-full text-left font-normal justify-start border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                               !field.value && "text-muted-foreground",
                               form.formState.errors.birthDate &&
                                 "border-red-400"
@@ -300,7 +300,7 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-black dark:text-white",
+                            "text-black dark:text-white border border-gray-300 dark:border-[#424242]",
                             form.formState.errors.hasDriversLicense && "border-red-400",
                             isEditMode && "text-xs"
                           )}

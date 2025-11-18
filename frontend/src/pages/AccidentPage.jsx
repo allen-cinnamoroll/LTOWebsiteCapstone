@@ -30,18 +30,6 @@ const AccidentPage = () => {
     fetchAccidents();
   }, []);
 
-  // Listen for edit accident events from details modal
-  useEffect(() => {
-    const handleEditAccident = (event) => {
-      setSelectedAccidentId(event.detail);
-      setEditAccidentModalOpen(true);
-    };
-
-    window.addEventListener('editAccident', handleEditAccident);
-    return () => {
-      window.removeEventListener('editAccident', handleEditAccident);
-    };
-  }, []);
 
   /**
    * fetchAccidents - Optimized accident fetching with pagination
@@ -109,6 +97,8 @@ const AccidentPage = () => {
   const onEdit = (accidentId) => {
     setSelectedAccidentId(accidentId);
     setEditAccidentModalOpen(true);
+    // Close other modals when opening edit
+    setAccidentDetailsModalOpen(false);
   };
 
   const handleAccidentAdded = () => {
@@ -180,17 +170,44 @@ const AccidentPage = () => {
       {/* Accident Details Modal */}
       <AccidentDetailsModal
         open={accidentDetailsModalOpen}
-        onOpenChange={setAccidentDetailsModalOpen}
+        onOpenChange={(isOpen) => {
+          setAccidentDetailsModalOpen(isOpen);
+          // Close other modals when closing details
+          if (!isOpen) {
+            setEditAccidentModalOpen(false);
+          }
+        }}
         accidentData={selectedAccident}
-        onEdit={onEdit}
+        onEditClick={(accidentId) => {
+          // Close details modal and open edit modal
+          setAccidentDetailsModalOpen(false);
+          onEdit(accidentId);
+        }}
       />
 
       {/* Edit Accident Modal */}
       <EditAccidentModal
         open={editAccidentModalOpen}
-        onOpenChange={setEditAccidentModalOpen}
+        onOpenChange={(isOpen) => {
+          setEditAccidentModalOpen(isOpen);
+          // Close other modals when closing edit (unless canceling to return to details)
+          if (!isOpen) {
+            // Only close details modal if we're not canceling to return to it
+            // The onCancel callback will handle reopening details modal
+            if (!accidentDetailsModalOpen) {
+              // No other modals to close
+            }
+          }
+        }}
         accidentId={selectedAccidentId}
         onAccidentUpdated={handleAccidentAdded}
+        onCancel={() => {
+          // Close edit modal and reopen details modal
+          setEditAccidentModalOpen(false);
+          if (selectedAccident) {
+            setAccidentDetailsModalOpen(true);
+          }
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

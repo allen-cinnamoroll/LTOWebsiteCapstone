@@ -62,7 +62,7 @@ const TableComponent = ({
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 8, // 8 rows per page
+    pageSize: 10, // 10 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   // Define the columns where you want to apply the global filter

@@ -55,14 +55,15 @@ const VehiclesTable = ({
   onBinClick,
   submitting,
   onRestore,
-  onPermanentDelete
+  onPermanentDelete,
+  showExport = true
 }) => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 9, // 9 rows per page
+    pageSize: 10, // 10 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
@@ -139,7 +140,7 @@ const VehiclesTable = ({
               <span className="hidden lg:inline">{"Bin"}</span>
             </Button>
           )}
-          <VehicleExportModal />
+          {showExport && <VehicleExportModal />}
           <DataTableViewOptions table={table} />
         </div>
       </div>

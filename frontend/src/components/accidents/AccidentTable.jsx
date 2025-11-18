@@ -44,51 +44,13 @@ const AccidentTable = ({
   const [columnVisibility, setColumnVisibility] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 12, // Start with more rows, will be dynamically adjusted
+    pageSize: 10, // 10 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
-  const [containerHeight, setContainerHeight] = React.useState(0);
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
   const [hoveredRowId, setHoveredRowId] = React.useState(null);
   const filterColumns = filters;
   const containerRef = React.useRef(null);
-
-  // Calculate dynamic page size based on available height
-  React.useEffect(() => {
-    let timeoutId;
-    
-    const calculatePageSize = () => {
-      if (containerRef.current) {
-        const containerHeight = containerRef.current.offsetHeight;
-        const headerHeight = 180; // Height of title, search, and controls
-        const paginationHeight = 80; // Height of pagination controls
-        const tableHeaderHeight = 60; // Height of table header
-        const rowHeight = 52; // Height of each table row (including padding)
-        const availableHeight = containerHeight - headerHeight - paginationHeight - tableHeaderHeight;
-        const maxRows = Math.max(8, Math.floor(availableHeight / rowHeight)); // Minimum 8 rows, but can be more
-        
-        // Cap the maximum rows to prevent too many rows on very large screens
-        const cappedRows = Math.min(maxRows, 25);
-        
-        if (cappedRows !== pagination.pageSize) {
-          setPagination(prev => ({ ...prev, pageSize: cappedRows }));
-        }
-      }
-    };
-
-    const debouncedCalculate = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(calculatePageSize, 100);
-    };
-
-    // Initial calculation
-    setTimeout(calculatePageSize, 100);
-    window.addEventListener('resize', debouncedCalculate);
-    return () => {
-      window.removeEventListener('resize', debouncedCalculate);
-      clearTimeout(timeoutId);
-    };
-  }, [pagination.pageSize]);
 
   const table = useReactTable({
     data,

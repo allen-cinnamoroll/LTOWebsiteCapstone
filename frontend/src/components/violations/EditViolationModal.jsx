@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { Edit } from "lucide-react";
 
-const EditViolationModal = ({ open, onOpenChange, violationId, onViolationUpdated }) => {
+const EditViolationModal = ({ open, onOpenChange, violationId, onViolationUpdated, onCancel }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [violationData, setViolationData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -235,30 +235,9 @@ const EditViolationModal = ({ open, onOpenChange, violationId, onViolationUpdate
     onOpenChange(isOpen);
   };
 
-  if (loading) {
-    return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Edit Violation
-            </DialogTitle>
-            <DialogDescription>
-              Loading violation data...
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-50 to-red-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col overflow-hidden">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
@@ -282,7 +261,15 @@ const EditViolationModal = ({ open, onOpenChange, violationId, onViolationUpdate
           <Button
             type="button"
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => {
+              // If onCancel is provided, call it to return to details modal
+              // Otherwise, just close the modal
+              if (onCancel) {
+                onCancel();
+              } else {
+                handleOpenChange(false);
+              }
+            }}
             disabled={submitting}
             className="min-w-[100px]"
           >

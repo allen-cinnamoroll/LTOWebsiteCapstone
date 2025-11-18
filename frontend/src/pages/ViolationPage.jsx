@@ -35,18 +35,6 @@ const ViolationPage = () => {
     fetchViolations();
   }, []);
 
-  // Listen for edit violation events from details modal
-  useEffect(() => {
-    const handleEditViolation = (event) => {
-      setSelectedViolationId(event.detail);
-      setEditViolationModalOpen(true);
-    };
-
-    window.addEventListener('editViolation', handleEditViolation);
-    return () => {
-      window.removeEventListener('editViolation', handleEditViolation);
-    };
-  }, []);
 
   // Listen for open violation entry with pre-filled violator
   useEffect(() => {
@@ -141,6 +129,9 @@ const ViolationPage = () => {
   const onEdit = (violationId) => {
     setSelectedViolationId(violationId);
     setEditViolationModalOpen(true);
+    // Close other modals when opening edit
+    setViolationDetailsModalOpen(false);
+    setViolationInformationModalOpen(false);
   };
 
   const handleViolationAdded = () => {
@@ -238,16 +229,45 @@ const ViolationPage = () => {
             setShouldReopenInformationModal(false);
             setViolationInformationModalOpen(true);
           }
+          // Close other modals when closing details
+          if (!isOpen) {
+            setEditViolationModalOpen(false);
+          }
         }}
         violationData={selectedViolationForDetails}
+        onEditClick={(violationId) => {
+          // Close details modal and open edit modal
+          setViolationDetailsModalOpen(false);
+          onEdit(violationId);
+        }}
       />
 
       {/* Edit Violation Modal */}
       <EditViolationModal
         open={editViolationModalOpen}
-        onOpenChange={setEditViolationModalOpen}
+        onOpenChange={(isOpen) => {
+          setEditViolationModalOpen(isOpen);
+          // Close other modals when closing edit (unless canceling to return to details)
+          if (!isOpen) {
+            // Only close details modal if we're not canceling to return to it
+            // The onCancel callback will handle reopening details modal
+            if (!violationDetailsModalOpen && !violationInformationModalOpen) {
+              // No other modals to close
+            }
+          }
+        }}
         violationId={selectedViolationId}
         onViolationUpdated={handleViolationUpdated}
+        onCancel={() => {
+          // Close edit modal and reopen details modal
+          setEditViolationModalOpen(false);
+          if (selectedViolationForDetails) {
+            setViolationDetailsModalOpen(true);
+          } else if (selectedViolation) {
+            // If we came from information modal, reopen that instead
+            setViolationInformationModalOpen(true);
+          }
+        }}
       />
 
       {/* Delete Confirmation Dialog */}

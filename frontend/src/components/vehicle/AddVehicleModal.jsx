@@ -21,7 +21,7 @@ import { saveFormData, loadFormData, clearFormData } from "@/util/formPersistenc
 
 const FORM_STORAGE_KEY = 'vehicle_form_draft';
 
-const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
+const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded, onAddNewOwner, formData, setFormData }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
@@ -29,6 +29,10 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
   const date = formatDate(Date.now());
 
   const getDefaultValues = () => {
+    // Use formData from parent if provided, otherwise check localStorage, otherwise use defaults
+    if (formData && Object.keys(formData).length > 0) {
+      return formData;
+    }
     const savedData = loadFormData(FORM_STORAGE_KEY);
     if (savedData) {
       return savedData;
@@ -53,11 +57,14 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
     defaultValues: getDefaultValues(),
   });
 
-  // Watch form changes and save to localStorage
+  // Watch form changes and sync to parent state
   const formValues = form.watch();
   useEffect(() => {
-    if (open && !submitting) {
-      // Only save if form has some data (not empty)
+    if (open && !submitting && setFormData) {
+      // Sync form values to parent state for persistence across modal transitions
+      setFormData(formValues);
+      
+      // Also save to localStorage as backup
       const hasData = Object.values(formValues).some(value => {
         if (Array.isArray(value)) return value.some(v => v && v !== "");
         if (value instanceof Date) return true;
@@ -67,21 +74,24 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
       if (hasData) {
         saveFormData(FORM_STORAGE_KEY, formValues);
       } else {
-        // Clear saved data if form is empty
         clearFormData(FORM_STORAGE_KEY);
       }
     }
-  }, [formValues, open, submitting]);
+  }, [formValues, open, submitting, setFormData]);
 
-  // Restore saved data when modal opens
+  // Restore form data when modal opens (from parent state or localStorage)
   useEffect(() => {
     if (open) {
-      const savedData = loadFormData(FORM_STORAGE_KEY);
-      if (savedData) {
-        form.reset(savedData);
+      // Prefer formData from parent, fallback to localStorage
+      const dataToUse = (formData && Object.keys(formData).length > 0) 
+        ? formData 
+        : loadFormData(FORM_STORAGE_KEY);
+      
+      if (dataToUse) {
+        form.reset(dataToUse);
       }
     }
-  }, [open, form]);
+  }, [open, form, formData]);
 
   const onSubmit = async (formData) => {
     // Show confirmation modal instead of submitting directly
@@ -127,6 +137,23 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
 
         // Clear saved form data
         clearFormData(FORM_STORAGE_KEY);
+        
+        // Clear parent form data state
+        if (setFormData) {
+          setFormData({
+            plateNo: "",
+            fileNo: "",
+            engineNo: "",
+            chassisNo: "",
+            make: "",
+            bodyType: "",
+            color: "",
+            classification: undefined,
+            dateOfRenewal: undefined,
+            vehicleStatusType: "",
+            driver: "",
+          });
+        }
 
         // Reset form
         form.reset({
@@ -139,6 +166,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
           color: "",
           classification: undefined,
           dateOfRenewal: undefined,
+          vehicleStatusType: "",
           driver: "",
         });
 
@@ -169,7 +197,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
   return (
     <>
     <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col overflow-hidden">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Car className="h-5 w-5" />
@@ -185,6 +213,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded }) => {
               form={form}
               onSubmit={onSubmit}
               submitting={submitting}
+              onAddNewOwner={onAddNewOwner}
             />
           </div>
 

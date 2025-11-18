@@ -32,10 +32,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import AddDriverModal from "@/components/driver/AddDriverModal";
 import OwnerDetailsModal from "./OwnerDetailsModal";
 
-const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, isEditMode = false, readOnlyFields = [], prePopulatedOwner = "" }) => {
+const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, isEditMode = false, readOnlyFields = [], prePopulatedOwner = "", onAddNewOwner }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useAuth();
@@ -44,7 +43,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   const [isSearching, setIsSearching] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [showNoResults, setShowNoResults] = useState(false);
-  const [addDriverModalOpen, setAddDriverModalOpen] = useState(false);
   const [isOwnerEditable, setIsOwnerEditable] = useState(false);
   const [ownerDetailsModalOpen, setOwnerDetailsModalOpen] = useState(false);
   const [selectedOwnerId, setSelectedOwnerId] = useState(null);
@@ -148,24 +146,68 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
       ownerRepresentativeName: currentFormData.ownerRepresentativeName || searchTerm || ''
     }));
     
-    // Open the add owner modal
-    setAddDriverModalOpen(true);
+    // Call parent callback to open Add Owner modal (which will close Add Vehicle modal)
+    if (onAddNewOwner) {
+      onAddNewOwner();
+    }
   };
-
-  const handleDriverAdded = (newDriver) => {
-    // Set the newly created owner as selected
-    setSelectedDriver(newDriver);
-    form.setValue("driver", newDriver._id);
-    setSearchTerm(newDriver.ownerRepresentativeName);
+  
+  // Watch for driver field changes (e.g., when owner is created externally)
+  // and fetch owner details to display the name
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      // When driver field changes, fetch owner details if needed
+      if (name === "driver" || name === undefined) {
+        const driverId = value.driver || form.getValues("driver");
+        if (driverId && !selectedDriver) {
+          // Fetch owner details if driver ID is set but we don't have the owner object
+          const fetchOwnerDetails = async () => {
+            try {
+              const { data } = await apiClient.get(`/owner/${driverId}`, {
+                headers: { Authorization: token }
+              });
+              if (data.success && data.data) {
+                const owner = data.data;
+                setSelectedDriver(owner);
+                setSearchTerm(owner.ownerRepresentativeName || "");
     setSearchResults([]);
-    setShowNoResults(false); // Hide the "Add new owner" option
-    setAddDriverModalOpen(false);
-    setIsOwnerEditable(false); // Return to read-only state after selection
-    
-    toast.success("Owner added successfully", {
-      description: "The owner has been selected for this vehicle."
+                setShowNoResults(false);
+                setIsOwnerEditable(false);
+              }
+            } catch (error) {
+              console.error("Failed to fetch owner details:", error);
+            }
+          };
+          fetchOwnerDetails();
+        }
+      }
     });
-  };
+    
+    // Also check immediately when component mounts or form is reset
+    const driverId = form.getValues("driver");
+    if (driverId && !selectedDriver) {
+      const fetchOwnerDetails = async () => {
+        try {
+          const { data } = await apiClient.get(`/owner/${driverId}`, {
+            headers: { Authorization: token }
+          });
+          if (data.success && data.data) {
+            const owner = data.data;
+            setSelectedDriver(owner);
+            setSearchTerm(owner.ownerRepresentativeName || "");
+            setSearchResults([]);
+            setShowNoResults(false);
+            setIsOwnerEditable(false);
+          }
+        } catch (error) {
+          console.error("Failed to fetch owner details:", error);
+        }
+      };
+      fetchOwnerDetails();
+    }
+    
+    return () => subscription.unsubscribe();
+  }, [form, selectedDriver, token]);
 
 
   return (
@@ -450,7 +492,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-black dark:text-white text-sm",
+                            "text-black dark:text-white text-sm border border-gray-300 dark:border-[#424242]",
                             form.formState.errors.classification && "border-red-400"
                           )}
                         >
@@ -487,7 +529,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                       <FormControl>
                         <SelectTrigger
                           className={cn(
-                            "text-black dark:text-white text-sm",
+                            "text-black dark:text-white text-sm border border-gray-300 dark:border-[#424242]",
                             form.formState.errors.vehicleStatusType && "border-red-400"
                           )}
                         >
@@ -533,7 +575,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                               <Button
                                 variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal text-black dark:text-white text-sm",
+                                "w-full pl-3 text-left font-normal text-black dark:text-white text-sm border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                                 !field.value && "text-muted-foreground",
                                 form.formState.errors.dateOfRenewal && "border-red-400"
                               )}
@@ -643,8 +685,8 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                                 className="flex-1 cursor-pointer"
                                 onClick={() => handleDriverSelect(driver)}
                               >
-                                <div className="text-sm font-medium text-foreground">{driver.ownerRepresentativeName}</div>
-                                <div className="text-xs text-muted-foreground mt-1">
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-200">{driver.ownerRepresentativeName}</div>
+                                <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                                   Current vehicles: {driver.plateNo || "None"}
                                 </div>
                               </div>
@@ -727,13 +769,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
           {/* Removed duplicate buttons - using modal footer buttons instead */}
         </div>
       </form>
-      
-      {/* Add Owner Modal */}
-      <AddDriverModal
-        open={addDriverModalOpen}
-        onOpenChange={setAddDriverModalOpen}
-        onDriverAdded={handleDriverAdded}
-      />
       
       {/* Owner Details Modal */}
       <OwnerDetailsModal

@@ -22,7 +22,7 @@ import { saveFormData, loadFormData, clearFormData } from "@/util/formPersistenc
 
 const FORM_STORAGE_KEY = 'driver_form_draft';
 
-const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
+const AddDriverModal = ({ open, onOpenChange, onDriverAdded, onCancel }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
@@ -267,11 +267,16 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
           birthDate: undefined,
         });
 
-        // Clear session storage and close modal
+        // Clear session storage
         sessionStorage.removeItem('vehicleFormData');
-        onOpenChange(false);
+        
+        // Call onDriverAdded callback with the new owner data
+        // The parent will handle closing this modal and reopening Add Vehicle modal
         if (onDriverAdded) {
           onDriverAdded(data.data);
+        } else {
+          // Fallback: close modal if no callback provided
+          onOpenChange(false);
         }
       }
     } catch (error) {
@@ -287,6 +292,11 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
+      // If closing and onCancel is provided, use it to return to Add Vehicle modal
+      if (onCancel) {
+        onCancel();
+        return;
+      }
       // Don't clear form data when closing - it will be restored next time
       // Only reset if user explicitly wants to discard (we'll keep the saved data)
     }
@@ -294,9 +304,16 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
   };
 
   const handleCancel = () => {
-    // Clear session storage and close modal
+    // Clear session storage
     sessionStorage.removeItem('vehicleFormData');
+    
+    // Call onCancel callback if provided (to return to Add Vehicle modal)
+    if (onCancel) {
+      onCancel();
+    } else {
+      // Fallback to default behavior
     handleOpenChange(false);
+    }
   };
 
   return (
@@ -348,10 +365,13 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded }) => {
       
       {/* Confirmation Modal */}
       <Dialog open={showConfirmation} onOpenChange={(isOpen) => {
-        setShowConfirmation(isOpen);
         if (!isOpen) {
-          // If confirmation is closed, also close the main dialog
-          onOpenChange(false);
+          // If confirmation is closed (e.g., clicking outside), return to Add Vehicle modal
+          // The "Back to Edit" button explicitly reopens the Add Owner modal
+          setShowConfirmation(false);
+          if (onCancel) {
+            onCancel();
+          }
         }
       }}>
         <DialogContent className="max-w-lg border border-gray-200 animate-in fade-in-0 zoom-in-95 duration-300">

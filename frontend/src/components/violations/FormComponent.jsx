@@ -569,6 +569,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       variant="outline"
                       size="icon"
                       onClick={() => removeViolation(index)}
+                      className="border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 dark:hover:border-red-500"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -580,7 +581,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               type="button"
               variant="outline"
               onClick={addViolation}
-              className="w-full text-xs"
+              className="w-full text-xs border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Violation
@@ -723,7 +724,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal text-xs",
+                              "w-full pl-3 text-left font-normal text-xs border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                               !field.value && "text-muted-foreground"
                             )}
                           >

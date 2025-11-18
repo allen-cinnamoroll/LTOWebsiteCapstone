@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { User, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) => {
+const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated, onCancel }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showNoChanges, setShowNoChanges] = useState(false);
@@ -305,13 +305,19 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
   };
 
   const handleCancel = () => {
+    // If onCancel is provided, call it to return to details modal
+    // Otherwise, just close the modal
+    if (onCancel) {
+      onCancel();
+    } else {
     handleOpenChange(false);
+    }
   };
 
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar]:bg-transparent animate-in fade-in-0 zoom-in-95 duration-300">
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&::-webkit-scrollbar-thumb:hover]:bg-gray-500 [&::-webkit-scrollbar]:bg-transparent animate-in fade-in-0 zoom-in-95 duration-300">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" />
@@ -332,7 +338,24 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated }) =>
             />
           </div>
 
-          <DialogFooter className="flex justify-end gap-3 pt-6">
+          <DialogFooter className="flex justify-start gap-3 pt-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                // If onCancel is provided, call it to return to details modal
+                // Otherwise, just close the modal
+                if (onCancel) {
+                  onCancel();
+                } else {
+                  handleOpenChange(false);
+                }
+              }}
+              disabled={submitting}
+              className="min-w-[100px]"
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               form="driver-form"

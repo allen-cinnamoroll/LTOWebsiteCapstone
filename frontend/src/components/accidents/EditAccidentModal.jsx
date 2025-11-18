@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { AlertTriangle } from "lucide-react";
 
-const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }) => {
+const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated, onCancel }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
@@ -193,21 +193,9 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
     onOpenChange(isOpen);
   };
 
-  if (loading) {
-    return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-50 to-red-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col overflow-hidden">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5" />
@@ -218,7 +206,7 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-1 py-2">
+        <div className="flex-1 overflow-y-auto px-1 py-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-red-600 dark:[&::-webkit-scrollbar-thumb]:hover:bg-red-500">
           <FormComponent
             form={form}
             onSubmit={onSubmit}
@@ -231,7 +219,15 @@ const EditAccidentModal = ({ open, onOpenChange, accidentId, onAccidentUpdated }
           <Button
             type="button"
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => {
+              // If onCancel is provided, call it to return to details modal
+              // Otherwise, just close the modal
+              if (onCancel) {
+                onCancel();
+              } else {
+                handleOpenChange(false);
+              }
+            }}
             disabled={submitting}
             className="min-w-[100px]"
           >

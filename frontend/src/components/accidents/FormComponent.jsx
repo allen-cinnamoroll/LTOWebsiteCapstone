@@ -465,7 +465,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full text-left font-normal text-xs justify-start",
+                          "w-full text-left font-normal text-xs justify-start border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -523,7 +523,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full text-left font-normal text-xs justify-start",
+                            "w-full text-left font-normal text-xs justify-start border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -579,7 +579,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full text-left font-normal text-xs justify-start",
+                          "w-full text-left font-normal text-xs justify-start border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                           !field.value && "text-muted-foreground"
                         )}
                       >
@@ -617,7 +617,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormControl>
                 <Textarea 
                   placeholder="Enter narrative details about the incident..." 
-                  className="resize-none text-xs"
+                  className="resize-none text-xs border border-gray-300 dark:border-[#424242] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-red-600 dark:[&::-webkit-scrollbar-thumb]:hover:bg-red-500"
                   rows={4}
                   {...field} 
                 />

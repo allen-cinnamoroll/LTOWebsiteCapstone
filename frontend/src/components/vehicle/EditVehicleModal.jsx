@@ -19,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { Car } from "lucide-react";
 import NoChangesModal from "./NoChangesModal";
 
-const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) => {
+const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onAddNewOwner, formData, setFormData, onCancel }) => {
   const [submitting, setIsSubmitting] = useState(false);
   const [vehicleData, setVehicleData] = useState({});
   const [originalData, setOriginalData] = useState({});
@@ -30,9 +30,15 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
   const { token } = useAuth();
   const date = formatDate(Date.now());
 
-  const form = useForm({
-    resolver: zodResolver(EditVehicleSchema),
-    defaultValues: {
+  const getDefaultValues = () => {
+    // Use formData from parent if provided, otherwise use defaults
+    if (formData && Object.keys(formData).length > 0) {
+      return {
+        ...formData,
+        ownerName: vehicleData.ownerName || "",
+      };
+    }
+    return {
       plateNo: "",
       fileNo: "",
       engineNo: "",
@@ -45,7 +51,12 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
       dateOfRenewal: undefined,
       driver: "",
       ownerName: "",
-    },
+    };
+  };
+
+  const form = useForm({
+    resolver: zodResolver(EditVehicleSchema),
+    defaultValues: getDefaultValues(),
   });
 
   const { reset } = form;
@@ -57,12 +68,37 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
     }
   }, [open, vehicleId, token]);
 
+  // Watch form changes and sync to parent state
+  const formValues = form.watch();
+  useEffect(() => {
+    if (open && !submitting && setFormData) {
+      // Sync form values to parent state for persistence across modal transitions
+      setFormData({
+        plateNo: formValues.plateNo || "",
+        fileNo: formValues.fileNo || "",
+        engineNo: formValues.engineNo || "",
+        chassisNo: formValues.chassisNo || "",
+        make: formValues.make || "",
+        bodyType: formValues.bodyType || "",
+        color: formValues.color || "",
+        classification: formValues.classification,
+        dateOfRenewal: formValues.dateOfRenewal,
+        vehicleStatusType: formValues.vehicleStatusType || "",
+        driver: formValues.driver || "",
+      });
+    }
+  }, [formValues, open, submitting, setFormData]);
+
   // Update form when vehicleData changes
   useEffect(() => {
     if (Object.keys(vehicleData).length > 0) {
-      reset(vehicleData);
+      // Prefer formData from parent if available, otherwise use vehicleData
+      const dataToUse = (formData && Object.keys(formData).length > 0 && formData.plateNo) 
+        ? { ...formData, ownerName: vehicleData.ownerName || "" }
+        : vehicleData;
+      reset(dataToUse);
     }
-  }, [vehicleData, reset]);
+  }, [vehicleData, reset, formData]);
 
   const fetchVehicleData = async () => {
     setLoading(true);
@@ -233,6 +269,22 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
+      // Clear parent form data when closing modal
+      if (setFormData) {
+        setFormData({
+          plateNo: "",
+          fileNo: "",
+          engineNo: "",
+          chassisNo: "",
+          make: "",
+          bodyType: "",
+          color: "",
+          classification: undefined,
+          dateOfRenewal: undefined,
+          vehicleStatusType: "",
+          driver: "",
+        });
+      }
       // Reset form when closing modal
       form.reset({
         plateNo: "",
@@ -264,31 +316,10 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
     onOpenChange(false);
   };
 
-  if (loading) {
-    return (
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="flex items-center gap-2">
-              <Car className="h-5 w-5" />
-              Edit Vehicle
-            </DialogTitle>
-            <DialogDescription>
-              Loading vehicle data...
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col overflow-hidden">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Car className="h-5 w-5" />
@@ -308,6 +339,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
               isEditMode={true}
               readOnlyFields={['fileNo', 'dateOfRenewal']}
               prePopulatedOwner={vehicleData.ownerName}
+              onAddNewOwner={onAddNewOwner}
             />
           </div>
 
@@ -315,7 +347,15 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleOpenChange(false)}
+              onClick={() => {
+                // If onCancel is provided, call it to return to details modal
+                // Otherwise, just close the modal
+                if (onCancel) {
+                  onCancel();
+                } else {
+                  handleOpenChange(false);
+                }
+              }}
               disabled={submitting}
               className="min-w-[100px]"
             >
@@ -325,7 +365,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated }) =
               type="submit"
               form="vehicle-form"
               disabled={submitting}
-              className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+              className="flex items-center gap-2 min-w-[120px] bg-blue-600 hover:bg-blue-700 text-white"
             >
               {submitting && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
               {submitting ? "Updating..." : "Update Vehicle"}

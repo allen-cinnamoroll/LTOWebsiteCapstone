@@ -121,6 +121,8 @@ const DriverPage = () => {
     if (driver) {
       setSelectedDriver(driver);
       setEditDriverModalOpen(true);
+      // Close other modals when opening edit
+      setDriverProfileModalOpen(false);
     } else {
       toast.error("Owner not found", {
         description: "The selected owner could not be found."
@@ -289,18 +291,46 @@ const DriverPage = () => {
       {/* Driver Profile Modal */}
       <DriverModal
         open={driverProfileModalOpen}
-        onOpenChange={setDriverProfileModalOpen}
+        onOpenChange={(isOpen) => {
+          setDriverProfileModalOpen(isOpen);
+          // Close other modals when closing details
+          if (!isOpen) {
+            setEditDriverModalOpen(false);
+          }
+        }}
         driverData={selectedDriver}
         onFileNumberClick={handleFileNumberClick}
         onDriverUpdated={handleDriverUpdated}
+        onEditClick={(driverId) => {
+          // Close details modal and open edit modal
+          setDriverProfileModalOpen(false);
+          onEdit(driverId);
+        }}
       />
 
       {/* Edit Driver Modal */}
       <EditDriverModal
         open={editDriverModalOpen}
-        onOpenChange={setEditDriverModalOpen}
+        onOpenChange={(isOpen) => {
+          setEditDriverModalOpen(isOpen);
+          // Close other modals when closing edit (unless canceling to return to details)
+          if (!isOpen) {
+            // Only close details modal if we're not canceling to return to it
+            // The onCancel callback will handle reopening details modal
+            if (!driverProfileModalOpen) {
+              // No other modals to close
+            }
+          }
+        }}
         driverData={selectedDriver}
         onDriverUpdated={handleDriverUpdated}
+        onCancel={() => {
+          // Close edit modal and reopen details modal
+          setEditDriverModalOpen(false);
+          if (selectedDriver) {
+            setDriverProfileModalOpen(true);
+          }
+        }}
       />
 
       {/* Vehicle Modal */}

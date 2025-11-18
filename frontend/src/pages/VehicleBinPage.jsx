@@ -168,6 +168,7 @@ const VehicleBinPage = () => {
             submitting={submitting}
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
+            showExport={false}
           />
         </div>
       </div>

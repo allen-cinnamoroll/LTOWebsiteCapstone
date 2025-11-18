@@ -59,7 +59,7 @@ const DriversTable = ({
   const [columnSizing, setColumnSizing] = React.useState({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 9, // 9 rows per page
+    pageSize: 10, // 10 rows per page
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });

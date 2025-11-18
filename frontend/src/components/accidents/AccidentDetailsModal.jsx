@@ -16,20 +16,12 @@ import {
   Hash, 
   FileText,
   Edit,
-  Loader2,
   User,
   Clock
 } from "lucide-react";
 import { formatSimpleDate } from "@/util/dateFormatter";
 
-const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (open && accidentData) {
-      setLoading(false);
-    }
-  }, [open, accidentData]);
+const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEditClick }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Not set";
@@ -275,22 +267,6 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
     { id: "accident", label: "Accident Details", icon: FileText },
   ];
 
-  if (loading) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>Loading Incident Details</DialogTitle>
-            <DialogDescription>Please wait while we fetch the incident information</DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
@@ -337,7 +313,7 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
           </div>
 
           {/* Scrollable Tab Content */}
-          <div className="flex-1 overflow-y-auto bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="flex-1 overflow-y-auto bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-red-600 dark:[&::-webkit-scrollbar-thumb]:hover:bg-red-500">
             <AccidentDetailsTab />
           </div>
 
@@ -346,9 +322,10 @@ const AccidentDetailsModal = ({ open, onOpenChange, accidentData, onEdit }) => {
              <div className="flex items-center justify-end">
                <Button
                  onClick={() => {
-                   onOpenChange(false);
-                   // Trigger edit modal instead of navigation
-                   window.dispatchEvent(new CustomEvent('editAccident', { detail: accidentData?._id }));
+                   // Close details modal and trigger edit via parent callback
+                   if (onEditClick && accidentData?._id) {
+                     onEditClick(accidentData._id);
+                   }
                  }}
                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2 text-sm font-semibold"
                >

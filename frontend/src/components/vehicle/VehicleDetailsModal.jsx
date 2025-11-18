@@ -10,13 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, Loader2, Edit } from "lucide-react";
-import EditVehicleModal from "./EditVehicleModal";
 import VehicleRenewalModal from "./VehicleRenewalModal";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
-const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated }) => {
+const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated, onEditClick }) => {
   const [activeTab, setActiveTab] = useState("vehicle");
   const [ownerData, setOwnerData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -24,7 +23,6 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [renewalLoading, setRenewalLoading] = useState(false);
   const [renewalError, setRenewalError] = useState(null);
   const [userNameCache, setUserNameCache] = useState({});
-  const [editOpen, setEditOpen] = useState(false);
   const [renewOpen, setRenewOpen] = useState(false);
   const { token } = useAuth();
 
@@ -669,7 +667,12 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setEditOpen(true)}
+            onClick={() => {
+              // Close details modal and trigger edit via parent callback
+              if (onEditClick && vehicleData?._id) {
+                onEditClick(vehicleData._id);
+              }
+            }}
             className="text-xs"
           >
             <Edit className="h-3 w-3 mr-1" />
@@ -688,12 +691,6 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       </DialogContent>
     </Dialog>
     {/* Action Modals */}
-    <EditVehicleModal
-      open={editOpen}
-      onOpenChange={setEditOpen}
-      vehicleId={vehicleData?._id}
-      onVehicleUpdated={onVehicleUpdated}
-    />
     <VehicleRenewalModal
       open={renewOpen}
       onOpenChange={setRenewOpen}
