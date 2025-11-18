@@ -183,11 +183,11 @@ export function NavUser() {
                 }
               }}
               disabled={isLoggingOut}
-              className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-white"
             >
               {isLoggingOut ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
                   Logging out...
                 </>
               ) : (
