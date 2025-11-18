@@ -14,23 +14,20 @@ const COLORS = ["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#10b981"
 
 const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 	// Expect data as [{ type: 'Alarm'|'Confiscated'|'Impounded', value: number }, ...]
-	const [isDarkMode, setIsDarkMode] = useState(() => {
+	// Initialize with correct theme detection - only check the class, not system preference
+	const getInitialTheme = () => {
 		if (typeof document === "undefined") return false;
 		const root = document.documentElement;
-		const prefersDark =
-			window.matchMedia &&
-			window.matchMedia("(prefers-color-scheme: dark)").matches;
-		return root.classList.contains("dark") || prefersDark;
-	});
+		return root.classList.contains("dark");
+	};
+
+	const [isDarkMode, setIsDarkMode] = useState(getInitialTheme);
 
 	useEffect(() => {
 		const checkTheme = () => {
 			if (typeof document === "undefined") return;
 			const root = document.documentElement;
-			const prefersDark =
-				window.matchMedia &&
-				window.matchMedia("(prefers-color-scheme: dark)").matches;
-			setIsDarkMode(root.classList.contains("dark") || prefersDark);
+			setIsDarkMode(root.classList.contains("dark"));
 		};
 
 		checkTheme();
@@ -41,23 +38,7 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 				attributes: true,
 				attributeFilter: ["class"],
 			});
-			
-			// Also listen to media query changes
-			const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-			if (mediaQuery.addEventListener) {
-				mediaQuery.addEventListener("change", checkTheme);
-			} else if (mediaQuery.addListener) {
-				mediaQuery.addListener(checkTheme);
-			}
-			
-			return () => {
-				observer.disconnect();
-				if (mediaQuery.removeEventListener) {
-					mediaQuery.removeEventListener("change", checkTheme);
-				} else if (mediaQuery.removeListener) {
-					mediaQuery.removeListener(checkTheme);
-				}
-			};
+			return () => observer.disconnect();
 		}
 	}, []);
 
@@ -131,7 +112,7 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 													y={viewBox.cy - 8}
 													textAnchor="middle"
 													fontSize="9"
-													fill="#000000"
+													fill={isDarkMode ? "#e5e7eb" : "#111827"}
 													fontWeight="600"
 													style={{ 
 														userSelect: 'none',
@@ -148,7 +129,7 @@ const ViolationTypeDistribution = ({ data = [], colors = COLORS }) => {
 													textAnchor="middle"
 													fontSize="24"
 													fontWeight="800"
-													fill="#000000"
+													fill={isDarkMode ? "#ffffff" : "#111827"}
 													style={{ 
 														filter: isDarkMode 
 															? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'

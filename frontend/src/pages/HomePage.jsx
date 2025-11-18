@@ -218,11 +218,12 @@ const HomePage = () => {
             {/* Row 1: Stat Cards - Violation Total, Total Accident, System Users */}
             <div className="col-span-12 md:col-span-4">
               <StatCard
-                name="Violation Total"
+                name="Total Violation"
                 icon={AlertTriangle}
                 value={stats.kpi?.violations?.current?.toLocaleString() || 0}
                 color="orange"
                 loading={loading}
+                description="Total violations recorded this month"
               />
             </div>
             <div className="col-span-12 md:col-span-4">
@@ -232,6 +233,7 @@ const HomePage = () => {
                 value={stats.kpi?.accidents?.current?.toLocaleString() || 0}
                 color="red"
                 loading={loading}
+                description="Total accidents recorded this month"
               />
             </div>
             <div className="col-span-12 md:col-span-4">
@@ -241,6 +243,7 @@ const HomePage = () => {
                 value={stats.kpi?.systemUsers?.total?.toLocaleString() || stats.userStats?.total?.toLocaleString() || 0}
                 color="blue"
                 loading={loading}
+                description="Total users in the system"
               />
             </div>
 

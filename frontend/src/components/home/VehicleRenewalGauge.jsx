@@ -1,6 +1,6 @@
 "use client";
  
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Car } from "lucide-react";
  
 // Helper: clamp a value into a range
@@ -19,6 +19,34 @@ const formatInt = (n) =>
  * - Responsive: SVG scales with container width
  */
 const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal" }) => {
+  // Initialize with correct theme detection - only check the class, not system preference
+  const getInitialTheme = () => {
+    if (typeof document === "undefined") return false;
+    const root = document.documentElement;
+    return root.classList.contains("dark");
+  };
+
+  const [isDarkMode, setIsDarkMode] = useState(getInitialTheme);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      if (typeof document === "undefined") return;
+      const root = document.documentElement;
+      setIsDarkMode(root.classList.contains("dark"));
+    };
+
+    checkTheme();
+
+    if (typeof MutationObserver !== "undefined") {
+      const observer = new MutationObserver(checkTheme);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+      return () => observer.disconnect();
+    }
+  }, []);
+
   const safeTarget = Math.max(target, min);
   const range = Math.max(1, safeTarget - min); // avoid divide-by-zero
   const ratio = (actual - min) / range;
@@ -156,8 +184,8 @@ const VehicleRenewalGauge = ({ actual, target, min = 0, title = "Vehicle Renewal
           })}
  
           {/* Needle */}
-          <path d={needlePath} fill="#111827" />
-          <circle cx={cx} cy={cy} r={8} fill="#111827" />
+          <path d={needlePath} fill={isDarkMode ? "#ffffff" : "#111827"} />
+          <circle cx={cx} cy={cy} r={8} fill={isDarkMode ? "#ffffff" : "#111827"} />
  
           {/* End labels removed as requested */}
         </svg>
