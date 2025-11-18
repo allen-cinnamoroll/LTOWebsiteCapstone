@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // Track logout loading state
   const [showOTPModal, setShowOTPModal] = useState(false);
   const navigate = useNavigate();
   const isNavigating = useRef(false); // Track navigation state
@@ -176,6 +177,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    setIsLoggingOut(true); // Show loading overlay
     try {
       // Call backend logout API to log the activity
       await apiClient.post("/auth/logout");
@@ -183,12 +185,16 @@ export const AuthProvider = ({ children }) => {
       // Even if the API call fails, we should still clear local state
       console.error("Logout API call failed:", error);
     } finally {
+      // Add a small delay to ensure the loading message is visible
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Always clear local state regardless of API call result
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
       setToken(null);
       setUserData(null);
       setIsAuthenticated(false);
+      setIsLoggingOut(false); // Hide loading overlay
       
       // Prevent multiple navigation calls
       if (!isNavigating.current) {
@@ -287,6 +293,15 @@ export const AuthProvider = ({ children }) => {
         onSuccess={handleOTPSuccess}
         userEmail={userData?.email || ''}
       />
+      {/* Logout Loading Overlay */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 bg-white dark:bg-gray-900 rounded-lg p-8 shadow-xl">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-400"></div>
+            <p className="text-lg font-medium text-gray-900 dark:text-gray-100">Logging out..</p>
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

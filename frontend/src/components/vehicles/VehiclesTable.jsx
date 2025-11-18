@@ -128,10 +128,10 @@ const VehiclesTable = ({
 
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
           {onAdd && (
-            <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
-              <Plus />
-              <span className="hidden lg:inline">{"Add Vehicle"}</span>
-            </Button>
+          <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
+            <Plus />
+            <span className="hidden lg:inline">{"Add Vehicle"}</span>
+          </Button>
           )}
           {onBinClick && (
             <Button onClick={onBinClick} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>

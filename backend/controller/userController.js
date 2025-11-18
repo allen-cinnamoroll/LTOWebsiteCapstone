@@ -253,7 +253,20 @@ export const getUserLogs = async (req, res) => {
     }
     
     if (logType && logType !== "all") {
+      // Validate logType against enum to prevent query errors
+      const validLogTypes = ['login', 'logout', 'register', 'update', 'delete', 'password_change', 'password_reset', 'password_reset_otp_sent', 'password_reset_otp_verified', 'otp_sent', 'otp_verified', 'otp_reset', 'profile_update', 'add_driver', 'add_vehicle', 'add_accident', 'add_violation', 'update_driver', 'update_vehicle', 'update_accident', 'update_violation', 'delete_driver', 'delete_vehicle', 'delete_accident', 'delete_violation', 'restore_driver', 'restore_vehicle', 'restore_accident', 'restore_violation', 'permanent_delete_driver', 'permanent_delete_vehicle', 'permanent_delete_accident', 'permanent_delete_violation'];
+      if (validLogTypes.includes(logType)) {
       filter.logType = logType;
+      } else {
+        // Invalid logType, return empty results instead of error
+        return res.status(200).json({
+          success: true,
+          logs: [],
+          totalLogs: 0,
+          totalPages: 0,
+          currentPage: parseInt(page),
+        });
+      }
     }
     
     if (dateFrom || dateTo) {
