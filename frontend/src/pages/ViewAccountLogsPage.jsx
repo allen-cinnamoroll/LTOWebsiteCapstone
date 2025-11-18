@@ -41,10 +41,18 @@ const logTypes = [
   { value: "update_vehicle", label: "Update Vehicle" },
   { value: "update_accident", label: "Update Accident" },
   { value: "update_violation", label: "Update Violation" },
-  { value: "delete_driver", label: "Delete Owner" },
-  { value: "delete_vehicle", label: "Delete Vehicle" },
-  { value: "delete_accident", label: "Delete Accident" },
-  { value: "delete_violation", label: "Delete Violation" },
+  { value: "delete_driver", label: "Delete Owner (Move to Bin)" },
+  { value: "delete_vehicle", label: "Delete Vehicle (Move to Bin)" },
+  { value: "delete_accident", label: "Delete Accident (Move to Bin)" },
+  { value: "delete_violation", label: "Delete Violation (Move to Bin)" },
+  { value: "restore_driver", label: "Restore Owner" },
+  { value: "restore_vehicle", label: "Restore Vehicle" },
+  { value: "restore_accident", label: "Restore Accident" },
+  { value: "restore_violation", label: "Restore Violation" },
+  { value: "permanent_delete_driver", label: "Permanently Delete Owner" },
+  { value: "permanent_delete_vehicle", label: "Permanently Delete Vehicle" },
+  { value: "permanent_delete_accident", label: "Permanently Delete Accident" },
+  { value: "permanent_delete_violation", label: "Permanently Delete Violation" },
 ];
 
 export default function ViewAccountLogsPage() {
