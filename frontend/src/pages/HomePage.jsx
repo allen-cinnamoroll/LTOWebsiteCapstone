@@ -177,32 +177,34 @@ const HomePage = () => {
               <KpiSkeleton />
             </div>
 
-            {/* Row 2: Vehicle Renewal and Charts Skeleton */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+            {/* Row 2: Vehicle Renewal, Most Common Violations, and Online Users Skeleton */}
+            <div className="col-span-12 md:col-span-4 lg:col-span-3">
               <CardSkeleton contentHeight="aspect-[4/3]" />
             </div>
-            <div className="col-span-12 lg:col-span-3">
+            <div className="col-span-12 md:col-span-8 lg:col-span-6">
+              <ChartSkeleton />
+            </div>
+            <div className="col-span-12 md:col-span-4 lg:col-span-3">
+              <CardSkeleton showContent={false} />
+            </div>
+
+            {/* Row 3: Top Officers and Violation Distribution Skeleton */}
+            <div className="col-span-12 md:col-span-8 lg:col-span-8">
+              <ChartSkeleton />
+            </div>
+            <div className="col-span-12 md:col-span-4 lg:col-span-4">
+              <ChartSkeleton />
+            </div>
+
+            {/* Row 4: System Status & Analysis Skeleton */}
+            <div className="col-span-12 lg:col-span-6">
               <ChartSkeleton />
             </div>
             <div className="col-span-12 lg:col-span-6">
               <ChartSkeleton />
             </div>
 
-            {/* Row 3: System Status & Analysis */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <CardSkeleton showContent={false} />
-            </div>
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <ChartSkeleton />
-            </div>
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <ChartSkeleton />
-            </div>
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <ChartSkeleton />
-            </div>
-
-            {/* Row 4: Accident Analysis */}
+            {/* Row 5: Accident Analysis Skeleton */}
             <div className="col-span-12 lg:col-span-6">
               <ChartSkeleton />
             </div>
@@ -249,7 +251,7 @@ const HomePage = () => {
 
             {/* Row 2: Key Performance Indicators and Charts */}
             {/* Vehicle Renewal KPI */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+            <div className="col-span-12 md:col-span-4 lg:col-span-3">
               <div className="w-full">
                 <VehicleRenewalGauge
                   actual={stats.kpi?.renewal?.current || 0}
@@ -259,17 +261,8 @@ const HomePage = () => {
               </div>
             </div>
             
-            {/* Top Performing Municipalities */}
-            <div className="col-span-12 lg:col-span-3">
-              {charts.loading ? (
-                <ChartSkeleton />
-              ) : (
-                <Top3Municipality data={charts.municipalityTop3 || []} />
-              )}
-            </div>
-            
             {/* Most Common Violations */}
-            <div className="col-span-12 lg:col-span-6">
+            <div className="col-span-12 md:col-span-8 lg:col-span-6">
               {charts.loading ? (
                 <ChartSkeleton />
               ) : (
@@ -277,27 +270,18 @@ const HomePage = () => {
               )}
             </div>
 
-            {/* Row 2: System Status & Analysis */}
             {/* Active Users */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+            <div className="col-span-12 md:col-span-4 lg:col-span-3">
               <div className="rounded-xl shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 border border-gray-200 dark:border-gray-700 p-4 h-full overflow-hidden relative">
                 {/* Decorative gradient background */}
                 <div className="absolute top-0 right-0 w-32 h-32 opacity-5 dark:opacity-10 bg-blue-500 rounded-full blur-3xl"></div>
                 <OnlineUsersPanel />
               </div>
             </div>
-            
-            {/* Violation Categories */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              {charts.loading ? (
-                <ChartSkeleton />
-              ) : (
-                <ViolationTypeDistribution data={charts.violationTypeDistribution || []} />
-              )}
-            </div>
-            
+
+            {/* Row 3: Top Officers and Violation Distribution */}
             {/* Top Performing Officers */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+            <div className="col-span-12 md:col-span-8 lg:col-span-8">
               {charts.loading ? (
                 <ChartSkeleton />
               ) : (
@@ -305,8 +289,27 @@ const HomePage = () => {
               )}
             </div>
             
+            {/* Violation Categories */}
+            <div className="col-span-12 md:col-span-4 lg:col-span-4">
+              {charts.loading ? (
+                <ChartSkeleton />
+              ) : (
+                <ViolationTypeDistribution data={charts.violationTypeDistribution || []} />
+              )}
+            </div>
+
+            {/* Row 4: System Status & Analysis */}
+            {/* Top Performing Municipalities */}
+            <div className="col-span-12 lg:col-span-6">
+              {charts.loading ? (
+                <ChartSkeleton />
+              ) : (
+                <Top3Municipality data={charts.municipalityTop3 || []} />
+              )}
+            </div>
+            
             {/* Areas Needing Attention */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+            <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
                 <ChartSkeleton />
               ) : (
@@ -314,7 +317,7 @@ const HomePage = () => {
               )}
             </div>
 
-            {/* Row 3: Accident Analysis */}
+            {/* Row 5: Accident Analysis */}
             {/* Accident-Prone Areas */}
             <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
