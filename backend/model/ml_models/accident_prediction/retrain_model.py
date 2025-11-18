@@ -11,20 +11,25 @@ import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Get script directory
+script_dir = Path(__file__).parent.absolute()
+project_root = script_dir.parent.parent.parent.parent
+
+# Create logs directory if it doesn't exist (Windows-compatible)
+logs_dir = script_dir / 'logs'
+logs_dir.mkdir(exist_ok=True)
+log_file = logs_dir / 'accident-prediction-retrain.log'
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/var/log/accident-prediction-retrain.log'),
+        logging.FileHandler(str(log_file)),
         logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
-
-# Get script directory
-script_dir = Path(__file__).parent.absolute()
-project_root = script_dir.parent.parent.parent.parent
 
 def is_last_day_of_month():
     """Check if today is the last day of the current month"""
@@ -56,14 +61,23 @@ def main():
     
     try:
         # Activate virtual environment and run training
-        venv_python = script_dir / 'venv' / 'bin' / 'python'
+        # Windows uses 'Scripts', Linux/Mac uses 'bin'
+        import platform
+        if platform.system() == 'Windows':
+            venv_python = script_dir / 'venv' / 'Scripts' / 'python.exe'
+        else:
+            venv_python = script_dir / 'venv' / 'bin' / 'python'
         
         if not venv_python.exists():
             logger.error(f"Virtual environment not found at: {venv_python}")
             logger.error("Please create the virtual environment first:")
             logger.error("  cd backend/model/ml_models/accident_prediction")
-            logger.error("  python3 -m venv venv")
-            logger.error("  source venv/bin/activate")
+            if platform.system() == 'Windows':
+                logger.error("  python -m venv venv")
+                logger.error("  venv\\Scripts\\activate")
+            else:
+                logger.error("  python3 -m venv venv")
+                logger.error("  source venv/bin/activate")
             logger.error("  pip install -r requirements.txt")
             sys.exit(1)
         

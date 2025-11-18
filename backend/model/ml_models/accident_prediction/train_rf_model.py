@@ -259,21 +259,22 @@ class AccidentRFTrainer:
     
     def _train_regressor(self, X_train, y_train_t, y_train_raw, X_test, y_test_t, y_test_raw, random_state):
         """Train Random Forest Regressor with hyperparameter tuning"""
-        # Hyperparameter tuning
-        logger.info("  Performing hyperparameter tuning for regressor...")
+        # Hyperparameter tuning - Enhanced for better accuracy
+        logger.info("  Performing enhanced hyperparameter tuning for regressor...")
         base_model = RandomForestRegressor(random_state=random_state, n_jobs=-1)
         param_dist = {
-            'n_estimators': np.arange(200, 801, 50),
-            'max_depth': [10, 15, 20, 25, 30, None],
-            'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 2, 4],
-            'max_features': ['sqrt', 'log2', None],
-            'bootstrap': [True, False]
+            'n_estimators': np.arange(300, 1001, 50),  # Increased range: 300-1000 (was 200-800)
+            'max_depth': [15, 20, 25, 30, 35, 40, None],  # Added more depth options
+            'min_samples_split': [2, 3, 5, 7, 10],  # More granular options
+            'min_samples_leaf': [1, 2, 3, 4],  # Added option
+            'max_features': ['sqrt', 'log2', None, 0.8, 0.9],  # Added feature fraction options
+            'bootstrap': [True, False],
+            'max_samples': [0.8, 0.9, 1.0]  # Added max_samples for better generalization
         }
         search = RandomizedSearchCV(
             estimator=base_model,
             param_distributions=param_dist,
-            n_iter=40,
+            n_iter=100,  # Increased from 40 to 100 for more thorough search
             cv=KFold(n_splits=5, shuffle=True, random_state=random_state),
             scoring='neg_mean_absolute_error',
             random_state=random_state,
@@ -291,23 +292,24 @@ class AccidentRFTrainer:
     
     def _train_classifier(self, X_train, y_train_class, X_test, y_test_class, random_state):
         """Train Random Forest Classifier with hyperparameter tuning"""
-        # Hyperparameter tuning
-        logger.info("  Performing hyperparameter tuning for classifier...")
+        # Hyperparameter tuning - Enhanced for better accuracy (90-95% target)
+        logger.info("  Performing enhanced hyperparameter tuning for classifier (targeting 90-95% accuracy)...")
         base_model = RandomForestClassifier(random_state=random_state, n_jobs=-1, class_weight='balanced')
         param_dist = {
-            'n_estimators': np.arange(200, 801, 50),
-            'max_depth': [10, 15, 20, 25, 30, None],
-            'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 2, 4],
-            'max_features': ['sqrt', 'log2', None],
-            'bootstrap': [True, False]
+            'n_estimators': np.arange(300, 1001, 50),  # Increased range: 300-1000 (was 200-800)
+            'max_depth': [15, 20, 25, 30, 35, 40, None],  # Added more depth options
+            'min_samples_split': [2, 3, 5, 7, 10],  # More granular options
+            'min_samples_leaf': [1, 2, 3, 4],  # Added option
+            'max_features': ['sqrt', 'log2', None, 0.8, 0.9],  # Added feature fraction options
+            'bootstrap': [True, False],
+            'max_samples': [0.8, 0.9, 1.0]  # Added max_samples for better generalization
         }
         search = RandomizedSearchCV(
             estimator=base_model,
             param_distributions=param_dist,
-            n_iter=40,
+            n_iter=100,  # Increased from 40 to 100 for more thorough search
             cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state),
-            scoring='f1',
+            scoring='accuracy',  # Changed from 'f1' to 'accuracy' to directly optimize for accuracy
             random_state=random_state,
             n_jobs=-1,
             verbose=1

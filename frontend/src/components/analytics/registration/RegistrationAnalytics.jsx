@@ -195,48 +195,48 @@ export function RegistrationAnalytics() {
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
           />
-        </div>
-        
+          
           {loading ? (
-          <div className="registration-analytics-controls controls-fade-in loading-fade">
-            <div className="animate-pulse">
-              <div className="h-8 bg-muted rounded w-32"></div>
+            <div className="registration-analytics-controls controls-fade-in loading-fade">
+              <div className="animate-pulse">
+                <div className="h-8 bg-muted rounded w-32"></div>
+              </div>
+              <div className="animate-pulse">
+                <div className="h-8 bg-muted rounded w-32"></div>
+              </div>
             </div>
-            <div className="animate-pulse">
-              <div className="h-8 bg-muted rounded w-32"></div>
-            </div>
-          </div>
-        ) : (
-          <div className="registration-analytics-controls controls-fade-in smooth-transition">
-            {/* Month Dropdown */}
-            <Select value={selectedMonth || ''} onValueChange={handleMonthSelect}>
-              <SelectTrigger className="w-[140px] smooth-transition hover-smooth" data-month-select>
-                <SelectValue placeholder="Month" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map((month) => (
-                  <SelectItem key={month} value={month} className="smooth-transition">
-                    {month}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          ) : (
+            <div className="registration-analytics-controls controls-fade-in smooth-transition">
+              {/* Month Dropdown */}
+              <Select value={selectedMonth || ''} onValueChange={handleMonthSelect}>
+                <SelectTrigger className="w-[110px] h-8 rounded-md px-3 text-xs border border-input dark:border-[#424242] bg-background shadow-sm hover:bg-accent hover:text-accent-foreground text-black dark:text-white smooth-transition hover-smooth" data-month-select>
+                  <SelectValue placeholder="Month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month) => (
+                    <SelectItem key={month} value={month} className="smooth-transition">
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Year Dropdown */}
-            <Select value={selectedYear || ''} onValueChange={handleYearSelect}>
-              <SelectTrigger className="w-[120px] smooth-transition hover-smooth" data-year-select>
-                <SelectValue placeholder="Year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year} className="smooth-transition">
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+              {/* Year Dropdown */}
+              <Select value={selectedYear || ''} onValueChange={handleYearSelect}>
+                <SelectTrigger className="w-[90px] h-8 rounded-md px-3 text-xs border border-input dark:border-[#424242] bg-background shadow-sm hover:bg-accent hover:text-accent-foreground text-black dark:text-white smooth-transition hover-smooth" data-year-select>
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year} className="smooth-transition">
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
       </div>
       
       

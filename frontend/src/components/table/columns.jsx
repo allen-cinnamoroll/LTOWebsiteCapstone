@@ -54,6 +54,7 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
   },
   {
     id: "actions",
+    header: "Actions",
     enableHiding: false,
     cell: ({ row }) => {
       const accident = row.original;
@@ -66,26 +67,26 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
         onDelete(accident);
       };
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-5 w-5 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-24">
-            <DropdownMenuLabel className="text-xs py-1">Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleEdit} className="text-xs py-1">
-              <Edit className="h-3 w-3 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-xs py-1 text-red-600">
-              <Trash className="h-3 w-3 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleEdit}
+            className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-100 hover:text-gray-700"
+            disabled={submitting}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleDelete}
+            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+            disabled={submitting}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </div>
       );
     },
   },
@@ -145,14 +146,6 @@ export const accidentBinColumns = (onRestore, onPermanentDelete, submitting) => 
     accessorKey: "barangay",
     header: "Barangay",
     cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
-  },
-  {
-    accessorKey: "deletedAt",
-    header: "Deleted At",
-    cell: ({ row }) => {
-      const deletedAt = row.getValue("deletedAt");
-      return <div className="text-gray-700 dark:text-gray-200 text-xs">{deletedAt ? new Date(deletedAt).toLocaleString() : "N/A"}</div>;
-    },
   },
   {
     id: "actions",
@@ -555,6 +548,7 @@ export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting) =
   },
   {
     id: "actions",
+    header: "Actions",
     enableHiding: false,
     cell: ({ row }) => {
       const violation = row.original;
@@ -671,14 +665,6 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
           )}
         </div>
       );
-    },
-  },
-  {
-    accessorKey: "deletedAt",
-    header: "Deleted At",
-    cell: ({ row }) => {
-      const deletedAt = row.getValue("deletedAt");
-      return <div className="text-gray-700 dark:text-gray-200 text-xs">{deletedAt ? new Date(deletedAt).toLocaleString() : "N/A"}</div>;
     },
   },
   {
@@ -842,14 +828,6 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
     accessorKey: "apprehendingOfficer",
     header: "Officer",
     cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("apprehendingOfficer") || "None"}</div>,
-  },
-  {
-    accessorKey: "deletedAt",
-    header: "Deleted At",
-    cell: ({ row }) => {
-      const deletedAt = row.getValue("deletedAt");
-      return <div className="text-gray-700 dark:text-gray-200 text-xs">{deletedAt ? new Date(deletedAt).toLocaleString() : "N/A"}</div>;
-    },
   },
   {
     id: "actions",
@@ -1186,14 +1164,6 @@ export const vehicleBinColumns = (onRestore, onPermanentDelete, submitting) => [
           )}
         </div>
       );
-    },
-  },
-  {
-    accessorKey: "deletedAt",
-    header: "Deleted At",
-    cell: ({ row }) => {
-      const deletedAt = row.getValue("deletedAt");
-      return <div className="text-gray-700 dark:text-gray-200 text-xs">{deletedAt ? new Date(deletedAt).toLocaleString() : "N/A"}</div>;
     },
   },
   {
