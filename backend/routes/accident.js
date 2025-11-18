@@ -9,6 +9,9 @@ import {
 	deleteAccident,
 	getAccidentAnalytics,
 	getAccidentRiskAnalytics,
+	getDeletedAccidents,
+	restoreAccident,
+	permanentDeleteAccident,
 } from "../controller/accidentController.js";
 
 const accidentRouter = express.Router();
@@ -26,6 +29,18 @@ accidentRouter.post(
 // Get all accidents (Authenticated Users)
 accidentRouter.get("/", authenticate, getAccidents);
 
+// Get deleted accidents (bin)
+accidentRouter.get("/bin", authenticate, getDeletedAccidents);
+
+// Restore accident from bin (Only Admin or Superadmin)
+accidentRouter.patch("/bin/:id/restore", authenticate, restoreAccident);
+
+// Permanently delete accident from bin (Only Admin or Superadmin)
+accidentRouter.delete("/bin/:id", authenticate, permanentDeleteAccident);
+
+// Delete an accident (Only Admin or Superadmin)
+accidentRouter.delete("/:id", authenticate, deleteAccident);
+
 // Get a single accident by ID (Authenticated Users)
 accidentRouter.get("/:id", authenticate, getAccidentById);
 
@@ -38,9 +53,6 @@ accidentRouter.patch(
 	validate,
 	updateAccident
 );
-
-// Delete an accident (Only Admin or Superadmin)
-accidentRouter.delete("/:id", authenticate, deleteAccident);
 
 // Analytics endpoints
 accidentRouter.get("/analytics/summary", authenticate, getAccidentAnalytics);

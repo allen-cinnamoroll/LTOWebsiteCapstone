@@ -64,18 +64,6 @@ export const createVehicle = async (req, res) => {
     const latestRenewalDate = normalizedRenewals.length > 0 ? normalizedRenewals[normalizedRenewals.length - 1].date : null;
     const initialStatus = getVehicleStatus(plateNo, latestRenewalDate, vehicleStatusType);
 
-    // Debug user tracking
-    console.log('=== VEHICLE CREATION DEBUG ===');
-    console.log('req.user:', req.user);
-    console.log('req.user type:', typeof req.user);
-    if (req.user) {
-      console.log('req.user keys:', Object.keys(req.user));
-      console.log('req.user.firstName:', req.user.firstName);
-      console.log('req.user.lastName:', req.user.lastName);
-      console.log('req.user.userId:', req.user.userId);
-    }
-    console.log('=== END DEBUG ===');
-
     const vehicle = new VehicleModel({
       fileNo,
       plateNo,
@@ -144,12 +132,6 @@ export const getVehicle = async (req, res) => {
   try {
     const { page = 1, limit, search, status, classification, fetchAll } = req.query;
     
-    // DEBUG: Log query parameters
-    console.log('=== GET VEHICLES API DEBUG ===');
-    console.log('Query params:', { page, limit, search, status, classification, fetchAll });
-    console.log('fetchAll type:', typeof fetchAll);
-    console.log('fetchAll value:', fetchAll);
-    
     // If fetchAll is true, don't apply pagination
     // Handle string "true", boolean true, or string "1"
     const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
@@ -157,12 +139,7 @@ export const getVehicle = async (req, res) => {
     const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
     const skip = shouldPaginate ? (page - 1) * limitValue : 0;
     
-    console.log('isFetchAll:', isFetchAll);
-    console.log('shouldPaginate:', shouldPaginate);
-    console.log('limitValue:', limitValue);
-    console.log('skip:', skip);
-
-    let query = {};
+    let query = { deletedAt: null }; // Exclude deleted items
 
     // Add search functionality
     if (search) {
@@ -184,7 +161,11 @@ export const getVehicle = async (req, res) => {
       query.classification = classification;
     }
 
+    // OPTIMIZATION: Select only fields needed for listing page
+    // Reduces payload size and improves query performance
+    // Indexes used: createdAt (for sorting), deletedAt (for filtering), status, classification
     let vehiclesQuery = VehicleModel.find(query)
+      .select("fileNo plateNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal vehicleStatusType status driverId createdBy updatedBy createdAt updatedAt")
       .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName")
@@ -192,22 +173,14 @@ export const getVehicle = async (req, res) => {
     
     // Only apply skip and limit if pagination is enabled
     if (shouldPaginate) {
-      console.log('Applying pagination - skip:', skip, 'limit:', limitValue);
       vehiclesQuery = vehiclesQuery.skip(skip);
       if (limitValue) {
         vehiclesQuery = vehiclesQuery.limit(limitValue);
       }
-    } else {
-      console.log('FetchAll mode - NO pagination limits applied');
     }
     
     const vehicles = await vehiclesQuery;
-    
-    console.log('Vehicles fetched from DB:', vehicles.length);
-
     const total = await VehicleModel.countDocuments(query);
-    
-    console.log('Total vehicles in DB:', total);
 
     // Add calculated status for each vehicle and update database status if needed
     const vehiclesWithStatus = await Promise.all(vehicles.map(async (vehicle) => {
@@ -222,7 +195,6 @@ export const getVehicle = async (req, res) => {
       // Update database status if it doesn't match calculated status
       if (vehicle.status !== calculatedStatus) {
         await VehicleModel.findByIdAndUpdate(vehicle._id, { status: calculatedStatus });
-        console.log(`Updated vehicle ${vehicle.plateNo} status from ${vehicle.status} to ${calculatedStatus}`);
       }
       
       const vehicleData = {
@@ -243,12 +215,6 @@ export const getVehicle = async (req, res) => {
       
       return vehicleData;
     }));
-
-    console.log('=== SENDING RESPONSE ===');
-    console.log('Total vehicles in response:', vehiclesWithStatus.length);
-    console.log('Total in database:', total);
-    console.log('FetchAll mode:', !shouldPaginate);
-    console.log('=== END GET VEHICLES DEBUG ===');
 
     res.json({
       success: true,
@@ -276,7 +242,7 @@ export const findVehicle = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const vehicle = await VehicleModel.findById(id)
+    const vehicle = await VehicleModel.findOne({ _id: id, deletedAt: null })
       .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
@@ -319,13 +285,6 @@ export const updateVehicle = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    console.log('=== VEHICLE UPDATE DEBUG ===');
-    console.log('Vehicle ID:', id);
-    console.log('Update data:', updateData);
-    console.log('dateOfRenewal type:', typeof updateData.dateOfRenewal);
-    console.log('dateOfRenewal value:', updateData.dateOfRenewal);
-    console.log('Is array:', Array.isArray(updateData.dateOfRenewal));
-
     // Remove fields that shouldn't be updated directly
     delete updateData._id;
     delete updateData.createdAt;
@@ -339,10 +298,6 @@ export const updateVehicle = async (req, res) => {
         message: "Vehicle not found",
       });
     }
-
-    console.log('Current vehicle dateOfRenewal:', currentVehicle.dateOfRenewal);
-    console.log('Current vehicle dateOfRenewal type:', typeof currentVehicle.dateOfRenewal);
-    console.log('Current vehicle dateOfRenewal is array:', Array.isArray(currentVehicle.dateOfRenewal));
 
     // Normalize incoming dateOfRenewal to array of {date, processedBy}
     if (updateData.dateOfRenewal) {
@@ -418,7 +373,6 @@ export const updateVehicle = async (req, res) => {
       if (vehicle.status !== newStatus) {
         await VehicleModel.findByIdAndUpdate(id, { status: newStatus });
         vehicle.status = newStatus;
-        console.log(`Updated vehicle ${vehicle.plateNo} status to ${newStatus} due to plate/status type change`);
       }
     }
 
@@ -838,65 +792,6 @@ export const exportVehicles = async (req, res) => {
       `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
     );
 
-    // Debug: Check first vehicle's driverId population and date extraction
-    if (vehicles.length > 0) {
-      const firstVehicle = vehicles[0];
-      console.log('=== EXPORT DEBUG ===');
-      console.log('Total vehicles found:', vehicles.length);
-      console.log('Sample vehicle plateNo:', firstVehicle.plateNo);
-      
-      // Debug dateOfRenewal extraction
-      const renewalDates = firstVehicle.dateOfRenewal || [];
-      console.log('dateOfRenewal array:', JSON.stringify(renewalDates, null, 2));
-      if (Array.isArray(renewalDates) && renewalDates.length > 0) {
-        const latestEntry = renewalDates[renewalDates.length - 1];
-        console.log('Latest renewal entry:', JSON.stringify(latestEntry, null, 2));
-        const latestDate = latestEntry?.date || latestEntry;
-        if (latestDate) {
-          // Show raw value before any conversion
-          console.log('Raw latestDate type:', typeof latestDate);
-          console.log('Raw latestDate value:', latestDate);
-          console.log('Raw latestDate instanceof Date:', latestDate instanceof Date);
-          
-          // Get ISO string
-          let isoString;
-          if (latestDate instanceof Date) {
-            isoString = latestDate.toISOString();
-          } else if (typeof latestDate === 'string') {
-            isoString = latestDate.includes('Z') ? latestDate : new Date(latestDate).toISOString();
-          } else {
-            isoString = new Date(latestDate).toISOString();
-          }
-          
-          const date = new Date(isoString);
-          console.log('Parsed date ISO:', isoString);
-          console.log('ISO string extracted - Year:', isoString.substring(0, 4), 'Month:', isoString.substring(5, 7), 'Day:', isoString.substring(8, 10));
-          console.log('UTC components - Year:', date.getUTCFullYear(), 'Month:', date.getUTCMonth() + 1, 'Day:', date.getUTCDate());
-          console.log('Local components - Year:', date.getFullYear(), 'Month:', date.getMonth() + 1, 'Day:', date.getDate());
-          
-          // Extract directly from ISO string
-          const isoMatch = isoString.match(/^(\d{4})-(\d{2})-(\d{2})T/);
-          if (isoMatch) {
-            console.log('Direct ISO extraction - Year:', isoMatch[1], 'Month:', isoMatch[2], 'Day:', isoMatch[3]);
-            const formatted = `${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`;
-            console.log('Formatted date (from ISO string):', formatted);
-          }
-        }
-      }
-      
-      console.log('Sample vehicle driverId:', JSON.stringify(firstVehicle.driverId, null, 2));
-      console.log('DriverId type:', typeof firstVehicle.driverId);
-      
-      if (firstVehicle.driverId && typeof firstVehicle.driverId === 'object') {
-        console.log('DriverId has ownerRepresentativeName:', firstVehicle.driverId.ownerRepresentativeName);
-        console.log('DriverId has address:', JSON.stringify(firstVehicle.driverId.address, null, 2));
-        console.log('DriverId has driversLicenseNumber:', firstVehicle.driverId.driversLicenseNumber);
-      } else {
-        console.log('WARNING: DriverId is not populated correctly');
-        console.log('DriverId value:', firstVehicle.driverId);
-      }
-      console.log('=== END EXPORT DEBUG ===');
-    }
 
     // Format vehicles data according to required fields
     // Track index for logging (only log first few vehicles)
@@ -979,12 +874,6 @@ export const exportVehicles = async (req, res) => {
               let day = parseInt(isoMatch[3]);
               const hour = parseInt(isoMatch[4]);
               
-              // Log the extraction for debugging (only for first few vehicles to avoid spam)
-              const shouldLog = index < 5;
-              if (shouldLog) {
-                console.log(`[DATE EXTRACTION] Vehicle ${vehicleObj.plateNo}: ISO=${isoString}, Hour=${hour}, BeforeAdjust=${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
-              }
-              
               // ROOT CAUSE ANALYSIS:
               // Dates are stored with afternoon UTC times (e.g., 16:00 = 4 PM UTC)
               // In UTC+8 timezone (Philippines), these represent the NEXT day at midnight:
@@ -1005,14 +894,6 @@ export const exportVehicles = async (req, res) => {
                 year = tempDate.getUTCFullYear();
                 month = tempDate.getUTCMonth() + 1;
                 day = tempDate.getUTCDate();
-                
-                if (shouldLog) {
-                  console.log(`[DATE ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Hour=${hour} UTC >= 16, Added 1 day -> ${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`);
-                }
-              } else {
-                if (shouldLog) {
-                  console.log(`[DATE NO ADJUSTMENT] Vehicle ${vehicleObj.plateNo}: Hour=${hour} UTC < 16, Using original date ${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`);
-                }
               }
               
               renewalDateStr = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`;
@@ -1093,21 +974,6 @@ export const exportVehicles = async (req, res) => {
       });
     }
 
-    // Debug: Check if exportData contains owner information
-    if (exportData.length > 0) {
-      const sampleExport = exportData[0];
-      console.log('=== EXPORT DATA DEBUG ===');
-      console.log('Sample export data plateNo:', sampleExport.plateNo);
-      console.log('Sample ownerRepresentativeName:', sampleExport.ownerRepresentativeName);
-      console.log('Sample address_purok:', sampleExport.address_purok);
-      console.log('Sample address_barangay:', sampleExport.address_barangay);
-      console.log('Sample dateOfRenewal:', sampleExport.dateOfRenewal);
-      console.log('Total vehicles in export:', exportData.length);
-      if (format === "csv") {
-        console.log('CSV export sorted by dateOfRenewal (ascending)');
-      }
-      console.log('=== END EXPORT DATA DEBUG ===');
-    }
 
     // Convert to requested format and send
     // Set CORS headers explicitly for blob responses
@@ -1139,6 +1005,231 @@ export const exportVehicles = async (req, res) => {
       success: false,
       message: "Internal server error",
       error: error.message,
+    });
+  }
+};
+
+// Soft delete vehicle (move to bin)
+export const deleteVehicle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vehicle = await VehicleModel.findById(id);
+
+    if (!vehicle) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
+    }
+
+    if (vehicle.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle is already deleted",
+      });
+    }
+
+    // Soft delete by setting deletedAt
+    vehicle.deletedAt = new Date();
+    vehicle.updatedBy = req.user ? req.user.userId : null;
+    await vehicle.save();
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+      if (actorUser) {
+        const actorName = `${actorUser.firstName} ${actorUser.middleName ? actorUser.middleName + ' ' : ''}${actorUser.lastName}`.trim();
+        await logUserActivity({
+          userId: actorUser._id,
+          logType: 'delete_vehicle',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Vehicle moved to bin (Plate: ${vehicle.plateNo})`
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Vehicle moved to bin successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting vehicle:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get deleted vehicles (bin)
+export const getDeletedVehicles = async (req, res) => {
+  try {
+    const { page = 1, limit, search, fetchAll } = req.query;
+    
+    // If fetchAll is true, don't apply pagination
+    const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
+    const shouldPaginate = !isFetchAll;
+    const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
+    const skip = shouldPaginate ? (page - 1) * limitValue : 0;
+
+    let query = { deletedAt: { $ne: null } }; // Only deleted items
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { plateNo: { $regex: search, $options: "i" } },
+        { fileNo: { $regex: search, $options: "i" } },
+        { make: { $regex: search, $options: "i" } },
+        { bodyType: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // OPTIMIZATION: Select only fields needed for listing page
+    let vehiclesQuery = VehicleModel.find(query)
+      .select("plateNo fileNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal status vehicleStatusType driverId createdBy updatedBy createdAt updatedAt deletedAt")
+      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("createdBy", "firstName middleName lastName")
+      .populate("updatedBy", "firstName middleName lastName")
+      .sort({ deletedAt: -1 });
+
+    // Only apply skip and limit if pagination is enabled
+    if (shouldPaginate) {
+      vehiclesQuery = vehiclesQuery.skip(skip);
+      if (limitValue) {
+        vehiclesQuery = vehiclesQuery.limit(limitValue);
+      }
+    }
+
+    const vehicles = await vehiclesQuery;
+    const total = await VehicleModel.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: vehicles,
+      pagination: {
+        current: shouldPaginate ? parseInt(page) : 1,
+        pages: shouldPaginate ? Math.ceil(total / (limitValue || 100)) : 1,
+        total,
+        limit: limitValue || null,
+        fetchAll: !shouldPaginate,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching deleted vehicles:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+// Restore vehicle from bin
+export const restoreVehicle = async (req, res) => {
+  try {
+    const vehicle = await VehicleModel.findById(req.params.id);
+    
+    if (!vehicle) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Vehicle not found" 
+      });
+    }
+
+    if (!vehicle.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle is not deleted",
+      });
+    }
+
+    // Restore by clearing deletedAt
+    vehicle.deletedAt = null;
+    vehicle.updatedBy = req.user ? req.user.userId : null;
+    await vehicle.save();
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      try {
+        const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+        if (actorUser) {
+          await logUserActivity({
+            userId: actorUser._id,
+            logType: 'restore_vehicle',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Vehicle restored from bin (Plate: ${vehicle.plateNo})`
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Vehicle restored successfully",
+      data: vehicle
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Permanently delete vehicle
+export const permanentDeleteVehicle = async (req, res) => {
+  try {
+    const vehicle = await VehicleModel.findById(req.params.id);
+    
+    if (!vehicle) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Vehicle not found" 
+      });
+    }
+
+    if (!vehicle.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle must be in bin before permanent deletion",
+      });
+    }
+
+    const plateNo = vehicle.plateNo;
+
+    // Permanently delete from database
+    await VehicleModel.findByIdAndDelete(req.params.id);
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      try {
+        const actorUser = await UserModel.findById(req.user.userId).select("firstName middleName lastName email role");
+        if (actorUser) {
+          await logUserActivity({
+            userId: actorUser._id,
+            logType: 'permanent_delete_vehicle',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Vehicle permanently deleted (Plate: ${plateNo})`
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Vehicle permanently deleted successfully" 
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
     });
   }
 };

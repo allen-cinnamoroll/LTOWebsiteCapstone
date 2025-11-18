@@ -35,16 +35,26 @@ const DriverPage = () => {
   const [driverProfileModalOpen, setDriverProfileModalOpen] = useState(false);
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [selectedFileNumber, setSelectedFileNumber] = useState("");
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [driverToDelete, setDriverToDelete] = useState(null);
 
   useEffect(() => {
     fetchDrivers();
   }, []);
 
+  /**
+   * fetchDrivers - Optimized driver fetching with pagination
+   * 
+   * IMPROVEMENTS:
+   * - Uses server-side pagination with limit (100 items) instead of fetching all
+   * - Reduces initial payload size significantly
+   */
   const fetchDrivers = async () => {
     try {
       setLoading(true);
       
-      const { data } = await apiClient.get("/owner", {
+      // Use pagination with reasonable limit instead of fetching all
+      const { data } = await apiClient.get("/owner?page=1&limit=100", {
         headers: {
           Authorization: token,
         },
@@ -127,12 +137,12 @@ const DriverPage = () => {
     setSelectedDriver(data)
   };
 
-  const confirmDelete = () => {
+  const confirmDeactivate = () => {
     onDelete(false); // Call the delete function
     setShowAlert(false); // Close the alert dialog after deleting
   };
 
-  const cancelDelete = () => {
+  const cancelDeactivate = () => {
     setShowAlert(false); // Close the alert dialog without deleting
   };
 
@@ -177,6 +187,39 @@ const DriverPage = () => {
     toast.success("Owner updated successfully", {
       description: "The owner information has been updated in the table."
     });
+  };
+
+  const handleDelete = (driver) => {
+    setDriverToDelete(driver);
+    setShowDeleteAlert(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!driverToDelete) return;
+    
+    try {
+      await apiClient.delete(`/owner/${driverToDelete._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      toast.success("Owner moved to bin successfully");
+      fetchDrivers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete owner");
+    } finally {
+      setShowDeleteAlert(false);
+      setDriverToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteAlert(false);
+    setDriverToDelete(null);
+  };
+
+  const handleBinClick = () => {
+    navigate("/owner/bin");
   };
 
   const onDelete = async (data) => {
@@ -224,17 +267,18 @@ const DriverPage = () => {
             loading={loading}
             onRowClick={onManage}
             onEdit={onEdit}
-            onDelete={handleDeactivate}
+            onDelete={handleDelete}
             onNavigate={handleNavigate}
             onFileNumberClick={handleFileNumberClick}
+            onBinClick={handleBinClick}
           />
         </div>
       </div>
       <ConfirmationDIalog
         open={showAlert}
         onOpenChange={setShowAlert}
-        confirm={confirmDelete}
-        cancel={cancelDelete}
+        confirm={confirmDeactivate}
+        cancel={cancelDeactivate}
         title={"Are you sure?"}
         description={
           "This action cannot be undone. This will deactivate the owner."
@@ -264,6 +308,16 @@ const DriverPage = () => {
         open={vehicleModalOpen}
         onOpenChange={setVehicleModalOpen}
         fileNumber={selectedFileNumber}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDIalog
+        open={showDeleteAlert}
+        onOpenChange={setShowDeleteAlert}
+        confirm={confirmDelete}
+        cancel={cancelDelete}
+        title="Do you want to delete this?"
+        description="This action will move the owner to bin. You can restore it later from the bin."
       />
     </div>
   );

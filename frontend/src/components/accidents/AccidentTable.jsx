@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Trash } from "lucide-react";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import { Label } from "@/components/ui/label";
 import { Button } from "../ui/button";
@@ -32,8 +32,12 @@ const AccidentTable = ({
   onRowClick,
   onAdd,
   onEdit,
+  onDelete,
+  onBinClick,
   onUpdateStatus,
-  submitting
+  submitting,
+  onRestore,
+  onPermanentDelete
 }) => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -88,7 +92,9 @@ const AccidentTable = ({
 
   const table = useReactTable({
     data,
-    columns: tableColumn(onEdit, onUpdateStatus, submitting),
+    columns: onRestore && onPermanentDelete 
+      ? tableColumn(onRestore, onPermanentDelete, submitting)
+      : tableColumn(onEdit, onUpdateStatus, onDelete, submitting),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
@@ -136,10 +142,18 @@ const AccidentTable = ({
           )}
         </div>
         <div className="flex gap-2 justify-end md:justify-normal md:items-center">
-          <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
-            <Plus className="w-4 h-4" />
-            <span className="hidden lg:inline">{"Add Accident"}</span>
-          </Button>
+          {onAdd && (
+            <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
+              <Plus className="w-4 h-4" />
+              <span className="hidden lg:inline">{"Add Accident"}</span>
+            </Button>
+          )}
+          {onBinClick && (
+            <Button onClick={onBinClick} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
+              <Trash className="w-4 h-4" />
+              <span className="hidden lg:inline">{"Bin"}</span>
+            </Button>
+          )}
           <DataTableViewOptions table={table} />
         </div>
       </div>
@@ -172,14 +186,14 @@ const AccidentTable = ({
                     {table.getRowModel().rows.map((row) => (
                       <TableRow
                         key={row.id}
-                        onClick={() => onRowClick(row.original)}
+                        onClick={() => onRowClick && onRowClick(row.original)}
                         onMouseEnter={() => setHoveredRowId(row.id)}
                         onMouseLeave={() => setHoveredRowId(null)}
                         onMouseMove={(e) => {
                           setMousePosition({ x: e.clientX, y: e.clientY });
                         }}
                         data-state={row.getIsSelected() && "selected"}
-                        className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+                        className={`hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 ${onRowClick ? 'cursor-pointer' : 'cursor-default'}`}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="px-3 py-3 text-gray-800 dark:text-gray-200 text-left">
@@ -219,7 +233,7 @@ const AccidentTable = ({
                 )}
               </TableBody>
             </Table>
-              {hoveredRowId && (
+              {hoveredRowId && onRowClick && (
                 <div
                   className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
                   style={{

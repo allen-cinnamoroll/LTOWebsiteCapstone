@@ -9,6 +9,8 @@ import ViolationEntryModal from "@/components/violations/ViolationEntryModal";
 import ViolationInformationModal from "@/components/violations/ViolationInformationModal";
 import ViolationDetailsModal from "@/components/violations/ViolationDetailsModal";
 import EditViolationModal from "@/components/violations/EditViolationModal";
+import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
+import { toast } from "sonner";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
@@ -26,6 +28,8 @@ const ViolationPage = () => {
   const [selectedViolationId, setSelectedViolationId] = useState(null);
   const [initialViolator, setInitialViolator] = useState(null);
   const [shouldReopenInformationModal, setShouldReopenInformationModal] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [violationToDelete, setViolationToDelete] = useState(null);
 
   useEffect(() => {
     fetchViolations();
@@ -79,9 +83,17 @@ const ViolationPage = () => {
     };
   }, []);
 
+  /**
+   * fetchViolations - Optimized violation fetching with pagination
+   * 
+   * IMPROVEMENTS:
+   * - Uses server-side pagination with limit (100 items) instead of fetching all
+   * - Reduces initial payload size significantly
+   */
   const fetchViolations = async () => {
     try {
-      const { data } = await apiClient.get("/violations", {
+      // Use pagination with reasonable limit instead of fetching all
+      const { data } = await apiClient.get("/violations?page=1&limit=100", {
         headers: {
           Authorization: token,
         },
@@ -141,6 +153,39 @@ const ViolationPage = () => {
     fetchViolations();
   };
 
+  const handleDelete = (violation) => {
+    setViolationToDelete(violation);
+    setShowDeleteAlert(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!violationToDelete) return;
+    
+    try {
+      await apiClient.delete(`/violations/${violationToDelete._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      toast.success("Violation moved to bin successfully");
+      fetchViolations();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete violation");
+    } finally {
+      setShowDeleteAlert(false);
+      setViolationToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteAlert(false);
+    setViolationToDelete(null);
+  };
+
+  const handleBinClick = () => {
+    navigate("/violation/bin");
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="bg-white dark:bg-transparent rounded-lg shadow-sm border border-gray-200 dark:border-0 px-4 md:px-6 pt-4 md:pt-6 pb-2 flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -154,6 +199,8 @@ const ViolationPage = () => {
             loading={loading}
             onRowClick={onRowClick}
             onEdit={onEdit}
+            onDelete={handleDelete}
+            onBinClick={handleBinClick}
             onUpdateStatus={() => {}}
             submitting={submitting}
           />
@@ -201,6 +248,16 @@ const ViolationPage = () => {
         onOpenChange={setEditViolationModalOpen}
         violationId={selectedViolationId}
         onViolationUpdated={handleViolationUpdated}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDIalog
+        open={showDeleteAlert}
+        onOpenChange={setShowDeleteAlert}
+        confirm={confirmDelete}
+        cancel={cancelDelete}
+        title="Do you want to delete this?"
+        description="This action will move the violation to bin. You can restore it later from the bin."
       />
     </div>
   );

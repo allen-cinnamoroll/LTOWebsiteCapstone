@@ -7,6 +7,7 @@ import {
   ViolationPrescriptionTable
 } from './index';
 import { ViolationMonitoring } from './ViolationMonitoring.jsx';
+import ViolationAnalyticsExport from './ViolationAnalyticsExport.jsx';
 
 export function ViolationAnalytics() {
   const [selectedYear, setSelectedYear] = useState('');
@@ -73,7 +74,13 @@ export function ViolationAnalytics() {
     return `Year ${year}`;
   };
 
-  // Fetch analytics data
+  /**
+   * fetchAnalyticsData - Optimized violation analytics fetching
+   * 
+   * IMPROVEMENTS:
+   * - Fetches analytics and count in parallel using Promise.all
+   * - Reduces total load time significantly
+   */
   const fetchAnalyticsData = async (year) => {
     try {
       setLoading(true);
@@ -86,19 +93,17 @@ export function ViolationAnalytics() {
         yearValue = year;
       }
       
-      const response = await getViolationAnalytics({}, yearValue);
+      // PARALLEL FETCHING: Fetch analytics and count simultaneously
+      const [response, countResp] = await Promise.all([
+        getViolationAnalytics({}, yearValue),
+        getViolationCount().catch(() => ({ data: { totalRecords: null } })) // Non-critical, don't fail if this errors
+      ]);
 
-      // Also fetch total records count to reflect "Traffic Violators" as total records
-      try {
-        const countResp = await getViolationCount();
-        const totalRecords = countResp?.data?.totalRecords;
-        if (typeof totalRecords === 'number') {
-          setTotalTrafficViolatorsOverride(totalRecords);
-        } else {
-          setTotalTrafficViolatorsOverride(null);
-        }
-      } catch (e) {
-        // Non-critical if this fails; fall back to analytics-provided value
+      // Process total records count
+      const totalRecords = countResp?.data?.totalRecords;
+      if (typeof totalRecords === 'number') {
+        setTotalTrafficViolatorsOverride(totalRecords);
+      } else {
         setTotalTrafficViolatorsOverride(null);
       }
       
@@ -161,6 +166,12 @@ export function ViolationAnalytics() {
                 </span>
               )}
             </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <ViolationAnalyticsExport 
+              analyticsData={analyticsData}
+              selectedYear={selectedYear}
+            />
           </div>
         </div>
         

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import http from "http"; 
 import path from "path";
 import database from "./database/database.js";
@@ -12,11 +13,30 @@ dotenv.config();
 
 //routes
 import router from "./routes/index.js";
+import performanceLogger from "./middleware/performanceLogger.js";
 
 const app = express();
 
 // Trust proxy for proper IP address detection
 app.set('trust proxy', true);
+
+// Performance logging middleware - logs execution time for all requests
+// Helps identify slow endpoints that need optimization
+app.use(performanceLogger);
+
+// Enable compression middleware for all responses
+// This significantly reduces payload size for JSON responses and improves load times
+app.use(compression({
+  filter: (req, res) => {
+    // Compress all responses except if client explicitly doesn't want compression
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6, // Compression level (0-9, 6 is a good balance)
+  threshold: 1024, // Only compress responses larger than 1KB
+}));
 
 app.use(cors());
 app.use(express.json());

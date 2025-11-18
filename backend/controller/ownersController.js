@@ -103,17 +103,46 @@ export const createDriver = async (req, res) => {
 
 export const getDrivers = async (req, res) => {
   try {
-    console.log('=== GET DRIVERS API DEBUG ===');
-    console.log('Fetching all drivers from database...');
+    const { page = 1, limit, search, fetchAll } = req.query;
     
-    const drivers = await OwnerModel.find()
+    // If fetchAll is true, don't apply pagination
+    const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
+    const shouldPaginate = !isFetchAll;
+    const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
+    const skip = shouldPaginate ? (page - 1) * limitValue : 0;
+
+    let query = { deletedAt: null };
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { ownerRepresentativeName: { $regex: search, $options: "i" } },
+        { contactNumber: { $regex: search, $options: "i" } },
+        { emailAddress: { $regex: search, $options: "i" } },
+        { driversLicenseNumber: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // OPTIMIZATION: Select only fields needed for listing page
+    // Reduces payload size and improves query performance
+    // Indexes used: createdAt (for sorting), deletedAt (for filtering)
+    let driversQuery = OwnerModel.find(query)
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
       .populate('createdBy', 'firstName middleName lastName')
       .populate('updatedBy', 'firstName middleName lastName')
-      .sort({createdAt:-1})
-    
-    console.log('Total drivers fetched from DB:', drivers.length);
+      .sort({createdAt:-1});
+
+    // Only apply skip and limit if pagination is enabled
+    if (shouldPaginate) {
+      driversQuery = driversQuery.skip(skip);
+      if (limitValue) {
+        driversQuery = driversQuery.limit(limitValue);
+      }
+    }
+
+    const drivers = await driversQuery;
+    const total = await OwnerModel.countDocuments(query);
 
     // Return drivers with their vehicle information and user tracking
     const driversWithVehicles = drivers.map(driver => {
@@ -135,13 +164,16 @@ export const getDrivers = async (req, res) => {
       return driverObj;
     });
 
-    console.log('Total drivers being returned:', driversWithVehicles.length);
-    console.log('=== END GET DRIVERS DEBUG ===');
-
     res.status(200).json({
       success: true,
       data: driversWithVehicles,
-      total: driversWithVehicles.length,
+      pagination: {
+        current: shouldPaginate ? parseInt(page) : 1,
+        pages: shouldPaginate ? Math.ceil(total / (limitValue || 100)) : 1,
+        total,
+        limit: limitValue || null,
+        fetchAll: !shouldPaginate,
+      },
     });
   } catch (err) {
     return res.status(500).json({
@@ -154,7 +186,7 @@ export const getDrivers = async (req, res) => {
 export const findDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
-    const driver = await OwnerModel.findById(driverId)
+    const driver = await OwnerModel.findOne({ _id: driverId, deletedAt: null })
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal')
       .populate('createdBy', 'firstName middleName lastName')
@@ -257,7 +289,7 @@ export const updateDriver = async (req, res) => {
   }
 };
 
-// Delete driver
+// Soft delete driver (move to bin)
 export const deleteDriver = async (req, res) => {
   const driverId = req.params.id;
   try {
@@ -270,6 +302,18 @@ export const deleteDriver = async (req, res) => {
       });
     }
 
+    if (driver.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Driver is already deleted",
+      });
+    }
+
+    // Soft delete by setting deletedAt
+    driver.deletedAt = new Date();
+    driver.updatedBy = req.user ? req.user.userId : null;
+    await driver.save();
+
     // Log the activity before deleting
     if (req.user) {
       // Fetch full user details from database since JWT only contains userId, role, email
@@ -280,21 +324,189 @@ export const deleteDriver = async (req, res) => {
             logType: 'delete_driver',
             ipAddress: getClientIP(req),
             status: 'success',
-            details: `Deleted driver: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
+            details: `Driver moved to bin: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
           });
       }
     }
 
-    await OwnerModel.findByIdAndDelete(driverId);
-
     res.status(200).json({
       success: true,
-      message: "Driver deleted successfully",
+      message: "Driver moved to bin successfully",
     });
   } catch (err) {
     return res.status(500).json({
       success: false,
       message: err.message,
+    });
+  }
+};
+
+// Get deleted drivers (bin)
+export const getDeletedDrivers = async (req, res) => {
+  try {
+    const { page = 1, limit, search, fetchAll } = req.query;
+    
+    // If fetchAll is true, don't apply pagination
+    const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
+    const shouldPaginate = !isFetchAll;
+    const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
+    const skip = shouldPaginate ? (page - 1) * limitValue : 0;
+
+    let query = { deletedAt: { $ne: null } }; // Only deleted items
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { ownerRepresentativeName: { $regex: search, $options: "i" } },
+        { contactNumber: { $regex: search, $options: "i" } },
+        { emailAddress: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // OPTIMIZATION: Select only fields needed for listing page
+    let driversQuery = OwnerModel.find(query)
+      .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt deletedAt")
+      .populate('vehicleIds', 'plateNo fileNo make bodyType color status')
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName')
+      .sort({ deletedAt: -1 });
+
+    // Only apply skip and limit if pagination is enabled
+    if (shouldPaginate) {
+      driversQuery = driversQuery.skip(skip);
+      if (limitValue) {
+        driversQuery = driversQuery.limit(limitValue);
+      }
+    }
+
+    const drivers = await driversQuery;
+    const total = await OwnerModel.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: drivers,
+      pagination: {
+        current: shouldPaginate ? parseInt(page) : 1,
+        pages: shouldPaginate ? Math.ceil(total / (limitValue || 100)) : 1,
+        total,
+        limit: limitValue || null,
+        fetchAll: !shouldPaginate,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// Restore driver from bin
+export const restoreDriver = async (req, res) => {
+  try {
+    const driver = await OwnerModel.findById(req.params.id);
+    
+    if (!driver) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Driver not found" 
+      });
+    }
+
+    if (!driver.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Driver is not deleted",
+      });
+    }
+
+    // Restore by clearing deletedAt
+    driver.deletedAt = null;
+    driver.updatedBy = req.user ? req.user.userId : null;
+    await driver.save();
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      try {
+        const fullUser = await UserModel.findById(req.user.userId);
+        if (fullUser) {
+          await logUserActivity({
+            userId: fullUser._id,
+            logType: 'restore_driver',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Driver restored from bin: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Driver restored successfully",
+      data: driver
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Permanently delete driver
+export const permanentDeleteDriver = async (req, res) => {
+  try {
+    const driver = await OwnerModel.findById(req.params.id);
+    
+    if (!driver) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Driver not found" 
+      });
+    }
+
+    if (!driver.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Driver must be in bin before permanent deletion",
+      });
+    }
+
+    const ownerName = driver.ownerRepresentativeName;
+    const licenseNumber = driver.driversLicenseNumber || 'N/A';
+
+    // Permanently delete from database
+    await OwnerModel.findByIdAndDelete(req.params.id);
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      try {
+        const fullUser = await UserModel.findById(req.user.userId);
+        if (fullUser) {
+          await logUserActivity({
+            userId: fullUser._id,
+            logType: 'permanent_delete_driver',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Driver permanently deleted: ${ownerName} (License: ${licenseNumber})`
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Driver permanently deleted successfully" 
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
     });
   }
 };
@@ -305,9 +517,6 @@ export const searchDrivers = async (req, res) => {
   try {
     const { name } = req.query;
     
-    console.log('=== SEARCH DRIVERS API CALLED ===');
-    console.log('Search term:', name);
-    
     if (!name || name.trim().length < 2) {
       return res.status(400).json({
         success: false,
@@ -315,9 +524,9 @@ export const searchDrivers = async (req, res) => {
       });
     }
 
-    console.log('Querying database for:', name.trim());
     const drivers = await OwnerModel.find({
-      ownerRepresentativeName: { $regex: name.trim(), $options: 'i' }
+      ownerRepresentativeName: { $regex: name.trim(), $options: 'i' },
+      deletedAt: null // Exclude deleted items
     }).lean();
 
     res.status(200).json({

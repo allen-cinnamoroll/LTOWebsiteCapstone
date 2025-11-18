@@ -8,15 +8,19 @@ import ProtectedRoutes from "./auth/ProtectedRoutes";
 import RoleBasedRoute from "./components/auth/RoleBasedRoute";
 import DashboardLayout from "./layout/DashboardLayout";
 import DriverPage from "./pages/DriverPage";
+import OwnerBinPage from "./pages/OwnerBinPage";
 import DriverProfile from "./pages/DriverProfile";
 import PageNotFound from "./pages/PageNotFound";
 import EditDriverForm from "./pages/EditDriverForm";
 import DeactivatedDriversPage from "./pages/DeactivatedDriversPage";
 import VehiclesPage from "./pages/VehiclesPage";
+import VehicleBinPage from "./pages/VehicleBinPage";
 import VehicleProfile from "./pages/VehicleProfile";
 import EditVehicleForm from "./pages/EditVehicleForm";
 import ViolationPage from "./pages/ViolationPage";
+import ViolationBinPage from "./pages/ViolationBinPage";
 import AccidentPage from "./pages/AccidentPage";
+import AccidentBinPage from "./pages/AccidentBinPage";
 import EditAccidentForm from "./pages/EditAccidentForm";
 import EditViolationForm from "./pages/EditViolationForm";
 import RegistrationAnalyticsPage from "./pages/RegistrationAnalyticsPage";
@@ -66,21 +70,25 @@ function App() {
 
             {/* Owner routes - accessible to all authenticated users */}
             <Route path="owner" element={<DriverPage />} />
+            <Route path="owner/bin" element={<OwnerBinPage />} />
             <Route path="owner/inactive" element={<DeactivatedDriversPage />} />
             <Route path="owner/:id" element={<DriverProfile />} />
             <Route path="owner/:id/edit" element={<EditDriverForm />} />
 
             {/* Vehicle routes - accessible to all authenticated users */}
             <Route path="vehicle" element={<VehiclesPage />} />
+            <Route path="vehicle/bin" element={<VehicleBinPage />} />
             <Route path="vehicle/:id" element={<VehicleProfile />} />
             <Route path="vehicle/:id/edit" element={<EditVehicleForm />} />
 
             {/* Violation routes - accessible to all authenticated users */}
             <Route path="violation" element={<ViolationPage />} />
+            <Route path="violation/bin" element={<ViolationBinPage />} />
             <Route path="violation/:id/edit" element={<EditViolationForm />} />
 
             {/* Accident routes - accessible to all authenticated users */}
             <Route path="accident" element={<AccidentPage />} />
+            <Route path="accident/bin" element={<AccidentBinPage />} />
             <Route path="accident/:id/edit" element={<EditAccidentForm />} />
 
             {/* Account management routes - for admin and superadmin */}

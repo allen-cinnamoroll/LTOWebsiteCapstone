@@ -6,7 +6,10 @@ import {
   updateViolation,
   getViolationCount,
   getViolationAnalytics,
-  // deleteViolation,
+  deleteViolation,
+  getDeletedViolations,
+  restoreViolation,
+  permanentDeleteViolation,
 } from "../controller/violationController.js";
 import { validateViolation, validate } from "../middleware/validator.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
@@ -19,19 +22,28 @@ violationRouter.post("/", authenticate, express.json(), validateViolation, valid
 // Get all violations (Authenticated Users)
 violationRouter.get("/", authenticate, getViolations);
 
+// Get deleted violations (bin)
+violationRouter.get("/bin", authenticate, getDeletedViolations);
+
+// Restore violation from bin (Only Admin or Superadmin)
+violationRouter.patch("/bin/:id/restore", authenticate, restoreViolation);
+
+// Permanently delete violation from bin (Only Admin or Superadmin)
+violationRouter.delete("/bin/:id", authenticate, permanentDeleteViolation);
+
 // Get violation count statistics (Authenticated Users)
 violationRouter.get("/count", authenticate, getViolationCount);
 
 // Get comprehensive violation analytics (Authenticated Users)
 violationRouter.get("/analytics", authenticate, getViolationAnalytics);
 
+// Delete a violation (Only Admin or Superadmin)
+violationRouter.delete("/:id", authenticate, deleteViolation);
+
 // Get a single violation by ID (Authenticated Users)
 violationRouter.get("/:id", authenticate, getViolationById);
 
 // Update a violation (Only Admin or Superadmin)
 violationRouter.patch("/:id", authenticate, express.json(), validateViolation, validate, updateViolation);
-
-// // Delete a violation (Only Admin or Superadmin)
-// violationRouter.delete("/:id", authenticate, deleteViolation);
 
 export default violationRouter;

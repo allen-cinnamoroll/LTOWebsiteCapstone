@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, X, ListFilter } from "lucide-react";
+import { Plus, Search, X, ListFilter, Trash } from "lucide-react";
 import TableSkeleton from "@/components/table/TableSkeleton";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,8 +33,12 @@ const ViolationTable = ({
   onRowClick,
   onAdd,
   onEdit,
+  onDelete,
+  onBinClick,
   onUpdateStatus,
-  submitting
+  submitting,
+  onRestore,
+  onPermanentDelete
 }) => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -51,7 +55,9 @@ const ViolationTable = ({
 
   const table = useReactTable({
     data,
-    columns: tableColumn(onEdit, onUpdateStatus, submitting),
+    columns: onRestore && onPermanentDelete 
+      ? tableColumn(onRestore, onPermanentDelete, submitting)
+      : tableColumn(onEdit, onUpdateStatus, onDelete, submitting),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
@@ -145,17 +151,25 @@ const ViolationTable = ({
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
-            <Plus />
-            <span className="hidden lg:inline">{"Add Violation"}</span>
-          </Button>
+          {onAdd && (
+            <Button onClick={onAdd} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
+              <Plus />
+              <span className="hidden lg:inline">{"Add Violation"}</span>
+            </Button>
+          )}
+          {onBinClick && (
+            <Button onClick={onBinClick} className={"w-min flex items-center gap-2 bg-white text-black border border-gray-300 hover:bg-gray-100 dark:bg-black dark:text-white dark:border-[#424242] dark:hover:bg-gray-800"}>
+              <Trash />
+              <span className="hidden lg:inline">{"Bin"}</span>
+            </Button>
+          )}
           <DataTableViewOptions table={table} />
         </div>
       </div>
-      <div className="border shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242]" style={{ height: '500px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-        <div className="overflow-x-auto overflow-y-hidden flex-1" style={{ height: '100%' }}>
-          <div className="px-0 min-w-full" style={{ height: '100%' }}>
-            <Table className="min-w-full" style={{ height: '100%' }}>
+      <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242] min-h-0">
+        <div className="overflow-x-auto overflow-y-auto h-full">
+          <div className="px-0 min-w-full">
+            <Table className="min-w-full">
               <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:bg-[#18181B] border-b-2 border-gray-300 dark:border-[#424242]">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-[#18181B] dark:bg-[#18181B]">
@@ -180,17 +194,17 @@ const ViolationTable = ({
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
-                      onClick={() => onRowClick(row.original)}
+                      onClick={() => onRowClick && onRowClick(row.original)}
                       onMouseEnter={() => setHoveredRowId(row.id)}
                       onMouseLeave={() => setHoveredRowId(null)}
                       onMouseMove={(e) => {
                         setMousePosition({ x: e.clientX, y: e.clientY });
                       }}
                       data-state={row.getIsSelected() && "selected"}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+                      className={`hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 ${onRowClick ? 'cursor-pointer' : 'cursor-default'}`}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="px-3 py-3 text-gray-800 dark:text-gray-200 text-left">
+                        <TableCell key={cell.id} className="px-3 py-2 text-gray-800 dark:text-gray-200 text-left">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
@@ -216,20 +230,20 @@ const ViolationTable = ({
                 )}
               </TableBody>
             </Table>
-              {hoveredRowId && (
-                <div
-                  className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
-                  style={{
-                    left: `${mousePosition.x + 10}px`,
-                    top: `${mousePosition.y - 10}px`,
-                  }}
-                >
-                  Click to view details
-                </div>
-              )}
           </div>
         </div>
       </div>
+      {hoveredRowId && onRowClick && (
+        <div
+          className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
+          style={{
+            left: `${mousePosition.x + 10}px`,
+            top: `${mousePosition.y - 10}px`,
+          }}
+        >
+          Click to view details
+        </div>
+      )}
       <div className="mt-2 mb-2 flex-shrink-0">
         <DataTablePagination table={table} />
       </div>

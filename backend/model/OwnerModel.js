@@ -79,6 +79,10 @@ const ownerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Users',
       default: null
+    },
+    deletedAt: {
+      type: Date,
+      default: null
     }
   },
   {

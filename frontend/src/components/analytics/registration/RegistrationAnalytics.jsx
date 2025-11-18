@@ -6,6 +6,7 @@ import VehicleTrendChart from './VehicleTrendChart.jsx';
 import OwnerMunicipalityChart from './OwnerMunicipalityChart.jsx';
 import VehicleClassificationChart from './VehicleClassificationChart.jsx';
 import { PredictiveAnalytics } from './PredictiveAnalytics.jsx';
+import RegistrationAnalyticsExport from './RegistrationAnalyticsExport.jsx';
 import { 
   Select, 
   SelectContent, 
@@ -187,6 +188,13 @@ export function RegistrationAnalytics() {
           <p className="registration-analytics-subtitle subtitle-fade-in">
             Vehicle and Owners Registration Analytics
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <RegistrationAnalyticsExport 
+            analyticsData={analyticsData}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+          />
         </div>
         
           {loading ? (

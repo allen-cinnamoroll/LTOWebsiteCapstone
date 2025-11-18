@@ -51,13 +51,15 @@ CORS(app,
      supports_credentials=False)
 
 # Global variables
-rf_model = None
+rf_regressor_model = None
+rf_classifier_model = None
 municipality_encoder = None
 barangay_encoder = None
 feature_columns = None
 model_metadata = None
 model_loaded = False
 data_loader = None
+high_risk_threshold = None
 
 
 def convert_to_native_types(obj):
@@ -85,8 +87,8 @@ def convert_to_native_types(obj):
 
 
 def initialize_model():
-    """Initialize the accident prediction model"""
-    global rf_model, municipality_encoder, barangay_encoder, feature_columns, model_metadata, model_loaded, data_loader
+    """Initialize the accident prediction models (regressor + classifier)"""
+    global rf_regressor_model, rf_classifier_model, municipality_encoder, barangay_encoder, feature_columns, model_metadata, model_loaded, data_loader, high_risk_threshold
     
     try:
         # Get paths
@@ -98,15 +100,24 @@ def initialize_model():
             logger.error(f"Model directory not found: {model_dir}")
             return False
         
-        # Load Random Forest model
-        model_path = os.path.join(model_dir, 'accident_rf_regression_model.pkl')
-        if not os.path.exists(model_path):
-            logger.error(f"Model not found: {model_path}")
+        # Load Random Forest Regressor model
+        regressor_path = os.path.join(model_dir, 'accident_rf_regression_model.pkl')
+        if not os.path.exists(regressor_path):
+            logger.error(f"Regressor model not found: {regressor_path}")
             logger.error("Please train the model first using train_rf_model.py")
             return False
         
-        rf_model = joblib.load(model_path)
-        logger.info(f"Loaded Random Forest model from: {model_path}")
+        rf_regressor_model = joblib.load(regressor_path)
+        logger.info(f"Loaded Random Forest Regressor from: {regressor_path}")
+        
+        # Load Random Forest Classifier model (optional - may not exist for backward compatibility)
+        classifier_path = os.path.join(model_dir, 'accident_rf_classification_model.pkl')
+        if os.path.exists(classifier_path):
+            rf_classifier_model = joblib.load(classifier_path)
+            logger.info(f"Loaded Random Forest Classifier from: {classifier_path}")
+        else:
+            rf_classifier_model = None
+            logger.warning("Classifier model not found - will only provide regression predictions")
         
         # Load encoders
         municipality_encoder_path = os.path.join(model_dir, 'municipality_encoder.pkl')
@@ -140,8 +151,14 @@ def initialize_model():
             with open(metadata_path, 'r') as f:
                 model_metadata = json.load(f)
             logger.info("Loaded model metadata")
+            
+            # Extract high-risk threshold from metadata
+            high_risk_threshold = model_metadata.get('high_risk_threshold')
+            if high_risk_threshold:
+                logger.info(f"High-risk threshold: {high_risk_threshold}")
         else:
             model_metadata = {}
+            high_risk_threshold = None
         
         # Initialize data loader
         data_loader = AccidentDataLoader()
@@ -296,30 +313,88 @@ def health_check():
         model_info = {}
         if model_metadata:
             model_info = {
-                'model_type': model_metadata.get('model_type', 'Unknown'),
+                'model_types': model_metadata.get('model_types', ['RandomForestRegressor']),
                 'training_date': model_metadata.get('training_date', 'Unknown'),
                 'feature_count': model_metadata.get('feature_count', 0),
                 'training_samples': model_metadata.get('training_samples', 0),
-                'test_samples': model_metadata.get('test_samples', 0)
+                'test_samples': model_metadata.get('test_samples', 0),
+                'classifier_available': rf_classifier_model is not None
             }
             
-            # Add accuracy metrics if available
-            metrics = model_metadata.get('metrics', {})
-            if metrics:
-                accuracy_info = {}
-                if metrics.get('test_accuracy_pct') is not None:
-                    accuracy_info['accuracy_percentage'] = round(metrics['test_accuracy_pct'], 2)
-                if metrics.get('test_accuracy_20pct') is not None:
-                    accuracy_info['accuracy_within_20pct'] = round(metrics['test_accuracy_20pct'], 2)
-                if metrics.get('test_accuracy_30pct') is not None:
-                    accuracy_info['accuracy_within_30pct'] = round(metrics['test_accuracy_30pct'], 2)
-                if metrics.get('test_r2') is not None:
-                    accuracy_info['r2_score'] = round(metrics['test_r2'], 4)
-                if metrics.get('test_mape') is not None:
-                    accuracy_info['mape'] = round(metrics['test_mape'], 2)
+            # Add regressor metrics if available
+            regressor_metrics = model_metadata.get('regressor_metrics', {})
+            if regressor_metrics:
+                regressor_info = {}
+                if regressor_metrics.get('test_r2') is not None:
+                    regressor_info['r2_score'] = round(regressor_metrics['test_r2'], 4)
+                if regressor_metrics.get('test_rmse') is not None:
+                    regressor_info['rmse'] = round(regressor_metrics['test_rmse'], 4)
+                if regressor_metrics.get('test_mae') is not None:
+                    regressor_info['mae'] = round(regressor_metrics['test_mae'], 4)
+                if regressor_metrics.get('test_accuracy_20pct') is not None:
+                    regressor_info['accuracy_within_20pct'] = round(regressor_metrics['test_accuracy_20pct'], 2)
+                if regressor_metrics.get('test_accuracy_30pct') is not None:
+                    regressor_info['accuracy_within_30pct'] = round(regressor_metrics['test_accuracy_30pct'], 2)
+                if regressor_metrics.get('cv_r2_mean') is not None:
+                    regressor_info['cv_r2_mean'] = round(regressor_metrics['cv_r2_mean'], 4)
+                if regressor_info:
+                    model_info['regressor_metrics'] = regressor_info
+            
+            # Add classifier metrics if available
+            classifier_metrics = model_metadata.get('classifier_metrics', {})
+            if classifier_metrics:
+                classifier_info = {}
+                if classifier_metrics.get('test_accuracy') is not None:
+                    classifier_info['accuracy'] = round(classifier_metrics['test_accuracy'], 4)
+                if classifier_metrics.get('test_f1') is not None:
+                    classifier_info['f1_score'] = round(classifier_metrics['test_f1'], 4)
+                if classifier_metrics.get('test_precision') is not None:
+                    classifier_info['precision'] = round(classifier_metrics['test_precision'], 4)
+                if classifier_metrics.get('test_recall') is not None:
+                    classifier_info['recall'] = round(classifier_metrics['test_recall'], 4)
+                if classifier_metrics.get('test_roc_auc') is not None:
+                    classifier_info['roc_auc'] = round(classifier_metrics['test_roc_auc'], 4)
+                if classifier_info:
+                    model_info['classifier_metrics'] = classifier_info
+            
+            # Add backward-compatible accuracy_metrics for frontend
+            # Primary accuracy is from classifier (high-risk prediction), with regressor metrics for count prediction
+            accuracy_metrics = {}
+            
+            # Primary Model Accuracy: Use test accuracy (most realistic for production)
+            # Cross-validation accuracy is shown as additional context
+            if classifier_metrics:
+                # Primary: Test set accuracy (most realistic for production)
+                if classifier_metrics.get('test_accuracy') is not None:
+                    accuracy_metrics['overall_accuracy'] = round(classifier_metrics['test_accuracy'] * 100, 2)
+                    accuracy_metrics['test_accuracy'] = round(classifier_metrics['test_accuracy'] * 100, 2)
                 
-                if accuracy_info:
-                    model_info['accuracy_metrics'] = accuracy_info
+                # Additional: Cross-validation accuracy (shows model stability)
+                if classifier_metrics.get('cv_accuracy_mean') is not None:
+                    cv_mean = classifier_metrics['cv_accuracy_mean']
+                    cv_std = classifier_metrics.get('cv_accuracy_std', 0)
+                    accuracy_metrics['cv_accuracy'] = round(cv_mean * 100, 2)
+                    accuracy_metrics['cv_accuracy_std'] = round(cv_std * 100, 2)
+                    accuracy_metrics['cv_accuracy_display'] = f"{accuracy_metrics['cv_accuracy']}% ± {accuracy_metrics['cv_accuracy_std']}%"
+            
+            # Regressor metrics (for count prediction)
+            if regressor_metrics:
+                if regressor_metrics.get('test_mape') is not None:
+                    accuracy_metrics['mape'] = round(regressor_metrics['test_mape'], 2)
+                if regressor_metrics.get('test_r2') is not None:
+                    accuracy_metrics['r2_score'] = round(regressor_metrics['test_r2'], 4)
+                if regressor_metrics.get('test_accuracy_20pct') is not None:
+                    accuracy_metrics['accuracy_within_20pct'] = round(regressor_metrics['test_accuracy_20pct'], 2)
+                if regressor_metrics.get('test_accuracy_30pct') is not None:
+                    accuracy_metrics['accuracy_within_30pct'] = round(regressor_metrics['test_accuracy_30pct'], 2)
+                if regressor_metrics.get('test_accuracy_pct') is not None:
+                    accuracy_metrics['count_prediction_accuracy'] = round(regressor_metrics['test_accuracy_pct'], 2)
+            
+            if accuracy_metrics:
+                model_info['accuracy_metrics'] = accuracy_metrics
+                logger.info(f"Added accuracy_metrics to response: {list(accuracy_metrics.keys())}")
+            else:
+                logger.warning("No accuracy_metrics to add - metrics may be missing or incomplete")
         
         return jsonify({
             'status': 'ok' if model_loaded else 'error',
@@ -389,19 +464,32 @@ def predict_accident_count():
         # Prepare features
         features_df = prepare_features(year, month, municipality, barangay, historical_data)
         
-        # Make prediction
-        prediction = rf_model.predict(features_df)[0]
-        prediction = max(0, float(prediction))  # Ensure non-negative
+        # Make regression prediction (accident count)
+        prediction_count = rf_regressor_model.predict(features_df)[0]
+        prediction_count = max(0, float(prediction_count))  # Ensure non-negative
         
-        return jsonify({
+        # Make classification prediction (high-risk) if classifier is available
+        is_high_risk = None
+        risk_probability = None
+        if rf_classifier_model is not None:
+            risk_probability = float(rf_classifier_model.predict_proba(features_df)[0][1])
+            is_high_risk = bool(rf_classifier_model.predict(features_df)[0])
+        
+        response = {
             'success': True,
-            'prediction': convert_to_native_types(prediction),
+            'prediction': {
+                'predicted_count': convert_to_native_types(prediction_count),
+                'is_high_risk': is_high_risk,
+                'risk_probability': convert_to_native_types(risk_probability) if risk_probability is not None else None
+            },
             'year': year,
             'month': month,
             'municipality': municipality,
             'barangay': barangay,
             'timestamp': datetime.now().isoformat()
-        }), 200
+        }
+        
+        return jsonify(response), 200
         
     except Exception as e:
         logger.error(f"Prediction error: {str(e)}")
@@ -662,18 +750,31 @@ def predict_all_barangays():
             # Prepare features
             features_df = prepare_features(year, month, municipality, barangay, historical_data)
             
-            # Make prediction
-            prediction = rf_model.predict(features_df)[0]
-            prediction = max(0, float(prediction))
+            # Make regression prediction (accident count)
+            # Model is trained on log-transformed target, so we need to inverse transform
+            use_log_target = model_metadata.get('use_log_target', True) if model_metadata else True
+            prediction_log = rf_regressor_model.predict(features_df)[0]
+            if use_log_target:
+                prediction_count = np.expm1(prediction_log)  # Inverse log1p transform
+            else:
+                prediction_count = prediction_log
+            prediction_count = max(0, float(prediction_count))
             
             # Compute historical baseline and blend to add locality differentiation
             baseline = compute_baseline_count(historical_data, year, month, municipality, barangay)
             # Blend: 60% baseline, 40% model prediction
-            blended_prediction = 0.6 * baseline + 0.4 * prediction
+            blended_prediction = 0.6 * baseline + 0.4 * prediction_count
             # Ensure non-negative and reasonable precision
             blended_prediction = max(0.0, float(blended_prediction))
             # Rounded count for reporting and rule thresholds
             rounded_prediction = int(round(blended_prediction))
+            
+            # Make classification prediction (high-risk) if classifier is available
+            is_high_risk = None
+            risk_probability = None
+            if rf_classifier_model is not None:
+                risk_probability = float(rf_classifier_model.predict_proba(features_df)[0][1])
+                is_high_risk = bool(rf_classifier_model.predict(features_df)[0])
             
             # Compute predicted high-risk hours based on historical hourly distribution
             high_risk = compute_high_risk_hours(accidents, municipality, barangay)
@@ -686,6 +787,8 @@ def predict_all_barangays():
                 'barangay': barangay,
                 'predicted_count': convert_to_native_types(rounded_prediction),
                 'predicted_count_raw': convert_to_native_types(round(blended_prediction, 2)),
+                'is_high_risk': is_high_risk,
+                'risk_probability': convert_to_native_types(risk_probability) if risk_probability is not None else None,
                 'predicted_high_risk_hours': high_risk.get('hours', []),
                 'predicted_high_risk_ranges': high_risk.get('ranges', ''),
                 'prescription': prescription
@@ -785,14 +888,29 @@ def predict_batch():
             # Prepare features
             features_df = prepare_features(year, month, municipality, barangay, historical_data)
             
-            # Make prediction
-            prediction = rf_model.predict(features_df)[0]
-            prediction = max(0, float(prediction))
+            # Make regression prediction (accident count)
+            # Model is trained on log-transformed target, so we need to inverse transform
+            use_log_target = model_metadata.get('use_log_target', True) if model_metadata else True
+            prediction_log = rf_regressor_model.predict(features_df)[0]
+            if use_log_target:
+                prediction_count = np.expm1(prediction_log)  # Inverse log1p transform
+            else:
+                prediction_count = prediction_log
+            prediction_count = max(0, float(prediction_count))
+            
+            # Make classification prediction (high-risk) if classifier is available
+            is_high_risk = None
+            risk_probability = None
+            if rf_classifier_model is not None:
+                risk_probability = float(rf_classifier_model.predict_proba(features_df)[0][1])
+                is_high_risk = bool(rf_classifier_model.predict(features_df)[0])
             
             predictions.append({
                 'municipality': municipality,
                 'barangay': barangay,
-                'predicted_count': convert_to_native_types(prediction)
+                'predicted_count': convert_to_native_types(prediction_count),
+                'is_high_risk': is_high_risk,
+                'risk_probability': convert_to_native_types(risk_probability) if risk_probability is not None else None
             })
         
         return jsonify({

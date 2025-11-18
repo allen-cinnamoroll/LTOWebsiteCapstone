@@ -76,6 +76,8 @@ export default function AccidentPredictionPage() {
       const data = await response.json();
       
       if (data.status === 'ok' && data.model_loaded) {
+        console.log('[AccidentPredictionPage] Model info received:', data.model_info);
+        console.log('[AccidentPredictionPage] Accuracy metrics:', data.model_info?.accuracy_metrics);
         setModelInfo(data.model_info || {});
         // Only show success toast when explicitly requested (e.g., on refresh)
         if (showToast) {
@@ -102,8 +104,17 @@ export default function AccidentPredictionPage() {
     setRefreshing(false);
   };
 
-  // Calculate accuracy percentage from MAPE if available
-  const getAccuracyFromMAPE = () => {
+  // Get primary model accuracy (from classifier cross-validation)
+  const getPrimaryAccuracy = () => {
+    // Prefer overall_accuracy (classifier CV accuracy) if available
+    if (modelInfo?.accuracy_metrics?.overall_accuracy !== undefined) {
+      return modelInfo.accuracy_metrics.overall_accuracy;
+    }
+    // Fallback to count prediction accuracy (regressor)
+    if (modelInfo?.accuracy_metrics?.count_prediction_accuracy !== undefined) {
+      return modelInfo.accuracy_metrics.count_prediction_accuracy;
+    }
+    // Last fallback: calculate from MAPE
     if (modelInfo?.accuracy_metrics?.mape !== undefined) {
       const mape = modelInfo.accuracy_metrics.mape;
       return Math.max(0, Math.min(100, 100 - mape));
@@ -111,7 +122,8 @@ export default function AccidentPredictionPage() {
     return null;
   };
 
-  const accuracyPercentage = getAccuracyFromMAPE();
+  const accuracyPercentage = getPrimaryAccuracy();
+  const cvAccuracyDisplay = modelInfo?.accuracy_metrics?.cv_accuracy_display;
 
   // Get accuracy color based on percentage
   const getAccuracyColor = (accuracy) => {
@@ -248,7 +260,7 @@ export default function AccidentPredictionPage() {
       </Card>
 
       {/* Accuracy Metrics Card */}
-      {modelInfo?.accuracy_metrics && (
+      {modelInfo?.accuracy_metrics && Object.keys(modelInfo.accuracy_metrics).length > 0 && (
         <Card className="border-blue-200 dark:border-blue-900">
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -260,13 +272,29 @@ export default function AccidentPredictionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Model Type Labels */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div>
+                <div className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">High-Risk Prediction (Classifier)</div>
+                <div className="text-xs text-muted-foreground">
+                  Predicts whether an area is high-risk for accidents
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1">Count Prediction (Regressor)</div>
+                <div className="text-xs text-muted-foreground">
+                  Predicts the number of accidents expected
+                </div>
+              </div>
+            </div>
+
             {/* Overall Accuracy */}
             {accuracyPercentage !== null && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-blue-500" />
-                    <span className="font-semibold">Overall Accuracy</span>
+                    <span className="font-semibold">Model Accuracy</span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
@@ -274,8 +302,7 @@ export default function AccidentPredictionPage() {
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs">
-                            Calculated as 100% - MAPE (Mean Absolute Percentage Error).
-                            Higher is better.
+                            Test set accuracy for high-risk area prediction. This is the accuracy on completely unseen data, representing the most realistic performance expectation for production use.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -297,11 +324,40 @@ export default function AccidentPredictionPage() {
                     style={{ width: `${accuracyPercentage}%` }}
                   />
                 </div>
+                {cvAccuracyDisplay && (
+                  <p className="text-sm text-muted-foreground">
+                    Cross-Validation Accuracy: {cvAccuracyDisplay} (averaged across 5 folds - shows model stability)
+                  </p>
+                )}
               </div>
             )}
 
             {/* Detailed Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Count Prediction Accuracy */}
+              {modelInfo.accuracy_metrics.count_prediction_accuracy !== undefined && (
+                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">Count Prediction Accuracy</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Accuracy for predicting accident counts (100% - MAPE)
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {modelInfo.accuracy_metrics.count_prediction_accuracy.toFixed(2)}%
+                  </div>
+                </div>
+              )}
+
               {/* MAPE */}
               {modelInfo.accuracy_metrics.mape !== undefined && (
                 <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">

@@ -14,6 +14,7 @@ import ViolationTypeDistribution from "@/components/home/charts/ViolationTypeDis
 import { useDashboardCharts } from "@/api/dashboardCharts";
 import { AlertTriangle, Car, Users } from "lucide-react";
 import StatCard from "@/components/home/StatCard";
+import { KpiSkeleton, ChartSkeleton, CardSkeleton } from "@/components/skeletons";
 
 const HomePage = () => {
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,14 @@ const HomePage = () => {
     fetchDashboardStats();
   }, []);
 
+  /**
+   * fetchDashboardStats - Optimized dashboard stats fetching
+   * 
+   * IMPROVEMENTS:
+   * - Uses parallel fetching (already optimized endpoint)
+   * - Critical for first paint: KPI stats load first
+   * - Stats endpoint aggregates data server-side for faster response
+   */
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
@@ -155,98 +164,51 @@ const HomePage = () => {
       
       {loading ? (
         <>
-          {/* Skeleton Grid matching final layout */}
+          {/* OPTIMIZED: Reusable skeleton components for better maintainability */}
           <section className="w-full grid grid-cols-12 gap-4">
-            {/* Row 1: Stat Cards Skeleton */}
+            {/* Row 1: Stat Cards Skeleton - Critical for first paint */}
             <div className="col-span-12 md:col-span-4">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-32 bg-muted rounded mb-4"></div>
-                <div className="h-8 w-20 bg-muted rounded"></div>
-              </div>
+              <KpiSkeleton />
             </div>
             <div className="col-span-12 md:col-span-4">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-32 bg-muted rounded mb-4"></div>
-                <div className="h-8 w-20 bg-muted rounded"></div>
-              </div>
+              <KpiSkeleton />
             </div>
             <div className="col-span-12 md:col-span-4">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-32 bg-muted rounded mb-4"></div>
-                <div className="h-8 w-20 bg-muted rounded"></div>
-              </div>
+              <KpiSkeleton />
             </div>
 
             {/* Row 2: Vehicle Renewal and Charts Skeleton */}
-            {/* div1: Vehicle Renewal (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-40 bg-muted rounded mb-4"></div>
-                <div className="w-full aspect-[4/3] bg-muted rounded"></div>
-                <div className="h-3 w-28 bg-muted rounded mt-3"></div>
-              </div>
+              <CardSkeleton contentHeight="aspect-[4/3]" />
             </div>
-            {/* div2: Top 3 Municipality (lg:3) */}
             <div className="col-span-12 lg:col-span-3">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-44 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
-                  </div>
-                </div>
-            {/* div3: Top 5 Violation (lg:6) */}
+              <ChartSkeleton />
+            </div>
             <div className="col-span-12 lg:col-span-6">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-44 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
-              </div>
+              <ChartSkeleton />
             </div>
 
-            {/* div4: Online Users (lg:3) */}
+            {/* Row 3: System Status & Analysis */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-36 bg-muted rounded mb-2"></div>
-                <div className="h-3 w-40 bg-muted rounded mb-4"></div>
-                <div className="h-3 w-48 bg-muted rounded mb-2"></div>
-                <div className="h-3 w-48 bg-muted rounded"></div>
-              </div>
+              <CardSkeleton showContent={false} />
             </div>
-            {/* div5: Top 3 Bottom Municipality (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-56 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
-              </div>
-                </div>
-            {/* div6: Violation Type Distribution (lg:3) */}
-            <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-64 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
-              </div>
+              <ChartSkeleton />
             </div>
-            {/* div7: Top 3 Officer (lg:3) */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-44 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
+              <ChartSkeleton />
             </div>
-          </div>
+            <div className="col-span-12 md:col-span-6 lg:col-span-3">
+              <ChartSkeleton />
+            </div>
 
-            {/* Bottom row */}
-            {/* div8: Top 5 Municipality Accident (lg:6) */}
+            {/* Row 4: Accident Analysis */}
             <div className="col-span-12 lg:col-span-6">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-64 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
-              </div>
+              <ChartSkeleton />
             </div>
-            {/* div9: Weekly Accident Pattern (lg:6) */}
             <div className="col-span-12 lg:col-span-6">
-              <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                <div className="h-5 w-64 bg-muted rounded mb-4"></div>
-                <div className="h-56 bg-muted rounded"></div>
-              </div>
-        </div>
+              <ChartSkeleton />
+            </div>
           </section>
         </>
       ) : (
@@ -297,10 +259,7 @@ const HomePage = () => {
             {/* Top Performing Municipalities */}
             <div className="col-span-12 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <Top3Municipality data={charts.municipalityTop3 || []} />
               )}
@@ -309,10 +268,7 @@ const HomePage = () => {
             {/* Most Common Violations */}
             <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <Top5Violation data={charts.violationsTop5 || []} />
               )}
@@ -331,10 +287,7 @@ const HomePage = () => {
             {/* Violation Categories */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <ViolationTypeDistribution data={charts.violationTypeDistribution || []} />
               )}
@@ -343,10 +296,7 @@ const HomePage = () => {
             {/* Top Performing Officers */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <Top3Officer data={charts.topOfficersTop3 || []} />
               )}
@@ -355,10 +305,7 @@ const HomePage = () => {
             {/* Areas Needing Attention */}
             <div className="col-span-12 md:col-span-6 lg:col-span-3">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <Top3BottomMunicipality data={charts.bottomMunicipalityTop3 || []} />
               )}
@@ -368,10 +315,7 @@ const HomePage = () => {
             {/* Accident-Prone Areas */}
             <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <Top5MunicipalityAccident data={charts.accidentMunicipalityTop5 || []} />
               )}
@@ -380,10 +324,7 @@ const HomePage = () => {
             {/* Weekly Accident Trends */}
             <div className="col-span-12 lg:col-span-6">
               {charts.loading ? (
-                <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-neutral-900 dark:to-neutral-800 shadow-lg border border-gray-200 dark:border-gray-700 p-4 h-full animate-pulse">
-                  <div className="h-6 bg-muted rounded w-40 mb-4"></div>
-                  <div className="h-48 bg-muted rounded"></div>
-                </div>
+                <ChartSkeleton />
               ) : (
                 <WeeklyAccidentPattern data={charts.weeklyAccidentPattern || []} />
               )}

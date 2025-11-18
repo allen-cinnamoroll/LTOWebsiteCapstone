@@ -6,13 +6,64 @@ import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.j
 
 export const getAccidents = async (req, res) => {
   try {
-    const accidents = await AccidentModel.find()
+    const { page = 1, limit, search, municipality, fetchAll } = req.query;
+    
+    // If fetchAll is true, don't apply pagination
+    const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
+    const shouldPaginate = !isFetchAll;
+    const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
+    const skip = shouldPaginate ? (page - 1) * limitValue : 0;
+
+    let query = { deletedAt: null };
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { blotterNo: { $regex: search, $options: "i" } },
+        { vehiclePlateNo: { $regex: search, $options: "i" } },
+        { vehicleMCPlateNo: { $regex: search, $options: "i" } },
+        { suspect: { $regex: search, $options: "i" } },
+        { offense: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Add municipality filter
+    if (municipality) {
+      query.municipality = municipality;
+    }
+
+    // OPTIMIZATION: Select only fields needed for listing page
+    // Reduces payload size and improves query performance
+    // Indexes used: createdAt (for sorting), deletedAt (for filtering), municipality
+    let accidentsQuery = AccidentModel.find(query)
+      .select("blotterNo vehiclePlateNo vehicleMCPlateNo vehicleChassisNo suspect stageOfFelony offense offenseType narrative caseStatus region province municipality barangay street lat lng dateEncoded dateReported timeReported dateCommited timeCommited incidentType createdBy updatedBy createdAt updatedAt")
       .populate('createdBy', 'firstName middleName lastName')
-      .populate('updatedBy', 'firstName middleName lastName');
+      .populate('updatedBy', 'firstName middleName lastName')
+      .sort({ createdAt: -1 });
 
-    res.json({ success: true, data: accidents });
+    // Only apply skip and limit if pagination is enabled
+    if (shouldPaginate) {
+      accidentsQuery = accidentsQuery.skip(skip);
+      if (limitValue) {
+        accidentsQuery = accidentsQuery.limit(limitValue);
+      }
+    }
+
+    const accidents = await accidentsQuery;
+    const total = await AccidentModel.countDocuments(query);
+
+    res.json({ 
+      success: true, 
+      data: accidents,
+      pagination: {
+        current: shouldPaginate ? parseInt(page) : 1,
+        pages: shouldPaginate ? Math.ceil(total / (limitValue || 100)) : 1,
+        total,
+        limit: limitValue || null,
+        fetchAll: !shouldPaginate,
+      },
+    });
   } catch (error) {
-
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -78,7 +129,7 @@ export const createAccident = async (req, res) => {
 
 export const getAccidentById = async (req, res) => {
   try {
-    const accident = await AccidentModel.findById(req.params.id)
+    const accident = await AccidentModel.findOne({ _id: req.params.id, deletedAt: null })
       .populate('createdBy', 'firstName middleName lastName')
       .populate('updatedBy', 'firstName middleName lastName');
     if (!accident) {
@@ -154,6 +205,18 @@ export const deleteAccident = async (req, res) => {
       });
     }
 
+    if (accident.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Accident is already deleted",
+      });
+    }
+
+    // Soft delete by setting deletedAt
+    accident.deletedAt = new Date();
+    accident.updatedBy = req.user ? req.user.userId : null;
+    await accident.save();
+
     // Log the activity before deleting
     if (req.user && req.user.userId) {
       try {
@@ -165,7 +228,7 @@ export const deleteAccident = async (req, res) => {
             logType: 'delete_accident',
             ipAddress: getClientIP(req),
             status: 'success',
-            details: `Accident Deleted Successfully (Blotter No: ${accident.blotterNo})`
+            details: `Accident moved to bin (Blotter No: ${accident.blotterNo})`
           });
         }
       } catch (logError) {
@@ -175,12 +238,180 @@ export const deleteAccident = async (req, res) => {
     } else {
       console.warn('User not authenticated or user.userId is missing for accident deletion');
     }
-
-    await AccidentModel.findByIdAndDelete(req.params.id);
     
     res.json({ 
       success: true, 
-      message: "Accident deleted successfully" 
+      message: "Accident moved to bin successfully" 
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Get deleted accidents (bin)
+export const getDeletedAccidents = async (req, res) => {
+  try {
+    const { page = 1, limit, search, fetchAll } = req.query;
+    
+    // If fetchAll is true, don't apply pagination
+    const isFetchAll = fetchAll === 'true' || fetchAll === true || fetchAll === '1' || fetchAll === 1;
+    const shouldPaginate = !isFetchAll;
+    const limitValue = shouldPaginate ? (parseInt(limit) || 100) : null;
+    const skip = shouldPaginate ? (page - 1) * limitValue : 0;
+
+    let query = { deletedAt: { $ne: null } }; // Only deleted items
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { blotterNo: { $regex: search, $options: "i" } },
+        { vehiclePlateNo: { $regex: search, $options: "i" } },
+        { vehicleMCPlateNo: { $regex: search, $options: "i" } },
+        { suspect: { $regex: search, $options: "i" } },
+        { municipality: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // OPTIMIZATION: Select only fields needed for listing page
+    let accidentsQuery = AccidentModel.find(query)
+      .select("blotterNo vehiclePlateNo vehicleMCPlateNo vehicleChassisNo suspect stageOfFelony offense offenseType narrative caseStatus region province municipality barangay street lat lng dateEncoded dateReported timeReported dateCommited timeCommited incidentType createdBy updatedBy createdAt updatedAt deletedAt")
+      .populate('createdBy', 'firstName middleName lastName')
+      .populate('updatedBy', 'firstName middleName lastName')
+      .sort({ deletedAt: -1 });
+
+    // Only apply skip and limit if pagination is enabled
+    if (shouldPaginate) {
+      accidentsQuery = accidentsQuery.skip(skip);
+      if (limitValue) {
+        accidentsQuery = accidentsQuery.limit(limitValue);
+      }
+    }
+
+    const accidents = await accidentsQuery;
+    const total = await AccidentModel.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: accidents,
+      pagination: {
+        current: shouldPaginate ? parseInt(page) : 1,
+        pages: shouldPaginate ? Math.ceil(total / (limitValue || 100)) : 1,
+        total,
+        limit: limitValue || null,
+        fetchAll: !shouldPaginate,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Restore accident from bin
+export const restoreAccident = async (req, res) => {
+  try {
+    const accident = await AccidentModel.findById(req.params.id);
+    
+    if (!accident) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Accident not found" 
+      });
+    }
+
+    if (!accident.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Accident is not deleted",
+      });
+    }
+
+    // Restore by clearing deletedAt
+    accident.deletedAt = null;
+    accident.updatedBy = req.user ? req.user.userId : null;
+    await accident.save();
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      try {
+        const user = await UserModel.findById(req.user.userId);
+        if (user) {
+          await logUserActivity({
+            userId: user._id,
+            logType: 'restore_accident',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Accident restored from bin (Blotter No: ${accident.blotterNo})`
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Accident restored successfully",
+      data: accident
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Permanently delete accident
+export const permanentDeleteAccident = async (req, res) => {
+  try {
+    const accident = await AccidentModel.findById(req.params.id);
+    
+    if (!accident) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Accident not found" 
+      });
+    }
+
+    if (!accident.deletedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Accident must be in bin before permanent deletion",
+      });
+    }
+
+    const blotterNo = accident.blotterNo;
+
+    // Permanently delete from database
+    await AccidentModel.findByIdAndDelete(req.params.id);
+
+    // Log the activity
+    if (req.user && req.user.userId) {
+      try {
+        const user = await UserModel.findById(req.user.userId);
+        if (user) {
+          await logUserActivity({
+            userId: user._id,
+            logType: 'permanent_delete_accident',
+            ipAddress: getClientIP(req),
+            status: 'success',
+            details: `Accident permanently deleted (Blotter No: ${blotterNo})`
+          });
+        }
+      } catch (logError) {
+        console.error('Failed to log user activity:', logError.message);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Accident permanently deleted successfully" 
     });
   } catch (error) {
     res.status(400).json({ 

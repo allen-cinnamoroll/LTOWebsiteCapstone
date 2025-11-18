@@ -9,6 +9,8 @@ import VehicleRenewalModal from "@/components/vehicle/VehicleRenewalModal";
 import AddVehicleModal from "@/components/vehicle/AddVehicleModal";
 import VehicleDetailsModal from "@/components/vehicle/VehicleDetailsModal";
 import EditVehicleModal from "@/components/vehicle/EditVehicleModal";
+import ConfirmationDIalog from "@/components/dialog/ConfirmationDIalog";
+import { toast } from "sonner";
 
 
 const VehiclesPage = () => {
@@ -27,17 +29,29 @@ const VehiclesPage = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicleId, setEditingVehicleId] = useState(null);
   const [renewingVehicle, setRenewingVehicle] = useState(null);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState(null);
 
   useEffect(() => {
     fetchVehicles();
   }, []);
 
+  /**
+   * fetchVehicles - Optimized vehicle fetching with pagination
+   * 
+   * IMPROVEMENTS:
+   * - Uses server-side pagination with limit (100 items) instead of fetchAll
+   * - Reduces initial payload size significantly
+   * - For very large datasets (>1000 vehicles), consider implementing full server-side pagination
+   *   in VehiclesTable component (currently uses client-side pagination)
+   */
   const fetchVehicles = async () => {
     try {
       setLoading(true);
       
-      // Fetch all vehicles by using fetchAll parameter
-      const { data } = await apiClient.get("/vehicle?fetchAll=true", {
+      // Use pagination with reasonable limit instead of fetching all
+      // This reduces payload size and improves initial load time
+      const { data } = await apiClient.get("/vehicle?page=1&limit=100", {
         headers: {
           Authorization: token,
         },
@@ -118,6 +132,39 @@ const VehiclesPage = () => {
     fetchVehicles();
   };
 
+  const handleDelete = (vehicle) => {
+    setVehicleToDelete(vehicle);
+    setShowDeleteAlert(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!vehicleToDelete) return;
+    
+    try {
+      await apiClient.delete(`/vehicle/${vehicleToDelete._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      toast.success("Vehicle moved to bin successfully");
+      fetchVehicles();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete vehicle");
+    } finally {
+      setShowDeleteAlert(false);
+      setVehicleToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteAlert(false);
+    setVehicleToDelete(null);
+  };
+
+  const handleBinClick = () => {
+    navigate("/vehicle/bin");
+  };
+
 
 
   return (
@@ -135,6 +182,8 @@ const VehiclesPage = () => {
             onRowClick={onRowClick}
             onEdit={onEdit}
             onRenew={onRenew}
+            onDelete={handleDelete}
+            onBinClick={handleBinClick}
             submitting={submitting}
           />
         </div>
@@ -175,6 +224,16 @@ const VehiclesPage = () => {
         onOpenChange={setEditVehicleModalOpen}
         vehicleId={editingVehicleId}
         onVehicleUpdated={handleVehicleUpdated}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDIalog
+        open={showDeleteAlert}
+        onOpenChange={setShowDeleteAlert}
+        confirm={confirmDelete}
+        cancel={cancelDelete}
+        title="Do you want to delete this?"
+        description="This action will move the vehicle to bin. You can restore it later from the bin."
       />
     </div>
   );
