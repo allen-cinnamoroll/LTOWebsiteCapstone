@@ -65,10 +65,56 @@ export function useDashboardCharts() {
         const byType = vioRes?.data?.data?.violationsByType || [];
 
         setViolationsTop5(
-          mostCommon.slice(0,5).map(v => ({ violation: v._id, value: v.count }))
+          mostCommon.slice(0,5).map(v => {
+            // Extract only the first word/code before the dash (e.g., "1E - RECKLESS DRIVING" -> "1E")
+            const violationName = v._id || '';
+            const firstWord = violationName.includes(' - ') 
+              ? violationName.split(' - ')[0].trim() 
+              : violationName.split('-')[0].trim();
+            return { violation: firstWord, value: v.count };
+          })
         );
         setTopOfficersTop3(
-          topOfficers.slice(0,3).map(o => ({ officer: o.officerName, value: o.violationCount }))
+          topOfficers.slice(0,3).map(o => {
+            const officerName = o.officerName || '';
+            
+            // Common police ranks in the Philippines (remove from start)
+            const ranks = ['PSSG', 'SPO1', 'SPO2', 'SPO3', 'SPO4', 'PO1', 'PO2', 'PO3', 'PO4', 
+                          'PCpl', 'PSgt', 'PMSg', 'PInsp', 'PSupt', 'PSSupt', 'PCSupt', 'PLtCol', 
+                          'PCol', 'PBGen', 'PMGen', 'PLtGen', 'PGen', 'CPL', 'SGT', 'SSG', 'MSG'];
+            
+            // Remove rank from the beginning
+            let nameWithoutRank = officerName.trim();
+            for (const rank of ranks) {
+              if (nameWithoutRank.toUpperCase().startsWith(rank.toUpperCase())) {
+                nameWithoutRank = nameWithoutRank.substring(rank.length).trim();
+                break;
+              }
+            }
+            
+            // Split by spaces
+            const nameParts = nameWithoutRank.split(/\s+/).filter(part => part.length > 0);
+            
+            if (nameParts.length === 0) {
+              return { officer: officerName, value: o.violationCount };
+            }
+            
+            // Check if first part is an initial (single letter or letter with dots like "P." or "A.F.J")
+            const firstPart = nameParts[0];
+            const isInitial = /^[A-Z](\.[A-Z])*\.?$/.test(firstPart.toUpperCase()) || 
+                             (firstPart.length === 1 && /^[A-Z]$/.test(firstPart.toUpperCase()));
+            
+            let displayName;
+            if (isInitial && nameParts.length > 1) {
+              // First part is an initial, use last name (last part)
+              displayName = nameParts[nameParts.length - 1];
+            } else {
+              // First part is a name, use it
+              displayName = firstPart;
+            }
+            
+            return { officer: displayName, value: o.violationCount };
+          })
         );
         // Only Alarm, Confiscated, Impounded
         const typeMap = { alarm: "Alarm", confiscated: "Confiscated", impounded: "Impounded" };
