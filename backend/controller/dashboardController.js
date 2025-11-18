@@ -159,9 +159,11 @@ const buildDateOfRenewalFilter = (month, year) => {
  * - Critical for first paint: Returns quickly with aggregated stats
  */
 export const getDashboardStats = async (req, res) => {
+  console.log('=== getDashboardStats called ===');
   try {
     // Calculate date ranges once
     const now = new Date();
+    console.log(`[DASHBOARD] Current date: ${now.toISOString()}`);
     const currentMonth = now.getMonth(); // 0-11
     const currentYear = now.getFullYear();
     const monthStart = new Date(currentYear, currentMonth, 1);
@@ -324,15 +326,284 @@ export const getDashboardStats = async (req, res) => {
 
     // External API calls - run in parallel (non-blocking)
     // These are optional and shouldn't block the main response
+    // Helper function to extract current month prediction from API response
+    const extractCurrentMonthPrediction = (data) => {
+      console.log('[EXTRACT] === Starting extraction function ===');
+      console.log('[EXTRACT] Input data:', {
+        hasData: !!data,
+        success: data?.success,
+        hasDataField: !!(data?.data),
+        dataKeys: data ? Object.keys(data) : []
+      });
+      
+      if (!data || !data.success || !data.data) {
+        console.log('[EXTRACT] Prediction API response missing or unsuccessful:', {
+          hasData: !!data,
+          success: data?.success,
+          hasDataField: !!(data?.data)
+        });
+        return 0;
+      }
+
+      const predictionData = data.data;
+      console.log('[EXTRACT] Prediction data structure:', {
+        hasWeeklyPredictions: !!(predictionData.weekly_predictions),
+        weeklyCount: predictionData.weekly_predictions?.length || 0,
+        hasMonthlyAggregation: !!(predictionData.monthly_aggregation),
+        monthlyValue: predictionData.monthly_aggregation?.total_predicted || 0,
+        predictionStartDate: predictionData.prediction_start_date,
+        currentMonth: `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`,
+        monthStart: monthStart.toISOString(),
+        monthEnd: monthEnd.toISOString()
+      });
+      
+      // Log first week sample if available
+      if (predictionData.weekly_predictions && predictionData.weekly_predictions.length > 0) {
+        console.log('[EXTRACT] First week sample:', JSON.stringify(predictionData.weekly_predictions[0], null, 2));
+      }
+      
+      // The API returns weekly_predictions and monthly_aggregation
+      // We need to sum up weekly predictions that fall within the current month
+      // IMPORTANT: Match the frontend logic exactly (WeeklyPredictionsChart.jsx)
+      // 1. Filter out training month (July, month index 6)
+      // 2. Group by month and sum predicted_count (or predicted, or total_predicted)
+      // 3. Round the final value
+      
+      // Determine training month from last_data_date or default to July (6)
+      let trainingMonth = 6; // Default to July (0-indexed: 6)
+      if (predictionData.last_data_date) {
+        try {
+          const [ldYear, ldMonth, ldDay] = predictionData.last_data_date.split('-').map(Number);
+          const lastDataDate = new Date(ldYear, ldMonth - 1, ldDay);
+          if (!isNaN(lastDataDate.getTime())) {
+            trainingMonth = lastDataDate.getMonth();
+            console.log(`[EXTRACT] Training month detected: ${trainingMonth} (${lastDataDate.toLocaleString('default', { month: 'long' })})`);
+          }
+        } catch (e) {
+          console.log(`[EXTRACT] Could not parse last_data_date: ${predictionData.last_data_date}`);
+        }
+      }
+      
+      if (predictionData.weekly_predictions && Array.isArray(predictionData.weekly_predictions)) {
+        let currentMonthTotal = 0;
+        let matchedWeeks = 0;
+        
+        predictionData.weekly_predictions.forEach((week, index) => {
+          // Get the week start date (could be 'date' or 'week_start')
+          const weekDateStr = week.date || week.week_start;
+          if (!weekDateStr) {
+            console.log(`[EXTRACT] Week ${index} missing date field`);
+            return;
+          }
+          
+          // Parse date string (format: YYYY-MM-DD) - parse as local date to avoid timezone issues
+          const [year, month, day] = weekDateStr.split('-').map(Number);
+          const weekDate = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+          
+          if (isNaN(weekDate.getTime())) {
+            console.log(`[EXTRACT] Week ${index} has invalid date: ${weekDateStr}`);
+            return;
+          }
+          
+          // EXCLUDE training month (same as frontend)
+          const predictionMonth = weekDate.getMonth();
+          if (predictionMonth === trainingMonth) {
+            console.log(`[EXTRACT] Week ${index} (${weekDateStr}) is in training month, excluding`);
+            return;
+          }
+          
+          // Check if this week falls within the current month
+          // Use same logic as frontend: check if week's month matches current month
+          const weekYear = weekDate.getFullYear();
+          const weekMonth = weekDate.getMonth();
+          
+          // Check if week is in current month
+          if (weekMonth === currentMonth && weekYear === currentYear) {
+            // Get the predicted count for this week - use same priority as frontend:
+            // predicted_count || predicted || total_predicted
+            const weekValue = week.predicted_count || week.predicted || week.total_predicted || 0;
+            const numericValue = typeof weekValue === 'number' ? weekValue : parseFloat(weekValue) || 0;
+            currentMonthTotal += numericValue;
+            matchedWeeks++;
+            console.log(`[EXTRACT] Week ${index} (${weekDateStr}) in current month, value: ${numericValue}`);
+          }
+        });
+        
+        // If we found weekly predictions for the current month, return the rounded sum (same as frontend)
+        if (currentMonthTotal > 0) {
+          const roundedTotal = Math.round(currentMonthTotal);
+          console.log(`[EXTRACT] Extracted ${currentMonthTotal} from ${matchedWeeks} weekly predictions for current month, rounded: ${roundedTotal}`);
+          return roundedTotal;
+        } else {
+          console.log(`[EXTRACT] No weekly predictions overlap with current month. Checked ${predictionData.weekly_predictions.length} weeks.`);
+          // Log first few weeks for debugging
+          if (predictionData.weekly_predictions.length > 0) {
+            const firstWeek = predictionData.weekly_predictions[0];
+            console.log('[EXTRACT] First week sample:', {
+              date: firstWeek.date || firstWeek.week_start,
+              predicted_count: firstWeek.predicted_count,
+              total_predicted: firstWeek.total_predicted,
+              predicted: firstWeek.predicted
+            });
+          }
+        }
+      }
+      
+      // Fallback: Calculate first month of predictions from weekly data
+      // This handles the case where predictions start in the future
+      // IMPORTANT: Also exclude training month in fallback
+      if (predictionData.weekly_predictions && predictionData.weekly_predictions.length > 0) {
+        // Find the first week's date (excluding training month)
+        let firstWeek = null;
+        for (const week of predictionData.weekly_predictions) {
+          const weekDateStr = week.date || week.week_start;
+          if (!weekDateStr) continue;
+          
+          const [wYear, wMonth, wDay] = weekDateStr.split('-').map(Number);
+          const weekDate = new Date(wYear, wMonth - 1, wDay);
+          if (isNaN(weekDate.getTime())) continue;
+          
+          // Skip training month
+          if (weekDate.getMonth() === trainingMonth) continue;
+          
+          firstWeek = week;
+          break;
+        }
+        
+        if (firstWeek) {
+          const firstWeekDateStr = firstWeek.date || firstWeek.week_start;
+          
+          if (firstWeekDateStr) {
+            // Parse date string (format: YYYY-MM-DD) - parse as local date to avoid timezone issues
+            const [year, month, day] = firstWeekDateStr.split('-').map(Number);
+            const firstWeekDate = new Date(year, month - 1, day);
+            
+            if (!isNaN(firstWeekDate.getTime())) {
+              const firstMonth = firstWeekDate.getMonth();
+              const firstYear = firstWeekDate.getFullYear();
+              const firstMonthStart = new Date(firstYear, firstMonth, 1);
+              const firstMonthEnd = new Date(firstYear, firstMonth + 1, 0, 23, 59, 59, 999);
+              
+              // If the first month of predictions matches the current month, calculate its total
+              if (firstMonth === currentMonth && firstYear === currentYear) {
+                let firstMonthTotal = 0;
+                let matchedWeeks = 0;
+                
+                predictionData.weekly_predictions.forEach(week => {
+                  const weekDateStr = week.date || week.week_start;
+                  if (!weekDateStr) return;
+                  
+                  // Parse date string properly
+                  const [wYear, wMonth, wDay] = weekDateStr.split('-').map(Number);
+                  const weekDate = new Date(wYear, wMonth - 1, wDay);
+                  if (isNaN(weekDate.getTime())) return;
+                  
+                  // EXCLUDE training month
+                  if (weekDate.getMonth() === trainingMonth) return;
+                  
+                  // Normalize to start of day for comparison
+                  const weekDateNormalized = new Date(weekDate.getFullYear(), weekDate.getMonth(), weekDate.getDate());
+                  
+                  // Check if week is in the first month
+                  if (weekDateNormalized >= firstMonthStart && weekDateNormalized <= firstMonthEnd) {
+                    // Use same field priority as frontend: predicted_count || predicted || total_predicted
+                    const weekValue = week.predicted_count || week.predicted || week.total_predicted || 0;
+                    const numericValue = typeof weekValue === 'number' ? weekValue : parseFloat(weekValue) || 0;
+                    firstMonthTotal += numericValue;
+                    matchedWeeks++;
+                  }
+                });
+                
+                if (firstMonthTotal > 0) {
+                  const roundedTotal = Math.round(firstMonthTotal);
+                  console.log(`[EXTRACT] Using first month of predictions (${matchedWeeks} weeks): ${firstMonthTotal}, rounded: ${roundedTotal}`);
+                  return roundedTotal;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Fallback: If monthly_aggregation exists, check if we can use it
+      // Note: monthly_aggregation might be for ALL weeks (52 weeks), not just first month
+      if (predictionData.monthly_aggregation) {
+        const monthlyValue = predictionData.monthly_aggregation.total_predicted || 0;
+        
+        // If prediction starts from current month, use the monthly aggregation
+        if (predictionData.prediction_start_date && monthlyValue > 0) {
+          // Parse date string properly (format: YYYY-MM-DD or ISO string)
+          let predictionStartDate;
+          if (predictionData.prediction_start_date.includes('-') && predictionData.prediction_start_date.split('-').length === 3) {
+            const [pYear, pMonth, pDay] = predictionData.prediction_start_date.split('-').map(Number);
+            predictionStartDate = new Date(pYear, pMonth - 1, pDay);
+          } else {
+            predictionStartDate = new Date(predictionData.prediction_start_date);
+          }
+          
+          if (!isNaN(predictionStartDate.getTime())) {
+            const predictionMonth = predictionStartDate.getMonth();
+            const predictionYear = predictionStartDate.getFullYear();
+            
+            // If predictions start from current month, use monthly aggregation
+            // BUT: monthly_aggregation might be for all 52 weeks, so we need to calculate first month from weeks
+            // Only use it if we can't calculate from weeks
+            if (predictionMonth === currentMonth && predictionYear === currentYear) {
+              // Try to calculate first month from weeks first
+              if (predictionData.weekly_predictions && predictionData.weekly_predictions.length > 0) {
+                // Already handled above, but if we reach here, use monthly as last resort
+                // Divide by approximate number of months if it's for 52 weeks
+                const weeksRequested = predictionData.prediction_weeks || 52;
+                const approximateMonths = Math.ceil(weeksRequested / 4.33); // ~4.33 weeks per month
+                const firstMonthEstimate = Math.round(monthlyValue / approximateMonths);
+                
+                console.log(`[EXTRACT] Using estimated first month from monthly aggregation: ${firstMonthEstimate} (total: ${monthlyValue} for ${approximateMonths} months)`);
+                return firstMonthEstimate;
+              } else {
+                console.log(`[EXTRACT] Using monthly aggregation: ${monthlyValue} (prediction starts from current month, no weekly data)`);
+                return monthlyValue;
+              }
+            }
+          }
+        }
+      }
+      
+      console.log('[EXTRACT] No prediction found for current month after all checks');
+      return 0;
+    };
+
+    console.log('=== STARTING PREDICTION API CALLS ===');
+    console.log(`Current month: ${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`);
+    console.log(`Month range: ${monthStart.toISOString()} to ${monthEnd.toISOString()}`);
+    
     const [predictedRenewalsThisMonth, predictedVehiclesThisMonth] = await Promise.all([
       // Prediction API call for renewals (with timeout)
       (async () => {
+        console.log('[RENEWAL PREDICTION] Starting API call...');
         try {
           const predictionApiUrl = process.env.MV_PREDICTION_API_URL || 'http://localhost:5002';
+          console.log(`[RENEWAL PREDICTION] API URL: ${predictionApiUrl}`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced to 5s timeout
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30s timeout
           
           try {
+            // First, try a health check to see if API is running (quick check)
+            try {
+              const healthController = new AbortController();
+              const healthTimeout = setTimeout(() => healthController.abort(), 3000);
+              const healthResponse = await fetch(`${predictionApiUrl}/api/health`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: healthController.signal
+              });
+              clearTimeout(healthTimeout);
+              console.log(`[RENEWAL PREDICTION] Health check status: ${healthResponse?.status}`);
+            } catch (healthError) {
+              console.warn(`[RENEWAL PREDICTION] Health check failed (API may be slow or down):`, healthError.message);
+            }
+            
+            // Request 52 weeks to get full year of predictions
+            console.log(`[RENEWAL PREDICTION] Fetching: ${predictionApiUrl}/api/predict/registrations?weeks=52`);
             const response = await fetch(
               `${predictionApiUrl}/api/predict/registrations?weeks=52`,
               {
@@ -343,41 +614,64 @@ export const getDashboardStats = async (req, res) => {
             );
             clearTimeout(timeoutId);
             
+            console.log(`[RENEWAL PREDICTION] Response status: ${response?.status}, ok: ${response?.ok}`);
+            
             if (response && response.ok) {
               const data = await response.json();
-              if (data.success && data.data) {
-                // Process prediction data (same logic as before)
-                if (data.data.daily_predictions && Array.isArray(data.data.daily_predictions)) {
-                  const currentMonthPredictions = data.data.daily_predictions.filter(day => {
-                    const predictionDate = new Date(day.date || day.predicted_date || day.predictedDate);
-                    return predictionDate >= monthStart && predictionDate <= monthEnd;
-                  });
-                  return currentMonthPredictions.reduce((sum, day) => {
-                    const value = day.predicted || day.predicted_count || day.value || 0;
-                    return sum + (typeof value === 'number' ? value : 0);
-                  }, 0);
-                }
-              }
+              console.log(`[RENEWAL PREDICTION] Response received, success: ${data?.success}`);
+              console.log(`[RENEWAL PREDICTION] Response keys:`, Object.keys(data || {}));
+              
+              const prediction = extractCurrentMonthPrediction(data);
+              console.log(`[RENEWAL PREDICTION] Final predicted renewals for current month: ${prediction}`);
+              return prediction;
+            } else {
+              const errorText = await response?.text().catch(() => 'Unable to read error');
+              console.error(`[RENEWAL PREDICTION] API returned error status ${response?.status}:`, errorText);
             }
           } catch (fetchError) {
             clearTimeout(timeoutId);
             if (fetchError.name !== 'AbortError') {
-              console.warn('Prediction API error:', fetchError.message);
+              console.error('[RENEWAL PREDICTION] Fetch error:', fetchError.message);
+              console.error('[RENEWAL PREDICTION] Error stack:', fetchError.stack);
+            } else {
+              console.warn('[RENEWAL PREDICTION] Request aborted (timeout)');
             }
           }
         } catch (error) {
-          console.error('Error fetching predicted renewals:', error.message);
+          console.error('[RENEWAL PREDICTION] Outer error:', error.message);
+          console.error('[RENEWAL PREDICTION] Error stack:', error.stack);
         }
+        console.log('[RENEWAL PREDICTION] Returning 0 (fallback)');
         return 0;
       })(),
       // Prediction API call for vehicle registrations (with timeout)
+      // Use the same API call and same logic to ensure consistency
       (async () => {
+        console.log('[VEHICLE PREDICTION] Starting API call...');
         try {
           const predictionApiUrl = process.env.MV_PREDICTION_API_URL || 'http://localhost:5002';
+          console.log(`[VEHICLE PREDICTION] API URL: ${predictionApiUrl}`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // Reduced to 5s timeout
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // Increased to 30s timeout
           
           try {
+            // First, try a health check to see if API is running (quick check)
+            try {
+              const healthController = new AbortController();
+              const healthTimeout = setTimeout(() => healthController.abort(), 3000);
+              const healthResponse = await fetch(`${predictionApiUrl}/api/health`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                signal: healthController.signal
+              });
+              clearTimeout(healthTimeout);
+              console.log(`[VEHICLE PREDICTION] Health check status: ${healthResponse?.status}`);
+            } catch (healthError) {
+              console.warn(`[VEHICLE PREDICTION] Health check failed (API may be slow or down):`, healthError.message);
+            }
+            
+            // Request 52 weeks to get full year of predictions
+            console.log(`[VEHICLE PREDICTION] Fetching: ${predictionApiUrl}/api/predict/registrations?weeks=52`);
             const response = await fetch(
               `${predictionApiUrl}/api/predict/registrations?weeks=52`,
               {
@@ -388,34 +682,41 @@ export const getDashboardStats = async (req, res) => {
             );
             clearTimeout(timeoutId);
             
+            console.log(`[VEHICLE PREDICTION] Response status: ${response?.status}, ok: ${response?.ok}`);
+            
             if (response && response.ok) {
               const data = await response.json();
-              if (data.success && data.data) {
-                // Process prediction data (same logic as before)
-                if (data.data.daily_predictions && Array.isArray(data.data.daily_predictions)) {
-                  const currentMonthPredictions = data.data.daily_predictions.filter(day => {
-                    const predictionDate = new Date(day.date || day.predicted_date || day.predictedDate);
-                    return predictionDate >= monthStart && predictionDate <= monthEnd;
-                  });
-                  return currentMonthPredictions.reduce((sum, day) => {
-                    const value = day.predicted || day.predicted_count || day.value || 0;
-                    return sum + (typeof value === 'number' ? value : 0);
-                  }, 0);
-                }
-              }
+              console.log(`[VEHICLE PREDICTION] Response received, success: ${data?.success}`);
+              console.log(`[VEHICLE PREDICTION] Response keys:`, Object.keys(data || {}));
+              
+              const prediction = extractCurrentMonthPrediction(data);
+              console.log(`[VEHICLE PREDICTION] Final predicted vehicles for current month: ${prediction}`);
+              return prediction;
+            } else {
+              const errorText = await response?.text().catch(() => 'Unable to read error');
+              console.error(`[VEHICLE PREDICTION] API returned error status ${response?.status}:`, errorText);
             }
           } catch (fetchError) {
             clearTimeout(timeoutId);
             if (fetchError.name !== 'AbortError') {
-              console.warn('Prediction API error:', fetchError.message);
+              console.error('[VEHICLE PREDICTION] Fetch error:', fetchError.message);
+              console.error('[VEHICLE PREDICTION] Error stack:', fetchError.stack);
+            } else {
+              console.warn('[VEHICLE PREDICTION] Request aborted (timeout)');
             }
           }
         } catch (error) {
-          console.error('Error fetching predicted vehicles:', error.message);
+          console.error('[VEHICLE PREDICTION] Outer error:', error.message);
+          console.error('[VEHICLE PREDICTION] Error stack:', error.stack);
         }
+        console.log('[VEHICLE PREDICTION] Returning 0 (fallback)');
         return 0;
       })()
     ]);
+    
+    console.log('=== PREDICTION API CALLS COMPLETED ===');
+    console.log(`Predicted renewals: ${predictedRenewalsThisMonth}`);
+    console.log(`Predicted vehicles: ${predictedVehiclesThisMonth}`);
 
     const vehiclesNeedingRenewalThisMonth = Math.round(predictedRenewalsThisMonth);
     const predictedVehiclesThisMonthRounded = Math.round(predictedVehiclesThisMonth);
@@ -2303,3 +2604,4 @@ export const getVehicleClassificationData = async (req, res) => {
     });
   }
 };
+
