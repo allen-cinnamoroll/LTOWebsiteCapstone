@@ -28,14 +28,27 @@ function isInCIDR(ip, cidr) {
 function getClientIP(req) {
   // Check various headers in order of preference
   // This handles cases where the app is behind a proxy/load balancer
-  return (
+  let ip = (
     req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
     req.headers['x-real-ip'] ||
     req.connection?.remoteAddress ||
     req.socket?.remoteAddress ||
     req.ip ||
+    (req.socket?.remoteAddress ? req.socket.remoteAddress.replace('::ffff:', '') : null) ||
     'unknown'
   );
+  
+  // Remove IPv6 prefix if present
+  if (ip && ip.startsWith('::ffff:')) {
+    ip = ip.replace('::ffff:', '');
+  }
+  
+  // Handle IPv6 localhost
+  if (ip === '::1' || ip === '::ffff:127.0.0.1') {
+    ip = '127.0.0.1';
+  }
+  
+  return ip;
 }
 
 // Parse allowed IPs from environment variable
@@ -85,11 +98,15 @@ function isIPAllowed(clientIP, allowedIPs) {
  * Use this to restrict access based on IP addresses
  */
 export const ipWhitelist = (req, res, next) => {
-  // Check if IP whitelisting is enabled
-  const isEnabled = process.env.IP_WHITELIST_ENABLED === 'true';
+  // Check if IP whitelisting is enabled (case-insensitive, trimmed)
+  const isEnabled = String(process.env.IP_WHITELIST_ENABLED || '').trim().toLowerCase() === 'true';
   
   if (!isEnabled) {
     // If whitelisting is disabled, allow all requests
+    // But log for debugging if someone expects it to be enabled
+    if (process.env.IP_WHITELIST_ENABLED) {
+      console.log(`[IP Whitelist] DISABLED - IP_WHITELIST_ENABLED="${process.env.IP_WHITELIST_ENABLED}" (not 'true')`);
+    }
     return next();
   }
 
@@ -97,20 +114,40 @@ export const ipWhitelist = (req, res, next) => {
   const allowedIPs = getAllowedIPs();
 
   // Log the access attempt (useful for debugging)
-  console.log(`Access attempt from IP: ${clientIP}`);
+  console.log(`[IP Whitelist] Access attempt from IP: ${clientIP} | Allowed IPs: ${allowedIPs.join(', ') || 'NONE'}`);
+
+  // Check if IP is 'unknown' or localhost - this might indicate configuration issue
+  if (clientIP === 'unknown' || clientIP === '::1') {
+    console.warn(`[IP Whitelist] WARNING: Could not detect client IP properly. IP detected: ${clientIP}`);
+  }
 
   if (!isIPAllowed(clientIP, allowedIPs)) {
-    console.warn(`Access denied for IP: ${clientIP}. Allowed IPs: ${allowedIPs.join(', ')}`);
+    console.warn(`[IP Whitelist] ACCESS DENIED for IP: ${clientIP} | Allowed IPs: ${allowedIPs.join(', ')}`);
     return res.status(403).json({
       success: false,
       message: 'Access denied. Your IP address is not authorized to access this system.',
-      code: 'IP_NOT_WHITELISTED'
+      code: 'IP_NOT_WHITELISTED',
+      detectedIP: clientIP
     });
   }
 
   // IP is allowed, proceed
+  console.log(`[IP Whitelist] ACCESS ALLOWED for IP: ${clientIP}`);
   next();
 };
+
+// Log whitelist configuration on module load
+const isEnabledOnLoad = String(process.env.IP_WHITELIST_ENABLED || '').trim().toLowerCase() === 'true';
+const allowedIPsOnLoad = getAllowedIPs();
+
+if (isEnabledOnLoad) {
+  console.log(`[IP Whitelist] ENABLED - Allowed IPs: ${allowedIPsOnLoad.join(', ') || 'NONE (ALL ACCESS WILL BE DENIED)'}`);
+} else {
+  console.log(`[IP Whitelist] DISABLED - All requests will be allowed`);
+  if (process.env.IP_WHITELIST_ENABLED) {
+    console.log(`[IP Whitelist] Note: IP_WHITELIST_ENABLED is set to "${process.env.IP_WHITELIST_ENABLED}" but should be "true" to enable`);
+  }
+}
 
 /**
  * Optional: Middleware that allows certain routes (like auth/login) to bypass IP check
