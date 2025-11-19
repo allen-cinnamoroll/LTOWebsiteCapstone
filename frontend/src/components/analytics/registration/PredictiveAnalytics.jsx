@@ -74,9 +74,9 @@ export function PredictiveAnalytics() {
   const accuracyDisplay = getAccuracyDisplay();
 
   return (
-    <div className="mt-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-800 rounded-xl shadow-lg">
+    <div className="mt-8 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 rounded-xl shadow-lg">
       {/* Header */}
-      <div className="p-6 border-b border-blue-200/50 dark:border-blue-700/50">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 flex items-center justify-center">

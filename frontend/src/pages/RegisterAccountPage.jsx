@@ -99,6 +99,10 @@ export default function RegisterAccountPage() {
         description: date,
       });
     } finally {
+      // Always clear sensitive fields after submit attempt
+      form.setValue("email", "");
+      form.setValue("password", "");
+      form.setValue("confirmPassword", "");
       setIsSubmitting(false);
     }
   };

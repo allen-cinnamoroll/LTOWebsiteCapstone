@@ -57,7 +57,7 @@ const WeeklyPredictionsChart = () => {
 
   // Color palette for different months
   const monthColors = {
-    0: '#3b82f6', // January - Blue
+    0: '#6b7280', // January - Gray
     1: '#10b981', // February - Green
     2: '#f59e0b', // March - Amber
     3: '#ef4444', // April - Red
@@ -1073,11 +1073,11 @@ const WeeklyPredictionsChart = () => {
   const recommendations = generateRecommendations(kpiMetrics);
 
   return (
-    <div className="bg-white/80 dark:bg-gray-800/50 border border-blue-200/50 dark:border-blue-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
+    <div className="bg-white/80 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
       <div className="flex items-center justify-between mb-4 gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="w-8 h-8 flex items-center justify-center">
-            <svg className="w-6 h-6 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
@@ -1088,7 +1088,7 @@ const WeeklyPredictionsChart = () => {
             <p className="text-xs text-gray-600 dark:text-gray-400">
               {getChartDescription()}
               {selectedMunicipality && (
-                <span className="ml-2 text-blue-600 dark:text-blue-400 font-medium">
+                <span className="ml-2 text-gray-600 dark:text-gray-400 font-medium">
                   • {municipalities.find(m => m.value === selectedMunicipality)?.label || selectedMunicipality}
                 </span>
               )}
@@ -1114,7 +1114,7 @@ const WeeklyPredictionsChart = () => {
             <select
               value={selectedMunicipality || ''}
               onChange={(e) => handleMunicipalityChange(e.target.value || null)}
-              className="px-3 py-1.5 text-sm border border-blue-200 dark:border-blue-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm min-w-[180px]"
+              className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors shadow-sm min-w-[180px]"
               title="Select municipality for predictions"
             >
               {municipalities.map((mun) => (
@@ -1131,7 +1131,7 @@ const WeeklyPredictionsChart = () => {
               onClick={() => setViewType('weekly')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 viewType === 'weekly'
-                  ? 'bg-blue-500 text-white shadow-sm'
+                  ? 'bg-gray-600 text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -1141,7 +1141,7 @@ const WeeklyPredictionsChart = () => {
               onClick={() => setViewType('monthly')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 viewType === 'monthly'
-                  ? 'bg-blue-500 text-white shadow-sm'
+                  ? 'bg-gray-600 text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -1151,7 +1151,7 @@ const WeeklyPredictionsChart = () => {
               onClick={() => setViewType('yearly')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 viewType === 'yearly'
-                  ? 'bg-blue-500 text-white shadow-sm'
+                  ? 'bg-gray-600 text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
@@ -1165,7 +1165,7 @@ const WeeklyPredictionsChart = () => {
             <select
               value={weeksToPredict}
               onChange={(e) => setWeeksToPredict(parseInt(e.target.value))}
-              className="px-3 py-1.5 text-sm border border-blue-200 dark:border-blue-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm"
+              className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors shadow-sm"
             >
               <option value={4}>4 weeks</option>
               <option value={8}>8 weeks</option>
@@ -1182,16 +1182,16 @@ const WeeklyPredictionsChart = () => {
       {kpiMetrics && !loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Total Predicted Registrations */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Total Predicted
               </h3>
-              <div className="w-8 h-8 flex items-center justify-center bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
-                <BarChart2 className="w-5 h-5 text-blue-600 dark:text-blue-400" strokeWidth={2} />
+              <div className="w-8 h-8 flex items-center justify-center bg-gray-500/10 dark:bg-gray-400/10 rounded-lg">
+                <BarChart2 className="w-5 h-5 text-gray-600 dark:text-gray-400" strokeWidth={2} />
               </div>
             </div>
-            <p className="text-3xl font-bold text-blue-900 dark:text-blue-200">
+            <p className="text-3xl font-bold text-gray-900 dark:text-gray-200">
               {kpiMetrics.total.toLocaleString()}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -1311,7 +1311,7 @@ const WeeklyPredictionsChart = () => {
       <div className="h-80 w-full min-h-[320px] flex-1 mb-0">
         {loading ? (
           <div className="flex items-center justify-center w-full h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-500"></div>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center w-full h-full text-red-500">
@@ -1339,8 +1339,8 @@ const WeeklyPredictionsChart = () => {
               >
                 <defs>
                   <linearGradient id="yearlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
+                    <stop offset="0%" stopColor="#6b7280" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#6b7280" stopOpacity={0.5}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
@@ -1385,8 +1385,8 @@ const WeeklyPredictionsChart = () => {
               >
                 <defs>
                   <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.5}/>
+                    <stop offset="0%" stopColor="#6b7280" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#6b7280" stopOpacity={0.5}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
@@ -1433,8 +1433,8 @@ const WeeklyPredictionsChart = () => {
               >
                 <defs>
                   <linearGradient id="weeklyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.0}/>
+                    <stop offset="0%" stopColor="#6b7280" stopOpacity={0.8}/>
+                    <stop offset="100%" stopColor="#6b7280" stopOpacity={0.0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
@@ -1464,22 +1464,22 @@ const WeeklyPredictionsChart = () => {
                 <Line
                   type="monotone"
                   dataKey="predicted"
-                  stroke="#3b82f6"
+                  stroke="#6b7280"
                   strokeWidth={3}
                   fill="url(#weeklyGradient)"
                   dot={{ 
                     fill: 'white', 
-                    stroke: '#3b82f6', 
+                    stroke: '#6b7280', 
                     strokeWidth: 2, 
                     r: 4,
-                    filter: 'drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3))'
+                    filter: 'drop-shadow(0 1px 2px rgba(107, 114, 128, 0.3))'
                   }}
                   activeDot={{ 
                     r: 6, 
                     fill: 'white',
-                    stroke: '#3b82f6', 
+                    stroke: '#6b7280', 
                     strokeWidth: 2,
-                    filter: 'drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4))'
+                    filter: 'drop-shadow(0 2px 4px rgba(107, 114, 128, 0.4))'
                   }}
                   name="Predicted Registrations"
                 />
@@ -1499,17 +1499,17 @@ const WeeklyPredictionsChart = () => {
           <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
             {viewType === 'yearly' ? (
               <>
-                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                <div className="w-3 h-3 rounded bg-gray-600 shadow-sm"></div>
                 <span>Yearly Total Predictions</span>
               </>
             ) : viewType === 'monthly' ? (
               <>
-                <div className="w-3 h-3 rounded bg-blue-500 shadow-sm"></div>
+                <div className="w-3 h-3 rounded bg-gray-600 shadow-sm"></div>
                 <span>Monthly Total Predictions</span>
               </>
             ) : (
               <>
-                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
+                <div className="w-3 h-3 rounded-full bg-gray-600 shadow-sm"></div>
                 <span>Weekly Predictions</span>
               </>
             )}
@@ -1533,10 +1533,10 @@ const WeeklyPredictionsChart = () => {
               {recommendations.map((rec, index) => {
               const colorClasses = {
                 blue: {
-                  bg: 'bg-blue-50 dark:bg-blue-900/20',
-                  border: 'border-blue-200 dark:border-blue-800',
-                  icon: 'text-blue-600 dark:text-blue-400',
-                  badge: 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300'
+                  bg: 'bg-gray-50 dark:bg-gray-900/20',
+                  border: 'border-gray-200 dark:border-gray-800',
+                  icon: 'text-gray-600 dark:text-gray-400',
+                  badge: 'bg-gray-100 dark:bg-gray-900/50 text-gray-800 dark:text-gray-300'
                 },
                 green: {
                   bg: 'bg-green-50 dark:bg-green-900/20',
