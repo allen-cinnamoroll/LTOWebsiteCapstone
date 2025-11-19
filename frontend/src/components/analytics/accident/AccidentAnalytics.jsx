@@ -1384,14 +1384,6 @@ export function AccidentAnalytics() {
               {chartData && chartData.items.length > 0 && (
                 <div className="relative">
                   {/* Show loading overlay on top of existing data when refreshing */}
-                  {predLoading && (
-                    <div className="absolute inset-0 bg-white/70 dark:bg-black/70 flex items-center justify-center z-20 rounded-lg backdrop-blur-sm">
-                      <div className="flex flex-col items-center gap-2 bg-white dark:bg-gray-800 px-4 py-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-                        <p className="text-xs text-muted-foreground font-medium">Updating predictions...</p>
-                      </div>
-                    </div>
-                  )}
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div className="rounded-lg border bg-blue-50/40 dark:bg-blue-950/10 p-4">

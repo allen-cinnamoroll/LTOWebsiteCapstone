@@ -119,11 +119,10 @@ const AccidentTable = ({
           <DataTableViewOptions table={table} />
         </div>
       </div>
-      <div className="border flex-1 overflow-hidden shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242] min-h-0 flex flex-col">
-        <div className="overflow-x-auto overflow-y-auto flex-1">
-          <div className="px-0 min-w-full">
-            <Table className="min-w-full">
-              <TableHeader className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-gray-100 dark:bg-[#18181B] border-b-2 border-gray-300 dark:border-[#424242]">
+      <div className="w-full overflow-x-auto">
+        <div className="h-[550px] overflow-y-auto border rounded-lg shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242]">
+          <Table className="min-w-full text-sm">
+            <TableHeader className="sticky top-0 bg-gray-100 dark:bg-[#18181B] z-20 border-b-2 border-gray-300 dark:border-[#424242]">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-gray-100/50 dark:hover:bg-[#18181B] dark:bg-[#18181B]">
                     {headerGroup.headers.map((header) => (
@@ -167,16 +166,6 @@ const AccidentTable = ({
                         ))}
                       </TableRow>
                     ))}
-                    {/* Fill remaining space with empty rows if needed */}
-                    {Array.from({ length: Math.max(0, pagination.pageSize - table.getRowModel().rows.length) }).map((_, index) => (
-                      <TableRow key={`empty-${index}`} className="hover:bg-transparent">
-                        {table.getVisibleLeafColumns().map((column) => (
-                          <TableCell key={`empty-${index}-${column.id}`} className="px-3 py-3 h-12 border-b border-gray-100 dark:border-gray-700">
-                            &nbsp;
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
                   </>
                 ) : (
                   <TableRow className="hover:bg-transparent">
@@ -193,22 +182,21 @@ const AccidentTable = ({
                     </TableCell>
                   </TableRow>
                 )}
-              </TableBody>
-            </Table>
-              {hoveredRowId && onRowClick && (
-                <div
-                  className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
-                  style={{
-                    left: `${mousePosition.x + 10}px`,
-                    top: `${mousePosition.y - 10}px`,
-                  }}
-                >
-                  Click to view details
-                </div>
-              )}
-          </div>
+            </TableBody>
+          </Table>
         </div>
       </div>
+      {hoveredRowId && onRowClick && (
+        <div
+          className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
+          style={{
+            left: `${mousePosition.x + 10}px`,
+            top: `${mousePosition.y - 10}px`,
+          }}
+        >
+          Click to view details
+        </div>
+      )}
       <div className="mt-2 mb-2 flex-shrink-0">
         <DataTablePagination table={table} />
       </div>
