@@ -14,11 +14,17 @@ dotenv.config();
 //routes
 import router from "./routes/index.js";
 import performanceLogger from "./middleware/performanceLogger.js";
+import ipWhitelist from "./middleware/ipWhitelistMiddleware.js";
 
 const app = express();
 
 // Trust proxy for proper IP address detection
 app.set('trust proxy', true);
+
+// IP Whitelist Middleware - Restrict access based on IP addresses
+// Configure via environment variables: IP_WHITELIST_ENABLED and ALLOWED_IPS
+// See backend/middleware/ipWhitelistMiddleware.js for details
+app.use(ipWhitelist);
 
 // Performance logging middleware - logs execution time for all requests
 // Helps identify slow endpoints that need optimization
