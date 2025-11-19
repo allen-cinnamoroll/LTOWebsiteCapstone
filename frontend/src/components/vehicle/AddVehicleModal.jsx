@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded, onAddNewOwner, fo
   const [confirmationData, setConfirmationData] = useState(null);
   const { token } = useAuth();
   const date = formatDate(Date.now());
+  const prevOpenRef = useRef(false);
 
   const getDefaultValues = () => {
     // Use formData from parent if provided, otherwise check localStorage, otherwise use defaults
@@ -80,8 +81,10 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded, onAddNewOwner, fo
   }, [formValues, open, submitting, setFormData]);
 
   // Restore form data when modal opens (from parent state or localStorage)
+  // Only reset when modal first opens, not when formData changes while modal is already open
   useEffect(() => {
-    if (open) {
+    // Only reset when modal transitions from closed to open
+    if (open && !prevOpenRef.current) {
       // Prefer formData from parent, fallback to localStorage
       const dataToUse = (formData && Object.keys(formData).length > 0) 
         ? formData 
@@ -91,6 +94,8 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded, onAddNewOwner, fo
         form.reset(dataToUse);
       }
     }
+    // Update ref to track current open state
+    prevOpenRef.current = open;
   }, [open, form, formData]);
 
   const onSubmit = async (formData) => {

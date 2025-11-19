@@ -82,9 +82,8 @@ const VehiclesPage = () => {
     try {
       setLoading(true);
       
-      // Use pagination with reasonable limit instead of fetching all
-      // This reduces payload size and improves initial load time
-      const { data } = await apiClient.get("/vehicle?page=1&limit=100", {
+      // Fetch all vehicles to enable correct pagination display
+      const { data } = await apiClient.get("/vehicle?fetchAll=true", {
         headers: {
           Authorization: token,
         },

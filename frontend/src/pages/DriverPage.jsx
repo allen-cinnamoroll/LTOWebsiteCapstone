@@ -53,8 +53,8 @@ const DriverPage = () => {
     try {
       setLoading(true);
       
-      // Use pagination with reasonable limit instead of fetching all
-      const { data } = await apiClient.get("/owner?page=1&limit=100", {
+      // Fetch all owners to enable correct pagination display
+      const { data } = await apiClient.get("/owner?fetchAll=true", {
         headers: {
           Authorization: token,
         },

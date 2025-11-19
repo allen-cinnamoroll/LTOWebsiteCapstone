@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
 import { AlertTriangle } from "lucide-react";
-import { saveFormData, loadFormData, clearFormData } from "@/util/formPersistence";
+import { clearFormData } from "@/util/formPersistence";
 
 const FORM_STORAGE_KEY = 'accident_form_draft';
 
@@ -27,10 +27,6 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
   const date = formatDate(Date.now());
 
   const getDefaultValues = () => {
-    const savedData = loadFormData(FORM_STORAGE_KEY);
-    if (savedData) {
-      return savedData;
-    }
     return {
       blotterNo: "",
       vehiclePlateNo: "",
@@ -63,35 +59,31 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
     defaultValues: getDefaultValues(),
   });
 
-  // Watch form changes and save to localStorage
-  const formValues = form.watch();
-  useEffect(() => {
-    if (open && !submitting) {
-      // Only save if form has some data (not empty)
-      const hasData = Object.values(formValues).some(value => {
-        if (Array.isArray(value)) return value.some(v => v && v !== "");
-        if (value instanceof Date) return true;
-        return value !== "" && value !== undefined && value !== null;
-      });
-      
-      if (hasData) {
-        saveFormData(FORM_STORAGE_KEY, formValues);
-      } else {
-        // Clear saved data if form is empty
-        clearFormData(FORM_STORAGE_KEY);
-      }
-    }
-  }, [formValues, open, submitting]);
-
-  // Restore saved data when modal opens
-  useEffect(() => {
-    if (open) {
-      const savedData = loadFormData(FORM_STORAGE_KEY);
-      if (savedData) {
-        form.reset(savedData);
-      }
-    }
-  }, [open, form]);
+  const emptyFormValues = {
+    blotterNo: "",
+    vehiclePlateNo: "",
+    vehicleMCPlateNo: "",
+    vehicleChassisNo: "",
+    suspect: "",
+    stageOfFelony: "",
+    offense: "",
+    offenseType: "",
+    narrative: "",
+    caseStatus: "",
+    region: "",
+    province: "",
+    municipality: "",
+    barangay: "",
+    street: "",
+    lat: undefined,
+    lng: undefined,
+    dateEncoded: undefined,
+    dateReported: undefined,
+    timeReported: "",
+    dateCommited: undefined,
+    timeCommited: "",
+    incidentType: "",
+  };
 
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
@@ -135,31 +127,7 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
         clearFormData(FORM_STORAGE_KEY);
 
         // Reset form
-        form.reset({
-          blotterNo: "",
-          vehiclePlateNo: "",
-          vehicleMCPlateNo: "",
-          vehicleChassisNo: "",
-          suspect: "",
-          stageOfFelony: "",
-          offense: "",
-          offenseType: "",
-          narrative: "",
-          caseStatus: "",
-          region: "",
-          province: "",
-          municipality: "",
-          barangay: "",
-          street: "",
-          lat: undefined,
-          lng: undefined,
-          dateEncoded: undefined,
-          dateReported: undefined,
-          timeReported: "",
-          dateCommited: undefined,
-          timeCommited: "",
-          incidentType: "",
-        });
+        form.reset(emptyFormValues);
 
         // Close modal and refresh data
         onOpenChange(false);
@@ -179,8 +147,9 @@ const AddAccidentModal = ({ open, onOpenChange, onAccidentAdded }) => {
 
   const handleOpenChange = (isOpen) => {
     if (!isOpen && !submitting) {
-      // Don't clear form data when closing - it will be restored next time
-      // Only reset if user explicitly wants to discard (we'll keep the saved data)
+      // Reset form when closing modal
+      clearFormData(FORM_STORAGE_KEY);
+      form.reset(emptyFormValues);
     }
     onOpenChange(isOpen);
   };

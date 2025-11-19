@@ -41,8 +41,8 @@ const AccidentPage = () => {
   const fetchAccidents = async () => {
     try {
       setLoading(true);
-      // Use pagination with reasonable limit instead of fetching all
-      const { data } = await apiClient.get("/accident?page=1&limit=100", {
+      // Fetch all accidents to enable correct pagination display
+      const { data } = await apiClient.get("/accident?fetchAll=true", {
         headers: {
           Authorization: token,
         },

@@ -80,8 +80,8 @@ const ViolationPage = () => {
    */
   const fetchViolations = async () => {
     try {
-      // Use pagination with reasonable limit instead of fetching all
-      const { data } = await apiClient.get("/violations?page=1&limit=100", {
+      // Fetch all violations to enable correct pagination display
+      const { data } = await apiClient.get("/violations?fetchAll=true", {
         headers: {
           Authorization: token,
         },
