@@ -117,14 +117,27 @@ export const ipWhitelist = (req, res, next) => {
   // Get client IP
   const clientIP = getClientIP(req);
   
+  // Log detailed IP information for debugging
+  console.log('=== IP Whitelist Check ===');
+  console.log(`Request URL: ${req.method} ${req.path}`);
+  console.log(`Detected Client IP: ${clientIP}`);
+  console.log(`X-Forwarded-For: ${req.headers['x-forwarded-for'] || 'none'}`);
+  console.log(`X-Real-IP: ${req.headers['x-real-ip'] || 'none'}`);
+  console.log(`Remote Address: ${req.connection?.remoteAddress || req.socket?.remoteAddress || 'none'}`);
+  console.log(`Request IP: ${req.ip || 'none'}`);
+  console.log(`Allowed IPs/Ranges: ${allowedIPsString}`);
+  
   // Check if IP is whitelisted
   if (isIPWhitelisted(clientIP, allowedIPs)) {
-    console.log(`Access granted for IP: ${clientIP}`);
+    console.log(`✅ Access GRANTED for IP: ${clientIP}`);
+    console.log('========================\n');
     return next();
   }
   
   // IP not whitelisted - deny access
-  console.log(`Access denied for IP: ${clientIP}. Allowed IPs: ${allowedIPsString}`);
+  console.log(`❌ Access DENIED for IP: ${clientIP}`);
+  console.log(`Allowed IPs/Ranges: ${allowedIPsString}`);
+  console.log('========================\n');
   return res.status(403).json({
     success: false,
     message: 'Access denied. This system can only be accessed from authorized networks.',
