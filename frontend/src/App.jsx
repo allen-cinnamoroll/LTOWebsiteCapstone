@@ -34,6 +34,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AccountPage from "./pages/AccountPage";
 import MVPredictionPage from "./pages/MVPredictionPage";
 import AccidentPredictionPage from "./pages/AccidentPredictionPage";
+import NetworkRestrictedPage from "./pages/NetworkRestrictedPage";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/network-restricted" element={<NetworkRestrictedPage />} />
         <Route path="/404" element={<PageNotFound/>} />
         
         {/* Protected routes */}

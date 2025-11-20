@@ -21,12 +21,19 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle auth errors
+// Add a response interceptor to handle auth errors and network restrictions
 apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
+    // Handle IP whitelist / network restriction errors (403)
+    if (error.response?.status === 403 && error.response?.data?.error === 'IP_NOT_WHITELISTED') {
+      // Redirect to network restriction page
+      window.location.href = '/network-restricted';
+      return Promise.reject(error);
+    }
+    
     if (error.response?.status === 401) {
       // Check if this is a login request - don't redirect on login failures
       const isLoginRequest = error.config?.url?.includes('/auth/login');
