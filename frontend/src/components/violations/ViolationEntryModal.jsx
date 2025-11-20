@@ -510,7 +510,7 @@ const ViolationEntryModal = ({ open, onOpenChange, onViolationAdded, initialViol
       <DialogContent className="max-w-2xl max-h-[90vh] bg-gradient-to-br from-slate-50 to-red-50 dark:from-gray-900 dark:to-gray-800 border-0 shadow-2xl flex flex-col overflow-visible">
         {/* Offline Indicator Banner */}
         {!isOnline && (
-          <div className="bg-amber-500 dark:bg-amber-600 text-white px-4 py-2 flex items-center gap-2 text-sm">
+          <div className="bg-amber-100 dark:bg-amber-600 text-amber-900 dark:text-white px-4 py-2 flex items-center gap-2 text-sm border-b border-amber-200 dark:border-amber-700">
             <WifiOff className="h-4 w-4 flex-shrink-0" />
             <span className="flex-1">
               <strong>You're offline.</strong> Your form data is being saved automatically and will be preserved.
