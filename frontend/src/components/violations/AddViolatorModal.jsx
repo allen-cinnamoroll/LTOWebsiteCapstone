@@ -396,10 +396,10 @@ const AddViolatorModal = ({ open, onOpenChange, onViolationAdded, initialValues,
       <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Offline Indicator Banner */}
         {!isOnline && (
-          <div className="bg-amber-100 dark:bg-amber-600 text-amber-900 dark:text-white px-4 py-2 flex items-center gap-2 text-sm border-b border-amber-200 dark:border-amber-700">
-            <WifiOff className="h-4 w-4 flex-shrink-0" />
-            <span className="flex-1">
-              <strong>You're offline.</strong> Your form data is being saved automatically and will be preserved.
+          <div className="bg-amber-100 dark:bg-amber-600 px-4 py-2 flex items-center gap-2 text-sm border-b border-amber-200 dark:border-amber-700">
+            <WifiOff className="h-4 w-4 flex-shrink-0 text-amber-900 dark:text-white" />
+            <span className="flex-1 text-amber-900 dark:text-white">
+              <strong className="text-amber-900 dark:text-white">You're offline.</strong> Your form data is being saved automatically and will be preserved.
             </span>
           </div>
         )}
