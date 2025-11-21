@@ -317,13 +317,30 @@ export function AccidentAnalytics() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [predYear, predMonth, predScope]);
 
+  // Get Flask API URL from environment variable or use relative path in production
+  const getAccidentPredictionAPIBase = () => {
+    // If environment variable is explicitly set, use it (highest priority)
+    if (import.meta.env.VITE_ACCIDENT_PRED_API) {
+      return import.meta.env.VITE_ACCIDENT_PRED_API;
+    }
+    
+    // In development mode, use localhost
+    if (import.meta.env.DEV || import.meta.env.MODE === 'development') {
+      return 'http://localhost:5004';
+    }
+    
+    // In production, use relative path through nginx proxy
+    // This avoids CORS issues and works with the nginx reverse proxy
+    return '/accident-prediction-api';
+  };
+
   // Fetch predictions from Flask API
   const fetchAccidentPredictions = async () => {
     try {
       setPredLoading(true);
       setPredError(null);
       // Don't clear previous predictions immediately - keep them visible while loading
-      const baseUrl = import.meta?.env?.VITE_ACCIDENT_PRED_API || 'http://localhost:5004';
+      const baseUrl = getAccidentPredictionAPIBase();
       const healthUrl = `${baseUrl}/api/accidents/health`;
       // Limit to top 10 barangays for faster performance (based on historical accident counts)
       const url = `${baseUrl}/api/accidents/predict/all?year=${predYear}&month=${predMonth}&limit=10`;
