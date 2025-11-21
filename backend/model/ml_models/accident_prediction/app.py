@@ -937,9 +937,7 @@ if __name__ == '__main__':
     if initialize_model():
         logger.info("Starting Flask server...")
         port = int(os.getenv('PORT', 5004))
-        # Bind to 127.0.0.1 (IPv4 only) since we're behind nginx proxy
-        # This prevents IPv6 connection issues with nginx
-        app.run(host='127.0.0.1', port=port, debug=False)
+        app.run(host='0.0.0.0', port=port, debug=False)
     else:
         logger.error("Failed to initialize model. Exiting.")
         sys.exit(1)
