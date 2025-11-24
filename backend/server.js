@@ -7,6 +7,7 @@ import path from "path";
 import database from "./database/database.js";
 import dotenv from "dotenv"
 import { scheduleVehicleExpirationCheck, scheduleWeeklyOTPReset } from "./util/scheduler.js";
+import { startReportScheduler } from "./util/reportScheduler.js";
 
 //Load environment variables from .env file
 dotenv.config();
@@ -68,4 +69,7 @@ server.listen(PORT, () => {
   
   // Start the weekly OTP reset scheduler
   scheduleWeeklyOTPReset();
+  
+  // Start the report generation scheduler
+  startReportScheduler();
 });

@@ -15,6 +15,7 @@ import { useDashboardCharts } from "@/api/dashboardCharts";
 import { AlertTriangle, Car, Users } from "lucide-react";
 import StatCard from "@/components/home/StatCard";
 import { KpiSkeleton, ChartSkeleton, CardSkeleton } from "@/components/skeletons";
+import ReportButton from "@/components/dashboard/ReportButton";
 
 const HomePage = () => {
   const [loading, setLoading] = useState(true);
@@ -154,12 +155,19 @@ const HomePage = () => {
     <div className="container mx-auto p-4 md:p-6 bg-gradient-to-br from-gray-50 to-white dark:from-black dark:to-neutral-950 min-h-screen space-y-4 md:space-y-6 rounded-lg">
       {/* Header Section with Description */}
       <section className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
-          {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-        </h1>
-        <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
-          Overview of vehicle registrations, violations, accidents, and system activity for this period
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
+              {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+            </h1>
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+              Overview of vehicle registrations, violations, accidents, and system activity for this period
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <ReportButton />
+          </div>
+        </div>
       </section>
       
       {loading ? (
