@@ -25,8 +25,56 @@ class DailyDataPreprocessor:
         """
         self.csv_path = csv_path
         self.davao_oriental_municipalities = DAVAO_ORIENTAL_MUNICIPALITIES
-        # Philippine holidays for exogenous variable creation
+        # Philippine holidays for exogenous variable creation (national set)
         self.ph_holidays = holidays.Philippines()
+
+        # Custom holiday calendar loaded from local CSV (holiday_data.csv), if available
+        self.custom_holiday_dates = set()
+        self.custom_holiday_categories = {}
+
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            holiday_csv_path = os.path.join(base_dir, "holiday_data.csv")
+
+            if os.path.exists(holiday_csv_path):
+                df_holidays = pd.read_csv(holiday_csv_path)
+
+                if "date" in df_holidays.columns:
+                    # Holiday CSV uses day/month/year (e.g., 01/07/2020 for July 1)
+                    df_holidays["date_parsed"] = pd.to_datetime(
+                        df_holidays["date"],
+                        dayfirst=True,
+                        errors="coerce"
+                    )
+                    df_holidays = df_holidays.dropna(subset=["date_parsed"])
+
+                    # Normalize to midnight for safe comparison against DatetimeIndex.normalize()
+                    df_holidays["date_parsed"] = df_holidays["date_parsed"].dt.normalize()
+
+                    self.custom_holiday_dates = set(df_holidays["date_parsed"].tolist())
+
+                    # Optionally keep categories for potential future use/analysis
+                    if "category" in df_holidays.columns:
+                        for _, row in df_holidays.iterrows():
+                            self.custom_holiday_categories[row["date_parsed"]] = row["category"]
+
+                    print(
+                        f"Loaded {len(self.custom_holiday_dates)} custom holiday date(s) "
+                        f"from holiday_data.csv"
+                    )
+                else:
+                    print(
+                        "Warning: holiday_data.csv found but has no 'date' column. "
+                        "Custom holiday dates will not be used."
+                    )
+            else:
+                # Not fatal; we just fall back to the built‑in PH holiday calendar
+                print("holiday_data.csv not found – using built‑in Philippines holidays only.")
+        except Exception as e:
+            # Fail gracefully so training still works even if the holiday file is malformed
+            print(f"Warning: Failed to load custom holiday_data.csv: {str(e)}")
+            self.custom_holiday_dates = set()
+            self.custom_holiday_categories = {}
     
     def load_and_process_daily_data(self, fill_missing_days=True, fill_method='forward', municipality=None):
         """
@@ -228,15 +276,37 @@ class DailyDataPreprocessor:
             DataFrame with exogenous variables
         """
         exog_data = pd.DataFrame(index=date_index)
+
+        # Normalize dates to midnight so comparisons against sets work reliably
+        normalized_dates = date_index.normalize()
         
         # Weekend indicator (1 = Saturday or Sunday, 0 = weekday)
-        exog_data['is_weekend'] = (date_index.dayofweek >= 5).astype(int)
+        exog_data['is_weekend'] = (normalized_dates.dayofweek >= 5).astype(int)
+
+        # Holiday indicator from built‑in Philippines holiday library
+        exog_data['is_holiday_library'] = normalized_dates.map(
+            lambda x: x in self.ph_holidays
+        ).astype(int)
+
+        # Holiday indicator from custom holiday_data.csv (if loaded)
+        if self.custom_holiday_dates:
+            exog_data['is_custom_holiday'] = normalized_dates.isin(
+                self.custom_holiday_dates
+            ).astype(int)
+        else:
+            exog_data['is_custom_holiday'] = 0
+
+        # Unified holiday flag: either library holiday or custom holiday
+        exog_data['is_holiday'] = (
+            (exog_data['is_holiday_library'] == 1) |
+            (exog_data['is_custom_holiday'] == 1)
+        ).astype(int)
         
-        # Holiday indicator (1 = holiday, 0 = not holiday)
-        exog_data['is_holiday'] = date_index.map(lambda x: x in self.ph_holidays).astype(int)
-        
-        # Combined weekend/holiday indicator (1 = weekend or holiday, 0 = otherwise)
-        exog_data['is_weekend_or_holiday'] = ((exog_data['is_weekend'] == 1) | (exog_data['is_holiday'] == 1)).astype(int)
+        # Combined weekend/holiday indicator (1 = weekend or any holiday, 0 = otherwise)
+        exog_data['is_weekend_or_holiday'] = (
+            (exog_data['is_weekend'] == 1) |
+            (exog_data['is_holiday'] == 1)
+        ).astype(int)
         
         # Day of week (0=Monday, 6=Sunday) - can be useful for more granular patterns
         exog_data['day_of_week'] = date_index.dayofweek
