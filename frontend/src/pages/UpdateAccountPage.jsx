@@ -189,7 +189,7 @@ export default function UpdateAccountPage() {
   };
 
   return (
-    <div className="h-full bg-white dark:bg-black overflow-hidden">
+    <div className="h-full bg-white dark:bg-black overflow-hidden rounded-lg">
       <div className="container mx-auto px-6 py-4 h-full flex flex-col">
         <div className="max-w-7xl mx-auto w-full h-full flex flex-col space-y-4">
           {/* Header */}

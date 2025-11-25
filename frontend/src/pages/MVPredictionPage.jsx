@@ -428,7 +428,7 @@ export default function MVPredictionPage() {
   };
 
   return (
-    <div className="h-full bg-white dark:bg-black overflow-y-auto">
+    <div className="h-full bg-white dark:bg-black overflow-y-auto rounded-lg">
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
       {/* Header */}
       <div className="mb-6">

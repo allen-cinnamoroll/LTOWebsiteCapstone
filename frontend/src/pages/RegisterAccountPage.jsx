@@ -108,7 +108,7 @@ export default function RegisterAccountPage() {
   };
 
   return (
-    <div className="h-full bg-white dark:bg-black">
+    <div className="h-full bg-white dark:bg-black rounded-lg">
       <div className="container mx-auto px-6 py-4 h-full flex items-center justify-center">
         <div className="max-w-2xl w-full">
         <Card>

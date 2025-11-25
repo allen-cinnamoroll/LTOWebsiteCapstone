@@ -34,6 +34,7 @@ const AccountPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [profileData, setProfileData] = useState(null); // Store full profile data with createdAt
   const [editData, setEditData] = useState({
     firstName: '',
     middleName: '',
@@ -45,12 +46,28 @@ const AccountPage = () => {
   const [avatarKey, setAvatarKey] = useState(0); // Force re-render when avatar changes
   const fileInputRef = useRef(null);
 
+  // Fetch full profile data including createdAt
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await apiClient.get('/account/profile');
+        if (response.data.success) {
+          setProfileData(response.data.user);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    if (userData) {
+      fetchProfile();
+    }
+  }, [userData]);
+
+  useEffect(() => {
     // Initialize edit data
     if (userData) {
       console.log('AccountPage - Current userData.avatar:', userData.avatar);
@@ -140,6 +157,9 @@ const AccountPage = () => {
 
         // Update state first
         setUserData(updatedUserData);
+        
+        // Update profileData to include createdAt and other fields
+        setProfileData(response.data.user);
         
         // Save to localStorage
         console.log('Saving to localStorage:', updatedUserData);
@@ -276,7 +296,7 @@ const AccountPage = () => {
   }
 
   return (
-    <div className="h-full bg-white dark:bg-black overflow-hidden">
+    <div className="h-full bg-white dark:bg-black overflow-hidden rounded-lg">
       <div className="container mx-auto px-6 py-3 h-full flex flex-col">
         <div className="max-w-7xl mx-auto w-full h-full flex flex-col space-y-3">
           {/* Header */}
@@ -434,11 +454,13 @@ const AccountPage = () => {
                     <div>
                       <p className="text-sm font-medium">Account Created</p>
                       <p className="text-sm text-muted-foreground">
-                        {userData?.createdAt
+                        {profileData?.createdAt
+                          ? new Date(profileData.createdAt).toLocaleDateString()
+                          : userData?.createdAt
                           ? new Date(userData.createdAt).toLocaleDateString()
                           : userData?.dateCreated
                           ? new Date(userData.dateCreated).toLocaleDateString()
-                          : new Date().toLocaleDateString()}
+                          : 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -447,7 +469,9 @@ const AccountPage = () => {
                     <div>
                       <p className="text-sm font-medium">Last Login</p>
                       <p className="text-sm text-muted-foreground">
-                        {userData?.lastLogin
+                        {profileData?.lastLogin
+                          ? new Date(profileData.lastLogin).toLocaleString()
+                          : userData?.lastLogin
                           ? new Date(userData.lastLogin).toLocaleString()
                           : userData?.lastLoginDate
                           ? new Date(userData.lastLoginDate).toLocaleString()

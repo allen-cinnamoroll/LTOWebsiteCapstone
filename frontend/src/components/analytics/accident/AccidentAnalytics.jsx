@@ -806,7 +806,7 @@ export function AccidentAnalytics() {
   }
 
   return (
-    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen space-y-6">
+    <div className="container mx-auto p-6 bg-white dark:bg-black min-h-screen space-y-6 rounded-lg">
       {/* Enhanced Header */}
       <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

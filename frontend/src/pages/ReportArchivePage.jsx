@@ -74,11 +74,11 @@ const ReportArchivePage = () => {
   };
 
   return (
-    <div className="h-full bg-white dark:bg-black overflow-hidden">
+    <div className="h-full bg-white dark:bg-black overflow-hidden rounded-lg">
       <div className="container mx-auto px-6 py-4 h-full flex flex-col">
         <div className="max-w-7xl mx-auto w-full h-full flex flex-col space-y-4">
           {/* Header */}
-          <Card className="flex-shrink-0">
+          <Card className="flex-shrink-0 rounded-lg">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ const ReportArchivePage = () => {
           </Card>
 
           {/* Automated Reports List */}
-          <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
+          <Card className="flex-1 flex flex-col min-h-0 overflow-hidden rounded-lg">
             <CardHeader className="flex-shrink-0 pb-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -150,7 +150,7 @@ const ReportArchivePage = () => {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-md border overflow-hidden flex-1 flex flex-col min-h-0">
+                <div className="rounded-lg border overflow-hidden flex-1 flex flex-col min-h-0">
                   <div className="overflow-y-auto flex-1" style={{ maxHeight: '400px' }}>
                     <table className="w-full">
                       <thead className="sticky top-0 bg-gray-50 dark:bg-gray-900 z-10">

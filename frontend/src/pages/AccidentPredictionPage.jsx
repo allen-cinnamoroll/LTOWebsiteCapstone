@@ -148,11 +148,13 @@ export default function AccidentPredictionPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
-            <p className="text-muted-foreground">Loading model information...</p>
+      <div className="h-full bg-white dark:bg-black overflow-hidden rounded-lg">
+        <div className="container mx-auto p-6 space-y-6">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center space-y-4">
+              <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+              <p className="text-muted-foreground">Loading model information...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -161,38 +163,41 @@ export default function AccidentPredictionPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Card className="border-red-200 dark:border-red-900">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
-              <CardTitle>Error Loading Model</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-            <Button onClick={handleRefresh} disabled={refreshing}>
-              {refreshing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Retrying...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Retry
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="h-full bg-white dark:bg-black overflow-hidden rounded-lg">
+        <div className="container mx-auto p-6 space-y-6">
+          <Card className="border-red-200 dark:border-red-900">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-6 w-6 text-red-500" />
+                <CardTitle>Error Loading Model</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+              <Button onClick={handleRefresh} disabled={refreshing}>
+                {refreshing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Retry
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
+    <div className="h-full bg-white dark:bg-black overflow-y-auto rounded-lg">
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
@@ -585,6 +590,7 @@ export default function AccidentPredictionPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
