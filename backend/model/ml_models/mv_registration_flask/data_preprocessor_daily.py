@@ -37,7 +37,12 @@ class DailyDataPreprocessor:
             holiday_csv_path = os.path.join(base_dir, "holiday_data.csv")
 
             if os.path.exists(holiday_csv_path):
-                df_holidays = pd.read_csv(holiday_csv_path)
+                # Try UTF-8 first, then fall back to a more permissive encoding
+                try:
+                    df_holidays = pd.read_csv(holiday_csv_path)
+                except UnicodeDecodeError:
+                    # Many Windows-edited CSVs use cp1252/latin-1; this keeps things simple
+                    df_holidays = pd.read_csv(holiday_csv_path, encoding="latin1")
 
                 if "date" in df_holidays.columns:
                     # Holiday CSV uses day/month/year (e.g., 01/07/2020 for July 1)
