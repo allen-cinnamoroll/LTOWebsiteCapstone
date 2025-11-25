@@ -15,7 +15,6 @@ import { useDashboardCharts } from "@/api/dashboardCharts";
 import { AlertTriangle, Car, Users } from "lucide-react";
 import StatCard from "@/components/home/StatCard";
 import { KpiSkeleton, ChartSkeleton, CardSkeleton } from "@/components/skeletons";
-import ReportButton from "@/components/dashboard/ReportButton";
 
 const HomePage = () => {
   const [loading, setLoading] = useState(true);
@@ -34,7 +33,7 @@ const HomePage = () => {
       systemUsers: { total: 0 }
     }
   });
-  const { token, userData } = useAuth();
+  const { token } = useAuth();
   const charts = useDashboardCharts();
 
   useEffect(() => {
@@ -163,9 +162,6 @@ const HomePage = () => {
             <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
               Overview of vehicle registrations, violations, accidents, and system activity for this period
             </p>
-          </div>
-          <div className="flex-shrink-0">
-            <ReportButton />
           </div>
         </div>
       </section>

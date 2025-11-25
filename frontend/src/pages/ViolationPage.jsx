@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -190,8 +190,8 @@ const ViolationPage = () => {
             loading={loading}
             onRowClick={onRowClick}
             onEdit={onEdit}
-            onDelete={handleDelete}
-            onBinClick={handleBinClick}
+            onDelete={userData?.role === "2" ? null : handleDelete}
+            onBinClick={userData?.role === "2" ? null : handleBinClick}
             onUpdateStatus={() => {}}
             submitting={submitting}
           />

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 const VehiclesPage = () => {
   const [vehicleData, setVehicleData] = useState([]);
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -306,8 +306,9 @@ const VehiclesPage = () => {
             onRowClick={onRowClick}
             onEdit={onEdit}
             onRenew={onRenew}
-            onDelete={handleDelete}
-            onBinClick={handleBinClick}
+            onDelete={userData?.role === "2" ? null : handleDelete}
+            onBinClick={userData?.role === "2" ? null : handleBinClick}
+            showExport={userData?.role !== "2"}
             submitting={submitting}
           />
         </div>

@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 const AccidentPage = () => {
   const [accidentData, setAccidentData] = useState([]);
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -152,8 +152,8 @@ const AccidentPage = () => {
             loading={loading}
             onRowClick={onRowClick}
             onEdit={onEdit}
-            onDelete={handleDelete}
-            onBinClick={handleBinClick}
+            onDelete={userData?.role === "2" ? null : handleDelete}
+            onBinClick={userData?.role === "2" ? null : handleBinClick}
             onUpdateStatus={() => {}}
             submitting={submitting}
           />
