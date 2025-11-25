@@ -207,21 +207,21 @@ const DriversTable = ({
                 </TableCell>
               </TableRow>
             )}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
         </div>
       </div>
-      {hoveredRowId && onRowClick && (
-        <div
-          className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
-          style={{
-            left: `${mousePosition.x + 10}px`,
-            top: `${mousePosition.y - 10}px`,
-          }}
-        >
-          Click to view details
-        </div>
-      )}
+              {hoveredRowId && onRowClick && (
+                <div
+                  className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
+                  style={{
+                    left: `${mousePosition.x + 10}px`,
+                    top: `${mousePosition.y - 10}px`,
+                  }}
+                >
+                  Click to view details
+                </div>
+              )}
       <div className="mt-2 mb-2 flex-shrink-0">
          <DataTablePagination table={table}/>
       </div>

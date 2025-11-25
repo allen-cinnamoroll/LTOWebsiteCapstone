@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals, getYearlyVehicleTrends, getMonthlyVehicleTrends, getOwnerMunicipalityData, getVehicleClassificationData } from "../controller/dashboardController.js";
+import { getDashboardStats, getChartData, getDriverChartData, getRegistrationAnalytics, getMunicipalityAnalytics, getMunicipalityRegistrationTotals, getBarangayRegistrationTotals, getYearlyVehicleTrends, getMonthlyVehicleTrends, getOwnerMunicipalityData, getVehicleClassificationData, exportDashboardReport, listAutomatedReports, downloadAutomatedReport } from "../controller/dashboardController.js";
 
 const dashboardRouter = express.Router();
 
@@ -36,5 +36,14 @@ dashboardRouter.get("/owner-municipality-data", authenticate, getOwnerMunicipali
 
 // Get vehicle classification data (Authenticated Users)
 dashboardRouter.get("/vehicle-classification-data", authenticate, getVehicleClassificationData);
+
+// Generate and download report export (Authenticated Users)
+dashboardRouter.get("/report-export", authenticate, exportDashboardReport);
+
+// List automatically generated reports (Authenticated Users)
+dashboardRouter.get("/automated-reports", authenticate, listAutomatedReports);
+
+// Download an automatically generated report (Authenticated Users)
+dashboardRouter.get("/automated-reports/:filename", authenticate, downloadAutomatedReport);
 
 export default dashboardRouter;

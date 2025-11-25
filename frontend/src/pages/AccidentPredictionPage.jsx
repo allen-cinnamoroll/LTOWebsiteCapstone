@@ -104,9 +104,13 @@ export default function AccidentPredictionPage() {
     setRefreshing(false);
   };
 
-  // Get primary model accuracy (from classifier cross-validation)
+  // Get primary model accuracy (supports both old and new API formats)
   const getPrimaryAccuracy = () => {
-    // Prefer overall_accuracy (classifier CV accuracy) if available
+    // Check for old API format first (accuracy_percentage)
+    if (modelInfo?.accuracy_metrics?.accuracy_percentage !== undefined) {
+      return modelInfo.accuracy_metrics.accuracy_percentage;
+    }
+    // New format: Prefer overall_accuracy (classifier CV accuracy) if available
     if (modelInfo?.accuracy_metrics?.overall_accuracy !== undefined) {
       return modelInfo.accuracy_metrics.overall_accuracy;
     }
@@ -124,6 +128,10 @@ export default function AccidentPredictionPage() {
 
   const accuracyPercentage = getPrimaryAccuracy();
   const cvAccuracyDisplay = modelInfo?.accuracy_metrics?.cv_accuracy_display;
+  
+  // Determine if we have the new dual-model format or old single-model format
+  const hasClassifierModel = modelInfo?.classifier_available || modelInfo?.model_types?.includes('RandomForestClassifier');
+  const hasDualModels = hasClassifierModel && (modelInfo?.classifier_metrics || modelInfo?.regressor_metrics);
 
   // Get accuracy color based on percentage
   const getAccuracyColor = (accuracy) => {
@@ -231,14 +239,31 @@ export default function AccidentPredictionPage() {
             <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
               <div className="text-sm text-muted-foreground mb-1">Model Type</div>
               <div className="text-lg font-semibold">
-                {modelInfo?.model_type 
-                  ? modelInfo.model_type
+                {(() => {
+                  // Handle new format with multiple model types
+                  if (modelInfo?.model_types && Array.isArray(modelInfo.model_types)) {
+                    if (modelInfo.model_types.length > 1) {
+                      return 'Random Forest (Dual Model)';
+                    }
+                    return modelInfo.model_types[0]
+                      .replace('RandomForestRegressor', 'Random Forest')
+                      .replace('RandomForestClassifier', 'Random Forest')
+                      .replace('Regressor', '')
+                      .replace('Classifier', '')
+                      .replace('Regression', '')
+                      .trim() || 'Random Forest';
+                  }
+                  // Handle old format with single model type
+                  if (modelInfo?.model_type) {
+                    return modelInfo.model_type
                       .replace('RandomForestRegressor', 'Random Forest')
                       .replace('Random Forest Regressor', 'Random Forest')
                       .replace('Regressor', '')
                       .replace('Regression', '')
-                      .trim() || 'Random Forest'
-                  : 'Random Forest'}
+                      .trim() || 'Random Forest';
+                  }
+                  return 'Random Forest';
+                })()}
               </div>
             </div>
             
@@ -272,21 +297,23 @@ export default function AccidentPredictionPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Model Type Labels */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div>
-                <div className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">High-Risk Prediction (Classifier)</div>
-                <div className="text-xs text-muted-foreground">
-                  Predicts whether an area is high-risk for accidents
+            {/* Model Type Labels - Only show for dual-model format */}
+            {hasDualModels && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div>
+                  <div className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">High-Risk Prediction (Classifier)</div>
+                  <div className="text-xs text-muted-foreground">
+                    Predicts whether an area is high-risk for accidents
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1">Count Prediction (Regressor)</div>
+                  <div className="text-xs text-muted-foreground">
+                    Predicts the number of accidents expected
+                  </div>
                 </div>
               </div>
-              <div>
-                <div className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1">Count Prediction (Regressor)</div>
-                <div className="text-xs text-muted-foreground">
-                  Predicts the number of accidents expected
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Overall Accuracy */}
             {accuracyPercentage !== null && (
@@ -302,7 +329,9 @@ export default function AccidentPredictionPage() {
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="max-w-xs">
-                            Test set accuracy for high-risk area prediction. This is the accuracy on completely unseen data, representing the most realistic performance expectation for production use.
+                            {hasDualModels 
+                              ? "Test set accuracy for high-risk area prediction. This is the accuracy on completely unseen data, representing the most realistic performance expectation for production use."
+                              : "Model accuracy based on test set evaluation. This represents the performance on unseen data."}
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -326,7 +355,7 @@ export default function AccidentPredictionPage() {
                 </div>
                 {cvAccuracyDisplay && (
                   <p className="text-sm text-muted-foreground">
-                    Cross-Validation Accuracy: {cvAccuracyDisplay} (averaged across 5 folds - shows model stability)
+                    Cross-Validation: {cvAccuracyDisplay} {hasDualModels ? '(averaged across 5 folds - shows model stability)' : ''}
                   </p>
                 )}
               </div>
@@ -334,8 +363,8 @@ export default function AccidentPredictionPage() {
 
             {/* Detailed Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Count Prediction Accuracy */}
-              {modelInfo.accuracy_metrics.count_prediction_accuracy !== undefined && (
+              {/* Count Prediction Accuracy - Only in new dual-model format */}
+              {hasDualModels && modelInfo.accuracy_metrics?.count_prediction_accuracy !== undefined && (
                 <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm text-muted-foreground">Count Prediction Accuracy</div>

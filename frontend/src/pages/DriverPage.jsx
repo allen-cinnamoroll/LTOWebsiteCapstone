@@ -25,7 +25,7 @@ const civilStatusMap = createCategoryMap({
 
 const DriverPage = () => {
   const [driverData, setDriverData] = useState([]);
-  const { token } = useAuth();
+  const { token, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -269,10 +269,10 @@ const DriverPage = () => {
             loading={loading}
             onRowClick={onManage}
             onEdit={onEdit}
-            onDelete={handleDelete}
+            onDelete={userData?.role === "2" ? null : handleDelete}
             onNavigate={handleNavigate}
             onFileNumberClick={handleFileNumberClick}
-            onBinClick={handleBinClick}
+            onBinClick={userData?.role === "2" ? null : handleBinClick}
           />
         </div>
       </div>

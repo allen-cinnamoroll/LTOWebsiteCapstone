@@ -7,6 +7,7 @@ import path from "path";
 import database from "./database/database.js";
 import dotenv from "dotenv"
 import { scheduleVehicleExpirationCheck, scheduleWeeklyOTPReset } from "./util/scheduler.js";
+import { startReportScheduler } from "./util/reportScheduler.js";
 
 //Load environment variables from .env file
 dotenv.config();
@@ -14,11 +15,16 @@ dotenv.config();
 //routes
 import router from "./routes/index.js";
 import performanceLogger from "./middleware/performanceLogger.js";
+import ipWhitelist from "./middleware/ipWhitelistMiddleware.js";
 
 const app = express();
 
 // Trust proxy for proper IP address detection
 app.set('trust proxy', true);
+
+// IP Whitelist middleware - restrict access to specific network only
+// This must be before any other routes to protect the entire API
+app.use(ipWhitelist);
 
 // Performance logging middleware - logs execution time for all requests
 // Helps identify slow endpoints that need optimization
@@ -63,4 +69,7 @@ server.listen(PORT, () => {
   
   // Start the weekly OTP reset scheduler
   scheduleWeeklyOTPReset();
+  
+  // Start the report generation scheduler
+  startReportScheduler();
 });

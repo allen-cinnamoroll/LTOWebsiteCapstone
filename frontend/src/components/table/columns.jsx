@@ -77,15 +77,17 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleDelete}
-            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
-            disabled={submitting}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
+          {onDelete && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleDelete}
+              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+              disabled={submitting}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       );
     },
@@ -420,14 +422,16 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleDelete}
-            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
+          {onDelete && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleDelete}
+              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       );
     },
@@ -571,15 +575,17 @@ export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting) =
           >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleDelete}
-            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
-            disabled={submitting}
-          >
-            <Trash className="h-4 w-4" />
-          </Button>
+          {onDelete && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleDelete}
+              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+              disabled={submitting}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       );
     },
@@ -1059,20 +1065,22 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
               Renew
             </div>
           </div>
-          <div className="relative group">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={handleDelete}
-              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
-              disabled={submitting}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-              Delete
+          {onDelete && (
+            <div className="relative group">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleDelete}
+                className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                disabled={submitting}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                Delete
+              </div>
             </div>
-          </div>
+          )}
         </div>
       );
     },

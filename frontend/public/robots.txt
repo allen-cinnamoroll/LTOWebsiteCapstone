@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /account/
+Disallow: /owner/
+Disallow: /vehicle/
+Disallow: /violation/
+Disallow: /accident/
+Disallow: /analytics/
+Disallow: /trained-models/
+
+Sitemap: http://ltodatamanager.com/sitemap.xml
+

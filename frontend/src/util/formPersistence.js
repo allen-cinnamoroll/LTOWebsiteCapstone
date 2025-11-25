@@ -62,11 +62,21 @@ export const deserializeFormData = (jsonString) => {
  * Save form data to localStorage
  * @param {string} key - localStorage key
  * @param {Object} formData - Form data object
+ * @param {Object} metadata - Optional metadata (e.g., savedWhileOffline, timestamp)
  */
-export const saveFormData = (key, formData) => {
+export const saveFormData = (key, formData, metadata = {}) => {
   try {
     const serialized = serializeFormData(formData);
     localStorage.setItem(key, serialized);
+    
+    // Save metadata separately
+    if (Object.keys(metadata).length > 0) {
+      const metadataKey = `${key}_metadata`;
+      localStorage.setItem(metadataKey, JSON.stringify({
+        ...metadata,
+        timestamp: new Date().toISOString()
+      }));
+    }
   } catch (error) {
     console.error(`Error saving form data to ${key}:`, error);
   }
@@ -88,12 +98,31 @@ export const loadFormData = (key) => {
 };
 
 /**
+ * Load form metadata from localStorage
+ * @param {string} key - localStorage key
+ * @returns {Object|null} - Metadata object or null if not found
+ */
+export const loadFormMetadata = (key) => {
+  try {
+    const metadataKey = `${key}_metadata`;
+    const stored = localStorage.getItem(metadataKey);
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error(`Error loading form metadata from ${key}:`, error);
+    return null;
+  }
+};
+
+/**
  * Clear form data from localStorage
  * @param {string} key - localStorage key
  */
 export const clearFormData = (key) => {
   try {
     localStorage.removeItem(key);
+    // Also clear metadata
+    const metadataKey = `${key}_metadata`;
+    localStorage.removeItem(metadataKey);
   } catch (error) {
     console.error(`Error clearing form data from ${key}:`, error);
   }

@@ -30,6 +30,7 @@ import {
   Brain,
   TrendingUp,
   ClipboardCheck,
+  Archive,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav/NavMain";
@@ -238,6 +239,18 @@ export function AppSidebar(props) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            
+            {/* Report Archive - Only visible for Admin and Superadmin */}
+            {canManageAccounts && (
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={location.pathname === "/report-archive"} asChild>
+                  <Link to="/report-archive">
+                    <Archive />
+                    <span>Report Archive</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </SidebarGroup>
 

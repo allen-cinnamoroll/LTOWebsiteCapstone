@@ -34,6 +34,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AccountPage from "./pages/AccountPage";
 import MVPredictionPage from "./pages/MVPredictionPage";
 import AccidentPredictionPage from "./pages/AccidentPredictionPage";
+import NetworkRestrictedPage from "./pages/NetworkRestrictedPage";
+import ReportArchivePage from "./pages/ReportArchivePage";
 
 function App() {
   return (
@@ -44,6 +46,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/network-restricted" element={<NetworkRestrictedPage />} />
         <Route path="/404" element={<PageNotFound/>} />
         
         {/* Protected routes */}
@@ -90,6 +93,13 @@ function App() {
             <Route path="accident" element={<AccidentPage />} />
             <Route path="accident/bin" element={<AccidentBinPage />} />
             <Route path="accident/:id/edit" element={<EditAccidentForm />} />
+
+            {/* Report Archive - for admin and superadmin */}
+            <Route path="report-archive" element={
+              <RoleBasedRoute allowedRoles={["admin", "superadmin"]}>
+                <ReportArchivePage />
+              </RoleBasedRoute>
+            } />
 
             {/* Account management routes - for admin and superadmin */}
             <Route path="account/register" element={

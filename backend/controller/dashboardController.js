@@ -5,6 +5,14 @@ import AccidentModel from "../model/AccidentModel.js";
 import UserModel from "../model/UserModel.js";
 import { getVehicleStatus, calculateExpirationDate } from "../util/plateStatusCalculator.js";
 import { getLatestRenewalDate } from "../util/vehicleHelpers.js";
+import dayjs from "dayjs";
+import XLSX from "xlsx";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Helper function to build date filter for dateOfRenewal array field
@@ -146,6 +154,100 @@ const buildDateOfRenewalFilter = (month, year) => {
   }
   
   return {};
+};
+
+const buildNotDeletedFilter = () => ({
+  $or: [
+    { deletedAt: null },
+    { deletedAt: { $exists: false } }
+  ]
+});
+
+const normalizeLabel = (value, fallback = "UNSPECIFIED") => {
+  if (value === null || value === undefined) {
+    return fallback;
+  }
+  const normalized = value.toString().trim();
+  return normalized ? normalized.toUpperCase() : fallback;
+};
+
+const parseHourFromTime = (timeString) => {
+  if (!timeString) return null;
+  const raw = timeString.toString().trim();
+  if (!raw) return null;
+
+  const sanitized = raw
+    .replace(/[^\dAPMapm:\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const numericMatch = sanitized.match(/^(\d{3,4})$/);
+  if (numericMatch) {
+    const padded = numericMatch[1].padStart(4, "0");
+    const hour = parseInt(padded.slice(0, 2), 10);
+    return Number.isNaN(hour) ? null : hour % 24;
+  }
+
+  const match = sanitized.match(/(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(AM|PM)?/i);
+  if (!match) return null;
+
+  let hour = parseInt(match[1], 10);
+  if (Number.isNaN(hour)) return null;
+
+  const meridiem = match[4]?.toUpperCase() || null;
+  if (meridiem === "PM" && hour < 12) {
+    hour += 12;
+  } else if (meridiem === "AM" && hour === 12) {
+    hour = 0;
+  }
+  return hour % 24;
+};
+
+const sanitizeForFilename = (value) => {
+  if (!value) return "report";
+  return value
+    .toString()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "") || "report";
+};
+
+const getReportRangeDetails = ({ period = "daily", targetDate, targetMonth, targetYear }) => {
+  const now = dayjs();
+
+  if (period === "monthly") {
+    const monthNumber = targetMonth ? parseInt(targetMonth, 10) : now.month() + 1;
+    const yearNumber = targetYear ? parseInt(targetYear, 10) : now.year();
+
+    if (Number.isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+      throw new Error("Invalid targetMonth value");
+    }
+
+    const target = dayjs(`${yearNumber}-${String(monthNumber).padStart(2, "0")}-01`);
+    if (!target.isValid()) {
+      throw new Error("Invalid month/year provided");
+    }
+
+    return {
+      start: target.startOf("month").toDate(),
+      end: target.endOf("month").toDate(),
+      label: target.format("MMMM YYYY"),
+      fileSuffix: target.format("YYYY-MM")
+    };
+  }
+
+  const targetDay = targetDate ? dayjs(targetDate) : now;
+  if (!targetDay.isValid()) {
+    throw new Error("Invalid targetDate provided");
+  }
+
+  return {
+    start: targetDay.startOf("day").toDate(),
+    end: targetDay.endOf("day").toDate(),
+    label: targetDay.format("MMMM DD, YYYY"),
+    fileSuffix: targetDay.format("YYYY-MM-DD")
+  };
 };
 
 // Get dashboard statistics
@@ -2605,3 +2707,430 @@ export const getVehicleClassificationData = async (req, res) => {
   }
 };
 
+
+export const exportDashboardReport = async (req, res) => {
+  try {
+    const { period = "daily", targetDate, targetMonth, targetYear } = req.query;
+    if (!["daily", "monthly"].includes(period)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid period. Allowed values are daily or monthly."
+      });
+    }
+
+    let rangeDetails;
+    try {
+      rangeDetails = getReportRangeDetails({
+        period,
+        targetDate,
+        targetMonth,
+        targetYear
+      });
+    } catch (validationError) {
+      return res.status(400).json({
+        success: false,
+        message: validationError.message
+      });
+    }
+
+    const { start, end, label: rangeLabel, fileSuffix } = rangeDetails;
+
+    const registeredVehiclesPromise = VehicleModel.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: start,
+            $lte: end
+          },
+          ...buildNotDeletedFilter()
+        }
+      },
+      {
+        $lookup: {
+          from: "owners",
+          localField: "driverId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: {
+          path: "$owner",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          ownerId: "$owner._id",
+          hasLicense: "$owner.hasDriversLicense",
+          municipality: "$owner.address.municipality",
+          plateNo: { $ifNull: ["$plateNo", ""] }
+        }
+      }
+    ]);
+
+    const renewedVehiclesPromise = VehicleModel.aggregate([
+      {
+        $match: {
+          ...buildNotDeletedFilter()
+        }
+      },
+      {
+        $addFields: {
+          renewalsInRange: {
+            $filter: {
+              input: { $ifNull: ["$dateOfRenewal", []] },
+              as: "renewal",
+              cond: {
+                $let: {
+                  vars: {
+                    renewalDate: {
+                      $cond: [
+                        { $eq: [{ $type: "$$renewal" }, "object"] },
+                        "$$renewal.date",
+                        {
+                          $cond: [
+                            { $eq: [{ $type: "$$renewal" }, "date"] },
+                            "$$renewal",
+                            null
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  in: {
+                    $and: [
+                      { $ne: ["$$renewalDate", null] },
+                      { $gte: ["$$renewalDate", start] },
+                      { $lte: ["$$renewalDate", end] }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          $expr: {
+            $gt: [
+              { $size: "$renewalsInRange" },
+              0
+            ]
+          }
+        }
+      },
+      {
+        $project: {
+          plateNo: { $ifNull: ["$plateNo", ""] }
+        }
+      }
+    ]);
+
+    const violationMatch = {
+      dateOfApprehension: {
+        $gte: start,
+        $lte: end
+      },
+      ...buildNotDeletedFilter()
+    };
+
+    const accidentsMatch = {
+      dateCommited: {
+        $gte: start,
+        $lte: end
+      },
+      ...buildNotDeletedFilter()
+    };
+
+    const [
+      registeredVehicles,
+      renewedVehicles,
+      totalViolators,
+      frequentViolations,
+      accidents
+    ] = await Promise.all([
+      registeredVehiclesPromise,
+      renewedVehiclesPromise,
+      ViolationModel.countDocuments(violationMatch),
+      ViolationModel.aggregate([
+        { $match: violationMatch },
+        {
+          $unwind: {
+            path: "$violations",
+            preserveNullAndEmptyArrays: false
+          }
+        },
+        {
+          $match: {
+            violations: { $nin: [null, ""] }
+          }
+        },
+        {
+          $group: {
+            _id: "$violations",
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } },
+        { $limit: 10 }
+      ]),
+      AccidentModel.find(accidentsMatch)
+        .select("municipality barangay timeCommited")
+        .lean()
+    ]);
+
+    const totalRegisteredVehicles = registeredVehicles.length;
+    const municipalityRegistrationCounts = {};
+    const ownerLicenseMap = new Map();
+
+    registeredVehicles.forEach((vehicle) => {
+      const municipalityLabel = normalizeLabel(vehicle.municipality);
+      municipalityRegistrationCounts[municipalityLabel] = (municipalityRegistrationCounts[municipalityLabel] || 0) + 1;
+
+      if (vehicle.ownerId) {
+        const ownerKey = vehicle.ownerId.toString();
+        if (!ownerLicenseMap.has(ownerKey)) {
+          ownerLicenseMap.set(ownerKey, vehicle.hasLicense === true);
+        }
+      }
+    });
+
+    const totalOwners = ownerLicenseMap.size;
+    const ownersWithLicense = [...ownerLicenseMap.values()].filter(Boolean).length;
+    const ownersWithoutLicense = Math.max(totalOwners - ownersWithLicense, 0);
+
+    const totalRenewedVehicles = renewedVehicles.length;
+    let temporaryPlates = 0;
+    renewedVehicles.forEach((vehicle) => {
+      const plate = vehicle.plateNo ? vehicle.plateNo.toString().trim().toUpperCase() : "";
+      if (/^[0-9]+$/.test(plate)) {
+        temporaryPlates += 1;
+      }
+    });
+    const permanentPlates = Math.max(totalRenewedVehicles - temporaryPlates, 0);
+
+    const accidentCount = accidents.length;
+    const accidentMunicipalityCounts = {};
+    const accidentBarangayCounts = {};
+    const accidentHourCounts = {};
+
+    accidents.forEach((accident) => {
+      const municipalityLabel = normalizeLabel(accident.municipality);
+      accidentMunicipalityCounts[municipalityLabel] = (accidentMunicipalityCounts[municipalityLabel] || 0) + 1;
+
+      const barangayLabel = normalizeLabel(accident.barangay);
+      accidentBarangayCounts[barangayLabel] = (accidentBarangayCounts[barangayLabel] || 0) + 1;
+
+      const parsedHour = parseHourFromTime(accident.timeCommited);
+      if (parsedHour !== null) {
+        const hourLabel = `${String(parsedHour).padStart(2, "0")}:00`;
+        accidentHourCounts[hourLabel] = (accidentHourCounts[hourLabel] || 0) + 1;
+      }
+    });
+
+    const sortEntries = (counts) => Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+    const municipalityRows = sortEntries(municipalityRegistrationCounts);
+    if (!municipalityRows.length) {
+      municipalityRows.push(["NO REGISTRATIONS FOR PERIOD", 0]);
+    }
+
+    const frequentViolationRows = frequentViolations.map((item) => [item._id || "UNSPECIFIED", item.count]);
+    if (!frequentViolationRows.length) {
+      frequentViolationRows.push(["NO VIOLATIONS FOR PERIOD", 0]);
+    }
+
+    const accidentMunicipalityRows = sortEntries(accidentMunicipalityCounts);
+    if (!accidentMunicipalityRows.length) {
+      accidentMunicipalityRows.push(["NO DATA", 0]);
+    }
+
+    const accidentBarangayRows = sortEntries(accidentBarangayCounts);
+    if (!accidentBarangayRows.length) {
+      accidentBarangayRows.push(["NO DATA", 0]);
+    }
+
+    const accidentHourRows = sortEntries(accidentHourCounts).slice(0, 10);
+    if (!accidentHourRows.length) {
+      accidentHourRows.push(["NO DATA", 0]);
+    }
+
+    const workbook = XLSX.utils.book_new();
+
+    const vehicleSheetData = [
+      ["Vehicle Summary", `Period: ${rangeLabel}`],
+      ["Metric", "Value"],
+      ["Registered Vehicles", totalRegisteredVehicles],
+      ["Renewed Vehicles", totalRenewedVehicles],
+      [],
+      ["Registered Owners (Unique)"],
+      ["Category", "Count"],
+      ["Total Owners", totalOwners],
+      ["With Driver's License", ownersWithLicense],
+      ["Without Driver's License", ownersWithoutLicense],
+      [],
+      ["Plate Classification (Renewals)"],
+      ["Category", "Count"],
+      ["Temporary Plates", temporaryPlates],
+      ["Permanent Plates", permanentPlates],
+      [],
+      ["Registered Vehicles by Municipality"],
+      ["Municipality", "Count"],
+      ...municipalityRows
+    ];
+    const vehicleSheet = XLSX.utils.aoa_to_sheet(vehicleSheetData);
+    vehicleSheet["!cols"] = [{ wch: 40 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(workbook, vehicleSheet, "Vehicles");
+
+    const violationSheetData = [
+      ["Violation Overview", `Period: ${rangeLabel}`],
+      ["Metric", "Value"],
+      ["Total Violators", totalViolators],
+      [],
+      ["Frequent Violations"],
+      ["Violation", "Count"],
+      ...frequentViolationRows
+    ];
+    const violationSheet = XLSX.utils.aoa_to_sheet(violationSheetData);
+    violationSheet["!cols"] = [{ wch: 45 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(workbook, violationSheet, "Violations");
+
+    const accidentsSheetData = [
+      ["Accident Overview", `Period: ${rangeLabel}`],
+      ["Metric", "Value"],
+      ["Total Accidents", accidentCount],
+      [],
+      ["Municipality with Many Accidents"],
+      ["Municipality", "Count"],
+      ...accidentMunicipalityRows,
+      [],
+      ["Barangay with Many Accidents"],
+      ["Barangay", "Count"],
+      ...accidentBarangayRows,
+      [],
+      ["Hours with Many Accidents"],
+      ["Hour", "Count"],
+      ...accidentHourRows
+    ];
+    const accidentsSheet = XLSX.utils.aoa_to_sheet(accidentsSheetData);
+    accidentsSheet["!cols"] = [{ wch: 45 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(workbook, accidentsSheet, "Accidents");
+
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+    const filename = `lto-dashboard-${period}-report-${sanitizeForFilename(fileSuffix)}.xlsx`;
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    return res.status(200).send(buffer);
+  } catch (error) {
+    console.error("Dashboard report export error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate dashboard report."
+    });
+  }
+};
+
+// List automatically generated reports
+export const listAutomatedReports = async (req, res) => {
+  try {
+    const reportsDir = path.join(__dirname, '..', 'reports');
+    
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(reportsDir)) {
+      fs.mkdirSync(reportsDir, { recursive: true });
+      return res.status(200).json({
+        success: true,
+        data: []
+      });
+    }
+
+    // Read all files in reports directory
+    const files = fs.readdirSync(reportsDir);
+    
+    // Filter and parse report files
+    const reports = files
+      .filter(file => file.endsWith('.xlsx') && file.startsWith('LTO_Report_'))
+      .map(file => {
+        const filepath = path.join(reportsDir, file);
+        const stats = fs.statSync(filepath);
+        
+        // Parse filename: LTO_Report_{type}_{date}.xlsx
+        const match = file.match(/LTO_Report_(daily|monthly)_(.+)\.xlsx/);
+        if (!match) return null;
+        
+        const [, type, date] = match;
+        
+        return {
+          filename: file,
+          type: type,
+          date: date,
+          size: stats.size,
+          createdAt: stats.birthtime,
+          modifiedAt: stats.mtime
+        };
+      })
+      .filter(report => report !== null)
+      .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)); // Sort by newest first
+
+    return res.status(200).json({
+      success: true,
+      data: reports
+    });
+  } catch (error) {
+    console.error("Error listing automated reports:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to list automated reports."
+    });
+  }
+};
+
+// Download an automatically generated report
+export const downloadAutomatedReport = async (req, res) => {
+  try {
+    const { filename } = req.params;
+    
+    // Security: Only allow files that match the expected pattern
+    if (!filename.match(/^LTO_Report_(daily|monthly)_[\d-]+\.xlsx$/)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid filename format."
+      });
+    }
+
+    const reportsDir = path.join(__dirname, '..', 'reports');
+    const filepath = path.join(reportsDir, filename);
+
+    // Check if file exists
+    if (!fs.existsSync(filepath)) {
+      return res.status(404).json({
+        success: false,
+        message: "Report file not found."
+      });
+    }
+
+    // Set headers for file download
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    // Stream the file
+    const fileStream = fs.createReadStream(filepath);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error("Error downloading automated report:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to download automated report."
+    });
+  }
+};

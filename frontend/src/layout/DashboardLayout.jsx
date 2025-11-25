@@ -106,7 +106,7 @@ const DashboardLayout = () => {
                 </Breadcrumb>
               )}
             </div>
-            <div className="px-4 md:px-8">
+            <div className="px-4 md:px-8 flex items-center gap-2">
               <ModeToggle />
             </div>
           </header>
