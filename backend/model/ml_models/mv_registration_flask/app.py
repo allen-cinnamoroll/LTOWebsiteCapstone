@@ -156,10 +156,10 @@ def initialize_model():
             scaler_type='minmax'
         )
         
-            if aggregated_model.model_exists():
+        if aggregated_model.model_exists():
             logger.info("Loading existing optimized aggregated model...")
             aggregated_model.load_model()
-            else:
+        else:
             logger.info("Training new optimized aggregated model...")
             # Load daily data with exogenous variables
             daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
