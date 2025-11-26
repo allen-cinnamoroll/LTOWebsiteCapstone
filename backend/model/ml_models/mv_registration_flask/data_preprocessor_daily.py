@@ -241,7 +241,7 @@ class DailyDataPreprocessor:
         print(f"Actual registration date range: {actual_min_date} to {actual_max_date}")
         
         # Create exogenous variables
-        exogenous_vars = self._create_exogenous_variables(daily_data.index)
+        exogenous_vars = self._create_exogenous_variables(daily_data.index, df_filtered)
         
         # Prepare processing info
         processing_info = {
@@ -270,7 +270,7 @@ class DailyDataPreprocessor:
         
         return daily_data[['count']], exogenous_vars, processing_info
     
-    def _create_exogenous_variables(self, date_index):
+    def _create_exogenous_variables(self, date_index, raw_df=None):
         """
         Create exogenous variables for weekends and holidays
         
@@ -281,6 +281,7 @@ class DailyDataPreprocessor:
             DataFrame with exogenous variables
         """
         exog_data = pd.DataFrame(index=date_index)
+        raw_df = raw_df.copy() if raw_df is not None else None
 
         # Normalize dates to midnight so comparisons against sets work reliably
         normalized_dates = date_index.normalize()
@@ -316,8 +317,89 @@ class DailyDataPreprocessor:
         # Day of week (0=Monday, 6=Sunday) - can be useful for more granular patterns
         exog_data['day_of_week'] = date_index.dayofweek
         
-        # Month (1-12) - for seasonal patterns
+        # Month (1-12) - calendar month
         exog_data['month'] = date_index.month
+
+        # --- LTO-specific renewal schedule features ---
+        # Default zeros in case raw_df or plateNo is missing
+        exog_data['is_scheduled_month'] = 0
+        exog_data['is_scheduled_week'] = 0
+
+        if raw_df is not None and 'plateNo' in raw_df.columns:
+            # Map plate -> (scheduled_month, scheduled_week)
+            def get_schedule(plate):
+                if not isinstance(plate, str) or not plate:
+                    return None, None
+                digits = ''.join(ch for ch in plate if ch.isdigit())
+                if len(digits) < 2:
+                    return None, None
+                last = digits[-1]
+                second_last = digits[-2]
+
+                # Month mapping based on last digit
+                month_map = {
+                    '1': 1,  # Jan
+                    '2': 2,  # Feb
+                    '3': 3,  # Mar
+                    '4': 4,  # Apr
+                    '5': 5,  # May
+                    '6': 6,  # Jun
+                    '7': 7,  # Jul
+                    '8': 8,  # Aug
+                    '9': 9,  # Sep
+                    '0': 10, # Oct
+                }
+                sched_month = month_map.get(last)
+
+                # Week mapping based on second-to-last digit
+                if second_last in ('1', '2', '3'):
+                    sched_week = 1
+                elif second_last in ('4', '5', '6'):
+                    sched_week = 2
+                elif second_last in ('7', '8'):
+                    sched_week = 3
+                elif second_last in ('9', '0'):
+                    sched_week = 4
+                else:
+                    sched_week = None
+
+                return sched_month, sched_week
+
+            # Compute scheduled month/week for each original registration row
+            schedule_info = raw_df[['dateOfRenewal_parsed', 'plateNo']].copy()
+            schedule_info['scheduled_month'], schedule_info['scheduled_week'] = zip(
+                *schedule_info['plateNo'].map(get_schedule)
+            )
+
+            # Keep only rows where schedule is defined
+            schedule_info = schedule_info.dropna(subset=['scheduled_month', 'scheduled_week'])
+
+            if not schedule_info.empty:
+                # Derive calendar month and week-of-month for each actual renewal date
+                schedule_info['calendar_month'] = schedule_info['dateOfRenewal_parsed'].dt.month
+                # Week of month: 1–5 based on day of month
+                schedule_info['week_of_month'] = ((schedule_info['dateOfRenewal_parsed'].dt.day - 1) // 7) + 1
+
+                # Flag whether the actual renewal falls in its scheduled month/week
+                schedule_info['is_scheduled_month'] = (
+                    schedule_info['calendar_month'] == schedule_info['scheduled_month']
+                ).astype(int)
+                schedule_info['is_scheduled_week'] = (
+                    (schedule_info['calendar_month'] == schedule_info['scheduled_month']) &
+                    (schedule_info['week_of_month'] == schedule_info['scheduled_week'])
+                ).astype(int)
+
+                # Aggregate to daily level to match exog_data index
+                daily_sched = schedule_info.groupby('dateOfRenewal_parsed').agg({
+                    'is_scheduled_month': 'max',
+                    'is_scheduled_week': 'max',
+                }).rename_axis('date')
+
+                # Align with full date_index
+                daily_sched = daily_sched.reindex(date_index.normalize(), fill_value=0)
+
+                exog_data['is_scheduled_month'] = daily_sched['is_scheduled_month'].values
+                exog_data['is_scheduled_week'] = daily_sched['is_scheduled_week'].values
         
         print(f"Created exogenous variables:")
         print(f"  - Weekends: {exog_data['is_weekend'].sum()} days")

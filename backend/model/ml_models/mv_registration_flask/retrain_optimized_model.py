@@ -73,9 +73,19 @@ def main():
         )
         
         print("   - Training model with force=True (will overwrite existing model)...")
+        # Use multiple exogenous features, including LTO schedule-based ones
+        exog_cols = [
+            'is_weekend_or_holiday',
+            'day_of_week',
+            'month',
+            'is_scheduled_month',
+            'is_scheduled_week',
+        ]
+        available_exog = [c for c in exog_cols if c in exogenous_vars.columns]
+
         training_info = model.train(
             data=daily_data,
-            exogenous=exogenous_vars[['is_weekend_or_holiday']],
+            exogenous=exogenous_vars[available_exog],
             force=True,  # Force retraining to update metadata
             processing_info=processing_info
         )

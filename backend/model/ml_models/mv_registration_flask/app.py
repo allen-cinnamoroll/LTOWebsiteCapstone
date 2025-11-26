@@ -166,10 +166,19 @@ def initialize_model():
                 fill_missing_days=True,
                 fill_method='zero'
             )
-            # Train with exogenous variables (weekends/holidays)
+            # Train with richer exogenous variables (weekends/holidays + schedule-based features)
+            exog_cols = [
+                'is_weekend_or_holiday',
+                'day_of_week',
+                'month',
+                'is_scheduled_month',
+                'is_scheduled_week',
+            ]
+            available_exog = [c for c in exog_cols if c in exogenous_vars.columns]
+
             aggregated_model.train(
                 data=daily_data,
-                exogenous=exogenous_vars[['is_weekend_or_holiday']],  # Use combined indicator
+                exogenous=exogenous_vars[available_exog],
                 force=False,
                 processing_info=processing_info
             )
@@ -979,10 +988,19 @@ def retrain_model():
                 fill_missing_days=True,
                 fill_method='zero'
             )
+
+            exog_cols = [
+                'is_weekend_or_holiday',
+                'day_of_week',
+                'month',
+                'is_scheduled_month',
+                'is_scheduled_week',
+            ]
+            available_exog = [c for c in exog_cols if c in exogenous_vars.columns]
             
             training_info = aggregated_model.train(
                 data=daily_data,
-                exogenous=exogenous_vars[['is_weekend_or_holiday']],  # Use combined indicator
+                exogenous=exogenous_vars[available_exog],
                 force=force,
                 processing_info=processing_info
             )
