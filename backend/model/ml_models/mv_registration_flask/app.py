@@ -156,20 +156,26 @@ def initialize_model():
             scaler_type='minmax'
         )
         
-        if aggregated_model.model_exists():
+            if aggregated_model.model_exists():
             logger.info("Loading existing optimized aggregated model...")
             aggregated_model.load_model()
-        else:
+            else:
             logger.info("Training new optimized aggregated model...")
             # Load daily data with exogenous variables
             daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
                 fill_missing_days=True,
                 fill_method='zero'
             )
-            # Train with exogenous variables (weekends/holidays)
+            # Decide which exogenous feature columns to use
+            exog_feature_cols = [
+                col
+                for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
+                if col in exogenous_vars.columns
+            ]
+            # Train with exogenous variables (weekends/holidays + calendar features)
             aggregated_model.train(
                 data=daily_data,
-                exogenous=exogenous_vars[['is_weekend_or_holiday']],  # Use combined indicator
+                exogenous=exogenous_vars[exog_feature_cols] if exog_feature_cols else None,
                 force=False,
                 processing_info=processing_info
             )
@@ -206,9 +212,14 @@ def initialize_model():
                             # Check if we have enough data
                             if len(daily_data) >= MIN_WEEKS_FOR_MUNICIPALITY_MODEL * 7:  # Convert weeks to days
                                 logger.info(f"Training new model for {municipality}...")
+                                exog_feature_cols_mun = [
+                                    col
+                                    for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
+                                    if col in exogenous_vars.columns
+                                ]
                                 mun_model.train(
                                     data=daily_data,
-                                    exogenous=exogenous_vars[['is_weekend_or_holiday']],
+                                    exogenous=exogenous_vars[exog_feature_cols_mun] if exog_feature_cols_mun else None,
                                     force=False,
                                     processing_info=processing_info
                                 )
@@ -316,7 +327,12 @@ def predict_registrations():
         
         # Create future exogenous variables
         future_exog = preprocessor._create_exogenous_variables(future_dates)
-        future_exog = future_exog[['is_weekend_or_holiday']]  # Use only the combined indicator
+        exog_feature_cols = [
+            col
+            for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
+            if col in future_exog.columns
+        ]
+        future_exog = future_exog[exog_feature_cols] if exog_feature_cols else None
         
         # CRITICAL: Ensure future_exog has a DatetimeIndex so the model can use these dates
         # This ensures all models (aggregated and municipality-specific) use the same prediction dates
@@ -453,10 +469,11 @@ def predict_registrations():
             logger.info(f"Actual last registration date: {actual_last_date}")
             logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
             logger.info(f"Exogenous variables shape: {future_exog.shape}")
-            logger.info(
-                f"Weekend/holiday days in future period: "
-                f"{(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}"
-            )
+            if future_exog is not None:
+                logger.info(
+                    f"Weekend/holiday days in future period: "
+                    f"{(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}"
+                )
             
             # CRITICAL FIX: Temporarily override the model's actual_last_date to ensure
             # all models (aggregated and municipality-specific) use the same date logic
@@ -925,9 +942,14 @@ def retrain_model():
                 municipality=municipality_upper
             )
             
+            exog_feature_cols = [
+                col
+                for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
+                if col in exogenous_vars.columns
+            ]
             training_info = mun_model.train(
                 data=daily_data,
-                exogenous=exogenous_vars[['is_weekend_or_holiday']],
+                exogenous=exogenous_vars[exog_feature_cols] if exog_feature_cols else None,
                 force=force,
                 processing_info=processing_info
             )
@@ -980,9 +1002,14 @@ def retrain_model():
                 fill_method='zero'
             )
             
+            exog_feature_cols = [
+                col
+                for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
+                if col in exogenous_vars.columns
+            ]
             training_info = aggregated_model.train(
                 data=daily_data,
-                exogenous=exogenous_vars[['is_weekend_or_holiday']],  # Use combined indicator
+                exogenous=exogenous_vars[exog_feature_cols] if exog_feature_cols else None,
                 force=force,
                 processing_info=processing_info
             )
