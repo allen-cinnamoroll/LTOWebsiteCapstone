@@ -62,13 +62,6 @@ def main():
         traceback.print_exc()
         return False
     
-    # Decide which exogenous feature columns to use
-    exog_feature_cols = [
-        col
-        for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
-        if col in exogenous_vars.columns
-    ]
-    
     # Initialize and train model
     print("Step 2: Initializing and training optimized model...")
     try:
@@ -82,7 +75,7 @@ def main():
         print("   - Training model with force=True (will overwrite existing model)...")
         training_info = model.train(
             data=daily_data,
-            exogenous=exogenous_vars[exog_feature_cols] if exog_feature_cols else None,
+            exogenous=exogenous_vars[['is_weekend_or_holiday']],
             force=True,  # Force retraining to update metadata
             processing_info=processing_info
         )
