@@ -50,7 +50,7 @@ const AddVehicleForm = () => {
         bodyType: formData.bodyType,
         color: formData.color,
         classification: formData.classification,
-        driverId: formData.driver // Map driver to driverId
+        ownerId: formData.driver // Map driver to ownerId
       };
 
       // Only include dateOfRenewal if it has a value

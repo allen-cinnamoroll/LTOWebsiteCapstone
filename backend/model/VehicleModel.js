@@ -86,10 +86,10 @@
         enum:["0","1"],
         default:"1"
       },
-      driverId: {
+      ownerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Owners',
-        required: [true, "driverId is required"]
+        required: [true, "ownerId is required"]
       },
       // User tracking fields
       createdBy: {

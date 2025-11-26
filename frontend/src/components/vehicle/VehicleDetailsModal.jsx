@@ -27,7 +27,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const { token } = useAuth();
 
   useEffect(() => {
-    if (open && vehicleData?.driverId) {
+    if (open && vehicleData?.ownerId) {
       fetchOwnerData();
     }
     if (open && vehicleData?._id) {
@@ -36,13 +36,13 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   }, [open, vehicleData]);
 
   const fetchOwnerData = async () => {
-    if (!vehicleData?.driverId) {
+    if (!vehicleData?.ownerId) {
       return;
     }
     
     setLoading(true);
     try {
-      const { data } = await apiClient.get(`/owner/${vehicleData.driverId}`, {
+      const { data } = await apiClient.get(`/owner/${vehicleData.ownerId}`, {
         headers: {
           Authorization: token,
         },

@@ -35,7 +35,6 @@ export const registrationValidationRules = () => [
 
 //driver registration validation rules
 export const driverValidationRules = () => [
-  body("plateNo").notEmpty().withMessage("plateNo is required"),
   body("ownerRepresentativeName").notEmpty().withMessage("ownerRepresentativeName is required"),
   body("address").notEmpty().withMessage("address is required"),
   body("address.purok").optional(),

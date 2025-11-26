@@ -83,14 +83,14 @@ export const createDriver = async (req, res) => {
           logType: 'add_driver',
           ipAddress: getClientIP(req),
           status: 'success',
-          details: `Added driver: ${req.body.ownerRepresentativeName} (License: ${driversLicenseNumber || 'N/A'})`
+          details: `Added owner: ${req.body.ownerRepresentativeName} (License: ${driversLicenseNumber || 'N/A'})`
         });
       }
     }
 
     res.status(201).json({
       success: true,
-      message: "Driver registered successfully",
+      message: "Owner registered successfully",
       data: newDriver
     });
   } catch (err) {
@@ -184,9 +184,9 @@ export const getDrivers = async (req, res) => {
 };
 
 export const findDriver = async (req, res) => {
-  const driverId = req.params.id;
+  const ownerId = req.params.id;
   try {
-    const driver = await OwnerModel.findOne({ _id: driverId, deletedAt: null })
+    const driver = await OwnerModel.findOne({ _id: ownerId, deletedAt: null })
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
       .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal')
       .populate('createdBy', 'firstName middleName lastName')
@@ -195,7 +195,7 @@ export const findDriver = async (req, res) => {
     if (!driver) {
       return res.status(404).json({
         success: false,
-        message: "Driver not found",
+        message: "Owner not found",
       });
     }
 
@@ -214,7 +214,7 @@ export const findDriver = async (req, res) => {
 };
 
 export const updateDriver = async (req, res) => {
-  const driverId = req.params.id;
+  const ownerId = req.params.id;
   try {
     let updateData = { ...req.body };
     
@@ -247,7 +247,7 @@ export const updateDriver = async (req, res) => {
     };
     
     const driver = await OwnerModel.findByIdAndUpdate(
-      driverId, 
+      ownerId, 
       updateDataWithUser,
       { new: true, runValidators: true }
     )
@@ -257,7 +257,7 @@ export const updateDriver = async (req, res) => {
     if (!driver) {
       return res.status(404).json({
         success: false,
-        message: "Driver not found",
+        message: "Owner not found",
       });
     }
 
@@ -279,7 +279,7 @@ export const updateDriver = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Driver updated",
+      message: "Owner updated",
     });
   } catch (err) {
     return res.status(500).json({
@@ -291,21 +291,21 @@ export const updateDriver = async (req, res) => {
 
 // Soft delete driver (move to bin)
 export const deleteDriver = async (req, res) => {
-  const driverId = req.params.id;
+  const ownerId = req.params.id;
   try {
-    const driver = await OwnerModel.findById(driverId);
+    const driver = await OwnerModel.findById(ownerId);
     
     if (!driver) {
       return res.status(404).json({
         success: false,
-        message: "Driver not found",
+        message: "Owner not found",
       });
     }
 
     if (driver.deletedAt) {
       return res.status(400).json({
         success: false,
-        message: "Driver is already deleted",
+        message: "Owner is already deleted",
       });
     }
 
@@ -324,14 +324,14 @@ export const deleteDriver = async (req, res) => {
             logType: 'delete_driver',
             ipAddress: getClientIP(req),
             status: 'success',
-            details: `Driver moved to bin: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
+            details: `Owner moved to bin: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
           });
       }
     }
 
     res.status(200).json({
       success: true,
-      message: "Driver moved to bin successfully",
+      message: "Owner moved to bin successfully",
     });
   } catch (err) {
     return res.status(500).json({
@@ -409,14 +409,14 @@ export const restoreDriver = async (req, res) => {
     if (!driver) {
       return res.status(404).json({ 
         success: false, 
-        message: "Driver not found" 
+        message: "Owner not found" 
       });
     }
 
     if (!driver.deletedAt) {
       return res.status(400).json({
         success: false,
-        message: "Driver is not deleted",
+        message: "Owner is not deleted",
       });
     }
 
@@ -435,7 +435,7 @@ export const restoreDriver = async (req, res) => {
             logType: 'restore_driver',
             ipAddress: getClientIP(req),
             status: 'success',
-            details: `Driver restored from bin: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
+            details: `Owner restored from bin: ${driver.ownerRepresentativeName} (License: ${driver.driversLicenseNumber || 'N/A'})`
           });
         }
       } catch (logError) {
@@ -445,7 +445,7 @@ export const restoreDriver = async (req, res) => {
     
     res.json({ 
       success: true, 
-      message: "Driver restored successfully",
+      message: "Owner restored successfully",
       data: driver
     });
   } catch (error) {
@@ -464,14 +464,14 @@ export const permanentDeleteDriver = async (req, res) => {
     if (!driver) {
       return res.status(404).json({ 
         success: false, 
-        message: "Driver not found" 
+        message: "Owner not found" 
       });
     }
 
     if (!driver.deletedAt) {
       return res.status(400).json({
         success: false,
-        message: "Driver must be in bin before permanent deletion",
+        message: "Owner must be in bin before permanent deletion",
       });
     }
 
@@ -491,7 +491,7 @@ export const permanentDeleteDriver = async (req, res) => {
             logType: 'permanent_delete_driver',
             ipAddress: getClientIP(req),
             status: 'success',
-            details: `Driver permanently deleted: ${ownerName} (License: ${licenseNumber})`
+            details: `Owner permanently deleted: ${ownerName} (License: ${licenseNumber})`
           });
         }
       } catch (logError) {
@@ -501,7 +501,7 @@ export const permanentDeleteDriver = async (req, res) => {
     
     res.json({ 
       success: true, 
-      message: "Driver permanently deleted successfully" 
+      message: "Owner permanently deleted successfully" 
     });
   } catch (error) {
     res.status(400).json({ 

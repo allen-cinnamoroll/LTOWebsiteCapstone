@@ -158,12 +158,12 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     const subscription = form.watch((value, { name }) => {
       // When driver field changes, fetch owner details if needed
       if (name === "driver" || name === undefined) {
-        const driverId = value.driver || form.getValues("driver");
-        if (driverId && !selectedDriver) {
+        const ownerId = value.driver || form.getValues("driver");
+        if (ownerId && !selectedDriver) {
           // Fetch owner details if driver ID is set but we don't have the owner object
           const fetchOwnerDetails = async () => {
             try {
-              const { data } = await apiClient.get(`/owner/${driverId}`, {
+              const { data } = await apiClient.get(`/owner/${ownerId}`, {
                 headers: { Authorization: token }
               });
               if (data.success && data.data) {
@@ -184,11 +184,11 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     });
     
     // Also check immediately when component mounts or form is reset
-    const driverId = form.getValues("driver");
-    if (driverId && !selectedDriver) {
+    const ownerId = form.getValues("driver");
+    if (ownerId && !selectedDriver) {
       const fetchOwnerDetails = async () => {
         try {
-          const { data } = await apiClient.get(`/owner/${driverId}`, {
+          const { data } = await apiClient.get(`/owner/${ownerId}`, {
             headers: { Authorization: token }
           });
           if (data.success && data.data) {
@@ -214,16 +214,16 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     <Form {...form}>
       <form id="vehicle-form" onSubmit={form.handleSubmit((data) => {
         // Handle owner field properly for edit mode
-        let driverId = data.driver;
+        let ownerId = data.driver;
         if (isEditMode && !isOwnerEditable && !selectedDriver) {
           // If in edit mode and owner field is not editable, keep the original owner
-          driverId = data.driver || form.getValues('driver');
+          ownerId = data.driver || form.getValues('driver');
         } else if (selectedDriver) {
           // If a new owner is selected, use their ID
-          driverId = selectedDriver._id;
+          ownerId = selectedDriver._id;
         } else if (isEditMode && prePopulatedOwner && prePopulatedOwner !== 'No owner assigned') {
           // If we have a pre-populated owner, preserve the existing owner ID
-          driverId = form.getValues('driver') || data.driver;
+          ownerId = form.getValues('driver') || data.driver;
         }
         
         // Include the owner's name in the form data
@@ -232,7 +232,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
         
         const formDataWithOwner = {
           ...data,
-          driver: driverId,
+          driver: ownerId,
           ownerName: ownerName
         };
         onSubmit(formDataWithOwner);

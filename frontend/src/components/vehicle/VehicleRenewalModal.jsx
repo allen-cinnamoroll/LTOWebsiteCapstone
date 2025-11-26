@@ -63,18 +63,18 @@ const VehicleRenewalModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       setError("");
       
       // Fetch owner data
-      if (vehicleData.driverId) {
+      if (vehicleData.ownerId) {
         fetchOwnerData();
       }
     }
   }, [open, vehicleData]);
 
   const fetchOwnerData = async () => {
-    if (!vehicleData?.driverId) return;
+    if (!vehicleData?.ownerId) return;
     
     setLoadingOwner(true);
     try {
-      const { data } = await apiClient.get(`/owner/${vehicleData.driverId}`, {
+      const { data } = await apiClient.get(`/owner/${vehicleData.ownerId}`, {
         headers: {
           Authorization: token,
         },

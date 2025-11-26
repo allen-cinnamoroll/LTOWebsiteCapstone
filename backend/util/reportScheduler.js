@@ -86,7 +86,7 @@ const generateReportData = async (reportType = 'daily') => {
         {
           $lookup: {
             from: 'owners',
-            localField: 'driverId',
+            localField: 'ownerId',
             foreignField: '_id',
             as: 'owner'
           }

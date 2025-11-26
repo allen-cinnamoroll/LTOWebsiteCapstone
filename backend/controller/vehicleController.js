@@ -19,7 +19,7 @@ export const createVehicle = async (req, res) => {
       classification,
       dateOfRenewal,
       vehicleStatusType,
-      driverId,
+      ownerId,
     } = req.body;
 
     // Check if chassis number already exists (only if provided)
@@ -34,11 +34,11 @@ export const createVehicle = async (req, res) => {
     }
 
     // Verify driver exists
-    const driver = await OwnerModel.findById(driverId);
-    if (!driver) {
+    const owner = await OwnerModel.findById(ownerId);
+    if (!owner) {
       return res.status(400).json({
         success: false,
-        message: "Driver not found",
+        message: "Owner not found",
       });
     }
 
@@ -75,7 +75,7 @@ export const createVehicle = async (req, res) => {
       classification,
       dateOfRenewal: normalizedRenewals,
       vehicleStatusType,
-      driverId,
+      ownerId,
       status: initialStatus, // Set status based on plate number logic
       // Add user tracking fields
       createdBy: req.user ? req.user.userId : defaultActor,
@@ -84,9 +84,9 @@ export const createVehicle = async (req, res) => {
 
     await vehicle.save();
 
-    // Update driver's vehicleIds array
+    // Update owner's vehicleIds array
     await OwnerModel.findByIdAndUpdate(
-      driverId,
+      ownerId,
       { $push: { vehicleIds: vehicle._id } },
       { new: true }
     );
@@ -107,7 +107,7 @@ export const createVehicle = async (req, res) => {
 
     // Populate driver and user information
     await vehicle.populate([
-      { path: "driverId", select: "fullname ownerRepresentativeName" },
+      { path: "ownerId", select: "fullname ownerRepresentativeName" },
       { path: "createdBy", select: "firstName middleName lastName" },
       { path: "updatedBy", select: "firstName middleName lastName" }
     ]);
@@ -165,8 +165,8 @@ export const getVehicle = async (req, res) => {
     // Reduces payload size and improves query performance
     // Indexes used: createdAt (for sorting), deletedAt (for filtering), status, classification
     let vehiclesQuery = VehicleModel.find(query)
-      .select("fileNo plateNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal vehicleStatusType status driverId createdBy updatedBy createdAt updatedAt")
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .select("fileNo plateNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal vehicleStatusType status ownerId createdBy updatedBy createdAt updatedAt")
+      .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName")
       .sort({ createdAt: -1 });
@@ -201,17 +201,17 @@ export const getVehicle = async (req, res) => {
         ...vehicle.toObject(),
         status: calculatedStatus, // Use calculated status instead of database status
         calculatedStatus,
-        // Ensure driverId is the actual ID string, not the populated object
-        driverId: typeof vehicle.driverId === 'object' && vehicle.driverId?._id 
-          ? vehicle.driverId._id 
-          : vehicle.driverId,
+        // Ensure ownerId is the actual ID string, not the populated object
+        ownerId: typeof vehicle.ownerId === 'object' && vehicle.ownerId?._id 
+          ? vehicle.ownerId._id 
+          : vehicle.ownerId,
         // Keep the full populated user objects for createdBy/updatedBy (don't transform)
         // The frontend will handle building the full name from firstName, middleName, lastName
       };
       
       // Verbose logging disabled for performance (uncomment for debugging specific vehicles)
       // console.log(`Vehicle ${vehicle.plateNo} - Status: ${calculatedStatus} (${calculatedStatus === "1" ? "ACTIVE" : "EXPIRED"})`);
-      // console.log(`Vehicle ${vehicle.plateNo} - DriverId: ${vehicleData.driverId}`);
+      // console.log(`Vehicle ${vehicle.plateNo} - DriverId: ${vehicleData.ownerId}`);
       
       return vehicleData;
     }));
@@ -243,7 +243,7 @@ export const findVehicle = async (req, res) => {
     const { id } = req.params;
 
     const vehicle = await VehicleModel.findOne({ _id: id, deletedAt: null })
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
 
@@ -347,7 +347,7 @@ export const updateVehicle = async (req, res) => {
       updateDataWithUser,
       { new: true, runValidators: true }
     )
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber")
+      .populate("ownerId", "fullname ownerRepresentativeName contactNumber")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
 
@@ -445,7 +445,7 @@ export const updateVehicleStatus = async (req, res) => {
       },
       { new: true }
     )
-      .populate("driverId", "fullname ownerRepresentativeName")
+      .populate("ownerId", "fullname ownerRepresentativeName")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
 
@@ -517,7 +517,7 @@ export const getVehicleOwnerByPlate = async (req, res) => {
     const { plateNo } = req.params;
 
     const vehicle = await VehicleModel.findOne({ plateNo })
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
 
@@ -559,7 +559,7 @@ export const getVehicleByFileNumber = async (req, res) => {
     const { fileNo } = req.params;
 
     const vehicle = await VehicleModel.findOne({ fileNo })
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
 
@@ -774,12 +774,12 @@ export const exportVehicles = async (req, res) => {
     const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Fetch vehicles with filter and populate driver information
-    // Populate driverId with all necessary owner fields
-    // Note: driverId is an ObjectId that references the Drivers collection
+    // Populate ownerId with all necessary owner fields
+    // Note: ownerId is an ObjectId that references the Drivers collection
     // Use .lean() for performance, but we need to handle date conversion properly
     let vehicles = await VehicleModel.find(dateFilter)
       .populate({
-        path: "driverId",
+        path: "ownerId",
         select: "ownerRepresentativeName address driversLicenseNumber",
       })
       .lean() // Use lean() for better performance - returns plain JS objects
@@ -912,25 +912,25 @@ export const exportVehicles = async (req, res) => {
       }
 
       // Extract driver/owner information
-      // driverId is an ObjectId reference to the Drivers collection
+      // ownerId is an ObjectId reference to the Drivers collection
       // After populate(), it becomes an object with ownerRepresentativeName, address, driversLicenseNumber
       // If not populated, it remains as an ObjectId
       let driver = {};
       let address = {};
       
-      if (vehicleObj.driverId) {
-        // Check if driverId is populated by checking for ownerRepresentativeName property
+      if (vehicleObj.ownerId) {
+        // Check if ownerId is populated by checking for ownerRepresentativeName property
         // If populated, it will have ownerRepresentativeName
         // If not populated, it will just be an ObjectId (which doesn't have this property)
-        if (vehicleObj.driverId.ownerRepresentativeName !== undefined) {
+        if (vehicleObj.ownerId.ownerRepresentativeName !== undefined) {
           // Successfully populated - use the driver data
-          driver = vehicleObj.driverId;
-          address = vehicleObj.driverId.address || {};
+          driver = vehicleObj.ownerId;
+          address = vehicleObj.ownerId.address || {};
         } else {
-          // Not populated - driverId is still just an ObjectId
+          // Not populated - ownerId is still just an ObjectId
           // This shouldn't happen if populate worked, but log it for debugging
           console.warn(`Driver not populated for vehicle ${vehicleObj.plateNo || vehicleObj._id}`);
-          console.warn(`DriverId value:`, vehicleObj.driverId);
+          console.warn(`DriverId value:`, vehicleObj.ownerId);
         }
       }
 
@@ -1087,8 +1087,8 @@ export const getDeletedVehicles = async (req, res) => {
 
     // OPTIMIZATION: Select only fields needed for listing page
     let vehiclesQuery = VehicleModel.find(query)
-      .select("plateNo fileNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal status vehicleStatusType driverId createdBy updatedBy createdAt updatedAt deletedAt")
-      .populate("driverId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .select("plateNo fileNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal status vehicleStatusType ownerId createdBy updatedBy createdAt updatedAt deletedAt")
+      .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName")
       .sort({ deletedAt: -1 });

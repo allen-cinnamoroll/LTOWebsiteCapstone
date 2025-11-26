@@ -1270,7 +1270,7 @@ export const getRegistrationAnalytics = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1408,7 +1408,7 @@ export const getMunicipalityAnalytics = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1646,7 +1646,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -1693,10 +1693,10 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
     
     if (Object.keys(dateFilter).length > 0) {
       // If we have a date filter, find drivers whose vehicles match the date criteria
-      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'driverId').distinct('driverId');
-      const validDriverIds = vehiclesInDateRange.filter(id => id !== null);
+      const vehiclesInDateRange = await VehicleModel.find(dateFilter, 'ownerId').distinct('ownerId');
+      const validOwnerIds = vehiclesInDateRange.filter(id => id !== null);
       
-      if (validDriverIds.length > 0) {
+      if (validOwnerIds.length > 0) {
         const driverAggregation = [
           {
             $match: { _id: { $in: validDriverIds } }
@@ -1816,25 +1816,25 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
 // Get driver-specific chart data with time period filter
 export const getDriverChartData = async (req, res) => {
   try {
-    const { period = 'all', driverId } = req.query; // week, 3months, 6months, months, year, years, all
+    const { period = 'all', ownerId } = req.query; // week, 3months, 6months, months, year, years, all
     
-    if (!driverId) {
+    if (!ownerId) {
       return res.status(400).json({
         success: false,
         message: "Driver ID is required"
       });
     }
     
-    // First, get the driver's plate number
-    const driver = await OwnerModel.findById(driverId);
-    if (!driver) {
+    // First, get the owner's plate number
+    const owner = await OwnerModel.findById(ownerId);
+    if (!owner) {
       return res.status(404).json({
         success: false,
-        message: "Driver not found"
+        message: "Owner not found"
       });
     }
     
-    console.log("Driver found:", driver.ownerRepresentativeName, "Plates:", driver.plateNo);
+    console.log("Owner found:", owner.ownerRepresentativeName, "Plates:", owner.plateNo);
     
     // Handle multiple plate numbers - use $in operator to match any of the driver's plates
     const driverPlates = Array.isArray(driver.plateNo) ? driver.plateNo : [driver.plateNo];
@@ -2055,7 +2055,7 @@ export const getDriverChartData = async (req, res) => {
       success: true,
       data: {
         period,
-        driverId,
+        ownerId,
         chartData: finalData,
         violations: detailedViolations
       }
@@ -2091,7 +2091,7 @@ export const getOwnerMunicipalityData = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -2253,7 +2253,7 @@ export const getBarangayRegistrationTotals = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -2362,7 +2362,7 @@ export const getYearlyVehicleTrends = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -2517,7 +2517,7 @@ export const getMonthlyVehicleTrends = async (req, res) => {
       {
         $lookup: {
           from: 'owners',
-          localField: 'driverId',
+          localField: 'ownerId',
           foreignField: '_id',
           as: 'driverInfo'
         }
@@ -2748,7 +2748,7 @@ export const exportDashboardReport = async (req, res) => {
       {
         $lookup: {
           from: "owners",
-          localField: "driverId",
+          localField: "ownerId",
           foreignField: "_id",
           as: "owner"
         }

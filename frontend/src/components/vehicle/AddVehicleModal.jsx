@@ -205,7 +205,7 @@ const AddVehicleModal = ({ open, onOpenChange, onVehicleAdded, onAddNewOwner, fo
         color: formData.color,
         classification: formData.classification,
         vehicleStatusType: formData.vehicleStatusType,
-        driverId: formData.driver // Map driver to driverId
+        ownerId: formData.driver // Map driver to ownerId
       };
 
       // Only include dateOfRenewal if it has a value

@@ -156,8 +156,8 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
           classification: mapClassification(data.data?.classification),
           vehicleStatusType: data.data?.vehicleStatusType || "Old",
           dateOfRenewal: resolveLatestRenewalDate(data.data?.dateOfRenewal),
-          driver: data.data?.driverId?._id || "",
-          ownerName: data.data?.driverId?.ownerRepresentativeName || "No driver assigned",
+          driver: data.data?.ownerId?._id || "",
+          ownerName: data.data?.ownerId?.ownerRepresentativeName || "No owner assigned",
         };
         setVehicleData(vData);
         setOriginalData(vData);
@@ -230,8 +230,8 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
         color: pendingFormData.color,
         classification: pendingFormData.classification,
         vehicleStatusType: pendingFormData.vehicleStatusType,
-        // Only include driverId if it's provided and different from original
-        ...(pendingFormData.driver && pendingFormData.driver !== originalData.driver && { driverId: pendingFormData.driver }),
+        // Only include ownerId if it's provided and different from original
+        ...(pendingFormData.driver && pendingFormData.driver !== originalData.driver && { ownerId: pendingFormData.driver }),
       };
 
       const { data } = await apiClient.patch(`/vehicle/${vehicleId}`, content, {

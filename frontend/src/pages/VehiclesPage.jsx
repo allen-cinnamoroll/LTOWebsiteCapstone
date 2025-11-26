@@ -95,10 +95,10 @@ const VehiclesPage = () => {
       }
 
       const vehicleData = data.data.map((dData) => {
-        // Handle both populated and non-populated driverId
-        const driverId = typeof dData.driverId === 'object' && dData.driverId?._id 
-          ? dData.driverId._id 
-          : dData.driverId;
+        // Handle both populated and non-populated ownerId
+        const ownerId = typeof dData.ownerId === 'object' && dData.ownerId?._id 
+          ? dData.ownerId._id 
+          : dData.ownerId;
         
         return {
           _id: dData._id,
@@ -112,7 +112,7 @@ const VehiclesPage = () => {
           classification: dData.classification,
           dateOfRenewal: dData.dateOfRenewal,
           status: dData.status,
-          driverId: driverId, // Use the extracted driverId
+          ownerId: ownerId, // Use the extracted ownerId
           vehicleStatusType: dData.vehicleStatusType, // Include vehicleStatusType
           // Include metadata fields
           createdBy: dData.createdBy,

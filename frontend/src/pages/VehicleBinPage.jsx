@@ -33,10 +33,10 @@ const VehicleBinPage = () => {
         },
       });
       const vehicleData = data.data.map((dData) => {
-        // Handle both populated and non-populated driverId
-        const driverId = typeof dData.driverId === 'object' && dData.driverId?._id 
-          ? dData.driverId._id 
-          : dData.driverId;
+        // Handle both populated and non-populated ownerId
+        const ownerId = typeof dData.ownerId === 'object' && dData.ownerId?._id 
+          ? dData.ownerId._id 
+          : dData.ownerId;
         
         return {
           _id: dData._id,
@@ -50,7 +50,7 @@ const VehicleBinPage = () => {
           classification: dData.classification,
           dateOfRenewal: dData.dateOfRenewal,
           status: dData.status,
-          driverId: driverId,
+          ownerId: ownerId,
           vehicleStatusType: dData.vehicleStatusType,
           deletedAt: dData.deletedAt,
           createdBy: dData.createdBy,
