@@ -91,7 +91,7 @@ def export_mongo_to_csv(output_dir: str, filename: str = "DAVOR_data.csv") -> st
         {
             "$lookup": {
                 "from": "owners",
-                "localField": "driverId",
+                "localField": "ownerId",
                 "foreignField": "_id",
                 "as": "owner",
             }
