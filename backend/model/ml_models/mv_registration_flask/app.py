@@ -29,6 +29,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sarima_model_optimized import OptimizedSARIMAModel
 from data_preprocessor_daily import DailyDataPreprocessor
+from mongo_to_csv_exporter import export_mongo_to_csv
 from barangay_predictor import BarangayPredictor
 from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES, MIN_WEEKS_FOR_MUNICIPALITY_MODEL
 
@@ -130,7 +131,15 @@ def initialize_model():
         # Create directories if they don't exist
         os.makedirs(model_dir, exist_ok=True)
         
-        # Initialize daily preprocessor
+        # Always export latest data from MongoDB into the training directory
+        try:
+            export_mongo_to_csv(data_dir, filename="DAVOR_data.csv")
+            logger.info("Exported latest registration data from MongoDB to DAVOR_data.csv")
+        except Exception as e:
+            logger.error(f"Failed to export data from MongoDB: {str(e)}")
+            raise
+        
+        # Initialize daily preprocessor (will see all CSVs in the directory, including DAVOR_data.csv)
         csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
         preprocessor = DailyDataPreprocessor(csv_path)
         
@@ -951,6 +960,21 @@ def retrain_model():
                 }), 400
             
             logger.info("Retraining optimized aggregated model...")
+
+            # Refresh CSV from MongoDB before each retrain to use latest data
+            try:
+                export_mongo_to_csv(
+                    os.path.join(os.path.dirname(os.path.abspath(__file__)), '../mv registration training'),
+                    filename="DAVOR_data.csv",
+                )
+                logger.info("Refreshed DAVOR_data.csv from MongoDB for retraining")
+            except Exception as e:
+                logger.error(f"Failed to refresh data from MongoDB before retrain: {str(e)}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Failed to export data from MongoDB: {str(e)}'
+                }), 500
+
             daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
                 fill_missing_days=True,
                 fill_method='zero'

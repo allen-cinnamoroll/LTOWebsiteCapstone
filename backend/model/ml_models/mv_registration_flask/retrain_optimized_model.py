@@ -5,6 +5,7 @@ This script retrains the optimized model to store actual_last_date for correct f
 
 from data_preprocessor_daily import DailyDataPreprocessor
 from sarima_model_optimized import OptimizedSARIMAModel
+from mongo_to_csv_exporter import export_mongo_to_csv
 import os
 
 def main():
@@ -22,11 +23,15 @@ def main():
             data_dir = data_dir_alt
     
     model_dir = os.path.join(base_dir, '../trained')
-    csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
-    
-    # Check if data exists
-    if not os.path.exists(csv_path):
-        print(f"❌ ERROR: Data file not found: {csv_path}")
+
+    # Always export fresh data from MongoDB into the training directory.
+    # This will create/overwrite DAVOR_data.csv based on the latest DB state.
+    print("Step 0: Exporting registration data from MongoDB to CSV...")
+    try:
+        csv_path = export_mongo_to_csv(data_dir, filename="DAVOR_data.csv")
+        print(f"   ✅ Mongo export complete: {csv_path}")
+    except Exception as e:
+        print(f"❌ ERROR: Failed to export data from MongoDB: {str(e)}")
         return False
     
     print(f"📁 Data directory: {data_dir}")
