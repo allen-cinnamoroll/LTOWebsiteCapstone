@@ -346,12 +346,12 @@ def predict_registrations():
         #    compute the regional total by summing all municipality-specific predictions.
         # 3. Otherwise, fall back to the aggregated model.
         
-        use_municipality_aggregation = (
-            municipality_upper is None and
-            ENABLE_PER_MUNICIPALITY and
-            municipality_models and
-            len(municipality_models) > 0
-        )
+        # NOTE:
+        # We keep per-municipality models enabled for explicit municipality requests,
+        # but for "All Municipalities" we now default to the aggregated model.
+        # The previous aggregated_from_municipalities path sometimes returned
+        # empty predictions when some municipality models were missing or failed.
+        use_municipality_aggregation = False
         
         if use_municipality_aggregation:
             # Aggregate predictions from all municipality-specific models
