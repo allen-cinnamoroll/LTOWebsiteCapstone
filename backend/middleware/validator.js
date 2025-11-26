@@ -86,13 +86,16 @@ export const vehicleRegistrationRules = () =>[
 // driver violation
 export const validateViolation = [
   body("topNo").optional(),
-  body("violationType").isIn(["confiscated", "alarm", "impounded"]).withMessage("Violation type must be confiscated, alarm, or impounded"),
+  body("violationType").optional().isIn(["confiscated", "alarm", "impounded"]).withMessage("Violation type must be confiscated, alarm, or impounded"),
   
   // Conditional validation for firstName (required for confiscated and impounded)
-  body("firstName").custom((value, { req }) => {
+  body("firstName").optional().custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if ((violationType === 'confiscated' || violationType === 'impounded') && (!value || value.trim() === '')) {
-      throw new Error("First name is required for confiscated and impounded types");
+    // Only validate if violationType is provided and value is being set
+    if (violationType && (violationType === 'confiscated' || violationType === 'impounded')) {
+      if (value !== undefined && value !== null && (!value || value.trim() === '')) {
+        throw new Error("First name is required for confiscated and impounded types");
+      }
     }
     return true;
   }),
@@ -100,10 +103,13 @@ export const validateViolation = [
   body("middleInitial").optional(),
   
   // Conditional validation for lastName (required for confiscated and impounded)
-  body("lastName").custom((value, { req }) => {
+  body("lastName").optional().custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if ((violationType === 'confiscated' || violationType === 'impounded') && (!value || value.trim() === '')) {
-      throw new Error("Last name is required for confiscated and impounded types");
+    // Only validate if violationType is provided and value is being set
+    if (violationType && (violationType === 'confiscated' || violationType === 'impounded')) {
+      if (value !== undefined && value !== null && (!value || value.trim() === '')) {
+        throw new Error("Last name is required for confiscated and impounded types");
+      }
     }
     return true;
   }),
@@ -111,37 +117,46 @@ export const validateViolation = [
   body("suffix").optional(),
   
   // Conditional validation for violations (required for confiscated and impounded)
-  body("violations").custom((value, { req }) => {
+  body("violations").optional().custom((value, { req }) => {
     const violationType = req.body.violationType;
-    if ((violationType === 'confiscated' || violationType === 'impounded')) {
-      if (!Array.isArray(value) || value.length === 0 || value.every(v => !v || v.trim() === '')) {
-        throw new Error("At least one violation is required for confiscated and impounded types");
+    // Only validate if violationType is provided and value is being set
+    if (violationType && (violationType === 'confiscated' || violationType === 'impounded')) {
+      if (value !== undefined && value !== null) {
+        if (!Array.isArray(value) || value.length === 0 || value.every(v => !v || v.trim() === '')) {
+          throw new Error("At least one violation is required for confiscated and impounded types");
+        }
       }
     }
     return true;
   }),
   
   // Conditional validation for licenseType (required for confiscated only)
-  body("licenseType").custom((value, { req }) => {
+  body("licenseType").optional().custom((value, { req }) => {
     const violationType = req.body.violationType;
     const isEmpty = value === undefined || value === null || (typeof value === "string" && value.trim() === "");
     const normalizedValue = typeof value === "string" ? value.trim() : value;
 
-    if (violationType === 'confiscated') {
-      if (isEmpty || !LICENSE_TYPE_OPTIONS.includes(normalizedValue)) {
-        throw new Error("License type is required and must be a valid selection for confiscated type");
-      }
-    } else {
-      if (!isEmpty && !LICENSE_TYPE_OPTIONS.includes(normalizedValue)) {
-        throw new Error("License type must be a valid selection");
+    // Only validate if violationType is provided
+    if (violationType) {
+      if (violationType === 'confiscated') {
+        // Only require licenseType if value is being set (not undefined/null)
+        if (value !== undefined && value !== null) {
+          if (isEmpty || !LICENSE_TYPE_OPTIONS.includes(normalizedValue)) {
+            throw new Error("License type is required and must be a valid selection for confiscated type");
+          }
+        }
+      } else {
+        if (!isEmpty && !LICENSE_TYPE_OPTIONS.includes(normalizedValue)) {
+          throw new Error("License type must be a valid selection");
+        }
       }
     }
     return true;
   }),
   
-  body("plateNo").notEmpty().withMessage("Plate number is required"),
-  body("dateOfApprehension").isISO8601().withMessage("Date of apprehension is required and must be valid"),
-  body("apprehendingOfficer").notEmpty().withMessage("Apprehending officer is required"),
+  body("plateNo").optional().notEmpty().withMessage("Plate number is required"),
+  body("dateOfApprehension").optional().isISO8601().withMessage("Date of apprehension is required and must be valid"),
+  body("apprehendingOfficer").optional().notEmpty().withMessage("Apprehending officer is required"),
   body("remarks").optional().isString().withMessage("Remarks must be a string"),
 ];
 
@@ -165,15 +180,15 @@ export const validateAccident = [
   body("caseStatus").optional().isString().withMessage("Case status must be a string"),
   body("region").optional().isString().withMessage("Region must be a string"),
   body("province").optional().isString().withMessage("Province must be a string"),
-  body("municipality").notEmpty().withMessage("Municipality is required"),
-  body("barangay").notEmpty().withMessage("Barangay is required"),
+  body("municipality").optional().notEmpty().withMessage("Municipality is required"),
+  body("barangay").optional().notEmpty().withMessage("Barangay is required"),
   body("street").optional().isString().withMessage("Street must be a string"),
   body("lat").optional().isFloat().withMessage("Latitude must be a number"),
   body("lng").optional().isFloat().withMessage("Longitude must be a number"),
   body("dateEncoded").optional().isISO8601().withMessage("Date encoded must be valid"),
   body("dateReported").optional().isISO8601().withMessage("Date reported must be valid"),
   body("timeReported").optional().isString().withMessage("Time reported must be a string"),
-  body("dateCommited").isISO8601().withMessage("Date committed is required and must be valid"),
+  body("dateCommited").optional().isISO8601().withMessage("Date committed is required and must be valid"),
   body("timeCommited").optional().isString().withMessage("Time committed must be a string"),
   body("incidentType").optional().isString().withMessage("Incident type must be a string"),
 ];

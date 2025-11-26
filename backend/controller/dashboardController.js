@@ -1444,37 +1444,7 @@ export const getMunicipalityAnalytics = async (req, res) => {
           activeVehicles: {
             $sum: {
               $cond: [
-                {
-                  $eq: [
-                    {
-                      $function: {
-                        body: function(plateNo, dateOfRenewal) {
-                          // Import the getVehicleStatus function logic here
-                          if (!plateNo || !dateOfRenewal) return "0";
-                          
-                          const currentDate = new Date();
-                          const renewalDate = new Date(dateOfRenewal);
-                          const timeDiff = currentDate.getTime() - renewalDate.getTime();
-                          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                          
-                          // Check if plate number contains letters (permanent) or only numbers (temporary)
-                          const hasLetters = /[A-Za-z]/.test(plateNo);
-                          
-                          if (hasLetters) {
-                            // Permanent plates: valid for 3 years
-                            return daysDiff <= 1095 ? "1" : "0";
-                          } else {
-                            // Temporary plates: valid for 1 year
-                            return daysDiff <= 365 ? "1" : "0";
-                          }
-                        },
-                        args: ['$plateNo', '$dateOfRenewal'],
-                        lang: 'js'
-                      }
-                    },
-                    "1"
-                  ]
-                },
+                { $eq: ["$status", "1"] },
                 1,
                 0
               ]
@@ -1483,33 +1453,7 @@ export const getMunicipalityAnalytics = async (req, res) => {
           expiredVehicles: {
             $sum: {
               $cond: [
-                {
-                  $eq: [
-                    {
-                      $function: {
-                        body: function(plateNo, dateOfRenewal) {
-                          if (!plateNo || !dateOfRenewal) return "0";
-                          
-                          const currentDate = new Date();
-                          const renewalDate = new Date(dateOfRenewal);
-                          const timeDiff = currentDate.getTime() - renewalDate.getTime();
-                          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                          
-                          const hasLetters = /[A-Za-z]/.test(plateNo);
-                          
-                          if (hasLetters) {
-                            return daysDiff <= 1095 ? "1" : "0";
-                          } else {
-                            return daysDiff <= 365 ? "1" : "0";
-                          }
-                        },
-                        args: ['$plateNo', '$dateOfRenewal'],
-                        lang: 'js'
-                      }
-                    },
-                    "0"
-                  ]
-                },
+                { $eq: ["$status", "0"] },
                 1,
                 0
               ]
@@ -1821,11 +1765,11 @@ export const getDriverChartData = async (req, res) => {
     if (!ownerId) {
       return res.status(400).json({
         success: false,
-        message: "Driver ID is required"
+        message: "Owner ID is required"
       });
     }
     
-    // First, get the owner's plate number
+    // First, get the owner and their vehicles
     const owner = await OwnerModel.findById(ownerId);
     if (!owner) {
       return res.status(404).json({
@@ -1834,10 +1778,21 @@ export const getDriverChartData = async (req, res) => {
       });
     }
     
-    console.log("Owner found:", owner.ownerRepresentativeName, "Plates:", owner.plateNo);
+    // Get all vehicles associated with this owner
+    const ownerVehicles = await VehicleModel.find({ ownerId: ownerId }).select('plateNo');
+    const ownerPlates = ownerVehicles.map(v => v.plateNo).filter(plate => plate); // Get plate numbers and filter out null/undefined
     
-    // Handle multiple plate numbers - use $in operator to match any of the driver's plates
-    const driverPlates = Array.isArray(driver.plateNo) ? driver.plateNo : [driver.plateNo];
+    if (ownerPlates.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No vehicles found for this owner"
+      });
+    }
+    
+    console.log("Owner found:", owner.ownerRepresentativeName, "Plates:", ownerPlates);
+    
+    // Handle multiple plate numbers - use $in operator to match any of the owner's plates
+    const driverPlates = ownerPlates;
     let matchStage = { plateNo: { $in: driverPlates } };
     let groupStage = {};
     let sortStage = {};

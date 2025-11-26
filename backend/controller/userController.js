@@ -43,14 +43,54 @@ export const getUserById = async (req, res) => {
   }
 };
 
-// Get all users (for admin/superadmin)
+// Get all users (for admin/superadmin) with optional role filtering
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await UserModel.find({}).select("-password -otp -otpExpiresAt");
+    const { role, search, page = 1, limit = 50 } = req.query;
+    
+    // Build query filter
+    const filter = {};
+    
+    // Filter by role if provided
+    if (role) {
+      filter.role = role;
+    }
+    
+    // Search filter (by name or email)
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { middleName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Get total count for pagination
+    const totalUsers = await UserModel.countDocuments(filter);
+    
+    // Get users with pagination
+    const users = await UserModel.find(filter)
+      .select("-password -otp -otpExpiresAt -passwordResetOTP -passwordResetOTPExpiresAt")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    // Calculate total pages
+    const totalPages = Math.ceil(totalUsers / parseInt(limit));
     
     res.status(200).json({
       success: true,
       users: users,
+      pagination: {
+        totalUsers,
+        totalPages,
+        currentPage: parseInt(page),
+        limit: parseInt(limit)
+      }
     });
   } catch (err) {
     return res.status(500).json({

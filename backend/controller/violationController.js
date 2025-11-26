@@ -205,8 +205,18 @@ export const getViolationById = async (req, res) => {
 // Update a violation by ID (Only Admin or Superadmin)
 export const updateViolation = async (req, res) => {
     try {
+        // Fetch existing violation first to get current values
+        const existingViolation = await ViolationModel.findById(req.params.id);
+        
+        if (!existingViolation) {
+            return res.status(404).json({ success: false, message: "Violation not found" });
+        }
+
         const { violations, violationType } = req.body;
         let updateData = { ...req.body };
+
+        // Use existing violationType if not provided in update
+        const effectiveViolationType = violationType || existingViolation.violationType;
 
         // Ensure violations is an array
         if (violations) {
@@ -223,17 +233,41 @@ export const updateViolation = async (req, res) => {
             updateData.updatedBy = req.user.userId;
         }
 
+        // Validate required fields based on effective violation type
+        // Only validate if the field is being updated or if violationType is being changed
+        if (effectiveViolationType === 'confiscated' || effectiveViolationType === 'impounded') {
+            // If violationType is being changed, validate required fields
+            if (violationType && violationType !== existingViolation.violationType) {
+                // If changing to confiscated/impounded, ensure required fields are present
+                if (!updateData.firstName && !existingViolation.firstName) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: "First name is required for confiscated and impounded types" 
+                    });
+                }
+                if (!updateData.lastName && !existingViolation.lastName) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: "Last name is required for confiscated and impounded types" 
+                    });
+                }
+                if ((!updateData.violations || (Array.isArray(updateData.violations) && updateData.violations.length === 0)) 
+                    && (!existingViolation.violations || (Array.isArray(existingViolation.violations) && existingViolation.violations.length === 0))) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: "At least one violation is required for confiscated and impounded types" 
+                    });
+                }
+            }
+        }
+
         const violation = await ViolationModel.findByIdAndUpdate(
             req.params.id,
             updateData,
-            { new: true, runValidators: true }
+            { new: true, runValidators: false } // Disable schema validators, we handle validation above
         )
         .populate('createdBy', 'firstName lastName')
         .populate('updatedBy', 'firstName lastName');
-
-        if (!violation) {
-            return res.status(404).json({ success: false, message: "Violation not found" });
-        }
 
         // Log the activity
         if (req.user && req.user.userId) {

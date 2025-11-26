@@ -121,7 +121,7 @@ export const createAccident = async (req, res) => {
 
     res
       .status(201)
-      .json({ success: true, message: "Incident created", data: accident });
+      .json({ success: true, message: "Accident created successfully", data: accident });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
