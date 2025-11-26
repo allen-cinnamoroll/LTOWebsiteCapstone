@@ -327,12 +327,10 @@ def predict_registrations():
         
         # Create future exogenous variables
         future_exog = preprocessor._create_exogenous_variables(future_dates)
-        exog_feature_cols = [
-            col
-            for col in ['is_weekend_or_holiday', 'day_of_week', 'month']
-            if col in future_exog.columns
-        ]
-        future_exog = future_exog[exog_feature_cols] if exog_feature_cols else None
+        # IMPORTANT: The underlying SARIMA model was trained with a single
+        # exogenous column (is_weekend_or_holiday). Passing more columns here
+        # causes a shape mismatch error in statsmodels.
+        future_exog = future_exog[['is_weekend_or_holiday']]
         
         # CRITICAL: Ensure future_exog has a DatetimeIndex so the model can use these dates
         # This ensures all models (aggregated and municipality-specific) use the same prediction dates
@@ -469,11 +467,10 @@ def predict_registrations():
             logger.info(f"Actual last registration date: {actual_last_date}")
             logger.info(f"Future dates range: {future_dates[0]} to {future_dates[-1]}")
             logger.info(f"Exogenous variables shape: {future_exog.shape}")
-            if future_exog is not None:
-                logger.info(
-                    f"Weekend/holiday days in future period: "
-                    f"{(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}"
-                )
+            logger.info(
+                f"Weekend/holiday days in future period: "
+                f"{(future_exog['is_weekend_or_holiday'] == 1).sum()} out of {len(future_exog)}"
+            )
             
             # CRITICAL FIX: Temporarily override the model's actual_last_date to ensure
             # all models (aggregated and municipality-specific) use the same date logic
