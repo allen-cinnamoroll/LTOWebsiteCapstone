@@ -1338,30 +1338,31 @@ const WeeklyPredictionsChart = () => {
                 }}
               >
                 <defs>
+                  {/* Yearly bars - soft blue gradient */}
                   <linearGradient id="yearlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#6b7280" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#6b7280" stopOpacity={0.5}/>
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.95}/>
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" opacity={0.6} />
                 <XAxis 
                   dataKey="yearLabel" 
-                  stroke="#6b7280"
+                  stroke="#1d4ed8"
                   fontSize={12}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
                   width={60}
                 />
                 <YAxis 
-                  stroke="#6b7280"
+                  stroke="#1d4ed8"
                   fontSize={12}
                   tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
                   width={80}
                   label={{ 
                     value: 'Number of Vehicles', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6b7280' }
+                    style: { textAnchor: 'middle', fill: '#1d4ed8' }
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
@@ -1384,32 +1385,33 @@ const WeeklyPredictionsChart = () => {
                 }}
               >
                 <defs>
+                  {/* Monthly bars - reuse soft blue gradient */}
                   <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#6b7280" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#6b7280" stopOpacity={0.5}/>
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.95}/>
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" opacity={0.6} />
                 <XAxis 
                   dataKey="monthShort" 
-                  stroke="#6b7280"
+                  stroke="#1d4ed8"
                   fontSize={12}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                 />
                 <YAxis 
-                  stroke="#6b7280"
+                  stroke="#1d4ed8"
                   fontSize={12}
                   tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
                   width={80}
                   label={{ 
                     value: 'Number of Vehicles', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6b7280' }
+                    style: { textAnchor: 'middle', fill: '#1d4ed8' }
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
@@ -1432,17 +1434,18 @@ const WeeklyPredictionsChart = () => {
                 }}
               >
                 <defs>
+                  {/* Weekly line area - soft blue gradient */}
                   <linearGradient id="weeklyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#6b7280" stopOpacity={0.8}/>
-                    <stop offset="100%" stopColor="#6b7280" stopOpacity={0.0}/>
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#6b7280" opacity={0.4} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" opacity={0.6} />
                 <XAxis 
                   dataKey="weekLabel" 
-                  stroke="#6b7280"
+                  stroke="#1d4ed8"
                   fontSize={11}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
