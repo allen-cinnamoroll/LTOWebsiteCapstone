@@ -137,6 +137,21 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// Validate and clean up avatar path
+const validateAvatarPath = (avatarPath) => {
+  if (!avatarPath || avatarPath === '') {
+    return '';
+  }
+  
+  const fullPath = path.join(process.cwd(), avatarPath);
+  if (!fs.existsSync(fullPath)) {
+    // Avatar file doesn't exist, return empty string
+    return '';
+  }
+  
+  return avatarPath;
+};
+
 // Get user profile
 export const getProfile = async (req, res) => {
   try {
@@ -150,6 +165,14 @@ export const getProfile = async (req, res) => {
         success: false,
         message: "User not found"
       });
+    }
+
+    // Validate and clean up avatar path if it doesn't exist
+    const validatedAvatar = validateAvatarPath(user.avatar);
+    if (validatedAvatar !== user.avatar) {
+      // Avatar file doesn't exist, update user record to remove invalid reference
+      user.avatar = '';
+      await UserModel.findByIdAndUpdate(userId, { avatar: '' });
     }
 
     res.status(200).json({

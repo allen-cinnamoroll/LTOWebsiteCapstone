@@ -97,6 +97,12 @@ const isIPWhitelisted = (clientIP, allowedIPs) => {
 };
 
 export const ipWhitelist = (req, res, next) => {
+  // Allow static file requests (uploads) to bypass IP whitelist
+  // These are public assets that need to be accessible
+  if (req.path.startsWith('/uploads/')) {
+    return next();
+  }
+  
   // Check if IP whitelist is enabled
   const isEnabled = process.env.IP_WHITELIST_ENABLED === 'true';
   

@@ -3,8 +3,28 @@ from datetime import datetime
 
 import pandas as pd
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
 from config import DAVAO_ORIENTAL_MUNICIPALITIES
+
+# Load environment variables from .env file
+# Try multiple locations: current directory, backend directory, and parent directories
+base_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.join(base_dir, '../../..')  # Go up to backend directory
+project_root = os.path.join(backend_dir, '..')
+
+# Try loading .env from multiple locations
+for env_path in [
+    os.path.join(backend_dir, '.env'),  # backend/.env
+    os.path.join(project_root, '.env'),  # project root/.env
+    os.path.join(base_dir, '.env'),      # current directory/.env
+]:
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+        break
+else:
+    # Try loading from backend directory even if file doesn't exist (dotenv will just skip)
+    load_dotenv(os.path.join(backend_dir, '.env'))
 
 
 def get_mongo_client():

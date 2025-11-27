@@ -23,6 +23,38 @@ from werkzeug.utils import secure_filename
 import pandas as pd
 import numpy as np
 import logging
+from dotenv import load_dotenv
+
+# Set up basic logging first
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Load environment variables from .env file
+# Try multiple locations: current directory, backend directory, and parent directories
+base_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.join(base_dir, '../../..')  # Go up to backend directory
+project_root = os.path.join(backend_dir, '..')
+
+# Try loading .env from multiple locations
+env_loaded = False
+for env_path in [
+    os.path.join(backend_dir, '.env'),  # backend/.env
+    os.path.join(project_root, '.env'),  # project root/.env
+    os.path.join(base_dir, '.env'),      # current directory/.env
+]:
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+        logger.info(f"Loaded environment variables from: {env_path}")
+        env_loaded = True
+        break
+
+if not env_loaded:
+    # Try loading from backend directory even if file doesn't exist (dotenv will just skip)
+    load_dotenv(os.path.join(backend_dir, '.env'))
+    logger.warning(
+        "No .env file found. Make sure DATABASE environment variable is set, "
+        "or create a .env file in the backend directory with: DATABASE=mongodb://..."
+    )
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -32,10 +64,6 @@ from data_preprocessor_daily import DailyDataPreprocessor
 from mongo_to_csv_exporter import export_mongo_to_csv
 from barangay_predictor import BarangayPredictor
 from config import ENABLE_PER_MUNICIPALITY, DAVAO_ORIENTAL_MUNICIPALITIES, MIN_WEEKS_FOR_MUNICIPALITY_MODEL
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 def convert_to_native_types(obj):
     """
@@ -131,13 +159,32 @@ def initialize_model():
         # Create directories if they don't exist
         os.makedirs(model_dir, exist_ok=True)
         
-        # Always export latest data from MongoDB into the training directory
-        try:
-            export_mongo_to_csv(data_dir, filename="DAVOR_data.csv")
-            logger.info("Exported latest registration data from MongoDB to DAVOR_data.csv")
-        except Exception as e:
-            logger.error(f"Failed to export data from MongoDB: {str(e)}")
-            raise
+        # Try to export latest data from MongoDB into the training directory
+        # If DATABASE is not set, skip export and use existing CSV files
+        csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
+        if os.getenv("DATABASE"):
+            try:
+                export_mongo_to_csv(data_dir, filename="DAVOR_data.csv")
+                logger.info("Exported latest registration data from MongoDB to DAVOR_data.csv")
+            except Exception as e:
+                logger.warning(f"Failed to export data from MongoDB: {str(e)}")
+                logger.warning("Will attempt to use existing CSV files if available")
+                if not os.path.exists(csv_path):
+                    raise RuntimeError(
+                        f"Could not export from MongoDB and no existing CSV file found at {csv_path}. "
+                        "Please set DATABASE environment variable or ensure CSV files exist in the training directory."
+                    )
+        else:
+            logger.warning(
+                "DATABASE environment variable is not set. Skipping MongoDB export. "
+                "Will use existing CSV files if available."
+            )
+            if not os.path.exists(csv_path):
+                logger.warning(
+                    f"No existing CSV file found at {csv_path}. "
+                    "The app may fail if no training data is available. "
+                    "Set DATABASE environment variable to export from MongoDB."
+                )
         
         # Initialize daily preprocessor (will see all CSVs in the directory, including DAVOR_data.csv)
         csv_path = os.path.join(data_dir, 'DAVOR_data.csv')
@@ -971,18 +1018,21 @@ def retrain_model():
             logger.info("Retraining optimized aggregated model...")
 
             # Refresh CSV from MongoDB before each retrain to use latest data
-            try:
-                export_mongo_to_csv(
-                    os.path.join(os.path.dirname(os.path.abspath(__file__)), '../mv registration training'),
-                    filename="DAVOR_data.csv",
+            if os.getenv("DATABASE"):
+                try:
+                    export_mongo_to_csv(
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)), '../mv registration training'),
+                        filename="DAVOR_data.csv",
+                    )
+                    logger.info("Refreshed DAVOR_data.csv from MongoDB for retraining")
+                except Exception as e:
+                    logger.warning(f"Failed to refresh data from MongoDB before retrain: {str(e)}")
+                    logger.warning("Will use existing CSV files if available")
+            else:
+                logger.warning(
+                    "DATABASE environment variable is not set. Skipping MongoDB export. "
+                    "Will use existing CSV files for retraining."
                 )
-                logger.info("Refreshed DAVOR_data.csv from MongoDB for retraining")
-            except Exception as e:
-                logger.error(f"Failed to refresh data from MongoDB before retrain: {str(e)}")
-                return jsonify({
-                    'success': False,
-                    'error': f'Failed to export data from MongoDB: {str(e)}'
-                }), 500
 
             daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
                 fill_missing_days=True,

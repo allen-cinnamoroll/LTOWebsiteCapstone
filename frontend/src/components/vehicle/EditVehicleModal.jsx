@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
   const [pendingFormData, setPendingFormData] = useState(null);
   const { token } = useAuth();
   const date = formatDate(Date.now());
+  const formInitializedRef = useRef(false);
 
   const getDefaultValues = () => {
     // Use formData from parent if provided, otherwise use defaults
@@ -89,16 +90,24 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
     }
   }, [formValues, open, submitting, setFormData]);
 
-  // Update form when vehicleData changes
+  // Reset initialization flag when modal closes or vehicleId changes
   useEffect(() => {
-    if (Object.keys(vehicleData).length > 0) {
-      // Prefer formData from parent if available, otherwise use vehicleData
-      const dataToUse = (formData && Object.keys(formData).length > 0 && formData.plateNo) 
-        ? { ...formData, ownerName: vehicleData.ownerName || "" }
-        : vehicleData;
-      reset(dataToUse);
+    if (!open) {
+      formInitializedRef.current = false;
     }
-  }, [vehicleData, reset, formData]);
+  }, [open, vehicleId]);
+
+  // Update form when vehicleData changes (only on initial load, not when user types)
+  useEffect(() => {
+    if (Object.keys(vehicleData).length > 0 && !formInitializedRef.current) {
+      // Only reset on initial load when vehicleData is first fetched
+      reset({
+        ...vehicleData,
+        ownerName: vehicleData.ownerName || "",
+      });
+      formInitializedRef.current = true;
+    }
+  }, [vehicleData, reset]); // Removed formData from dependencies to prevent reset loop when user types
 
   const fetchVehicleData = async () => {
     setLoading(true);

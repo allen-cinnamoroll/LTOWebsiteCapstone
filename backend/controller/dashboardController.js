@@ -1643,7 +1643,7 @@ export const getMunicipalityRegistrationTotals = async (req, res) => {
       if (validOwnerIds.length > 0) {
         const driverAggregation = [
           {
-            $match: { _id: { $in: validDriverIds } }
+            $match: { _id: { $in: validOwnerIds } }
           },
           {
             $addFields: {
