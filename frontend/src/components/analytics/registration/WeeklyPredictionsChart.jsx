@@ -1339,25 +1339,25 @@ const WeeklyPredictionsChart = () => {
                     <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" opacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.7} />
                 <XAxis 
                   dataKey="yearLabel" 
-                  stroke="#1d4ed8"
+                  stroke="#000000"
                   fontSize={12}
-                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
+                  tick={{ fill: '#000000', fontWeight: 500 }}
                   width={60}
                 />
                 <YAxis 
-                  stroke="#1d4ed8"
+                  stroke="#000000"
                   fontSize={12}
                   tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
+                  tick={{ fill: '#000000', fontWeight: 500 }}
                   width={80}
                   label={{ 
                     value: 'Number of Vehicles', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#1d4ed8' }
+                    style: { textAnchor: 'middle', fill: '#000000' }
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
@@ -1386,27 +1386,27 @@ const WeeklyPredictionsChart = () => {
                     <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.7}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" opacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.7} />
                 <XAxis 
                   dataKey="monthShort" 
-                  stroke="#1d4ed8"
+                  stroke="#000000"
                   fontSize={12}
-                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
+                  tick={{ fill: '#000000', fontWeight: 500 }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                 />
                 <YAxis 
-                  stroke="#1d4ed8"
+                  stroke="#000000"
                   fontSize={12}
                   tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
+                  tick={{ fill: '#000000', fontWeight: 500 }}
                   width={80}
                   label={{ 
                     value: 'Number of Vehicles', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#1d4ed8' }
+                    style: { textAnchor: 'middle', fill: '#000000' }
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
@@ -1435,39 +1435,39 @@ const WeeklyPredictionsChart = () => {
                     <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#bfdbfe" opacity={0.6} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.7} />
                 <XAxis 
                   dataKey="weekLabel" 
-                  stroke="#1d4ed8"
+                  stroke="#000000"
                   fontSize={11}
-                  tick={{ fill: '#1d4ed8', fontWeight: 500 }}
+                  tick={{ fill: '#000000', fontWeight: 500 }}
                   angle={-45}
                   textAnchor="end"
                   height={80}
                 />
                 <YAxis 
-                  stroke="#6b7280"
+                  stroke="#000000"
                   fontSize={12}
                   tickFormatter={(value) => value.toLocaleString()}
-                  tick={{ fill: '#6b7280', fontWeight: 500 }}
+                  tick={{ fill: '#000000', fontWeight: 500 }}
                   width={80}
                   label={{ 
                     value: 'Number of Vehicles', 
                     angle: -90, 
                     position: 'insideLeft',
-                    style: { textAnchor: 'middle', fill: '#6b7280' }
+                    style: { textAnchor: 'middle', fill: '#000000' }
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Line
                   type="monotone"
                   dataKey="predicted"
-                  stroke="#6b7280"
+                  stroke="#2563eb"
                   strokeWidth={3}
                   fill="url(#weeklyGradient)"
                   dot={{ 
                     fill: 'white', 
-                    stroke: '#6b7280', 
+                    stroke: '#2563eb', 
                     strokeWidth: 2, 
                     r: 4,
                     filter: 'drop-shadow(0 1px 2px rgba(107, 114, 128, 0.3))'
@@ -1475,7 +1475,7 @@ const WeeklyPredictionsChart = () => {
                   activeDot={{ 
                     r: 6, 
                     fill: 'white',
-                    stroke: '#6b7280', 
+                    stroke: '#2563eb', 
                     strokeWidth: 2,
                     filter: 'drop-shadow(0 2px 4px rgba(107, 114, 128, 0.4))'
                   }}
