@@ -1076,11 +1076,6 @@ const WeeklyPredictionsChart = () => {
     <div className="bg-white/80 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-6 w-full shadow-sm min-h-[400px] flex flex-col backdrop-blur-sm">
       <div className="flex items-center justify-between mb-4 gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-8 h-8 flex items-center justify-center">
-            <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
           <div className="flex flex-col">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
               {getChartTitle()}
@@ -1126,13 +1121,13 @@ const WeeklyPredictionsChart = () => {
           </div>
           
           {/* View Type Toggle */}
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 rounded-lg p-1">
             <button
               onClick={() => setViewType('weekly')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 viewType === 'weekly'
-                  ? 'bg-gray-600 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
               }`}
             >
               Weekly
@@ -1141,8 +1136,8 @@ const WeeklyPredictionsChart = () => {
               onClick={() => setViewType('monthly')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 viewType === 'monthly'
-                  ? 'bg-gray-600 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
               }`}
             >
               Monthly
@@ -1151,8 +1146,8 @@ const WeeklyPredictionsChart = () => {
               onClick={() => setViewType('yearly')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 viewType === 'yearly'
-                  ? 'bg-gray-600 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-blue-600 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
               }`}
             >
               Yearly
