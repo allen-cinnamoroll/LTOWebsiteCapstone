@@ -780,11 +780,11 @@ export const exportVehicles = async (req, res) => {
       dateFilter = buildDateOfRenewalFilter(1, yearNum, startDate, endDate); // Pass month=1 but use custom dates
     } else {
       const monthNum = parseInt(month);
-      if (monthNum < 1 || monthNum > 12) {
-        return res.status(400).json({
-          success: false,
+    if (monthNum < 1 || monthNum > 12) {
+      return res.status(400).json({
+        success: false,
           message: "Month must be between 1 and 12, or 'all' for all months",
-        });
+      });
       }
       dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
     }

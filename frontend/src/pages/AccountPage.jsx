@@ -413,9 +413,9 @@ const AccountPage = () => {
               <Button onClick={handleChangePassword} variant="outline" className="gap-2">
                 <Lock className="h-4 w-4" /> Change Password
               </Button>
-              <Button onClick={handleEdit} variant="outline" className="gap-2">
-                <Edit className="h-4 w-4" /> Edit Profile
-              </Button>
+            <Button onClick={handleEdit} variant="outline" className="gap-2">
+              <Edit className="h-4 w-4" /> Edit Profile
+            </Button>
             </div>
           </div>
 

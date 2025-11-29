@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LoaderCircle, FileText, Search, Download, Filter, Calendar } from "lucide-react";
+import { LoaderCircle, FileText, Search, Download, Filter, Calendar, RefreshCw } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -205,9 +205,9 @@ export default function ViewAccountLogsPage() {
                   <span className="hidden sm:inline">Export Excel</span>
                   <span className="sm:hidden">Export</span>
                 </Button>
-                <Button onClick={handleSearch} size="sm" className="w-full sm:w-auto">
-                  <Search className="mr-2 h-4 w-4" />
-                  Search
+                <Button onClick={() => fetchLogs(currentPage)} size="sm" className="w-full sm:w-auto">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
                 </Button>
               </div>
             </div>
