@@ -521,6 +521,29 @@ export const exportUserLogs = async (req, res) => {
       bookType: 'xlsx' 
     });
 
+    // Log the export activity BEFORE sending response
+    if (req.user && req.user.userId) {
+      try {
+        const filterDetails = [];
+        if (email) filterDetails.push(`Email: ${email}`);
+        if (role) filterDetails.push(`Role: ${role}`);
+        if (roles) filterDetails.push(`Roles: ${roles}`);
+        if (logType) filterDetails.push(`Log Type: ${logType}`);
+        if (dateFrom) filterDetails.push(`From: ${dateFrom}`);
+        if (dateTo) filterDetails.push(`To: ${dateTo}`);
+        
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_account_logs',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Exported account logs to Excel (${logs.length} records)${filterDetails.length > 0 ? ` - Filters: ${filterDetails.join(', ')}` : ''}`
+        });
+      } catch (logError) {
+        console.error('Failed to log account logs export:', logError);
+      }
+    }
+
     // Set response headers for Excel download
     const filename = `account-logs-${new Date().toISOString().split('T')[0]}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -579,7 +602,13 @@ const getLogTypeLabel = (logType) => {
     "delete_driver": "Delete Owner",
     "delete_vehicle": "Delete Vehicle",
     "delete_accident": "Delete Accident",
-    "delete_violation": "Delete Violation"
+    "delete_violation": "Delete Violation",
+    "export_vehicles": "Export Vehicles",
+    "export_violations": "Export Violations",
+    "export_accidents": "Export Accidents",
+    "export_dashboard_report": "Export Dashboard Report",
+    "export_account_logs": "Export Account Logs",
+    "download_automated_report": "Download Automated Report"
   };
   return logTypes[logType] || logType;
 };

@@ -53,6 +53,12 @@ const logTypes = [
   { value: "permanent_delete_vehicle", label: "Permanently Delete Vehicle" },
   { value: "permanent_delete_accident", label: "Permanently Delete Accident" },
   { value: "permanent_delete_violation", label: "Permanently Delete Violation" },
+  { value: "export_vehicles", label: "Export Vehicles" },
+  { value: "export_violations", label: "Export Violations" },
+  { value: "export_accidents", label: "Export Accidents" },
+  { value: "export_dashboard_report", label: "Export Dashboard Report" },
+  { value: "export_account_logs", label: "Export Account Logs" },
+  { value: "download_automated_report", label: "Download Automated Report" },
 ];
 
 export default function ViewAccountLogsPage() {

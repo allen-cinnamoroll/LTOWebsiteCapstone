@@ -5,6 +5,7 @@ import AccidentModel from "../model/AccidentModel.js";
 import UserModel from "../model/UserModel.js";
 import { getVehicleStatus, calculateExpirationDate } from "../util/plateStatusCalculator.js";
 import { getLatestRenewalDate } from "../util/vehicleHelpers.js";
+import { logUserActivity, getClientIP, getUserAgent } from "../util/userLogger.js";
 import dayjs from "dayjs";
 import XLSX from "xlsx";
 import fs from "fs";
@@ -2976,6 +2977,21 @@ export const exportDashboardReport = async (req, res) => {
     const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
     const filename = `lto-dashboard-${period}-report-${sanitizeForFilename(fileSuffix)}.xlsx`;
 
+    // Log the export activity BEFORE sending response
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_dashboard_report',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Exported dashboard report (${period}) - Period: ${rangeLabel}, Vehicles: ${totalRegisteredVehicles}, Violations: ${totalViolators}, Accidents: ${accidentCount}`
+        });
+      } catch (logError) {
+        console.error('Failed to log dashboard report export:', logError);
+      }
+    }
+
     res.setHeader(
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -2985,6 +3001,22 @@ export const exportDashboardReport = async (req, res) => {
     return res.status(200).send(buffer);
   } catch (error) {
     console.error("Dashboard report export error:", error);
+    
+    // Log failed export attempt
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_dashboard_report',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Failed to export dashboard report (${period}) - Error: ${error.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log dashboard report export error:', logError);
+      }
+    }
+    
     return res.status(500).json({
       success: false,
       message: "Failed to generate dashboard report."
@@ -3071,6 +3103,23 @@ export const downloadAutomatedReport = async (req, res) => {
       });
     }
 
+    // Log the download activity BEFORE sending response
+    if (req.user && req.user.userId) {
+      try {
+        const fileStats = fs.statSync(filepath);
+        const fileSizeMB = (fileStats.size / (1024 * 1024)).toFixed(2);
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'download_automated_report',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Downloaded automated report: ${filename} (${fileSizeMB} MB)`
+        });
+      } catch (logError) {
+        console.error('Failed to log automated report download:', logError);
+      }
+    }
+
     // Set headers for file download
     res.setHeader(
       "Content-Type",
@@ -3083,6 +3132,22 @@ export const downloadAutomatedReport = async (req, res) => {
     fileStream.pipe(res);
   } catch (error) {
     console.error("Error downloading automated report:", error);
+    
+    // Log failed download attempt
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'download_automated_report',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Failed to download automated report: ${req.params.filename} - Error: ${error.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log automated report download error:', logError);
+      }
+    }
+    
     return res.status(500).json({
       success: false,
       message: "Failed to download automated report."

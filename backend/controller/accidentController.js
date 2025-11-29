@@ -933,27 +933,59 @@ export const exportAccidents = async (req, res) => {
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     
+    const filenameMonthLabel = month === "all" ? "AllMonths" : month;
+    const filename = `accidents_${filenameMonthLabel}_${year}.${format}`;
+    
+    // Log the export activity BEFORE sending response
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_accidents',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Exported accidents to ${format.toUpperCase()} - Month: ${filenameMonthLabel}, Year: ${year}, Records: ${exportData.length}`
+        });
+      } catch (logError) {
+        console.error('Failed to log accident export:', logError);
+      }
+    }
+    
     if (format === "csv") {
       const csvContent = convertAccidentsToCSV(exportData);
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
-      const monthLabel = month === "all" ? "AllMonths" : month;
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename=accidents_${monthLabel}_${year}.csv`
+        `attachment; filename=${filename}`
       );
       res.send("\ufeff" + csvContent); // Add BOM for Excel compatibility
     } else {
       const jsonContent = JSON.stringify(exportData, null, 2);
       res.setHeader("Content-Type", "application/json; charset=utf-8");
-      const monthLabel = month === "all" ? "AllMonths" : month;
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename=accidents_${monthLabel}_${year}.json`
+        `attachment; filename=${filename}`
       );
       res.send(jsonContent);
     }
   } catch (error) {
     console.error("Error exporting accidents:", error);
+    
+    // Log failed export attempt
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_accidents',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Failed to export accidents - Month: ${req.query.month || 'all'}, Year: ${req.query.year} - Error: ${error.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log accident export error:', logError);
+      }
+    }
+    
     res.status(500).json({
       success: false,
       message: "Internal server error",
