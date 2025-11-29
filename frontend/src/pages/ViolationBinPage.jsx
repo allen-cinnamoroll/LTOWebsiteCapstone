@@ -149,7 +149,7 @@ const ViolationBinPage = () => {
         <div className="flex-1 flex flex-col min-h-0">
           <ViolationTable
             data={violationData}
-            filters={["topNo", "firstName", "lastName", "plateNo", "violationType"]}
+            filters={["firstName", "lastName", "plateNo", "violationType"]}
             tableColumn={violationBinColumns}
             onAdd={null}
             loading={loading}

@@ -1,23 +1,30 @@
+// Helper function to convert text to uppercase
+const toUpperCase = (value) => {
+  if (value === null || value === undefined || value === '') return value;
+  if (typeof value === 'string') return value.toUpperCase();
+  return value;
+};
+
 export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) => [
   {
     accessorKey: "blotterNo",
     header: "Blotter No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("blotterNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("blotterNo"))}</div>,
   },
   {
     accessorKey: "vehiclePlateNo",
     header: "Vehicle Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehiclePlateNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("vehiclePlateNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "incidentType",
     header: "Incident Type",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("incidentType") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("incidentType")) || "N/A"}</div>,
   },
   {
     accessorKey: "suspect",
     header: "Suspect",
-    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{row.getValue("suspect") || "N/A"}</div>,
+    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("suspect")) || "N/A"}</div>,
   },
   {
     accessorKey: "dateCommited",
@@ -37,7 +44,7 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
       };
       return (
         <div className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${statusColors[caseStatus?.toLowerCase()] || 'text-gray-600 bg-gray-100'}`}>
-          {caseStatus || "N/A"}
+          {toUpperCase(caseStatus) || "N/A"}
         </div>
       );
     },
@@ -45,12 +52,12 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("municipality")) || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("barangay")) || "N/A"}</div>,
   },
   {
     id: "actions",
@@ -67,26 +74,40 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
         onDelete(accident);
       };
       return (
-        <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleEdit}
-            className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-100 hover:text-gray-700"
-            disabled={submitting}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          {onDelete && (
+        <div 
+          className="flex items-center gap-1" 
+          data-action-container="true"
+          onMouseEnter={(e) => e.stopPropagation()}
+        >
+          <div className="relative group">
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={handleDelete}
-              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={handleEdit}
+              className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-100 hover:text-gray-700"
               disabled={submitting}
             >
-              <Trash className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-[60]">
+              Edit
+            </div>
+          </div>
+          {onDelete && (
+            <div className="relative group">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleDelete}
+                className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                disabled={submitting}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-[60]">
+                Delete
+              </div>
+            </div>
           )}
         </div>
       );
@@ -99,22 +120,22 @@ export const accidentBinColumns = (onRestore, onPermanentDelete, submitting) => 
   {
     accessorKey: "blotterNo",
     header: "Blotter No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("blotterNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("blotterNo"))}</div>,
   },
   {
     accessorKey: "vehiclePlateNo",
     header: "Vehicle Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("vehiclePlateNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("vehiclePlateNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "incidentType",
     header: "Incident Type",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("incidentType") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("incidentType")) || "N/A"}</div>,
   },
   {
     accessorKey: "suspect",
     header: "Suspect",
-    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{row.getValue("suspect") || "N/A"}</div>,
+    cell: ({ row }) => <div className="text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("suspect")) || "N/A"}</div>,
   },
   {
     accessorKey: "dateCommited",
@@ -134,7 +155,7 @@ export const accidentBinColumns = (onRestore, onPermanentDelete, submitting) => 
       };
       return (
         <div className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${statusColors[caseStatus?.toLowerCase()] || 'text-gray-600 bg-gray-100'}`}>
-          {caseStatus || "N/A"}
+          {toUpperCase(caseStatus) || "N/A"}
         </div>
       );
     },
@@ -142,12 +163,12 @@ export const accidentBinColumns = (onRestore, onPermanentDelete, submitting) => 
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("municipality")) || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("barangay")) || "N/A"}</div>,
   },
   {
     id: "actions",
@@ -231,14 +252,14 @@ export const deactivatedDriverColumns = (onAction) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="">{toUpperCase(row.getValue("plateNo"))}</div>,
   },
   {
     accessorKey: "ownerRepresentativeName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title={"Owner/Representative Name"} />
     ),
-    cell: ({ row }) => <div className="">{row.getValue("ownerRepresentativeName")}</div>,
+    cell: ({ row }) => <div className="">{toUpperCase(row.getValue("ownerRepresentativeName"))}</div>,
   },
   {
     accessorKey: "hasDriversLicense",
@@ -250,13 +271,13 @@ export const deactivatedDriverColumns = (onAction) => [
         <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
           {hasLicense ? (
             <>
-              <span className="font-semibold text-green-600 whitespace-nowrap">Yes</span>
+              <span className="font-semibold text-green-600 whitespace-nowrap">YES</span>
               {licenseNumber && (
                 <span className="text-xs text-muted-foreground whitespace-nowrap">{licenseNumber}</span>
               )}
             </>
           ) : (
-            <span className="font-semibold text-red-600 whitespace-nowrap">No</span>
+            <span className="font-semibold text-red-600 whitespace-nowrap">NO</span>
           )}
         </div>
       );
@@ -275,7 +296,7 @@ export const deactivatedDriverColumns = (onAction) => [
     header: "Contact Number",
     cell: ({ row }) => {
       const contactNumber = row.getValue("contactNumber");
-      return <div className="">{contactNumber || "None"}</div>;
+      return <div className="">{toUpperCase(contactNumber) || "None"}</div>;
     },
   },
   {
@@ -283,7 +304,7 @@ export const deactivatedDriverColumns = (onAction) => [
     header: "Email Address",
     cell: ({ row }) => {
       const emailAddress = row.getValue("emailAddress");
-      return <div className="">{emailAddress || "None"}</div>;
+      return <div className="">{toUpperCase(emailAddress) || "None"}</div>;
     },
   },
   {
@@ -341,22 +362,22 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
   {
     accessorKey: "emailAddress",
     header: "Email Address",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("emailAddress") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("emailAddress")) || "N/A"}</div>,
   },
   {
     accessorKey: "province",
     header: "Province",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("province") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("province")) || "N/A"}</div>,
   },
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("municipality")) || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("barangay")) || "N/A"}</div>,
   },
   {
     accessorKey: "birthDate",
@@ -387,7 +408,7 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
             <>
               <span className="font-semibold text-green-600 text-xs whitespace-nowrap">Yes</span>
               {licenseNumber && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{licenseNumber}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{toUpperCase(licenseNumber)}</span>
               )}
             </>
           ) : (
@@ -413,142 +434,170 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
       };
 
       return (
-        <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleEdit}
-            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          {onDelete && (
+        <div 
+          className="flex items-center gap-1" 
+          data-action-container="true"
+          onMouseEnter={(e) => e.stopPropagation()}
+        >
+          <div className="relative group">
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={handleDelete}
-              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={handleEdit}
+              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
             >
-              <Trash className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-50">
+              Edit
+            </div>
+          </div>
+          {onDelete && (
+            <div className="relative group">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleDelete}
+                className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-50">
+                Delete
+              </div>
+            </div>
           )}
         </div>
       );
     },
   },
 ];
-export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting) => [
+export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting, typeFilter = "all") => [
   {
-    accessorKey: "topNo",
-    header: "TOP NO.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("topNo")}</div>,
-  },
-      {
-      accessorKey: "firstName",
-      header: "Full Name",
-      cell: ({ row }) => {
-        const firstName = row.getValue("firstName");
-        const middleInitial = row.original.middleInitial;
-        const lastName = row.original.lastName;
-        const suffix = row.original.suffix;
-        
-        // If all name fields are "None" or null (alarm type), display "None"
-        if ((firstName === "None" || !firstName) && (middleInitial === "None" || !middleInitial) && (lastName === "None" || !lastName) && (suffix === "None" || !suffix)) {
-          return <div className="text-gray-500 dark:text-gray-400 text-xs">None</div>;
-        }
-        
-        const parts = [firstName];
-        if (middleInitial && middleInitial !== "None") parts.push(middleInitial);
-        if (lastName && lastName !== "None") parts.push(lastName);
-        if (suffix && suffix !== "None") parts.push(suffix);
-        
-        return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{parts.join(" ")}</div>;
-      },
-    },
-  {
-    accessorKey: "violations",
-    header: "Violations",
+    accessorKey: "firstName",
+    header: "First Name",
     cell: ({ row }) => {
-      const violations = row.getValue("violations");
-      let violationCount = 0;
-      
-      if (violations && Array.isArray(violations)) {
-        // Count only non-"None" violations
-        violationCount = violations.filter(v => v && v !== "None").length;
-      } else if (violations && violations !== "None") {
-        violationCount = 1;
+      const firstName = row.getValue("firstName");
+      if (!firstName || firstName === "None") {
+        return <div className="text-gray-500 dark:text-gray-400 text-xs">N/A</div>;
       }
-      
-      return (
-        <div className="text-xs text-gray-900 dark:text-gray-200 font-medium">
-          {violationCount > 0 ? violationCount : "0"}
-        </div>
-      );
+      return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(firstName)}</div>;
+    },
+  },
+  {
+    accessorKey: "lastName",
+    header: "Last Name",
+    cell: ({ row }) => {
+      const lastName = row.getValue("lastName");
+      if (!lastName || lastName === "None") {
+        return <div className="text-gray-500 dark:text-gray-400 text-xs">N/A</div>;
+      }
+      return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(lastName)}</div>;
+    },
+  },
+  {
+    accessorKey: "middleInitial",
+    header: "Middle Initial",
+    cell: ({ row }) => {
+      const middleInitial = row.original.middleInitial;
+      if (!middleInitial || middleInitial === "None" || middleInitial === "") {
+        return <div className="text-gray-500 dark:text-gray-400 text-xs">N/A</div>;
+      }
+      return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(middleInitial)}</div>;
     },
   },
   {
     accessorKey: "violationType",
     header: "Type",
+    accessorFn: (row) => {
+      // Return the violationTypes array for proper filtering
+      return row.violationTypes || [row.violationType || ""];
+    },
+    filterFn: (row, id, filterValue) => {
+      // Get violation types from the row
+      const violationTypes = row.original.violationTypes || [row.original.violationType || ""];
+      // If filter is empty or "all", show all rows
+      if (!filterValue || filterValue === "") {
+        return true;
+      }
+      // Check if the filtered type is in the violationTypes array
+      return violationTypes.includes(filterValue);
+    },
     cell: ({ row }) => {
-      const violationType = row.getValue("violationType");
-      const getTypeText = (violationType) => {
-        switch (violationType) {
-          case "confiscated":
-            return "Confiscated";
-          case "alarm":
-            return "Alarm";
-          case "impounded":
-            return "Impounded";
-          default:
-            return "Unknown";
-        }
+      const violationTypes = row.original.violationTypes || [row.original.violationType || ""];
+      
+      // Get type badges
+      const getTypeBadge = (type) => {
+        const typeConfig = {
+          "confiscated": { text: "CONFISCATED", color: "bg-red-100 text-red-800" },
+          "alarm": { text: "ALARM", color: "bg-yellow-100 text-yellow-800" },
+          "impounded": { text: "IMPOUNDED", color: "bg-orange-100 text-orange-800" }
+        };
+        return typeConfig[type] || { text: toUpperCase(type), color: "bg-gray-100 text-gray-800" };
       };
-                const getTypeColor = (violationType) => {
-                  switch (violationType) {
-                    case "confiscated":
-                      return "bg-red-100 text-red-800"; // Confiscated should be red
-                    case "alarm":
-                      return "bg-yellow-100 text-yellow-800"; // Alarm should be yellow
-                    case "impounded":
-                      return "bg-orange-100 text-orange-800"; // Impounded remains orange
-                    default:
-                      return "bg-gray-100 text-gray-800";
-                  }
-                };
+      
+      // Filter types based on typeFilter
+      let typesToShow = ["alarm", "confiscated", "impounded"].filter(t => violationTypes.includes(t));
+      
+      // If a specific type filter is selected, show only that type
+      if (typeFilter !== "all" && typesToShow.includes(typeFilter)) {
+        typesToShow = [typeFilter];
+      } else if (typeFilter !== "all" && !typesToShow.includes(typeFilter)) {
+        // If filter is set but this row doesn't have that type, show nothing
+        return <div className="text-gray-500 dark:text-gray-400 text-xs">N/A</div>;
+      }
+      
+      if (typesToShow.length === 0) {
+        return <div className="text-gray-500 dark:text-gray-400 text-xs">N/A</div>;
+      }
+      
       return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(violationType)}`}>
-          {getTypeText(violationType)}
-        </span>
+        <div className="flex flex-wrap gap-1">
+          {typesToShow.map((type, idx) => {
+            const badge = getTypeBadge(type);
+            return (
+              <span key={idx} className={`px-2 py-1 rounded-full text-xs font-medium ${badge.color}`}>
+                {badge.text}
+              </span>
+            );
+          })}
+        </div>
       );
     },
   },
   {
-    accessorKey: "licenseType",
-    header: "License Type",
+    accessorKey: "totalViolationsCount",
+    header: "Violations",
     cell: ({ row }) => {
-      const licenseType = row.getValue("licenseType");
-      return <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
+      // If a specific type filter is selected, count only violations of that type
+      if (typeFilter !== "all") {
+        const violationsByType = row.original.violationsByType || {};
+        const count = violationsByType[typeFilter] || 0;
+        return (
+          <div className="text-xs text-gray-900 dark:text-gray-200 font-medium text-center">
+            {count}
+          </div>
+        );
+      }
+      
+      // Use totalViolationsCount if available, otherwise count from violations array
+      let totalCount = row.original.totalViolationsCount;
+      if (totalCount === undefined || totalCount === null) {
+        const violations = row.original.violations || [];
+        if (Array.isArray(violations)) {
+          totalCount = violations.filter(v => v && v !== "None").length;
+        } else if (violations && violations !== "None") {
+          totalCount = 1;
+        } else {
+          totalCount = 0;
+        }
+      }
+      return (
+        <div className="text-xs text-gray-900 dark:text-gray-200 font-medium text-center">
+          {totalCount}
+        </div>
+      );
     },
-  },
-  {
-    accessorKey: "plateNo",
-    header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
-  },
-  {
-    accessorKey: "dateOfApprehension",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Date of Apprehension" />
-    ),
-    cell: ({ row }) => {
-      const date = row.getValue("dateOfApprehension");
-      return <div className="text-gray-700 dark:text-gray-200 text-xs">{date ? new Date(date).toLocaleDateString() : "None"}</div>;
-    },
-  },
-  {
-    accessorKey: "apprehendingOfficer",
-    header: "Officer",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("apprehendingOfficer") || "None"}</div>,
   },
   {
     id: "actions",
@@ -565,26 +614,40 @@ export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting) =
         onDelete(violation);
       };
       return (
-        <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleEdit}
-            className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-100 hover:text-gray-700"
-            disabled={submitting}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          {onDelete && (
+        <div 
+          className="flex items-center gap-1" 
+          data-action-container="true"
+          onMouseEnter={(e) => e.stopPropagation()}
+        >
+          <div className="relative group">
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={handleDelete}
-              className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={handleEdit}
+              className="h-8 w-8 p-0 text-gray-600 hover:bg-gray-100 hover:text-gray-700"
               disabled={submitting}
             >
-              <Trash className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-50">
+              Edit
+            </div>
+          </div>
+          {onDelete && (
+            <div className="relative group">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleDelete}
+                className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                disabled={submitting}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-50">
+                Delete
+              </div>
+            </div>
           )}
         </div>
       );
@@ -601,7 +664,7 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
     ),
     cell: ({ row }) => (
       <div className="font-medium text-gray-900 dark:text-gray-200 text-xs max-w-sm break-words whitespace-normal leading-tight">
-        {row.getValue("ownerRepresentativeName")}
+        {toUpperCase(row.getValue("ownerRepresentativeName"))}
       </div>
     ),
     size: 300,
@@ -617,22 +680,22 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
   {
     accessorKey: "emailAddress",
     header: "Email Address",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("emailAddress") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("emailAddress")) || "N/A"}</div>,
   },
   {
     accessorKey: "province",
     header: "Province",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("province") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("province")) || "N/A"}</div>,
   },
   {
     accessorKey: "municipality",
     header: "Municipality",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("municipality") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("municipality")) || "N/A"}</div>,
   },
   {
     accessorKey: "barangay",
     header: "Barangay",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("barangay") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("barangay")) || "N/A"}</div>,
   },
   {
     accessorKey: "birthDate",
@@ -663,7 +726,7 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
             <>
               <span className="font-semibold text-green-600 text-xs whitespace-nowrap">Yes</span>
               {licenseNumber && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{licenseNumber}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{toUpperCase(licenseNumber)}</span>
               )}
             </>
           ) : (
@@ -726,11 +789,6 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
 // Bin columns for violations - with restore and delete actions (no edit)
 export const violationBinColumns = (onRestore, onPermanentDelete, submitting) => [
   {
-    accessorKey: "topNo",
-    header: "TOP NO.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("topNo")}</div>,
-  },
-  {
     accessorKey: "firstName",
     header: "Full Name",
     cell: ({ row }) => {
@@ -743,10 +801,10 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
         return <div className="text-gray-500 dark:text-gray-400 text-xs">None</div>;
       }
       
-      const parts = [firstName];
-      if (middleInitial && middleInitial !== "None") parts.push(middleInitial);
-      if (lastName && lastName !== "None") parts.push(lastName);
-      if (suffix && suffix !== "None") parts.push(suffix);
+      const parts = [toUpperCase(firstName)];
+      if (middleInitial && middleInitial !== "None") parts.push(toUpperCase(middleInitial));
+      if (lastName && lastName !== "None") parts.push(toUpperCase(lastName));
+      if (suffix && suffix !== "None") parts.push(toUpperCase(suffix));
       
       return <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{parts.join(" ")}</div>;
     },
@@ -779,13 +837,13 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
       const getTypeText = (violationType) => {
         switch (violationType) {
           case "confiscated":
-            return "Confiscated";
+            return "CONFISCATED";
           case "alarm":
-            return "Alarm";
+            return "ALARM";
           case "impounded":
-            return "Impounded";
+            return "IMPOUNDED";
           default:
-            return "Unknown";
+            return toUpperCase("Unknown");
         }
       };
       const getTypeColor = (violationType) => {
@@ -812,13 +870,13 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
     header: "License Type",
     cell: ({ row }) => {
       const licenseType = row.getValue("licenseType");
-      return <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? licenseType : "N/A"}</div>;
+      return <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{licenseType && licenseType !== "None" && licenseType !== "N/A" ? toUpperCase(licenseType) : "N/A"}</div>;
     },
   },
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("plateNo"))}</div>,
   },
   {
     accessorKey: "dateOfApprehension",
@@ -833,7 +891,7 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
   {
     accessorKey: "apprehendingOfficer",
     header: "Officer",
-    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{row.getValue("apprehendingOfficer") || "None"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-700 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("apprehendingOfficer")) || "None"}</div>,
   },
   {
     id: "actions",
@@ -935,22 +993,22 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("plateNo"))}</div>,
   },
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("fileNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "engineNo",
     header: "Engine No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("engineNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("engineNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "chassisNo",
     header: "Chassis No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("chassisNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("chassisNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "dateOfRenewal",
@@ -980,7 +1038,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
   {
     accessorKey: "classification",
     header: "Classification",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("classification") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("classification")) || "N/A"}</div>,
   },
   {
     accessorKey: "status",
@@ -1001,7 +1059,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
             <span className={`text-xs font-medium ${
               isActive ? "text-green-700" : "text-red-700"
             }`}>
-              {isActive ? "Active" : "Expired"}
+              {isActive ? "ACTIVE" : "EXPIRED"}
             </span>
           </div>
           {expirationInfo && (
@@ -1036,7 +1094,11 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
         onDelete(vehicle);
       };
       return (
-        <div className="flex items-center gap-1">
+        <div 
+          className="flex items-center gap-1" 
+          data-action-container="true"
+          onMouseEnter={(e) => e.stopPropagation()}
+        >
           <div className="relative group">
             <Button 
               variant="ghost" 
@@ -1047,7 +1109,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
             >
               <Edit className="h-4 w-4" />
             </Button>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-50">
               Edit
             </div>
           </div>
@@ -1061,7 +1123,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-[60]">
               Renew
             </div>
           </div>
@@ -1076,7 +1138,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
               >
                 <Trash className="h-4 w-4" />
               </Button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none whitespace-nowrap z-50">
                 Delete
               </div>
             </div>
@@ -1092,22 +1154,22 @@ export const vehicleBinColumns = (onRestore, onPermanentDelete, submitting) => [
   {
     accessorKey: "plateNo",
     header: "Plate No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("plateNo")}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("plateNo"))}</div>,
   },
   {
     accessorKey: "fileNo",
     header: "File No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("fileNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("fileNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "engineNo",
     header: "Engine No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("engineNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("engineNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "chassisNo",
     header: "Chassis No.",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("chassisNo") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("chassisNo")) || "N/A"}</div>,
   },
   {
     accessorKey: "dateOfRenewal",
@@ -1137,7 +1199,7 @@ export const vehicleBinColumns = (onRestore, onPermanentDelete, submitting) => [
   {
     accessorKey: "classification",
     header: "Classification",
-    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{row.getValue("classification") || "N/A"}</div>,
+    cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-gray-200 text-xs">{toUpperCase(row.getValue("classification")) || "N/A"}</div>,
   },
   {
     accessorKey: "status",
@@ -1158,7 +1220,7 @@ export const vehicleBinColumns = (onRestore, onPermanentDelete, submitting) => [
             <span className={`text-xs font-medium ${
               isActive ? "text-green-700" : "text-red-700"
             }`}>
-              {isActive ? "Active" : "Expired"}
+              {isActive ? "ACTIVE" : "EXPIRED"}
             </span>
           </div>
           {expirationInfo && (

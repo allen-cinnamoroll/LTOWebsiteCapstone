@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -20,7 +20,10 @@ const HierarchicalLocationSelector = ({
   const [selectedPurok, setSelectedPurok] = useState("");
   const [municipalitySearch, setMunicipalitySearch] = useState("");
   const [barangaySearch, setBarangaySearch] = useState("");
-  const [purokSearch, setPurokSearch] = useState("");
+  const [municipalityHighlightedIndex, setMunicipalityHighlightedIndex] = useState(-1);
+  const [barangayHighlightedIndex, setBarangayHighlightedIndex] = useState(-1);
+  const municipalityDropdownRef = useRef(null);
+  const barangayDropdownRef = useRef(null);
 
   // Get available options based on current selections
   const allMunicipalities = Object.keys(davaoOrientalData.municipalities);
@@ -38,15 +41,6 @@ const HierarchicalLocationSelector = ({
   const barangays = allBarangays.filter(barangay =>
     barangay.toLowerCase().includes(barangaySearch.toLowerCase())
   );
-  
-  const allPuroks = selectedMunicipality && selectedBarangay
-    ? davaoOrientalData.municipalities[selectedMunicipality].barangays[selectedBarangay].puroks
-    : [];
-  
-  // Filter puroks based on search input
-  const puroks = allPuroks.filter(purok =>
-    purok.toLowerCase().includes(purokSearch.toLowerCase())
-  );
 
   // Handle municipality selection
   const handleMunicipalityChange = (value) => {
@@ -56,7 +50,7 @@ const HierarchicalLocationSelector = ({
     setSelectedPurok("");
     setMunicipalitySearch(""); // Clear search when municipality is selected
     setBarangaySearch(""); // Clear search when municipality changes
-    setPurokSearch(""); // Clear search when municipality changes
+    setMunicipalityHighlightedIndex(-1); // Reset highlighted index
     
     // Update form values
     console.log('=== SETTING MUNICIPALITY ===');
@@ -97,7 +91,7 @@ const HierarchicalLocationSelector = ({
     setSelectedBarangay(value);
     setSelectedPurok("");
     setBarangaySearch(""); // Clear search when barangay is selected
-    setPurokSearch(""); // Clear search when barangay changes
+    setBarangayHighlightedIndex(-1); // Reset highlighted index
     
     // Update form values
     console.log('=== SETTING BARANGAY ===');
@@ -130,23 +124,6 @@ const HierarchicalLocationSelector = ({
     }
   };
 
-  // Handle purok selection
-  const handlePurokChange = (value) => {
-    setSelectedPurok(value);
-    setPurokSearch(""); // Clear search when purok is selected
-    
-    // Update form values
-    form.setValue("purok", value, { shouldValidate: true, shouldDirty: true });
-    
-    if (onLocationChange) {
-      onLocationChange({
-        region: davaoOrientalData.region,
-        municipality: selectedMunicipality,
-        barangay: selectedBarangay,
-        purok: value
-      });
-    }
-  };
 
   // Initialize region value on component mount
   useEffect(() => {
@@ -185,13 +162,93 @@ const HierarchicalLocationSelector = ({
   // Remove the complex watch effect - it was causing issues
   // We'll handle form synchronization differently
 
+  // Handle municipality keyboard navigation
+  const handleMunicipalityKeyDown = (e) => {
+    if (!municipalitySearch || municipalities.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setMunicipalityHighlightedIndex((prev) => 
+        prev < municipalities.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setMunicipalityHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (municipalityHighlightedIndex >= 0 && municipalityHighlightedIndex < municipalities.length) {
+        handleMunicipalityChange(municipalities[municipalityHighlightedIndex]);
+      } else if (municipalities.length === 1) {
+        handleMunicipalityChange(municipalities[0]);
+      }
+    } else if (e.key === "Escape") {
+      setMunicipalitySearch("");
+      setMunicipalityHighlightedIndex(-1);
+    }
+  };
+
+  // Handle barangay keyboard navigation
+  const handleBarangayKeyDown = (e) => {
+    if (!barangaySearch || barangays.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setBarangayHighlightedIndex((prev) => 
+        prev < barangays.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setBarangayHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (barangayHighlightedIndex >= 0 && barangayHighlightedIndex < barangays.length) {
+        handleBarangayChange(barangays[barangayHighlightedIndex]);
+      } else if (barangays.length === 1) {
+        handleBarangayChange(barangays[0]);
+      }
+    } else if (e.key === "Escape") {
+      setBarangaySearch("");
+      setBarangayHighlightedIndex(-1);
+    }
+  };
+
+  // Scroll highlighted item into view for municipality
+  useEffect(() => {
+    if (municipalityHighlightedIndex >= 0 && municipalityDropdownRef.current) {
+      const highlightedElement = municipalityDropdownRef.current.children[municipalityHighlightedIndex];
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+  }, [municipalityHighlightedIndex]);
+
+  // Scroll highlighted item into view for barangay
+  useEffect(() => {
+    if (barangayHighlightedIndex >= 0 && barangayDropdownRef.current) {
+      const highlightedElement = barangayDropdownRef.current.children[barangayHighlightedIndex];
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+  }, [barangayHighlightedIndex]);
+
+  // Reset highlighted index when search changes
+  useEffect(() => {
+    setMunicipalityHighlightedIndex(-1);
+  }, [municipalitySearch]);
+
+  useEffect(() => {
+    setBarangayHighlightedIndex(-1);
+  }, [barangaySearch]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if ((municipalitySearch || barangaySearch || purokSearch) && !event.target.closest('.relative')) {
+      if ((municipalitySearch || barangaySearch) && !event.target.closest('.relative')) {
         setMunicipalitySearch("");
         setBarangaySearch("");
-        setPurokSearch("");
+        setMunicipalityHighlightedIndex(-1);
+        setBarangayHighlightedIndex(-1);
       }
     };
 
@@ -199,7 +256,7 @@ const HierarchicalLocationSelector = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [municipalitySearch, barangaySearch, purokSearch]);
+  }, [municipalitySearch, barangaySearch]);
 
   return (
     <div className="space-y-2">
@@ -238,6 +295,7 @@ const HierarchicalLocationSelector = ({
                   form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
                 }
               }}
+              onKeyDown={handleMunicipalityKeyDown}
               className={cn(
                 "mt-1",
                 form.formState.errors.municipality && "border-red-400",
@@ -245,13 +303,23 @@ const HierarchicalLocationSelector = ({
               )}
             />
             {municipalitySearch && (
-              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto scrollbar-transparent">
+              <div 
+                ref={municipalityDropdownRef}
+                className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg overflow-y-auto scrollbar-transparent"
+                style={{ maxHeight: '8.5rem' }}
+              >
                 {municipalities.length > 0 ? (
-                  municipalities.map((municipality) => (
+                  municipalities.map((municipality, index) => (
                     <div
                       key={municipality}
-                      className="px-3 py-2 cursor-pointer hover:bg-accent text-sm text-foreground"
+                      className={cn(
+                        "px-3 py-2 cursor-pointer text-sm text-foreground",
+                        index === municipalityHighlightedIndex 
+                          ? "bg-accent" 
+                          : "hover:bg-accent"
+                      )}
                       onClick={() => handleMunicipalityChange(municipality)}
+                      onMouseEnter={() => setMunicipalityHighlightedIndex(index)}
                     >
                       {municipality}
                     </div>
@@ -291,6 +359,7 @@ const HierarchicalLocationSelector = ({
                   form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
                 }
               }}
+              onKeyDown={handleBarangayKeyDown}
               disabled={!selectedMunicipality}
               className={cn(
                 "mt-1",
@@ -300,13 +369,23 @@ const HierarchicalLocationSelector = ({
               )}
             />
             {selectedMunicipality && barangaySearch && (
-              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto scrollbar-transparent">
+              <div 
+                ref={barangayDropdownRef}
+                className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg overflow-y-auto scrollbar-transparent"
+                style={{ maxHeight: '8.5rem' }}
+              >
                 {barangays.length > 0 ? (
-                  barangays.map((barangay) => (
+                  barangays.map((barangay, index) => (
                     <div
                       key={barangay}
-                      className="px-3 py-2 cursor-pointer hover:bg-accent text-sm text-foreground"
+                      className={cn(
+                        "px-3 py-2 cursor-pointer text-sm text-foreground",
+                        index === barangayHighlightedIndex 
+                          ? "bg-accent" 
+                          : "hover:bg-accent"
+                      )}
                       onClick={() => handleBarangayChange(barangay)}
+                      onMouseEnter={() => setBarangayHighlightedIndex(index)}
                     >
                       {barangay}
                     </div>
@@ -335,14 +414,20 @@ const HierarchicalLocationSelector = ({
             <Input
               type="text"
               autoFocus={false}
-              placeholder={selectedBarangay ? "Type to search purok..." : "Select barangay first"}
-              value={selectedPurok || purokSearch}
+              placeholder={selectedBarangay ? "Enter purok name..." : "Select barangay first"}
+              value={selectedPurok || ""}
               onChange={(e) => {
                 const value = e.target.value.toUpperCase();
-                setPurokSearch(value);
-                if (selectedPurok && value !== selectedPurok) {
-                  setSelectedPurok("");
-                  form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+                setSelectedPurok(value);
+                form.setValue("purok", value, { shouldValidate: true, shouldDirty: true });
+                
+                if (onLocationChange) {
+                  onLocationChange({
+                    region: davaoOrientalData.region,
+                    municipality: selectedMunicipality,
+                    barangay: selectedBarangay,
+                    purok: value
+                  });
                 }
               }}
               disabled={!selectedBarangay}
@@ -353,25 +438,6 @@ const HierarchicalLocationSelector = ({
                 isEditMode && "text-[8px]"
               )}
             />
-            {selectedBarangay && purokSearch && (
-              <div className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto scrollbar-transparent">
-                {puroks.length > 0 ? (
-                  puroks.map((purok) => (
-                    <div
-                      key={purok}
-                      className="px-3 py-2 cursor-pointer hover:bg-accent text-sm text-foreground"
-                      onClick={() => handlePurokChange(purok)}
-                    >
-                      {purok}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    No puroks found
-                  </div>
-                )}
-              </div>
-            )}
           </div>
           {form.formState.errors.purok && (
             <p className="text-xs text-red-400 mt-1">

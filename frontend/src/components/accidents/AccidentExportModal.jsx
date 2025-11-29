@@ -25,7 +25,7 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
-const VehicleExportModal = () => {
+const AccidentExportModal = () => {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1); // 1 = format selection, 2 = date filter
   const [format, setFormat] = useState("");
@@ -85,7 +85,7 @@ const VehicleExportModal = () => {
     setLoading(true);
     try {
       const response = await apiClient.get(
-        `/vehicle/export?format=${format}&year=${year}&month=${month}`,
+        `/accident/export?format=${format}&year=${year}&month=${month}`,
         {
           headers: {
             Authorization: token,
@@ -99,9 +99,9 @@ const VehicleExportModal = () => {
         const text = await response.data.text();
         try {
           const errorData = JSON.parse(text);
-          toast.error(errorData.message || "Failed to export vehicle data");
+          toast.error(errorData.message || "Failed to export accident data");
         } catch {
-          toast.error("Failed to export vehicle data");
+          toast.error("Failed to export accident data");
         }
         return;
       }
@@ -157,7 +157,7 @@ const VehicleExportModal = () => {
       const monthName = month === "all" 
         ? "AllMonths" 
         : months.find((m) => m.value === month)?.label || month;
-      const filename = `vehicles_${monthName}_${year}.${format}`;
+      const filename = `accidents_${monthName}_${year}.${format}`;
       link.setAttribute("download", filename);
 
       document.body.appendChild(link);
@@ -165,7 +165,7 @@ const VehicleExportModal = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      toast.success(`Vehicle data exported successfully as ${format.toUpperCase()}`);
+      toast.success(`Accident data exported successfully as ${format.toUpperCase()}`);
       setOpen(false);
     } catch (error) {
       console.error("Export error:", error);
@@ -175,13 +175,13 @@ const VehicleExportModal = () => {
         try {
           const text = await error.response.data.text();
           const errorData = JSON.parse(text);
-          toast.error(errorData.message || "Failed to export vehicle data");
+          toast.error(errorData.message || "Failed to export accident data");
         } catch {
-          toast.error("Failed to export vehicle data");
+          toast.error("Failed to export accident data");
         }
       } else {
         toast.error(
-          error.response?.data?.message || "Failed to export vehicle data"
+          error.response?.data?.message || "Failed to export accident data"
         );
       }
     } finally {
@@ -343,7 +343,7 @@ const VehicleExportModal = () => {
               No data yet for this selected date range.
             </p>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Please select a different month and year that contains vehicle data.
+              Please select a different month and year that contains accident data.
             </p>
           </div>
           <DialogFooter>
@@ -360,5 +360,5 @@ const VehicleExportModal = () => {
   );
 };
 
-export default VehicleExportModal;
+export default AccidentExportModal;
 

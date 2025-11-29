@@ -189,3 +189,103 @@ export const getProfile = async (req, res) => {
     });
   }
 };
+
+// Change password
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password and new password are required"
+      });
+    }
+
+    // Validate new password length
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters long"
+      });
+    }
+
+    // Get user with password field
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    // Verify current password
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      // Log failed password change attempt
+      await logUserActivity({
+        userId: user._id,
+        logType: "password_change",
+        ipAddress: getClientIP(req),
+        status: "failed",
+        details: "Password change failed: Incorrect current password"
+      });
+
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect"
+      });
+    }
+
+    // Check if new password is the same as current password
+    const isSamePassword = await user.comparePassword(newPassword);
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be different from current password"
+      });
+    }
+
+    // Update password (will be hashed by pre-save hook)
+    user.password = newPassword;
+    await user.save();
+
+    // Log successful password change
+    await logUserActivity({
+      userId: user._id,
+      logType: "password_change",
+      ipAddress: getClientIP(req),
+      status: "success",
+      details: "Password changed successfully"
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully"
+    });
+
+  } catch (error) {
+    console.error("Change password error:", error);
+    
+    // Log the failed password change activity
+    try {
+      await logUserActivity({
+        userId: req.user.userId,
+        logType: "password_change",
+        ipAddress: getClientIP(req),
+        status: "failed",
+        details: `Password change failed: ${error.message}`
+      });
+    } catch (logError) {
+      console.error("Failed to log password change error:", logError);
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to change password",
+      error: error.message
+    });
+  }
+};

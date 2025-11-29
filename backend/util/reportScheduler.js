@@ -211,8 +211,15 @@ const generateReportData = async (reportType = 'daily') => {
 /**
  * Create Excel workbook from report data
  */
-const createExcelReport = (reportData) => {
+const createExcelReport = async (reportData) => {
   const workbook = XLSX.utils.book_new();
+
+  // Define all Davao Oriental municipalities
+  const davaoOrientalMunicipalities = [
+    'BAGANGA', 'BANAYBANAY', 'BOSTON', 'CARAGA', 'CATEEL', 
+    'GOVERNOR GENEROSO', 'LUPON', 'MANAY', 'SAN ISIDRO', 
+    'TARRAGONA', 'CITY OF MATI'
+  ];
 
   // === VEHICLE SHEET ===
   const vehicleSheetData = [];
@@ -232,10 +239,12 @@ const createExcelReport = (reportData) => {
   const temporaryPlates = reportData.vehicleData.filter(v => /^[0-9]+$/.test(v.plateNo)).length;
   const permanentPlates = reportData.vehicleData.filter(v => /[A-Za-z]/.test(v.plateNo)).length;
   
-  // Municipality breakdown
+  // Municipality breakdown - normalize municipality names to uppercase
   const municipalityBreakdown = {};
   reportData.vehicleData.forEach(vehicle => {
-    const municipality = vehicle.owner?.address?.municipality || 'Unknown';
+    const municipality = vehicle.owner?.address?.municipality 
+      ? vehicle.owner.address.municipality.toUpperCase().trim()
+      : 'Unknown';
     municipalityBreakdown[municipality] = (municipalityBreakdown[municipality] || 0) + 1;
   });
   
@@ -254,13 +263,147 @@ const createExcelReport = (reportData) => {
   vehicleSheetData.push(['Permanent Plates', permanentPlates]);
   vehicleSheetData.push([]);
   
-  vehicleSheetData.push(['VEHICLES PER MUNICIPALITY']);
-  vehicleSheetData.push(['Municipality', 'Vehicle Count']);
+  // Registered Vehicles by Municipality - show all municipalities even with 0 count
+  vehicleSheetData.push(['REGISTERED VEHICLES BY MUNICIPALITY']);
+  vehicleSheetData.push(['Municipality', 'Count']);
+  davaoOrientalMunicipalities.forEach(municipality => {
+    const count = municipalityBreakdown[municipality] || 0;
+    vehicleSheetData.push([municipality, count]);
+  });
+  
+  // Add any municipalities not in the standard list (if any)
   Object.entries(municipalityBreakdown)
+    .filter(([municipality]) => !davaoOrientalMunicipalities.includes(municipality) && municipality !== 'Unknown')
     .sort((a, b) => b[1] - a[1])
     .forEach(([municipality, count]) => {
       vehicleSheetData.push([municipality, count]);
     });
+  
+  // Add Unknown if it exists
+  if (municipalityBreakdown['Unknown']) {
+    vehicleSheetData.push(['Unknown', municipalityBreakdown['Unknown']]);
+  }
+  
+  vehicleSheetData.push([]);
+  
+  // PREDICTIONS BY MUNICIPALITY
+  vehicleSheetData.push(['PREDICTED VEHICLE REGISTRATIONS BY MUNICIPALITY']);
+  vehicleSheetData.push(['Municipality', 'Predicted Count']);
+  
+  const municipalityPredictions = {};
+  
+  try {
+    const predictionApiUrl = process.env.MV_PREDICTION_API_URL || 'http://localhost:5002';
+    
+    // First, try to get aggregated predictions with municipality breakdown
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      const response = await fetch(
+        `${predictionApiUrl}/api/predict/registrations?weeks=4`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal
+        }
+      );
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const predictionData = await response.json();
+        
+        // Check if we have municipality-specific predictions
+        if (predictionData.municipality_predictions && Object.keys(predictionData.municipality_predictions).length > 0) {
+          // Use municipality-specific predictions
+          Object.entries(predictionData.municipality_predictions).forEach(([municipality, pred]) => {
+            const municipalityUpper = municipality.toUpperCase().trim();
+            // Sum up predicted counts from weekly predictions (4 weeks)
+            const totalPredicted = pred.weekly_predictions 
+              ? pred.weekly_predictions.reduce((sum, week) => sum + (week.predicted_count || 0), 0)
+              : 0;
+            municipalityPredictions[municipalityUpper] = Math.round(totalPredicted);
+          });
+        } else if (predictionData.weekly_predictions && predictionData.weekly_predictions.length > 0) {
+          // Use aggregated predictions - try to fetch individual municipality predictions
+          // If that fails, distribute equally
+          const totalPredicted = predictionData.weekly_predictions.reduce(
+            (sum, week) => sum + (week.predicted_count || 0), 0
+          );
+          
+          // Try to fetch predictions for each municipality individually
+          const predictionPromises = davaoOrientalMunicipalities.map(async (municipality) => {
+            try {
+              const munController = new AbortController();
+              const munTimeout = setTimeout(() => munController.abort(), 5000);
+              const munResponse = await fetch(
+                `${predictionApiUrl}/api/predict/registrations?weeks=4&municipality=${encodeURIComponent(municipality)}`,
+                {
+                  method: 'GET',
+                  headers: { 'Content-Type': 'application/json' },
+                  signal: munController.signal
+                }
+              );
+              clearTimeout(munTimeout);
+              
+              if (munResponse.ok) {
+                const munData = await munResponse.json();
+                if (munData.weekly_predictions && munData.weekly_predictions.length > 0) {
+                  const munTotal = munData.weekly_predictions.reduce(
+                    (sum, week) => sum + (week.predicted_count || 0), 0
+                  );
+                  return { municipality, predicted: Math.round(munTotal) };
+                }
+              }
+            } catch (err) {
+              // Silently fail for individual municipality - will use distributed value
+            }
+            return null;
+          });
+          
+          const individualPredictions = await Promise.all(predictionPromises);
+          const successfulPredictions = individualPredictions.filter(p => p !== null);
+          
+          if (successfulPredictions.length > 0) {
+            // Use individual municipality predictions where available
+            successfulPredictions.forEach(({ municipality, predicted }) => {
+              municipalityPredictions[municipality] = predicted;
+            });
+            
+            // For municipalities without individual predictions, distribute remaining
+            const remainingMunicipalities = davaoOrientalMunicipalities.filter(
+              m => !municipalityPredictions[m]
+            );
+            const usedTotal = successfulPredictions.reduce((sum, p) => sum + p.predicted, 0);
+            const remainingTotal = Math.max(0, totalPredicted - usedTotal);
+            const avgPerRemaining = remainingMunicipalities.length > 0
+              ? Math.round(remainingTotal / remainingMunicipalities.length)
+              : 0;
+            
+            remainingMunicipalities.forEach(municipality => {
+              municipalityPredictions[municipality] = avgPerRemaining;
+            });
+          } else {
+            // No individual predictions available, distribute equally
+            const avgPerMunicipality = Math.round(totalPredicted / davaoOrientalMunicipalities.length);
+            davaoOrientalMunicipalities.forEach(municipality => {
+              municipalityPredictions[municipality] = avgPerMunicipality;
+            });
+          }
+        }
+      }
+    } catch (predictionError) {
+      console.warn('[REPORT SCHEDULER] Could not fetch predictions:', predictionError.message);
+    }
+  } catch (error) {
+    console.warn('[REPORT SCHEDULER] Error fetching predictions:', error.message);
+  }
+  
+  // Display all municipalities with predictions (or 0 if no prediction available)
+  davaoOrientalMunicipalities.forEach(municipality => {
+    const predicted = municipalityPredictions[municipality] || 0;
+    vehicleSheetData.push([municipality, predicted]);
+  });
   
   const vehicleSheet = XLSX.utils.aoa_to_sheet(vehicleSheetData);
   XLSX.utils.book_append_sheet(workbook, vehicleSheet, 'Vehicles');
@@ -299,6 +442,25 @@ const createExcelReport = (reportData) => {
     .slice(0, 20) // Top 20
     .forEach(([violation, count]) => {
       violationSheetData.push([violation, count]);
+    });
+  violationSheetData.push([]);
+  
+  // Apprehending Officer statistics
+  const officerCounts = {};
+  reportData.violationData.forEach(record => {
+    const officer = record.apprehendingOfficer;
+    if (officer && officer.trim() !== '' && officer !== 'None' && officer !== 'N/A') {
+      const officerName = officer.trim().toUpperCase();
+      officerCounts[officerName] = (officerCounts[officerName] || 0) + 1;
+    }
+  });
+  
+  violationSheetData.push(['APPREHENDING OFFICERS']);
+  violationSheetData.push(['Officer Name', 'Violation Count']);
+  Object.entries(officerCounts)
+    .sort((a, b) => b[1] - a[1]) // Sort by count descending
+    .forEach(([officer, count]) => {
+      violationSheetData.push([officer, count]);
     });
   
   const violationSheet = XLSX.utils.aoa_to_sheet(violationSheetData);
@@ -409,7 +571,7 @@ const generateDailyReport = async () => {
   try {
     console.log('[REPORT SCHEDULER] Starting daily report generation...');
     const reportData = await generateReportData('daily');
-    const workbook = createExcelReport(reportData);
+    const workbook = await createExcelReport(reportData);
     await saveReport(workbook, 'daily');
     console.log('[REPORT SCHEDULER] Daily report generated successfully');
   } catch (error) {
@@ -424,7 +586,7 @@ const generateMonthlyReport = async () => {
   try {
     console.log('[REPORT SCHEDULER] Starting monthly report generation...');
     const reportData = await generateReportData('monthly');
-    const workbook = createExcelReport(reportData);
+    const workbook = await createExcelReport(reportData);
     await saveReport(workbook, 'monthly');
     console.log('[REPORT SCHEDULER] Monthly report generated successfully');
   } catch (error) {

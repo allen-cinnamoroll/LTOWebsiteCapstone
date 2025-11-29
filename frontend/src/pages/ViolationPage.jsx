@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 const ViolationPage = () => {
   const [violationData, setViolationData] = useState([]);
+  const [allViolationsData, setAllViolationsData] = useState([]); // Keep all violations for modal
   const { token, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +31,7 @@ const ViolationPage = () => {
   const [shouldReopenInformationModal, setShouldReopenInformationModal] = useState(false);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [violationToDelete, setViolationToDelete] = useState(null);
+  const [currentTypeFilter, setCurrentTypeFilter] = useState("all");
 
   useEffect(() => {
     fetchViolations();
@@ -87,7 +89,7 @@ const ViolationPage = () => {
         },
       });
       
-      const violationData = data.data.map((vData) => ({
+      const allViolations = data.data.map((vData) => ({
         _id: vData._id,
         topNo: vData.topNo || "N/A",
         firstName: vData.firstName || "N/A",
@@ -108,7 +110,101 @@ const ViolationPage = () => {
         createdBy: vData.createdBy,
         updatedBy: vData.updatedBy,
       }));
-      setViolationData(violationData);
+
+      // Separate alarm violations from non-alarm violations
+      // Alarm violations should NOT be deduplicated (allow duplicates)
+      const alarmViolations = allViolations.filter(v => v.violationType === "alarm");
+      const nonAlarmViolations = allViolations.filter(v => v.violationType !== "alarm");
+
+      // Deduplicate by name: group non-alarm violations by unique name combination
+      // Aggregate violation types and total violations for each person
+      const nameMap = new Map();
+      
+      nonAlarmViolations.forEach((violation) => {
+        // Create a unique key from name components
+        const nameKey = `${violation.firstName || "N/A"}_${violation.lastName || "N/A"}_${violation.middleInitial || ""}_${violation.suffix || ""}`;
+        
+        const violationCount = (violation.violations || []).filter(v => v && v !== "None").length;
+        const violationType = violation.violationType;
+        
+        if (!nameMap.has(nameKey)) {
+          // First occurrence of this name, add it with aggregated data
+          nameMap.set(nameKey, {
+            ...violation,
+            violationTypes: new Set([violationType]),
+            totalViolationsCount: violationCount,
+            violationsByType: {
+              [violationType]: violationCount
+            }
+          });
+        } else {
+          // Name already exists, aggregate data
+          const existing = nameMap.get(nameKey);
+          existing.violationTypes.add(violationType);
+          existing.totalViolationsCount += violationCount;
+          if (!existing.violationsByType) {
+            existing.violationsByType = {};
+          }
+          existing.violationsByType[violationType] = (existing.violationsByType[violationType] || 0) + violationCount;
+          
+          // Keep the one with the most recent dateOfApprehension as base
+          const existingDate = existing.dateOfApprehension ? new Date(existing.dateOfApprehension) : new Date(0);
+          const currentDate = violation.dateOfApprehension ? new Date(violation.dateOfApprehension) : new Date(0);
+          
+          if (currentDate > existingDate) {
+            // Update base violation but keep aggregated data
+            const baseViolation = { ...violation };
+            baseViolation.violationTypes = existing.violationTypes;
+            baseViolation.totalViolationsCount = existing.totalViolationsCount;
+            baseViolation.violationsByType = existing.violationsByType;
+            nameMap.set(nameKey, baseViolation);
+          }
+        }
+      });
+
+      // Process alarm violations - keep all as separate entries (alarm can be duplicated)
+      const processedAlarmViolations = alarmViolations.map(violation => {
+        const nameKey = `${violation.firstName || "N/A"}_${violation.lastName || "N/A"}_${violation.middleInitial || ""}_${violation.suffix || ""}`;
+        
+        const violationCount = (violation.violations || []).filter(v => v && v !== "None").length;
+        
+        // If this name exists in non-alarm map, also add alarm type to that entry
+        if (nameMap.has(nameKey)) {
+          const existing = nameMap.get(nameKey);
+          existing.violationTypes.add("alarm");
+          existing.totalViolationsCount += violationCount;
+          if (!existing.violationsByType) {
+            existing.violationsByType = {};
+          }
+          existing.violationsByType["alarm"] = (existing.violationsByType["alarm"] || 0) + violationCount;
+        }
+        
+        // Always return alarm violation as separate entry (alarm can be duplicated)
+        return {
+          ...violation,
+          violationTypes: new Set([violation.violationType]),
+          totalViolationsCount: violationCount,
+          violationsByType: {
+            [violation.violationType]: violationCount
+          }
+        };
+      });
+
+      // Convert violationTypes Set to Array for easier use in components
+      const deduplicatedNonAlarm = Array.from(nameMap.values()).map(v => ({
+        ...v,
+        violationTypes: Array.from(v.violationTypes)
+      }));
+      
+      const processedAlarm = processedAlarmViolations.map(v => ({
+        ...v,
+        violationTypes: Array.from(v.violationTypes)
+      }));
+
+      const deduplicatedData = [...deduplicatedNonAlarm, ...processedAlarm];
+      setViolationData(deduplicatedData);
+      // Keep all violations for the modal to show all violations for a person
+      setAllViolationsData(allViolations);
     } catch (error) {
       // Error handled silently
     } finally {
@@ -184,7 +280,7 @@ const ViolationPage = () => {
         <div className="flex-1 flex flex-col min-h-0">
           <ViolationTable
             data={violationData}
-            filters={["topNo", "firstName", "lastName", "violations", "violationType", "licenseType", "plateNo", "dateOfApprehension", "apprehendingOfficer"]}
+            filters={["firstName", "lastName", "middleInitial", "violations"]}
             tableColumn={violationColumns}
             onAdd={handleAdd}
             loading={loading}
@@ -194,6 +290,8 @@ const ViolationPage = () => {
             onBinClick={userData?.role === "2" ? null : handleBinClick}
             onUpdateStatus={() => {}}
             submitting={submitting}
+            onTypeFilterChange={setCurrentTypeFilter}
+            showExport={userData?.role !== "2"}
           />
         </div>
       </div>
@@ -216,7 +314,8 @@ const ViolationPage = () => {
         open={violationInformationModalOpen}
         onOpenChange={setViolationInformationModalOpen}
         violationData={selectedViolation}
-        allViolations={violationData}
+        allViolations={allViolationsData}
+        typeFilter={currentTypeFilter}
       />
 
       {/* Violation Details Modal */}

@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "../ui/button";
 import { DataTableViewOptions } from "../table/DataTableViewOptions";
 import { DataTablePagination } from "../table/DataTablePagination";
+import ViolationExportModal from "./ViolationExportModal";
 
 const ViolationTable = ({
   title,
@@ -38,7 +39,9 @@ const ViolationTable = ({
   onUpdateStatus,
   submitting,
   onRestore,
-  onPermanentDelete
+  onPermanentDelete,
+  onTypeFilterChange,
+  showExport = true
 }) => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -49,15 +52,28 @@ const ViolationTable = ({
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("all");
+
+  // Notify parent when typeFilter changes
+  React.useEffect(() => {
+    if (onTypeFilterChange) {
+      onTypeFilterChange(typeFilter);
+    }
+  }, [typeFilter, onTypeFilterChange]);
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
   const [hoveredRowId, setHoveredRowId] = React.useState(null);
+  const [isHoveringAction, setIsHoveringAction] = React.useState(false);
   const filterColumns = filters;
+
+  // Memoize columns to recreate when typeFilter changes
+  const columns = React.useMemo(() => {
+    return onRestore && onPermanentDelete 
+      ? tableColumn(onRestore, onPermanentDelete, submitting)
+      : tableColumn(onEdit, onUpdateStatus, onDelete, submitting, typeFilter);
+  }, [onRestore, onPermanentDelete, submitting, onEdit, onUpdateStatus, onDelete, typeFilter]);
 
   const table = useReactTable({
     data,
-    columns: onRestore && onPermanentDelete 
-      ? tableColumn(onRestore, onPermanentDelete, submitting)
-      : tableColumn(onEdit, onUpdateStatus, onDelete, submitting),
+    columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onPaginationChange: setPagination,
@@ -163,6 +179,7 @@ const ViolationTable = ({
               <span className="hidden lg:inline">{"Bin"}</span>
             </Button>
           )}
+          {showExport && <ViolationExportModal />}
           <DataTableViewOptions table={table} />
         </div>
       </div>
@@ -195,9 +212,16 @@ const ViolationTable = ({
                       key={row.id}
                       onClick={() => onRowClick && onRowClick(row.original)}
                       onMouseEnter={() => setHoveredRowId(row.id)}
-                      onMouseLeave={() => setHoveredRowId(null)}
+                      onMouseLeave={() => {
+                        setHoveredRowId(null);
+                        setIsHoveringAction(false);
+                      }}
                       onMouseMove={(e) => {
                         setMousePosition({ x: e.clientX, y: e.clientY });
+                        // Check if hovering over action buttons using data attribute
+                        const target = e.target;
+                        const actionContainer = target.closest('[data-action-container="true"]');
+                        setIsHoveringAction(!!actionContainer);
                       }}
                       data-state={row.getIsSelected() && "selected"}
                       className={`hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 ${onRowClick ? 'cursor-pointer' : 'cursor-default'}`}
@@ -231,12 +255,12 @@ const ViolationTable = ({
           </Table>
         </div>
       </div>
-      {hoveredRowId && onRowClick && (
+      {hoveredRowId && onRowClick && !isHoveringAction && (
         <div
           className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
           style={{
             left: `${mousePosition.x + 10}px`,
-            top: `${mousePosition.y - 10}px`,
+            top: `${mousePosition.y + 20}px`,
           }}
         >
           Click to view details
