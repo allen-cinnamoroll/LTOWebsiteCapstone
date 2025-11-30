@@ -113,7 +113,22 @@ def main():
             logger.error("  pip install -r requirements.txt")
             
             # Log failure
-            log_activity_to_api('failed', f'Virtual environment not found at {venv_python}')
+            try:
+                import requests
+                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+                log_url = f'{api_url}/api/user/logs/automatic-retrain'
+                log_data = {
+                    'logType': 'automatic_retrain_mv_registration',
+                    'status': 'failed',
+                    'details': f'Virtual environment not found at {venv_python}'
+                }
+                try:
+                    requests.post(log_url, json=log_data, timeout=10)
+                except:
+                    pass
+            except:
+                pass
+            
             sys.exit(1)
         
         # Change to script directory
@@ -125,7 +140,21 @@ def main():
         
         if not train_script.exists():
             logger.error(f"Training script not found: {train_script}")
-            log_activity_to_api('failed', f'Training script not found: {train_script}')
+            try:
+                import requests
+                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+                log_url = f'{api_url}/api/user/logs/automatic-retrain'
+                log_data = {
+                    'logType': 'automatic_retrain_mv_registration',
+                    'status': 'failed',
+                    'details': f'Training script not found: {train_script}'
+                }
+                try:
+                    requests.post(log_url, json=log_data, timeout=10)
+                except:
+                    pass
+            except:
+                pass
             sys.exit(1)
         
         result = subprocess.run(
@@ -142,8 +171,23 @@ def main():
             logger.error(f"STDERR:\n{result.stderr}")
             
             # Log failed retrain activity
-            error_details = result.stderr[:200] if result.stderr else "Unknown error"
-            log_activity_to_api('failed', f'Automatic retrain failed: {error_details}')
+            try:
+                import requests
+                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+                log_url = f'{api_url}/api/user/logs/automatic-retrain'
+                error_details = result.stderr[:200] if result.stderr else "Unknown error"
+                log_data = {
+                    'logType': 'automatic_retrain_mv_registration',
+                    'status': 'failed',
+                    'details': f'Automatic retrain failed: {error_details}'
+                }
+                try:
+                    requests.post(log_url, json=log_data, timeout=10)
+                except:
+                    pass  # Don't fail if logging fails
+            except:
+                pass  # Don't fail if requests is not available
+            
             sys.exit(1)
         
         logger.info("Training completed successfully!")
@@ -198,7 +242,32 @@ def main():
         
         # Step 4: Log the automatic retrain activity to the database
         logger.info("Step 4: Logging automatic retrain activity...")
-        log_activity_to_api('success', f'Automatic retrain completed successfully at {datetime.now().isoformat()}')
+        try:
+            try:
+                import requests
+            except ImportError:
+                logger.warning("requests library not available, skipping activity log")
+            else:
+                # Get the Node.js API URL (default port 5000)
+                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+                log_url = f'{api_url}/api/user/logs/automatic-retrain'
+                
+                log_data = {
+                    'logType': 'automatic_retrain_mv_registration',
+                    'status': 'success',
+                    'details': f'Automatic retrain completed successfully at {datetime.now().isoformat()}'
+                }
+                
+                try:
+                    log_response = requests.post(log_url, json=log_data, timeout=10)
+                    if log_response.status_code == 200:
+                        logger.info("Automatic retrain activity logged successfully")
+                    else:
+                        logger.warning(f"Failed to log activity (status {log_response.status_code}): {log_response.text}")
+                except Exception as log_error:
+                    logger.warning(f"Failed to log activity: {log_error}")
+        except Exception as e:
+            logger.warning(f"Error logging activity: {e}")
         
         logger.info("=" * 80)
         logger.info("RETRAINING COMPLETE!")
@@ -209,13 +278,41 @@ def main():
         
     except subprocess.TimeoutExpired:
         logger.error("Training process timed out after 1 hour")
-        log_activity_to_api('failed', 'Training process timed out after 1 hour')
+        try:
+            import requests
+            api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+            log_url = f'{api_url}/api/user/logs/automatic-retrain'
+            log_data = {
+                'logType': 'automatic_retrain_mv_registration',
+                'status': 'failed',
+                'details': 'Training process timed out after 1 hour'
+            }
+            try:
+                requests.post(log_url, json=log_data, timeout=10)
+            except:
+                pass
+        except:
+            pass
         sys.exit(1)
     except Exception as e:
         logger.error(f"Unexpected error during retraining: {str(e)}")
         import traceback
         logger.error(traceback.format_exc())
-        log_activity_to_api('failed', f'Unexpected error: {str(e)[:200]}')
+        try:
+            import requests
+            api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+            log_url = f'{api_url}/api/user/logs/automatic-retrain'
+            log_data = {
+                'logType': 'automatic_retrain_mv_registration',
+                'status': 'failed',
+                'details': f'Unexpected error: {str(e)[:200]}'
+            }
+            try:
+                requests.post(log_url, json=log_data, timeout=10)
+            except:
+                pass
+        except:
+            pass
         sys.exit(1)
 
 
