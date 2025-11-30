@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Scheduled retraining script for Accident Prediction Model
+Scheduled retraining script for MV Registration Prediction Model
 Runs automatically at the end of each month via systemd timer
 """
 
@@ -18,7 +18,7 @@ project_root = script_dir.parent.parent.parent.parent
 # Create logs directory if it doesn't exist (Windows-compatible)
 logs_dir = script_dir / 'logs'
 logs_dir.mkdir(exist_ok=True)
-log_file = logs_dir / 'accident-prediction-retrain.log'
+log_file = logs_dir / 'mv-registration-retrain.log'
 
 # Setup logging
 logging.basicConfig(
@@ -40,10 +40,42 @@ def is_last_day_of_month():
     return tomorrow.day == 1
 
 
+def log_activity_to_api(status, details):
+    """Log automatic retrain activity to the Node.js API"""
+    try:
+        import requests
+        api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+        log_url = f'{api_url}/api/user/logs/automatic-retrain'
+        
+        log_data = {
+            'logType': 'automatic_retrain_mv_registration',
+            'status': status,
+            'details': details
+        }
+        
+        try:
+            log_response = requests.post(log_url, json=log_data, timeout=10)
+            if log_response.status_code == 200:
+                logger.info("Automatic retrain activity logged successfully")
+                return True
+            else:
+                logger.warning(f"Failed to log activity (status {log_response.status_code}): {log_response.text}")
+                return False
+        except Exception as log_error:
+            logger.warning(f"Failed to log activity: {log_error}")
+            return False
+    except ImportError:
+        logger.warning("requests library not available, skipping activity log")
+        return False
+    except Exception as e:
+        logger.warning(f"Error logging activity: {e}")
+        return False
+
+
 def main():
     """Main retraining function"""
     logger.info("=" * 80)
-    logger.info("STARTING AUTOMATED MODEL RETRAINING")
+    logger.info("STARTING AUTOMATED MV REGISTRATION MODEL RETRAINING")
     logger.info("=" * 80)
     logger.info(f"Timestamp: {datetime.now().isoformat()}")
     logger.info(f"Script directory: {script_dir}")
@@ -71,7 +103,7 @@ def main():
         if not venv_python.exists():
             logger.error(f"Virtual environment not found at: {venv_python}")
             logger.error("Please create the virtual environment first:")
-            logger.error("  cd backend/model/ml_models/accident_prediction")
+            logger.error("  cd backend/model/ml_models/mv_registration_flask")
             if platform.system() == 'Windows':
                 logger.error("  python -m venv venv")
                 logger.error("  venv\\Scripts\\activate")
@@ -79,6 +111,9 @@ def main():
                 logger.error("  python3 -m venv venv")
                 logger.error("  source venv/bin/activate")
             logger.error("  pip install -r requirements.txt")
+            
+            # Log failure
+            log_activity_to_api('failed', f'Virtual environment not found at {venv_python}')
             sys.exit(1)
         
         # Change to script directory
@@ -86,10 +121,11 @@ def main():
         
         # Run training script
         logger.info("Step 1: Running training script...")
-        train_script = script_dir / 'train_rf_model.py'
+        train_script = script_dir / 'retrain_optimized_model.py'
         
         if not train_script.exists():
             logger.error(f"Training script not found: {train_script}")
+            log_activity_to_api('failed', f'Training script not found: {train_script}')
             sys.exit(1)
         
         result = subprocess.run(
@@ -106,22 +142,8 @@ def main():
             logger.error(f"STDERR:\n{result.stderr}")
             
             # Log failed retrain activity
-            try:
-                import requests
-                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
-                log_url = f'{api_url}/api/user/logs/automatic-retrain'
-                log_data = {
-                    'logType': 'automatic_retrain_accident',
-                    'status': 'failed',
-                    'details': f'Automatic retrain failed: {result.stderr[:200] if result.stderr else "Unknown error"}'
-                }
-                try:
-                    requests.post(log_url, json=log_data, timeout=10)
-                except:
-                    pass  # Don't fail if logging fails
-            except:
-                pass  # Don't fail if requests is not available
-            
+            error_details = result.stderr[:200] if result.stderr else "Unknown error"
+            log_activity_to_api('failed', f'Automatic retrain failed: {error_details}')
             sys.exit(1)
         
         logger.info("Training completed successfully!")
@@ -136,7 +158,7 @@ def main():
                 logger.warning("requests library not available, skipping API reload")
                 raise ImportError("requests not available")
             
-            reload_url = 'http://localhost:5004/api/accidents/reload-model'
+            reload_url = 'http://localhost:5002/api/model/reload'
             reload_response = requests.post(reload_url, timeout=30)
             
             if reload_response.status_code == 200:
@@ -152,7 +174,7 @@ def main():
             # Step 3: Restart Flask API service to load new model
             try:
                 restart_result = subprocess.run(
-                    ['sudo', 'systemctl', 'restart', 'accident-prediction-api'],
+                    ['sudo', 'systemctl', 'restart', 'mv-prediction-api'],
                     capture_output=True,
                     text=True,
                     timeout=30
@@ -162,46 +184,21 @@ def main():
                     logger.info("Service restarted successfully")
                 else:
                     logger.warning("Failed to restart service automatically")
-                    logger.warning("Please restart manually: sudo systemctl restart accident-prediction-api")
+                    logger.warning("Please restart manually: sudo systemctl restart mv-prediction-api")
                     logger.warning(f"STDERR: {restart_result.stderr}")
             
             except subprocess.TimeoutExpired:
                 logger.warning("Service restart timed out")
             except FileNotFoundError:
                 logger.warning("systemctl not found - cannot restart service automatically")
-                logger.warning("Please restart manually: sudo systemctl restart accident-prediction-api")
+                logger.warning("Please restart manually: sudo systemctl restart mv-prediction-api")
             except Exception as e:
                 logger.warning(f"Error restarting service: {e}")
-                logger.warning("Please restart manually: sudo systemctl restart accident-prediction-api")
+                logger.warning("Please restart manually: sudo systemctl restart mv-prediction-api")
         
         # Step 4: Log the automatic retrain activity to the database
         logger.info("Step 4: Logging automatic retrain activity...")
-        try:
-            try:
-                import requests
-            except ImportError:
-                logger.warning("requests library not available, skipping activity log")
-            else:
-                # Get the Node.js API URL (default port 5000)
-                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
-                log_url = f'{api_url}/api/user/logs/automatic-retrain'
-                
-                log_data = {
-                    'logType': 'automatic_retrain_accident',
-                    'status': 'success',
-                    'details': f'Automatic retrain completed successfully at {datetime.now().isoformat()}'
-                }
-                
-                try:
-                    log_response = requests.post(log_url, json=log_data, timeout=10)
-                    if log_response.status_code == 200:
-                        logger.info("Automatic retrain activity logged successfully")
-                    else:
-                        logger.warning(f"Failed to log activity (status {log_response.status_code}): {log_response.text}")
-                except Exception as log_error:
-                    logger.warning(f"Failed to log activity: {log_error}")
-        except Exception as e:
-            logger.warning(f"Error logging activity: {e}")
+        log_activity_to_api('success', f'Automatic retrain completed successfully at {datetime.now().isoformat()}')
         
         logger.info("=" * 80)
         logger.info("RETRAINING COMPLETE!")
@@ -212,11 +209,13 @@ def main():
         
     except subprocess.TimeoutExpired:
         logger.error("Training process timed out after 1 hour")
+        log_activity_to_api('failed', 'Training process timed out after 1 hour')
         sys.exit(1)
     except Exception as e:
         logger.error(f"Unexpected error during retraining: {str(e)}")
         import traceback
         logger.error(traceback.format_exc())
+        log_activity_to_api('failed', f'Unexpected error: {str(e)[:200]}')
         sys.exit(1)
 
 

@@ -760,3 +760,67 @@ export const updateHeartbeat = async (req, res) => {
     });
   }
 };
+
+// Log automatic retrain activity (called by Python retrain scripts)
+// This endpoint is for internal use by automated scripts
+export const logAutomaticRetrain = async (req, res) => {
+  try {
+    const { logType, status, details } = req.body;
+
+    // Validate required fields
+    if (!logType || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "logType and status are required"
+      });
+    }
+
+    // Validate logType is one of the automatic retrain types
+    if (logType !== 'automatic_retrain_accident' && logType !== 'automatic_retrain_mv_registration') {
+      return res.status(400).json({
+        success: false,
+        message: "logType must be 'automatic_retrain_accident' or 'automatic_retrain_mv_registration'"
+      });
+    }
+
+    // Validate status
+    if (!['success', 'failed', 'pending'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "status must be 'success', 'failed', or 'pending'"
+      });
+    }
+
+    // Find superadmin user (role "0")
+    const superadmin = await UserModel.findOne({ role: "0" }).select("_id");
+    
+    if (!superadmin) {
+      return res.status(404).json({
+        success: false,
+        message: "Superadmin user not found"
+      });
+    }
+
+    // Get IP address from request (for automated scripts, use localhost)
+    const ipAddress = getClientIP(req) || '127.0.0.1';
+
+    // Log the automatic retrain activity with superadmin as the performer
+    await logUserActivity({
+      userId: superadmin._id,
+      logType: logType,
+      ipAddress: ipAddress,
+      status: status,
+      details: details || `Automatic retrain performed by system`
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Automatic retrain activity logged successfully"
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};

@@ -1,5 +1,5 @@
 import express from "express";
-import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat } from "../controller/userController.js";
+import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat, logAutomaticRetrain } from "../controller/userController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
 
 const userRouter = express.Router();
@@ -30,5 +30,9 @@ userRouter.put("/:userId", authenticate, authorizeRole("admin", "superadmin"), u
 
 // Delete user (admin and superadmin only)
 userRouter.delete("/:userId", authenticate, authorizeRole("admin", "superadmin"), deleteUser);
+
+// Log automatic retrain activity (internal endpoint for Python scripts)
+// No authentication required - this is for automated scripts running on the server
+userRouter.post("/logs/automatic-retrain", logAutomaticRetrain);
 
 export default userRouter;

@@ -73,6 +73,38 @@ def main():
     logger.info("\n")
     model.print_model_summary()
     
+    # Display Model Accuracy section (prioritize CV accuracy)
+    logger.info("\n" + "=" * 60)
+    logger.info("MODEL ACCURACY")
+    logger.info("=" * 60)
+    
+    if training_info.get('model_accuracy'):
+        model_acc = training_info['model_accuracy']
+        
+        # Display CV accuracy first (most reliable)
+        if model_acc.get('cv_accuracy') is not None:
+            cv_std = training_info.get('cv_results', {}).get('std_accuracy', 0)
+            logger.info(f"⭐ Cross-Validation Accuracy: {model_acc['cv_accuracy']:.2f}% ± {cv_std:.2f}% (RECOMMENDED)")
+            logger.info("")
+        
+        if model_acc.get('training_accuracy') is not None:
+            logger.info(f"Training Accuracy: {model_acc['training_accuracy']:.2f}%")
+        if model_acc.get('test_accuracy') is not None:
+            logger.info(f"Test Accuracy: {model_acc['test_accuracy']:.2f}%")
+        
+        if model_acc.get('cv_accuracy') is None and model_acc.get('training_accuracy') is None and model_acc.get('test_accuracy') is None:
+            logger.info("Accuracy: Not available (R² not calculated)")
+        
+        # Display recommendation
+        if model_acc.get('cv_accuracy') is not None:
+            logger.info("")
+            logger.info("💡 Recommendation: Use Cross-Validation Accuracy as the primary metric")
+            logger.info("   This provides the most reliable estimate of model performance on unseen data.")
+    else:
+        logger.info("Accuracy: Not available")
+    
+    logger.info("=" * 60)
+    
     # Generate sample predictions
     logger.info("\nGenerating 30-day forecast...")
     predictions = model.predict(days=30)

@@ -1,0 +1,19 @@
+[Unit]
+Description=Retrain MV Registration Prediction Model at End of Month
+Requires=mv-registration-retrain.service
+
+[Timer]
+# Run at midnight on the last day of each month (00:00)
+# Since systemd doesn't support "L" (last day) directly, we run on days 28-31
+# The script will check if it's actually the last day before proceeding
+# Default: Run at midnight on days 28-31 (script checks if last day)
+OnCalendar=*-*-28..31 00:00:00
+# Alternative: Run on 1st of month at 00:05 (ensures all previous month data)
+# To use this instead, comment the line above and uncomment below:
+# OnCalendar=*-*-01 00:05:00
+AccuracySec=1min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
