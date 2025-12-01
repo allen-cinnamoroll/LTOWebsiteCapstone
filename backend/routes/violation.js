@@ -10,6 +10,7 @@ import {
   getDeletedViolations,
   restoreViolation,
   permanentDeleteViolation,
+  exportViolations,
 } from "../controller/violationController.js";
 import { validateViolation, validate } from "../middleware/validator.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
@@ -21,6 +22,9 @@ violationRouter.post("/", authenticate, express.json(), validateViolation, valid
 
 // Get all violations (Authenticated Users)
 violationRouter.get("/", authenticate, getViolations);
+
+// Export violations (Authenticated Users)
+violationRouter.get("/export", authenticate, exportViolations);
 
 // Get deleted violations (bin)
 violationRouter.get("/bin", authenticate, getDeletedViolations);

@@ -68,6 +68,7 @@ const VehiclesTable = ({
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
   const [hoveredRowId, setHoveredRowId] = React.useState(null);
+  const [isHoveringAction, setIsHoveringAction] = React.useState(false);
   // Define the columns where you want to apply the global filter
   const filterColumns = filters;
 
@@ -174,9 +175,16 @@ const VehiclesTable = ({
                     key={row.id}
                     onClick={() => onRowClick && onRowClick(row.original)}
                     onMouseEnter={() => setHoveredRowId(row.id)}
-                    onMouseLeave={() => setHoveredRowId(null)}
+                    onMouseLeave={() => {
+                      setHoveredRowId(null);
+                      setIsHoveringAction(false);
+                    }}
                     onMouseMove={(e) => {
                       setMousePosition({ x: e.clientX, y: e.clientY });
+                      // Check if hovering over action buttons using data attribute
+                      const target = e.target;
+                      const actionContainer = target.closest('[data-action-container="true"]');
+                      setIsHoveringAction(!!actionContainer);
                     }}
                     data-state={row.getIsSelected() && "selected"}
                     className={`hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors duration-150 border-b border-gray-100 dark:border-gray-700 ${onRowClick ? 'cursor-pointer' : 'cursor-default'}`}
@@ -210,12 +218,12 @@ const VehiclesTable = ({
           </Table>
         </div>
       </div>
-      {hoveredRowId && onRowClick && (
+      {hoveredRowId && onRowClick && !isHoveringAction && (
         <div
           className="fixed z-50 px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap"
           style={{
             left: `${mousePosition.x + 10}px`,
-            top: `${mousePosition.y - 10}px`,
+            top: `${mousePosition.y + 20}px`,
           }}
         >
           Click to view details

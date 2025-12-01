@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LoaderCircle, FileText, Search, Download, Filter, Calendar } from "lucide-react";
+import { LoaderCircle, FileText, Search, Download, Filter, Calendar, RefreshCw } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
@@ -53,6 +53,14 @@ const logTypes = [
   { value: "permanent_delete_vehicle", label: "Permanently Delete Vehicle" },
   { value: "permanent_delete_accident", label: "Permanently Delete Accident" },
   { value: "permanent_delete_violation", label: "Permanently Delete Violation" },
+  { value: "export_vehicles", label: "Export Vehicles" },
+  { value: "export_violations", label: "Export Violations" },
+  { value: "export_accidents", label: "Export Accidents" },
+  { value: "export_dashboard_report", label: "Export Dashboard Report" },
+  { value: "export_account_logs", label: "Export Account Logs" },
+  { value: "download_automated_report", label: "Download Automated Report" },
+  { value: "automatic_retrain_accident", label: "Automatic Retrain - Accident Model" },
+  { value: "automatic_retrain_mv_registration", label: "Automatic Retrain - MV Registration Model" },
 ];
 
 export default function ViewAccountLogsPage() {
@@ -199,9 +207,9 @@ export default function ViewAccountLogsPage() {
                   <span className="hidden sm:inline">Export Excel</span>
                   <span className="sm:hidden">Export</span>
                 </Button>
-                <Button onClick={handleSearch} size="sm" className="w-full sm:w-auto">
-                  <Search className="mr-2 h-4 w-4" />
-                  Search
+                <Button onClick={() => fetchLogs(currentPage)} size="sm" className="w-full sm:w-auto">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
                 </Button>
               </div>
             </div>

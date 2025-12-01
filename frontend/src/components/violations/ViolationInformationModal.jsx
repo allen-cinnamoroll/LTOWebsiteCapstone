@@ -13,7 +13,7 @@ import {
   X
 } from "lucide-react";
 
-const ViolationInformationModal = ({ open, onOpenChange, violationData, allViolations = [] }) => {
+const ViolationInformationModal = ({ open, onOpenChange, violationData, allViolations = [], typeFilter = "all" }) => {
   const [violatorViolations, setViolatorViolations] = useState([]);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const ViolationInformationModal = ({ open, onOpenChange, violationData, allViola
       // Find all violations for this violator
       findViolatorViolations();
     }
-  }, [open, violationData, allViolations]);
+  }, [open, violationData, allViolations, typeFilter]);
 
   const findViolatorViolations = () => {
     if (!violationData || allViolations.length === 0) {
@@ -30,7 +30,7 @@ const ViolationInformationModal = ({ open, onOpenChange, violationData, allViola
     }
 
     // Match violations by firstName, lastName, middleInitial, and suffix
-    const matchingViolations = allViolations.filter(v => {
+    let matchingViolations = allViolations.filter(v => {
       const sameFirstName = (v.firstName || "N/A") === (violationData.firstName || "N/A");
       const sameLastName = (v.lastName || "N/A") === (violationData.lastName || "N/A");
       const sameMiddleInitial = (v.middleInitial || "") === (violationData.middleInitial || "");
@@ -38,6 +38,11 @@ const ViolationInformationModal = ({ open, onOpenChange, violationData, allViola
       
       return sameFirstName && sameLastName && sameMiddleInitial && sameSuffix;
     });
+
+    // Filter by typeFilter if not "all"
+    if (typeFilter !== "all") {
+      matchingViolations = matchingViolations.filter(v => v.violationType === typeFilter);
+    }
 
     // Find the clicked violation (match by _id or topNo)
     const clickedViolationId = violationData._id;

@@ -4,6 +4,7 @@ import cors from "cors";
 import compression from "compression";
 import http from "http"; 
 import path from "path";
+import fs from "fs";
 import database from "./database/database.js";
 import dotenv from "dotenv"
 import { scheduleVehicleExpirationCheck, scheduleWeeklyOTPReset } from "./util/scheduler.js";
@@ -48,8 +49,26 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+// Serve static files from uploads directory with custom error handling for avatars
+app.use('/uploads', (req, res, next) => {
+  // For avatar files, check if they exist before serving
+  if (req.path.startsWith('/avatars/')) {
+    const filePath = path.join(process.cwd(), 'uploads', req.path);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      // Return 404 with JSON response for API consistency
+      return res.status(404).json({
+        success: false,
+        message: 'Avatar file not found',
+        error: 'FILE_NOT_FOUND'
+      });
+    }
+  }
+  
+  // Use express.static for existing files
+  express.static(path.join(process.cwd(), 'uploads'))(req, res, next);
+});
 
 //import routes
 app.use("/api", router);

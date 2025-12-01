@@ -618,11 +618,20 @@ export const fixDriverVehicleRelationships = async (req, res) => {
  * Helper function to build date filter for dateOfRenewal array field
  * Filters vehicles whose date of renewal falls within the specified month and year
  */
-const buildDateOfRenewalFilter = (month, year) => {
+const buildDateOfRenewalFilter = (month, year, customStartDate = null, customEndDate = null) => {
   // Build date range for the specified month/year
   // MongoDB aggregation requires ISODate, so we create date objects in the pipeline
-  const startDate = new Date(year, month - 1, 1);
-  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+  let startDate, endDate;
+  
+  if (customStartDate && customEndDate) {
+    // Use custom dates (for "all" months case)
+    startDate = customStartDate;
+    endDate = customEndDate;
+  } else {
+    // Use month/year to build dates
+    startDate = new Date(year, month - 1, 1);
+    endDate = new Date(year, month, 0, 23, 59, 59, 999);
+  }
 
   return {
     $expr: {
@@ -752,26 +761,33 @@ export const exportVehicles = async (req, res) => {
       });
     }
 
-    // Validate month and year
-    if (!month || !year) {
+    // Validate year
+    if (!year) {
       return res.status(400).json({
         success: false,
-        message: "Month and year are required",
+        message: "Year is required",
       });
     }
 
-    const monthNum = parseInt(month);
     const yearNum = parseInt(year);
 
+    // Build date filter based on whether month is "all" or a specific month
+    let dateFilter;
+    if (month === "all" || !month) {
+      // Filter by entire year - use January to December
+      const startDate = new Date(yearNum, 0, 1); // January 1st
+      const endDate = new Date(yearNum, 11, 31, 23, 59, 59, 999); // December 31st
+      dateFilter = buildDateOfRenewalFilter(1, yearNum, startDate, endDate); // Pass month=1 but use custom dates
+    } else {
+      const monthNum = parseInt(month);
     if (monthNum < 1 || monthNum > 12) {
       return res.status(400).json({
         success: false,
-        message: "Month must be between 1 and 12",
+          message: "Month must be between 1 and 12, or 'all' for all months",
       });
+      }
+      dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
     }
-
-    // Build date filter
-    const dateFilter = buildDateOfRenewalFilter(monthNum, yearNum);
 
     // Fetch vehicles with filter and populate driver information
     // Populate ownerId with all necessary owner fields
@@ -788,8 +804,9 @@ export const exportVehicles = async (req, res) => {
     // Note: With .lean(), dates are already converted to Date objects or ISO strings
     // No need to call toObject() as lean() already returns plain objects
 
+    const monthLabel = month === "all" ? "all months" : `${month}/${year}`;
     console.log(
-      `Exporting ${vehicles.length} vehicles for ${month}/${year} as ${format.toUpperCase()}`
+      `Exporting ${vehicles.length} vehicles for ${monthLabel} as ${format.toUpperCase()}`
     );
 
 
@@ -981,12 +998,30 @@ export const exportVehicles = async (req, res) => {
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     
+    const filenameMonthLabel = month === "all" ? "AllMonths" : month;
+    const filename = `vehicles_${filenameMonthLabel}_${year}.${format}`;
+    
+    // Log the export activity BEFORE sending response
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_vehicles',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Exported vehicles to ${format.toUpperCase()} - Month: ${filenameMonthLabel}, Year: ${year}, Records: ${exportData.length}`
+        });
+      } catch (logError) {
+        console.error('Failed to log vehicle export:', logError);
+      }
+    }
+    
     if (format === "csv") {
       const csvContent = convertToCSV(exportData);
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename=vehicles_${month}_${year}.csv`
+        `attachment; filename=${filename}`
       );
       res.send("\ufeff" + csvContent); // Add BOM for Excel compatibility
     } else {
@@ -995,12 +1030,28 @@ export const exportVehicles = async (req, res) => {
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename=vehicles_${month}_${year}.json`
+        `attachment; filename=${filename}`
       );
       res.send(jsonContent);
     }
   } catch (error) {
     console.error("Error exporting vehicles:", error);
+    
+    // Log failed export attempt
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_vehicles',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Failed to export vehicles - Month: ${req.query.month || 'all'}, Year: ${req.query.year} - Error: ${error.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log vehicle export error:', logError);
+      }
+    }
+    
     res.status(500).json({
       success: false,
       message: "Internal server error",

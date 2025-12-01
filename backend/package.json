@@ -15,7 +15,11 @@
         "verify": "node scripts/verify_relationships.js",
         "fix-duplicates": "node scripts/fix_duplicate_drivers.js",
         "find-orphaned": "node scripts/find_orphaned_drivers.js",
-        "show-multiple": "node scripts/show_multiple_vehicles.js"
+        "show-multiple": "node scripts/show_multiple_vehicles.js",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=unit_testing",
+        "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+        "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
     },
     "keywords": [],
     "author": "",
@@ -40,5 +44,9 @@
         "nodemailer": "^7.0.6",
         "pdfkit": "^0.17.2",
         "xlsx": "^0.18.5"
+    },
+    "devDependencies": {
+        "@jest/globals": "^29.7.0",
+        "jest": "^29.7.0"
     }
 }

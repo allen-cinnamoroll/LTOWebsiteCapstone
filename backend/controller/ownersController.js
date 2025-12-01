@@ -309,6 +309,14 @@ export const deleteDriver = async (req, res) => {
       });
     }
 
+    // Check if owner has vehicles
+    if (driver.vehicleIds && Array.isArray(driver.vehicleIds) && driver.vehicleIds.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete owner with associated vehicles. Please remove or reassign vehicles first.",
+      });
+    }
+
     // Soft delete by setting deletedAt
     driver.deletedAt = new Date();
     driver.updatedBy = req.user ? req.user.userId : null;
@@ -472,6 +480,14 @@ export const permanentDeleteDriver = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Owner must be in bin before permanent deletion",
+      });
+    }
+
+    // Check if owner has vehicles
+    if (driver.vehicleIds && Array.isArray(driver.vehicleIds) && driver.vehicleIds.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot permanently delete owner with associated vehicles. Please remove or reassign vehicles first.",
       });
     }
 

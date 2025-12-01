@@ -154,7 +154,9 @@ const VehicleExportModal = () => {
       link.href = url;
 
       // Generate filename with date
-      const monthName = months.find((m) => m.value === month)?.label || month;
+      const monthName = month === "all" 
+        ? "AllMonths" 
+        : months.find((m) => m.value === month)?.label || month;
       const filename = `vehicles_${monthName}_${year}.${format}`;
       link.setAttribute("download", filename);
 
@@ -288,6 +290,7 @@ const VehicleExportModal = () => {
                     <SelectValue placeholder="Select month" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">All Months</SelectItem>
                     {months.map((m) => (
                       <SelectItem key={m.value} value={m.value}>
                         {m.label}

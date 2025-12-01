@@ -410,6 +410,36 @@ def health_check():
         }), 500
 
 
+def compute_baseline_count(historical_df, year, month, municipality, barangay):
+    """
+    Compute a simple baseline: average of last up to 3 months for this barangay.
+    """
+    try:
+        # Build previous months list (year, month)
+        prev = []
+        py, pm = year, month
+        for _ in range(3):
+            pm -= 1
+            if pm == 0:
+                pm = 12
+                py -= 1
+            prev.append((py, pm))
+        # Filter historical df for these months
+        subset = historical_df[
+            (historical_df['municipality'] == municipality) &
+            (historical_df['barangay'] == barangay) &
+            (
+                (historical_df['year'] == prev[0][0]) & (historical_df['month'] == prev[0][1]) |
+                (historical_df['year'] == prev[1][0]) & (historical_df['month'] == prev[1][1]) |
+                (historical_df['year'] == prev[2][0]) & (historical_df['month'] == prev[2][1])
+            )
+        ]
+        if subset.empty:
+            return 0.0
+        return float(subset['accident_count'].mean())
+    except Exception:
+        return 0.0
+
 @app.route('/api/accidents/predict/count', methods=['GET'])
 def predict_accident_count():
     """
@@ -465,8 +495,26 @@ def predict_accident_count():
         features_df = prepare_features(year, month, municipality, barangay, historical_data)
         
         # Make regression prediction (accident count)
-        prediction_count = rf_regressor_model.predict(features_df)[0]
-        prediction_count = max(0, float(prediction_count))  # Ensure non-negative
+        # Model is trained on log-transformed target, so we need to inverse transform
+        use_log_target = model_metadata.get('use_log_target', True) if model_metadata else True
+        prediction_log = rf_regressor_model.predict(features_df)[0]
+        if use_log_target:
+            prediction_count = np.expm1(prediction_log)  # Inverse log1p transform
+        else:
+            prediction_count = prediction_log
+        prediction_count = max(0, float(prediction_count))
+        
+        # Compute historical baseline and blend to add locality differentiation
+        baseline = 0.0
+        if historical_data is not None and not historical_data.empty:
+            baseline = compute_baseline_count(historical_data, year, month, municipality, barangay)
+        
+        # Blend: 60% baseline, 40% model prediction
+        blended_prediction = 0.6 * baseline + 0.4 * prediction_count
+        # Ensure non-negative and reasonable precision
+        blended_prediction = max(0.0, float(blended_prediction))
+        # Rounded count for reporting and rule thresholds
+        rounded_prediction = int(round(blended_prediction))
         
         # Make classification prediction (high-risk) if classifier is available
         is_high_risk = None
@@ -478,7 +526,8 @@ def predict_accident_count():
         response = {
             'success': True,
             'prediction': {
-                'predicted_count': convert_to_native_types(prediction_count),
+                'predicted_count': convert_to_native_types(rounded_prediction),
+                'predicted_count_raw': convert_to_native_types(round(blended_prediction, 2)),
                 'is_high_risk': is_high_risk,
                 'risk_probability': convert_to_native_types(risk_probability) if risk_probability is not None else None
             },
@@ -647,36 +696,6 @@ def predict_all_barangays():
         except Exception as e:
             logger.warning(f'compute_high_risk_hours error for {municipality}/{barangay}: {e}')
             return {'hours': [], 'ranges': '', 'threshold': 0.0}
-
-    def compute_baseline_count(historical_df, year, month, municipality, barangay):
-        """
-        Compute a simple baseline: average of last up to 3 months for this barangay.
-        """
-        try:
-            # Build previous months list (year, month)
-            prev = []
-            py, pm = year, month
-            for _ in range(3):
-                pm -= 1
-                if pm == 0:
-                    pm = 12
-                    py -= 1
-                prev.append((py, pm))
-            # Filter historical df for these months
-            subset = historical_df[
-                (historical_df['municipality'] == municipality) &
-                (historical_df['barangay'] == barangay) &
-                (
-                    (historical_df['year'] == prev[0][0]) & (historical_df['month'] == prev[0][1]) |
-                    (historical_df['year'] == prev[1][0]) & (historical_df['month'] == prev[1][1]) |
-                    (historical_df['year'] == prev[2][0]) & (historical_df['month'] == prev[2][1])
-                )
-            ]
-            if subset.empty:
-                return 0.0
-            return float(subset['accident_count'].mean())
-        except Exception:
-            return 0.0
 
     try:
         if not model_loaded:
@@ -898,6 +917,18 @@ def predict_batch():
                 prediction_count = prediction_log
             prediction_count = max(0, float(prediction_count))
             
+            # Compute historical baseline and blend to add locality differentiation
+            baseline = 0.0
+            if historical_data is not None and not historical_data.empty:
+                baseline = compute_baseline_count(historical_data, year, month, municipality, barangay)
+            
+            # Blend: 60% baseline, 40% model prediction
+            blended_prediction = 0.6 * baseline + 0.4 * prediction_count
+            # Ensure non-negative and reasonable precision
+            blended_prediction = max(0.0, float(blended_prediction))
+            # Rounded count for reporting and rule thresholds
+            rounded_prediction = int(round(blended_prediction))
+            
             # Make classification prediction (high-risk) if classifier is available
             is_high_risk = None
             risk_probability = None
@@ -908,7 +939,8 @@ def predict_batch():
             predictions.append({
                 'municipality': municipality,
                 'barangay': barangay,
-                'predicted_count': convert_to_native_types(prediction_count),
+                'predicted_count': convert_to_native_types(rounded_prediction),
+                'predicted_count_raw': convert_to_native_types(round(blended_prediction, 2)),
                 'is_high_risk': is_high_risk,
                 'risk_probability': convert_to_native_types(risk_probability) if risk_probability is not None else None
             })

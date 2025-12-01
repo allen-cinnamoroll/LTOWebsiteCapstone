@@ -754,6 +754,246 @@ export const getAccidentAnalytics = async (req, res) => {
 };
 
 // Get accident risk predictions analytics
+// Helper function to convert accidents to CSV
+const convertAccidentsToCSV = (exportData) => {
+  const headers = [
+    "blotterNo",
+    "vehiclePlateNo",
+    "vehicleMCPlateNo",
+    "vehicleChassisNo",
+    "suspect",
+    "stageOfFelony",
+    "offense",
+    "offenseType",
+    "narrative",
+    "caseStatus",
+    "region",
+    "province",
+    "municipality",
+    "barangay",
+    "street",
+    "dateCommited",
+    "timeCommited",
+    "incidentType",
+  ];
+
+  const rows = exportData.map((accident) => {
+    return [
+      accident.blotterNo || "",
+      accident.vehiclePlateNo || "",
+      accident.vehicleMCPlateNo || "",
+      accident.vehicleChassisNo || "",
+      accident.suspect || "",
+      accident.stageOfFelony || "",
+      accident.offense || "",
+      accident.offenseType || "",
+      accident.narrative || "",
+      accident.caseStatus || "",
+      accident.region || "",
+      accident.province || "",
+      accident.municipality || "",
+      accident.barangay || "",
+      accident.street || "",
+      accident.dateCommited || "",
+      accident.timeCommited || "",
+      accident.incidentType || "",
+    ];
+  });
+
+  const escapeCSV = (value) => {
+    if (value === null || value === undefined) return "";
+    const str = String(value);
+    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const csvRows = [
+    headers.join(","),
+    ...rows.map((row) => row.map(escapeCSV).join(",")),
+  ];
+
+  return csvRows.join("\n");
+};
+
+// Export accidents filtered by date committed
+export const exportAccidents = async (req, res) => {
+  try {
+    const { format = "csv", month, year } = req.query;
+
+    // Validate format
+    if (format !== "csv" && format !== "json") {
+      return res.status(400).json({
+        success: false,
+        message: "Format must be either 'csv' or 'json'",
+      });
+    }
+
+    // Validate year
+    if (!year) {
+      return res.status(400).json({
+        success: false,
+        message: "Year is required",
+      });
+    }
+
+    const yearNum = parseInt(year);
+
+    // Build date filter for dateCommited
+    let startDate, endDate;
+    if (month === "all" || !month) {
+      // Filter by entire year
+      startDate = new Date(yearNum, 0, 1); // January 1st
+      endDate = new Date(yearNum, 11, 31, 23, 59, 59, 999); // December 31st
+    } else {
+      const monthNum = parseInt(month);
+      if (monthNum < 1 || monthNum > 12) {
+        return res.status(400).json({
+          success: false,
+          message: "Month must be between 1 and 12, or 'all' for all months",
+        });
+      }
+      startDate = new Date(yearNum, monthNum - 1, 1);
+      endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+    }
+
+    // Fetch accidents with date filter
+    let accidents = await AccidentModel.find({
+      deletedAt: null,
+      dateCommited: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    })
+      .lean()
+      .sort({ dateCommited: 1 });
+
+    const monthLabel = month === "all" ? "all months" : `${month}/${year}`;
+    console.log(
+      `Exporting ${accidents.length} accidents for ${monthLabel} as ${format.toUpperCase()}`
+    );
+
+    // Format accidents data
+    const exportData = accidents.map((accident) => {
+      let dateCommitedStr = "";
+      if (accident.dateCommited) {
+        try {
+          const date = new Date(accident.dateCommited);
+          if (!isNaN(date.getTime())) {
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            dateCommitedStr = `${month}/${day}/${year}`;
+          }
+        } catch (error) {
+          console.warn(`Error formatting date for accident ${accident.blotterNo}:`, error);
+        }
+      }
+
+      return {
+        blotterNo: accident.blotterNo || "",
+        vehiclePlateNo: accident.vehiclePlateNo || "",
+        vehicleMCPlateNo: accident.vehicleMCPlateNo || "",
+        vehicleChassisNo: accident.vehicleChassisNo || "",
+        suspect: accident.suspect || "",
+        stageOfFelony: accident.stageOfFelony || "",
+        offense: accident.offense || "",
+        offenseType: accident.offenseType || "",
+        narrative: accident.narrative || "",
+        caseStatus: accident.caseStatus || "",
+        region: accident.region || "",
+        province: accident.province || "",
+        municipality: accident.municipality || "",
+        barangay: accident.barangay || "",
+        street: accident.street || "",
+        dateCommited: dateCommitedStr,
+        timeCommited: accident.timeCommited || "",
+        incidentType: accident.incidentType || "",
+      };
+    });
+
+    // Sort exportData by dateCommited in ascending order
+    if (format === "csv") {
+      exportData.sort((a, b) => {
+        const parseDate = (dateStr) => {
+          if (!dateStr || dateStr === "") return new Date(0);
+          const [month, day, year] = dateStr.split('/').map(Number);
+          return new Date(year, month - 1, day);
+        };
+
+        const dateA = parseDate(a.dateCommited);
+        const dateB = parseDate(b.dateCommited);
+        return dateA.getTime() - dateB.getTime();
+      });
+    }
+
+    // Convert to requested format and send
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    
+    const filenameMonthLabel = month === "all" ? "AllMonths" : month;
+    const filename = `accidents_${filenameMonthLabel}_${year}.${format}`;
+    
+    // Log the export activity BEFORE sending response
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_accidents',
+          ipAddress: getClientIP(req),
+          status: 'success',
+          details: `Exported accidents to ${format.toUpperCase()} - Month: ${filenameMonthLabel}, Year: ${year}, Records: ${exportData.length}`
+        });
+      } catch (logError) {
+        console.error('Failed to log accident export:', logError);
+      }
+    }
+    
+    if (format === "csv") {
+      const csvContent = convertAccidentsToCSV(exportData);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=${filename}`
+      );
+      res.send("\ufeff" + csvContent); // Add BOM for Excel compatibility
+    } else {
+      const jsonContent = JSON.stringify(exportData, null, 2);
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=${filename}`
+      );
+      res.send(jsonContent);
+    }
+  } catch (error) {
+    console.error("Error exporting accidents:", error);
+    
+    // Log failed export attempt
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'export_accidents',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Failed to export accidents - Month: ${req.query.month || 'all'}, Year: ${req.query.year} - Error: ${error.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log accident export error:', logError);
+      }
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 export const getAccidentRiskAnalytics = async (req, res) => {
   try {
     const { period = '6months' } = req.query;

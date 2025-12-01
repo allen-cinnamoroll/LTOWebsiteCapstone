@@ -104,6 +104,24 @@ def main():
             logger.error("Training failed!")
             logger.error(f"STDOUT:\n{result.stdout}")
             logger.error(f"STDERR:\n{result.stderr}")
+            
+            # Log failed retrain activity
+            try:
+                import requests
+                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+                log_url = f'{api_url}/api/user/logs/automatic-retrain'
+                log_data = {
+                    'logType': 'automatic_retrain_accident',
+                    'status': 'failed',
+                    'details': f'Automatic retrain failed: {result.stderr[:200] if result.stderr else "Unknown error"}'
+                }
+                try:
+                    requests.post(log_url, json=log_data, timeout=10)
+                except:
+                    pass  # Don't fail if logging fails
+            except:
+                pass  # Don't fail if requests is not available
+            
             sys.exit(1)
         
         logger.info("Training completed successfully!")
@@ -155,6 +173,35 @@ def main():
             except Exception as e:
                 logger.warning(f"Error restarting service: {e}")
                 logger.warning("Please restart manually: sudo systemctl restart accident-prediction-api")
+        
+        # Step 4: Log the automatic retrain activity to the database
+        logger.info("Step 4: Logging automatic retrain activity...")
+        try:
+            try:
+                import requests
+            except ImportError:
+                logger.warning("requests library not available, skipping activity log")
+            else:
+                # Get the Node.js API URL (default port 5000)
+                api_url = os.getenv('NODE_API_URL', 'http://localhost:5000')
+                log_url = f'{api_url}/api/user/logs/automatic-retrain'
+                
+                log_data = {
+                    'logType': 'automatic_retrain_accident',
+                    'status': 'success',
+                    'details': f'Automatic retrain completed successfully at {datetime.now().isoformat()}'
+                }
+                
+                try:
+                    log_response = requests.post(log_url, json=log_data, timeout=10)
+                    if log_response.status_code == 200:
+                        logger.info("Automatic retrain activity logged successfully")
+                    else:
+                        logger.warning(f"Failed to log activity (status {log_response.status_code}): {log_response.text}")
+                except Exception as log_error:
+                    logger.warning(f"Failed to log activity: {log_error}")
+        except Exception as e:
+            logger.warning(f"Error logging activity: {e}")
         
         logger.info("=" * 80)
         logger.info("RETRAINING COMPLETE!")

@@ -12,6 +12,7 @@ import {
 	getDeletedAccidents,
 	restoreAccident,
 	permanentDeleteAccident,
+	exportAccidents,
 } from "../controller/accidentController.js";
 
 const accidentRouter = express.Router();
@@ -28,6 +29,9 @@ accidentRouter.post(
 
 // Get all accidents (Authenticated Users)
 accidentRouter.get("/", authenticate, getAccidents);
+
+// Export accidents (Authenticated Users)
+accidentRouter.get("/export", authenticate, exportAccidents);
 
 // Get deleted accidents (bin)
 accidentRouter.get("/bin", authenticate, getDeletedAccidents);

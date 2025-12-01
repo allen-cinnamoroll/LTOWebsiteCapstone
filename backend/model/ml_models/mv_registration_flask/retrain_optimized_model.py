@@ -7,12 +7,33 @@ from data_preprocessor_daily import DailyDataPreprocessor
 from sarima_model_optimized import OptimizedSARIMAModel
 from mongo_to_csv_exporter import export_mongo_to_csv
 import os
+import sys
+
+# Fix encoding for Windows console (cp1252 can't handle emojis)
+if sys.platform == 'win32':
+    # Try to set UTF-8 encoding for stdout/stderr
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except (AttributeError, ValueError):
+        # If reconfigure is not available, use a safe print function
+        pass
+
+# Safe print function that handles encoding errors
+def safe_print(text):
+    """Print text safely, handling encoding errors"""
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        # Replace emojis with ASCII alternatives
+        text_safe = text.replace('✅', '[OK]').replace('❌', '[ERROR]').replace('⚠️', '[WARNING]').replace('📁', '[DIR]')
+        print(text_safe)
 
 def main():
-    print("=" * 70)
-    print("RETRAINING OPTIMIZED SARIMA MODEL WITH DATE FIX")
-    print("=" * 70)
-    print()
+    safe_print("=" * 70)
+    safe_print("RETRAINING OPTIMIZED SARIMA MODEL WITH DATE FIX")
+    safe_print("=" * 70)
+    safe_print("")
     
     # Get paths
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,20 +47,20 @@ def main():
 
     # Always export fresh data from MongoDB into the training directory.
     # This will create/overwrite DAVOR_data.csv based on the latest DB state.
-    print("Step 0: Exporting registration data from MongoDB to CSV...")
+    safe_print("Step 0: Exporting registration data from MongoDB to CSV...")
     try:
         csv_path = export_mongo_to_csv(data_dir, filename="DAVOR_data.csv")
-        print(f"   ✅ Mongo export complete: {csv_path}")
+        safe_print(f"   [OK] Mongo export complete: {csv_path}")
     except Exception as e:
-        print(f"❌ ERROR: Failed to export data from MongoDB: {str(e)}")
+        safe_print(f"[ERROR] Failed to export data from MongoDB: {str(e)}")
         return False
     
-    print(f"📁 Data directory: {data_dir}")
-    print(f"📁 Model directory: {model_dir}")
-    print()
+    safe_print(f"[DIR] Data directory: {data_dir}")
+    safe_print(f"[DIR] Model directory: {model_dir}")
+    safe_print("")
     
     # Load data
-    print("Step 1: Loading and preprocessing daily data...")
+    safe_print("Step 1: Loading and preprocessing daily data...")
     try:
         preprocessor = DailyDataPreprocessor(csv_path)
         daily_data, exogenous_vars, processing_info = preprocessor.load_and_process_daily_data(
@@ -47,23 +68,23 @@ def main():
             fill_method='zero'
         )
         
-        print(f"✅ Data loaded successfully")
-        print(f"   - Total days: {len(daily_data)}")
-        print(f"   - Date range: {daily_data.index.min()} to {daily_data.index.max()}")
+        safe_print(f"[OK] Data loaded successfully")
+        safe_print(f"   - Total days: {len(daily_data)}")
+        safe_print(f"   - Date range: {daily_data.index.min()} to {daily_data.index.max()}")
         
         if 'actual_date_range' in processing_info:
             actual_last_date = processing_info['actual_date_range']['end']
-            print(f"   - Actual last registration date: {actual_last_date}")
+            safe_print(f"   - Actual last registration date: {actual_last_date}")
         
-        print()
+        safe_print("")
     except Exception as e:
-        print(f"❌ ERROR loading data: {str(e)}")
+        safe_print(f"[ERROR] Failed to load data: {str(e)}")
         import traceback
         traceback.print_exc()
         return False
     
     # Initialize and train model
-    print("Step 2: Initializing and training optimized model...")
+    safe_print("Step 2: Initializing and training optimized model...")
     try:
         model = OptimizedSARIMAModel(
             model_dir=model_dir,
@@ -72,7 +93,7 @@ def main():
             scaler_type='minmax'
         )
         
-        print("   - Training model with force=True (will overwrite existing model)...")
+        safe_print("   - Training model with force=True (will overwrite existing model)...")
         # Use multiple exogenous features, including LTO schedule-based ones
         exog_cols = [
             'is_weekend_or_holiday',
@@ -91,24 +112,24 @@ def main():
         )
         
         if training_info:
-            print("   ✅ Model trained successfully!")
-            print(f"   - Model parameters: {training_info['model_params']}")
+            safe_print("   [OK] Model trained successfully!")
+            safe_print(f"   - Model parameters: {training_info['model_params']}")
             if training_info.get('accuracy_metrics'):
-                print(f"   - Training accuracy (MAPE): {training_info['accuracy_metrics'].get('mape', 'N/A'):.2f}%")
+                safe_print(f"   - Training accuracy (MAPE): {training_info['accuracy_metrics'].get('mape', 'N/A'):.2f}%")
             if training_info.get('test_accuracy_metrics'):
-                print(f"   - Test accuracy (MAPE): {training_info['test_accuracy_metrics'].get('mape', 'N/A'):.2f}%")
+                safe_print(f"   - Test accuracy (MAPE): {training_info['test_accuracy_metrics'].get('mape', 'N/A'):.2f}%")
         else:
-            print("   ⚠️  Model training returned None")
+            safe_print("   [WARNING] Model training returned None")
         
-        print()
+        safe_print("")
     except Exception as e:
-        print(f"❌ ERROR training model: {str(e)}")
+        safe_print(f"[ERROR] Failed to train model: {str(e)}")
         import traceback
         traceback.print_exc()
         return False
     
     # Verify metadata
-    print("Step 3: Verifying metadata...")
+    safe_print("Step 3: Verifying metadata...")
     try:
         import json
         metadata_file = os.path.join(model_dir, 'sarima_metadata.json')
@@ -117,29 +138,29 @@ def main():
                 metadata = json.load(f)
             
             if 'actual_last_date' in metadata:
-                print(f"   ✅ actual_last_date found in metadata: {metadata['actual_last_date']}")
+                safe_print(f"   [OK] actual_last_date found in metadata: {metadata['actual_last_date']}")
             else:
-                print(f"   ⚠️  Warning: actual_last_date not in metadata")
+                safe_print(f"   [WARNING] actual_last_date not in metadata")
             
             if 'last_data_date' in metadata:
-                print(f"   - last_data_date (daily data): {metadata['last_data_date']}")
+                safe_print(f"   - last_data_date (daily data): {metadata['last_data_date']}")
         else:
-            print(f"   ⚠️  Warning: Metadata file not found")
+            safe_print(f"   [WARNING] Metadata file not found")
         
-        print()
+        safe_print("")
     except Exception as e:
-        print(f"   ⚠️  Warning: Could not verify metadata: {str(e)}")
-        print()
+        safe_print(f"   [WARNING] Could not verify metadata: {str(e)}")
+        safe_print("")
     
-    print("=" * 70)
-    print("✅ RETRAINING COMPLETE!")
-    print("=" * 70)
-    print()
-    print("Next steps:")
-    print("1. Restart Flask API: pm2 restart mv-prediction-api (or your method)")
-    print("2. Test API: curl http://localhost:5002/api/predict/registrations?weeks=4")
-    print("3. Clear browser cache and refresh frontend")
-    print()
+    safe_print("=" * 70)
+    safe_print("[OK] RETRAINING COMPLETE!")
+    safe_print("=" * 70)
+    safe_print("")
+    safe_print("Next steps:")
+    safe_print("1. Restart Flask API: pm2 restart mv-prediction-api (or your method)")
+    safe_print("2. Test API: curl http://localhost:5002/api/predict/registrations?weeks=4")
+    safe_print("3. Clear browser cache and refresh frontend")
+    safe_print("")
     
     return True
 

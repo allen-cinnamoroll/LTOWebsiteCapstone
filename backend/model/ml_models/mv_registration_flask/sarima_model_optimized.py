@@ -26,6 +26,7 @@ import os
 import json
 import logging
 from datetime import datetime, timedelta
+import holidays
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -288,6 +289,101 @@ class OptimizedSARIMAModel:
         else:
             return inverse.flatten()
     
+    def _generate_exogenous_for_future_dates(self, date_index):
+        """
+        Generate exogenous variables for future dates (weekends/holidays)
+        
+        Args:
+            date_index: pandas DatetimeIndex for future dates
+            
+        Returns:
+            DataFrame with exogenous variables matching the format used during training
+        """
+        exog_data = pd.DataFrame(index=date_index)
+        
+        # Normalize dates to midnight
+        normalized_dates = date_index.normalize()
+        
+        # Weekend indicator (1 = Saturday or Sunday, 0 = weekday)
+        exog_data['is_weekend'] = (normalized_dates.dayofweek >= 5).astype(int)
+        
+        # Holiday indicator from built-in Philippines holiday library
+        ph_holidays = holidays.Philippines()
+        exog_data['is_holiday_library'] = normalized_dates.map(
+            lambda x: x in ph_holidays
+        ).astype(int)
+        
+        # Try to load custom holiday dates if available
+        custom_holiday_dates = set()
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            holiday_csv_path = os.path.join(base_dir, "holiday_data.csv")
+            if os.path.exists(holiday_csv_path):
+                try:
+                    df_holidays = pd.read_csv(holiday_csv_path)
+                except UnicodeDecodeError:
+                    df_holidays = pd.read_csv(holiday_csv_path, encoding="latin1")
+                
+                if "date" in df_holidays.columns:
+                    df_holidays["date_parsed"] = pd.to_datetime(
+                        df_holidays["date"],
+                        dayfirst=True,
+                        errors="coerce"
+                    )
+                    df_holidays = df_holidays.dropna(subset=["date_parsed"])
+                    df_holidays["date_parsed"] = df_holidays["date_parsed"].dt.normalize()
+                    custom_holiday_dates = set(df_holidays["date_parsed"].tolist())
+        except Exception as e:
+            logger.warning(f"Could not load custom holiday data: {str(e)}")
+        
+        # Holiday indicator from custom holiday_data.csv (if loaded)
+        if custom_holiday_dates:
+            exog_data['is_custom_holiday'] = normalized_dates.isin(
+                custom_holiday_dates
+            ).astype(int)
+        else:
+            exog_data['is_custom_holiday'] = 0
+        
+        # Unified holiday flag
+        exog_data['is_holiday'] = (
+            (exog_data['is_holiday_library'] == 1) |
+            (exog_data['is_custom_holiday'] == 1)
+        ).astype(int)
+        
+        # Combined weekend/holiday indicator (this is what we use during training)
+        exog_data['is_weekend_or_holiday'] = (
+            (exog_data['is_weekend'] == 1) |
+            (exog_data['is_holiday'] == 1)
+        ).astype(int)
+        
+        # Return only the column(s) that were used during training
+        # Check what columns were used during training
+        exog_columns = None
+        
+        # Method 1: Check if we have exog_all stored (from training)
+        if self.exog_all is not None and len(self.exog_all.columns) > 0:
+            exog_columns = self.exog_all.columns.tolist()
+        # Method 2: Check the fitted model's exog_names (works for loaded models)
+        elif (hasattr(self, 'fitted_model') and 
+              self.fitted_model is not None and
+              hasattr(self.fitted_model, 'model') and 
+              hasattr(self.fitted_model.model, 'exog_names') and 
+              self.fitted_model.model.exog_names is not None and
+              len(self.fitted_model.model.exog_names) > 0):
+            exog_columns = list(self.fitted_model.model.exog_names)
+        
+        if exog_columns:
+            # Filter to only include columns that exist in exog_data
+            available_columns = [col for col in exog_columns if col in exog_data.columns]
+            if available_columns:
+                return exog_data[available_columns]
+            else:
+                logger.warning(f"Requested exogenous columns {exog_columns} not found in generated data. Using default.")
+                return exog_data[['is_weekend_or_holiday']]
+        else:
+            # Default: use is_weekend_or_holiday (most common case)
+            return exog_data[['is_weekend_or_holiday']]
+    
     def train(self, data, exogenous=None, force=False, processing_info=None):
         """
         Train the optimized SARIMA model
@@ -411,6 +507,11 @@ class OptimizedSARIMAModel:
             logger.warning("Test set is empty, skipping test metrics")
             self.test_accuracy_metrics = None
         
+        # Analyze test period patterns
+        if len(test_series) > 0:
+            logger.info("\nAnalyzing test period patterns...")
+            self._analyze_test_period_patterns(train_series, test_series, exog_train, exog_test)
+        
         # Calculate diagnostic metrics
         logger.info("\nCalculating model diagnostics...")
         self._calculate_diagnostics(train_series)
@@ -430,6 +531,17 @@ class OptimizedSARIMAModel:
         if self.test_accuracy_metrics:
             logger.info(f"DEBUG: Before training_info - test_accuracy_metrics.r2 = {self.test_accuracy_metrics.get('r2')}")
         
+        # Calculate model accuracy percentages
+        training_accuracy = None
+        test_accuracy = None
+        cv_accuracy = None
+        if self.accuracy_metrics and self.accuracy_metrics.get('r2') is not None:
+            training_accuracy = self.calculate_model_accuracy(self.accuracy_metrics['r2'])
+        if self.test_accuracy_metrics and self.test_accuracy_metrics.get('r2') is not None:
+            test_accuracy = self.calculate_model_accuracy(self.test_accuracy_metrics['r2'])
+        if self.cv_results and self.cv_results.get('mean_accuracy') is not None:
+            cv_accuracy = self.cv_results['mean_accuracy']
+        
         training_info = {
             'model_params': self.model_params,
             'training_days': len(train_series),
@@ -445,6 +557,11 @@ class OptimizedSARIMAModel:
             } if len(test_series) > 0 else None,
             'accuracy_metrics': self.accuracy_metrics,
             'test_accuracy_metrics': self.test_accuracy_metrics,
+            'model_accuracy': {
+                'cv_accuracy': float(cv_accuracy) if cv_accuracy is not None else None,  # Primary metric
+                'training_accuracy': float(training_accuracy) if training_accuracy is not None else None,
+                'test_accuracy': float(test_accuracy) if test_accuracy is not None else None
+            },
             'diagnostics': self.diagnostics,
             'cv_results': self.cv_results,
             'aic': float(self.fitted_model.aic),
@@ -744,6 +861,108 @@ class OptimizedSARIMAModel:
             traceback.print_exc()
             self.test_accuracy_metrics = None
     
+    def _analyze_test_period_patterns(self, train_series, test_series, exog_train=None, exog_test=None):
+        """
+        Analyze patterns in test period vs training period to detect differences
+        
+        Args:
+            train_series: Training time series
+            test_series: Test time series
+            exog_train: Training exogenous variables
+            exog_test: Test exogenous variables
+        """
+        try:
+            logger.info("=" * 60)
+            logger.info("TEST PERIOD PATTERN ANALYSIS")
+            logger.info("=" * 60)
+            
+            # Basic statistics comparison
+            train_mean = train_series.mean()
+            test_mean = test_series.mean()
+            train_std = train_series.std()
+            test_std = test_series.std()
+            train_median = train_series.median()
+            test_median = test_series.median()
+            
+            # Calculate percentage differences
+            mean_diff_pct = ((test_mean - train_mean) / train_mean * 100) if train_mean != 0 else 0
+            std_diff_pct = ((test_std - train_std) / train_std * 100) if train_std != 0 else 0
+            
+            logger.info(f"\nStatistical Comparison:")
+            logger.info(f"  Training - Mean: {train_mean:.2f}, Std: {train_std:.2f}, Median: {train_median:.2f}")
+            logger.info(f"  Test      - Mean: {test_mean:.2f}, Std: {test_std:.2f}, Median: {test_median:.2f}")
+            logger.info(f"  Difference - Mean: {mean_diff_pct:+.2f}%, Std: {std_diff_pct:+.2f}%")
+            
+            # Check for significant differences
+            if abs(mean_diff_pct) > 20:
+                logger.warning(f"  ⚠️  Significant mean difference ({mean_diff_pct:+.2f}%) - test period may have different patterns")
+            if abs(std_diff_pct) > 30:
+                logger.warning(f"  ⚠️  Significant variance difference ({std_diff_pct:+.2f}%) - test period may be more/less volatile")
+            
+            # Zero values analysis
+            train_zeros = (train_series == 0).sum()
+            test_zeros = (test_series == 0).sum()
+            train_zero_pct = (train_zeros / len(train_series)) * 100
+            test_zero_pct = (test_zeros / len(test_series)) * 100
+            
+            logger.info(f"\nZero Values:")
+            logger.info(f"  Training: {train_zeros} days ({train_zero_pct:.2f}%)")
+            logger.info(f"  Test: {test_zeros} days ({test_zero_pct:.2f}%)")
+            
+            if abs(test_zero_pct - train_zero_pct) > 10:
+                logger.warning(f"  ⚠️  Different zero-value patterns - test period has {abs(test_zero_pct - train_zero_pct):.2f}% difference")
+            
+            # Weekend/holiday pattern comparison (if exogenous variables available)
+            if exog_train is not None and exog_test is not None:
+                if 'is_weekend_or_holiday' in exog_train.columns:
+                    train_weekend_holiday = exog_train['is_weekend_or_holiday'].sum()
+                    test_weekend_holiday = exog_test['is_weekend_or_holiday'].sum()
+                    train_wh_pct = (train_weekend_holiday / len(exog_train)) * 100
+                    test_wh_pct = (test_weekend_holiday / len(exog_test)) * 100
+                    
+                    logger.info(f"\nWeekend/Holiday Distribution:")
+                    logger.info(f"  Training: {train_weekend_holiday} days ({train_wh_pct:.2f}%)")
+                    logger.info(f"  Test: {test_weekend_holiday} days ({test_wh_pct:.2f}%)")
+                    
+                    if abs(test_wh_pct - train_wh_pct) > 10:
+                        logger.warning(f"  ⚠️  Different weekend/holiday distribution - may affect predictions")
+            
+            # Trend analysis
+            train_trend = np.polyfit(range(len(train_series)), train_series.values, 1)[0]
+            test_trend = np.polyfit(range(len(test_series)), test_series.values, 1)[0]
+            
+            logger.info(f"\nTrend Analysis:")
+            logger.info(f"  Training trend: {train_trend:.4f} (per day)")
+            logger.info(f"  Test trend: {test_trend:.4f} (per day)")
+            
+            if (train_trend > 0 and test_trend < 0) or (train_trend < 0 and test_trend > 0):
+                logger.warning(f"  ⚠️  Opposite trends detected - training and test periods show different directions")
+            
+            # Summary recommendations
+            logger.info(f"\n" + "-" * 60)
+            logger.info("Analysis Summary:")
+            issues = []
+            if abs(mean_diff_pct) > 20:
+                issues.append("Significant mean difference")
+            if abs(std_diff_pct) > 30:
+                issues.append("Significant variance difference")
+            if abs(test_zero_pct - train_zero_pct) > 10:
+                issues.append("Different zero-value patterns")
+            
+            if issues:
+                logger.warning(f"  ⚠️  Potential issues detected: {', '.join(issues)}")
+                logger.info(f"  💡 Recommendation: Consider using cross-validation accuracy as primary metric")
+                logger.info(f"  💡 Recommendation: Model may need retraining with more recent data")
+            else:
+                logger.info(f"  ✓ Test period patterns are similar to training period")
+            
+            logger.info("=" * 60)
+            
+        except Exception as e:
+            logger.error(f"Error analyzing test period patterns: {str(e)}")
+            import traceback
+            traceback.print_exc()
+    
     def _calculate_diagnostics(self, actual_series):
         """Calculate diagnostic metrics: residuals randomness, ACF/PACF"""
         try:
@@ -876,37 +1095,100 @@ class OptimizedSARIMAModel:
                     # Forecast
                     forecast = temp_fitted.forecast(steps=len(test_data), exog=exog_test_fold)
                     
-                    # Calculate MAPE
-                    non_zero_mask = test_data != 0
+                    # Align forecast with test data
+                    if len(forecast) != len(test_data):
+                        min_len = min(len(forecast), len(test_data))
+                        forecast = forecast.iloc[:min_len] if hasattr(forecast, 'iloc') else forecast[:min_len]
+                        test_data = test_data.iloc[:min_len]
+                    
+                    # Convert to arrays for calculations
+                    test_array = np.array(test_data, dtype=float)
+                    forecast_array = np.array(forecast, dtype=float)
+                    
+                    # Remove NaN/Inf values
+                    mask = np.isfinite(test_array) & np.isfinite(forecast_array)
+                    if mask.sum() < 2:
+                        logger.warning(f"  Fold {fold + 1}: Insufficient valid data points")
+                        continue
+                    
+                    test_clean = test_array[mask]
+                    forecast_clean = forecast_array[mask]
+                    
+                    # Calculate multiple metrics
+                    mae = mean_absolute_error(test_clean, forecast_clean)
+                    rmse = np.sqrt(mean_squared_error(test_clean, forecast_clean))
+                    
+                    # MAPE
+                    non_zero_mask = test_clean != 0
                     if non_zero_mask.sum() > 0:
-                        mape = np.mean(np.abs((test_data[non_zero_mask] - forecast[non_zero_mask]) 
-                                              / test_data[non_zero_mask])) * 100
+                        mape = np.mean(np.abs((test_clean[non_zero_mask] - forecast_clean[non_zero_mask]) 
+                                              / test_clean[non_zero_mask])) * 100
                     else:
                         mape = np.nan
                     
+                    # R²
+                    r2 = None
+                    if len(test_clean) >= 2:
+                        test_variance = np.var(test_clean)
+                        if test_variance > 0 and not np.isnan(test_variance) and not np.isinf(test_variance):
+                            try:
+                                r2 = r2_score(test_clean, forecast_clean)
+                                if np.isnan(r2) or np.isinf(r2):
+                                    r2 = None
+                            except:
+                                r2 = None
+                    
+                    # Calculate accuracy percentage
+                    cv_accuracy = self.calculate_model_accuracy(r2) if r2 is not None else None
+                    
                     cv_scores.append({
                         'fold': fold + 1,
+                        'mae': float(mae),
+                        'rmse': float(rmse),
                         'mape': float(mape) if not np.isnan(mape) else None,
+                        'r2': float(r2) if r2 is not None else None,
+                        'accuracy': float(cv_accuracy) if cv_accuracy is not None else None,
                         'parameters': (p, d, q, P, D, Q, s)
                     })
                     
-                    logger.info(f"  Fold {fold + 1} MAPE: {mape:.2f}%")
+                    logger.info(f"  Fold {fold + 1} - MAE: {mae:.2f}, RMSE: {rmse:.2f}, MAPE: {mape:.2f}%, R²: {r2:.4f if r2 is not None else 'N/A'}, Accuracy: {cv_accuracy:.2f}%")
                     
                 except Exception as e:
                     logger.warning(f"  Fold {fold + 1} failed: {str(e)}")
                     continue
             
             if cv_scores:
-                avg_mape = np.mean([s['mape'] for s in cv_scores if s['mape'] is not None])
+                # Calculate mean and std for all metrics
+                valid_mape = [s['mape'] for s in cv_scores if s['mape'] is not None]
+                valid_r2 = [s['r2'] for s in cv_scores if s['r2'] is not None]
+                valid_accuracy = [s['accuracy'] for s in cv_scores if s['accuracy'] is not None]
+                valid_mae = [s['mae'] for s in cv_scores if s['mae'] is not None]
+                valid_rmse = [s['rmse'] for s in cv_scores if s['rmse'] is not None]
+                
                 self.cv_results = {
                     'n_splits': n_splits,
                     'fold_scores': cv_scores,
-                    'mean_mape': float(avg_mape),
-                    'std_mape': float(np.std([s['mape'] for s in cv_scores if s['mape'] is not None]))
+                    'mean_mape': float(np.mean(valid_mape)) if valid_mape else None,
+                    'std_mape': float(np.std(valid_mape)) if valid_mape else None,
+                    'mean_r2': float(np.mean(valid_r2)) if valid_r2 else None,
+                    'std_r2': float(np.std(valid_r2)) if valid_r2 else None,
+                    'mean_accuracy': float(np.mean(valid_accuracy)) if valid_accuracy else None,
+                    'std_accuracy': float(np.std(valid_accuracy)) if valid_accuracy else None,
+                    'mean_mae': float(np.mean(valid_mae)) if valid_mae else None,
+                    'mean_rmse': float(np.mean(valid_rmse)) if valid_rmse else None
                 }
+                
                 logger.info(f"\nCross-Validation Results:")
-                logger.info(f"  Mean MAPE: {avg_mape:.2f}%")
-                logger.info(f"  Std MAPE: {self.cv_results['std_mape']:.2f}%")
+                if valid_accuracy:
+                    logger.info(f"  Mean Accuracy: {self.cv_results['mean_accuracy']:.2f}% ± {self.cv_results['std_accuracy']:.2f}%")
+                if valid_r2:
+                    logger.info(f"  Mean R²: {self.cv_results['mean_r2']:.4f} ± {self.cv_results['std_r2']:.4f}")
+                if valid_mape:
+                    logger.info(f"  Mean MAPE: {self.cv_results['mean_mape']:.2f}% ± {self.cv_results['std_mape']:.2f}%")
+                if valid_mae:
+                    logger.info(f"  Mean MAE: {self.cv_results['mean_mae']:.2f}")
+                if valid_rmse:
+                    logger.info(f"  Mean RMSE: {self.cv_results['mean_rmse']:.2f}")
             else:
                 self.cv_results = None
                 logger.warning("Cross-validation failed for all folds")
@@ -992,6 +1274,33 @@ class OptimizedSARIMAModel:
                 freq='D'
             )
             logger.info(f"Generated forecast dates: {forecast_dates[0]} to {forecast_dates[-1]}")
+        
+        # Auto-generate exogenous variables if they were used during training but not provided
+        if exogenous is None:
+            # Check if model was trained with exogenous variables
+            needs_exog = False
+            
+            # Method 1: Check if we have exog_all stored (from training)
+            if self.exog_all is not None and len(self.exog_all.columns) > 0:
+                needs_exog = True
+                logger.info("Model was trained with exogenous variables. Auto-generating them for forecast period...")
+            # Method 2: Check the fitted model's exog_names (works for loaded models)
+            elif (hasattr(self.fitted_model, 'model') and 
+                  hasattr(self.fitted_model.model, 'exog_names') and 
+                  self.fitted_model.model.exog_names is not None and
+                  len(self.fitted_model.model.exog_names) > 0):
+                needs_exog = True
+                logger.info("Model was trained with exogenous variables (detected from model). Auto-generating them for forecast period...")
+            # Method 3: Check if model has exog in its specification
+            elif (hasattr(self.fitted_model, 'model') and 
+                  hasattr(self.fitted_model.model, 'k_exog') and 
+                  self.fitted_model.model.k_exog > 0):
+                needs_exog = True
+                logger.info("Model was trained with exogenous variables (detected from k_exog). Auto-generating them for forecast period...")
+            
+            if needs_exog:
+                exogenous = self._generate_exogenous_for_future_dates(forecast_dates)
+                logger.info(f"Generated exogenous variables with columns: {list(exogenous.columns)}")
         
         # Generate forecasts
         try:
@@ -1158,10 +1467,26 @@ class OptimizedSARIMAModel:
             if self.all_data is not None and len(self.all_data) > 0:
                 last_data_date = str(self.all_data.index.max())
             
+            # Calculate model accuracy percentages for metadata
+            training_accuracy = None
+            test_accuracy = None
+            cv_accuracy = None
+            if self.accuracy_metrics and self.accuracy_metrics.get('r2') is not None:
+                training_accuracy = self.calculate_model_accuracy(self.accuracy_metrics['r2'])
+            if self.test_accuracy_metrics and self.test_accuracy_metrics.get('r2') is not None:
+                test_accuracy = self.calculate_model_accuracy(self.test_accuracy_metrics['r2'])
+            if self.cv_results and self.cv_results.get('mean_accuracy') is not None:
+                cv_accuracy = self.cv_results['mean_accuracy']
+            
             metadata = {
                 'model_params': self.model_params,
                 'accuracy_metrics': self.accuracy_metrics,
                 'test_accuracy_metrics': self.test_accuracy_metrics,
+                'model_accuracy': {
+                    'cv_accuracy': float(cv_accuracy) if cv_accuracy is not None else None,  # Primary metric
+                    'training_accuracy': float(training_accuracy) if training_accuracy is not None else None,
+                    'test_accuracy': float(test_accuracy) if test_accuracy is not None else None
+                },
                 'diagnostics': self.diagnostics,
                 'cv_results': self.cv_results,
                 'last_trained': datetime.now().isoformat(),
@@ -1230,6 +1555,23 @@ class OptimizedSARIMAModel:
             logger.error(f"Error loading model: {str(e)}")
             raise
     
+    def calculate_model_accuracy(self, r2_value):
+        """
+        Calculate model accuracy as a percentage (0-100%)
+        Based on R² (coefficient of determination)
+        
+        Args:
+            r2_value: R² value (can be None, negative, or 0-1)
+            
+        Returns:
+            float: Model accuracy as percentage (0-100)
+        """
+        if r2_value is None:
+            return 0.0
+        # R² ranges from -∞ to 1.0
+        # Convert to 0-100% scale: max(0, R²) * 100
+        return max(0.0, float(r2_value)) * 100.0
+    
     def print_model_summary(self):
         """Print comprehensive model summary"""
         logger.info("=" * 60)
@@ -1242,6 +1584,35 @@ class OptimizedSARIMAModel:
         if self.fitted_model:
             logger.info(f"AIC: {self.fitted_model.aic:.2f}")
             logger.info(f"BIC: {self.fitted_model.bic:.2f}")
+        
+        # Calculate and display Model Accuracy (prioritize CV accuracy)
+        logger.info(f"\nMODEL ACCURACY")
+        logger.info(f"-" * 60)
+        
+        # Prioritize cross-validation accuracy (most reliable)
+        cv_accuracy = None
+        if self.cv_results and self.cv_results.get('mean_accuracy') is not None:
+            cv_accuracy = self.cv_results['mean_accuracy']
+            cv_std = self.cv_results.get('std_accuracy', 0)
+            logger.info(f"  Cross-Validation Accuracy: {cv_accuracy:.2f}% ± {cv_std:.2f}% ⭐ (RECOMMENDED)")
+        
+        training_accuracy = None
+        if self.accuracy_metrics and self.accuracy_metrics.get('r2') is not None:
+            training_accuracy = self.calculate_model_accuracy(self.accuracy_metrics['r2'])
+            logger.info(f"  Training Accuracy: {training_accuracy:.2f}%")
+        
+        test_accuracy = None
+        if self.test_accuracy_metrics and self.test_accuracy_metrics.get('r2') is not None:
+            test_accuracy = self.calculate_model_accuracy(self.test_accuracy_metrics['r2'])
+            logger.info(f"  Test Accuracy: {test_accuracy:.2f}%")
+        
+        if cv_accuracy is None and training_accuracy is None and test_accuracy is None:
+            logger.info(f"  Accuracy: Not available (R² not calculated)")
+        
+        # Display primary accuracy recommendation
+        if cv_accuracy is not None:
+            logger.info(f"\n  💡 Primary Metric: Cross-Validation Accuracy ({cv_accuracy:.2f}%)")
+            logger.info(f"     This is the most reliable indicator of model performance.")
         
         if self.accuracy_metrics:
             logger.info(f"\nIn-Sample Performance:")
@@ -1258,9 +1629,17 @@ class OptimizedSARIMAModel:
             logger.info(f"  R²: {self.test_accuracy_metrics['r2']:.4f}")
         
         if self.cv_results:
-            logger.info(f"\nCross-Validation:")
-            logger.info(f"  Mean MAPE: {self.cv_results['mean_mape']:.2f}%")
-            logger.info(f"  Std MAPE: {self.cv_results['std_mape']:.2f}%")
+            logger.info(f"\nCross-Validation Details:")
+            if self.cv_results.get('mean_accuracy') is not None:
+                logger.info(f"  Mean Accuracy: {self.cv_results['mean_accuracy']:.2f}% ± {self.cv_results.get('std_accuracy', 0):.2f}%")
+            if self.cv_results.get('mean_r2') is not None:
+                logger.info(f"  Mean R²: {self.cv_results['mean_r2']:.4f} ± {self.cv_results.get('std_r2', 0):.4f}")
+            if self.cv_results.get('mean_mape') is not None:
+                logger.info(f"  Mean MAPE: {self.cv_results['mean_mape']:.2f}% ± {self.cv_results.get('std_mape', 0):.2f}%")
+            if self.cv_results.get('mean_mae') is not None:
+                logger.info(f"  Mean MAE: {self.cv_results['mean_mae']:.2f}")
+            if self.cv_results.get('mean_rmse') is not None:
+                logger.info(f"  Mean RMSE: {self.cv_results['mean_rmse']:.2f}")
         
         logger.info("=" * 60)
 

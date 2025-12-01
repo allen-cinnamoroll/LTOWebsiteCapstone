@@ -23,6 +23,9 @@ import {
   Camera,
   Save,
   X,
+  Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/api/axios';
@@ -33,7 +36,9 @@ const AccountPage = () => {
   const { userData, setUserData } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [profileData, setProfileData] = useState(null); // Store full profile data with createdAt
   const [editData, setEditData] = useState({
     firstName: '',
@@ -45,6 +50,17 @@ const AccountPage = () => {
   const [previewAvatar, setPreviewAvatar] = useState('');
   const [avatarKey, setAvatarKey] = useState(0); // Force re-render when avatar changes
   const fileInputRef = useRef(null);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
 
   // Fetch full profile data including createdAt
   useEffect(() => {
@@ -287,6 +303,92 @@ const AccountPage = () => {
     }
   };
 
+  const handleChangePassword = () => {
+    setIsChangePasswordModalOpen(true);
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setPasswordErrors({});
+  };
+
+  const handleCancelPasswordChange = () => {
+    setIsChangePasswordModalOpen(false);
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setPasswordErrors({});
+    setShowPasswords({ current: false, new: false, confirm: false });
+  };
+
+  const validatePasswordForm = () => {
+    const errors = {};
+    
+    if (!passwordData.currentPassword) {
+      errors.currentPassword = 'Current password is required';
+    }
+    
+    if (!passwordData.newPassword) {
+      errors.newPassword = 'New password is required';
+    } else if (passwordData.newPassword.length < 8) {
+      errors.newPassword = 'Password must be at least 8 characters long';
+    }
+    
+    if (!passwordData.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your new password';
+    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setPasswordErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSavePassword = async () => {
+    if (!validatePasswordForm()) {
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      
+      const response = await apiClient.post('/account/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      if (response.data.success) {
+        toast.success('Password changed successfully!', {
+          description: new Date().toLocaleString(),
+        });
+        
+        setIsChangePasswordModalOpen(false);
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+        setPasswordErrors({});
+        setShowPasswords({ current: false, new: false, confirm: false });
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      const errorMessage =
+        error.response?.data?.message || 'Failed to change password. Please try again.';
+      toast.error(errorMessage, { description: new Date().toLocaleString() });
+      
+      // Set specific error for current password if it's incorrect
+      if (error.response?.data?.message?.toLowerCase().includes('current password')) {
+        setPasswordErrors({ currentPassword: 'Current password is incorrect' });
+      }
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -307,9 +409,14 @@ const AccountPage = () => {
                 Manage your account information and settings
               </p>
             </div>
+            <div className="flex gap-2">
+              <Button onClick={handleChangePassword} variant="outline" className="gap-2">
+                <Lock className="h-4 w-4" /> Change Password
+              </Button>
             <Button onClick={handleEdit} variant="outline" className="gap-2">
               <Edit className="h-4 w-4" /> Edit Profile
             </Button>
+            </div>
           </div>
 
           {/* Main Content */}
@@ -521,6 +628,155 @@ const AccountPage = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Change Password Modal */}
+          <Dialog open={isChangePasswordModalOpen} onOpenChange={setIsChangePasswordModalOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <div className="flex items-center gap-2">
+                  <Lock className="h-6 w-6" />
+                  <DialogTitle>Change Password</DialogTitle>
+                </div>
+                <DialogDescription>
+                  Enter your current password and choose a new password
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                {/* Current Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showPasswords.current ? "text" : "password"}
+                      value={passwordData.currentPassword}
+                      onChange={(e) => {
+                        setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }));
+                        if (passwordErrors.currentPassword) {
+                          setPasswordErrors(prev => ({ ...prev, currentPassword: '' }));
+                        }
+                      }}
+                      placeholder="Enter current password"
+                      className={passwordErrors.currentPassword ? "border-red-500" : ""}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                    >
+                      {showPasswords.current ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  {passwordErrors.currentPassword && (
+                    <p className="text-xs text-red-500">{passwordErrors.currentPassword}</p>
+                  )}
+                </div>
+
+                {/* New Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPasswords.new ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) => {
+                        setPasswordData(prev => ({ ...prev, newPassword: e.target.value }));
+                        if (passwordErrors.newPassword) {
+                          setPasswordErrors(prev => ({ ...prev, newPassword: '' }));
+                        }
+                        // Clear confirm password error if passwords now match
+                        if (e.target.value === passwordData.confirmPassword && passwordErrors.confirmPassword) {
+                          setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
+                        }
+                      }}
+                      placeholder="Enter new password (min. 8 characters)"
+                      className={passwordErrors.newPassword ? "border-red-500" : ""}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                    >
+                      {showPasswords.new ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  {passwordErrors.newPassword && (
+                    <p className="text-xs text-red-500">{passwordErrors.newPassword}</p>
+                  )}
+                </div>
+
+                {/* Confirm Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showPasswords.confirm ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => {
+                        setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                        if (passwordErrors.confirmPassword) {
+                          setPasswordErrors(prev => ({ ...prev, confirmPassword: '' }));
+                        }
+                      }}
+                      placeholder="Confirm new password"
+                      className={passwordErrors.confirmPassword ? "border-red-500" : ""}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    >
+                      {showPasswords.confirm ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  {passwordErrors.confirmPassword && (
+                    <p className="text-xs text-red-500">{passwordErrors.confirmPassword}</p>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    onClick={handleSavePassword}
+                    className="gap-2"
+                    disabled={isChangingPassword}
+                  >
+                    <Lock className="h-4 w-4" />
+                    {isChangingPassword ? 'Changing...' : 'Change Password'}
+                  </Button>
+                  <Button
+                    onClick={handleCancelPasswordChange}
+                    variant="outline"
+                    className="gap-2"
+                    disabled={isChangingPassword}
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Edit Profile Modal */}
           <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
