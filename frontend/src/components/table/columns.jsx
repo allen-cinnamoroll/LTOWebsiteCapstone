@@ -346,7 +346,7 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
     ),
     cell: ({ row }) => (
       <div className="font-medium text-gray-900 dark:text-gray-200 text-xs max-w-sm break-words whitespace-normal leading-tight">
-        {row.getValue("ownerRepresentativeName")}
+        {toUpperCase(row.getValue("ownerRepresentativeName"))}
       </div>
     ),
     size: 300, // Set explicit width for Owner column
@@ -406,13 +406,13 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
         <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
           {hasLicense ? (
             <>
-              <span className="font-semibold text-green-600 text-xs whitespace-nowrap">Yes</span>
+              <span className="font-semibold text-green-600 text-xs whitespace-nowrap">YES</span>
               {licenseNumber && (
                 <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{toUpperCase(licenseNumber)}</span>
               )}
             </>
           ) : (
-            <span className="font-semibold text-red-600 text-xs whitespace-nowrap">No</span>
+            <span className="font-semibold text-red-600 text-xs whitespace-nowrap">NO</span>
           )}
         </div>
       );
