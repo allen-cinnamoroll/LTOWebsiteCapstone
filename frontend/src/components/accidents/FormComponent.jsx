@@ -142,7 +142,8 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormControl>
                   <Input 
                     placeholder="BLT-0001" 
-                    {...field} 
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                     className={cn(
                       "text-xs",
                       isEditMode && "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
@@ -165,7 +166,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Vehicle Plate No.</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter vehicle plate no." {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter vehicle plate no." 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -178,7 +184,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Vehicle MC Plate No.</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter motorcycle plate no." {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter motorcycle plate no." 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -191,7 +202,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Vehicle Chassis No.</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter chassis no." {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter chassis no." 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -208,7 +224,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Suspect</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter suspect name" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter suspect name" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -239,6 +260,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                     <Input
                       placeholder="Enter custom incident type"
                       {...field}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className="text-xs"
                       autoFocus
                     />
@@ -259,7 +281,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Offense</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter offense" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter offense" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -290,6 +317,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                     <Input
                       placeholder="Enter custom offense type"
                       {...field}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className="text-xs"
                       autoFocus
                     />
@@ -310,7 +338,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Stage of Felony</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter stage of felony" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter stage of felony" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -323,7 +356,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Case Status</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter case status" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter case status" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -341,7 +379,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Region</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter region" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter region" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -354,7 +397,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Province</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter province" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter province" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -371,7 +419,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Municipality</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter municipality" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter municipality" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -384,7 +437,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Barangay</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter barangay" {...field} className="text-xs" />
+                  <Input 
+                    placeholder="Enter barangay" 
+                    {...field} 
+                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    className="text-xs" 
+                  />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -400,7 +458,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
             <FormItem className="space-y-0">
               <FormLabel className="text-xs text-gray-600">Street</FormLabel>
               <FormControl>
-                <Input placeholder="Enter street" {...field} className="text-xs" />
+                <Input 
+                  placeholder="Enter street" 
+                  {...field} 
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                  className="text-xs" 
+                />
               </FormControl>
               <FormMessage className="text-xs text-red-400" />
             </FormItem>
@@ -619,7 +682,8 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                   placeholder="Enter narrative details about the incident..." 
                   className="resize-none text-xs border border-gray-300 dark:border-[#424242] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-red-600 dark:[&::-webkit-scrollbar-thumb]:hover:bg-red-500"
                   rows={4}
-                  {...field} 
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
               </FormControl>
               <FormMessage className="text-xs text-red-400" />

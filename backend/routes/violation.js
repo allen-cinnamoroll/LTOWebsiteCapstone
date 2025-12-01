@@ -11,6 +11,7 @@ import {
   restoreViolation,
   permanentDeleteViolation,
   exportViolations,
+  getApprehendingOfficers,
 } from "../controller/violationController.js";
 import { validateViolation, validate } from "../middleware/validator.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
@@ -40,6 +41,9 @@ violationRouter.get("/count", authenticate, getViolationCount);
 
 // Get comprehensive violation analytics (Authenticated Users)
 violationRouter.get("/analytics", authenticate, getViolationAnalytics);
+
+// Get unique apprehending officers (Authenticated Users)
+violationRouter.get("/officers", authenticate, getApprehendingOfficers);
 
 // Delete a violation (Only Admin or Superadmin)
 violationRouter.delete("/:id", authenticate, deleteViolation);

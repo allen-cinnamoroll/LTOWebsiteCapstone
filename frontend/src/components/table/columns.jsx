@@ -61,7 +61,7 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const accident = row.original;
@@ -75,7 +75,7 @@ export const accidentColumns = (onEdit, onUpdateStatus, onDelete, submitting) =>
       };
       return (
         <div 
-          className="flex items-center gap-1" 
+          className="flex items-center gap-1 justify-end ml-auto" 
           data-action-container="true"
           onMouseEnter={(e) => e.stopPropagation()}
         >
@@ -172,7 +172,7 @@ export const accidentBinColumns = (onRestore, onPermanentDelete, submitting) => 
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const accident = row.original;
@@ -185,7 +185,7 @@ export const accidentBinColumns = (onRestore, onPermanentDelete, submitting) => 
         onPermanentDelete(accident);
       };
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 justify-end ml-auto">
           <div className="relative group">
             <Button 
               variant="ghost" 
@@ -309,6 +309,7 @@ export const deactivatedDriverColumns = (onAction) => [
   },
   {
     id: "actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const driver = row.original;
@@ -317,6 +318,7 @@ export const deactivatedDriverColumns = (onAction) => [
         onAction(driver._id);
       };
       return (
+        <div className="flex justify-end ml-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-5 w-5 p-0">
@@ -333,6 +335,7 @@ export const deactivatedDriverColumns = (onAction) => [
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       );
     },
   },
@@ -420,7 +423,7 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
   },
   {
     id: "actions",
-    header: "Action",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const driver = row.original;
@@ -435,7 +438,7 @@ export const driverColumns = (onEdit, onDelete, onFileNumberClick) => [
 
       return (
         <div 
-          className="flex items-center gap-1" 
+          className="flex items-center gap-1 justify-end ml-auto" 
           data-action-container="true"
           onMouseEnter={(e) => e.stopPropagation()}
         >
@@ -569,39 +572,26 @@ export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting, t
     accessorKey: "totalViolationsCount",
     header: "Violations",
     cell: ({ row }) => {
-      // If a specific type filter is selected, count only violations of that type
+      // Count topNo records per person (grouped by name)
+      // Use topNoCount if available (from aggregation), otherwise use totalViolationsCount
+      let count = row.original.topNoCount !== undefined ? row.original.topNoCount : row.original.totalViolationsCount;
+      
+      // If a specific type filter is selected, use violationsByType count
       if (typeFilter !== "all") {
         const violationsByType = row.original.violationsByType || {};
-        const count = violationsByType[typeFilter] || 0;
-        return (
-          <div className="text-xs text-gray-900 dark:text-gray-200 font-medium text-center">
-            {count}
-          </div>
-        );
+        count = violationsByType[typeFilter] || 0;
       }
       
-      // Use totalViolationsCount if available, otherwise count from violations array
-      let totalCount = row.original.totalViolationsCount;
-      if (totalCount === undefined || totalCount === null) {
-        const violations = row.original.violations || [];
-        if (Array.isArray(violations)) {
-          totalCount = violations.filter(v => v && v !== "None").length;
-        } else if (violations && violations !== "None") {
-          totalCount = 1;
-        } else {
-          totalCount = 0;
-        }
-      }
       return (
         <div className="text-xs text-gray-900 dark:text-gray-200 font-medium text-center">
-          {totalCount}
+          {count || 0}
         </div>
       );
     },
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const violation = row.original;
@@ -615,7 +605,7 @@ export const violationColumns = (onEdit, onUpdateStatus, onDelete, submitting, t
       };
       return (
         <div 
-          className="flex items-center gap-1" 
+          className="flex items-center gap-1 justify-end ml-auto" 
           data-action-container="true"
           onMouseEnter={(e) => e.stopPropagation()}
         >
@@ -738,7 +728,7 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const driver = row.original;
@@ -751,7 +741,7 @@ export const driverBinColumns = (onRestore, onPermanentDelete, submitting) => [
         onPermanentDelete(driver);
       };
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 justify-end ml-auto">
           <div className="relative group">
             <Button 
               variant="ghost" 
@@ -813,18 +803,13 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
     accessorKey: "violations",
     header: "Violations",
     cell: ({ row }) => {
-      const violations = row.getValue("violations");
-      let violationCount = 0;
-      
-      if (violations && Array.isArray(violations)) {
-        violationCount = violations.filter(v => v && v !== "None").length;
-      } else if (violations && violations !== "None") {
-        violationCount = 1;
-      }
+      // Count by topNo instead of violations array - each topNo represents one violation record
+      const topNo = row.original.topNo;
+      const count = topNo ? 1 : 0;
       
       return (
         <div className="text-xs text-gray-900 dark:text-gray-200 font-medium">
-          {violationCount > 0 ? violationCount : "0"}
+          {count}
         </div>
       );
     },
@@ -895,7 +880,7 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const violation = row.original;
@@ -908,7 +893,7 @@ export const violationBinColumns = (onRestore, onPermanentDelete, submitting) =>
         onPermanentDelete(violation);
       };
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 justify-end ml-auto">
           <div className="relative group">
             <Button 
               variant="ghost" 
@@ -1077,7 +1062,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const vehicle = row.original;
@@ -1095,7 +1080,7 @@ export const vehicleColumns = (onEdit, onRenew, onDelete, submitting) => [
       };
       return (
         <div 
-          className="flex items-center gap-1" 
+          className="flex items-center gap-1 justify-end ml-auto" 
           data-action-container="true"
           onMouseEnter={(e) => e.stopPropagation()}
         >
@@ -1238,7 +1223,7 @@ export const vehicleBinColumns = (onRestore, onPermanentDelete, submitting) => [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-right">Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
       const vehicle = row.original;
@@ -1251,7 +1236,7 @@ export const vehicleBinColumns = (onRestore, onPermanentDelete, submitting) => [
         onPermanentDelete(vehicle);
       };
       return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 justify-end ml-auto">
           <div className="relative group">
             <Button 
               variant="ghost" 

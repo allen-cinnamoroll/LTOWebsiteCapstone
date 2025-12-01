@@ -40,12 +40,25 @@ const ReportArchivePage = () => {
     }
   };
 
-  // Filter reports based on selected type
+  // Filter and sort reports based on selected type (latest to oldest)
   const filteredReports = useMemo(() => {
-    if (filterType === 'all') {
-      return automatedReports;
-    }
-    return automatedReports.filter(report => report.type === filterType);
+    let reports = filterType === 'all' 
+      ? automatedReports 
+      : automatedReports.filter(report => report.type === filterType);
+    
+    // Sort by date (latest to oldest) - parse date string to Date object for proper sorting
+    return reports.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      // If dates are equal, sort by type (daily before monthly) then by filename
+      if (dateB.getTime() === dateA.getTime()) {
+        if (a.type !== b.type) {
+          return a.type === 'daily' ? -1 : 1;
+        }
+        return b.filename.localeCompare(a.filename);
+      }
+      return dateB - dateA; // Descending order (newest first)
+    });
   }, [automatedReports, filterType]);
 
   const downloadAutomatedReport = async (filename) => {

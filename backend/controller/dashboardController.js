@@ -3054,17 +3054,35 @@ export const listAutomatedReports = async (req, res) => {
         
         const [, type, date] = match;
         
+        // Parse date string (format: YYYY-MM-DD)
+        let parsedDate;
+        try {
+          parsedDate = new Date(date);
+          // If date parsing fails, use modifiedAt as fallback
+          if (isNaN(parsedDate.getTime())) {
+            parsedDate = stats.mtime;
+          }
+        } catch (e) {
+          parsedDate = stats.mtime;
+        }
+        
         return {
           filename: file,
           type: type,
           date: date,
+          dateParsed: parsedDate,
           size: stats.size,
           createdAt: stats.birthtime,
           modifiedAt: stats.mtime
         };
       })
       .filter(report => report !== null)
-      .sort((a, b) => new Date(b.modifiedAt) - new Date(a.modifiedAt)); // Sort by newest first
+      .sort((a, b) => {
+        // Sort by parsed date (descending - newest first)
+        const dateA = a.dateParsed instanceof Date ? a.dateParsed : new Date(a.dateParsed);
+        const dateB = b.dateParsed instanceof Date ? b.dateParsed : new Date(b.dateParsed);
+        return dateB - dateA;
+      });
 
     return res.status(200).json({
       success: true,

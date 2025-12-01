@@ -11,6 +11,8 @@ import DatePicker from "@/components/calendar/DatePicker";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useWatch } from "react-hook-form";
+import apiClient from "@/api/axios";
+import { useAuth } from "@/context/AuthContext";
 // List of common LTO violations
 const COMMON_VIOLATIONS = [
   "1A - NO DRIVER'S LICENSE/CONDUCTOR PERMIT",
@@ -120,6 +122,7 @@ const COMMON_VIOLATIONS = [
 
 const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [violations, setViolations] = useState([]);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [violationToRemove, setViolationToRemove] = useState(null);
@@ -127,7 +130,52 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const [violationSearchTerms, setViolationSearchTerms] = useState({});
   const [openDropdowns, setOpenDropdowns] = useState({});
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [apprehendingOfficers, setApprehendingOfficers] = useState([]);
+  const [loadingOfficers, setLoadingOfficers] = useState(false);
+  const [officerSearchTerm, setOfficerSearchTerm] = useState("");
+  const [isOfficerDropdownOpen, setIsOfficerDropdownOpen] = useState(false);
   
+  // Fetch apprehending officers from database
+  useEffect(() => {
+    const fetchOfficers = async () => {
+      try {
+        setLoadingOfficers(true);
+        const { data } = await apiClient.get("/violations/officers", {
+          headers: {
+            Authorization: token,
+          },
+        });
+        if (data.success) {
+          setApprehendingOfficers(data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch apprehending officers:", error);
+        // If fetch fails, keep empty array - user can still type
+      } finally {
+        setLoadingOfficers(false);
+      }
+    };
+
+    if (!isEditMode) {
+      fetchOfficers();
+    }
+  }, [token, isEditMode]);
+
+  // Sync officer search term with form field value
+  const apprehendingOfficerValue = useWatch({
+    control: form.control,
+    name: "apprehendingOfficer",
+    defaultValue: ""
+  });
+
+  useEffect(() => {
+    if (apprehendingOfficerValue && apprehendingOfficerValue !== "null") {
+      setOfficerSearchTerm(apprehendingOfficerValue);
+    } else if (!apprehendingOfficerValue || apprehendingOfficerValue === "null") {
+      setOfficerSearchTerm("");
+    }
+  }, [apprehendingOfficerValue]);
+
   // Watch the violationType to conditionally render fields
   const violationType = useWatch({
     control: form.control,
@@ -308,16 +356,17 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   };
 
   const handleViolationSearchChange = (index, value) => {
+    const upperValue = value.toUpperCase();
     setViolationSearchTerms((prev) => ({
       ...prev,
-      [index]: value,
+      [index]: upperValue,
     }));
     
     // Update violation value as user types (don't close dropdown)
-    updateViolation(index, value, false);
+    updateViolation(index, upperValue, false);
     
     // Open dropdown when user starts typing
-    if (value && !openDropdowns[index]) {
+    if (upperValue && !openDropdowns[index]) {
       setOpenDropdowns((prev) => ({
         ...prev,
         [index]: true,
@@ -358,11 +407,81 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
     );
   };
 
+  // Filter officers based on search term
+  const getFilteredOfficers = () => {
+    const searchTerm = officerSearchTerm.toLowerCase().trim();
+    if (!searchTerm) {
+      return [];
+    }
+    return apprehendingOfficers.filter((officer) =>
+      officer.toLowerCase().includes(searchTerm)
+    );
+  };
+
+  const handleOfficerInputChange = (value) => {
+    const upperValue = value.toUpperCase();
+    setOfficerSearchTerm(value);
+    form.setValue("apprehendingOfficer", upperValue);
+    setIsOfficerDropdownOpen(value.length > 0);
+  };
+
+  const handleOfficerSelect = (officer) => {
+    const upperOfficer = officer.toUpperCase();
+    form.setValue("apprehendingOfficer", upperOfficer);
+    setOfficerSearchTerm(upperOfficer);
+    setIsOfficerDropdownOpen(false);
+    
+    // If the selected officer is not in the list, add it
+    if (officer !== "Others" && !apprehendingOfficers.includes(upperOfficer)) {
+      const updatedOfficers = [...apprehendingOfficers, upperOfficer].sort();
+      setApprehendingOfficers(updatedOfficers);
+    }
+  };
+
+  const handleOfficerInputFocus = () => {
+    if (officerSearchTerm.length > 0) {
+      setIsOfficerDropdownOpen(true);
+    }
+  };
+
+  const handleOfficerInputBlur = () => {
+    // Delay closing to allow clicking on dropdown items
+    setTimeout(() => {
+      setIsOfficerDropdownOpen(false);
+      
+      // If user typed a custom officer name that's not in the list, add it
+      const currentValue = form.getValues("apprehendingOfficer");
+      if (currentValue && currentValue.trim() !== "" && currentValue !== "null") {
+        const upperValue = currentValue.toUpperCase();
+        if (!apprehendingOfficers.includes(upperValue)) {
+          const updatedOfficers = [...apprehendingOfficers, upperValue].sort();
+          setApprehendingOfficers(updatedOfficers);
+        }
+      }
+    }, 200);
+  };
+
+  const handleOthersSelect = () => {
+    // When "Others" is selected, keep the input focused and allow typing
+    setIsOfficerDropdownOpen(false);
+    // Don't set a value, let user type freely
+  };
+
   const handleFormSubmit = (data) => {
     console.log("=== FORM COMPONENT SUBMIT ===");
     console.log("Form submitted with data:", data);
     console.log("Form state:", form.formState);
     console.log("Form errors:", form.formState.errors);
+    
+    // If a custom officer name was entered, add it to the officers list
+    if (data.apprehendingOfficer && data.apprehendingOfficer.trim() !== "" && data.apprehendingOfficer !== "null") {
+      const upperOfficer = data.apprehendingOfficer.toUpperCase();
+      if (!apprehendingOfficers.includes(upperOfficer)) {
+        const updatedOfficers = [...apprehendingOfficers, upperOfficer].sort();
+        setApprehendingOfficers(updatedOfficers);
+      }
+    }
+    
     onSubmit(data);
   };
 
@@ -404,6 +523,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="TOP-0001" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       readOnly={isEditMode}
                       className={cn(
                         "text-xs",
@@ -422,12 +542,73 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Apprehending Officer</FormLabel>
                 <FormControl>
+                  {!isEditMode ? (
+                    <div className="relative">
+                      <Input 
+                        placeholder="Type to search officer..." 
+                        value={officerSearchTerm || field.value || ""}
+                        onChange={(e) => handleOfficerInputChange(e.target.value)}
+                        onFocus={handleOfficerInputFocus}
+                        onBlur={handleOfficerInputBlur}
+                        className="text-xs"
+                        disabled={loadingOfficers}
+                      />
+                      {isOfficerDropdownOpen && (
+                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          {getFilteredOfficers().length > 0 ? (
+                            <>
+                              {getFilteredOfficers().map((officer) => (
+                                <div
+                                  key={officer}
+                                  className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-900 dark:text-gray-100"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    handleOfficerSelect(officer);
+                                  }}
+                                >
+                                  {officer}
+                                </div>
+                              ))}
+                              <div
+                                className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-blue-600 dark:text-blue-400 border-t border-gray-200 dark:border-gray-700"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleOthersSelect();
+                                }}
+                              >
+                                Others (Type custom name)
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {officerSearchTerm && (
+                                <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
+                                  No officers found matching "{officerSearchTerm}"
+                                </div>
+                              )}
+                              <div
+                                className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-blue-600 dark:text-blue-400 border-t border-gray-200 dark:border-gray-700"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleOthersSelect();
+                                }}
+                              >
+                                Others (Type custom name)
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
                     <Input 
                       placeholder="Officer Name" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
-                      className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
+                      readOnly
+                      className={cn("text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
+                  )}
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -451,6 +632,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="John" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -470,6 +652,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       maxLength={1} 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -488,6 +671,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="Doe" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -506,6 +690,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="Jr." 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -644,6 +829,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="ABC-1234" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -662,6 +848,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="Chassis Number" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -680,6 +867,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="Engine Number" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
@@ -698,6 +886,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       placeholder="File Number" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                       className={cn("text-xs", field.value === "null" && "text-gray-400 dark:text-gray-500")}
                     />
                   </FormControl>
