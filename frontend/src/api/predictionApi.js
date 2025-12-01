@@ -55,13 +55,27 @@ export const getWeeklyPredictions = async (weeks = 12, municipality = null) => {
     
     if (!response.ok) {
       const errorText = await response.text();
-      let errorData;
-      try {
-        errorData = JSON.parse(errorText);
-      } catch (e) {
-        errorData = { error: errorText || `HTTP ${response.status}` };
+      const contentType = response.headers.get('content-type') || '';
+
+      let friendlyMessage = '';
+
+      // Prefer structured JSON error messages when available
+      if (contentType.includes('application/json')) {
+        try {
+          const errorData = JSON.parse(errorText);
+          friendlyMessage = errorData.error || JSON.stringify(errorData);
+        } catch {
+          friendlyMessage = errorText || `HTTP ${response.status}`;
+        }
+      } else if (contentType.includes('text/html')) {
+        // Avoid dumping raw HTML (e.g., nginx 502 pages) into the UI
+        const statusText = response.statusText || 'Server Error';
+        friendlyMessage = `${response.status} ${statusText} (HTML error page from server)`;
+      } else {
+        friendlyMessage = errorText || `HTTP ${response.status}`;
       }
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || errorText}`);
+
+      throw new Error(`HTTP error! status: ${response.status}, message: ${friendlyMessage}`);
     }
     
     const data = await response.json();
