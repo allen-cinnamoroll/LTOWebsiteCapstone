@@ -542,6 +542,10 @@ class OptimizedSARIMAModel:
         if self.cv_results and self.cv_results.get('mean_accuracy') is not None:
             cv_accuracy = self.cv_results['mean_accuracy']
         
+        # Compute active (non-zero) ranges for clearer reporting in UI
+        train_nonzero = train_series[train_series > 0]
+        test_nonzero = test_series[test_series > 0] if len(test_series) > 0 else test_series
+        
         training_info = {
             'model_params': self.model_params,
             'training_days': len(train_series),
@@ -555,6 +559,19 @@ class OptimizedSARIMAModel:
                 'start': str(test_series.index.min()),
                 'end': str(test_series.index.max())
             } if len(test_series) > 0 else None,
+            # New: active (non-zero) date ranges for training and test sets.
+            # These are used by the frontend to show when registrations actually occurred,
+            # instead of only showing the raw calendar window (which may be mostly zeros).
+            'active_date_ranges': {
+                'training': {
+                    'start': str(train_nonzero.index.min()) if len(train_nonzero) > 0 else None,
+                    'end': str(train_nonzero.index.max()) if len(train_nonzero) > 0 else None,
+                },
+                'test': {
+                    'start': str(test_nonzero.index.min()) if len(test_nonzero) > 0 else None,
+                    'end': str(test_nonzero.index.max()) if len(test_nonzero) > 0 else None,
+                } if len(test_series) > 0 else None,
+            },
             'accuracy_metrics': self.accuracy_metrics,
             'test_accuracy_metrics': self.test_accuracy_metrics,
             'model_accuracy': {

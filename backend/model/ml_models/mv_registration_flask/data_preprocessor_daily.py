@@ -182,6 +182,20 @@ class DailyDataPreprocessor:
         # Drop rows with invalid dates
         df_filtered = df_filtered.dropna(subset=['dateOfRenewal_parsed'])
         print(f"After date parsing: {len(df_filtered)} rows")
+
+        # IMPORTANT: Only use registrations up to "today"
+        # This prevents the model from training on future-dated records
+        # (e.g., advance renewals scheduled months ahead), which can distort
+        # the train/test split and create confusing date ranges.
+        today_date = datetime.now().date()
+        before_future_filter = len(df_filtered)
+        df_filtered = df_filtered[df_filtered['dateOfRenewal_parsed'].dt.date <= today_date]
+        removed_future = before_future_filter - len(df_filtered)
+        if removed_future > 0:
+            print(
+                f"Filtered out {removed_future} future-dated registration(s) "
+                f"with dateOfRenewal after {today_date}"
+            )
         
         # Sort by date
         df_filtered = df_filtered.sort_values('dateOfRenewal_parsed')

@@ -1673,11 +1673,12 @@ export default function MVPredictionPage() {
                           <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Training Date Range</p>
                         </div>
                         <p className="text-xs text-gray-900 dark:text-white font-medium">
-                          {trainingData.date_range?.start 
-                            ? formatDate(trainingData.date_range.start)
-                            : 'N/A'} – {trainingData.date_range?.end 
-                            ? formatDate(trainingData.date_range.end)
-                            : 'N/A'}
+                          {/* Prefer active (non-zero) range if available, otherwise fall back to calendar range */}
+                          {trainingData.active_date_ranges?.training?.start
+                            ? `${formatDate(trainingData.active_date_ranges.training.start)} – ${formatDate(trainingData.active_date_ranges.training.end)}`
+                            : `${trainingData.date_range?.start ? formatDate(trainingData.date_range.start) : 'N/A'} – ${
+                                trainingData.date_range?.end ? formatDate(trainingData.date_range.end) : 'N/A'
+                              }`}
                         </p>
                       </div>
 
@@ -1689,7 +1690,14 @@ export default function MVPredictionPage() {
                             <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Test Date Range</p>
                           </div>
                           <p className="text-xs text-gray-900 dark:text-white font-medium">
-                            {formatDate(trainingData.test_date_range.start)} – {formatDate(trainingData.test_date_range.end)}
+                            {/* Prefer active (non-zero) range for test; if none, show calendar window */}
+                            {trainingData.active_date_ranges?.test?.start
+                              ? `${formatDate(trainingData.active_date_ranges.test.start)} – ${formatDate(
+                                  trainingData.active_date_ranges.test.end
+                                )}`
+                              : `${formatDate(trainingData.test_date_range.start)} – ${formatDate(
+                                  trainingData.test_date_range.end
+                                )}`}
                           </p>
                         </div>
                       )}
