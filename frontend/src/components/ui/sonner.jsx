@@ -14,8 +14,10 @@ const Toaster = ({
         classNames: {
           toast:
             "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
-          // Make description text more visible/legible across themes
-          description: "group-[.toast]:text-foreground",
+          // Force description text to be clearly readable
+          // Use solid black in light mode and white in dark mode
+          description:
+            "group-[.toast]:text-black dark:group-[.toast]:text-white",
           actionButton:
             "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
           cancelButton:

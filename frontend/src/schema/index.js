@@ -84,9 +84,15 @@ export const VehicleSchema = z.object({
   vehicleStatusType: z.enum(["New", "Old"], {
     required_error: "Vehicle status type is required",
   }),
-  driver: z.string().min(1, {
-    message: "Owner selection is required",
-  }),
+  // Owner/driver must be selected; provide user-friendly error even when value is null
+  driver: z
+    .string({
+      required_error: "Please select an owner",
+      invalid_type_error: "Please select an owner",
+    })
+    .min(1, {
+      message: "Please select an owner",
+    }),
 });
 
 export const EditVehicleSchema = z.object({
