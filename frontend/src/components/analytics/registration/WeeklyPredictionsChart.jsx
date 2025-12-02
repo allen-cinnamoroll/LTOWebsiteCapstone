@@ -1503,17 +1503,17 @@ const WeeklyPredictionsChart = () => {
           <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
             {viewType === 'yearly' ? (
               <>
-                <div className="w-3 h-3 rounded bg-gray-600 shadow-sm"></div>
+                <div className="w-3 h-3 rounded bg-[#2563eb] shadow-sm"></div>
                 <span>Yearly Total Predictions</span>
               </>
             ) : viewType === 'monthly' ? (
               <>
-                <div className="w-3 h-3 rounded bg-gray-600 shadow-sm"></div>
+                <div className="w-3 h-3 rounded bg-[#2563eb] shadow-sm"></div>
                 <span>Monthly Total Predictions</span>
               </>
             ) : (
               <>
-                <div className="w-3 h-3 rounded-full bg-gray-600 shadow-sm"></div>
+                <div className="w-3 h-3 rounded-full bg-[#2563eb] shadow-sm"></div>
                 <span>Weekly Predictions</span>
               </>
             )}
