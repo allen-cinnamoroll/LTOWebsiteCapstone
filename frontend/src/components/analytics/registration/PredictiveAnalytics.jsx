@@ -14,22 +14,39 @@ export function PredictiveAnalytics() {
         const response = await getModelAccuracy();
         
         if (response.success && response.data) {
-          // Use test set (out-of-sample) accuracy if available, otherwise use training (in-sample)
+          // Prefer a stable, meaningful metric in this order:
+          // 1) Test set MAPE (if < 100 and available)
+          // 2) Cross-validation mean MAPE
+          // 3) Training (in-sample) MAPE
           const testMetrics = response.data.out_of_sample || response.data.test_accuracy_metrics;
           const trainingMetrics = response.data.in_sample || response.data;
-          
-          // Prefer test set metrics as they're more reliable
-          const mape = testMetrics?.mape ?? trainingMetrics?.mape;
-          
-          if (mape !== null && mape !== undefined) {
+          const cvMetrics = response.data.cross_validation;
+
+          let selectedMape = null;
+          let source = null;
+
+          // 1) Use test metrics only if MAPE is defined and < 100 (avoid misleading negative accuracy)
+          if (testMetrics && typeof testMetrics.mape === 'number' && isFinite(testMetrics.mape) && testMetrics.mape >= 0 && testMetrics.mape < 100) {
+            selectedMape = testMetrics.mape;
+            source = 'Test Set';
+          } else if (cvMetrics && typeof cvMetrics.mean_mape === 'number' && isFinite(cvMetrics.mean_mape)) {
+            // 2) Fall back to cross-validation mean MAPE
+            selectedMape = cvMetrics.mean_mape;
+            source = 'Cross-Validation';
+          } else if (trainingMetrics && typeof trainingMetrics.mape === 'number' && isFinite(trainingMetrics.mape)) {
+            // 3) Finally, fall back to training MAPE
+            selectedMape = trainingMetrics.mape;
+            source = 'Training Set';
+          }
+
+          if (selectedMape !== null && selectedMape !== undefined) {
             // Calculate accuracy: 100 - MAPE (same as shown in modal)
-            const accuracyPercent = Math.max(0, Math.min(100, 100 - mape));
-            const isTestSet = !!testMetrics?.mape;
-            
+            const accuracyPercent = Math.max(0, Math.min(100, 100 - selectedMape));
+
             setAccuracy({
               percent: accuracyPercent,
-              mape: mape,
-              isTestSet: isTestSet,
+              mape: selectedMape,
+              source,
               level: accuracyPercent >= 80 ? 'High' : accuracyPercent >= 60 ? 'Moderate' : 'Low'
             });
           }
@@ -65,7 +82,7 @@ export function PredictiveAnalytics() {
       percent: accuracy.percent.toFixed(2),
       level: accuracy.level,
       colorClass,
-      source: accuracy.isTestSet ? 'Test Set' : 'Training Set',
+      source: accuracy.source || 'Training Set',
       context: getContext(),
       mape: accuracy.mape.toFixed(2)
     };
