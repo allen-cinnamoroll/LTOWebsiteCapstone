@@ -7,7 +7,6 @@ import {
   ViolationPrescriptionTable
 } from './index';
 import { ViolationMonitoring } from './ViolationMonitoring.jsx';
-import ViolationAnalyticsExport from './ViolationAnalyticsExport.jsx';
 
 export function ViolationAnalytics() {
   const [selectedYear, setSelectedYear] = useState('');
@@ -166,12 +165,6 @@ export function ViolationAnalytics() {
                 </span>
               )}
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <ViolationAnalyticsExport 
-              analyticsData={analyticsData}
-              selectedYear={selectedYear}
-            />
           </div>
         </div>
         

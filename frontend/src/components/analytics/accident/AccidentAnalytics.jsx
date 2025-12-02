@@ -55,7 +55,6 @@ import AccidentMap from './AccidentMap';
 import AccidentHeatmap from './AccidentHeatmap';
 import AccidentComparison from './AccidentComparison';
 import EnhancedAccidentMap from './EnhancedAccidentMap';
-import ExportUtilities from './ExportUtilities';
 
 // Theme-aware colors that work in both light and dark modes
 // Optimized for severity distribution with better contrast
@@ -817,13 +816,6 @@ export function AccidentAnalytics() {
           <p className="text-muted-foreground">
             Comprehensive analysis of accident data
           </p>
-        </div>
-          <div className="flex items-center gap-2">
-            <ExportUtilities 
-              analyticsData={analyticsData}
-              riskData={riskData}
-              timePeriod={timePeriod}
-            />
           </div>
         </div>
 

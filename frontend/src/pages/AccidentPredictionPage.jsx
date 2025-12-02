@@ -15,6 +15,16 @@ import {
   Zap
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 
 // Get Flask API URL from environment variable or use default
@@ -37,6 +47,8 @@ export default function AccidentPredictionPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [retraining, setRetraining] = useState(false);
+  const [showRetrainModal, setShowRetrainModal] = useState(false);
 
   // Fetch model information on component mount
   useEffect(() => {
@@ -102,6 +114,65 @@ export default function AccidentPredictionPage() {
     setRefreshing(true);
     await fetchModelInfo(true); // Show toast on manual refresh
     setRefreshing(false);
+  };
+
+  const handleRetrain = async () => {
+    setShowRetrainModal(false);
+    
+    try {
+      setRetraining(true);
+      setError(null);
+      
+      const url = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/retrain`;
+      console.log('[AccidentPredictionPage] Starting retrain from:', url);
+      
+      // Create timeout controller for browser compatibility
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3600000); // 1 hour timeout for training
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ force: true }),
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Failed to retrain model', response.status, text);
+        throw new Error(`HTTP ${response.status}: ${text || 'Failed to retrain model'}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success('Model retrained successfully! Refreshing model information...');
+        // Refresh model info after successful retrain
+        await fetchModelInfo(false);
+      } else {
+        throw new Error(data.error || data.message || 'Failed to retrain model');
+      }
+    } catch (err) {
+      console.error('Error retraining model:', err);
+      let errorMessage = err.message || 'Failed to retrain model. Please check server logs.';
+      
+      // Remove localhost references from error messages
+      if (errorMessage.includes('localhost')) {
+        errorMessage = errorMessage.replace(/localhost:\d+/g, 'prediction service');
+      }
+      if (errorMessage.includes('Cannot connect')) {
+        errorMessage = 'Cannot connect to prediction service. Please ensure the Flask API is running.';
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setRetraining(false);
+    }
   };
 
   // Get primary model accuracy (supports both old and new API formats)
@@ -208,19 +279,39 @@ export default function AccidentPredictionPage() {
             Random Forest regression model for predicting monthly accident counts
           </p>
         </div>
-        <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
-          {refreshing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Refreshing...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => setShowRetrainModal(true)} 
+            disabled={retraining || refreshing} 
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {retraining ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Retraining...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Retrain Model
+              </>
+            )}
+          </Button>
+          <Button onClick={handleRefresh} disabled={refreshing || retraining} variant="outline">
+            {refreshing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Refreshing...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Model Status Card */}
@@ -492,6 +583,144 @@ export default function AccidentPredictionPage() {
         </Card>
       )}
 
+      {/* Random Forest Classifier Metrics */}
+      {hasClassifierModel && modelInfo?.classifier_metrics && (
+        <Card className="border-indigo-200 dark:border-indigo-900">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-6 w-6 text-indigo-500" />
+              <CardTitle>Trained Models</CardTitle>
+            </div>
+            <CardDescription>
+              Random Forest Classifier performance metrics
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Accuracy */}
+              {modelInfo.classifier_metrics.accuracy !== undefined && (
+                <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">Accuracy</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Percentage of correct predictions on the test set
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {(modelInfo.classifier_metrics.accuracy * 100).toFixed(2)}%
+                  </div>
+                </div>
+              )}
+
+              {/* Precision */}
+              {modelInfo.classifier_metrics.precision !== undefined && (
+                <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">Precision</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Proportion of positive predictions that were correct
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {(modelInfo.classifier_metrics.precision * 100).toFixed(2)}%
+                  </div>
+                </div>
+              )}
+
+              {/* Recall */}
+              {modelInfo.classifier_metrics.recall !== undefined && (
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">Recall</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Proportion of actual positives that were correctly identified
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {(modelInfo.classifier_metrics.recall * 100).toFixed(2)}%
+                  </div>
+                </div>
+              )}
+
+              {/* F1 Score */}
+              {modelInfo.classifier_metrics.f1_score !== undefined && (
+                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">F1 Score</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Harmonic mean of precision and recall
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {(modelInfo.classifier_metrics.f1_score * 100).toFixed(2)}%
+                  </div>
+                </div>
+              )}
+
+              {/* ROC-AUC */}
+              {modelInfo.classifier_metrics.roc_auc !== undefined && (
+                <div className="p-4 rounded-lg bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-muted-foreground">ROC–AUC</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Area under the ROC curve. Measures the model's ability to distinguish between classes
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {(modelInfo.classifier_metrics.roc_auc * 100).toFixed(2)}%
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Training Data Info */}
       <Card>
         <CardHeader>
@@ -590,6 +819,35 @@ export default function AccidentPredictionPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Retrain Confirmation Modal */}
+      <AlertDialog open={showRetrainModal} onOpenChange={setShowRetrainModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Retrain Model</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to retrain the model? This process may take several minutes and will use the latest data from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={retraining}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRetrain}
+              disabled={retraining}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {retraining ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Retraining...
+                </>
+              ) : (
+                'Continue'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </div>
   );

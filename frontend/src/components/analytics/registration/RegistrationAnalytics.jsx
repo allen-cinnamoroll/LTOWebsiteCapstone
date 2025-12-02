@@ -6,7 +6,6 @@ import VehicleTrendChart from './VehicleTrendChart.jsx';
 import OwnerMunicipalityChart from './OwnerMunicipalityChart.jsx';
 import VehicleClassificationChart from './VehicleClassificationChart.jsx';
 import { PredictiveAnalytics } from './PredictiveAnalytics.jsx';
-import RegistrationAnalyticsExport from './RegistrationAnalyticsExport.jsx';
 import { 
   Select, 
   SelectContent, 
@@ -190,12 +189,6 @@ export function RegistrationAnalytics() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <RegistrationAnalyticsExport 
-            analyticsData={analyticsData}
-            selectedMonth={selectedMonth}
-            selectedYear={selectedYear}
-          />
-          
           {loading ? (
             <div className="registration-analytics-controls controls-fade-in loading-fade">
               <div className="animate-pulse">

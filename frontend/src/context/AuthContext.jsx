@@ -143,9 +143,9 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true); // Make sure to set authenticated to true
   };
 
-  // Check if OTP verification is required for non-superadmin users
+  // Check if OTP verification is required for all users (including superadmin)
   useEffect(() => {
-    if (isAuthenticated && userData?.role && userData.role !== "0" && userData.isOtpVerified === false) {
+    if (isAuthenticated && userData && userData.isOtpVerified === false) {
       setShowOTPModal(true);
     } else {
       setShowOTPModal(false);

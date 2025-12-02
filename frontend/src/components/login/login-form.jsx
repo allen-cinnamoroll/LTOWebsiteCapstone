@@ -123,7 +123,7 @@ export function LoginForm({ className, ...props }) {
       } else if (errorMessage === "Email is incorrect" || errorMessage.includes("Email") || errorMessage.includes("license")) {
         form.setError("email", {
           type: "manual",
-          message: "Email or license number is incorrect",
+          message: "Email is incorrect",
         });
       } else {
         // For other errors (like email sending failures), show general error

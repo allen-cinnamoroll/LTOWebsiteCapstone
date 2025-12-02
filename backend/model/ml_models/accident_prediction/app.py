@@ -278,6 +278,102 @@ def prepare_features(year, month, municipality, barangay, historical_data=None):
     return df
 
 
+@app.route('/api/accidents/retrain', methods=['POST'])
+def retrain_model():
+    """
+    Retrain the accident prediction models (Random Forest Regressor and Classifier)
+    
+    Optional JSON Body:
+    - force (bool): Force retrain even if model exists (default: false)
+    
+    Returns:
+    - success: Boolean indicating success
+    - message: Status message
+    - training_info: Information about the training process
+    """
+    import subprocess
+    import threading
+    
+    try:
+        # Get request body
+        data = request.get_json() or {}
+        force = data.get('force', False)
+        
+        # Get the path to the training script
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        train_script = os.path.join(current_dir, 'train_rf_model.py')
+        
+        if not os.path.exists(train_script):
+            return jsonify({
+                'success': False,
+                'error': 'Training script not found',
+                'timestamp': datetime.now().isoformat()
+            }), 500
+        
+        # Run training in a separate thread to avoid blocking
+        def run_retrain():
+            try:
+                logger.info("Starting model retraining...")
+                result = subprocess.run(
+                    [sys.executable, train_script],
+                    cwd=current_dir,
+                    capture_output=True,
+                    text=True,
+                    timeout=3600  # 1 hour timeout
+                )
+                
+                if result.returncode != 0:
+                    logger.error(f"Retraining failed: {result.stderr}")
+                    return {
+                        'success': False,
+                        'error': result.stderr or 'Training failed',
+                        'stdout': result.stdout
+                    }
+                
+                # Reload model after successful training
+                logger.info("Reloading model after retraining...")
+                initialize_model()
+                
+                return {
+                    'success': True,
+                    'message': 'Model retrained and reloaded successfully',
+                    'stdout': result.stdout
+                }
+            except subprocess.TimeoutExpired:
+                logger.error("Retraining timed out after 1 hour")
+                return {
+                    'success': False,
+                    'error': 'Training process timed out after 1 hour'
+                }
+            except Exception as e:
+                logger.error(f"Error during retraining: {str(e)}")
+                traceback.print_exc()
+                return {
+                    'success': False,
+                    'error': str(e)
+                }
+        
+        # For now, run synchronously (can be made async later)
+        # In production, you might want to use a task queue like Celery
+        result = run_retrain()
+        
+        return jsonify({
+            'success': result['success'],
+            'message': result.get('message', 'Retraining completed'),
+            'error': result.get('error'),
+            'timestamp': datetime.now().isoformat()
+        }), 200 if result['success'] else 500
+        
+    except Exception as e:
+        logger.error(f"Error initiating retrain: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+
 @app.route('/api/accidents/reload-model', methods=['POST'])
 def reload_model():
     """Reload the model after retraining (internal endpoint)"""
