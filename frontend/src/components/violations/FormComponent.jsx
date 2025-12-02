@@ -387,6 +387,30 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   };
 
   const handleViolationInputBlur = (index) => {
+    // Validate violation on blur
+    const currentViolation = violations[index] || "";
+    if (currentViolation.trim() !== "") {
+      // Check if violation is in the allowed list
+      if (!availableViolations.includes(currentViolation.trim())) {
+        // Set form error for this violation
+        form.setError(`violations.${index}`, {
+          type: "manual",
+          message: "Invalid violation. Please select from the dropdown or leave empty."
+        });
+        // Clear the invalid violation
+        const newViolations = [...violations];
+        newViolations[index] = "";
+        setViolations(newViolations);
+        form.setValue("violations", newViolations);
+      } else {
+        // Clear error if valid
+        form.clearErrors(`violations.${index}`);
+      }
+    } else {
+      // Clear error if empty (empty is allowed)
+      form.clearErrors(`violations.${index}`);
+    }
+    
     // Delay closing to allow clicking on dropdown items
     setTimeout(() => {
       setOpenDropdowns((prev) => ({
@@ -743,9 +767,14 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                     {isDropdownOpen && filteredViolations.length === 0 && searchTerm && (
                       <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
                         <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
-                          No violations found. You can still type a custom violation.
+                          No violations found. Please select from the dropdown or leave empty.
                         </div>
                       </div>
+                    )}
+                    {form.formState.errors.violations?.[index] && (
+                      <p className="text-xs text-red-400 mt-1">
+                        {form.formState.errors.violations[index]?.message}
+                      </p>
                     )}
                   </div>
                   {violations.length > 1 && (
