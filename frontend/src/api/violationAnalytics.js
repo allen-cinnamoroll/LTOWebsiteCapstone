@@ -11,10 +11,13 @@ export const getViolationCount = async () => {
   }
 };
 
-// Get all violations
+// Get all violations (no pagination) for analytics and KPIs
 export const getViolations = async () => {
   try {
-    const response = await apiClient.get('/violations');
+    // Use fetchAll=true so backend returns the entire violations collection (not just first page)
+    const response = await apiClient.get('/violations', {
+      params: { fetchAll: true },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching violations:', error);
