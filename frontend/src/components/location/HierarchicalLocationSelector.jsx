@@ -47,7 +47,7 @@ const HierarchicalLocationSelector = ({
     console.log('Setting municipality:', value);
     setSelectedMunicipality(value);
     setSelectedBarangay("");
-    setSelectedPurok("");
+    // Don't clear purok - it's independent of municipality/barangay
     setMunicipalitySearch(""); // Clear search when municipality is selected
     setBarangaySearch(""); // Clear search when municipality changes
     setMunicipalityHighlightedIndex(-1); // Reset highlighted index
@@ -57,7 +57,7 @@ const HierarchicalLocationSelector = ({
     console.log('Setting municipality to:', value);
     form.setValue("municipality", value, { shouldValidate: true, shouldDirty: true });
     form.setValue("barangay", "", { shouldValidate: true, shouldDirty: true });
-    form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+    // Don't clear purok - preserve user's input
     form.setValue("province", davaoOrientalData.region, { shouldValidate: true, shouldDirty: true });
     
     console.log('Form values after municipality change:', {
@@ -76,11 +76,13 @@ const HierarchicalLocationSelector = ({
     }, 100);
     
     if (onLocationChange) {
+      // Preserve current purok value
+      const currentPurok = form.getValues("purok") || selectedPurok || "";
       onLocationChange({
         region: davaoOrientalData.region,
         municipality: value,
         barangay: "",
-        purok: ""
+        purok: currentPurok
       });
     }
   };
@@ -89,7 +91,7 @@ const HierarchicalLocationSelector = ({
   const handleBarangayChange = (value) => {
     console.log('Setting barangay:', value);
     setSelectedBarangay(value);
-    setSelectedPurok("");
+    // Don't clear purok - it's independent of municipality/barangay
     setBarangaySearch(""); // Clear search when barangay is selected
     setBarangayHighlightedIndex(-1); // Reset highlighted index
     
@@ -97,7 +99,7 @@ const HierarchicalLocationSelector = ({
     console.log('=== SETTING BARANGAY ===');
     console.log('Setting barangay to:', value);
     form.setValue("barangay", value, { shouldValidate: true, shouldDirty: true });
-    form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+    // Don't clear purok - preserve user's input
     
     console.log('Form values after barangay change:', {
       municipality: form.getValues("municipality"),
@@ -115,11 +117,13 @@ const HierarchicalLocationSelector = ({
     }, 100);
     
     if (onLocationChange) {
+      // Preserve current purok value
+      const currentPurok = form.getValues("purok") || selectedPurok || "";
       onLocationChange({
         region: davaoOrientalData.region,
         municipality: selectedMunicipality,
         barangay: value,
-        purok: ""
+        purok: currentPurok
       });
     }
   };
@@ -328,10 +332,10 @@ const HierarchicalLocationSelector = ({
                 if (selectedMunicipality && value !== selectedMunicipality) {
                   setSelectedMunicipality("");
                   setSelectedBarangay("");
-                  setSelectedPurok("");
+                  // Don't clear purok - it's independent of municipality/barangay
                   form.setValue("municipality", "", { shouldValidate: true, shouldDirty: true });
                   form.setValue("barangay", "", { shouldValidate: true, shouldDirty: true });
-                  form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+                  // Don't clear purok - preserve user's input
                 }
               }}
               onKeyDown={handleMunicipalityKeyDown}
@@ -395,7 +399,7 @@ const HierarchicalLocationSelector = ({
                 if (selectedBarangay && value !== selectedBarangay) {
                   setSelectedBarangay("");
                   form.setValue("barangay", "", { shouldValidate: true, shouldDirty: true });
-                  form.setValue("purok", "", { shouldValidate: true, shouldDirty: true });
+                  // Don't clear purok - preserve user's input
                 }
               }}
               onKeyDown={handleBarangayKeyDown}
