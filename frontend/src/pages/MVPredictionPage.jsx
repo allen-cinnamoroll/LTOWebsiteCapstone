@@ -3,9 +3,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle, Calendar } from 'lucide-react';
+import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle, Calendar, ArrowLeft } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 // Get Flask API URL from environment variable or use relative path in production
 // In production, use relative path through nginx proxy (same origin = no CORS issues)
@@ -431,8 +432,8 @@ export default function MVPredictionPage() {
     <div className="h-full bg-white dark:bg-black overflow-y-auto rounded-lg">
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
@@ -445,6 +446,12 @@ export default function MVPredictionPage() {
             </p>
           </div>
         </div>
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link to="/trained-models/vehicle">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Vehicle Model
+          </Link>
+        </Button>
       </div>
 
       {/* Main Card */}
