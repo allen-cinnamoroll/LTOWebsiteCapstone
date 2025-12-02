@@ -446,9 +446,14 @@ export default function MVPredictionPage() {
             </p>
           </div>
         </div>
-        <Button asChild variant="outline" size="sm" className="shrink-0">
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          className="shrink-0 gap-2 rounded-full bg-white text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-900 dark:bg-transparent dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-900/60"
+        >
           <Link to="/trained-models/vehicle">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Vehicle Model
           </Link>
         </Button>
