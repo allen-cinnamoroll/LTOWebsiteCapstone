@@ -31,8 +31,16 @@ import DatePicker from "../calendar/DatePicker";
 import HierarchicalLocationSelector from "../location/HierarchicalLocationSelector";
 import { useNavigate } from "react-router-dom";
 
-const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = false }) => {
+const FormComponent = ({
+  onSubmit,
+  form,
+  submitting,
+  onCancel,
+  isEditMode = false,
+  lockVehicleFields = false, // when true, plate/file are read-only (used in Add Owner modal)
+}) => {
   const navigate = useNavigate();
+  const vehicleLocked = isEditMode || lockVehicleFields;
   return (
     <Form {...form}>
       <form id="driver-form" onSubmit={form.handleSubmit(onSubmit)}>
@@ -61,18 +69,19 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                         placeholder="ABC-123, DEF-456"
                         value={Array.isArray(field.value) ? field.value.join(", ") : field.value || ""}
                         onChange={(e) => {
-                          if (!isEditMode) {
+                          if (!vehicleLocked) {
                             const value = e.target.value.toUpperCase();
                             // Convert comma-separated string to array
                             const plateArray = value.split(",").map(plate => plate.trim()).filter(plate => plate.length > 0);
                             field.onChange(plateArray.length > 0 ? plateArray : value);
                           }
                         }}
-                        disabled={isEditMode}
+                        disabled={vehicleLocked}
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.plateNo && "border-red-400",
-                          isEditMode && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-[8px] text-gray-600 dark:text-gray-300"
+                          vehicleLocked && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-gray-600 dark:text-gray-300",
+                          isEditMode && "text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -99,16 +108,17 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                         type="text"
                         autoFocus={false}
                         onChange={(e) => {
-                          if (!isEditMode) {
+                          if (!vehicleLocked) {
                             const capitalizedValue = e.target.value.toUpperCase();
                             field.onChange(capitalizedValue);
                           }
                         }}
-                        disabled={isEditMode}
+                        disabled={vehicleLocked}
                         className={cn(
                           "border border-input focus:ring-0 text-black dark:text-white",
                           form.formState.errors.fileNo && "border-red-400",
-                          isEditMode && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-[8px] text-gray-600 dark:text-gray-300"
+                          vehicleLocked && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-gray-600 dark:text-gray-300",
+                          isEditMode && "text-[8px]"
                         )}
                       />
                     </FormControl>
@@ -224,6 +234,15 @@ const FormComponent = ({ onSubmit, form, submitting, onCancel, isEditMode = fals
                         {...field}
                         type="tel"
                         autoFocus={false}
+                        maxLength={11}
+                        inputMode="numeric"
+                        pattern="^09[0-9]{9}$"
+                        title="Contact number must start with 09 and contain 11 digits (numbers only), e.g. 09123456789"
+                        onChange={(e) => {
+                          // Allow only digits and enforce 11-digit 09XXXXXXXXX pattern
+                          const digitsOnly = e.target.value.replace(/\D/g, "");
+                          field.onChange(digitsOnly);
+                        }}
                         className={cn(
                           "text-black dark:text-white",
                           form.formState.errors.contactNumber && "border-red-400",

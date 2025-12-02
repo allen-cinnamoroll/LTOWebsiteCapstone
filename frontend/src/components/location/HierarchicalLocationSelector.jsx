@@ -270,8 +270,47 @@ const HierarchicalLocationSelector = ({
         </div>
       </div>
 
-      {/* First Row: Municipality, Barangay, and Purok */}
+      {/* First Row: Purok/Street, Municipality, and Barangay */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Purok / Street - Free text, independent of municipality/barangay */}
+        <div className="space-y-0">
+          <label className="text-xs font-medium text-muted-foreground mb-0">
+            Purok/Street
+          </label>
+          <div className="relative mt-0">
+            <Input
+              type="text"
+              autoFocus={false}
+              placeholder="Enter purok/street..."
+              value={selectedPurok || ""}
+              onChange={(e) => {
+                const value = e.target.value.toUpperCase();
+                setSelectedPurok(value);
+                form.setValue("purok", value, { shouldValidate: true, shouldDirty: true });
+                
+                if (onLocationChange) {
+                  onLocationChange({
+                    region: davaoOrientalData.region,
+                    municipality: selectedMunicipality,
+                    barangay: selectedBarangay,
+                    purok: value
+                  });
+                }
+              }}
+              className={cn(
+                "mt-1",
+                form.formState.errors.purok && "border-red-400",
+                isEditMode && "text-[8px]"
+              )}
+            />
+          </div>
+          {form.formState.errors.purok && (
+            <p className="text-xs text-red-400 mt-1">
+              {form.formState.errors.purok.message}
+            </p>
+          )}
+        </div>
+
         {/* Municipality Selection */}
         <div className="space-y-0">
           <label className="text-xs font-medium text-muted-foreground mb-0">
@@ -401,45 +440,6 @@ const HierarchicalLocationSelector = ({
           {form.formState.errors.barangay && (
             <p className="text-xs text-red-400 mt-1">
               {form.formState.errors.barangay.message}
-            </p>
-          )}
-        </div>
-
-        {/* Purok / Street - Free text, independent of municipality/barangay */}
-        <div className="space-y-0">
-          <label className="text-xs font-medium text-muted-foreground mb-0">
-            Purok/Street
-          </label>
-          <div className="relative mt-0">
-            <Input
-              type="text"
-              autoFocus={false}
-              placeholder="Enter purok/street..."
-              value={selectedPurok || ""}
-              onChange={(e) => {
-                const value = e.target.value.toUpperCase();
-                setSelectedPurok(value);
-                form.setValue("purok", value, { shouldValidate: true, shouldDirty: true });
-                
-                if (onLocationChange) {
-                  onLocationChange({
-                    region: davaoOrientalData.region,
-                    municipality: selectedMunicipality,
-                    barangay: selectedBarangay,
-                    purok: value
-                  });
-                }
-              }}
-              className={cn(
-                "mt-1",
-                form.formState.errors.purok && "border-red-400",
-                isEditMode && "text-[8px]"
-              )}
-            />
-          </div>
-          {form.formState.errors.purok && (
-            <p className="text-xs text-red-400 mt-1">
-              {form.formState.errors.purok.message}
             </p>
           )}
         </div>

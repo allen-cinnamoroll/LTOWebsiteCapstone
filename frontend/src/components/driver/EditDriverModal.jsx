@@ -165,6 +165,15 @@ const EditDriverModal = ({ open, onOpenChange, driverData, onDriverUpdated, onCa
       errors.push("Driver's license number is required when you have a driver's license");
     }
     
+    // Validate contact number format if provided
+    if (currentFormValues.contactNumber && currentFormValues.contactNumber.trim() !== '') {
+      const phone = currentFormValues.contactNumber.trim();
+      const phoneRegex = /^09\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        errors.push("Contact number must start with 09 and contain 11 digits (numbers only)");
+      }
+    }
+    
     // Validate email format if provided
     if (currentFormValues.emailAddress && currentFormValues.emailAddress.trim() !== '') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
