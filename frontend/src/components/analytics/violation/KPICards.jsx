@@ -50,6 +50,14 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   
+  // Extract violation code from full violation text (e.g., "1A - NO DRIVER'S LICENSE" -> "1A")
+  const getViolationCode = (violationText) => {
+    if (!violationText) return 'N/A';
+    // Extract everything before " - " or just return the text if no separator
+    const code = violationText.split(' - ')[0].trim();
+    return code || violationText;
+  };
+  
   // Track when data becomes available to trigger simultaneous animations
   const [animationTrigger, setAnimationTrigger] = useState(0);
   
@@ -198,15 +206,10 @@ export function KPICards({ displayData, loading, totalViolations, totalTrafficVi
                 <p className="text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Most Common Violation</p>
               </div>
               <div 
-                className="text-sm font-extrabold text-black dark:text-white mb-1.5 leading-snug break-words overflow-wrap-anywhere" 
+                className="text-3xl font-extrabold text-black dark:text-white mb-2 leading-tight" 
                 title={mostCommonViolation?._id || 'N/A'}
-                style={{ 
-                  wordBreak: 'break-word',
-                  overflowWrap: 'break-word',
-                  hyphens: 'auto'
-                }}
               >
-                {mostCommonViolation?._id || 'N/A'}
+                {getViolationCode(mostCommonViolation?._id)}
               </div>
               <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-0.5">
                 {loading ? '...' : commonViolationCountAnimated.toLocaleString()}{" "}occurrences

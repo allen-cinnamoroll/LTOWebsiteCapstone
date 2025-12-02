@@ -216,12 +216,26 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
         }
       });
       setViolationSearchTerms(searchTerms);
+      
+      // Validate existing violations (especially important in edit mode)
+      // Check each violation and set errors for invalid ones
+      formViolations.forEach((violation, index) => {
+        if (violation && violation.trim() !== "") {
+          if (!availableViolations.includes(violation.trim())) {
+            // Set error for invalid violation
+            form.setError(`violations.${index}`, {
+              type: "manual",
+              message: "Invalid violation. Please select from the dropdown or leave empty."
+            });
+          }
+        }
+      });
     } else if (violations.length === 0) {
       console.log("No form violations, setting to [\"\"]");
       setViolations([""]);
       form.setValue("violations", [""]);
     }
-  }, [formViolations, form]);
+  }, [formViolations, form, availableViolations]);
 
   const addViolation = () => {
     console.log("=== ADD VIOLATION CLICKED ===");
@@ -746,7 +760,10 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       onChange={(e) => handleViolationSearchChange(index, e.target.value)}
                       onFocus={() => handleViolationInputFocus(index)}
                       onBlur={() => handleViolationInputBlur(index)}
-                      className="text-xs"
+                      className={cn(
+                        "text-xs",
+                        form.formState.errors.violations?.[index] && "border-red-500 focus-visible:ring-red-500"
+                      )}
                     />
                     {isDropdownOpen && filteredViolations.length > 0 && (
                       <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
