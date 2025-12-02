@@ -429,7 +429,7 @@ export default function MVPredictionPage() {
   };
 
   return (
-    <div className="h-full bg-white dark:bg-black overflow-y-auto rounded-lg">
+    <div className="h-full bg-gradient-to-b from-slate-50 to-white dark:from-black dark:to-gray-900 overflow-y-auto rounded-lg">
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-4">
@@ -460,7 +460,7 @@ export default function MVPredictionPage() {
       </div>
 
       {/* Main Card */}
-      <Card className="border border-gray-200 dark:border-gray-800">
+      <Card className="border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-black">
         <CardHeader>
           <CardTitle className="text-xl">Retrain Model</CardTitle>
           <CardDescription>
@@ -649,7 +649,7 @@ export default function MVPredictionPage() {
       </Card>
 
        {/* CSV Format Requirements Card */}
-       <Card className="mt-6 border border-gray-200 dark:border-gray-800">
+       <Card className="mt-6 border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-black">
          <CardHeader>
            <CardTitle className="text-lg flex items-center gap-2">
              <File className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -716,7 +716,7 @@ export default function MVPredictionPage() {
        </Card>
 
        {/* Important Notes Card */}
-       <Card className="mt-6 border border-gray-200 dark:border-gray-800">
+       <Card className="mt-6 border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-black">
          <CardHeader>
            <CardTitle className="text-lg">Important Notes</CardTitle>
          </CardHeader>
