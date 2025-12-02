@@ -780,6 +780,16 @@ def get_model_accuracy():
                 logger.warning(f"Municipality-specific model not available for '{municipality_upper}'. Using aggregated model.")
         
         # Build accuracy response with all optimized metrics
+        # Derive simple training/test sample counts when available
+        try:
+            training_samples = len(model_to_use.training_data) if getattr(model_to_use, "training_data", None) is not None else None
+        except Exception:
+            training_samples = None
+        try:
+            test_samples = len(model_to_use.test_data) if getattr(model_to_use, "test_data", None) is not None else None
+        except Exception:
+            test_samples = None
+
         accuracy_data = {
             'mae': model_to_use.accuracy_metrics.get('mae') if model_to_use.accuracy_metrics else None,
             'rmse': model_to_use.accuracy_metrics.get('rmse') if model_to_use.accuracy_metrics else None,
@@ -790,6 +800,8 @@ def get_model_accuracy():
             'out_of_sample': model_to_use.test_accuracy_metrics,
             'cross_validation': model_to_use.cv_results,
             'diagnostics': model_to_use.diagnostics,
+            'training_samples': training_samples if training_samples is not None else (model_to_use.diagnostics.get('total_residuals') if model_to_use.diagnostics else None),
+            'test_samples': test_samples,
             'model_type': 'optimized_sarima_daily',
             'per_municipality_enabled': ENABLE_PER_MUNICIPALITY,
             'model_used': model_used_name,

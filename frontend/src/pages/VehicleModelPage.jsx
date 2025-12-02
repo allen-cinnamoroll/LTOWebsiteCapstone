@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Car, CheckCircle2, RefreshCw, Loader2, BarChart3 } from "lucide-react";
+import { Car, CheckCircle2, RefreshCw, Loader2, BarChart3, Activity, Info, TrendingUp, Target } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { getModelAccuracy } from "@/api/predictionApi";
@@ -247,6 +247,107 @@ export default function VehicleModelPage() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Training Data Info - styled similar to Accident model page */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Activity className="h-6 w-6 text-purple-500" />
+              <CardTitle>Training Data Information</CardTitle>
+            </div>
+            <CardDescription>Dataset statistics used for model training and evaluation</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                <div className="text-sm text-muted-foreground mb-1">Training Samples</div>
+                <div className="text-2xl font-bold">
+                  {metrics?.training_samples !== undefined && metrics.training_samples !== null
+                    ? metrics.training_samples.toLocaleString()
+                    : metrics?.diagnostics?.total_residuals?.toLocaleString() || 0}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">Days used for training</div>
+              </div>
+
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                <div className="text-sm text-muted-foreground mb-1">Test Samples</div>
+                <div className="text-2xl font-bold">
+                  {metrics?.test_samples !== undefined && metrics.test_samples !== null
+                    ? metrics.test_samples.toLocaleString()
+                    : 0}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">Days used for evaluation</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Usage Information - adapted for vehicle predictions */}
+        <Card className="border-yellow-200 dark:border-yellow-900">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-yellow-500" />
+              <CardTitle>Model Usage</CardTitle>
+            </div>
+            <CardDescription>
+              This model is actively used in the Vehicle Analytics / Predictive Analytics dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3">
+              <TrendingUp className="h-5 w-5 text-blue-500 mt-0.5" />
+              <div>
+                <div className="font-semibold">Predictive Analytics</div>
+                <div className="text-sm text-muted-foreground">
+                  Generates medium-term forecasts of monthly vehicle registration volumes across municipalities to
+                  support planning and resource allocation.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Target className="h-5 w-5 text-green-500 mt-0.5" />
+              <div>
+                <div className="font-semibold">Prescriptive Recommendations</div>
+                <div className="text-sm text-muted-foreground">
+                  Highlights peak months and high-variability periods to guide scheduling of renewal caravans and
+                  staffing levels at district offices.
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <BarChart3 className="h-5 w-5 text-purple-500 mt-0.5" />
+              <div>
+                <div className="font-semibold">Risk & Capacity Assessment</div>
+                <div className="text-sm text-muted-foreground">
+                  Identifies months with unusually low or high predicted renewals, helping LTO manage service capacity
+                  and avoid backlogs.
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Info Note */}
+        <Card className="border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
+          <CardContent className="pt-6">
+            <div className="flex gap-3">
+              <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-muted-foreground">
+                <p className="mb-2">
+                  <strong>Note:</strong> This SARIMA time-series model predicts monthly vehicle registration counts based
+                  on historical renewal patterns, seasonality, and schedule-based features (e.g., plate ending and
+                  LTO renewal calendar).
+                </p>
+                <p>
+                  The model is automatically used in the <strong>Predictive Analytics</strong> section of the{" "}
+                  <strong>Vehicle Model</strong> dashboard to provide forecasts for planning and decision-making.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
