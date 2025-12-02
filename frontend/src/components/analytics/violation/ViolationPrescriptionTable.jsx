@@ -52,8 +52,8 @@ const deriveRecommendations = (records, planningYear) => {
         topViolationsWithStats: [],
         recommendations: {
           enforcement: `Keep regular checkpoints in key roads for the whole year ${planningYear}. Assign more teams during busy days, evenings, and weekends.`,
-          education: 'Introduce focused sessions for high-risk violations during SP registrations and caravan operations.',
-          terminal: 'Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.'
+          education: 'Introduce focused sessions and conduct awareness campaigns specially for high-risk violations during SP registrations and caravan operations.',
+          terminal: 'Deploy traffic personnel before the start of critical holiday periods (March-April for Holy Week/Summer, May for Fiesta Month, June for Balik Eskwela, August for Long weekends, October for Semestral Break, November for Undas, and December for Christmas Rush). Conduct informative briefings about violations, especially high-risk ones.'
         }
       }
     };
@@ -136,8 +136,8 @@ const deriveRecommendations = (records, planningYear) => {
         topViolationsWithStats: [],
         recommendations: {
           enforcement: `Keep regular checkpoints in key roads for the whole year ${planningYear}. Assign more teams during busy days, evenings, and weekends.`,
-          education: 'Introduce focused sessions for high-risk violations during SP registrations and caravan operations.',
-          terminal: 'Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.'
+          education: 'Introduce focused sessions and conduct awareness campaigns specially for high-risk violations during SP registrations and caravan operations.',
+          terminal: 'Deploy traffic personnel before the start of critical holiday periods (March-April for Holy Week/Summer, May for Fiesta Month, June for Balik Eskwela, August for Long weekends, October for Semestral Break, November for Undas, and December for Christmas Rush). Conduct informative briefings about violations, especially high-risk ones.'
         }
       }
     };
@@ -190,7 +190,7 @@ const deriveRecommendations = (records, planningYear) => {
   let enforcementRecommendation = '';
   if (topMonths.length > 0) {
     const peakMonthsList = keyMonths.join(", ");
-    enforcementRecommendation = `Based on the analytics patterns from previous years, in year ${planningYear} it is recommended to conduct enforcement during the peak months (${peakMonthsList}).`;
+    enforcementRecommendation = `Based on the analytics patterns from previous years, for the year ${planningYear} it is recommended to conduct enforcement during these peak months (${peakMonthsList}) to support the timely achievement of the target quota.`;
   } else {
     enforcementRecommendation = `Keep regular checkpoints in key roads for the whole year ${planningYear}. Assign more teams during busy days, evenings, and weekends.`;
   }
@@ -201,23 +201,56 @@ const deriveRecommendations = (records, planningYear) => {
   let educationRecommendation = '';
   if (top3Violations.length > 0) {
     const violationsList = top3Violations.slice(0, 3).join(", ");
-    educationRecommendation = `Introduce focused sessions for high-risk violations (${violationsList}) during SP registrations and caravan operations.`;
+    educationRecommendation = `Introduce focused sessions and conduct awareness campaigns specially for high-risk violations (${violationsList}) during SP registrations and caravan operations.`;
   } else {
     educationRecommendation = `Introduce focused sessions for high-risk violations during SP registrations and caravan operations.`;
   }
 
   // Rule 3: Terminal Briefings Recommendation
-  // IF peak months include holiday months (May, June, August, December)
-  // THEN recommend terminal briefings before those months
-  const holidayMonths = ['May', 'June', 'August', 'December'];
+  // Based on historical data, prioritize terminal briefings for holiday months that appear in peak months
+  // Holiday months mapping: March-April (Holy Week/Summer), May (Fiesta), June (Balik Eskwela),
+  // August (Long weekends/Buwan ng Wika), October (Semestral Break), November (Undas), December (Christmas Rush)
+  const holidayMonthsMap = {
+    'March': 'Holy Week / Summer season',
+    'April': 'Holy Week / Summer season',
+    'May': 'Fiesta Month',
+    'June': 'Balik Eskwela',
+    'August': 'Long weekends / Buwan ng Wika',
+    'October': 'Semestral Break',
+    'November': 'Undas',
+    'December': 'Christmas Rush'
+  };
+  
+  const holidayMonths = Object.keys(holidayMonthsMap);
   const peakHolidayMonths = keyMonths.filter(month => holidayMonths.includes(month));
+  
   let terminalRecommendation = '';
   if (peakHolidayMonths.length > 0) {
-    terminalRecommendation = `Deploy traffic personnel before the start of special holidays in ${peakHolidayMonths.join(", ")}. Conduct informative briefings about violations, especially high-risk ones.`;
+    // Create detailed recommendation with event context
+    const holidayDetails = peakHolidayMonths.map(month => {
+      const event = holidayMonthsMap[month];
+      return `${month} (${event})`;
+    }).join(', ');
+    
+    terminalRecommendation = `Based on historical data, prioritize terminal briefings before the following holiday periods: ${holidayDetails}. Deploy traffic personnel and conduct informative briefings about violations, especially high-risk ones, to prepare for increased travel volume during these critical periods.`;
   } else if (topMonths.length > 0) {
-    terminalRecommendation = `Deploy traffic personnel before the start of peak months (${keyMonths.join(", ")}). Conduct informative briefings about violations, especially high-risk ones.`;
+    // Check if any peak months are holiday months (even if not in top 3)
+    const allHolidayMonthsInData = monthSummariesWithShare
+      .filter(m => holidayMonths.includes(m.monthName))
+      .map(m => m.monthName);
+    
+    if (allHolidayMonthsInData.length > 0) {
+      const holidayDetails = allHolidayMonthsInData.map(month => {
+        const event = holidayMonthsMap[month];
+        return `${month} (${event})`;
+      }).join(', ');
+      terminalRecommendation = `Based on historical data, prioritize terminal briefings before the following holiday periods: ${holidayDetails}. Deploy traffic personnel and conduct informative briefings about violations, especially high-risk ones.`;
+    } else {
+      terminalRecommendation = `Deploy traffic personnel before the start of peak months (${keyMonths.join(", ")}). Conduct informative briefings about violations, especially high-risk ones.`;
+    }
   } else {
-    terminalRecommendation = `Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.`;
+    // Default recommendation covering all critical holiday months
+    terminalRecommendation = `Deploy traffic personnel before the start of critical holiday periods (March-April for Holy Week/Summer, May for Fiesta Month, June for Balik Eskwela, August for Long weekends, October for Semestral Break, November for Undas, and December for Christmas Rush). Conduct informative briefings about violations, especially high-risk ones, to prepare for increased travel volume.`;
   }
 
   const recommendations = {
