@@ -1,11 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle, Calendar } from 'lucide-react';
+import { Upload, File, X, CheckCircle2, AlertCircle, Loader2, TrendingUp, Info, BarChart3, HelpCircle, Calendar, Target } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
+import { getModelAccuracy } from '@/api/predictionApi';
 
 // Get Flask API URL from environment variable or use relative path in production
 // In production, use relative path through nginx proxy (same origin = no CORS issues)
@@ -45,6 +46,33 @@ export default function MVPredictionPage() {
   const [dateRange, setDateRange] = useState(null); // { startDate, endDate } from CSV
   const [isAnalyzingDateRange, setIsAnalyzingDateRange] = useState(false);
   const fileInputRef = useRef(null);
+  const retrainSectionRef = useRef(null);
+
+  // Accuracy / status data from prediction API
+  const [accuracyData, setAccuracyData] = useState(null);
+  const [accuracyLoading, setAccuracyLoading] = useState(true);
+  const [accuracyError, setAccuracyError] = useState(null);
+
+  useEffect(() => {
+    const fetchAccuracy = async () => {
+      try {
+        setAccuracyLoading(true);
+        setAccuracyError(null);
+        const response = await getModelAccuracy();
+        if (response.success && response.data) {
+          setAccuracyData(response.data);
+        } else {
+          setAccuracyError(response.error || 'Unable to load model accuracy.');
+        }
+      } catch (error) {
+        setAccuracyError(error.message || 'Unable to load model accuracy.');
+      } finally {
+        setAccuracyLoading(false);
+      }
+    };
+
+    fetchAccuracy();
+  }, []);
 
   // Helper function to parse CSV row handling quoted fields
   const parseCSVRow = (line) => {
@@ -427,12 +455,54 @@ export default function MVPredictionPage() {
     }
   };
 
+  // Derive accuracy summary similar to PredictiveAnalytics + Accident model page
+  let overallAccuracy = null;
+  let accuracySourceLabel = null;
+  let cvAccuracyDisplay = null;
+  let trainingMape = null;
+  let testMape = null;
+  let trainingR2 = null;
+
+  if (accuracyData) {
+    const testMetrics = accuracyData.out_of_sample || accuracyData.test_accuracy_metrics;
+    const trainingMetrics = accuracyData.in_sample || accuracyData;
+    const cvMetrics = accuracyData.cross_validation;
+
+    if (trainingMetrics && typeof trainingMetrics.mape === 'number' && isFinite(trainingMetrics.mape)) {
+      trainingMape = trainingMetrics.mape;
+      if (typeof trainingMetrics.r2 === 'number' && isFinite(trainingMetrics.r2)) {
+        trainingR2 = trainingMetrics.r2;
+      }
+    }
+
+    if (testMetrics && typeof testMetrics.mape === 'number' && isFinite(testMetrics.mape)) {
+      testMape = testMetrics.mape;
+    }
+
+    // Prefer: test (when reasonable) -> cross-validation -> training
+    if (testMetrics && typeof testMetrics.mape === 'number' && isFinite(testMetrics.mape) && testMetrics.mape >= 0 && testMetrics.mape < 100) {
+      overallAccuracy = Math.max(0, Math.min(100, 100 - testMetrics.mape));
+      accuracySourceLabel = 'Test Set';
+    } else if (cvMetrics && typeof cvMetrics.mean_mape === 'number' && isFinite(cvMetrics.mean_mape)) {
+      overallAccuracy = Math.max(0, Math.min(100, 100 - cvMetrics.mean_mape));
+      accuracySourceLabel = 'Cross-Validation';
+      const cvAcc = 100 - cvMetrics.mean_mape;
+      const cvStd = cvMetrics.std_accuracy || null;
+      cvAccuracyDisplay = cvStd !== null && cvStd !== undefined
+        ? `${cvAcc.toFixed(2)}%`
+        : `${cvAcc.toFixed(2)}%`;
+    } else if (trainingMetrics && typeof trainingMetrics.mape === 'number' && isFinite(trainingMetrics.mape)) {
+      overallAccuracy = Math.max(0, Math.min(100, 100 - trainingMetrics.mape));
+      accuracySourceLabel = 'Training Set';
+    }
+  }
+
   return (
     <div className="h-full bg-white dark:bg-black overflow-y-auto rounded-lg">
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
@@ -441,13 +511,166 @@ export default function MVPredictionPage() {
               MV Prediction Model
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Upload new CSV data to retrain the prediction model
+              Daily SARIMA model for forecasting future vehicle registrations in Davao Oriental.
             </p>
           </div>
         </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            retrainSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        >
+          Retrain Model
+        </Button>
       </div>
 
-      {/* Main Card */}
+      {/* Model Status & Accuracy Overview */}
+      <div className="space-y-4 mb-6">
+        {/* Model Status */}
+        <Card className="border-green-200 dark:border-green-900">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <CardTitle>Model Status</CardTitle>
+              </div>
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                Active
+              </span>
+            </div>
+            <CardDescription>
+              The optimized SARIMA model is loaded from the VPS and ready for predictions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                <div className="text-xs text-muted-foreground mb-1">Model Type</div>
+                <div className="text-sm font-semibold">SARIMA (Daily, Optimized)</div>
+              </div>
+              <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                <div className="text-xs text-muted-foreground mb-1">Seasonality</div>
+                <div className="text-sm font-semibold">Weekly (7-day period)</div>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700">
+                <div className="text-xs text-muted-foreground mb-1">Municipality Models</div>
+                <div className="text-sm font-semibold">
+                  {accuracyData?.per_municipality_enabled ? 'Enabled (11 municipalities)' : 'Disabled'}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Accuracy Overview */}
+        <Card className="border-blue-200 dark:border-blue-900">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-500" />
+              <CardTitle>Model Accuracy</CardTitle>
+            </div>
+            <CardDescription>
+              Accuracy metrics from SARIMA evaluation. Cross‑validation reflects average performance across multiple time periods.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {accuracyLoading ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading model accuracy...
+              </div>
+            ) : accuracyError ? (
+              <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+                <AlertCircle className="w-4 h-4" />
+                {accuracyError}
+              </div>
+            ) : overallAccuracy !== null ? (
+              <>
+                {/* Overall accuracy bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-semibold">Overall Accuracy</span>
+                      <span className="text-xs text-muted-foreground">
+                        ({accuracySourceLabel || 'Cross-Validation'})
+                      </span>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        overallAccuracy >= 80
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                          : overallAccuracy >= 60
+                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                          : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300'
+                      }`}
+                    >
+                      {overallAccuracy.toFixed(2)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-3">
+                    <div
+                      className={`h-3 rounded-full transition-all duration-500 ${
+                        overallAccuracy >= 80
+                          ? 'bg-green-500'
+                          : overallAccuracy >= 60
+                          ? 'bg-yellow-500'
+                          : 'bg-orange-500'
+                      }`}
+                      style={{ width: `${overallAccuracy}%` }}
+                    />
+                  </div>
+                  {cvAccuracyDisplay && (
+                    <p className="text-xs text-muted-foreground">
+                      Cross‑Validation accuracy (average over folds): {cvAccuracyDisplay}
+                    </p>
+                  )}
+                </div>
+
+                {/* Detailed metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {trainingMape !== null && (
+                    <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">Training MAPE</span>
+                        <Info className="w-3.5 h-3.5 text-orange-500" />
+                      </div>
+                      <div className="text-lg font-bold">{trainingMape.toFixed(2)}%</div>
+                    </div>
+                  )}
+                  {testMape !== null && (
+                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">Test MAPE</span>
+                        <Info className="w-3.5 h-3.5 text-red-500" />
+                      </div>
+                      <div className="text-lg font-bold">{testMape.toFixed(2)}%</div>
+                      <p className="mt-1 text-[10px] text-red-700 dark:text-red-300">
+                        Test period has very low volumes; MAPE can be unstable here.
+                      </p>
+                    </div>
+                  )}
+                  {trainingR2 !== null && (
+                    <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">Training R²</span>
+                        <Info className="w-3.5 h-3.5 text-blue-500" />
+                      </div>
+                      <div className="text-lg font-bold">{trainingR2.toFixed(4)}</div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Accuracy metrics are not available.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Card - Retrain panel (scroll target) */}
+      <div ref={retrainSectionRef}>
       <Card className="border border-gray-200 dark:border-gray-800">
         <CardHeader>
           <CardTitle className="text-xl">Retrain Model</CardTitle>

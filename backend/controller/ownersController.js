@@ -309,12 +309,23 @@ export const deleteDriver = async (req, res) => {
       });
     }
 
-    // Check if owner has vehicles
-    if (driver.vehicleIds && Array.isArray(driver.vehicleIds) && driver.vehicleIds.length > 0) {
+    // Check if owner still has any ACTIVE vehicles linked
+    // We check the Vehicle collection directly to avoid issues with old/stale vehicleIds references.
+    const activeVehicleCount = await VehicleModel.countDocuments({
+      ownerId: ownerId,
+      deletedAt: null,
+    });
+
+    if (activeVehicleCount > 0) {
       return res.status(400).json({
         success: false,
         message: "Cannot delete owner with associated vehicles. Please remove or reassign vehicles first.",
       });
+    }
+
+    // Clean up any stale vehicleIds references (e.g., vehicles that were permanently deleted)
+    if (driver.vehicleIds && Array.isArray(driver.vehicleIds) && driver.vehicleIds.length > 0) {
+      driver.vehicleIds = [];
     }
 
     // Soft delete by setting deletedAt
@@ -483,8 +494,13 @@ export const permanentDeleteDriver = async (req, res) => {
       });
     }
 
-    // Check if owner has vehicles
-    if (driver.vehicleIds && Array.isArray(driver.vehicleIds) && driver.vehicleIds.length > 0) {
+    // Check if owner still has any ACTIVE vehicles linked
+    const activeVehicleCount = await VehicleModel.countDocuments({
+      ownerId: req.params.id,
+      deletedAt: null,
+    });
+
+    if (activeVehicleCount > 0) {
       return res.status(400).json({
         success: false,
         message: "Cannot permanently delete owner with associated vehicles. Please remove or reassign vehicles first.",
