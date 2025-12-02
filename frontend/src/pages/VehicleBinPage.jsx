@@ -169,6 +169,7 @@ const VehicleBinPage = () => {
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
             showExport={false}
+            disableHorizontalScroll={true}
           />
         </div>
       </div>

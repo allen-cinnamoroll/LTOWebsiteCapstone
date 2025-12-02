@@ -161,6 +161,7 @@ const ViolationBinPage = () => {
             submitting={submitting}
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
+            disableHorizontalScroll={true}
           />
         </div>
       </div>

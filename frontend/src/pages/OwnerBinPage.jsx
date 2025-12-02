@@ -178,6 +178,7 @@ const OwnerBinPage = () => {
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
             submitting={submitting}
+            disableHorizontalScroll={true}
           />
         </div>
       </div>

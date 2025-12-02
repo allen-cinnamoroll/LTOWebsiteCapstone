@@ -41,7 +41,8 @@ const ViolationTable = ({
   onRestore,
   onPermanentDelete,
   onTypeFilterChange,
-  showExport = true
+  showExport = true,
+  disableHorizontalScroll = false, // hide horizontal scrollbar for bin pages
 }) => {
   const [sorting, setSorting] = React.useState([]);
   const [columnFilters, setColumnFilters] = React.useState([]);
@@ -183,7 +184,7 @@ const ViolationTable = ({
           <DataTableViewOptions table={table} />
         </div>
       </div>
-      <div className="w-full overflow-x-auto">
+      <div className={disableHorizontalScroll ? "w-full" : "w-full overflow-x-auto"}>
         <div className="h-[550px] overflow-y-auto border rounded-lg shadow-sm bg-white dark:bg-transparent border-gray-300 dark:border-[#424242]">
           <Table className="min-w-full text-sm">
             <TableHeader className="sticky top-0 bg-gray-100 dark:bg-[#18181B] z-20 border-b-2 border-gray-300 dark:border-[#424242]">
