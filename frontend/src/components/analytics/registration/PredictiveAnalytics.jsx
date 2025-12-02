@@ -102,26 +102,7 @@ export function PredictiveAnalytics() {
               </svg>
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
-                {accuracyLoading ? (
-                  <span className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                    Loading model accuracy...
-                  </span>
-                ) : accuracyDisplay ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md border ${accuracyDisplay.colorClass}`} title={`MAPE: ${accuracyDisplay.mape}% | ${accuracyDisplay.context}`}>
-                      <span className="text-xs font-semibold">
-                        Model Accuracy: {accuracyDisplay.percent}% ({accuracyDisplay.source})
-                      </span>
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
-                      • {accuracyDisplay.context}
-                    </span>
-                  </div>
-                ) : null}
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Predictive Analytics</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Uses the SARIMA algorithm to forecast future trends based on historical and current data, providing insights on risks, traffic patterns, and vehicle registrations.
               </p>

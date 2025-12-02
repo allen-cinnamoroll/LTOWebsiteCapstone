@@ -74,7 +74,7 @@ const DashboardLayout = () => {
       case '/account/logs':
         return 'Account Logs';
       case '/trained-models/vehicle/mv-prediction':
-        return 'Vehicle Model';
+        return 'Vehicle Prediction Model';
       case '/trained-models/accident':
         return 'Accident Prediction Model';
       default:
