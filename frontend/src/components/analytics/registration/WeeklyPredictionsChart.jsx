@@ -518,8 +518,14 @@ const WeeklyPredictionsChart = () => {
         );
       } else if (viewType === 'monthly') {
         return (
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-lg">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div
+            className="border rounded-lg p-3 shadow-lg"
+            style={{
+              background: 'linear-gradient(to bottom, #2563eb, #60a5fa)',
+              borderColor: '#93c5fd',
+            }}
+          >
+            <div className="text-sm font-semibold text-white mb-2">
               {label}
             </div>
             <div className="space-y-1">
@@ -528,11 +534,11 @@ const WeeklyPredictionsChart = () => {
                   className="w-3 h-3 rounded-full" 
                   style={{ backgroundColor: payload[0].color }}
                 ></div>
-                <span className="text-sm text-gray-700 dark:text-gray-300">
+                <span className="text-sm text-white">
                   Total: <span className="ml-1 font-medium">{data.totalPredicted.toLocaleString()}</span> vehicles
                 </span>
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <div className="text-xs text-blue-50 mt-2">
                 Average Weekly: {data.avgPredicted.toLocaleString()} ({data.weekCount} weeks)
               </div>
             </div>
