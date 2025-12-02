@@ -40,7 +40,7 @@ const DriverOwnerInfoModal = ({ open, onOpenChange, violatorData }) => {
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <User className="h-5 w-5 text-orange-500" />
-            Owner Information
+            Driver Information
           </DialogTitle>
           <DialogDescription>
             View detailed information about the violator

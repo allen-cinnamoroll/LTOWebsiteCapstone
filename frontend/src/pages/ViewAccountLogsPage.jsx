@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,7 @@ export default function ViewAccountLogsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalLogs, setTotalLogs] = useState(0);
+  const isInitialMount = useRef(true);
 
   const fetchLogs = async (page = 1) => {
     try {
@@ -146,6 +147,21 @@ export default function ViewAccountLogsPage() {
     fetchLogs();
   }, [currentUser]);
 
+  // Auto-refresh when filters change
+  useEffect(() => {
+    // Skip the initial mount to avoid double fetching
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    // Only trigger if component is mounted and user is loaded
+    if (currentUser) {
+      setCurrentPage(1);
+      fetchLogs(1);
+    }
+  }, [selectedRole, selectedLogType, dateFrom, dateTo]);
+
   const handleSearch = () => {
     setCurrentPage(1);
     fetchLogs(1);
@@ -157,8 +173,7 @@ export default function ViewAccountLogsPage() {
     setSelectedLogType("");
     setDateFrom(null);
     setDateTo(null);
-    setCurrentPage(1);
-    fetchLogs(1);
+    // fetchLogs will be automatically triggered by useEffect when filters change
   };
 
   const exportLogs = async () => {

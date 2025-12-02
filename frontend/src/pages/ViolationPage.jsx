@@ -117,35 +117,60 @@ const ViolationPage = () => {
       const nonAlarmViolations = allViolations.filter(v => v.violationType !== "alarm");
 
       // Deduplicate by name: group non-alarm violations by unique name combination
-      // Aggregate violation types and total violations for each person
+      // Count topNo records per person instead of violations array items
       const nameMap = new Map();
       
       nonAlarmViolations.forEach((violation) => {
         // Create a unique key from name components
         const nameKey = `${violation.firstName || "N/A"}_${violation.lastName || "N/A"}_${violation.middleInitial || ""}_${violation.suffix || ""}`;
         
-        const violationCount = (violation.violations || []).filter(v => v && v !== "None").length;
         const violationType = violation.violationType;
+        const hasTopNo = violation.topNo && violation.topNo !== "N/A";
         
         if (!nameMap.has(nameKey)) {
           // First occurrence of this name, add it with aggregated data
+          const topNoByType = {};
+          if (hasTopNo) {
+            topNoByType[violationType] = new Set([violation.topNo]);
+          }
           nameMap.set(nameKey, {
             ...violation,
             violationTypes: new Set([violationType]),
-            totalViolationsCount: violationCount,
+            totalViolationsCount: hasTopNo ? 1 : 0, // Count topNo records, not violations array
+            topNoCount: hasTopNo ? 1 : 0, // Track count of topNo records
+            topNoSet: hasTopNo ? new Set([violation.topNo]) : new Set(), // Track unique topNo values
+            topNoByType: topNoByType, // Track topNo by type to avoid double counting
             violationsByType: {
-              [violationType]: violationCount
+              [violationType]: hasTopNo ? 1 : 0
             }
           });
         } else {
           // Name already exists, aggregate data
           const existing = nameMap.get(nameKey);
           existing.violationTypes.add(violationType);
-          existing.totalViolationsCount += violationCount;
+          // Count all topNo records (not just unique) - each topNo represents one violation record
+          if (hasTopNo) {
+            existing.topNoSet.add(violation.topNo);
+            existing.totalViolationsCount = existing.topNoSet.size; // Count unique topNo records
+            existing.topNoCount = existing.topNoSet.size;
+          }
           if (!existing.violationsByType) {
             existing.violationsByType = {};
           }
-          existing.violationsByType[violationType] = (existing.violationsByType[violationType] || 0) + violationCount;
+          // Count topNo records by type - only count if this is a new topNo for this type
+          if (hasTopNo) {
+            // Track topNo by type to avoid double counting
+            if (!existing.topNoByType) {
+              existing.topNoByType = {};
+            }
+            if (!existing.topNoByType[violationType]) {
+              existing.topNoByType[violationType] = new Set();
+            }
+            if (!existing.topNoByType[violationType].has(violation.topNo)) {
+              existing.topNoByType[violationType].add(violation.topNo);
+              existing.violationsByType[violationType] = (existing.violationsByType[violationType] || 0) + 1;
+            }
+          }
           
           // Keep the one with the most recent dateOfApprehension as base
           const existingDate = existing.dateOfApprehension ? new Date(existing.dateOfApprehension) : new Date(0);
@@ -156,6 +181,9 @@ const ViolationPage = () => {
             const baseViolation = { ...violation };
             baseViolation.violationTypes = existing.violationTypes;
             baseViolation.totalViolationsCount = existing.totalViolationsCount;
+            baseViolation.topNoCount = existing.topNoCount;
+            baseViolation.topNoSet = existing.topNoSet;
+            baseViolation.topNoByType = existing.topNoByType;
             baseViolation.violationsByType = existing.violationsByType;
             nameMap.set(nameKey, baseViolation);
           }
@@ -166,26 +194,45 @@ const ViolationPage = () => {
       const processedAlarmViolations = alarmViolations.map(violation => {
         const nameKey = `${violation.firstName || "N/A"}_${violation.lastName || "N/A"}_${violation.middleInitial || ""}_${violation.suffix || ""}`;
         
-        const violationCount = (violation.violations || []).filter(v => v && v !== "None").length;
+        const hasTopNo = violation.topNo && violation.topNo !== "N/A";
+        const topNoCount = hasTopNo ? 1 : 0;
         
         // If this name exists in non-alarm map, also add alarm type to that entry
         if (nameMap.has(nameKey)) {
           const existing = nameMap.get(nameKey);
           existing.violationTypes.add("alarm");
-          existing.totalViolationsCount += violationCount;
+          // Count unique topNo records instead of violations array items
+          if (hasTopNo) {
+            existing.topNoSet.add(violation.topNo);
+            existing.totalViolationsCount = existing.topNoSet.size;
+            existing.topNoCount = existing.topNoSet.size;
+          }
           if (!existing.violationsByType) {
             existing.violationsByType = {};
           }
-          existing.violationsByType["alarm"] = (existing.violationsByType["alarm"] || 0) + violationCount;
+          // Track topNo by type to avoid double counting
+          if (hasTopNo) {
+            if (!existing.topNoByType) {
+              existing.topNoByType = {};
+            }
+            if (!existing.topNoByType["alarm"]) {
+              existing.topNoByType["alarm"] = new Set();
+            }
+            if (!existing.topNoByType["alarm"].has(violation.topNo)) {
+              existing.topNoByType["alarm"].add(violation.topNo);
+              existing.violationsByType["alarm"] = (existing.violationsByType["alarm"] || 0) + 1;
+            }
+          }
         }
         
         // Always return alarm violation as separate entry (alarm can be duplicated)
         return {
           ...violation,
           violationTypes: new Set([violation.violationType]),
-          totalViolationsCount: violationCount,
+          totalViolationsCount: topNoCount, // Count topNo records
+          topNoCount: topNoCount,
           violationsByType: {
-            [violation.violationType]: violationCount
+            [violation.violationType]: topNoCount
           }
         };
       });

@@ -144,7 +144,7 @@ const OnlineUsersPanel = () => {
               <div className="mt-2 space-y-1">
                 {admins.map((admin) => (
                   <div key={admin.id} className="text-[11px] text-gray-600 dark:text-gray-400 pl-6">
-                    • {admin.name}
+                    <span className="text-green-500">•</span> {admin.name}
                   </div>
                 ))}
               </div>
@@ -169,7 +169,7 @@ const OnlineUsersPanel = () => {
             <div className="mt-2 space-y-1">
               {employees.map((employee) => (
                 <div key={employee.id} className="text-[11px] text-gray-600 dark:text-gray-400 pl-6">
-                  • {employee.name}
+                  <span className="text-green-500">•</span> {employee.name}
                 </div>
               ))}
             </div>

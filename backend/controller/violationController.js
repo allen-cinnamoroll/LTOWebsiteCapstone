@@ -970,6 +970,34 @@ const convertViolationsToCSV = (exportData) => {
 };
 
 // Export violations filtered by date of apprehension
+// Get unique apprehending officers (Authenticated Users)
+export const getApprehendingOfficers = async (req, res) => {
+    try {
+        // Get distinct apprehending officers from non-deleted violations
+        const officers = await ViolationModel.distinct("apprehendingOfficer", {
+            deletedAt: null,
+            apprehendingOfficer: { $ne: null, $ne: "" }
+        });
+
+        // Sort officers alphabetically and filter out null/empty values
+        const sortedOfficers = officers
+            .filter(officer => officer && officer.trim() !== "")
+            .map(officer => officer.trim())
+            .sort();
+
+        res.status(200).json({
+            success: true,
+            data: sortedOfficers
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch apprehending officers",
+            error: error.message
+        });
+    }
+};
+
 export const exportViolations = async (req, res) => {
   try {
     const { format = "csv", month, year } = req.query;
