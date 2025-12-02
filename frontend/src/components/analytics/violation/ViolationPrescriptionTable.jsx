@@ -17,14 +17,6 @@ const MONTH_NAMES = [
   'December'
 ];
 
-const formatMonthKey = (key) => {
-  if (!key || typeof key !== 'string') return '';
-  const [year, month] = key.split('-');
-  const monthIndex = Number(month) - 1;
-  if (Number.isNaN(monthIndex) || monthIndex < 0 || monthIndex > 11) return key;
-  return `${MONTH_NAMES[monthIndex]} ${year}`;
-};
-
 const parseViolations = (record) => {
   const raw =
     record?.violations ??
@@ -39,14 +31,6 @@ const parseViolations = (record) => {
   return [];
 };
 
-const summarizeRepeatMonths = (entries) => {
-  if (!entries?.length) return '—';
-  return entries
-    .slice(0, 3)
-    .map(([key, count]) => `${formatMonthKey(key)} (${count})`)
-    .join(', ');
-};
-
 const deriveRecommendations = (records, planningYear) => {
   // Use only historical data up to the year BEFORE the planning year
   const cutoffYear = planningYear - 1;
@@ -57,70 +41,26 @@ const deriveRecommendations = (records, planningYear) => {
         return !Number.isNaN(year) && year <= cutoffYear;
       })
     : [];
-  const defaultRows = [
-    {
-      category: 'Checkpoints',
-      recommendations: [
-        `Keep regular checkpoints in key roads for the whole year ${planningYear}.`,
-        'Assign more teams during busy days, evenings, and weekends.',
-        'Record simple checkpoint results (place, time, number of apprehensions) to monitor yearly quota.'
-      ],
-      basis: [
-        'No clear peak month detected yet in the historical data.',
-        'Regular, visible checkpoints help drivers remember traffic rules.',
-        'Simple records from checkpoints will guide better planning for the next year.'
-      ]
-    },
-    {
-      category: 'Seminar',
-      recommendations: [
-        `Use SP registration and renewal seminars in ${planningYear} to remind drivers about common violations.`,
-        'Ask apprehended drivers to attend short road safety talks when they have repeat violations.',
-        'Coordinate with schools, transport groups, and cooperatives for simple quarterly seminars.'
-      ],
-      basis: [
-        'Seminars are most effective for repeat violators and high-risk violations.',
-        'SP registration and renewal are good touchpoints to reinforce safe driving behavior.',
-        'Quarterly review of records will help decide which violations need stronger seminar focus.'
-      ]
-    },
-    {
-      category: 'Awareness Campaign',
-      recommendations: [
-        'Sustain simple road safety messages on social media, radio, and posters.',
-        'Work with LGUs and barangays on short community briefings about safe and legal driving.',
-        'Highlight stories of safe driving and responsible enforcement to build public trust.'
-      ],
-      basis: [
-        'Awareness campaigns are triggered when we see sudden increases in a specific violation type.',
-        'No strong spikes detected yet, so a general road safety advocacy campaign is recommended.',
-        `Re-check the data before mid-${planningYear} to see if a more focused campaign is needed.`
-      ]
-    }
-  ];
-
   if (!Array.isArray(basisRecords) || !basisRecords.length) {
     return {
-      rows: defaultRows,
       meta: {
         datasetSize: 0,
         topMonths: [],
-        uniqueViolations: 0,
-        heuristics: [
-          'Checkpoint priority months = top 3 months by total individual violations.',
-          'Seminar requirement = violation type with ≥4 cases across ≥2 years and ≥2 repeat months (each ≥2 cases).',
-          'Awareness spike = monthly count ≥ max(1.5× average, average + 2) and ≥3 cases.'
-        ],
         dominantViolation: null,
-        keyMonths: []
+        keyMonths: [],
+        top3Violations: [],
+        topViolationsWithStats: [],
+        recommendations: {
+          enforcement: `Keep regular checkpoints in key roads for the whole year ${planningYear}. Assign more teams during busy days, evenings, and weekends.`,
+          education: 'Introduce focused sessions for high-risk violations during SP registrations and caravan operations.',
+          terminal: 'Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.'
+        }
       }
     };
   }
 
   const monthBuckets = MONTH_NAMES.map(() => ({
-    totalViolations: 0,
     recordCount: 0,
-    yearCounts: new Map(),
     violationCounts: new Map()
   }));
 
@@ -140,10 +80,7 @@ const deriveRecommendations = (records, planningYear) => {
       violationList = [record.violationType];
     }
 
-    const violationCountForMonth = violationList.length || 1;
-    bucket.totalViolations += violationCountForMonth;
     bucket.recordCount += 1;
-    bucket.yearCounts.set(year, (bucket.yearCounts.get(year) || 0) + violationCountForMonth);
 
     violationList.forEach((violationRaw) => {
       const label = violationRaw?.trim?.();
@@ -178,35 +115,30 @@ const deriveRecommendations = (records, planningYear) => {
       if (bucket.recordCount === 0) return null;
       const violationEntries = Array.from(bucket.violationCounts.values()).sort((a, b) => b.count - a.count);
       const topViolationEntry = violationEntries[0] || null;
-      const yearEntries = Array.from(bucket.yearCounts.entries()).sort((a, b) => b[1] - a[1]);
-      const peakYearEntry = yearEntries[0] || null;
 
       return {
         monthIndex: index,
         monthName: MONTH_NAMES[index],
-        totalViolations: bucket.totalViolations,
         recordCount: bucket.recordCount, // Number of apprehensions (records/persons)
-        topViolation: topViolationEntry?.label ?? null,
-        peakYear: peakYearEntry ? peakYearEntry[0] : null,
-        peakYearCount: peakYearEntry ? peakYearEntry[1] : 0
+        topViolation: topViolationEntry?.label ?? null
       };
     })
     .filter(Boolean);
 
   if (!monthSummaries.length) {
     return {
-      rows: defaultRows,
       meta: {
         datasetSize: basisRecords.length,
         topMonths: [],
-        uniqueViolations: typeStats.size,
-        heuristics: [
-          'Checkpoint priority months = top 3 months by total individual violations.',
-          'Seminar requirement = violation type with ≥4 cases across ≥2 years and ≥2 repeat months (each ≥2 cases).',
-          'Awareness spike = monthly count ≥ max(1.5× average, average + 2) and ≥3 cases.'
-        ],
         dominantViolation: null,
-        keyMonths: []
+        keyMonths: [],
+        top3Violations: [],
+        topViolationsWithStats: [],
+        recommendations: {
+          enforcement: `Keep regular checkpoints in key roads for the whole year ${planningYear}. Assign more teams during busy days, evenings, and weekends.`,
+          education: 'Introduce focused sessions for high-risk violations during SP registrations and caravan operations.',
+          terminal: 'Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.'
+        }
       }
     };
   }
@@ -226,52 +158,15 @@ const deriveRecommendations = (records, planningYear) => {
   const dominantViolation = focusThemes[0] || topMonths[0]?.topViolation || null;
   const keyMonths = topMonths.map((month) => month.monthName);
 
-  const checkpointRecommendations = topMonths.length
-    ? topMonths.map(
-        (month) =>
-          `Plan more checkpoints in ${month.monthName} ${planningYear}, focusing on ${dominantViolation || 'the most common violations'} and meeting the yearly apprehension quota.`
-      )
-    : defaultRows[0].recommendations;
-
-  const checkpointBasis = topMonths.length
-    ? topMonths.map(
-        (month) =>
-          `${month.monthName}: ${month.totalViolations} violations (${month.share.toFixed(1)}% of total, peak ${month.peakYear ?? '—'} at ${month.peakYearCount || 0} cases).`
-      )
-    : defaultRows[0].basis;
-
-  const typeStatsArray = Array.from(typeStats.values()).map((stat) => {
-    const monthlyEntries = Array.from(stat.monthCounts.entries());
-    const monthlyCounts = monthlyEntries.map(([, count]) => count);
-    const totalMonthly = monthlyCounts.reduce((sum, count) => sum + count, 0);
-    const avgMonthly = monthlyEntries.length ? totalMonthly / monthlyEntries.length : 0;
-    const repeatMonths = monthlyEntries
-      .filter(([, count]) => count >= 2)
-      .sort((a, b) => b[1] - a[1]);
-    const spikeEntries = monthlyEntries
-      .filter(([, count]) => {
-        if (count < 3) return false;
-        const dynamicThreshold = Math.max(avgMonthly * 1.5, avgMonthly + 2);
-        return count >= dynamicThreshold || avgMonthly === 0;
-      })
-      .sort((a, b) => b[1] - a[1]);
-
-    return {
-      ...stat,
-      uniqueYears: stat.yearCounts.size,
-      repeatMonths,
-      spikeEntries,
-      avgMonthly
-    };
-  });
+  const typeStatsArray = Array.from(typeStats.values());
 
   // Get top 3 violations by total count (exclude violation types like "alarm", "confiscated", "impounded")
   const violationTypes = ['alarm', 'confiscated', 'impounded'];
   const filteredViolations = typeStatsArray
-    .filter(stat => {
-      const nameLower = stat.name.toLowerCase().trim();
-      return !violationTypes.some(type => nameLower === type || nameLower.includes(type));
-    })
+        .filter(stat => {
+          const nameLower = stat.name.toLowerCase().trim();
+          return !violationTypes.some(type => nameLower === type || nameLower.includes(type));
+        })
     .sort((a, b) => b.total - a.total);
   
   const top3Violations = filteredViolations.slice(0, 3).map(stat => stat.name);
@@ -288,161 +183,58 @@ const deriveRecommendations = (records, planningYear) => {
       percentage: totalViolationsCount > 0 ? (stat.total / totalViolationsCount) * 100 : 0
     }));
 
-  const seminarCandidates = typeStatsArray
-    .filter((stat) => stat.total >= 4 && (stat.uniqueYears >= 2 || stat.repeatMonths.length >= 2))
-    .sort((a, b) => {
-      const scoreA = a.total + a.repeatMonths.length * 2 + a.uniqueYears;
-      const scoreB = b.total + b.repeatMonths.length * 2 + b.uniqueYears;
-      return scoreB - scoreA;
-    })
-    .slice(0, 3);
+  // Rule-Based Recommendation Generation
+  // Rule 1: Data-Driven Enforcement Recommendation
+  // IF peak months exist AND have significant share (>10% each)
+  // THEN recommend enforcement during those specific months
+  let enforcementRecommendation = '';
+  if (topMonths.length > 0) {
+    const peakMonthsList = keyMonths.join(", ");
+    enforcementRecommendation = `Based on the analytics patterns from previous years, in year ${planningYear} it is recommended to conduct enforcement during the peak months (${peakMonthsList}).`;
+  } else {
+    enforcementRecommendation = `Keep regular checkpoints in key roads for the whole year ${planningYear}. Assign more teams during busy days, evenings, and weekends.`;
+  }
 
-  const seminarRecommendations = seminarCandidates.length
-    ? seminarCandidates.map((stat) => {
-        const hotspot = stat.repeatMonths[0] ? formatMonthKey(stat.repeatMonths[0][0]) : 'identified repeat months';
-        return `Use SP registration, renewal, and post-apprehension seminars in ${planningYear} to explain ${stat.name}, especially for drivers recorded repeatedly around ${hotspot}.`;
-      })
-    : defaultRows[1].recommendations;
+  // Rule 2: Targeted Education Programs Recommendation
+  // IF top violations exist AND have significant count
+  // THEN recommend education programs focusing on those violations
+  let educationRecommendation = '';
+  if (top3Violations.length > 0) {
+    const violationsList = top3Violations.slice(0, 3).join(", ");
+    educationRecommendation = `Introduce focused sessions for high-risk violations (${violationsList}) during SP registrations and caravan operations.`;
+  } else {
+    educationRecommendation = `Introduce focused sessions for high-risk violations during SP registrations and caravan operations.`;
+  }
 
-  const seminarBasis = seminarCandidates.length
-    ? seminarCandidates.map(
-        (stat) =>
-          `${stat.name}: ${stat.total} cases across ${stat.uniqueYears} year(s); repeat months – ${summarizeRepeatMonths(stat.repeatMonths)}.`
-      )
-    : defaultRows[1].basis;
+  // Rule 3: Terminal Briefings Recommendation
+  // IF peak months include holiday months (May, June, August, December)
+  // THEN recommend terminal briefings before those months
+  const holidayMonths = ['May', 'June', 'August', 'December'];
+  const peakHolidayMonths = keyMonths.filter(month => holidayMonths.includes(month));
+  let terminalRecommendation = '';
+  if (peakHolidayMonths.length > 0) {
+    terminalRecommendation = `Deploy traffic personnel before the start of special holidays in ${peakHolidayMonths.join(", ")}. Conduct informative briefings about violations, especially high-risk ones.`;
+  } else if (topMonths.length > 0) {
+    terminalRecommendation = `Deploy traffic personnel before the start of peak months (${keyMonths.join(", ")}). Conduct informative briefings about violations, especially high-risk ones.`;
+  } else {
+    terminalRecommendation = `Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.`;
+  }
 
-  const surgeScore = (stat) => {
-    if (!stat.spikeEntries.length) return 0;
-    const maxCount = Math.max(...stat.spikeEntries.map(([, count]) => count));
-    const avg = stat.avgMonthly || 0;
-    return (maxCount - avg) + stat.spikeEntries.length;
+  const recommendations = {
+    enforcement: enforcementRecommendation,
+    education: educationRecommendation,
+    terminal: terminalRecommendation
   };
 
-  const awarenessCandidates = typeStatsArray
-    .filter((stat) => stat.spikeEntries.length > 0)
-    .sort((a, b) => surgeScore(b) - surgeScore(a))
-    .slice(0, 3);
-
-  const awarenessRecommendations = awarenessCandidates.length
-    ? awarenessCandidates.map((stat) => {
-        const leadSpike = stat.spikeEntries[0] ? formatMonthKey(stat.spikeEntries[0][0]) : 'identified spike months';
-        return `Before ${leadSpike} ${planningYear}, run a simple road safety campaign on ${stat.name} (posters, social media, barangay announcements) to prevent another spike.`;
-      })
-    : defaultRows[2].recommendations;
-
-  const awarenessBasis = awarenessCandidates.length
-    ? awarenessCandidates.map(
-        (stat) =>
-          `${stat.name}: surge months – ${summarizeRepeatMonths(stat.spikeEntries)}; historical monthly average ${(stat.avgMonthly || 0).toFixed(1)}.`
-      )
-    : defaultRows[2].basis;
-
-  const rows = [
-    {
-      category: 'Checkpoints',
-      recommendations: checkpointRecommendations,
-      basis: checkpointBasis
-    },
-    {
-      category: 'Seminar',
-      recommendations: seminarRecommendations,
-      basis: seminarBasis
-    },
-    {
-      category: 'Awareness Campaign',
-      recommendations: awarenessRecommendations,
-      basis: awarenessBasis
-    }
-  ];
-
-  const heuristics = [
-    'Checkpoints: focus on the top 3 months with the highest number of recorded violations.',
-    'Seminars: prioritize violation types with many cases over several years or repeated months.',
-    'Awareness campaigns: triggered when we see a sudden increase in a specific violation type in a month.'
-  ];
-
-  // Calculate yearly quota estimate based on most recent year
-  const allYears = Array.from(new Set(basisRecords.map(r => {
-    if (!r?.dateOfApprehension) return null;
-    return new Date(r.dateOfApprehension).getFullYear();
-  }))).filter(Boolean).sort((a, b) => b - a);
-  
-  // Use the most recent year's count as the quota target
-  const mostRecentYear = allYears.length > 0 ? allYears[0] : null;
-  const yearlyQuotaEstimate = mostRecentYear
-    ? basisRecords.filter(r => {
-        if (!r?.dateOfApprehension) return false;
-        return new Date(r.dateOfApprehension).getFullYear() === mostRecentYear;
-      }).length
-    : basisRecords.length;
-  
-  // Calculate total violator records for the KPI year (same year as the policy year)
-  // This counts how many violator entries are recorded in the violations collection for the current year.
-  const currentKPIYear = planningYear;
-  const currentYearViolators = Array.isArray(records)
-    ? records.filter((r) => {
-        if (!r?.dateOfApprehension) return false;
-        const date = new Date(r.dateOfApprehension);
-        if (Number.isNaN(date.getTime())) return false;
-        const year = date.getFullYear();
-        return year === currentKPIYear;
-      }).length
-    : 0;
-  
-  // Debug logging (remove in production if needed)
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-    const year2025Records = Array.isArray(records) 
-      ? records.filter((r) => {
-          if (!r?.dateOfApprehension) return false;
-          const date = new Date(r.dateOfApprehension);
-          if (Number.isNaN(date.getTime())) return false;
-          return date.getFullYear() === 2025;
-        })
-      : [];
-    console.log(`ViolationPrescriptionTable: Total records loaded: ${records.length}`);
-    console.log(`ViolationPrescriptionTable: Records with dateOfApprehension in ${currentKPIYear}: ${currentYearViolators}`);
-    console.log(`ViolationPrescriptionTable: Sample 2025 records:`, year2025Records.slice(0, 3));
-  }
-  
-  // Calculate monthly quota distribution based on peak months
-  const monthlyQuotaDistribution = monthSummariesWithShare.map(month => ({
-    month: month.monthName,
-    targetQuota: Math.round((yearlyQuotaEstimate * (month.share / 100)) * 1.1), // 10% buffer
-    share: month.share,
-    isPeakMonth: topMonths.some(tm => tm.monthName === month.monthName)
-  }));
-
-  // Identify special holiday periods (Balik Skwela typically in May-June)
-  const specialHolidayMonths = ['May', 'June', 'August', 'December'];
-  const terminalBriefingMonths = specialHolidayMonths.filter(month => 
-    monthSummariesWithShare.some(m => m.monthName === month && m.totalViolations > 0)
-  );
-
-  // Calculate caravan recommendation based on peak months and LGU coordination needs
-  const caravanPriorityMonths = topMonths
-    .filter(month => month.share > 10) // Months with >10% share
-    .map(month => month.monthName);
-
   return {
-    rows,
     meta: {
       datasetSize: records.length,
       topMonths,
-      uniqueViolations: typeStats.size,
-      heuristics,
       dominantViolation,
       keyMonths,
       top3Violations: top3Violations.length > 0 ? top3Violations : [dominantViolation].filter(Boolean),
       topViolationsWithStats, // Most common violations with counts and percentages
-      // New rule-based metrics
-      yearlyQuotaEstimate: yearlyQuotaEstimate,
-      monthlyQuotaDistribution,
-      terminalBriefingMonths,
-      caravanPriorityMonths,
-      avgYearlyApprehensions: yearlyQuotaEstimate,
-      mostRecentYear: mostRecentYear,
-      currentKPIYear,
-      currentYearViolators
+      recommendations // Rule-based generated recommendations
     }
   };
 };
@@ -537,14 +329,14 @@ export function ViolationPrescriptionTable({ loading }) {
               <div className="flex-1">
                 <h3 className={`text-xl font-bold ${prefersDark ? 'text-white' : 'text-blue-900'} tracking-tight leading-tight uppercase`}>
                   {planningYear} POLICY PRESCRIPTION FOR REDUCING TRAFFIC VIOLATIONS
-                </h3>
+              </h3>
                 <p className={`text-sm ${prefersDark ? 'text-gray-300' : 'text-gray-600'} mt-2`}>
                   Land Transportation Office (LTO) • Violation Analytics Division
-                </p>
+              </p>
               </div>
             </div>
           </div>
-          
+
           <div className={`text-right border-l ${prefersDark ? 'border-gray-600' : 'border-blue-200'} pl-6 ml-6 flex-shrink-0`}>
             <p className={`text-xs ${prefersDark ? 'text-gray-400' : 'text-gray-600'} uppercase tracking-wider font-semibold mb-2`}>
               Document Reference
@@ -572,8 +364,8 @@ export function ViolationPrescriptionTable({ loading }) {
               </p>
               <div className={`${prefersDark ? 'bg-blue-500/20' : 'bg-blue-100'} rounded-full p-2`}>
                 <svg className={`w-4 h-4 ${prefersDark ? 'text-blue-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
               </div>
             </div>
             {meta.topMonths?.length > 0 ? (
@@ -630,7 +422,7 @@ export function ViolationPrescriptionTable({ loading }) {
                         </span>
                       </div>
                     </div>
-                  </div>
+                </div>
                 ))}
               </div>
             ) : (
@@ -638,9 +430,9 @@ export function ViolationPrescriptionTable({ loading }) {
                 No data available
               </p>
             )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
       {/* Strategic Recommendations Table */}
       <div className="px-8 py-7">
@@ -651,8 +443,8 @@ export function ViolationPrescriptionTable({ loading }) {
           </h4>
         </div>
         <div className="border-2 border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-          <table className="w-full border-collapse">
-            <thead>
+              <table className="w-full border-collapse">
+                <thead>
               <tr className={`${prefersDark ? 'bg-gray-800' : 'bg-gray-100'} border-b-2 ${prefersDark ? 'border-gray-700' : 'border-gray-300'}`}>
                 <th className={`text-left py-4 px-5 text-xs font-bold uppercase tracking-wider ${prefersDark ? 'text-gray-300' : 'text-gray-800'} border-r ${prefersDark ? 'border-gray-700' : 'border-gray-300'} w-[25%]`}>
                   Recommendation
@@ -663,17 +455,17 @@ export function ViolationPrescriptionTable({ loading }) {
                 <th className={`text-left py-4 px-5 text-xs font-bold uppercase tracking-wider ${prefersDark ? 'text-gray-300' : 'text-gray-800'} w-[25%]`}>
                   Focus Area
                 </th>
-              </tr>
-            </thead>
+                  </tr>
+                </thead>
             <tbody>
               {/* Row 1 */}
               <tr className={`border-b ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'hover:bg-gray-800/50' : 'hover:bg-blue-50/30'} transition-colors`}>
                 <td className={`py-5 px-5 align-top border-r ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
                   Strengthen Data-Driven Enforcement
-                </td>
+                    </td>
                 <td className={`py-5 px-5 align-top border-r ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed`}>
-                  Based on the analytics patterns from previous years, in year {planningYear} it is recommended to conduct enforcement during the peak months{meta.keyMonths?.length ? ` (${meta.keyMonths.join(", ")})` : ""}.
-                </td>
+                  {meta.recommendations?.enforcement || `Based on the analytics patterns from previous years, in year ${planningYear} it is recommended to conduct enforcement during the peak months.`}
+                    </td>
                 <td className={`py-5 px-5 align-top ${prefersDark ? 'text-gray-300' : 'text-gray-700'} text-sm`}>
                   <div className={`${prefersDark ? 'bg-white' : 'bg-white'} p-4 rounded-lg shadow-sm border ${prefersDark ? 'border-gray-200' : 'border-gray-200'}`}>
                     <p className={`text-xs font-bold uppercase mb-3 ${prefersDark ? 'text-gray-700' : 'text-gray-700'}`}>PEAK MONTHS:</p>
@@ -689,16 +481,16 @@ export function ViolationPrescriptionTable({ loading }) {
                       )}
                     </div>
                   </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
               {/* Row 2 */}
               <tr className={`border-b ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'hover:bg-gray-800/50' : 'hover:bg-blue-50/30'} transition-colors`}>
                 <td className={`py-5 px-5 align-top border-r ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
                   Implement Targeted Education Programs
-                </td>
+                    </td>
                 <td className={`py-5 px-5 align-top border-r ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed`}>
-                  Introduce focused sessions for high-risk violations during SP registrations and caravan operations.
-                </td>
+                  {meta.recommendations?.education || 'Introduce focused sessions for high-risk violations during SP registrations and caravan operations.'}
+                    </td>
                 <td rowSpan={2} className={`py-5 px-5 align-top ${prefersDark ? 'text-gray-300' : 'text-gray-700'} text-sm`}>
                   <div className={`${prefersDark ? 'bg-white' : 'bg-white'} p-4 rounded-lg shadow-sm border ${prefersDark ? 'border-gray-200' : 'border-gray-200'}`}>
                     <p className={`text-xs font-bold uppercase mb-3 ${prefersDark ? 'text-gray-700' : 'text-gray-700'}`}>MOST COMMON VIOLATIONS:</p>
@@ -714,21 +506,21 @@ export function ViolationPrescriptionTable({ loading }) {
                       )}
                     </div>
                   </div>
-                </td>
-              </tr>
+                    </td>
+                  </tr>
               {/* Row 3 */}
               <tr className={`${prefersDark ? 'hover:bg-gray-800/50' : 'hover:bg-blue-50/30'} transition-colors`}>
                 <td className={`py-5 px-5 align-top border-r ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'text-white' : 'text-gray-900'} font-bold text-sm`}>
                   Terminal Briefings
-                </td>
+                      </td>
                 <td className={`py-5 px-5 align-top border-r ${prefersDark ? 'border-gray-700' : 'border-gray-200'} ${prefersDark ? 'text-gray-300' : 'text-gray-700'} text-sm leading-relaxed`}>
-                  Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  {meta.recommendations?.terminal || 'Deploy traffic personnel before the start of special holidays. Conduct informative briefings about violations, especially high-risk ones.'}
+                      </td>
+                    </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
       {/* Document Footer */}
       <div className={`${prefersDark ? 'bg-gray-800/80' : 'bg-gray-50'} border-t-2 ${prefersDark ? 'border-gray-700' : 'border-gray-300'} px-8 py-5`}>
@@ -740,7 +532,7 @@ export function ViolationPrescriptionTable({ loading }) {
             <p className={`${prefersDark ? 'text-gray-500' : 'text-gray-500'} mt-2 text-[10px] italic`}>
               Generated from {meta.datasetSize.toLocaleString()} historical violation records
             </p>
-          </div>
+            </div>
           <div className={`md:text-right border-t md:border-t-0 md:border-l-2 ${prefersDark ? 'border-gray-700' : 'border-gray-300'} pt-4 md:pt-0 md:pl-6 md:ml-6`}>
             <p className={`font-bold text-xs uppercase tracking-wider ${prefersDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Valid Until:</p>
             <p className={`${prefersDark ? 'text-gray-200' : 'text-gray-800'} font-semibold text-sm mb-1`}>End of {planningYear}</p>
