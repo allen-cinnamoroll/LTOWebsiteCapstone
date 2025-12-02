@@ -31,6 +31,7 @@ const VehiclesPage = () => {
   const [editOwnerModalOpen, setEditOwnerModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicleId, setEditingVehicleId] = useState(null);
+  const [editOpenedFromDetails, setEditOpenedFromDetails] = useState(false);
   const [renewingVehicle, setRenewingVehicle] = useState(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState(null);
@@ -209,6 +210,7 @@ const VehiclesPage = () => {
     setEditVehicleModalOpen(false);
     setAddOwnerModalOpen(false);
     setEditOwnerModalOpen(false);
+    setEditOpenedFromDetails(false); // Reset flag when opening details
   };
 
   const onEdit = (vehicleId) => {
@@ -231,6 +233,7 @@ const VehiclesPage = () => {
       });
     }
     setEditVehicleModalOpen(true);
+    setEditOpenedFromDetails(false); // Edit opened from table, not from details modal
     // Close other modals when opening edit
     setDetailsModalOpen(false);
     setAddVehicleModalOpen(false);
@@ -380,11 +383,21 @@ const VehiclesPage = () => {
             setAddVehicleModalOpen(false);
             setAddOwnerModalOpen(false);
             setEditOwnerModalOpen(false);
+            // Only clear selectedVehicle if edit was NOT opened from details
+            // (If edit was opened from details, we need selectedVehicle to reopen details on cancel)
+            // Use setTimeout to check after state updates have been processed
+            setTimeout(() => {
+              if (!editOpenedFromDetails) {
+                setSelectedVehicle(null);
+              }
+            }, 0);
           }
         }}
         vehicleData={selectedVehicle}
         onVehicleUpdated={handleVehicleUpdated}
         onEditClick={(vehicleId) => {
+          // Mark that edit was opened from details modal BEFORE closing details
+          setEditOpenedFromDetails(true);
           // Close details modal and open edit modal
           setDetailsModalOpen(false);
           // Reset edit form data when opening from details modal
@@ -428,11 +441,17 @@ const VehiclesPage = () => {
         formData={editVehicleFormData}
         setFormData={setEditVehicleFormData}
         onCancel={() => {
-          // Close edit modal and reopen details modal
+          // Close edit modal
           setEditVehicleModalOpen(false);
-          if (selectedVehicle) {
+          // Only reopen details modal if edit was opened FROM details modal
+          if (editOpenedFromDetails && selectedVehicle) {
             setDetailsModalOpen(true);
+          } else {
+            // If edit was NOT opened from details, clear selectedVehicle
+            setSelectedVehicle(null);
           }
+          // Reset flag after canceling
+          setEditOpenedFromDetails(false);
         }}
       />
 
