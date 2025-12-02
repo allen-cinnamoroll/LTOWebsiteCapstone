@@ -5,6 +5,7 @@ import { Car, CheckCircle2, RefreshCw, Loader2, BarChart3, Activity, Info, Trend
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
 import { getModelAccuracy } from "@/api/predictionApi";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function VehicleModelPage() {
   const [metrics, setMetrics] = useState(null);
@@ -158,7 +159,23 @@ export default function VehicleModelPage() {
             {primaryAccuracy !== null && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Overall Model Accuracy</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Overall Model Accuracy</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Overall model accuracy used in the dashboard. This is calculated as{" "}
+                            <strong>100 − MAPE</strong>, prioritizing cross-validation error when available,
+                            so it reflects realistic performance on unseen data.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <span className={`font-semibold ${getAccuracyColor(primaryAccuracy)}`}>
                     {primaryAccuracy.toFixed(2)}%
                   </span>
@@ -177,28 +194,88 @@ export default function VehicleModelPage() {
             {metrics?.in_sample && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
                 <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-                  <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">Training MAPE</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium text-blue-700 dark:text-blue-300">Training MAPE</p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Mean Absolute Percentage Error on the training period. Lower values mean the model&apos;s
+                            predictions are closer to the actual registration counts it was fitted on.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
                     {metrics.in_sample.mape?.toFixed(2)}%
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Mean Absolute Percentage Error</p>
                 </div>
                 <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-1">Training MAE</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Training MAE</p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Mean Absolute Error on the training period. This is the average difference (in number of
+                            registrations) between predicted and actual values.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-xl font-bold text-emerald-900 dark:text-emerald-100">
                     {metrics.in_sample.mae?.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Mean Absolute Error</p>
                 </div>
                 <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
-                  <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Training RMSE</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300">Training RMSE</p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Root Mean Square Error on the training period. Larger errors are penalized more strongly,
+                            so lower RMSE means more stable predictions.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-xl font-bold text-purple-900 dark:text-purple-100">
                     {metrics.in_sample.rmse?.toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Root Mean Square Error</p>
                 </div>
                 <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
-                  <p className="text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">Training R²</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-medium text-orange-700 dark:text-orange-300">Training R²</p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Coefficient of determination on the training data. Values closer to 1.0 mean the model
+                            explains more of the variation in daily registrations.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <p className="text-xl font-bold text-orange-900 dark:text-orange-100">
                     {metrics.in_sample.r2 !== null && metrics.in_sample.r2 !== undefined
                       ? metrics.in_sample.r2.toFixed(4)
@@ -215,28 +292,89 @@ export default function VehicleModelPage() {
                 <h3 className="text-sm font-semibold mb-2">Test Accuracy (Out-of-Sample)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-                    <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">Test MAPE</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-blue-700 dark:text-blue-300">Test MAPE</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Mean Absolute Percentage Error on the held-out test period. This shows how far
+                              predictions are from actual values on unseen data; lower is better.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <p className="text-xl font-bold text-blue-900 dark:text-blue-100">
                       {metrics.out_of_sample.mape?.toFixed(2)}%
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Mean Absolute Percentage Error</p>
                   </div>
                   <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
-                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300 mb-1">Test MAE</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Test MAE</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Mean Absolute Error on the test period. Average absolute difference between predictions
+                              and actual counts (in number of registrations).
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <p className="text-xl font-bold text-emerald-900 dark:text-emerald-100">
                       {metrics.out_of_sample.mae?.toFixed(2)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Mean Absolute Error</p>
                   </div>
                   <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
-                    <p className="text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">Test RMSE</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-purple-700 dark:text-purple-300">Test RMSE</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Root Mean Square Error on the test period. Penalizes larger mistakes more strongly,
+                              giving a sense of how big the worst errors can be.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <p className="text-xl font-bold text-purple-900 dark:text-purple-100">
                       {metrics.out_of_sample.rmse?.toFixed(2)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Root Mean Square Error</p>
                   </div>
                   <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
-                    <p className="text-xs font-medium text-orange-700 dark:text-orange-300 mb-1">Test R²</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-medium text-orange-700 dark:text-orange-300">Test R²</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Coefficient of determination on unseen data. Values closer to 1.0 indicate the model is
+                              capturing the variation in the test period well; negative values mean it performs worse
+                              than a simple average.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                     <p className="text-xl font-bold text-orange-900 dark:text-orange-100">
                       {metrics.out_of_sample.r2 !== null && metrics.out_of_sample.r2 !== undefined
                         ? metrics.out_of_sample.r2.toFixed(4)
