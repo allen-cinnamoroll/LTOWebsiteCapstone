@@ -344,6 +344,9 @@ export default function MVPredictionPage() {
           setDuplicateInfo(processingInfo);
           setShowDuplicateModal(true);
         }
+
+        // Show success modal with high-level training info
+        setShowSuccessModal(true);
       }
       
       const successMessage = fileWasUploaded 
@@ -1911,7 +1914,17 @@ export default function MVPredictionPage() {
             </div>
           )}
           
-          <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+            <Button
+              asChild
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => setShowSuccessModal(false)}
+            >
+              <Link to="/trained-models/vehicle">
+                View Vehicle Model
+              </Link>
+            </Button>
             <Button onClick={() => setShowSuccessModal(false)} className="w-full sm:w-auto">
               Close
             </Button>
