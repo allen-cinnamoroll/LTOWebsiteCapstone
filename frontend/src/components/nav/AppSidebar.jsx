@@ -357,12 +357,6 @@ export function AppSidebar(props) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/trained-models/vehicle/mv-prediction" className="flex items-center gap-2">
-                        <Car className="h-4 w-4" />
-                        <span>MV Prediction Model (Retrain)</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
                       <Link to="/trained-models/accident" className="flex items-center gap-2">
                         <SquareActivity className="h-4 w-4" />
                         <span>Accident Model</span>
@@ -390,15 +384,6 @@ export function AppSidebar(props) {
                           <Link to="/trained-models/vehicle">
                             <Car />
                             <span>Vehicle Model</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      {/* Vehicle Model - retrain page */}
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/mv-prediction"} asChild>
-                          <Link to="/trained-models/vehicle/mv-prediction">
-                            <Car />
-                            <span>MV Prediction Model</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
