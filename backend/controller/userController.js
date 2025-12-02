@@ -323,16 +323,19 @@ export const getUserLogs = async (req, res) => {
     let filteredLogs = paginatedLogs.map(log => {
       const user = log.userId;
       
+      // Check if this is an automatic retrain log - show "System" as performer
+      const isAutomaticRetrain = log.logType === 'automatic_retrain_accident' || log.logType === 'automatic_retrain_mv_registration';
+      
       return {
         ...log,
         // User (target) data
         userName: user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A',
         email: user?.email || null,
         role: user?.role || null,
-        // Actor (performer) data - same as user since actorId is removed
-        actorName: user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A',
-        actorEmail: user?.email || null,
-        actorRole: user?.role || null
+        // Actor (performer) data - show "System" for automatic retrain logs
+        actorName: isAutomaticRetrain ? 'System' : (user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A'),
+        actorEmail: isAutomaticRetrain ? null : (user?.email || null),
+        actorRole: isAutomaticRetrain ? null : (user?.role || null)
       };
     });
 
@@ -473,16 +476,19 @@ export const exportUserLogs = async (req, res) => {
     const excelData = logs.map(log => {
       const user = log.userId;
       
-      const userName = user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A';
+      // Check if this is an automatic retrain log - show "System" as performer
+      const isAutomaticRetrain = log.logType === 'automatic_retrain_accident' || log.logType === 'automatic_retrain_mv_registration';
+      
+      const userName = isAutomaticRetrain ? 'System' : (user ? `${user.firstName || ''} ${user.middleName ? user.middleName + ' ' : ''}${user.lastName || ''}`.trim() : 'N/A');
       
       return {
         'Performed By': userName,
-        'Actor Email': user?.email || 'N/A',
-        'Actor Role': getRoleLabel(user?.role),
+        'Actor Email': isAutomaticRetrain ? 'N/A' : (user?.email || 'N/A'),
+        'Actor Role': isAutomaticRetrain ? 'N/A' : getRoleLabel(user?.role),
         'Timestamp': new Date(log.timestamp).toLocaleString(),
         'User Name': userName,
-        'Email': user?.email || 'N/A',
-        'Role': getRoleLabel(user?.role),
+        'Email': isAutomaticRetrain ? 'N/A' : (user?.email || 'N/A'),
+        'Role': isAutomaticRetrain ? 'N/A' : getRoleLabel(user?.role),
         'Activity': getLogTypeLabel(log.logType),
         'Details': log.details || 'N/A',
         'IP Address': log.ipAddress === '::1' ? '127.0.0.1' : 
