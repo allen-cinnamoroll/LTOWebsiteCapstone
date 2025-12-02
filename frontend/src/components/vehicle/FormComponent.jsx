@@ -686,9 +686,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                                 onClick={() => handleDriverSelect(driver)}
                               >
                                 <div className="text-sm font-medium text-gray-700 dark:text-gray-200">{driver.ownerRepresentativeName}</div>
-                                <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                                  Current vehicles: {driver.plateNo || "None"}
-                                </div>
+                                {/* Removed 'Current vehicles' line as requested */}
                               </div>
                               <Button
                                 type="button"
@@ -730,9 +728,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                               <div className="text-sm font-medium text-green-800 dark:text-gray-200">
                                 Selected: <span className="dark:text-white dark:font-semibold">{selectedDriver.ownerRepresentativeName}</span>
                               </div>
-                              <div className="text-xs text-green-600 dark:text-gray-400">
-                                Current vehicles: {selectedDriver.plateNo || "None"}
-                              </div>
+                              {/* Removed 'Current vehicles' line in selected owner display */}
                             </div>
                             <div className="flex gap-1">
                               <Button

@@ -405,16 +405,16 @@ const HierarchicalLocationSelector = ({
           )}
         </div>
 
-        {/* Purok Selection */}
+        {/* Purok / Street - Free text, independent of municipality/barangay */}
         <div className="space-y-0">
           <label className="text-xs font-medium text-muted-foreground mb-0">
-            Purok
+            Purok/Street
           </label>
           <div className="relative mt-0">
             <Input
               type="text"
               autoFocus={false}
-              placeholder={selectedBarangay ? "Enter purok name..." : "Select barangay first"}
+              placeholder="Enter purok/street..."
               value={selectedPurok || ""}
               onChange={(e) => {
                 const value = e.target.value.toUpperCase();
@@ -430,10 +430,8 @@ const HierarchicalLocationSelector = ({
                   });
                 }
               }}
-              disabled={!selectedBarangay}
               className={cn(
                 "mt-1",
-                !selectedBarangay && "opacity-50 cursor-not-allowed",
                 form.formState.errors.purok && "border-red-400",
                 isEditMode && "text-[8px]"
               )}
