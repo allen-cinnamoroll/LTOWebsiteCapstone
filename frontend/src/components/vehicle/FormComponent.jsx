@@ -32,7 +32,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import OwnerDetailsModal from "./OwnerDetailsModal";
+import DriverModal from "@/components/driver/DriverModal";
 
 const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, isEditMode = false, readOnlyFields = [], prePopulatedOwner = "", onAddNewOwner }) => {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   const [showNoResults, setShowNoResults] = useState(false);
   const [isOwnerEditable, setIsOwnerEditable] = useState(false);
   const [ownerDetailsModalOpen, setOwnerDetailsModalOpen] = useState(false);
-  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
+  const [ownerDetailsData, setOwnerDetailsData] = useState(null);
   const searchInputRef = useRef(null);
 
   // Set pre-populated owner name in edit mode
@@ -121,9 +121,26 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     setIsOwnerEditable(false); // Return to read-only state after selection
   };
 
-  const handleViewOwner = (driver) => {
-    setSelectedOwnerId(driver._id);
-    setOwnerDetailsModalOpen(true);
+  const handleViewOwner = async (driver) => {
+    try {
+      setOwnerDetailsData(null);
+      setOwnerDetailsModalOpen(true);
+
+      const { data } = await apiClient.get(`/owner/${driver._id}`, {
+        headers: { Authorization: token },
+      });
+
+      if (data.success && data.data) {
+        setOwnerDetailsData(data.data);
+      } else {
+        setOwnerDetailsModalOpen(false);
+        toast.error("Failed to load owner details");
+      }
+    } catch (error) {
+      console.error("Failed to load owner details from search:", error);
+      setOwnerDetailsModalOpen(false);
+      toast.error("Failed to load owner details");
+    }
   };
 
   const handleClearDriver = () => {
@@ -766,11 +783,11 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
         </div>
       </form>
       
-      {/* Owner Details Modal */}
-      <OwnerDetailsModal
+      {/* Owner Details / Profile Modal (reuses main Owner profile view) */}
+      <DriverModal
         open={ownerDetailsModalOpen}
         onOpenChange={setOwnerDetailsModalOpen}
-        ownerId={selectedOwnerId}
+        driverData={ownerDetailsData}
       />
     </Form>
   );
