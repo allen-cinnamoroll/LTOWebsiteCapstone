@@ -349,11 +349,17 @@ export function AppSidebar(props) {
                       <span>Trained Models</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right" align="start" className="w-48">
+                  <DropdownMenuContent side="right" align="start" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to="/trained-models/vehicle" className="flex items-center gap-2">
+                        <Car className="h-4 w-4" />
+                        <span>Vehicle Model – View Accuracy</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/trained-models/vehicle/mv-prediction" className="flex items-center gap-2">
                         <Car className="h-4 w-4" />
-                        <span>Vehicle Model</span>
+                        <span>MV Prediction Model (Retrain)</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -378,15 +384,25 @@ export function AppSidebar(props) {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {/* Vehicle Model - direct link */}
+                      {/* Vehicle Model - accuracy view */}
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/mv-prediction"} asChild>
-                          <Link to="/trained-models/vehicle/mv-prediction">
+                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle"} asChild>
+                          <Link to="/trained-models/vehicle">
                             <Car />
                             <span>Vehicle Model</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
+                      {/* Vehicle Model - retrain page */}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton isActive={location.pathname === "/trained-models/vehicle/mv-prediction"} asChild>
+                          <Link to="/trained-models/vehicle/mv-prediction">
+                            <Car />
+                            <span>MV Prediction Model</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      {/* Accident Model */}
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton isActive={location.pathname === "/trained-models/accident"} asChild>
                           <Link to="/trained-models/accident">

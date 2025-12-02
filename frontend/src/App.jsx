@@ -34,6 +34,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AccountPage from "./pages/AccountPage";
 import MVPredictionPage from "./pages/MVPredictionPage";
 import AccidentPredictionPage from "./pages/AccidentPredictionPage";
+import VehicleModelPage from "./pages/VehicleModelPage";
 import NetworkRestrictedPage from "./pages/NetworkRestrictedPage";
 import ReportArchivePage from "./pages/ReportArchivePage";
 
@@ -119,6 +120,11 @@ function App() {
             } />
             
             {/* Trained Models routes - for superadmin only */}
+            <Route path="trained-models/vehicle" element={
+              <RoleBasedRoute allowedRoles={["superadmin"]}>
+                <VehicleModelPage />
+              </RoleBasedRoute>
+            } />
             <Route path="trained-models/vehicle/mv-prediction" element={
               <RoleBasedRoute allowedRoles={["superadmin"]}>
                 <MVPredictionPage />
