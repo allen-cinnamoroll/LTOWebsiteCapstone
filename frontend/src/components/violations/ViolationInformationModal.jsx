@@ -151,45 +151,23 @@ const ViolationInformationModal = ({ open, onOpenChange, violationData, allViola
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {violatorViolations.length > 0 ? (
                   violatorViolations.map((violation, index) => {
-                    // Check if this is the clicked violation (first item should be the clicked one)
-                    const isClickedViolation = index === 0 && (
-                      violation._id === violationData._id || 
-                      violation.topNo === violationData.topNo
-                    );
-                    
                     return (
                       <div 
                         key={violation._id || index} 
                         onClick={() => handleTopNumberClick(violation)}
-                        className={`p-2 rounded-lg border shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${
-                          isClickedViolation
-                            ? "bg-orange-50/50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-700"
-                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-[#424242] hover:border-orange-300 dark:hover:border-orange-600"
-                        }`}
+                        className="p-2 rounded-lg border shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md bg-white dark:bg-gray-800 border-gray-200 dark:border-[#424242] hover:border-orange-300 dark:hover:border-orange-600"
                       >
-                        <div className={`text-[10px] uppercase tracking-wide flex items-center gap-1 ${
-                          isClickedViolation
-                            ? "text-orange-600 dark:text-orange-400"
-                            : "text-gray-500 dark:text-gray-400"
-                        }`}>
+                        <div className="text-[10px] uppercase tracking-wide flex items-center gap-1 text-gray-500 dark:text-gray-400">
                           <Hash className="h-3 w-3" /> TOP Number
                         </div>
                         <button
-                          className={`text-sm font-semibold break-all mt-0.5 w-full text-left hover:underline ${
-                            isClickedViolation
-                              ? "text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300"
-                              : "text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300"
-                          }`}
+                          className="text-sm font-semibold break-all mt-0.5 w-full text-left hover:underline text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300"
                           title={`View violation details for ${violation.topNo}`}
                         >
                           {violation.topNo || "N/A"}
                         </button>
                         {violation.plateNo && (
-                          <div className={`text-xs ${
-                            isClickedViolation
-                              ? "text-orange-500 dark:text-orange-500"
-                              : "text-gray-500 dark:text-gray-400"
-                          }`}>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
                             Plate: {violation.plateNo}
                           </div>
                         )}
