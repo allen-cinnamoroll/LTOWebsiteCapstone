@@ -33,6 +33,7 @@ import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import DriverModal from "@/components/driver/DriverModal";
+import VehicleModal from "@/components/vehicle/VehicleModal";
 
 const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, isEditMode = false, readOnlyFields = [], prePopulatedOwner = "", onAddNewOwner }) => {
   const navigate = useNavigate();
@@ -46,6 +47,8 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   const [isOwnerEditable, setIsOwnerEditable] = useState(false);
   const [ownerDetailsModalOpen, setOwnerDetailsModalOpen] = useState(false);
   const [ownerDetailsData, setOwnerDetailsData] = useState(null);
+  const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
+  const [selectedFileNumber, setSelectedFileNumber] = useState("");
   const searchInputRef = useRef(null);
 
   // Set pre-populated owner name in edit mode
@@ -788,6 +791,17 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
         open={ownerDetailsModalOpen}
         onOpenChange={setOwnerDetailsModalOpen}
         driverData={ownerDetailsData}
+        onFileNumberClick={(fileNo) => {
+          setSelectedFileNumber(fileNo);
+          setVehicleModalOpen(true);
+        }}
+      />
+
+      {/* Vehicle Information Modal (reused design) */}
+      <VehicleModal
+        open={vehicleModalOpen}
+        onOpenChange={setVehicleModalOpen}
+        fileNumber={selectedFileNumber}
       />
     </Form>
   );
