@@ -223,7 +223,6 @@ export default function MVPredictionPage() {
       // Track if a new file is being uploaded
       const fileWasUploaded = !!selectedFile;
       setHasNewFile(fileWasUploaded);
-      
       // Step 1: Upload CSV file if one is selected (optional)
       if (selectedFile) {
         const formData = new FormData();
@@ -285,6 +284,15 @@ export default function MVPredictionPage() {
       setRetrainStatus('training');
       setUploadProgress(0);
       
+      // Simulate training progress while waiting for the API response
+      const trainingInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          // Slowly move towards 90% while training
+          if (prev < 90) return prev + 5;
+          return prev;
+        });
+      }, 800);
+      
       let retrainResponse;
       try {
         // Create timeout controller for browser compatibility
@@ -302,6 +310,7 @@ export default function MVPredictionPage() {
         
         clearTimeout(timeoutId);
       } catch (fetchError) {
+        clearInterval(trainingInterval);
         if (fetchError.name === 'AbortError' || fetchError.name === 'TypeError') {
           throw new Error(
             `Cannot connect to prediction API server for retraining. Please ensure the Flask API is running on ${MV_PREDICTION_API_BASE}.`
@@ -313,6 +322,7 @@ export default function MVPredictionPage() {
       const retrainData = await retrainResponse.json();
 
       if (!retrainResponse.ok || !retrainData.success) {
+        clearInterval(trainingInterval);
         const error = new Error(retrainData.error || retrainData.message || 'Failed to retrain model');
         error.isFormatError = retrainData.error?.includes('missing required columns') || 
                              retrainData.error?.includes('CSV file is missing') ||
@@ -322,29 +332,19 @@ export default function MVPredictionPage() {
       }
 
       setRetrainStatus('success');
+      clearInterval(trainingInterval);
       setUploadProgress(100);
       
-      // Extract training data and duplicate info
+      // Extract training data and duplicate info (if any)
       const aggregatedData = retrainData.data?.aggregated;
-      console.log('Retrain response data:', retrainData);
-      console.log('Aggregated data:', aggregatedData);
-      
       if (aggregatedData) {
         setTrainingData(aggregatedData);
-        console.log('Training data set:', aggregatedData);
-        
-        // Check for duplicates
         const processingInfo = aggregatedData.processing_info;
         if (processingInfo && processingInfo.duplicates_removed > 0) {
           setDuplicateInfo(processingInfo);
           setShowDuplicateModal(true);
         }
-      } else {
-        console.error('No aggregated data in retrain response:', retrainData);
       }
-      
-      // Show success modal with accuracy metrics
-      setShowSuccessModal(true);
       
       const successMessage = fileWasUploaded 
         ? 'The prediction model has been updated with new data'
