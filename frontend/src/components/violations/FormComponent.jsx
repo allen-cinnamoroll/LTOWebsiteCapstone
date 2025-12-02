@@ -520,7 +520,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormLabel className="text-xs text-gray-600">TOP NO.</FormLabel>
                 <FormControl>
                     <Input 
-                      placeholder="TOP-0001" 
+                      placeholder="12345678" 
                       {...field}
                       value={field.value === "null" ? "null" : field.value || ""}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
