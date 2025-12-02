@@ -383,18 +383,22 @@ export default function ViewAccountLogsPage() {
                               <span className="font-medium text-sm">
                                 {log.actorName || "N/A"}
                               </span>
-                              <span className="text-xs text-muted-foreground">
-                                {log.actorEmail || ""}
-                              </span>
-                              {log.actorRole && (
-                                <Badge variant="outline" className="w-fit mt-1">
-                                  {roleOptions.find(r => r.value === log.actorRole)?.label || "Unknown"}
-                                </Badge>
+                              {log.actorName !== "System" && (
+                                <>
+                                  <span className="text-xs text-muted-foreground">
+                                    {log.actorEmail || ""}
+                                  </span>
+                                  {log.actorRole && (
+                                    <Badge variant="outline" className="w-fit mt-1">
+                                      {roleOptions.find(r => r.value === log.actorRole)?.label || "Unknown"}
+                                    </Badge>
+                                  )}
+                                </>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            {new Date(log.timestamp).toLocaleString()}
+                            {format(new Date(log.timestamp), "MMM dd, yyyy hh:mm:ss a")}
                           </TableCell>
                           <TableCell>
                             <span className="text-sm">
