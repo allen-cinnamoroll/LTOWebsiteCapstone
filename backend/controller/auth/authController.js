@@ -98,61 +98,10 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check if user is superadmin (role "0") - skip OTP
-    if (user.role === "0") {
-      // Generate JWT token directly for superadmin
-      const token = jwt.sign(
-        {
-          userId: user._id,
-          role: user.role,
-          email: user.email,
-          firstName: user.firstName,
-          middleName: user.middleName,
-          lastName: user.lastName,
-          avatar: user.avatar,
-          isPasswordChange: user.isPasswordChange,
-          isOtpVerified: user.isOtpVerified
-        },
-        ACCESS_KEY,
-        { expiresIn: ACCESS_EXPIRATION }
-      );
-
-      // Generate refresh token
-      const refreshToken = jwt.sign({ userId: user._id }, REFRESH_KEY, {
-        expiresIn: REFRESH_EXPIRATION,
-      });
-
-      // Store refresh token in HTTP-only cookie
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-
-      // Update lastSeenAt and lastLoginAt
-      user.lastSeenAt = new Date();
-      user.lastLoginAt = new Date();
-      await user.save();
-
-      // Log the successful login activity
-      await logUserActivity({
-        userId: user._id,
-        logType: "login",
-        ipAddress: getClientIP(req),
-        status: "success",
-        details: "Superadmin direct login (no OTP required)",
-        actorId: user._id
-      });
-
-      return res.status(200).json({
-        success: true,
-        message: "Login successful",
-        token,
-      });
-    }
-
-    // For admin and employee roles, check if OTP verification is required
+    // For all users (including superadmin), check if OTP verification is required
+    // Note: Once OTP is verified, isOtpVerified stays true for the entire day
+    // until the daily reset at 6:00 AM on weekdays. Users won't need to enter OTP
+    // again if they logout and login again on the same day.
     if (user.isOtpVerified === false) {
       // Generate OTP only if user needs verification
       const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -243,7 +192,9 @@ export const login = async (req, res) => {
         token: token
       });
     } else {
-      // User is already OTP verified, allow direct login
+      // User is already OTP verified (verified earlier today), allow direct login
+      // isOtpVerified persists throughout the day until daily reset at 6:00 AM on weekdays
+      // This means users won't need to enter OTP again if they logout and login on the same day
       // Update lastSeenAt and lastLoginAt
       user.lastSeenAt = new Date();
       user.lastLoginAt = new Date();
@@ -255,7 +206,7 @@ export const login = async (req, res) => {
         logType: "login",
         ipAddress: getClientIP(req),
         status: "success",
-        details: "Direct login (OTP already verified)",
+        details: "Direct login (OTP already verified today)",
         actorId: user._id
       });
 
@@ -519,6 +470,9 @@ export const logout = async (req, res) => {
     
     if (user) {
       // Clear lastSeenAt to mark user as offline
+      // Note: isOtpVerified is NOT reset on logout - it persists for the entire day
+      // until the daily reset at 6:00 AM on weekdays. This allows users to login
+      // again on the same day without needing to enter OTP again.
       user.lastSeenAt = null;
       await user.save();
       

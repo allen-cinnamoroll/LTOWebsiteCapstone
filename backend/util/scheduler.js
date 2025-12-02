@@ -1,8 +1,8 @@
 import { checkAllVehiclesExpiration } from "./vehicleStatusChecker.js";
 import { 
   resetAllUsersOTPStatus, 
-  isMonday, 
-  getMillisecondsUntilNextMonday 
+  isWeekday, 
+  getMillisecondsUntilNextWeekdayAt6AM 
 } from "./otpResetScheduler.js";
 
 /**
@@ -28,44 +28,55 @@ export const scheduleVehicleExpirationCheck = () => {
 };
 
 /**
- * Schedule weekly OTP reset every Monday at 12:00 AM
- * Resets isOtpVerified to false for all admin and employee users
+ * Schedule daily OTP reset every weekday at 6:00 AM
+ * Resets isOtpVerified to false for all users (including superadmin)
+ * Skips weekends (Saturday and Sunday)
  */
-export const scheduleWeeklyOTPReset = () => {
+export const scheduleDailyOTPReset = () => {
   const runOTPReset = async () => {
     try {
-      console.log("Running scheduled weekly OTP reset...");
+      console.log("Running scheduled daily OTP reset...");
       const result = await resetAllUsersOTPStatus();
-      console.log(`Weekly OTP reset completed: ${result.message}`);
+      console.log(`Daily OTP reset completed: ${result.message}`);
       
-      // Schedule next OTP reset for next Monday
+      // Schedule next OTP reset for next weekday at 6:00 AM
       scheduleNextOTPReset();
     } catch (error) {
-      console.error("Error in scheduled weekly OTP reset:", error);
+      console.error("Error in scheduled daily OTP reset:", error);
       // Still schedule next reset even if current one failed
       scheduleNextOTPReset();
     }
   };
 
   const scheduleNextOTPReset = () => {
-    const msUntilNextMonday = getMillisecondsUntilNextMonday();
-    console.log(`Next OTP reset scheduled for: ${new Date(Date.now() + msUntilNextMonday).toLocaleString()}`);
+    const msUntilNextWeekday = getMillisecondsUntilNextWeekdayAt6AM();
+    const nextResetDate = new Date(Date.now() + msUntilNextWeekday);
+    console.log(`Next OTP reset scheduled for: ${nextResetDate.toLocaleString()}`);
     
     setTimeout(() => {
       runOTPReset();
-    }, msUntilNextMonday);
+    }, msUntilNextWeekday);
   };
 
-  // Check if today is Monday, if so run immediately, otherwise schedule for next Monday
-  if (isMonday()) {
-    console.log("Today is Monday, running OTP reset immediately...");
-    runOTPReset();
+  // Check if today is a weekday and it's before 6:00 AM
+  const now = new Date();
+  const todayAt6AM = new Date(now);
+  todayAt6AM.setHours(6, 0, 0, 0);
+  
+  if (isWeekday() && now < todayAt6AM) {
+    // Today is a weekday and it's before 6:00 AM, schedule for today at 6:00 AM
+    const msUntil6AM = todayAt6AM.getTime() - now.getTime();
+    console.log(`Today is a weekday before 6:00 AM, scheduling OTP reset for today at 6:00 AM...`);
+    setTimeout(() => {
+      runOTPReset();
+    }, msUntil6AM);
   } else {
-    console.log("Scheduling OTP reset for next Monday...");
+    // Schedule for next weekday at 6:00 AM
+    console.log("Scheduling OTP reset for next weekday at 6:00 AM...");
     scheduleNextOTPReset();
   }
 
-  console.log("Weekly OTP reset scheduler started");
+  console.log("Daily OTP reset scheduler started (weekdays at 6:00 AM)");
 };
 
 /**
