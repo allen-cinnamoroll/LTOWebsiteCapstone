@@ -150,15 +150,31 @@ export const AccidentSchema = z.object({
 });
 
 export const ViolationCreateSchema = z.object({
-  topNo: z.string().optional(),
+  topNo: z.string({
+    required_error: "TOP number is required",
+  })
+  .min(1, { message: "TOP number is required" })
+  .refine((value) => /^\d+$/.test(value), {
+    message: "TOP number must contain numbers only",
+  }),
   firstName: z.string().optional().nullable(),
   middleInitial: z.string().optional().nullable(),
   lastName: z.string().optional().nullable(),
-  suffix: z.string().optional().nullable(),
+  suffix: z.string().optional().nullable().refine((value) => {
+    // Allow empty, undefined, or null
+    if (value === undefined || value === null || value.toString().trim() === "") {
+      return true;
+    }
+    const normalized = value.toString().trim().toUpperCase();
+    const allowedSuffixes = ["JR.", "SR.", "II", "III", "IV", "V"];
+    return allowedSuffixes.includes(normalized);
+  }, {
+    message: "Suffix must be a valid generational suffix or left blank if none.",
+  }),
   violations: z.array(z.string()).optional().nullable(),
   violationType: z.enum(["confiscated", "alarm", "impounded"], { required_error: "Violation type is required" }),
   licenseType: z.string().optional().nullable(),
-  plateNo: z.string().min(1, { message: "Plate number is required" }),
+  plateNo: z.string().optional().nullable(),
   dateOfApprehension: z.date({ required_error: "Date of apprehension is required" }),
   apprehendingOfficer: z.string().min(1, { message: "Apprehending officer is required" }),
   chassisNo: z.string().optional().nullable(),
