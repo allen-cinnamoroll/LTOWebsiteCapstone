@@ -597,26 +597,27 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                             <FormControl>
                               <Button
                                 variant="outline"
-                              className={cn(
-                                "w-full pl-3 text-left font-normal text-black dark:text-white text-sm border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
-                                !field.value && "text-muted-foreground",
-                                form.formState.errors.dateOfRenewal && "border-red-400"
-                              )}
+                                className={cn(
+                                  "w-full text-left font-normal text-xs justify-start border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
+                                  !field.value && "text-muted-foreground"
+                                )}
                               >
+                                <CalendarIcon className="h-4 w-4 opacity-50" />
                                 {field.value ? (
                                   format(field.value, "PPP")
                                 ) : (
                                   <span>Pick a date</span>
                                 )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-2 space-y-2" align="start">
                             <DatePicker
                               fieldValue={field.value}
-                              dateValue={field.onChange}
-                              maxDate={new Date(2025, 11, 31)} // December 31, 2025 - cannot select 2026 or later
+                              dateValue={(date) =>
+                                form.setValue("dateOfRenewal", date, { shouldValidate: true })
+                              }
+                              maxDate={new Date()}
                             />
                           </PopoverContent>
                         </Popover>
