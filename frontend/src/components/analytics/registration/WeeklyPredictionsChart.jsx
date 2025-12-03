@@ -1529,7 +1529,9 @@ const WeeklyPredictionsChart = () => {
           
           <div className="flex flex-col lg:flex-row gap-4 items-start">
             {/* Recommendations column */}
-            <div className="flex flex-col gap-4 w-full lg:w-1/2">
+            <div className={selectedMunicipality 
+              ? "grid grid-cols-1 md:grid-cols-2 gap-4 w-full" 
+              : "flex flex-col gap-4 w-full lg:w-1/2"}>
               {recommendations.map((rec, index) => {
               const colorClasses = {
                 blue: {
