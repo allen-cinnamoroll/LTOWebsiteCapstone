@@ -1,6 +1,41 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'https://ltodatamanager.com/api';
+// Get API base URL with smart detection for production
+const getAPIBaseURL = () => {
+  // Get the environment variable
+  let apiURL = import.meta.env.VITE_BASE_URL;
+  
+  // If no env var, use fallback
+  if (!apiURL) {
+    // In production (served from https://ltodatamanager.com), use relative path to avoid CORS
+    if (typeof window !== 'undefined' && window.location.origin.includes('ltodatamanager.com')) {
+      return '/api';
+    }
+    // Development fallback
+    return 'https://ltodatamanager.com/api';
+  }
+  
+  // If env var contains localhost and we're in production, fix it
+  if (typeof window !== 'undefined' && window.location.origin.includes('ltodatamanager.com')) {
+    // We're in production, but env var might be localhost (from old build)
+    if (apiURL.includes('localhost') || apiURL.includes('127.0.0.1')) {
+      // Use relative path in production (same origin = no CORS issues)
+      return '/api';
+    }
+    // If it's already a production URL, use it
+    if (apiURL.includes('ltodatamanager.com')) {
+      return apiURL;
+    }
+    // Otherwise use relative path
+    return '/api';
+  }
+  
+  // Development: use the env var as-is
+  return apiURL;
+};
+
+const API_BASE_URL = getAPIBaseURL();
+
 // Create an Axios instance with custom headers
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

@@ -175,30 +175,6 @@ export default function AccidentPredictionPage() {
     }
   };
 
-  // Get primary model accuracy (supports both old and new API formats)
-  const getPrimaryAccuracy = () => {
-    // Check for old API format first (accuracy_percentage)
-    if (modelInfo?.accuracy_metrics?.accuracy_percentage !== undefined) {
-      return modelInfo.accuracy_metrics.accuracy_percentage;
-    }
-    // New format: Prefer overall_accuracy (classifier CV accuracy) if available
-    if (modelInfo?.accuracy_metrics?.overall_accuracy !== undefined) {
-      return modelInfo.accuracy_metrics.overall_accuracy;
-    }
-    // Fallback to count prediction accuracy (regressor)
-    if (modelInfo?.accuracy_metrics?.count_prediction_accuracy !== undefined) {
-      return modelInfo.accuracy_metrics.count_prediction_accuracy;
-    }
-    // Last fallback: calculate from MAPE
-    if (modelInfo?.accuracy_metrics?.mape !== undefined) {
-      const mape = modelInfo.accuracy_metrics.mape;
-      return Math.max(0, Math.min(100, 100 - mape));
-    }
-    return null;
-  };
-
-  const accuracyPercentage = getPrimaryAccuracy();
-  const cvAccuracyDisplay = modelInfo?.accuracy_metrics?.cv_accuracy_display;
   
   // Determine if we have the new dual-model format or old single-model format
   const hasClassifierModel = modelInfo?.classifier_available || modelInfo?.model_types?.includes('RandomForestClassifier');
@@ -389,7 +365,7 @@ export default function AccidentPredictionPage() {
               <CardTitle>Model Accuracy Metrics</CardTitle>
             </div>
             <CardDescription>
-              Performance metrics from test set evaluation
+              Performance metrics from test set evaluation for both Random Forest Regressor and Classifier models
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -411,312 +387,304 @@ export default function AccidentPredictionPage() {
               </div>
             )}
 
-            {/* Overall Accuracy */}
-            {accuracyPercentage !== null && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-blue-500" />
-                    <span className="font-semibold">Model Accuracy</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            {hasDualModels 
-                              ? "Test set accuracy for high-risk area prediction. This is the accuracy on completely unseen data, representing the most realistic performance expectation for production use."
-                              : "Model accuracy based on test set evaluation. This represents the performance on unseen data."}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <Badge className={getAccuracyBadgeColor(accuracyPercentage)}>
-                    {accuracyPercentage.toFixed(2)}%
-                  </Badge>
+            {/* Random Forest Regressor Performance Metrics */}
+            {(modelInfo.accuracy_metrics?.count_prediction_accuracy !== undefined ||
+              modelInfo.accuracy_metrics?.mape !== undefined ||
+              modelInfo.accuracy_metrics?.r2_score !== undefined ||
+              modelInfo.accuracy_metrics?.accuracy_within_20pct !== undefined ||
+              modelInfo.accuracy_metrics?.accuracy_within_30pct !== undefined) && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                  <BarChart3 className="h-5 w-5 text-purple-500" />
+                  <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300">
+                    Random Forest Regressor Performance Metrics
+                  </h3>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                  <div
-                    className={`h-3 rounded-full transition-all duration-500 ${
-                      accuracyPercentage >= 80
-                        ? 'bg-green-500'
-                        : accuracyPercentage >= 60
-                        ? 'bg-yellow-500'
-                        : 'bg-orange-500'
-                    }`}
-                    style={{ width: `${accuracyPercentage}%` }}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Count Prediction Accuracy - Primary Metric */}
+                  {hasDualModels && modelInfo.accuracy_metrics?.count_prediction_accuracy !== undefined && (
+                    <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border-2 border-purple-300 dark:border-purple-700">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-semibold text-purple-700 dark:text-purple-300">Count Prediction Accuracy</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Accuracy for predicting accident counts (100% - MAPE). This is the primary accuracy metric for the regressor model, showing how accurately it predicts the number of accidents.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">
+                        {modelInfo.accuracy_metrics.count_prediction_accuracy.toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
+
+                  {/* MAPE */}
+                  {modelInfo.accuracy_metrics.mape !== undefined && (
+                    <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">MAPE</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Mean Absolute Percentage Error. Lower is better.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {modelInfo.accuracy_metrics.mape.toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
+
+                  {/* R² Score */}
+                  {modelInfo.accuracy_metrics.r2_score !== undefined && (
+                    <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">R² Score</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Coefficient of determination. Closer to 1.0 is better.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {modelInfo.accuracy_metrics.r2_score.toFixed(4)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Accuracy within 20% */}
+                  {modelInfo.accuracy_metrics.accuracy_within_20pct !== undefined && (
+                    <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">Within ±20%</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Percentage of predictions within 20% of actual values
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {modelInfo.accuracy_metrics.accuracy_within_20pct.toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Accuracy within 30% */}
+                  {modelInfo.accuracy_metrics.accuracy_within_30pct !== undefined && (
+                    <div className="p-4 rounded-lg bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">Within ±30%</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Percentage of predictions within 30% of actual values
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {modelInfo.accuracy_metrics.accuracy_within_30pct.toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
                 </div>
-                {cvAccuracyDisplay && (
-                  <p className="text-sm text-muted-foreground">
-                    Cross-Validation: {cvAccuracyDisplay} {hasDualModels ? '(averaged across 5 folds - shows model stability)' : ''}
-                  </p>
-                )}
               </div>
             )}
 
-            {/* Detailed Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Count Prediction Accuracy - Only in new dual-model format */}
-              {hasDualModels && modelInfo.accuracy_metrics?.count_prediction_accuracy !== undefined && (
-                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">Count Prediction Accuracy</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Accuracy for predicting accident counts (100% - MAPE)
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {modelInfo.accuracy_metrics.count_prediction_accuracy.toFixed(2)}%
-                  </div>
+            {/* Random Forest Classifier Performance Metrics */}
+            {hasClassifierModel && modelInfo?.classifier_metrics && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                  <BarChart3 className="h-5 w-5 text-indigo-500" />
+                  <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-300">
+                    Random Forest Classifier Performance Metrics
+                  </h3>
                 </div>
-              )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Classifier Test Accuracy - Primary Metric */}
+                  {modelInfo.classifier_metrics.accuracy !== undefined && (
+                    <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 border-2 border-indigo-300 dark:border-indigo-700">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Test Accuracy</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Percentage of correct predictions on the test set (unseen data). This is the primary accuracy metric for the classifier model.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-3xl font-bold text-indigo-700 dark:text-indigo-300">
+                        {(modelInfo.classifier_metrics.accuracy * 100).toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
 
-              {/* MAPE */}
-              {modelInfo.accuracy_metrics.mape !== undefined && (
-                <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">MAPE</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Mean Absolute Percentage Error. Lower is better.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {modelInfo.accuracy_metrics.mape.toFixed(2)}%
-                  </div>
-                </div>
-              )}
+                  {/* Cross-Validation Accuracy - Secondary Info */}
+                  {modelInfo.classifier_metrics.cv_accuracy_mean !== undefined && (
+                    <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">CV Accuracy</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Cross-validation accuracy averaged across multiple folds. Shows model stability and generalization across different data splits.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {(modelInfo.classifier_metrics.cv_accuracy_mean * 100).toFixed(2)}%
+                        {modelInfo.classifier_metrics.cv_accuracy_std !== undefined && (
+                          <span className="text-sm font-normal text-muted-foreground ml-1">
+                            ± {(modelInfo.classifier_metrics.cv_accuracy_std * 100).toFixed(2)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-              {/* R² Score */}
-              {modelInfo.accuracy_metrics.r2_score !== undefined && (
-                <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">R² Score</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Coefficient of determination. Closer to 1.0 is better.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {modelInfo.accuracy_metrics.r2_score.toFixed(4)}
-                  </div>
-                </div>
-              )}
+                  {/* Precision */}
+                  {modelInfo.classifier_metrics.precision !== undefined && (
+                    <div className="p-4 rounded-lg bg-pink-50 dark:bg-pink-950/20 border border-pink-200 dark:border-pink-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">Precision</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Proportion of positive predictions that were correct
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {(modelInfo.classifier_metrics.precision * 100).toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
 
-              {/* Accuracy within 20% */}
-              {modelInfo.accuracy_metrics.accuracy_within_20pct !== undefined && (
-                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">Within ±20%</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Percentage of predictions within 20% of actual values
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {modelInfo.accuracy_metrics.accuracy_within_20pct.toFixed(2)}%
-                  </div>
-                </div>
-              )}
+                  {/* Recall */}
+                  {modelInfo.classifier_metrics.recall !== undefined && (
+                    <div className="p-4 rounded-lg bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">Recall</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Proportion of actual positives that were correctly identified
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {(modelInfo.classifier_metrics.recall * 100).toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
 
-              {/* Accuracy within 30% */}
-              {modelInfo.accuracy_metrics.accuracy_within_30pct !== undefined && (
-                <div className="p-4 rounded-lg bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">Within ±30%</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Percentage of predictions within 30% of actual values
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {modelInfo.accuracy_metrics.accuracy_within_30pct.toFixed(2)}%
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  {/* F1 Score */}
+                  {modelInfo.classifier_metrics.f1_score !== undefined && (
+                    <div className="p-4 rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">F1 Score</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Harmonic mean of precision and recall
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {(modelInfo.classifier_metrics.f1_score * 100).toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
 
-      {/* Random Forest Classifier Metrics */}
-      {hasClassifierModel && modelInfo?.classifier_metrics && (
-        <Card className="border-indigo-200 dark:border-indigo-900">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-6 w-6 text-indigo-500" />
-              <CardTitle>Trained Models</CardTitle>
-            </div>
-            <CardDescription>
-              Random Forest Classifier performance metrics
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Accuracy */}
-              {modelInfo.classifier_metrics.accuracy !== undefined && (
-                <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">Accuracy</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Percentage of correct predictions on the test set
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(modelInfo.classifier_metrics.accuracy * 100).toFixed(2)}%
-                  </div>
+                  {/* ROC-AUC */}
+                  {modelInfo.classifier_metrics.roc_auc !== undefined && (
+                    <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-muted-foreground">ROC–AUC</div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                Area under the ROC curve. Measures the model's ability to distinguish between classes
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {(modelInfo.classifier_metrics.roc_auc * 100).toFixed(2)}%
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              {/* Precision */}
-              {modelInfo.classifier_metrics.precision !== undefined && (
-                <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">Precision</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Proportion of positive predictions that were correct
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(modelInfo.classifier_metrics.precision * 100).toFixed(2)}%
-                  </div>
-                </div>
-              )}
-
-              {/* Recall */}
-              {modelInfo.classifier_metrics.recall !== undefined && (
-                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">Recall</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Proportion of actual positives that were correctly identified
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(modelInfo.classifier_metrics.recall * 100).toFixed(2)}%
-                  </div>
-                </div>
-              )}
-
-              {/* F1 Score */}
-              {modelInfo.classifier_metrics.f1_score !== undefined && (
-                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">F1 Score</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Harmonic mean of precision and recall
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(modelInfo.classifier_metrics.f1_score * 100).toFixed(2)}%
-                  </div>
-                </div>
-              )}
-
-              {/* ROC-AUC */}
-              {modelInfo.classifier_metrics.roc_auc !== undefined && (
-                <div className="p-4 rounded-lg bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm text-muted-foreground">ROC–AUC</div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">
-                            Area under the ROC curve. Measures the model's ability to distinguish between classes
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <div className="text-2xl font-bold">
-                    {(modelInfo.classifier_metrics.roc_auc * 100).toFixed(2)}%
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

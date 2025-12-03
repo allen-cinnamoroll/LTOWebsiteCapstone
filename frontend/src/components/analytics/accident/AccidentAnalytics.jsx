@@ -1171,18 +1171,7 @@ export function AccidentAnalytics() {
                     fill={getColors()[2]}
                     radius={[8, 8, 0, 0]}
                     animationDuration={1500}
-                  >
-                    {formatDayOfWeekData(analyticsData.distributions.dayOfWeek).map((entry, index) => {
-                      // Highlight weekends (Friday, Saturday, Sunday)
-                      const isWeekend = ['Friday', 'Saturday', 'Sunday'].includes(entry.name);
-                      return (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={isWeekend ? getColors()[0] : getColors()[2]}
-                        />
-                      );
-                    })}
-                  </Bar>
+                  />
                 </BarChart>
               </ResponsiveContainer>
               <div className="mt-4 grid grid-cols-2 gap-2">

@@ -34,7 +34,7 @@ const DatePicker = ({ fieldValue, dateValue, maxDate, minDate }) => {
       updatedDate = maxDate;
     }
     setSelectedDate(updatedDate);
-    if (dateValue) dateValue(updatedDate);
+    // Don't call dateValue here - only update when user clicks a date
   };
 
   // Handle Month Change
@@ -42,7 +42,7 @@ const DatePicker = ({ fieldValue, dateValue, maxDate, minDate }) => {
     setSelectedMonth(month);
     const updatedDate = setMonth(selectedDate, month);
     setSelectedDate(updatedDate);
-    if (dateValue) dateValue(updatedDate);
+    // Don't call dateValue here - only update when user clicks a date
   };
 
   // Handle Date Selection

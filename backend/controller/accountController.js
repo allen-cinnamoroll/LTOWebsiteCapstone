@@ -11,13 +11,17 @@ const storage = multer.diskStorage({
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
+      console.log('Created uploads directory:', uploadPath);
     }
+    console.log('Multer destination:', uploadPath);
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
     // Generate unique filename with timestamp
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `avatar-${req.user.userId}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    const filename = `avatar-${req.user.userId}-${uniqueSuffix}${path.extname(file.originalname)}`;
+    console.log('Multer filename generated:', filename);
+    cb(null, filename);
   }
 });
 
@@ -78,11 +82,29 @@ export const updateProfile = async (req, res) => {
 
     // Handle avatar upload
     if (req.file) {
+      // Verify the file was actually saved
+      const newAvatarPath = path.join(process.cwd(), 'uploads', 'avatars', req.file.filename);
+      if (!fs.existsSync(newAvatarPath)) {
+        console.error('Avatar file was not saved:', newAvatarPath);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to save avatar file. Please try again."
+        });
+      }
+      
+      console.log('Avatar file saved successfully:', newAvatarPath);
+      
       // Delete old avatar if it exists
       if (user.avatar && user.avatar !== '') {
         const oldAvatarPath = path.join(process.cwd(), user.avatar);
         if (fs.existsSync(oldAvatarPath)) {
+          try {
           fs.unlinkSync(oldAvatarPath);
+            console.log('Old avatar deleted:', oldAvatarPath);
+          } catch (deleteError) {
+            console.error('Failed to delete old avatar:', deleteError);
+            // Don't fail the request if old avatar deletion fails
+          }
         }
       }
       

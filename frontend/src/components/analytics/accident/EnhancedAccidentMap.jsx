@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { getLocationCoordinates } from '@/util/geocoding';
+import { getLocationCoordinates, isValidDavaoOrientalCoordinate } from '@/util/geocoding';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,6 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showClusters, setShowClusters] = useState(true);
   const [showHeatmap, setShowHeatmap] = useState(false);
-  const [selectedSeverity, setSelectedSeverity] = useState('all');
   const [mapStyle, setMapStyle] = useState('streets');
   const [isChangingStyle, setIsChangingStyle] = useState(false);
 
@@ -152,12 +151,12 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
     }
   }, [mapStyle, mapLoaded]);
 
-  // Update map layers when clustering, heatmap, or severity filter changes
+  // Update map layers when clustering or heatmap changes
   useEffect(() => {
     if (mapLoaded && map.current && map.current.loaded() && !isChangingStyle) {
       setupMapLayers();
     }
-  }, [mapLoaded, showClusters, showHeatmap, selectedSeverity, isChangingStyle]);
+  }, [mapLoaded, showClusters, showHeatmap, isChangingStyle]);
 
   const setupMapLayers = () => {
     if (!map.current || !mapLoaded || !map.current.loaded() || isChangingStyle) return;
@@ -245,14 +244,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
       source: 'accidents',
       filter: ['!', ['has', 'point_count']],
       paint: {
-        'circle-color': [
-          'case',
-          ['==', ['get', 'severity'], 'fatal'], '#dc2626',
-          ['==', ['get', 'severity'], 'severe'], '#ea580c',
-          ['==', ['get', 'severity'], 'moderate'], '#f59e0b',
-          ['==', ['get', 'severity'], 'minor'], '#16a34a',
-          '#6b7280'
-        ],
+        'circle-color': '#dc2626',
         'circle-radius': 8,
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff'
@@ -271,23 +263,7 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
         source: 'accidents',
         maxzoom: 15,
         paint: {
-          'heatmap-weight': [
-            'interpolate',
-            ['linear'],
-            [
-              'case',
-              ['==', ['get', 'severity'], 'fatal'], 4,
-              ['==', ['get', 'severity'], 'severe'], 3,
-              ['==', ['get', 'severity'], 'moderate'], 2,
-              ['==', ['get', 'severity'], 'minor'], 1,
-              0
-            ],
-            0, 0,
-            1, 1,
-            2, 2,
-            3, 3,
-            4, 4
-          ],
+          'heatmap-weight': 1,
           'heatmap-intensity': [
             'interpolate',
             ['linear'],
@@ -394,16 +370,23 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
 
   const prepareGeojsonData = () => {
     const features = accidents
-      .filter(accident => {
-        if (selectedSeverity !== 'all' && accident.severity !== selectedSeverity) {
-          return false;
-        }
-        return true;
-      })
       .map(accident => {
         let coordinates = null;
         
-        if (accident.municipality) {
+        // First, check if accident has stored lat/lng coordinates (preferred, but validate)
+        if (accident.lat && accident.lng && 
+            typeof accident.lat === 'number' && typeof accident.lng === 'number' &&
+            !isNaN(accident.lat) && !isNaN(accident.lng)) {
+          // Only use stored coordinates if they're valid for Davao Oriental
+          if (isValidDavaoOrientalCoordinate(accident.lat, accident.lng)) {
+            coordinates = [accident.lng, accident.lat];
+          } else {
+            console.warn(`Stored coordinates invalid for Davao Oriental: ${accident.lat}, ${accident.lng}. Using geocoding for ${accident.municipality}`);
+          }
+        }
+        
+        // If no valid stored coordinates, use geocoding based on municipality/barangay
+        if (!coordinates && accident.municipality) {
           const geocodedCoords = getLocationCoordinates(
             accident.municipality, 
             accident.barangay, 
@@ -411,6 +394,8 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           );
           if (geocodedCoords) {
             coordinates = [geocodedCoords.lng, geocodedCoords.lat];
+          } else {
+            console.warn(`Geocoding failed for: ${accident.municipality}, ${accident.barangay}`);
           }
         }
         
@@ -418,15 +403,18 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
           return {
             type: 'Feature',
             properties: {
-              id: accident.accident_id,
-              severity: accident.severity || 'unknown',
-              plateNo: accident.plateNo,
-              vehicle_type: accident.vehicle_type,
+              blotterNo: accident.blotterNo,
+              vehiclePlateNo: accident.vehiclePlateNo,
+              vehicleMCPlateNo: accident.vehicleMCPlateNo,
+              vehicleChassisNo: accident.vehicleChassisNo,
+              incidentType: accident.incidentType,
+              caseStatus: accident.caseStatus,
               municipality: accident.municipality,
               barangay: accident.barangay,
               street: accident.street,
-              accident_date: accident.accident_date,
-              notes: accident.notes
+              dateCommited: accident.dateCommited,
+              suspect: accident.suspect,
+              offense: accident.offense
             },
             geometry: {
               type: 'Point',
@@ -445,37 +433,39 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
   };
 
   const createPopupContent = (properties) => {
+    const formatDate = (date) => {
+      if (!date) return 'N/A';
+      try {
+        return new Date(date).toLocaleDateString();
+      } catch {
+        return 'N/A';
+      }
+    };
+
+    const getVehiclePlate = (props) => {
+      if (props.vehiclePlateNo) return props.vehiclePlateNo;
+      if (props.vehicleMCPlateNo) return props.vehicleMCPlateNo;
+      return 'N/A';
+    };
+
     return `
       <div style="padding: 12px; min-width: 220px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
         <h3 style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold; color: #1f2937; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
-          ${properties.id || 'Accident ID: N/A'}
+          Blotter No: ${properties.blotterNo || 'N/A'}
         </h3>
         <div style="font-size: 13px; line-height: 1.5; color: #374151;">
-          <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Plate:</strong> ${properties.plateNo || 'N/A'}</p>
-          <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Severity:</strong> 
-            <span style="color: ${getSeverityColor(properties.severity)}; font-weight: bold; text-transform: uppercase;">
-              ${properties.severity || 'Unknown'}
-            </span>
-          </p>
-          <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Vehicle:</strong> ${properties.vehicle_type || 'N/A'}</p>
+          ${getVehiclePlate(properties) !== 'N/A' ? `<p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Vehicle Plate:</strong> ${getVehiclePlate(properties)}</p>` : ''}
+          ${properties.incidentType ? `<p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Incident Type:</strong> ${properties.incidentType}</p>` : ''}
+          ${properties.caseStatus ? `<p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Case Status:</strong> ${properties.caseStatus}</p>` : ''}
           <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Location:</strong> ${properties.municipality || 'N/A'}, ${properties.barangay || 'N/A'}</p>
-          <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Street:</strong> ${properties.street || 'N/A'}</p>
-          <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Date:</strong> ${properties.accident_date ? new Date(properties.accident_date).toLocaleDateString() : 'N/A'}</p>
-          ${properties.notes ? `<p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Notes:</strong> ${properties.notes}</p>` : ''}
+          ${properties.street ? `<p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Street:</strong> ${properties.street}</p>` : ''}
+          <p style="margin: 4px 0; color: #1f2937;"><strong style="color: #111827;">Date Committed:</strong> ${formatDate(properties.dateCommited)}</p>
+          <p style="margin: 4px 0; color: #f59e0b; font-size: 11px;"><em>📍 Location based on municipality</em></p>
         </div>
       </div>
     `;
   };
 
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'fatal': return '#dc2626';
-      case 'severe': return '#ea580c';
-      case 'moderate': return '#f59e0b';
-      case 'minor': return '#16a34a';
-      default: return '#6b7280';
-    }
-  };
 
   const resetMapView = () => {
     if (map.current && map.current.loaded()) {
@@ -603,19 +593,6 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
               </Button>
             </div>
             
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedSeverity}
-                onChange={(e) => setSelectedSeverity(e.target.value)}
-                className="px-2 py-1 text-sm border rounded-md bg-background"
-              >
-                <option value="all">All Severities</option>
-                <option value="fatal">Fatal</option>
-                <option value="severe">Severe</option>
-                <option value="moderate">Moderate</option>
-                <option value="minor">Minor</option>
-              </select>
-            </div>
 
             <div className="flex items-center gap-2 ml-auto">
               <Button
@@ -654,23 +631,11 @@ const EnhancedAccidentMap = ({ accidents, className = "" }) => {
                 ? 'bg-gray-800 border border-gray-700 text-gray-100' 
                 : 'bg-white border border-gray-200 text-gray-900'
             }`}>
-              <div className="font-semibold mb-2">Accident Severity</div>
+              <div className="font-semibold mb-1">Accident Markers</div>
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 rounded-full bg-red-600 border-2 border-white"></div>
-                  <span>Fatal</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-orange-600 border-2 border-white"></div>
-                  <span>Severe</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-amber-500 border-2 border-white"></div>
-                  <span>Moderate</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-green-600 border-2 border-white"></div>
-                  <span>Minor</span>
+                  <span>Accident Location</span>
                 </div>
               </div>
               {showClusters && (

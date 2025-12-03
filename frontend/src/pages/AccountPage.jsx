@@ -86,18 +86,25 @@ const AccountPage = () => {
   useEffect(() => {
     // Initialize edit data
     if (userData) {
-      console.log('AccountPage - Current userData.avatar:', userData.avatar);
-      console.log('AccountPage - Full userData:', userData);
+      // Normalize avatar URL to ensure it uses production domain and HTTPS
+      const normalizedAvatarURL = userData.avatar ? getAvatarURL(userData.avatar) : '';
       
-      // Ensure avatar URL is properly formatted
-      const avatarURL = userData.avatar || '';
+      // Update userData with normalized avatar URL if it changed
+      if (normalizedAvatarURL !== userData.avatar && normalizedAvatarURL) {
+        const updatedUserData = { ...userData, avatar: normalizedAvatarURL };
+        setUserData(updatedUserData);
+        localStorage.setItem('userData', JSON.stringify(updatedUserData));
+      }
+      
+      console.log('AccountPage - Current userData.avatar:', normalizedAvatarURL);
+      console.log('AccountPage - Full userData:', userData);
       
       setEditData({
         firstName: userData.firstName || '',
         middleName: userData.middleName || '',
         lastName: userData.lastName || '',
         email: userData.email || '',
-        avatar: avatarURL,
+        avatar: normalizedAvatarURL,
       });
       
       // Only set previewAvatar if it's not a data URL (which means it's a file preview)
@@ -107,8 +114,8 @@ const AccountPage = () => {
         if (prev && prev.startsWith('data:')) {
           return prev;
         }
-        // Otherwise, use the userData avatar
-        return avatarURL;
+        // Otherwise, use the normalized userData avatar
+        return normalizedAvatarURL;
       });
     }
   }, [userData]);

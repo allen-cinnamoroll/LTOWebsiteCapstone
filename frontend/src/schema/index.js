@@ -149,7 +149,14 @@ export const EditVehicleSchema = z.object({
 });
 
 export const AccidentSchema = z.object({
-  blotterNo: z.string().optional(),
+  blotterNo: z.string().optional().refine((value) => {
+    // Allow empty/undefined values since it's optional
+    if (!value || value.trim() === "") return true;
+    // Validate that it only contains numbers and special characters (-, )
+    return /^[0-9()\-]+$/.test(value);
+  }, {
+    message: "Blotter number must contain numbers and allowed special characters (-, ) only",
+  }),
   vehiclePlateNo: z.string().optional(),
   vehicleMCPlateNo: z.string().optional(),
   vehicleChassisNo: z.string().optional(),

@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import DatePicker from "@/components/calendar/DatePicker";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { davaoOrientalData } from "@/data/region11Data";
 
 // Default options
 const DEFAULT_INCIDENT_TYPES = [
@@ -33,6 +34,15 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const [offenseTypes, setOffenseTypes] = useState([]);
   const [showIncidentTypeInput, setShowIncidentTypeInput] = useState(false);
   const [showOffenseTypeInput, setShowOffenseTypeInput] = useState(false);
+  
+  // State for location
+  const [selectedMunicipality, setSelectedMunicipality] = useState("");
+  
+  // Get municipalities and barangays from data
+  const municipalities = Object.keys(davaoOrientalData.municipalities);
+  const barangays = selectedMunicipality 
+    ? Object.keys(davaoOrientalData.municipalities[selectedMunicipality]?.barangays || {})
+    : [];
 
   // Load custom options from localStorage on mount
   useEffect(() => {
@@ -70,6 +80,35 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
     }
   }, [incidentTypes, offenseTypes]);
 
+  // Set default region and province values on mount
+  useEffect(() => {
+    const currentRegion = form.getValues("region");
+    const currentProvince = form.getValues("province");
+    
+    if (!currentRegion || currentRegion === "") {
+      form.setValue("region", "REGION 11", { shouldValidate: true });
+    }
+    if (!currentProvince || currentProvince === "") {
+      form.setValue("province", "DAVAO ORIENTAL", { shouldValidate: true });
+    }
+    
+    // Initialize selected municipality from form value
+    const currentMunicipality = form.getValues("municipality");
+    if (currentMunicipality && municipalities.includes(currentMunicipality)) {
+      setSelectedMunicipality(currentMunicipality);
+    }
+  }, [form]);
+
+  // Watch municipality value to sync selectedMunicipality state (for edit mode)
+  const municipalityValue = form.watch("municipality");
+  useEffect(() => {
+    if (municipalityValue && municipalities.includes(municipalityValue)) {
+      setSelectedMunicipality(municipalityValue);
+    } else if (!municipalityValue) {
+      setSelectedMunicipality("");
+    }
+  }, [municipalityValue, municipalities]);
+
   // Handle incident type change
   const handleIncidentTypeChange = (value) => {
     if (value === "Others") {
@@ -90,6 +129,21 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
       setShowOffenseTypeInput(false);
       form.setValue("offenseType", value);
     }
+  };
+
+  // Handle municipality change
+  const handleMunicipalityChange = (value) => {
+    setSelectedMunicipality(value);
+    form.setValue("municipality", value, { shouldValidate: true });
+    // Clear barangay when municipality changes - don't validate to avoid showing error immediately
+    form.setValue("barangay", "", { shouldValidate: false });
+    // Clear any existing error for barangay
+    form.clearErrors("barangay");
+  };
+
+  // Handle barangay change
+  const handleBarangayChange = (value) => {
+    form.setValue("barangay", value, { shouldValidate: true });
   };
 
   // Save custom values to localStorage and update dropdown
@@ -141,9 +195,13 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormLabel className="text-xs text-gray-600">Blotter No.</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="BLT-0001" 
+                    placeholder="0000000-000000" 
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      // Only allow numeric characters (0-9) and special characters (-, )
+                      const allowedValue = e.target.value.replace(/[^0-9()\-]/g, '');
+                      field.onChange(allowedValue);
+                    }}
                     className={cn(
                       "text-xs",
                       isEditMode && "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
@@ -380,10 +438,13 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormLabel className="text-xs text-gray-600">Region</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Enter region" 
-                    {...field} 
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                    className="text-xs" 
+                    {...field}
+                    value={field.value || "REGION 11"}
+                    readOnly
+                    className={cn(
+                      "text-xs",
+                      "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
+                    )}
                   />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
@@ -398,10 +459,13 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormLabel className="text-xs text-gray-600">Province</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Enter province" 
-                    {...field} 
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                    className="text-xs" 
+                    {...field}
+                    value={field.value || "DAVAO ORIENTAL"}
+                    readOnly
+                    className={cn(
+                      "text-xs",
+                      "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 cursor-not-allowed border-gray-300 dark:border-gray-600"
+                    )}
                   />
                 </FormControl>
                 <FormMessage className="text-xs text-red-400" />
@@ -418,14 +482,18 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
             render={({ field }) => (
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Municipality</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter municipality" 
-                    {...field} 
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                    className="text-xs" 
-                  />
-                </FormControl>
+                <Select onValueChange={handleMunicipalityChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger className="text-xs">
+                      <SelectValue placeholder="Select municipality" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {municipalities.map((municipality) => (
+                      <SelectItem key={municipality} value={municipality}>{municipality}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
@@ -436,14 +504,27 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
             render={({ field }) => (
               <FormItem className="space-y-0">
                 <FormLabel className="text-xs text-gray-600">Barangay</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Enter barangay" 
-                    {...field} 
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                    className="text-xs" 
-                  />
-                </FormControl>
+                <Select 
+                  onValueChange={handleBarangayChange} 
+                  value={field.value || ""}
+                  disabled={!selectedMunicipality}
+                >
+                  <FormControl>
+                    <SelectTrigger 
+                      className={cn(
+                        "text-xs",
+                        !selectedMunicipality && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      <SelectValue placeholder={selectedMunicipality ? "Select barangay" : "Select municipality first"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {barangays.map((barangay) => (
+                      <SelectItem key={barangay} value={barangay}>{barangay}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
             )}
