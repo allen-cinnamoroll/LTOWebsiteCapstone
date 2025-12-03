@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LoaderCircle, FileText, Search, Download, Filter, Calendar, RefreshCw } from "lucide-react";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { LoaderCircle, FileText, Search, Download, Filter, Calendar, RefreshCw, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import DatePicker from "@/components/calendar/DatePicker";
 
 const roleOptions = [
   { value: "0", label: "Superadmin" },
@@ -72,6 +73,8 @@ export default function ViewAccountLogsPage() {
   const [selectedLogType, setSelectedLogType] = useState("");
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
+  const [dateFromOpen, setDateFromOpen] = useState(false);
+  const [dateToOpen, setDateToOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalLogs, setTotalLogs] = useState(0);
@@ -88,8 +91,18 @@ export default function ViewAccountLogsPage() {
 
       if (searchEmail) params.append("email", searchEmail);
       if (selectedLogType && selectedLogType !== "all") params.append("logType", selectedLogType);
-      if (dateFrom) params.append("dateFrom", dateFrom.toISOString().split('T')[0]);
-      if (dateTo) params.append("dateTo", dateTo.toISOString().split('T')[0]);
+      if (dateFrom) {
+        // Set to start of day (00:00:00)
+        const fromDate = new Date(dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        params.append("dateFrom", fromDate.toISOString().split('T')[0]);
+      }
+      if (dateTo) {
+        // Set to end of day (23:59:59.999) to include the entire day
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        params.append("dateTo", toDate.toISOString());
+      }
 
       // Apply role-based filtering based on current user's role
       if (currentUser?.role === "1") { // Admin can see admin and employee logs (including own logs)
@@ -132,7 +145,7 @@ export default function ViewAccountLogsPage() {
         console.log('Filtered logs:', filteredLogs); // Debug log
         setLogs(filteredLogs);
         setTotalPages(response.data.totalPages);
-        setTotalLogs(filteredLogs.length);
+        setTotalLogs(response.data.totalLogs); // Use total from backend, not filtered array length
         setCurrentPage(page);
       }
     } catch (error) {
@@ -147,7 +160,7 @@ export default function ViewAccountLogsPage() {
     fetchLogs();
   }, [currentUser]);
 
-  // Auto-refresh when filters change
+  // Auto-refresh when filters change (except dateFrom - only load when dateTo is selected)
   useEffect(() => {
     // Skip the initial mount to avoid double fetching
     if (isInitialMount.current) {
@@ -160,7 +173,7 @@ export default function ViewAccountLogsPage() {
       setCurrentPage(1);
       fetchLogs(1);
     }
-  }, [selectedRole, selectedLogType, dateFrom, dateTo]);
+  }, [selectedRole, selectedLogType, dateTo]); // Removed dateFrom - only load when dateTo changes
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -182,8 +195,18 @@ export default function ViewAccountLogsPage() {
       if (searchEmail) params.append("email", searchEmail);
       if (selectedRole) params.append("role", selectedRole);
       if (selectedLogType) params.append("logType", selectedLogType);
-      if (dateFrom) params.append("dateFrom", dateFrom.toISOString().split('T')[0]);
-      if (dateTo) params.append("dateTo", dateTo.toISOString().split('T')[0]);
+      if (dateFrom) {
+        // Set to start of day (00:00:00)
+        const fromDate = new Date(dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        params.append("dateFrom", fromDate.toISOString().split('T')[0]);
+      }
+      if (dateTo) {
+        // Set to end of day (23:59:59.999) to include the entire day
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        params.append("dateTo", toDate.toISOString());
+      }
 
       const response = await apiClient.get(`/user/logs/export?${params}`, {
         responseType: 'blob'
@@ -293,42 +316,58 @@ export default function ViewAccountLogsPage() {
                 </SelectContent>
               </Select>
 
-              <Popover>
+              <Popover open={dateFromOpen} onOpenChange={setDateFromOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateFrom && "text-muted-foreground"
+                    )}
                   >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {dateFrom ? format(dateFrom, "MM/dd/yyyy") : "From date"}
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFrom ? format(dateFrom, "PPP") : "From date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateFrom}
-                    onSelect={setDateFrom}
-                    initialFocus
+                <PopoverContent className="w-auto p-2 space-y-2" align="start">
+                  <DatePicker
+                    fieldValue={dateFrom}
+                    dateValue={(date) => {
+                      setDateFrom(date);
+                      setDateFromOpen(false);
+                    }}
+                    maxDate={dateTo || new Date()}
                   />
                 </PopoverContent>
               </Popover>
 
-              <Popover>
+              <Popover open={dateToOpen} onOpenChange={setDateToOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateTo && "text-muted-foreground"
+                    )}
                   >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {dateTo ? format(dateTo, "MM/dd/yyyy") : "To date"}
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateTo ? format(dateTo, "PPP") : "To date"}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateTo}
-                    onSelect={setDateTo}
-                    initialFocus
+                <PopoverContent className="w-auto p-2 space-y-2" align="start">
+                  <DatePicker
+                    fieldValue={dateTo}
+                    dateValue={(date) => {
+                      setDateTo(date);
+                      setDateToOpen(false);
+                      // Only load logs when to date is selected
+                      setTimeout(() => {
+                        setCurrentPage(1);
+                        fetchLogs(1);
+                      }, 100);
+                    }}
+                    minDate={dateFrom}
+                    maxDate={new Date()}
                   />
                 </PopoverContent>
               </Popover>

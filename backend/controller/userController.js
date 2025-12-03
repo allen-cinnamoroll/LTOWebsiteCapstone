@@ -299,10 +299,27 @@ export const getUserLogs = async (req, res) => {
     if (dateFrom || dateTo) {
       filter.timestamp = {};
       if (dateFrom) {
-        filter.timestamp.$gte = new Date(dateFrom);
+        // Set to start of day (00:00:00) in local timezone
+        const fromDate = new Date(dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        filter.timestamp.$gte = fromDate;
       }
       if (dateTo) {
-        filter.timestamp.$lte = new Date(dateTo);
+        // Set to end of day (23:59:59.999)
+        // If dateTo is already an ISO string with time, use it directly
+        // Otherwise, set it to end of day
+        let toDate = new Date(dateTo);
+        // Check if the date string already includes time (ISO format)
+        // URL-encoded strings might have %3A instead of :, so check for T and any time indicators
+        const dateToStr = String(dateTo);
+        if (dateToStr.includes('T') && (dateToStr.includes(':') || dateToStr.includes('%3A'))) {
+          // Already has time, use as is (decode if URL encoded)
+          toDate = new Date(decodeURIComponent(dateToStr));
+        } else {
+          // Just a date string, set to end of day
+          toDate.setHours(23, 59, 59, 999);
+        }
+        filter.timestamp.$lte = toDate;
       }
     }
 
@@ -459,10 +476,27 @@ export const exportUserLogs = async (req, res) => {
     if (dateFrom || dateTo) {
       filter.timestamp = {};
       if (dateFrom) {
-        filter.timestamp.$gte = new Date(dateFrom);
+        // Set to start of day (00:00:00) in local timezone
+        const fromDate = new Date(dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        filter.timestamp.$gte = fromDate;
       }
       if (dateTo) {
-        filter.timestamp.$lte = new Date(dateTo);
+        // Set to end of day (23:59:59.999)
+        // If dateTo is already an ISO string with time, use it directly
+        // Otherwise, set it to end of day
+        let toDate = new Date(dateTo);
+        // Check if the date string already includes time (ISO format)
+        // URL-encoded strings might have %3A instead of :, so check for T and any time indicators
+        const dateToStr = String(dateTo);
+        if (dateToStr.includes('T') && (dateToStr.includes(':') || dateToStr.includes('%3A'))) {
+          // Already has time, use as is (decode if URL encoded)
+          toDate = new Date(decodeURIComponent(dateToStr));
+        } else {
+          // Just a date string, set to end of day
+          toDate.setHours(23, 59, 59, 999);
+        }
+        filter.timestamp.$lte = toDate;
       }
     }
 
