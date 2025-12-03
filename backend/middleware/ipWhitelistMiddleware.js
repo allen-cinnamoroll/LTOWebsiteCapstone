@@ -19,23 +19,46 @@ dotenv.config();
 
 // Get the real client IP address, considering proxies
 const getClientIP = (req) => {
-  // Check various headers that might contain the real IP
+  // When trust proxy is enabled, Express's req.ip is the most reliable
+  // It automatically handles X-Forwarded-For and X-Real-IP headers
+  if (req.ip && req.ip !== '::1' && req.ip !== '127.0.0.1') {
+    return req.ip;
+  }
+  
+  // Check X-Forwarded-For header (most common proxy header)
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
     // x-forwarded-for can contain multiple IPs, take the first one
-    return forwarded.split(',')[0].trim();
+    const firstIP = forwarded.split(',')[0].trim();
+    // Only use it if it's not localhost
+    if (firstIP && firstIP !== '::1' && firstIP !== '127.0.0.1') {
+      return firstIP;
+    }
   }
   
+  // Check X-Real-IP header (nginx and other proxies)
   const realIP = req.headers['x-real-ip'];
-  if (realIP) {
+  if (realIP && realIP !== '::1' && realIP !== '127.0.0.1') {
     return realIP;
   }
   
+  // Check CF-Connecting-IP (Cloudflare)
+  const cfIP = req.headers['cf-connecting-ip'];
+  if (cfIP && cfIP !== '::1' && cfIP !== '127.0.0.1') {
+    return cfIP;
+  }
+  
   // Fallback to connection remote address
-  return req.connection.remoteAddress || 
-         req.socket.remoteAddress || 
-         req.connection.socket?.remoteAddress ||
-         req.ip;
+  const remoteAddr = req.connection?.remoteAddress || 
+                     req.socket?.remoteAddress || 
+                     req.connection?.socket?.remoteAddress;
+  
+  if (remoteAddr && remoteAddr !== '::1' && remoteAddr !== '127.0.0.1') {
+    return remoteAddr;
+  }
+  
+  // Last resort: use req.ip even if it's localhost
+  return req.ip || remoteAddr || 'unknown';
 };
 
 // Check if an IP is in a CIDR range
@@ -70,9 +93,13 @@ const isIPWhitelisted = (clientIP, allowedIPs) => {
   // Handle IPv6 addresses wrapped with ::ffff: prefix (IPv4-mapped IPv6)
   const cleanIP = clientIP.replace(/^::ffff:/, '');
   
-  // Always allow localhost for development
+  // Check if it's localhost (for development/testing)
   const localhostIPs = ['127.0.0.1', '::1', 'localhost'];
-  if (localhostIPs.includes(cleanIP) || localhostIPs.includes(clientIP)) {
+  const isLocalhost = localhostIPs.includes(cleanIP) || localhostIPs.includes(clientIP);
+  
+  if (isLocalhost) {
+    // Log that localhost is being bypassed
+    console.log(`⚠️  Localhost detected (${clientIP}) - Bypassing IP whitelist for development`);
     return true;
   }
   
@@ -126,11 +153,13 @@ export const ipWhitelist = (req, res, next) => {
   // Log detailed IP information for debugging
   console.log('=== IP Whitelist Check ===');
   console.log(`Request URL: ${req.method} ${req.path}`);
-  console.log(`Detected Client IP: ${clientIP}`);
+  console.log(`Final Detected Client IP: ${clientIP}`);
+  console.log('--- IP Detection Sources ---');
+  console.log(`req.ip: ${req.ip || 'none'}`);
   console.log(`X-Forwarded-For: ${req.headers['x-forwarded-for'] || 'none'}`);
   console.log(`X-Real-IP: ${req.headers['x-real-ip'] || 'none'}`);
+  console.log(`CF-Connecting-IP: ${req.headers['cf-connecting-ip'] || 'none'}`);
   console.log(`Remote Address: ${req.connection?.remoteAddress || req.socket?.remoteAddress || 'none'}`);
-  console.log(`Request IP: ${req.ip || 'none'}`);
   console.log(`Allowed IPs/Ranges: ${allowedIPsString}`);
   
   // Check if IP is whitelisted
