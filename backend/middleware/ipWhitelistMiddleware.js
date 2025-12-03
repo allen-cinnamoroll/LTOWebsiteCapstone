@@ -70,10 +70,13 @@ const isIPWhitelisted = (clientIP, allowedIPs) => {
   // Handle IPv6 addresses wrapped with ::ffff: prefix (IPv4-mapped IPv6)
   const cleanIP = clientIP.replace(/^::ffff:/, '');
   
-  // Always allow localhost for development
+  // Only allow localhost in development mode, not in production
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  if (isDevelopment) {
   const localhostIPs = ['127.0.0.1', '::1', 'localhost'];
   if (localhostIPs.includes(cleanIP) || localhostIPs.includes(clientIP)) {
     return true;
+    }
   }
   
   // Check against allowed IPs/ranges
