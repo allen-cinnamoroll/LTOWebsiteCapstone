@@ -69,13 +69,9 @@ export const CreateDriverSchema = z.object({
 export const VehicleSchema = z.object({
   plateNo: z.string().min(1, {
     message: "Plate number is required",
-  }).refine((value) => /^[A-Za-z0-9]+$/.test(value), {
-    message: "Plate number can only contain letters and numbers",
   }),
   fileNo: z.string().min(1, {
     message: "File number is required",
-  }).refine((value) => /^[0-9-]+$/.test(value), {
-    message: "File number can only contain numbers and hyphen (-)",
   }),
   engineNo: z.string().optional(),
   chassisNo: z.string().optional(),
@@ -91,11 +87,6 @@ export const VehicleSchema = z.object({
   }),
   dateOfRenewal: z.date({
     required_error: "Date of renewal is required",
-  }).refine((date) => {
-    const maxDate = new Date(2025, 11, 31); // December 31, 2025
-    return date <= maxDate;
-  }, {
-    message: "Date of renewal cannot be in 2026 or later",
   }),
   vehicleStatusType: z.enum(["New", "Old"], {
     required_error: "Vehicle status type is required",
@@ -114,13 +105,9 @@ export const VehicleSchema = z.object({
 export const EditVehicleSchema = z.object({
   plateNo: z.string().min(1, {
     message: "Plate number is required",
-  }).refine((value) => /^[A-Za-z0-9]+$/.test(value), {
-    message: "Plate number can only contain letters and numbers",
   }),
   fileNo: z.string().min(1, {
     message: "File number is required",
-  }).refine((value) => /^[0-9-]+$/.test(value), {
-    message: "File number can only contain numbers and hyphen (-)",
   }),
   engineNo: z.string().optional(),
   chassisNo: z.string().optional(),
@@ -136,11 +123,6 @@ export const EditVehicleSchema = z.object({
   }),
   dateOfRenewal: z.date({
     required_error: "Date of renewal is required",
-  }).refine((date) => {
-    const maxDate = new Date(2025, 11, 31); // December 31, 2025
-    return date <= maxDate;
-  }, {
-    message: "Date of renewal cannot be in 2026 or later",
   }),
   vehicleStatusType: z.enum(["New", "Old"], {
     required_error: "Vehicle status type is required",
@@ -149,14 +131,7 @@ export const EditVehicleSchema = z.object({
 });
 
 export const AccidentSchema = z.object({
-  blotterNo: z.string().optional().refine((value) => {
-    // Allow empty/undefined values since it's optional
-    if (!value || value.trim() === "") return true;
-    // Validate that it only contains numbers and special characters (-, )
-    return /^[0-9()\-]+$/.test(value);
-  }, {
-    message: "Blotter number must contain numbers and allowed special characters (-, ) only",
-  }),
+  blotterNo: z.string().optional(),
   vehiclePlateNo: z.string().optional(),
   vehicleMCPlateNo: z.string().optional(),
   vehicleChassisNo: z.string().optional(),

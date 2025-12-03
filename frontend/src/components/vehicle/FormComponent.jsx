@@ -279,9 +279,7 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         type="text"
                         placeholder="ABC-123"
                         onChange={(e) => {
-                          // Only allow letters and numbers, no symbols
-                          const filteredValue = e.target.value.replace(/[^A-Za-z0-9]/g, '');
-                          const capitalizedValue = filteredValue.toUpperCase();
+                          const capitalizedValue = e.target.value.toUpperCase();
                           field.onChange(capitalizedValue);
                         }}
                         className={cn(
@@ -314,9 +312,8 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                         readOnly={isEditMode && readOnlyFields.includes('fileNo')}
                         onChange={(e) => {
                           if (!(isEditMode && readOnlyFields.includes('fileNo'))) {
-                            // Only allow numbers and hyphen (-), no letters or other symbols
-                            const filteredValue = e.target.value.replace(/[^0-9-]/g, '');
-                            field.onChange(filteredValue);
+                            const capitalizedValue = e.target.value.toUpperCase();
+                            field.onChange(capitalizedValue);
                           }
                         }}
                         className={cn(
@@ -616,7 +613,6 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                             <DatePicker
                               fieldValue={field.value}
                               dateValue={field.onChange}
-                              maxDate={new Date(2025, 11, 31)} // December 31, 2025 (month is 0-indexed, so 11 = December)
                             />
                           </PopoverContent>
                         </Popover>
