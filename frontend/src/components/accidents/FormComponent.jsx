@@ -628,6 +628,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       dateValue={(date) =>
                         form.setValue("dateCommited", date, { shouldValidate: true })
                       }
+                      maxDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -686,6 +687,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                         dateValue={(date) =>
                           form.setValue("dateReported", date, { shouldValidate: true })
                         }
+                        maxDate={new Date()}
                       />
                     </PopoverContent>
                   </Popover>
@@ -742,6 +744,7 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       dateValue={(date) =>
                         form.setValue("dateEncoded", date, { shouldValidate: true })
                       }
+                      maxDate={new Date()}
                     />
                   </PopoverContent>
                 </Popover>

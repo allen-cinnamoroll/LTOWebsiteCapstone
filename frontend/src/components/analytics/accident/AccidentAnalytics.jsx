@@ -1245,15 +1245,12 @@ export function AccidentAnalytics() {
               </ResponsiveContainer>
               
               {/* Enhanced insights below chart */}
-              <div className="mt-4 grid grid-cols-3 gap-4">
+              <div className="mt-4 grid grid-cols-2 gap-4">
                 {(() => {
                   const municipalityData = formatMunicipalityData(analyticsData.distributions.municipality);
-                  const total = municipalityData.reduce((sum, item) => sum + item.accidents, 0);
                   const topMunicipality = municipalityData.reduce((max, current) => 
                     current.accidents > max.accidents ? current : max
                   );
-                  const avgAccidents = total / municipalityData.length;
-                  const matiData = municipalityData.find(m => m.name === "Mati");
                   
                   return (
                     <>
@@ -1278,18 +1275,6 @@ export function AccidentAnalytics() {
                         </div>
                         <div className="text-xs text-blue-600 dark:text-blue-400">
                           Municipalities affected
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20">
-                        <div className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                          Average
-                        </div>
-                        <div className="text-lg font-bold text-purple-900 dark:text-purple-100">
-                          {avgAccidents.toFixed(1)}
-                        </div>
-                        <div className="text-xs text-purple-600 dark:text-purple-400">
-                          Accidents per area
                         </div>
                       </div>
                     </>
@@ -1395,7 +1380,6 @@ export function AccidentAnalytics() {
                     <div className="rounded-lg border bg-rose-50/40 dark:bg-rose-950/10 p-4">
                       <div className="text-sm text-muted-foreground">Trend Direction</div>
                       <div className={`text-2xl font-bold ${chartData.trendColor}`}>{chartData.trendLabel}</div>
-                      <div className="text-xs text-muted-foreground">heuristic based on dispersion</div>
                     </div>
                     <div className="rounded-lg border bg-yellow-50/40 dark:bg-yellow-950/10 p-4">
                       <div className="text-sm text-muted-foreground">Peak Area</div>
@@ -1688,9 +1672,6 @@ export function AccidentAnalytics() {
                             : p.municipality}
                           <span className="ml-2 text-xs text-muted-foreground">
                             Pred: {typeof p.predicted_count === 'number' ? p.predicted_count : Number(p.predicted_count)}
-                            {p.predicted_count_raw !== undefined && (
-                              <span className="ml-1 text-[10px] text-muted-foreground">(raw {p.predicted_count_raw})</span>
-                            )}
                           </span>
                         </div>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded ${

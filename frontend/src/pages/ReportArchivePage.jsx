@@ -9,7 +9,9 @@ import {
   CheckCircle2,
   Archive,
   Loader2,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import apiClient from '@/api/axios';
 import { toast } from 'sonner';
@@ -19,6 +21,8 @@ const ReportArchivePage = () => {
   const [automatedReports, setAutomatedReports] = useState([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [filterType, setFilterType] = useState('all'); // 'all', 'daily', 'monthly'
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Fetch automatically generated reports
   useEffect(() => {
@@ -60,6 +64,17 @@ const ReportArchivePage = () => {
       return dateB - dateA; // Descending order (newest first)
     });
   }, [automatedReports, filterType]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredReports.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedReports = filteredReports.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filter or rows per page changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, rowsPerPage]);
 
   const downloadAutomatedReport = async (filename) => {
     try {
@@ -175,7 +190,7 @@ const ReportArchivePage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredReports.map((report, index) => (
+                        {paginatedReports.map((report, index) => (
                           <tr 
                             key={report.filename} 
                             className={`border-b hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
@@ -209,12 +224,63 @@ const ReportArchivePage = () => {
                       </tbody>
                     </table>
                   </div>
+                  {/* Pagination Controls */}
+                  {filteredReports.length > 0 && (
+                    <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50 dark:bg-gray-900">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Rows per page</p>
+                        <Select
+                          value={`${rowsPerPage}`}
+                          onValueChange={(value) => {
+                            setRowsPerPage(Number(value));
+                            setCurrentPage(1);
+                          }}
+                        >
+                          <SelectTrigger className="h-8 w-[70px] text-xs">
+                            <SelectValue placeholder={rowsPerPage} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[5, 10, 20, 30, 50, 100].map((pageSize) => (
+                              <SelectItem key={pageSize} value={`${pageSize}`}>
+                                {pageSize}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center justify-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                          Page {currentPage} of {totalPages}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
               {filteredReports.length > 0 && (
                 <div className="text-xs text-muted-foreground mt-3 text-center">
-                  Showing {filteredReports.length} of {automatedReports.length} report{automatedReports.length !== 1 ? 's' : ''}
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredReports.length)} of {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
                   {filterType !== 'all' && ` (${filterType} only)`}
                 </div>
               )}

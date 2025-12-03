@@ -148,10 +148,24 @@ export const AccidentSchema = z.object({
   street: z.string().optional(),
   lat: z.number().optional(),
   lng: z.number().optional(),
-  dateEncoded: z.date().optional(),
-  dateReported: z.date().optional(),
+  dateEncoded: z.date().optional().refine((date) => {
+    if (!date) return true; // Optional field
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of today
+    return date <= today;
+  }, { message: "Date encoded cannot be in the future" }),
+  dateReported: z.date().optional().refine((date) => {
+    if (!date) return true; // Optional field
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of today
+    return date <= today;
+  }, { message: "Date reported cannot be in the future" }),
   timeReported: z.string().optional(),
-  dateCommited: z.date({ required_error: "Date committed is required" }),
+  dateCommited: z.date({ required_error: "Date committed is required" }).refine((date) => {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of today
+    return date <= today;
+  }, { message: "Date committed cannot be in the future" }),
   timeCommited: z.string().optional(),
   incidentType: z.string().optional(),
 });
