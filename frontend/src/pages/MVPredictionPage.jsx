@@ -834,75 +834,186 @@ export default function MVPredictionPage() {
 
        </div>
 
-      {/* Success Modal with Accuracy Metrics */}
+      {/* Success Modal - Simplified */}
       <Dialog open={showSuccessModal} onOpenChange={(open) => {
         setShowSuccessModal(open);
-        if (!open) setCurrentPage(0); // Reset to first page when closing
       }}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-gray-800">
+        <DialogContent className="max-w-md bg-white dark:bg-gray-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
-              Model Retrained Successfully!
+              Model Successfully Retrained!
             </DialogTitle>
             <DialogDescription>
               {hasNewFile 
-                ? 'The prediction model has been updated with new data. Here are the training results:'
-                : 'The prediction model has been retrained using existing data. Here are the training results:'}
+                ? 'The prediction model has been updated with new data.'
+                : 'The prediction model has been retrained using existing data.'}
             </DialogDescription>
           </DialogHeader>
           
-          {!trainingData ? (
-            <div className="py-8 text-center">
-              <p className="text-gray-500 dark:text-gray-400">Loading training results...</p>
-            </div>
-          ) : (
-            <div className="relative overflow-hidden">
-              {/* Page Container with Smooth Transitions */}
-              <div className="relative" style={{ minHeight: '450px' }}>
-                {/* Page 1: Accuracy Metrics */}
-                <div 
-                  className={`transition-all duration-300 ease-in-out ${
-                    currentPage === 0 
-                      ? 'opacity-100 translate-x-0' 
-                      : 'opacity-0 absolute inset-0 translate-x-full pointer-events-none'
-                  }`}
-                >
-                  <div className="space-y-4 py-4">
-              {/* Model Accuracy Percentage - Use Test Accuracy if available, otherwise Training */}
-              {(trainingData.test_accuracy_metrics?.mape || trainingData.accuracy_metrics?.mape) && (
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1">
-                        {trainingData.test_accuracy_metrics?.mape 
-                          ? 'Forecast Accuracy (Based on MAPE – Out-of-Sample)' 
-                          : 'Overall Model Accuracy (Training Set - In-Sample)'}
-                      </p>
-                      <p className="text-3xl font-bold text-blue-900 dark:text-blue-300">
-                        {trainingData.test_accuracy_metrics?.mape
-                          ? (100 - trainingData.test_accuracy_metrics.mape).toFixed(2)
-                          : (100 - trainingData.accuracy_metrics.mape).toFixed(2)}%
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {trainingData.test_accuracy_metrics?.mape 
-                          ? "Forecast accuracy represents how close the model's predictions are to the actual values. It is calculated as 100% − MAPE (Mean Absolute Percentage Error)."
-                          : `Based on MAPE of ${trainingData.accuracy_metrics.mape.toFixed(2)}%`}
-                      </p>
-                    </div>
-                    <div className="text-4xl">📊</div>
+          <div className="py-4 space-y-4">
+            {/* Duplicate Information */}
+            {duplicateInfo && duplicateInfo.duplicates_removed > 0 && (
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-orange-900 dark:text-orange-300 text-sm">
+                      {duplicateInfo.duplicates_removed} duplicate record(s) were removed during processing
+                    </p>
+                    <p className="text-xs text-orange-700 dark:text-orange-400 mt-1">
+                      Duplicates were identified based on the same <strong>fileNo</strong> and <strong>dateOfRenewal</strong> combination.
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
+            
+            {/* Success Message */}
+            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-sm text-green-800 dark:text-green-300">
+                The model has been successfully retrained and is ready to use for predictions.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+            <Button
+              asChild
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              <Link to="/trained-models/vehicle">
+                View Vehicle Model
+              </Link>
+            </Button>
+            <Button onClick={() => setShowSuccessModal(false)} className="w-full sm:w-auto">
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-              {/* Accuracy Metrics - Training (In-Sample) */}
-              {trainingData.accuracy_metrics && (
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    Training Accuracy (In-Sample) - {trainingData.training_days 
-                      ? `${trainingData.training_days} days (${Math.round(trainingData.training_days / 7)} weeks)`
-                      : trainingData.training_weeks 
+      {/* Duplicate Information Modal */}
+      <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+        <DialogContent className="max-w-lg bg-white dark:bg-gray-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              Duplicate Records Removed
+            </DialogTitle>
+            <DialogDescription>
+              The system automatically removed duplicate registration records during processing.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {duplicateInfo && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-8 h-8 text-orange-600 dark:text-orange-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-orange-900 dark:text-orange-300">
+                      {duplicateInfo.duplicates_removed} duplicate record(s) removed
+                    </p>
+                     <p className="text-sm text-orange-700 dark:text-orange-400 mt-1">
+                       Duplicates were identified based on the same <strong>fileNo</strong> and <strong>dateOfRenewal</strong> combination.
+                     </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Total rows before deduplication:</span>
+                  <span className="font-medium">{duplicateInfo.total_rows_before_dedup?.toLocaleString() || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Duplicates removed:</span>
+                  <span className="font-medium text-orange-600 dark:text-orange-400">
+                    {duplicateInfo.duplicates_removed?.toLocaleString() || 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">Total rows after deduplication:</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">
+                    {duplicateInfo.total_rows_after_dedup?.toLocaleString() || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {duplicateInfo.csv_files && duplicateInfo.csv_files.length > 0 && (
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    CSV files processed:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                    {duplicateInfo.csv_files.slice(0, 5).map((file, idx) => (
+                      <li key={idx}>{file}</li>
+                    ))}
+                    {duplicateInfo.csv_files.length > 5 && (
+                      <li className="text-gray-500">...and {duplicateInfo.csv_files.length - 5} more</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setShowDuplicateModal(false)} className="w-full sm:w-auto">
+              I Understand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Modal */}
+      <Dialog open={showErrorModal} onOpenChange={setShowErrorModal}>
+        <DialogContent className="max-w-lg bg-white dark:bg-gray-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              {errorDetails?.title || 'Error'}
+            </DialogTitle>
+            <DialogDescription>
+              {errorDetails?.message || 'An error occurred while processing the request.'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {errorDetails && (
+            <div className="py-4">
+              {errorDetails.type === 'format' && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-800 dark:text-red-300">
+                    Please check your CSV file format and ensure it contains the required columns.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button onClick={() => setShowErrorModal(false)} className="w-full sm:w-auto">
+              I Understand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// Helper function to format dates
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return dateString;
+  }
+} 
                         ? `${trainingData.training_weeks} weeks`
                         : 'N/A'}
                   </h3>
@@ -1877,49 +1988,12 @@ export default function MVPredictionPage() {
                         </p>
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Minimal Navigation Dots */}
-              <div className="flex justify-center items-center gap-2 pt-3 pb-1 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => setCurrentPage(0)}
-                  className={`transition-all duration-200 ${
-                    currentPage === 0
-                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
-                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
-                  }`}
-                  aria-label="Go to accuracy metrics page"
-                />
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  className={`transition-all duration-200 ${
-                    currentPage === 1
-                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
-                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
-                  }`}
-                  aria-label="Go to diagnostics and parameters page"
-                />
-                <button
-                  onClick={() => setCurrentPage(2)}
-                  className={`transition-all duration-200 ${
-                    currentPage === 2
-                      ? 'w-8 h-1.5 bg-blue-600 dark:bg-blue-400 rounded-full'
-                      : 'w-1.5 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500'
-                  }`}
-                  aria-label="Go to training information page"
-                />
-              </div>
-            </div>
-          )}
           
           <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
             <Button
               asChild
               variant="outline"
               className="w-full sm:w-auto"
-              onClick={() => setShowSuccessModal(false)}
             >
               <Link to="/trained-models/vehicle">
                 View Vehicle Model
