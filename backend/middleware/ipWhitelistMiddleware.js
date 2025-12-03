@@ -106,6 +106,12 @@ export const ipWhitelist = (req, res, next) => {
     return next();
   }
   
+  // Allow OPTIONS requests (CORS preflight) to bypass IP whitelist
+  // The actual request (POST/GET/etc) will still be checked
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+  
   // Check if IP whitelist is enabled
   const isEnabled = process.env.IP_WHITELIST_ENABLED === 'true';
   
