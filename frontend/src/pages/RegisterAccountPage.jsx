@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LoaderCircle, UserPlus } from "lucide-react";
+import { LoaderCircle, UserPlus, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +28,8 @@ const roleOptions = [
 export default function RegisterAccountPage() {
   const { userData: currentUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const date = formatDate(Date.now());
 
   // Create schema dynamically based on user role
@@ -207,11 +209,26 @@ export default function RegisterAccountPage() {
                         )}
                       </div>
                       <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Enter password" 
-                          {...field} 
-                        />
+                        <div className="relative">
+                          <Input 
+                            type={showPassword ? "text" : "password"} 
+                            placeholder="Enter password" 
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
                       </FormControl>
                     </FormItem>
                   )}
@@ -230,11 +247,26 @@ export default function RegisterAccountPage() {
                         )}
                       </div>
                       <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Confirm password" 
-                          {...field} 
-                        />
+                        <div className="relative">
+                          <Input 
+                            type={showConfirmPassword ? "text" : "password"} 
+                            placeholder="Confirm password" 
+                            {...field} 
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </Button>
+                        </div>
                       </FormControl>
                     </FormItem>
                   )}
