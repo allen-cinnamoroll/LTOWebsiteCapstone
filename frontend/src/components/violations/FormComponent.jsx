@@ -216,12 +216,26 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
         }
       });
       setViolationSearchTerms(searchTerms);
+      
+      // Validate existing violations (especially important in edit mode)
+      // Check each violation and set errors for invalid ones
+      formViolations.forEach((violation, index) => {
+        if (violation && violation.trim() !== "") {
+          if (!availableViolations.includes(violation.trim())) {
+            // Set error for invalid violation
+            form.setError(`violations.${index}`, {
+              type: "manual",
+              message: "Invalid violation. Please select from the dropdown or leave empty."
+            });
+          }
+        }
+      });
     } else if (violations.length === 0) {
       console.log("No form violations, setting to [\"\"]");
       setViolations([""]);
       form.setValue("violations", [""]);
     }
-  }, [formViolations, form]);
+  }, [formViolations, form, availableViolations]);
 
   const addViolation = () => {
     console.log("=== ADD VIOLATION CLICKED ===");
@@ -387,6 +401,30 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   };
 
   const handleViolationInputBlur = (index) => {
+    // Validate violation on blur
+    const currentViolation = violations[index] || "";
+    if (currentViolation.trim() !== "") {
+      // Check if violation is in the allowed list
+      if (!availableViolations.includes(currentViolation.trim())) {
+        // Set form error for this violation
+        form.setError(`violations.${index}`, {
+          type: "manual",
+          message: "Invalid violation. Please select from the dropdown or leave empty."
+        });
+        // Clear the invalid violation
+        const newViolations = [...violations];
+        newViolations[index] = "";
+        setViolations(newViolations);
+        form.setValue("violations", newViolations);
+      } else {
+        // Clear error if valid
+        form.clearErrors(`violations.${index}`);
+      }
+    } else {
+      // Clear error if empty (empty is allowed)
+      form.clearErrors(`violations.${index}`);
+    }
+    
     // Delay closing to allow clicking on dropdown items
     setTimeout(() => {
       setOpenDropdowns((prev) => ({
@@ -722,7 +760,10 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                       onChange={(e) => handleViolationSearchChange(index, e.target.value)}
                       onFocus={() => handleViolationInputFocus(index)}
                       onBlur={() => handleViolationInputBlur(index)}
-                      className="text-xs"
+                      className={cn(
+                        "text-xs",
+                        form.formState.errors.violations?.[index] && "border-red-500 focus-visible:ring-red-500"
+                      )}
                     />
                     {isDropdownOpen && filteredViolations.length > 0 && (
                       <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
@@ -743,9 +784,14 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                     {isDropdownOpen && filteredViolations.length === 0 && searchTerm && (
                       <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
                         <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
-                          No violations found. You can still type a custom violation.
+                          No violations found. Please select from the dropdown or leave empty.
                         </div>
                       </div>
+                    )}
+                    {form.formState.errors.violations?.[index] && (
+                      <p className="text-xs text-red-400 mt-1">
+                        {form.formState.errors.violations[index]?.message}
+                      </p>
                     )}
                   </div>
                   {violations.length > 1 && (
