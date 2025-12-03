@@ -917,7 +917,7 @@ export function AccidentAnalytics() {
           <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300">
             <div className="absolute top-0 right-0 w-20 h-20 bg-purple-500/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-medium">Risk Predictions</CardTitle>
+              <CardTitle className="text-sm font-medium">High Risk Predictions</CardTitle>
               <Activity className="h-4 w-4 text-purple-500" />
             </CardHeader>
             <CardContent className="relative z-10">
@@ -927,7 +927,10 @@ export function AccidentAnalytics() {
                 duration={2000}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                High risk predictions
+                Crimes Against Persons
+              </p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">
+                Requires immediate response & medical units
               </p>
               <AnimatedProgressBar 
                 percentage={riskData ? riskData.riskPredictions.highRiskPercentage : 0}
