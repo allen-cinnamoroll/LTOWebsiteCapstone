@@ -7,20 +7,44 @@
  * Get backend base URL for static assets (avatars, uploads, etc.)
  * Uses VITE_BASE_URL or falls back to window.location.origin
  * Removes the /api suffix from VITE_BASE_URL if present
+ * Prioritizes current window.location.origin in production to avoid localhost URLs
  * 
  * @returns {string} Backend base URL (e.g., https://ltodatamanager.com)
  */
 export const getBackendBaseURL = () => {
-  // First try environment variable
-  const envURL = import.meta.env.VITE_BASE_URL;
-  if (envURL) {
-    // Remove /api suffix if present
-    return envURL.replace(/\/api$/, '');
+  // If in browser, check current origin first (prioritize production domain)
+  if (typeof window !== 'undefined') {
+    const currentOrigin = window.location.origin;
+    
+    // If we're on production domain, always use it (even if VITE_BASE_URL has localhost)
+    if (currentOrigin.includes('ltodatamanager.com') || 
+        (!currentOrigin.includes('localhost') && !currentOrigin.includes('127.0.0.1'))) {
+      return currentOrigin;
+    }
+    
+    // In development (localhost), try VITE_BASE_URL first, then fallback to current origin
+    const envURL = import.meta.env.VITE_BASE_URL;
+    if (envURL) {
+      // Remove /api suffix if present
+      const cleanURL = envURL.replace(/\/api$/, '');
+      // Only use env URL if it's not localhost (when we're in production)
+      if (!cleanURL.includes('localhost') && !cleanURL.includes('127.0.0.1')) {
+        return cleanURL;
+      }
+      // If env URL is localhost but we're in production, ignore it
+      if (!currentOrigin.includes('localhost')) {
+        return currentOrigin;
+      }
+      return cleanURL;
+    }
+    
+    return currentOrigin;
   }
   
-  // Fallback to current origin (works in dev and prod)
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
+  // Server-side rendering fallback
+  const envURL = import.meta.env.VITE_BASE_URL;
+  if (envURL) {
+    return envURL.replace(/\/api$/, '');
   }
   
   // Final fallback
@@ -53,10 +77,20 @@ export const getAvatarURL = (avatarPath, addCacheBuster = false) => {
     // Replace localhost URLs with production URL
     if (normalizedURL.includes('localhost:5000') || normalizedURL.includes('localhost:')) {
       const backendURL = getBackendBaseURL();
-      // Extract the path from the localhost URL
-      const urlObj = new URL(normalizedURL);
-      const path = urlObj.pathname;
-      normalizedURL = `${backendURL}${path}`;
+      // Extract the path and query from the localhost URL
+      try {
+        const urlObj = new URL(normalizedURL);
+        const path = urlObj.pathname;
+        const query = urlObj.search; // Preserve existing query params
+        normalizedURL = `${backendURL}${path}${query}`;
+      } catch (e) {
+        // If URL parsing fails, try simple string replacement
+        console.warn('Failed to parse URL, using string replacement:', e);
+        const pathMatch = normalizedURL.match(/https?:\/\/[^\/]+(\/[^?]*)/);
+        if (pathMatch) {
+          normalizedURL = `${backendURL}${pathMatch[1]}`;
+        }
+      }
     }
     
     if (addCacheBuster) {

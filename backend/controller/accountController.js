@@ -99,7 +99,7 @@ export const updateProfile = async (req, res) => {
         const oldAvatarPath = path.join(process.cwd(), user.avatar);
         if (fs.existsSync(oldAvatarPath)) {
           try {
-            fs.unlinkSync(oldAvatarPath);
+          fs.unlinkSync(oldAvatarPath);
             console.log('Old avatar deleted:', oldAvatarPath);
           } catch (deleteError) {
             console.error('Failed to delete old avatar:', deleteError);
