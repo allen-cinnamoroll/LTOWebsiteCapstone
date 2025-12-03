@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LoaderCircle, CalendarIcon } from "lucide-react";
-import { format, addMonths, setYear, setMonth } from "date-fns";
+import { format, addMonths, setYear, setMonth, subYears } from "date-fns";
 import {
   Popover,
   PopoverContent,
@@ -204,11 +204,22 @@ const FormComponent = ({
                       >
                         <DatePicker
                           fieldValue={field.value}
-                          dateValue={(date) =>
+                          dateValue={(date) => {
+                            // Validate that the selected date makes the person at least 18 years old
+                            const today = new Date();
+                            const maxBirthDate = subYears(today, 18);
+                            if (date > maxBirthDate) {
+                              form.setError("birthDate", {
+                                type: "manual",
+                                message: "Owner must be at least 18 years old",
+                              });
+                              return;
+                            }
                             form.setValue("birthDate", date, {
                               shouldValidate: true,
-                            })
-                          }
+                            });
+                          }}
+                          maxDate={subYears(new Date(), 18)} // Maximum date is 18 years ago
                         />
                       </PopoverContent>
                     </Popover>

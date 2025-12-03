@@ -198,6 +198,22 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded, onCancel }) => {
         }
       }
       
+      // Validate birthDate - owner must be at least 18 years old
+      if (currentFormValues.birthDate) {
+        const today = new Date();
+        const birthDate = new Date(currentFormValues.birthDate);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        const dayDiff = today.getDate() - birthDate.getDate();
+        
+        // Calculate actual age considering month and day
+        const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+        
+        if (actualAge < 18) {
+          errors.push("Owner must be at least 18 years old");
+        }
+      }
+      
       if (errors.length > 0) {
         console.log('Validation errors:', errors);
         toast.error("Please fill in all required fields", {

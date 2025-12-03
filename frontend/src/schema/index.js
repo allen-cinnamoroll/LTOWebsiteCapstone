@@ -48,7 +48,14 @@ export const CreateDriverSchema = z.object({
     required_error: "Please specify if you have a driver's license",
   }),
   driversLicenseNumber: z.string().optional(),
-  birthDate: z.date().optional(),
+  birthDate: z.date().optional().refine((date) => {
+    if (!date) return true; // Optional field, so undefined/null is valid
+    const today = new Date();
+    const minBirthDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    return date <= minBirthDate;
+  }, {
+    message: "Owner must be at least 18 years old",
+  }),
 }).refine((data) => {
   if (data.hasDriversLicense && !data.driversLicenseNumber) {
     return false;

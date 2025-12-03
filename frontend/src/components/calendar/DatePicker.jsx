@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 
-const DatePicker = ({ fieldValue, dateValue }) => {
+const DatePicker = ({ fieldValue, dateValue, maxDate, minDate }) => {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(fieldValue || today);
   const [selectedYear, setSelectedYear] = useState((fieldValue || today).getFullYear());
@@ -28,7 +28,11 @@ const DatePicker = ({ fieldValue, dateValue }) => {
   // Handle Year Change
   const handleYearChange = (year) => {
     setSelectedYear(year);
-    const updatedDate = setYear(selectedDate, year);
+    let updatedDate = setYear(selectedDate, year);
+    // If maxDate is set and the updated date exceeds it, clamp to maxDate
+    if (maxDate && updatedDate > maxDate) {
+      updatedDate = maxDate;
+    }
     setSelectedDate(updatedDate);
     if (dateValue) dateValue(updatedDate);
   };
@@ -91,8 +95,10 @@ const DatePicker = ({ fieldValue, dateValue }) => {
           <SelectContent>
             {Array.from({ length: 150 }, (_, i) => {
               const year = new Date().getFullYear() - 50 + i; // Start 50 years before current year, extend 100 years into future
+              // Disable years after maxDate if provided
+              const isDisabled = maxDate && year > maxDate.getFullYear();
               return (
-                <SelectItem key={year} value={year.toString()}>
+                <SelectItem key={year} value={year.toString()} disabled={isDisabled}>
                   {year}
                 </SelectItem>
               );
@@ -107,9 +113,17 @@ const DatePicker = ({ fieldValue, dateValue }) => {
           mode="single"
           selected={selectedDate}
           onSelect={handleDateSelect}
-          disabled={(date) => date < new Date("1900-01-01")}
+          disabled={(date) => {
+            // Disable dates before 1900
+            if (date < new Date("1900-01-01")) return true;
+            // Disable dates after maxDate if provided
+            if (maxDate && date > maxDate) return true;
+            // Disable dates before minDate if provided
+            if (minDate && date < minDate) return true;
+            return false;
+          }}
           fromYear={1900}
-          toYear={new Date().getFullYear() + 10}
+          toYear={maxDate ? maxDate.getFullYear() : new Date().getFullYear() + 10}
           month={selectedDate}
           onMonthChange={(date) => {
             setSelectedDate(date);
