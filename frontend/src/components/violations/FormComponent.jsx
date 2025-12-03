@@ -129,7 +129,6 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
   const [availableViolations] = useState(COMMON_VIOLATIONS);
   const [violationSearchTerms, setViolationSearchTerms] = useState({});
   const [openDropdowns, setOpenDropdowns] = useState({});
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [apprehendingOfficers, setApprehendingOfficers] = useState([]);
   const [loadingOfficers, setLoadingOfficers] = useState(false);
   const [officerSearchTerm, setOfficerSearchTerm] = useState("");
@@ -953,38 +952,37 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                 <FormItem className="space-y-0">
                   <FormLabel className="text-xs text-gray-600">Date of Apprehension</FormLabel>
                   <FormControl>
-                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                    <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full pl-3 text-left font-normal text-xs border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
+                              "w-full text-left font-normal text-xs justify-start border border-gray-300 dark:border-[#424242] bg-white dark:bg-gray-800",
                               !field.value && "text-muted-foreground"
                             )}
                           >
+                            <CalendarIcon className="h-4 w-4 opacity-50" />
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className="w-auto p-2 space-y-2" align="start">
                         <DatePicker
                           fieldValue={field.value}
-                          dateValue={(date) => {
-                            field.onChange(date);
-                            // Close popover after date selection
-                            setDatePickerOpen(false);
-                          }}
+                          dateValue={(date) =>
+                            form.setValue("dateOfApprehension", date, { shouldValidate: true })
+                          }
+                          maxDate={new Date()}
                         />
                       </PopoverContent>
                     </Popover>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-red-400" />
                 </FormItem>
               )}
             />
