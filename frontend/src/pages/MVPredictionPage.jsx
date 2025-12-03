@@ -1013,10 +1013,7 @@ function formatDate(dateString) {
   } catch {
     return dateString;
   }
-} 
-                        ? `${trainingData.training_weeks} weeks`
-                        : 'N/A'}
-                  </h3>
+}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <TooltipProvider>
                       <Tooltip>
