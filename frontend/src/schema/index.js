@@ -131,43 +131,41 @@ export const EditVehicleSchema = z.object({
 });
 
 export const AccidentSchema = z.object({
-  blotterNo: z.string().optional(),
+  blotterNo: z.string().min(1, { message: "Blotter No. is required" }),
   vehiclePlateNo: z.string().optional(),
   vehicleMCPlateNo: z.string().optional(),
   vehicleChassisNo: z.string().optional(),
-  suspect: z.string().optional(),
-  stageOfFelony: z.string().optional(),
-  offense: z.string().optional(),
-  offenseType: z.string().optional(),
-  narrative: z.string().optional(),
-  caseStatus: z.string().optional(),
-  region: z.string().optional(),
-  province: z.string().optional(),
+  suspect: z.string().min(1, { message: "Suspect is required" }),
+  stageOfFelony: z.string().min(1, { message: "Stage of Felony is required" }),
+  offense: z.string().min(1, { message: "Offense is required" }),
+  offenseType: z.string().min(1, { message: "Offense Type is required" }),
+  narrative: z.string().min(1, { message: "Narrative is required" }),
+  caseStatus: z.string().min(1, { message: "Case Status is required" }),
+  region: z.string().min(1, { message: "Region is required" }),
+  province: z.string().min(1, { message: "Province is required" }),
   municipality: z.string().min(1, { message: "Municipality is required" }),
   barangay: z.string().min(1, { message: "Barangay is required" }),
   street: z.string().optional(),
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  dateEncoded: z.date().optional().refine((date) => {
-    if (!date) return true; // Optional field
+  lat: z.number({ required_error: "Latitude is required" }),
+  lng: z.number({ required_error: "Longitude is required" }),
+  dateEncoded: z.date({ required_error: "Date encoded is required" }).refine((date) => {
     const today = new Date();
     today.setHours(23, 59, 59, 999); // Set to end of today
     return date <= today;
   }, { message: "Date encoded cannot be in the future" }),
-  dateReported: z.date().optional().refine((date) => {
-    if (!date) return true; // Optional field
+  dateReported: z.date({ required_error: "Date reported is required" }).refine((date) => {
     const today = new Date();
     today.setHours(23, 59, 59, 999); // Set to end of today
     return date <= today;
   }, { message: "Date reported cannot be in the future" }),
-  timeReported: z.string().optional(),
+  timeReported: z.string().min(1, { message: "Time reported is required" }),
   dateCommited: z.date({ required_error: "Date committed is required" }).refine((date) => {
     const today = new Date();
     today.setHours(23, 59, 59, 999); // Set to end of today
     return date <= today;
   }, { message: "Date committed cannot be in the future" }),
-  timeCommited: z.string().optional(),
-  incidentType: z.string().optional(),
+  timeCommited: z.string().min(1, { message: "Time committed is required" }),
+  incidentType: z.string().min(1, { message: "Incident Type is required" }),
 });
 
 export const ViolationCreateSchema = z.object({

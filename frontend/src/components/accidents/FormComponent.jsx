@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import DatePicker from "@/components/calendar/DatePicker";
@@ -120,6 +120,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
     }
   };
 
+  // Handle switching back from "Others" input to dropdown for incident type
+  const handleIncidentTypeBackToDropdown = () => {
+    setShowIncidentTypeInput(false);
+    form.setValue("incidentType", "");
+  };
+
   // Handle offense type change
   const handleOffenseTypeChange = (value) => {
     if (value === "Others") {
@@ -129,6 +135,12 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
       setShowOffenseTypeInput(false);
       form.setValue("offenseType", value);
     }
+  };
+
+  // Handle switching back from "Others" input to dropdown for offense type
+  const handleOffenseTypeBackToDropdown = () => {
+    setShowOffenseTypeInput(false);
+    form.setValue("offenseType", "");
   };
 
   // Handle municipality change
@@ -314,15 +326,27 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <FormControl>
-                    <Input
-                      placeholder="Enter custom incident type"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      className="text-xs"
-                      autoFocus
-                    />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter custom incident type"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        className="text-xs pr-8"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+                      onClick={handleIncidentTypeBackToDropdown}
+                      title="Back to dropdown"
+                    >
+                      <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                    </Button>
+                  </div>
                 )}
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
@@ -371,15 +395,27 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <FormControl>
-                    <Input
-                      placeholder="Enter custom offense type"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      className="text-xs"
-                      autoFocus
-                    />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter custom offense type"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        className="text-xs pr-8"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+                      onClick={handleOffenseTypeBackToDropdown}
+                      title="Back to dropdown"
+                    >
+                      <X className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                    </Button>
+                  </div>
                 )}
                 <FormMessage className="text-xs text-red-400" />
               </FormItem>
