@@ -50,6 +50,8 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   const [vehicleModalOpen, setVehicleModalOpen] = useState(false);
   const [selectedFileNumber, setSelectedFileNumber] = useState("");
   const searchInputRef = useRef(null);
+  const lastFetchedOwnerIdRef = useRef(null);
+  const isFetchingOwnerRef = useRef(false);
 
   // Set pre-populated owner name in edit mode
   useEffect(() => {
@@ -175,55 +177,58 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
   // Watch for driver field changes (e.g., when owner is created externally)
   // and fetch owner details to display the name
   useEffect(() => {
+    const fetchOwnerDetails = async (ownerId) => {
+      // Prevent duplicate fetches
+      if (isFetchingOwnerRef.current || lastFetchedOwnerIdRef.current === ownerId) {
+        return;
+      }
+      
+      isFetchingOwnerRef.current = true;
+      lastFetchedOwnerIdRef.current = ownerId;
+      
+      try {
+        const { data } = await apiClient.get(`/owner/${ownerId}`, {
+          headers: { Authorization: token }
+        });
+        if (data.success && data.data) {
+          const owner = data.data;
+          setSelectedDriver(owner);
+          setSearchTerm(owner.ownerRepresentativeName || "");
+          setSearchResults([]);
+          setShowNoResults(false);
+          setIsOwnerEditable(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch owner details:", error);
+        lastFetchedOwnerIdRef.current = null; // Reset on error to allow retry
+      } finally {
+        isFetchingOwnerRef.current = false;
+      }
+    };
+
     const subscription = form.watch((value, { name }) => {
       // When driver field changes, fetch owner details if needed
       if (name === "driver" || name === undefined) {
         const ownerId = value.driver || form.getValues("driver");
-        if (ownerId && !selectedDriver) {
-          // Fetch owner details if driver ID is set but we don't have the owner object
-          const fetchOwnerDetails = async () => {
-            try {
-              const { data } = await apiClient.get(`/owner/${ownerId}`, {
-                headers: { Authorization: token }
-              });
-              if (data.success && data.data) {
-                const owner = data.data;
-                setSelectedDriver(owner);
-                setSearchTerm(owner.ownerRepresentativeName || "");
-    setSearchResults([]);
-                setShowNoResults(false);
-                setIsOwnerEditable(false);
-              }
-            } catch (error) {
-              console.error("Failed to fetch owner details:", error);
-            }
-          };
-          fetchOwnerDetails();
+        const currentSelectedDriverId = selectedDriver?._id || selectedDriver?.id;
+        
+        // Fetch owner details if:
+        // 1. We have an ownerId but no selectedDriver, OR
+        // 2. The ownerId has changed (different from currently selected driver AND different from last fetched)
+        if (ownerId && ownerId !== lastFetchedOwnerIdRef.current && 
+            (!selectedDriver || currentSelectedDriverId !== ownerId)) {
+          fetchOwnerDetails(ownerId);
         }
       }
     });
     
     // Also check immediately when component mounts or form is reset
     const ownerId = form.getValues("driver");
-    if (ownerId && !selectedDriver) {
-      const fetchOwnerDetails = async () => {
-        try {
-          const { data } = await apiClient.get(`/owner/${ownerId}`, {
-            headers: { Authorization: token }
-          });
-          if (data.success && data.data) {
-            const owner = data.data;
-            setSelectedDriver(owner);
-            setSearchTerm(owner.ownerRepresentativeName || "");
-            setSearchResults([]);
-            setShowNoResults(false);
-            setIsOwnerEditable(false);
-          }
-        } catch (error) {
-          console.error("Failed to fetch owner details:", error);
-        }
-      };
-      fetchOwnerDetails();
+    const currentSelectedDriverId = selectedDriver?._id || selectedDriver?.id;
+    
+    if (ownerId && ownerId !== lastFetchedOwnerIdRef.current && 
+        (!selectedDriver || currentSelectedDriverId !== ownerId)) {
+      fetchOwnerDetails(ownerId);
     }
     
     return () => subscription.unsubscribe();

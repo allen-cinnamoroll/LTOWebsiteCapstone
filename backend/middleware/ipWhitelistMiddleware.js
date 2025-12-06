@@ -153,6 +153,24 @@ export const ipWhitelist = (req, res, next) => {
   console.log(`❌ Access DENIED for IP: ${clientIP}`);
   console.log(`Allowed IPs/Ranges: ${allowedIPsString}`);
   console.log('========================\n');
+  
+  // Add CORS headers to error response so browser shows proper error
+  const origin = req.headers.origin;
+  if (origin) {
+    // Allow common development origins
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000',
+    ];
+    
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+  }
+  
   return res.status(403).json({
     success: false,
     message: 'Access denied. This system can only be accessed from authorized networks.',

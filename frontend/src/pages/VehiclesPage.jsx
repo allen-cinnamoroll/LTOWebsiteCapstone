@@ -101,6 +101,11 @@ const VehiclesPage = () => {
           ? dData.ownerId._id 
           : dData.ownerId;
         
+        // Handle both populated and non-populated previousOwnerId
+        const previousOwnerId = typeof dData.previousOwnerId === 'object' && dData.previousOwnerId?._id 
+          ? dData.previousOwnerId._id 
+          : (dData.previousOwnerId || null);
+        
         return {
           _id: dData._id,
           plateNo: dData.plateNo,
@@ -114,6 +119,7 @@ const VehiclesPage = () => {
           dateOfRenewal: dData.dateOfRenewal,
           status: dData.status,
           ownerId: ownerId, // Use the extracted ownerId
+          previousOwnerId: previousOwnerId, // Include previousOwnerId
           vehicleStatusType: dData.vehicleStatusType, // Include vehicleStatusType
           // Include metadata fields
           createdBy: dData.createdBy,
@@ -202,8 +208,65 @@ const VehiclesPage = () => {
   };
 
   //open vehicle details modal
-  const onRowClick = (data) => {
-    setSelectedVehicle(data);
+  const onRowClick = async (data) => {
+    // Fetch full vehicle data to ensure we have all fields including previousOwnerId
+    try {
+      const { data: responseData } = await apiClient.get(`/vehicle/${data._id}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      
+      if (responseData.success && responseData.data) {
+        const vehicle = responseData.data;
+        const ownerId = typeof vehicle.ownerId === 'object' && vehicle.ownerId?._id 
+          ? vehicle.ownerId._id 
+          : vehicle.ownerId;
+        
+        const previousOwnerId = typeof vehicle.previousOwnerId === 'object' && vehicle.previousOwnerId?._id 
+          ? vehicle.previousOwnerId._id 
+          : vehicle.previousOwnerId;
+        
+        // Debug log (can be removed in production)
+        // console.log("Vehicle data from API:", {
+        //   _id: vehicle._id,
+        //   ownerId: ownerId,
+        //   previousOwnerId: previousOwnerId,
+        //   rawPreviousOwnerId: vehicle.previousOwnerId
+        // });
+        
+        const fullVehicleData = {
+          ...vehicle,
+          ownerId: ownerId,
+          previousOwnerId: previousOwnerId || null, // Explicitly set to null if undefined
+          chassisNo: vehicle.serialChassisNumber,
+          plateNo: vehicle.plateNo,
+          fileNo: vehicle.fileNo,
+          engineNo: vehicle.engineNo,
+          make: vehicle.make,
+          bodyType: vehicle.bodyType,
+          color: vehicle.color,
+          classification: vehicle.classification,
+          vehicleStatusType: vehicle.vehicleStatusType,
+          dateOfRenewal: vehicle.dateOfRenewal,
+          status: vehicle.status,
+          createdBy: vehicle.createdBy,
+          createdAt: vehicle.createdAt,
+          updatedBy: vehicle.updatedBy,
+          updatedAt: vehicle.updatedAt,
+        };
+        
+        setSelectedVehicle(fullVehicleData);
+      } else {
+        // Fallback to table data if API call fails
+        setSelectedVehicle(data);
+      }
+    } catch (error) {
+      console.error("Error fetching vehicle details:", error);
+      // Fallback to table data if API call fails
+      setSelectedVehicle(data);
+    }
+    
     setDetailsModalOpen(true);
     // Close other modals when opening details
     setAddVehicleModalOpen(false);
@@ -249,9 +312,61 @@ const VehiclesPage = () => {
     setRenewalModalOpen(true);
   };
 
-  const handleVehicleUpdated = () => {
-    // Refresh the vehicle list when a vehicle is updated through renewal modal
-    fetchVehicles();
+  const handleVehicleUpdated = async () => {
+    // Refresh the vehicle list when a vehicle is updated
+    await fetchVehicles();
+    
+    // If a vehicle is currently selected in details modal, refresh its data
+    if (selectedVehicle && selectedVehicle._id) {
+      try {
+        const { data } = await apiClient.get(`/vehicle/${selectedVehicle._id}`, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        
+        if (data.success && data.data) {
+          const updatedVehicle = data.data;
+          const newOwnerId = typeof updatedVehicle.ownerId === 'object' && updatedVehicle.ownerId?._id 
+            ? updatedVehicle.ownerId._id 
+            : updatedVehicle.ownerId;
+          
+          // Normalize previousOwnerId from the API response
+          const previousOwnerId = typeof updatedVehicle.previousOwnerId === 'object' && updatedVehicle.previousOwnerId?._id 
+            ? updatedVehicle.previousOwnerId._id 
+            : updatedVehicle.previousOwnerId;
+          
+          const oldOwnerId = selectedVehicle.ownerId;
+          
+          // Update selectedVehicle with fresh data including new ownerId
+          // Use previousOwnerId from API if available, otherwise use oldOwnerId if owner changed
+          const updatedSelectedVehicle = {
+            ...updatedVehicle,
+            ownerId: newOwnerId,
+            previousOwnerId: previousOwnerId || ((oldOwnerId && oldOwnerId !== newOwnerId) ? oldOwnerId : null),
+            chassisNo: updatedVehicle.serialChassisNumber,
+            plateNo: updatedVehicle.plateNo,
+            fileNo: updatedVehicle.fileNo,
+            engineNo: updatedVehicle.engineNo,
+            make: updatedVehicle.make,
+            bodyType: updatedVehicle.bodyType,
+            color: updatedVehicle.color,
+            classification: updatedVehicle.classification,
+            vehicleStatusType: updatedVehicle.vehicleStatusType,
+            dateOfRenewal: updatedVehicle.dateOfRenewal,
+            status: updatedVehicle.status,
+            createdBy: updatedVehicle.createdBy,
+            updatedBy: updatedVehicle.updatedBy,
+            createdAt: updatedVehicle.createdAt,
+            updatedAt: updatedVehicle.updatedAt,
+          };
+          
+          setSelectedVehicle(updatedSelectedVehicle);
+        }
+      } catch (error) {
+        console.error("Error refreshing selected vehicle:", error);
+      }
+    }
   };
 
   const handleVehicleAdded = () => {

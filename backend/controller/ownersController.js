@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import OwnerModel from "../model/OwnerModel.js";
 import VehicleModel from "../model/VehicleModel.js";
 import UserModel from "../model/UserModel.js";
@@ -144,11 +145,38 @@ export const getDrivers = async (req, res) => {
     const drivers = await driversQuery;
     const total = await OwnerModel.countDocuments(query);
 
+    // Get actual vehicle counts from VehicleModel for accuracy
+    // This ensures the count matches the actual vehicles in the database
+    const vehicleCountsMap = new Map();
+    const ownerIds = drivers.map(d => d._id.toString());
+    
+    if (ownerIds.length > 0) {
+      const vehicleCounts = await VehicleModel.aggregate([
+        {
+          $match: {
+            ownerId: { $in: ownerIds.map(id => new mongoose.Types.ObjectId(id)) },
+            deletedAt: null
+          }
+        },
+        {
+          $group: {
+            _id: "$ownerId",
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+      
+      vehicleCounts.forEach(item => {
+        vehicleCountsMap.set(item._id.toString(), item.count);
+      });
+    }
+
     // Return drivers with their vehicle information and user tracking
     const driversWithVehicles = drivers.map(driver => {
       const driverObj = driver.toObject();
-      // Add vehicle count for quick reference
-      driverObj.vehicleCount = driverObj.vehicleIds ? driverObj.vehicleIds.length : 0;
+      // Use actual vehicle count from database, fallback to vehicleIds length if not available
+      const actualCount = vehicleCountsMap.get(driver._id.toString());
+      driverObj.vehicleCount = actualCount !== undefined ? actualCount : (driverObj.vehicleIds ? driverObj.vehicleIds.length : 0);
       
       // Add user tracking with populated names
       driverObj.createdBy = driverObj.createdBy ? {
@@ -188,7 +216,6 @@ export const findDriver = async (req, res) => {
   try {
     const driver = await OwnerModel.findOne({ _id: ownerId, deletedAt: null })
       .select("fullname ownerRepresentativeName contactNumber emailAddress hasDriversLicense driversLicenseNumber birthDate address isActive vehicleIds createdBy updatedBy createdAt updatedAt")
-      .populate('vehicleIds', 'plateNo fileNo make bodyType color status dateOfRenewal')
       .populate('createdBy', 'firstName middleName lastName')
       .populate('updatedBy', 'firstName middleName lastName');
 
@@ -199,7 +226,18 @@ export const findDriver = async (req, res) => {
       });
     }
 
+    // Fetch vehicles directly from VehicleModel to ensure accuracy
+    // This ensures we get all vehicles assigned to this owner, even if vehicleIds array is out of sync
+    const vehicles = await VehicleModel.find({
+      ownerId: ownerId,
+      deletedAt: null
+    })
+      .select('plateNo fileNo make bodyType color status dateOfRenewal')
+      .lean();
+
     const driverWithCalculatedStatus = driver.toObject();
+    // Replace vehicleIds with actual vehicles from database
+    driverWithCalculatedStatus.vehicleIds = vehicles || [];
 
     res.status(200).json({
       success: true,

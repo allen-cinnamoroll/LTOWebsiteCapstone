@@ -225,8 +225,8 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded, onCancel }) => {
       // Show confirmation modal instead of submitting directly
       setConfirmationData(currentFormValues);
       setShowConfirmation(true);
-      // Close the main dialog to prevent nested modals
-      onOpenChange(false);
+      // Don't close the main dialog - keep it open behind the confirmation modal
+      // The confirmation modal will handle closing when needed
   };
 
   const handleConfirmSubmission = async () => {
@@ -295,14 +295,18 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded, onCancel }) => {
         // Clear session storage
         sessionStorage.removeItem('vehicleFormData');
         
-        // Call onDriverAdded callback with the new owner data
-        // The parent will handle closing this modal and reopening Add Vehicle modal
-        if (onDriverAdded) {
-          onDriverAdded(data.data);
-        } else {
-          // Fallback: close modal if no callback provided
-          onOpenChange(false);
-        }
+        // Close the Add Owner modal first, then call onDriverAdded
+        // This prevents the cancel handler from being called
+        onOpenChange(false);
+        
+        // Use setTimeout to ensure modal is closed before calling callback
+        setTimeout(() => {
+          // Call onDriverAdded callback with the new owner data
+          // The parent will handle reopening the appropriate modal
+          if (onDriverAdded) {
+            onDriverAdded(data.data);
+          }
+        }, 100);
       }
     } catch (error) {
       console.log(error);
@@ -310,6 +314,10 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded, onCancel }) => {
       toast.error(message, {
         description: date,
       });
+      // Reopen the Add Owner modal if there was an error
+      if (!open) {
+        onOpenChange(true);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -392,11 +400,12 @@ const AddDriverModal = ({ open, onOpenChange, onDriverAdded, onCancel }) => {
       {/* Confirmation Modal */}
       <Dialog open={showConfirmation} onOpenChange={(isOpen) => {
         if (!isOpen) {
-          // If confirmation is closed (e.g., clicking outside), return to Add Vehicle modal
-          // The "Back to Edit" button explicitly reopens the Add Owner modal
+          // If confirmation is closed (e.g., clicking outside), just close confirmation
+          // Don't call onCancel - keep the Add Owner modal open
           setShowConfirmation(false);
-          if (onCancel) {
-            onCancel();
+          // Reopen the Add Owner modal if it was closed
+          if (!open) {
+            onOpenChange(true);
           }
         }
       }}>

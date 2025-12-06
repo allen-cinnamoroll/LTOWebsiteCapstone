@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,9 @@ import { toast } from "sonner";
 const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated, onEditClick }) => {
   const [activeTab, setActiveTab] = useState("vehicle");
   const [ownerData, setOwnerData] = useState(null);
+  const [previousOwnerData, setPreviousOwnerData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [previousOwnerLoading, setPreviousOwnerLoading] = useState(false);
   const [renewalHistory, setRenewalHistory] = useState([]);
   const [renewalLoading, setRenewalLoading] = useState(false);
   const [renewalError, setRenewalError] = useState(null);
@@ -26,17 +28,162 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [renewOpen, setRenewOpen] = useState(false);
   const { token } = useAuth();
 
+  // Track previous ownerId to detect changes
+  const previousOwnerIdRef = useRef(null);
+  // Store current owner data in ref to preserve it when owner changes
+  const currentOwnerDataRef = useRef(null);
+  // Track current vehicle ID to detect when viewing different vehicle
+  const currentVehicleIdRef = useRef(null);
+
+  // Update ref when ownerData changes
   useEffect(() => {
-    if (open && vehicleData?.ownerId) {
-      fetchOwnerData();
+    if (ownerData) {
+      currentOwnerDataRef.current = ownerData;
     }
-    if (open && vehicleData?._id) {
+  }, [ownerData]);
+
+  useEffect(() => {
+    if (!open) {
+      // Don't reset refs when modal closes - keep them to detect changes when reopening
+      return;
+    }
+
+    // Log vehicleData when modal opens for debugging (can be removed in production)
+    // console.log("VehicleDetailsModal opened with vehicleData:", {
+    //   _id: vehicleData?._id,
+    //   ownerId: vehicleData?.ownerId,
+    //   previousOwnerId: vehicleData?.previousOwnerId,
+    //   hasPreviousOwnerData: !!previousOwnerData
+    // });
+
+    // Check if this is a different vehicle
+    // Note: currentVehicleIdRef might be null if component was unmounted (navigated away)
+    const wasRemounted = currentVehicleIdRef.current === null && vehicleData?._id;
+    const isDifferentVehicle = vehicleData?._id && 
+      currentVehicleIdRef.current !== null && 
+      currentVehicleIdRef.current !== vehicleData._id;
+    
+    if (isDifferentVehicle) {
+      // Reset refs when viewing a different vehicle
+      previousOwnerIdRef.current = null;
+      currentOwnerDataRef.current = null;
+      setPreviousOwnerData(null);
+      currentVehicleIdRef.current = vehicleData._id;
+    } else if (vehicleData?._id) {
+      // Set current vehicle ID (even if it's the same, to handle remounting)
+      currentVehicleIdRef.current = vehicleData._id;
+    }
+
+    // Always check for previousOwnerId first, before checking ownerId changes
+    // This ensures we fetch previous owner data when modal reopens
+    const normalizedPreviousId = vehicleData?.previousOwnerId 
+      ? (typeof vehicleData.previousOwnerId === 'object' && vehicleData.previousOwnerId?._id
+          ? vehicleData.previousOwnerId._id
+          : vehicleData.previousOwnerId)
+      : null;
+    
+    if (normalizedPreviousId) {
+      // Check if we need to fetch (don't have data or it's a different owner)
+      const currentPreviousId = previousOwnerData?._id;
+      // Always fetch if:
+      // 1. We don't have previousOwnerData, OR
+      // 2. The previousOwnerId has changed, OR
+      // 3. Component was remounted (meaning we navigated away and came back - state was reset)
+      if (!previousOwnerData || currentPreviousId !== normalizedPreviousId || wasRemounted) {
+        fetchPreviousOwnerData(normalizedPreviousId);
+      }
+    } else {
+      // If no previousOwnerId in vehicleData, only clear previousOwnerData if we're viewing a different vehicle
+      // Don't clear if we're viewing the same vehicle (might be remounting after navigation)
+      if (isDifferentVehicle && previousOwnerData) {
+        setPreviousOwnerData(null);
+      }
+    }
+
+    if (vehicleData?.ownerId) {
+      // Normalize ownerId - handle both object (populated) and string (ID) formats
+      const currentOwnerId = typeof vehicleData.ownerId === 'object' && vehicleData.ownerId?._id
+        ? vehicleData.ownerId._id
+        : vehicleData.ownerId;
+      
+      // If ownerId has changed within the same vehicle session, preserve current owner as previous owner
+      if (previousOwnerIdRef.current && previousOwnerIdRef.current !== currentOwnerId && !isDifferentVehicle) {
+        const oldOwnerId = previousOwnerIdRef.current;
+        
+        // If we have current owner data, use it; otherwise fetch the old owner
+        if (currentOwnerDataRef.current) {
+          setPreviousOwnerData(currentOwnerDataRef.current);
+        } else {
+          // Fetch the previous owner data using the old ownerId
+          const fetchOldOwner = async () => {
+            setPreviousOwnerLoading(true);
+            try {
+              const { data } = await apiClient.get(`/owner/${oldOwnerId}`, {
+                headers: {
+                  Authorization: token,
+                },
+              });
+              if (data.success && data.data) {
+                setPreviousOwnerData(data.data);
+              }
+            } catch (error) {
+              console.error("Error fetching previous owner data:", error);
+            } finally {
+              setPreviousOwnerLoading(false);
+            }
+          };
+          fetchOldOwner();
+        }
+        
+        setOwnerData(null); // Clear current owner data to fetch new one
+        currentOwnerDataRef.current = null;
+      }
+      
+      // Always fetch owner data when ownerId is present
+      // Update ref AFTER checking for changes to preserve the old value
+      previousOwnerIdRef.current = currentOwnerId;
+      
+      // Always fetch to ensure we have the latest data
+      const fetchCurrentOwner = async () => {
+        setLoading(true);
+        try {
+          const { data } = await apiClient.get(`/owner/${currentOwnerId}`, {
+            headers: {
+              Authorization: token,
+            },
+          });
+          if (data.success && data.data) {
+            setOwnerData(data.data);
+            currentOwnerDataRef.current = data.data;
+          } else {
+            setOwnerData(null);
+            currentOwnerDataRef.current = null;
+          }
+        } catch (error) {
+          console.error("Error fetching owner data:", error);
+          setOwnerData(null);
+          currentOwnerDataRef.current = null;
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCurrentOwner();
+    } else {
+      // Clear owner data if no ownerId
+      setOwnerData(null);
+      previousOwnerIdRef.current = null;
+      currentOwnerDataRef.current = null;
+    }
+    
+    if (vehicleData?._id) {
       fetchRenewalHistory();
     }
-  }, [open, vehicleData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, vehicleData?.ownerId, vehicleData?._id, vehicleData?.previousOwnerId, vehicleData?._id, token]);
 
   const fetchOwnerData = async () => {
     if (!vehicleData?.ownerId) {
+      setOwnerData(null);
       return;
     }
     
@@ -47,13 +194,51 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           Authorization: token,
         },
       });
-      setOwnerData(data.data);
+      if (data.success && data.data) {
+        setOwnerData(data.data);
+      }
     } catch (error) {
       console.error("Error fetching owner data:", error);
       console.error("Error response:", error.response?.data);
       console.error("Error status:", error.response?.status);
+      setOwnerData(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPreviousOwnerData = async (previousOwnerIdParam = null) => {
+    // Use parameter if provided, otherwise get from vehicleData
+    // This ensures we use the latest value even if called from useEffect with stale closure
+    const previousOwnerId = previousOwnerIdParam || 
+      (vehicleData?.previousOwnerId 
+        ? (typeof vehicleData.previousOwnerId === 'object' && vehicleData.previousOwnerId?._id
+            ? vehicleData.previousOwnerId._id
+            : vehicleData.previousOwnerId)
+        : null);
+    
+    if (!previousOwnerId) {
+      setPreviousOwnerData(null);
+      return;
+    }
+    
+    setPreviousOwnerLoading(true);
+    try {
+      const { data } = await apiClient.get(`/owner/${previousOwnerId}`, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      if (data.success && data.data) {
+        setPreviousOwnerData(data.data);
+      } else {
+        setPreviousOwnerData(null);
+      }
+    } catch (error) {
+      console.error("Error fetching previous owner data:", error);
+      setPreviousOwnerData(null);
+    } finally {
+      setPreviousOwnerLoading(false);
     }
   };
 
@@ -395,6 +580,98 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   );
 
   const OwnerInformationTab = () => {
+    const renderOwnerSection = (title, data, isLoading, isPrevious = false) => {
+      if (isLoading) {
+        return (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+          </div>
+        );
+      }
+
+      if (!data) {
+        return null;
+      }
+
+      return (
+        <div className="space-y-2 mb-6">
+          <div className="mb-3">
+            <h3 className={`text-sm font-semibold ${isPrevious ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'} flex items-center gap-2`}>
+              {isPrevious && <UserCheck className="h-4 w-4" />}
+              {title}
+            </h3>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <User className="h-3 w-3" />
+              Owner/Representative Name
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{data?.ownerRepresentativeName || "N/A"}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Phone className="h-3 w-3" />
+              Contact Number
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{data?.contactNumber || "N/A"}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <Mail className="h-3 w-3" />
+              Email Address
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{data?.emailAddress || "N/A"}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <CalendarIcon className="h-3 w-3" />
+              Birth Date
+            </label>
+            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatBirthDate(data?.birthDate)}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+              <CreditCard className="h-3 w-3" />
+              Driver's License
+            </label>
+            <div className="ml-4">
+              {data?.hasDriversLicense ? (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
+                    Yes
+                  </Badge>
+                  {data?.driversLicenseNumber && (
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {data.driversLicenseNumber}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
+                  No
+                </Badge>
+              )}
+            </div>
+          </div>
+          {data?.address && (
+            <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+              <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                Address
+              </label>
+              <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
+                {[
+                  data.address.barangay,
+                  data.address.municipality,
+                  data.address.province
+                ].filter(Boolean).join(', ')}
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    };
+
     if (loading) {
       return (
         <div className="flex items-center justify-center py-8">
@@ -403,7 +680,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       );
     }
 
-    if (!ownerData) {
+    if (!ownerData && !previousOwnerData) {
       return (
         <div className="text-center py-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">No owner information available</p>
@@ -412,74 +689,49 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     }
 
     return (
-      <div className="space-y-2">
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <User className="h-3 w-3" />
-            Owner/Representative Name
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData?.ownerRepresentativeName || "N/A"}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Phone className="h-3 w-3" />
-            Contact Number
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData?.contactNumber || "N/A"}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <Mail className="h-3 w-3" />
-            Email Address
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{ownerData?.emailAddress || "N/A"}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <CalendarIcon className="h-3 w-3" />
-            Birth Date
-          </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatBirthDate(ownerData?.birthDate)}</p>
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-            <CreditCard className="h-3 w-3" />
-            Driver's License
-          </label>
-          <div className="ml-4">
-            {ownerData?.hasDriversLicense ? (
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
-                  Yes
-                </Badge>
-                {ownerData?.driversLicenseNumber && (
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    {ownerData.driversLicenseNumber}
-                  </span>
-                )}
+      <div className="space-y-6">
+        {/* Current Owner Section */}
+        {ownerData ? (
+          renderOwnerSection("Current Owner", ownerData, loading, false)
+        ) : loading ? (
+          <div className="space-y-2 mb-6">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Current Owner</h3>
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        ) : null}
+        
+        {/* Previous Owner Section */}
+        {previousOwnerData ? (
+          renderOwnerSection("Previous Owner", previousOwnerData, previousOwnerLoading, true)
+        ) : previousOwnerLoading ? (
+          <div className="space-y-2 mb-6">
+            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              Previous Owner
+            </h3>
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        ) : (() => {
+          // Check if previousOwnerId exists (handle both object and ID formats)
+          const hasPreviousOwnerId = vehicleData?.previousOwnerId && (
+            (typeof vehicleData.previousOwnerId === 'object' && vehicleData.previousOwnerId?._id) ||
+            (typeof vehicleData.previousOwnerId === 'string' && vehicleData.previousOwnerId.trim() !== '')
+          );
+          
+          // Only show "No previous owner" if we have ownerData and we're sure there's no previousOwnerId
+          if (ownerData && !hasPreviousOwnerId) {
+            return (
+              <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400 italic">
+                No previous owner information available
               </div>
-            ) : (
-              <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
-                No
-              </Badge>
-            )}
-          </div>
-        </div>
-        {ownerData?.address && (
-          <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
-            <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
-              Address
-            </label>
-            <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
-              {[
-                ownerData.address.barangay,
-                ownerData.address.municipality,
-                ownerData.address.province
-              ].filter(Boolean).join(', ')}
-            </p>
-          </div>
-        )}
+            );
+          }
+          return null;
+        })()}
       </div>
     );
   };

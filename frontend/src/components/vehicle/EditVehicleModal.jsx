@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
 import { useForm } from "react-hook-form";
-import { Car } from "lucide-react";
+import { Car, UserPlus } from "lucide-react";
 import NoChangesModal from "./NoChangesModal";
 
 const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onAddNewOwner, formData, setFormData, onCancel }) => {
@@ -30,6 +30,7 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
   const { token } = useAuth();
   const date = formatDate(Date.now());
   const formInitializedRef = useRef(false);
+  const updatingFromNewOwnerRef = useRef(false);
 
   const getDefaultValues = () => {
     // Use formData from parent if provided, otherwise use defaults
@@ -94,12 +95,13 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
   useEffect(() => {
     if (!open) {
       formInitializedRef.current = false;
+      updatingFromNewOwnerRef.current = false;
     }
   }, [open, vehicleId]);
 
   // Update form when vehicleData changes (only on initial load, not when user types)
   useEffect(() => {
-    if (Object.keys(vehicleData).length > 0 && !formInitializedRef.current) {
+    if (Object.keys(vehicleData).length > 0 && !formInitializedRef.current && !updatingFromNewOwnerRef.current) {
       // Only reset on initial load when vehicleData is first fetched
       reset({
         ...vehicleData,
@@ -108,6 +110,61 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
       formInitializedRef.current = true;
     }
   }, [vehicleData, reset]); // Removed formData from dependencies to prevent reset loop when user types
+
+  // Update form when formData.driver changes (e.g., when new owner is created)
+  useEffect(() => {
+    if (open && formData?.driver && !updatingFromNewOwnerRef.current) {
+      const currentDriverValue = form.getValues("driver");
+      const vehicleDriverId = typeof vehicleData.driver === 'object' && vehicleData.driver?._id 
+        ? vehicleData.driver._id 
+        : vehicleData.driver;
+      
+      // Check if this is a new owner (different from current form value AND different from vehicle data)
+      const isDifferentFromForm = formData.driver !== currentDriverValue;
+      const isDifferentFromVehicle = vehicleDriverId && formData.driver !== vehicleDriverId;
+      const isNewOwner = isDifferentFromForm && isDifferentFromVehicle;
+      
+      if (isNewOwner) {
+        updatingFromNewOwnerRef.current = true;
+        
+        // New owner was added - update the form with the new driver ID
+        form.setValue("driver", formData.driver, { shouldValidate: false, shouldDirty: true });
+        
+        // Fetch owner details to update the owner name
+        const fetchNewOwnerDetails = async () => {
+          try {
+            const { data } = await apiClient.get(`/owner/${formData.driver}`, {
+              headers: { Authorization: token }
+            });
+            if (data.success && data.data) {
+              const owner = data.data;
+              // Update vehicleData with new owner info for display
+              setVehicleData(prev => ({
+                ...prev,
+                ownerName: owner.ownerRepresentativeName || "",
+                driver: formData.driver,
+                ownerId: formData.driver, // Also update ownerId for consistency
+              }));
+              // Also update the form's ownerName field if it exists
+              form.setValue("ownerName", owner.ownerRepresentativeName || "", { shouldValidate: false });
+              // FormComponent will automatically detect the driver field change and update
+              
+              // Reset the flag after a short delay to allow FormComponent to update
+              setTimeout(() => {
+                updatingFromNewOwnerRef.current = false;
+              }, 500);
+            } else {
+              updatingFromNewOwnerRef.current = false;
+            }
+          } catch (error) {
+            console.error("Failed to fetch new owner details:", error);
+            updatingFromNewOwnerRef.current = false;
+          }
+        };
+        fetchNewOwnerDetails();
+      }
+    }
+  }, [formData?.driver, open, form, token, vehicleData.driver]);
 
   const fetchVehicleData = async () => {
     setLoading(true);
@@ -325,6 +382,23 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
     onOpenChange(false);
   };
 
+  const handleAddNewOwner = () => {
+    // Get current form values
+    const currentFormData = form.getValues();
+    
+    // Store vehicle data in sessionStorage to pass to owner form
+    sessionStorage.setItem('vehicleFormData', JSON.stringify({
+      plateNo: currentFormData.plateNo || '',
+      fileNo: currentFormData.fileNo || '',
+      ownerRepresentativeName: '' // Empty since we're adding a new owner
+    }));
+    
+    // Call parent callback to open Add Owner modal
+    if (onAddNewOwner) {
+      onAddNewOwner();
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -352,24 +426,38 @@ const EditVehicleModal = ({ open, onOpenChange, vehicleId, onVehicleUpdated, onA
             />
           </div>
 
-          <DialogFooter className="flex-shrink-0 flex justify-start gap-3 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                // If onCancel is provided, call it to return to details modal
-                // Otherwise, just close the modal
-                if (onCancel) {
-                  onCancel();
-                } else {
-                  handleOpenChange(false);
-                }
-              }}
-              disabled={submitting}
-              className="min-w-[100px]"
-            >
-              Cancel
-            </Button>
+          <DialogFooter className="flex-shrink-0 flex justify-between items-center gap-3 pt-4 border-t">
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  // If onCancel is provided, call it to return to details modal
+                  // Otherwise, just close the modal
+                  if (onCancel) {
+                    onCancel();
+                  } else {
+                    handleOpenChange(false);
+                  }
+                }}
+                disabled={submitting}
+                className="min-w-[100px]"
+              >
+                Cancel
+              </Button>
+              {onAddNewOwner && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddNewOwner}
+                  disabled={submitting}
+                  className="flex items-center gap-2 min-w-[120px]"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  New Owner
+                </Button>
+              )}
+            </div>
             <Button
               type="submit"
               form="vehicle-form"

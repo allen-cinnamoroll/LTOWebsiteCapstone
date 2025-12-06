@@ -165,8 +165,9 @@ export const getVehicle = async (req, res) => {
     // Reduces payload size and improves query performance
     // Indexes used: createdAt (for sorting), deletedAt (for filtering), status, classification
     let vehiclesQuery = VehicleModel.find(query)
-      .select("fileNo plateNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal vehicleStatusType status ownerId createdBy updatedBy createdAt updatedAt")
+      .select("fileNo plateNo engineNo serialChassisNumber make bodyType color classification dateOfRenewal vehicleStatusType status ownerId previousOwnerId createdBy updatedBy createdAt updatedAt")
       .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("previousOwnerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName")
       .sort({ createdAt: -1 });
@@ -205,6 +206,9 @@ export const getVehicle = async (req, res) => {
         ownerId: typeof vehicle.ownerId === 'object' && vehicle.ownerId?._id 
           ? vehicle.ownerId._id 
           : vehicle.ownerId,
+        // Keep previousOwnerId (can be populated object or ID string)
+        // The frontend will handle normalization
+        previousOwnerId: vehicle.previousOwnerId || null,
         // Keep the full populated user objects for createdBy/updatedBy (don't transform)
         // The frontend will handle building the full name from firstName, middleName, lastName
       };
@@ -244,6 +248,7 @@ export const findVehicle = async (req, res) => {
 
     const vehicle = await VehicleModel.findOne({ _id: id, deletedAt: null })
       .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+      .populate("previousOwnerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
       .populate("createdBy", "firstName middleName lastName")
       .populate("updatedBy", "firstName middleName lastName");
 
@@ -262,15 +267,29 @@ export const findVehicle = async (req, res) => {
     
     const calculatedStatus = getVehicleStatus(vehicle.plateNo, latestRenewalDate, vehicle.vehicleStatusType);
 
+    const vehicleObject = vehicle.toObject();
+    
+    // Ensure previousOwnerId is explicitly included even if null or undefined
+    // Mongoose might not include null fields in toObject() by default
+    // Handle case where previousOwnerId might be populated but the document was deleted
+    if (vehicleObject.previousOwnerId && typeof vehicleObject.previousOwnerId === 'object' && !vehicleObject.previousOwnerId._id) {
+      // If populate returned an object without _id, it means the document was deleted
+      // Keep the ID if available, otherwise set to null
+      vehicleObject.previousOwnerId = vehicle.previousOwnerId ? vehicle.previousOwnerId.toString() : null;
+    } else {
+      vehicleObject.previousOwnerId = vehicleObject.previousOwnerId || vehicle.previousOwnerId || null;
+    }
+
     res.json({
       success: true,
       data: {
-        ...vehicle.toObject(),
+        ...vehicleObject,
         calculatedStatus,
       },
     });
   } catch (error) {
     console.error("Error fetching vehicle:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -358,6 +377,106 @@ export const updateVehicle = async (req, res) => {
       });
     }
 
+    // Update owner's vehicleIds arrays if owner changed
+    // Get old owner ID before update (keep as ObjectId for database operations)
+    const oldOwnerId = currentVehicle.ownerId;
+    // Get new owner ID from updateData (the incoming data) - this is what the user wants to change to
+    const newOwnerIdFromUpdate = updateData.ownerId;
+    
+    // Check if owner actually changed by comparing string representations
+    // This handles both ObjectId and string formats
+    const oldOwnerIdStr = oldOwnerId ? oldOwnerId.toString() : null;
+    const newOwnerIdStr = newOwnerIdFromUpdate ? newOwnerIdFromUpdate.toString() : null;
+    
+    // Debug logging to verify owner change detection
+    console.log('Owner change check:', {
+      oldOwnerId: oldOwnerIdStr,
+      newOwnerIdFromUpdate: newOwnerIdStr,
+      ownerChanged: oldOwnerId && newOwnerIdFromUpdate && oldOwnerIdStr !== newOwnerIdStr,
+      vehicleFileNo: vehicle.fileNo
+    });
+    
+    // Only proceed if ownerId is in updateData AND it's different from current owner
+    if (oldOwnerId && newOwnerIdFromUpdate && oldOwnerIdStr !== newOwnerIdStr) {
+      // Use the new owner ID from updateData for database operations
+      // Ensure both IDs are in the correct format (Mongoose will handle conversion, but be explicit)
+      const newOwnerId = newOwnerIdFromUpdate;
+      const vehicleId = vehicle._id;
+      
+      // Get counts before update for verification
+      const oldOwnerBefore = await OwnerModel.findById(oldOwnerId);
+      const newOwnerBefore = await OwnerModel.findById(newOwnerId);
+      const oldOwnerCountBefore = oldOwnerBefore?.vehicleIds?.length || 0;
+      const newOwnerCountBefore = newOwnerBefore?.vehicleIds?.length || 0;
+      
+      // Remove vehicle from old owner's vehicleIds array
+      // This ensures the vehicle's file number disappears from the old owner's assigned vehicles
+      // Previous owner -1
+      const oldOwnerUpdate = await OwnerModel.findByIdAndUpdate(
+        oldOwnerId,
+        { $pull: { vehicleIds: vehicleId } },
+        { new: true }
+      );
+      
+      // Add vehicle to new owner's vehicleIds array
+      // This ensures the vehicle's file number appears in the new owner's assigned vehicles
+      // Current owner +1
+      const newOwnerUpdate = await OwnerModel.findByIdAndUpdate(
+        newOwnerId,
+        { $addToSet: { vehicleIds: vehicleId } }, // Use $addToSet to avoid duplicates
+        { new: true }
+      );
+      
+      // Get counts after update
+      const oldOwnerCountAfter = oldOwnerUpdate?.vehicleIds?.length || 0;
+      const newOwnerCountAfter = newOwnerUpdate?.vehicleIds?.length || 0;
+      
+      // Log the transfer for debugging
+      console.log(`Vehicle ${vehicle.fileNo} (${vehicle.plateNo}) transferred from owner ${oldOwnerIdStr} to owner ${newOwnerIdStr}`);
+      console.log(`Previous owner (${oldOwnerIdStr}): ${oldOwnerCountBefore} → ${oldOwnerCountAfter} vehicles (should decrease by 1)`);
+      console.log(`Current owner (${newOwnerIdStr}): ${newOwnerCountBefore} → ${newOwnerCountAfter} vehicles (should increase by 1)`);
+      
+      // Verify the counts are correct
+      if (oldOwnerCountAfter !== oldOwnerCountBefore - 1) {
+        console.warn(`Warning: Previous owner vehicle count did not decrease correctly. Expected: ${oldOwnerCountBefore - 1}, Got: ${oldOwnerCountAfter}`);
+      }
+      if (newOwnerCountAfter !== newOwnerCountBefore + 1) {
+        // Check if vehicle was already in the array (duplicate)
+        const wasAlreadyInArray = newOwnerBefore?.vehicleIds?.some(id => id.toString() === vehicleId.toString());
+        if (!wasAlreadyInArray) {
+          console.warn(`Warning: Current owner vehicle count did not increase correctly. Expected: ${newOwnerCountBefore + 1}, Got: ${newOwnerCountAfter}`);
+        }
+      }
+      
+      // Store the previous owner ID in the vehicle document (use ObjectId, not string)
+      await VehicleModel.findByIdAndUpdate(
+        vehicle._id,
+        { previousOwnerId: oldOwnerId },
+        { new: true }
+      );
+      
+      // Re-fetch the vehicle with previousOwnerId populated to include it in the response
+      const updatedVehicle = await VehicleModel.findById(vehicle._id)
+        .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+        .populate("previousOwnerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+        .populate("createdBy", "firstName middleName lastName")
+        .populate("updatedBy", "firstName middleName lastName");
+      
+      if (updatedVehicle) {
+        // Replace the vehicle object with the updated one that includes previousOwnerId
+        // Convert to object and merge to ensure all populated fields are included
+        const updatedVehicleObj = updatedVehicle.toObject();
+        Object.keys(updatedVehicleObj).forEach(key => {
+          vehicle[key] = updatedVehicleObj[key];
+        });
+        // Ensure previousOwnerId is set (use the populated object or fallback to oldOwnerId)
+        vehicle.previousOwnerId = updatedVehicleObj.previousOwnerId || oldOwnerId;
+      } else {
+        // Fallback: just set the previousOwnerId on the existing vehicle object
+        vehicle.previousOwnerId = oldOwnerId;
+      }
+    }
+
     // Recalculate status if plate number or vehicle status type changed
     const plateChanged = currentVehicle.plateNo !== vehicle.plateNo;
     const statusTypeChanged = currentVehicle.vehicleStatusType !== vehicle.vehicleStatusType;
@@ -390,10 +509,45 @@ export const updateVehicle = async (req, res) => {
       }
     }
 
+    // Ensure previousOwnerId is included in the response
+    // Re-fetch the vehicle to ensure we have the latest previousOwnerId from database
+    let vehicleResponse;
+    try {
+      const finalVehicle = await VehicleModel.findById(vehicle._id)
+        .populate("ownerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+        .populate("previousOwnerId", "fullname ownerRepresentativeName contactNumber emailAddress address")
+        .populate("createdBy", "firstName middleName lastName")
+        .populate("updatedBy", "firstName middleName lastName");
+      
+      if (!finalVehicle) {
+        throw new Error("Vehicle not found after update");
+      }
+      
+      vehicleResponse = finalVehicle.toObject();
+      
+      // Handle case where previousOwnerId might be populated but the document was deleted
+      if (vehicleResponse.previousOwnerId && typeof vehicleResponse.previousOwnerId === 'object' && !vehicleResponse.previousOwnerId._id) {
+        // If populate returned an object without _id, it means the document was deleted
+        vehicleResponse.previousOwnerId = finalVehicle.previousOwnerId ? finalVehicle.previousOwnerId.toString() : null;
+      }
+    } catch (populateError) {
+      // If populate fails, use the vehicle object we already have
+      console.error("Error populating vehicle fields:", populateError);
+      console.error("Error details:", {
+        vehicleId: vehicle._id,
+        errorMessage: populateError.message,
+        errorStack: populateError.stack
+      });
+      vehicleResponse = vehicle.toObject ? vehicle.toObject() : vehicle;
+    }
+    
+    // Explicitly ensure previousOwnerId is included (can be null if never changed)
+    vehicleResponse.previousOwnerId = vehicleResponse.previousOwnerId || null;
+
     res.json({
       success: true,
       message: "Vehicle updated successfully",
-      data: vehicle,
+      data: vehicleResponse,
     });
   } catch (error) {
     console.error("Error updating vehicle:", error);
