@@ -92,10 +92,10 @@
         required: [true, "ownerId is required"]
       },
       previousOwnerId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: [mongoose.Schema.Types.ObjectId],
         ref: 'Owners',
         required: false,
-        default: null
+        default: []
       },
       // User tracking fields
       createdBy: {

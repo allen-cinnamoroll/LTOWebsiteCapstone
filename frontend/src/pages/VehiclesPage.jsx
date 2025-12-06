@@ -101,10 +101,18 @@ const VehiclesPage = () => {
           ? dData.ownerId._id 
           : dData.ownerId;
         
-        // Handle both populated and non-populated previousOwnerId
-        const previousOwnerId = typeof dData.previousOwnerId === 'object' && dData.previousOwnerId?._id 
-          ? dData.previousOwnerId._id 
-          : (dData.previousOwnerId || null);
+        // Handle previousOwnerId as array (or single value for backward compatibility)
+        const previousOwnerIdArray = Array.isArray(dData.previousOwnerId)
+          ? dData.previousOwnerId
+          : (dData.previousOwnerId ? [dData.previousOwnerId] : []);
+        
+        // Normalize to extract IDs
+        const normalizedPreviousOwnerIds = previousOwnerIdArray.map(id => {
+          if (typeof id === 'object' && id?._id) {
+            return id._id;
+          }
+          return id;
+        }).filter(Boolean);
         
         return {
           _id: dData._id,
@@ -119,7 +127,7 @@ const VehiclesPage = () => {
           dateOfRenewal: dData.dateOfRenewal,
           status: dData.status,
           ownerId: ownerId, // Use the extracted ownerId
-          previousOwnerId: previousOwnerId, // Include previousOwnerId
+          previousOwnerId: normalizedPreviousOwnerIds, // Include previousOwnerId as array
           vehicleStatusType: dData.vehicleStatusType, // Include vehicleStatusType
           // Include metadata fields
           createdBy: dData.createdBy,
@@ -223,22 +231,22 @@ const VehiclesPage = () => {
           ? vehicle.ownerId._id 
           : vehicle.ownerId;
         
-        const previousOwnerId = typeof vehicle.previousOwnerId === 'object' && vehicle.previousOwnerId?._id 
-          ? vehicle.previousOwnerId._id 
-          : vehicle.previousOwnerId;
+        // Handle previousOwnerId as array
+        const previousOwnerIdArray = Array.isArray(vehicle.previousOwnerId)
+          ? vehicle.previousOwnerId
+          : (vehicle.previousOwnerId ? [vehicle.previousOwnerId] : []);
         
-        // Debug log (can be removed in production)
-        // console.log("Vehicle data from API:", {
-        //   _id: vehicle._id,
-        //   ownerId: ownerId,
-        //   previousOwnerId: previousOwnerId,
-        //   rawPreviousOwnerId: vehicle.previousOwnerId
-        // });
+        const normalizedPreviousOwnerIds = previousOwnerIdArray.map(id => {
+          if (typeof id === 'object' && id?._id) {
+            return id._id;
+          }
+          return id;
+        }).filter(Boolean);
         
         const fullVehicleData = {
           ...vehicle,
           ownerId: ownerId,
-          previousOwnerId: previousOwnerId || null, // Explicitly set to null if undefined
+          previousOwnerId: normalizedPreviousOwnerIds, // Include as array
           chassisNo: vehicle.serialChassisNumber,
           plateNo: vehicle.plateNo,
           fileNo: vehicle.fileNo,
@@ -331,10 +339,17 @@ const VehiclesPage = () => {
             ? updatedVehicle.ownerId._id 
             : updatedVehicle.ownerId;
           
-          // Normalize previousOwnerId from the API response
-          const previousOwnerId = typeof updatedVehicle.previousOwnerId === 'object' && updatedVehicle.previousOwnerId?._id 
-            ? updatedVehicle.previousOwnerId._id 
-            : updatedVehicle.previousOwnerId;
+          // Normalize previousOwnerId from the API response as array
+          const previousOwnerIdArray = Array.isArray(updatedVehicle.previousOwnerId)
+            ? updatedVehicle.previousOwnerId
+            : (updatedVehicle.previousOwnerId ? [updatedVehicle.previousOwnerId] : []);
+          
+          const normalizedPreviousOwnerIds = previousOwnerIdArray.map(id => {
+            if (typeof id === 'object' && id?._id) {
+              return id._id;
+            }
+            return id;
+          }).filter(Boolean);
           
           const oldOwnerId = selectedVehicle.ownerId;
           
@@ -343,7 +358,9 @@ const VehiclesPage = () => {
           const updatedSelectedVehicle = {
             ...updatedVehicle,
             ownerId: newOwnerId,
-            previousOwnerId: previousOwnerId || ((oldOwnerId && oldOwnerId !== newOwnerId) ? oldOwnerId : null),
+            previousOwnerId: normalizedPreviousOwnerIds.length > 0 
+              ? normalizedPreviousOwnerIds 
+              : ((oldOwnerId && oldOwnerId !== newOwnerId) ? [oldOwnerId] : []),
             chassisNo: updatedVehicle.serialChassisNumber,
             plateNo: updatedVehicle.plateNo,
             fileNo: updatedVehicle.fileNo,

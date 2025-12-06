@@ -429,7 +429,7 @@ const DriverModal = ({ open, onOpenChange, driverData, onFileNumberClick, onDriv
                       </div>
                       <div>
                         <p className="text-xs text-gray-600">Chassis Number</p>
-                        <p className="font-medium text-sm">{vehicleData.chassisNo || "N/A"}</p>
+                        <p className="font-medium text-sm">{vehicleData.serialChassisNumber || "N/A"}</p>
                       </div>
                     </div>
                     <div className="space-y-2">

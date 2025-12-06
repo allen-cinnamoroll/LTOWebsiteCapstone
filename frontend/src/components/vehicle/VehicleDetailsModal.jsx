@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, Loader2, Edit } from "lucide-react";
+import { CheckCircle2Icon, CircleAlert, Calendar, User, Car, RefreshCw, Hash, Wrench, FileText, Calendar as CalendarIcon, Tag, Palette, Building, Clock, Shield, Phone, Mail, MapPin, CreditCard, UserCheck, AlertCircle, Loader2, Edit, ChevronDown, ChevronUp } from "lucide-react";
 import VehicleRenewalModal from "./VehicleRenewalModal";
 import apiClient from "@/api/axios";
 import { useAuth } from "@/context/AuthContext";
@@ -19,8 +19,10 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const [activeTab, setActiveTab] = useState("vehicle");
   const [ownerData, setOwnerData] = useState(null);
   const [previousOwnerData, setPreviousOwnerData] = useState(null);
+  const [allPreviousOwners, setAllPreviousOwners] = useState([]);
   const [loading, setLoading] = useState(false);
   const [previousOwnerLoading, setPreviousOwnerLoading] = useState(false);
+  const [expandedOwners, setExpandedOwners] = useState(new Set());
   const [renewalHistory, setRenewalHistory] = useState([]);
   const [renewalLoading, setRenewalLoading] = useState(false);
   const [renewalError, setRenewalError] = useState(null);
@@ -68,35 +70,42 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       previousOwnerIdRef.current = null;
       currentOwnerDataRef.current = null;
       setPreviousOwnerData(null);
+      setAllPreviousOwners([]);
+      setExpandedOwners(new Set());
       currentVehicleIdRef.current = vehicleData._id;
     } else if (vehicleData?._id) {
       // Set current vehicle ID (even if it's the same, to handle remounting)
       currentVehicleIdRef.current = vehicleData._id;
     }
 
-    // Always check for previousOwnerId first, before checking ownerId changes
+    // Always check for previousOwnerId array first, before checking ownerId changes
     // This ensures we fetch previous owner data when modal reopens
-    const normalizedPreviousId = vehicleData?.previousOwnerId 
-      ? (typeof vehicleData.previousOwnerId === 'object' && vehicleData.previousOwnerId?._id
-          ? vehicleData.previousOwnerId._id
-          : vehicleData.previousOwnerId)
-      : null;
+    // Handle previousOwnerId as array or single value (for backward compatibility)
+    const previousOwnerIds = Array.isArray(vehicleData?.previousOwnerId)
+      ? vehicleData.previousOwnerId
+      : (vehicleData?.previousOwnerId ? [vehicleData.previousOwnerId] : []);
     
-    if (normalizedPreviousId) {
-      // Check if we need to fetch (don't have data or it's a different owner)
-      const currentPreviousId = previousOwnerData?._id;
-      // Always fetch if:
-      // 1. We don't have previousOwnerData, OR
-      // 2. The previousOwnerId has changed, OR
-      // 3. Component was remounted (meaning we navigated away and came back - state was reset)
-      if (!previousOwnerData || currentPreviousId !== normalizedPreviousId || wasRemounted) {
-        fetchPreviousOwnerData(normalizedPreviousId);
+    // Normalize the array to extract IDs
+    const normalizedPreviousIds = previousOwnerIds
+      .map(id => {
+        if (typeof id === 'object' && id?._id) {
+          return id._id;
+        }
+        return id;
+      })
+      .filter(Boolean);
+    
+    if (normalizedPreviousIds.length > 0) {
+      // Fetch all previous owners from the array
+      if (wasRemounted || isDifferentVehicle || allPreviousOwners.length === 0) {
+        fetchAllPreviousOwnersFromArray(normalizedPreviousIds);
       }
     } else {
       // If no previousOwnerId in vehicleData, only clear previousOwnerData if we're viewing a different vehicle
       // Don't clear if we're viewing the same vehicle (might be remounting after navigation)
-      if (isDifferentVehicle && previousOwnerData) {
+      if (isDifferentVehicle) {
         setPreviousOwnerData(null);
+        setAllPreviousOwners([]);
       }
     }
 
@@ -207,39 +216,62 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
     }
   };
 
-  const fetchPreviousOwnerData = async (previousOwnerIdParam = null) => {
-    // Use parameter if provided, otherwise get from vehicleData
-    // This ensures we use the latest value even if called from useEffect with stale closure
-    const previousOwnerId = previousOwnerIdParam || 
-      (vehicleData?.previousOwnerId 
-        ? (typeof vehicleData.previousOwnerId === 'object' && vehicleData.previousOwnerId?._id
-            ? vehicleData.previousOwnerId._id
-            : vehicleData.previousOwnerId)
-        : null);
-    
-    if (!previousOwnerId) {
+  const fetchAllPreviousOwnersFromArray = async (previousOwnerIds) => {
+    if (!previousOwnerIds || previousOwnerIds.length === 0) {
       setPreviousOwnerData(null);
+      setAllPreviousOwners([]);
       return;
     }
     
     setPreviousOwnerLoading(true);
     try {
-      const { data } = await apiClient.get(`/owner/${previousOwnerId}`, {
-        headers: {
-          Authorization: token,
-        },
+      // Fetch all previous owners in parallel
+      const ownerPromises = previousOwnerIds.map(async (ownerId) => {
+        try {
+          const { data } = await apiClient.get(`/owner/${ownerId}`, {
+            headers: { Authorization: token },
+          });
+          if (data.success && data.data) {
+            return data.data;
+          }
+          return null;
+        } catch (error) {
+          console.error(`Error fetching owner ${ownerId}:`, error);
+          return null;
+        }
       });
-      if (data.success && data.data) {
-        setPreviousOwnerData(data.data);
+
+      const owners = await Promise.all(ownerPromises);
+      const validOwners = owners.filter(Boolean);
+
+      if (validOwners.length > 0) {
+        // Set the most recent previous owner (first in array) as previousOwnerData
+        setPreviousOwnerData(validOwners[0]);
+        // Set the rest as allPreviousOwners
+        setAllPreviousOwners(validOwners.slice(1));
       } else {
         setPreviousOwnerData(null);
+        setAllPreviousOwners([]);
       }
     } catch (error) {
-      console.error("Error fetching previous owner data:", error);
+      console.error("Error fetching previous owners:", error);
       setPreviousOwnerData(null);
+      setAllPreviousOwners([]);
     } finally {
       setPreviousOwnerLoading(false);
     }
+  };
+
+  const toggleOwnerExpansion = (ownerId) => {
+    setExpandedOwners(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(ownerId)) {
+        newSet.delete(ownerId);
+      } else {
+        newSet.add(ownerId);
+      }
+      return newSet;
+    });
   };
 
   // Prefetch names for createdBy / updatedBy so they render nicely in Vehicle tab
@@ -473,7 +505,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
             <Hash className="h-3 w-3" />
             Chassis Number
           </label>
-          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.chassisNo || "N/A"}</p>
+          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{vehicleData?.serialChassisNumber || "N/A"}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
           <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
@@ -702,18 +734,215 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
           </div>
         ) : null}
         
-        {/* Previous Owner Section */}
-        {previousOwnerData ? (
-          renderOwnerSection("Previous Owner", previousOwnerData, previousOwnerLoading, true)
-        ) : previousOwnerLoading ? (
+        {/* Previous Owners Section - Collapsible Accordion */}
+        {previousOwnerLoading ? (
           <div className="space-y-2 mb-6">
             <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 flex items-center gap-2">
               <UserCheck className="h-4 w-4" />
-              Previous Owner
+              Previous Owners
             </h3>
             <div className="flex items-center justify-center py-4">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
             </div>
+          </div>
+        ) : (previousOwnerData || allPreviousOwners.length > 0) ? (
+          <div className="space-y-2 mb-6">
+            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 flex items-center gap-2 mb-3">
+              <UserCheck className="h-4 w-4" />
+              Previous Owners {previousOwnerData && `(${1 + allPreviousOwners.length})`}
+            </h3>
+            
+            {/* Immediate Previous Owner Accordion Item */}
+            {previousOwnerData && (
+            <div className="border border-gray-200 dark:border-[#424242] rounded-lg overflow-hidden">
+              <button
+                onClick={() => toggleOwnerExpansion(previousOwnerData._id)}
+                className="w-full flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <UserCheck className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {previousOwnerData.ownerRepresentativeName || "Previous Owner"}
+                  </span>
+                </div>
+                {expandedOwners.has(previousOwnerData._id) ? (
+                  <ChevronUp className="h-4 w-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                )}
+              </button>
+              
+              {expandedOwners.has(previousOwnerData._id) && (
+                <div className="border-t border-gray-200 dark:border-[#424242] p-3 bg-gray-50 dark:bg-gray-900">
+                  <div className="space-y-2">
+                    <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                      <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        Owner/Representative Name
+                      </label>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{previousOwnerData?.ownerRepresentativeName || "N/A"}</p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                      <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        Contact Number
+                      </label>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{previousOwnerData?.contactNumber || "N/A"}</p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                      <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        Email Address
+                      </label>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{previousOwnerData?.emailAddress || "N/A"}</p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                      <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                        <CalendarIcon className="h-3 w-3" />
+                        Birth Date
+                      </label>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatBirthDate(previousOwnerData?.birthDate)}</p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                      <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                        <CreditCard className="h-3 w-3" />
+                        Driver's License
+                      </label>
+                      <div className="ml-4">
+                        {previousOwnerData?.hasDriversLicense ? (
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
+                              Yes
+                            </Badge>
+                            {previousOwnerData?.driversLicenseNumber && (
+                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                {previousOwnerData.driversLicenseNumber}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
+                            No
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    {previousOwnerData?.address && (
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                        <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          Address
+                        </label>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
+                          {[
+                            previousOwnerData.address.barangay,
+                            previousOwnerData.address.municipality,
+                            previousOwnerData.address.province
+                          ].filter(Boolean).join(', ')}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            )}
+            
+            {/* Display additional previous owners from allPreviousOwners array if any */}
+            {allPreviousOwners.length > 0 && allPreviousOwners.map((owner, index) => (
+              <div key={owner._id || index} className="border border-gray-200 dark:border-[#424242] rounded-lg overflow-hidden">
+                <button
+                  onClick={() => toggleOwnerExpansion(owner._id)}
+                  className="w-full flex items-center justify-between p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      {owner.ownerRepresentativeName || `Previous Owner ${index + 2}`}
+                    </span>
+                  </div>
+                  {expandedOwners.has(owner._id) ? (
+                    <ChevronUp className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  )}
+                </button>
+                
+                {expandedOwners.has(owner._id) && (
+                  <div className="border-t border-gray-200 dark:border-[#424242] p-3 bg-gray-50 dark:bg-gray-900">
+                    <div className="space-y-2">
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                        <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          Owner/Representative Name
+                        </label>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{owner?.ownerRepresentativeName || "N/A"}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                        <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                          <Phone className="h-3 w-3" />
+                          Contact Number
+                        </label>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{owner?.contactNumber || "N/A"}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                        <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                          <Mail className="h-3 w-3" />
+                          Email Address
+                        </label>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{owner?.emailAddress || "N/A"}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                        <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                          <CalendarIcon className="h-3 w-3" />
+                          Birth Date
+                        </label>
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">{formatBirthDate(owner?.birthDate)}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                        <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                          <CreditCard className="h-3 w-3" />
+                          Driver's License
+                        </label>
+                        <div className="ml-4">
+                          {owner?.hasDriversLicense ? (
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
+                                Yes
+                              </Badge>
+                              {owner?.driversLicenseNumber && (
+                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                  {owner.driversLicenseNumber}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <Badge variant="outline" className="text-red-600 border-red-600 text-xs">
+                              No
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {owner?.address && (
+                        <div className="bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-[#424242] shadow-sm">
+                          <label className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            Address
+                          </label>
+                          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 ml-4">
+                            {[
+                              owner.address.barangay,
+                              owner.address.municipality,
+                              owner.address.province
+                            ].filter(Boolean).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         ) : (() => {
           // Check if previousOwnerId exists (handle both object and ID formats)

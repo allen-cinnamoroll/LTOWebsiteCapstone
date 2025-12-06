@@ -90,7 +90,7 @@ const VehicleCard = () => {
             <p className="font-semibold w-full">{vehicleData?.engineNo || "N/A"}</p>
             
             <h2 className="text-muted-foreground px-6">Chassis Number:</h2>
-            <p className="font-semibold w-full">{vehicleData?.chassisNo || "N/A"}</p>
+            <p className="font-semibold w-full">{vehicleData?.serialChassisNumber || "N/A"}</p>
             
             <h2 className="text-muted-foreground px-6">Make:</h2>
             <p className="font-semibold w-full">

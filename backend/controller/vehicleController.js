@@ -206,9 +206,11 @@ export const getVehicle = async (req, res) => {
         ownerId: typeof vehicle.ownerId === 'object' && vehicle.ownerId?._id 
           ? vehicle.ownerId._id 
           : vehicle.ownerId,
-        // Keep previousOwnerId (can be populated object or ID string)
+        // Keep previousOwnerId as array (can be populated array or array of IDs)
         // The frontend will handle normalization
-        previousOwnerId: vehicle.previousOwnerId || null,
+        previousOwnerId: Array.isArray(vehicle.previousOwnerId) 
+          ? vehicle.previousOwnerId 
+          : (vehicle.previousOwnerId ? [vehicle.previousOwnerId] : []),
         // Keep the full populated user objects for createdBy/updatedBy (don't transform)
         // The frontend will handle building the full name from firstName, middleName, lastName
       };
@@ -269,15 +271,24 @@ export const findVehicle = async (req, res) => {
 
     const vehicleObject = vehicle.toObject();
     
-    // Ensure previousOwnerId is explicitly included even if null or undefined
-    // Mongoose might not include null fields in toObject() by default
-    // Handle case where previousOwnerId might be populated but the document was deleted
-    if (vehicleObject.previousOwnerId && typeof vehicleObject.previousOwnerId === 'object' && !vehicleObject.previousOwnerId._id) {
-      // If populate returned an object without _id, it means the document was deleted
-      // Keep the ID if available, otherwise set to null
-      vehicleObject.previousOwnerId = vehicle.previousOwnerId ? vehicle.previousOwnerId.toString() : null;
+    // Ensure previousOwnerId is an array
+    // Handle case where previousOwnerId might be populated array or single value
+    if (Array.isArray(vehicleObject.previousOwnerId)) {
+      // Filter out any deleted owners (objects without _id)
+      vehicleObject.previousOwnerId = vehicleObject.previousOwnerId
+        .map(owner => {
+          if (typeof owner === 'object' && !owner._id) {
+            // Deleted owner, try to get ID from original
+            return null;
+          }
+          return owner;
+        })
+        .filter(Boolean);
+    } else if (vehicleObject.previousOwnerId) {
+      // Convert single value to array for backward compatibility
+      vehicleObject.previousOwnerId = [vehicleObject.previousOwnerId];
     } else {
-      vehicleObject.previousOwnerId = vehicleObject.previousOwnerId || vehicle.previousOwnerId || null;
+      vehicleObject.previousOwnerId = [];
     }
 
     res.json({
@@ -448,10 +459,11 @@ export const updateVehicle = async (req, res) => {
         }
       }
       
-      // Store the previous owner ID in the vehicle document (use ObjectId, not string)
+      // Store the previous owner ID in the vehicle document as an array
+      // Add the old owner to the previousOwnerId array if not already present
       await VehicleModel.findByIdAndUpdate(
         vehicle._id,
-        { previousOwnerId: oldOwnerId },
+        { $addToSet: { previousOwnerId: oldOwnerId } }, // Use $addToSet to avoid duplicates
         { new: true }
       );
       
@@ -469,11 +481,15 @@ export const updateVehicle = async (req, res) => {
         Object.keys(updatedVehicleObj).forEach(key => {
           vehicle[key] = updatedVehicleObj[key];
         });
-        // Ensure previousOwnerId is set (use the populated object or fallback to oldOwnerId)
-        vehicle.previousOwnerId = updatedVehicleObj.previousOwnerId || oldOwnerId;
+        // Ensure previousOwnerId is an array (use the populated array or fallback to [oldOwnerId])
+        vehicle.previousOwnerId = Array.isArray(updatedVehicleObj.previousOwnerId) 
+          ? updatedVehicleObj.previousOwnerId 
+          : (updatedVehicleObj.previousOwnerId ? [updatedVehicleObj.previousOwnerId] : [oldOwnerId]);
       } else {
-        // Fallback: just set the previousOwnerId on the existing vehicle object
-        vehicle.previousOwnerId = oldOwnerId;
+        // Fallback: ensure previousOwnerId is an array
+        vehicle.previousOwnerId = Array.isArray(vehicle.previousOwnerId) 
+          ? vehicle.previousOwnerId 
+          : (vehicle.previousOwnerId ? [vehicle.previousOwnerId] : [oldOwnerId]);
       }
     }
 
@@ -525,10 +541,22 @@ export const updateVehicle = async (req, res) => {
       
       vehicleResponse = finalVehicle.toObject();
       
-      // Handle case where previousOwnerId might be populated but the document was deleted
-      if (vehicleResponse.previousOwnerId && typeof vehicleResponse.previousOwnerId === 'object' && !vehicleResponse.previousOwnerId._id) {
-        // If populate returned an object without _id, it means the document was deleted
-        vehicleResponse.previousOwnerId = finalVehicle.previousOwnerId ? finalVehicle.previousOwnerId.toString() : null;
+      // Ensure previousOwnerId is an array
+      if (Array.isArray(vehicleResponse.previousOwnerId)) {
+        // Filter out any deleted owners (objects without _id)
+        vehicleResponse.previousOwnerId = vehicleResponse.previousOwnerId
+          .map(owner => {
+            if (typeof owner === 'object' && !owner._id) {
+              return null; // Deleted owner
+            }
+            return owner;
+          })
+          .filter(Boolean);
+      } else if (vehicleResponse.previousOwnerId) {
+        // Convert single value to array for backward compatibility
+        vehicleResponse.previousOwnerId = [vehicleResponse.previousOwnerId];
+      } else {
+        vehicleResponse.previousOwnerId = [];
       }
     } catch (populateError) {
       // If populate fails, use the vehicle object we already have
@@ -539,10 +567,16 @@ export const updateVehicle = async (req, res) => {
         errorStack: populateError.stack
       });
       vehicleResponse = vehicle.toObject ? vehicle.toObject() : vehicle;
+      // Ensure previousOwnerId is an array even if populate failed
+      vehicleResponse.previousOwnerId = Array.isArray(vehicleResponse.previousOwnerId) 
+        ? vehicleResponse.previousOwnerId 
+        : (vehicleResponse.previousOwnerId ? [vehicleResponse.previousOwnerId] : []);
     }
     
-    // Explicitly ensure previousOwnerId is included (can be null if never changed)
-    vehicleResponse.previousOwnerId = vehicleResponse.previousOwnerId || null;
+    // Explicitly ensure previousOwnerId is an array (default to empty array if never changed)
+    if (!Array.isArray(vehicleResponse.previousOwnerId)) {
+      vehicleResponse.previousOwnerId = vehicleResponse.previousOwnerId ? [vehicleResponse.previousOwnerId] : [];
+    }
 
     res.json({
       success: true,
