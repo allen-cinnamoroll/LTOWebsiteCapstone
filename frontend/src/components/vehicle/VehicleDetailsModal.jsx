@@ -36,6 +36,8 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
   const currentOwnerDataRef = useRef(null);
   // Track current vehicle ID to detect when viewing different vehicle
   const currentVehicleIdRef = useRef(null);
+  // Track previousOwnerId array to detect when it changes
+  const previousOwnerIdsRef = useRef(null);
 
   // Update ref when ownerData changes
   useEffect(() => {
@@ -69,6 +71,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       // Reset refs when viewing a different vehicle
       previousOwnerIdRef.current = null;
       currentOwnerDataRef.current = null;
+      previousOwnerIdsRef.current = null;
       setPreviousOwnerData(null);
       setAllPreviousOwners([]);
       setExpandedOwners(new Set());
@@ -95,10 +98,19 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       })
       .filter(Boolean);
     
+    // Check if previousOwnerId array has changed by comparing with ref
+    const previousIdsString = normalizedPreviousIds.join(',');
+    const hasChangedPreviousIds = previousOwnerIdsRef.current !== previousIdsString;
+    
     if (normalizedPreviousIds.length > 0) {
-      // Fetch all previous owners from the array
-      if (wasRemounted || isDifferentVehicle || allPreviousOwners.length === 0) {
+      // Fetch all previous owners from the array if:
+      // 1. Component was remounted (navigated back)
+      // 2. Viewing a different vehicle
+      // 3. No previous owners loaded yet
+      // 4. The previousOwnerId array has changed (new owner added)
+      if (wasRemounted || isDifferentVehicle || allPreviousOwners.length === 0 || hasChangedPreviousIds) {
         fetchAllPreviousOwnersFromArray(normalizedPreviousIds);
+        previousOwnerIdsRef.current = previousIdsString; // Update ref
       }
     } else {
       // If no previousOwnerId in vehicleData, only clear previousOwnerData if we're viewing a different vehicle
@@ -106,6 +118,7 @@ const VehicleDetailsModal = ({ open, onOpenChange, vehicleData, onVehicleUpdated
       if (isDifferentVehicle) {
         setPreviousOwnerData(null);
         setAllPreviousOwners([]);
+        previousOwnerIdsRef.current = null; // Clear ref
       }
     }
 
