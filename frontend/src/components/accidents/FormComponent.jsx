@@ -297,7 +297,11 @@ const FormComponent = ({ form, onSubmit, submitting, isEditMode = false }) => {
                   <Input 
                     placeholder="Enter suspect name" 
                     {...field} 
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      // Remove numbers from the input - only allow letters, spaces, and common name characters
+                      const valueWithoutNumbers = e.target.value.replace(/[0-9]/g, '');
+                      field.onChange(valueWithoutNumbers.toUpperCase());
+                    }}
                     className="text-xs" 
                   />
                 </FormControl>

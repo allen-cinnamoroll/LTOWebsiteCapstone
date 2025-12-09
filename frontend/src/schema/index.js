@@ -135,7 +135,11 @@ export const AccidentSchema = z.object({
   vehiclePlateNo: z.string().optional(),
   vehicleMCPlateNo: z.string().optional(),
   vehicleChassisNo: z.string().optional(),
-  suspect: z.string().min(1, { message: "Suspect is required" }),
+  suspect: z.string()
+    .min(1, { message: "Suspect is required" })
+    .refine((value) => !/[0-9]/.test(value), {
+      message: "Suspect name cannot contain numbers",
+    }),
   stageOfFelony: z.string().min(1, { message: "Stage of Felony is required" }),
   offense: z.string().min(1, { message: "Offense is required" }),
   offenseType: z.string().min(1, { message: "Offense Type is required" }),
