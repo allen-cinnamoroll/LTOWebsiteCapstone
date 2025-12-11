@@ -292,18 +292,21 @@ export default function AccidentPredictionPage() {
 
   const handleCancelRetrain = async () => {
     try {
-      // Call cancel endpoint
-      const cancelUrl = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/cancel-training`;
-      console.log('[AccidentPredictionPage] Cancelling training:', cancelUrl);
+      // Call Node.js backend endpoint which logs the activity and proxies to Flask API
+      console.log('[AccidentPredictionPage] Cancelling training via backend API');
       
-      const response = await fetch(cancelUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Use apiClient to call Node.js backend endpoint which handles logging
+      const response = await apiClient.post('/user/cancel-retrain-accident-model', 
+        {},
+        {
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       
-      const data = await response.json();
+      const data = response.data;
       
       // Clean up progress tracking
       if (progressIntervalRef.current) {
@@ -314,7 +317,7 @@ export default function AccidentPredictionPage() {
       setRetraining(false);
       setProgress(0);
       
-      if (response.ok && data.success) {
+      if (data.success) {
         setEstimatedTimeRemaining('Training cancelled');
         toast.success('Training cancelled successfully');
         // Close modal after a short delay

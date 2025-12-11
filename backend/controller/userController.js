@@ -651,7 +651,8 @@ const getLogTypeLabel = (logType) => {
     "download_automated_report": "Download Automated Report",
     "automatic_retrain_accident": "Automatic Retrain - Accident Model",
     "automatic_retrain_mv_registration": "Automatic Retrain - MV Registration Model",
-    "manual_retrain_accident_model": "Manual Retrain - Accident Model"
+    "manual_retrain_accident_model": "Manual Retrain - Accident Model",
+    "cancel_retrain_accident_model": "Cancel Retrain - Accident Model"
   };
   return logTypes[logType] || logType;
 };
@@ -971,6 +972,83 @@ export const retrainAccidentModel = async (req, res) => {
       success: false,
       message: err.message,
       error: 'Failed to retrain model'
+    });
+  }
+};
+
+// Cancel retrain accident model endpoint with logging
+export const cancelRetrainAccidentModel = async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    const userId = req.user.userId;
+    const ipAddress = getClientIP(req);
+    
+    // Get Flask API base URL from environment or use default
+    const flaskApiBase = process.env.ACCIDENT_PREDICTION_API_URL || 
+                         (process.env.NODE_ENV === 'production' 
+                           ? 'http://localhost:5004' 
+                           : 'http://localhost:5004');
+    
+    const cancelUrl = `${flaskApiBase}/api/accidents/cancel-training`;
+    
+    // Forward the request to Flask API
+    const response = await fetch(cancelUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    // Log the cancel action
+    const logStatus = response.ok && data.success ? 'success' : 'failed';
+    const logDetails = response.ok && data.success 
+      ? 'Training cancellation requested successfully'
+      : `Cancel retrain failed: ${data.error || data.message || 'Unknown error'}`;
+
+    try {
+      await logUserActivity({
+        userId: userId,
+        logType: 'cancel_retrain_accident_model',
+        ipAddress: ipAddress,
+        status: logStatus,
+        details: logDetails
+      });
+    } catch (logError) {
+      console.error('Failed to log cancel retrain activity:', logError.message);
+      // Continue even if logging fails
+    }
+
+    // Return the Flask API response
+    return res.status(response.status).json(data);
+  } catch (err) {
+    // Log as failed if there's an error
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'cancel_retrain_accident_model',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Cancel retrain failed: ${err.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log cancel retrain error:', logError.message);
+      }
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+      error: 'Failed to cancel training'
     });
   }
 };

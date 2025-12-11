@@ -1,5 +1,5 @@
 import express from "express";
-import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat, logAutomaticRetrain, retrainAccidentModel } from "../controller/userController.js";
+import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat, logAutomaticRetrain, retrainAccidentModel, cancelRetrainAccidentModel } from "../controller/userController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
 
 const userRouter = express.Router();
@@ -37,5 +37,8 @@ userRouter.post("/logs/automatic-retrain", logAutomaticRetrain);
 
 // Manual retrain accident model endpoint (with logging)
 userRouter.post("/retrain-accident-model", authenticate, authorizeRole("admin", "superadmin"), retrainAccidentModel);
+
+// Cancel retrain accident model endpoint (with logging)
+userRouter.post("/cancel-retrain-accident-model", authenticate, authorizeRole("admin", "superadmin"), cancelRetrainAccidentModel);
 
 export default userRouter;
