@@ -313,14 +313,20 @@ def retrain_model():
         # Initialize progress tracker
         progress_tracker = ProgressTracker()
         
-        # Check if training is already in progress
+        # Check if training is already in progress (not cancelled or completed)
         current_progress = progress_tracker.get()
-        if current_progress and current_progress.get('is_training', False):
-            return jsonify({
-                'success': False,
-                'error': 'Training is already in progress',
-                'timestamp': datetime.now().isoformat()
-            }), 409  # Conflict status
+        if current_progress:
+            is_training = current_progress.get('is_training', False)
+            is_cancelled = current_progress.get('cancelled', False)
+            is_completed = current_progress.get('completed', False)
+            
+            # Only block if training is actively in progress (not cancelled or completed)
+            if is_training and not is_cancelled and not is_completed:
+                return jsonify({
+                    'success': False,
+                    'error': 'Training is already in progress',
+                    'timestamp': datetime.now().isoformat()
+                }), 409  # Conflict status
         
         # Reset progress tracker
         progress_tracker.reset()
@@ -464,27 +470,46 @@ def cancel_training():
         progress_tracker = ProgressTracker()
         current_progress = progress_tracker.get()
         
-        if not current_progress or not current_progress.get('is_training', False):
+        # If no progress file exists or training is not in progress, still mark as cancelled
+        # This handles edge cases where training just started or already completed
+        if not current_progress:
+            # No training was ever started, just return success
             return jsonify({
-                'success': False,
-                'error': 'No training in progress to cancel',
+                'success': True,
+                'message': 'No training in progress',
                 'timestamp': datetime.now().isoformat()
-            }), 400
+            }), 200
         
-        # Mark as cancelled
+        # If already completed or cancelled, reset it so new training can start
+        if current_progress.get('completed', False) or current_progress.get('cancelled', False):
+            # Reset the progress file so new training can start
+            progress_tracker.reset()
+            return jsonify({
+                'success': True,
+                'message': 'Training was already stopped. Progress has been reset.',
+                'timestamp': datetime.now().isoformat()
+            }), 200
+        
+        # Mark as cancelled first (so training script can detect it between steps)
         progress_tracker.cancel()
+        
+        # Reset immediately so new training can start right away
+        # The training script will check for cancellation between steps anyway
+        progress_tracker.reset()
         
         return jsonify({
             'success': True,
-            'message': 'Training cancellation requested. The current training step will complete but no new steps will start.',
+            'message': 'Training cancelled successfully. You can start a new training now.',
             'timestamp': datetime.now().isoformat()
         }), 200
         
     except Exception as e:
         logger.error(f"Error cancelling training: {str(e)}")
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e),
+            'message': f'Error cancelling training: {str(e)}',
             'timestamp': datetime.now().isoformat()
         }), 500
 

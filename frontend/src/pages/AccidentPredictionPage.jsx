@@ -293,12 +293,16 @@ export default function AccidentPredictionPage() {
     try {
       // Call cancel endpoint
       const cancelUrl = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/cancel-training`;
+      console.log('[AccidentPredictionPage] Cancelling training:', cancelUrl);
+      
       const response = await fetch(cancelUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
+      
+      const data = await response.json();
       
       // Clean up progress tracking
       if (progressIntervalRef.current) {
@@ -308,18 +312,23 @@ export default function AccidentPredictionPage() {
       
       setRetraining(false);
       setProgress(0);
-      setEstimatedTimeRemaining('Cancelling...');
       
-      // Wait a moment for cancellation to be processed
-      setTimeout(() => {
-        setShowRetrainProgressModal(false);
-        setEstimatedTimeRemaining('');
-      }, 1000);
-      
-      if (response.ok) {
-        toast.info('Training cancellation requested');
+      if (response.ok && data.success) {
+        setEstimatedTimeRemaining('Training cancelled');
+        toast.success('Training cancelled successfully');
+        // Close modal after a short delay
+        setTimeout(() => {
+          setShowRetrainProgressModal(false);
+          setEstimatedTimeRemaining('');
+        }, 1500);
       } else {
-        toast.warning('Could not cancel training. It may complete in the background.');
+        // Still close the modal even if cancel request had issues
+        setEstimatedTimeRemaining('Cancellation requested');
+        toast.info(data.message || 'Training cancellation requested. The current step will complete.');
+        setTimeout(() => {
+          setShowRetrainProgressModal(false);
+          setEstimatedTimeRemaining('');
+        }, 1500);
       }
     } catch (err) {
       console.error('Error cancelling training:', err);
@@ -329,10 +338,13 @@ export default function AccidentPredictionPage() {
         progressIntervalRef.current = null;
       }
       setRetraining(false);
-      setShowRetrainProgressModal(false);
       setProgress(0);
-      setEstimatedTimeRemaining('');
-      toast.warning('Could not cancel training. It may complete in the background.');
+      setEstimatedTimeRemaining('Cancellation requested');
+      toast.info('Training cancellation requested. Progress updates stopped.');
+      setTimeout(() => {
+        setShowRetrainProgressModal(false);
+        setEstimatedTimeRemaining('');
+      }, 1500);
     }
   };
 
