@@ -906,15 +906,79 @@ export const retrainAccidentModel = async (req, res) => {
     }
 
     // Forward the request to Flask API
-    const response = await fetch(retrainUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ force: true }),
-    });
+    let response;
+    let data;
+    
+    try {
+      response = await fetch(retrainUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ force: true }),
+      });
 
-    const data = await response.json();
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        // Flask returned HTML (error page) instead of JSON
+        const text = await response.text();
+        console.error('Flask API returned non-JSON response:', text.substring(0, 200));
+        
+        // Update log as failed
+        try {
+          const UserLog = (await import('../model/UserLogModel.js')).default;
+          const recentLog = await UserLog.findOne({
+            userId: userId,
+            logType: 'manual_retrain_accident_model',
+            status: 'pending'
+          }).sort({ timestamp: -1 });
+
+          if (recentLog) {
+            recentLog.status = 'failed';
+            recentLog.details = 'Retrain failed: Flask API returned non-JSON response (may be down or error)';
+            await recentLog.save();
+          }
+        } catch (logError) {
+          console.error('Failed to update log:', logError.message);
+        }
+        
+        return res.status(500).json({
+          success: false,
+          message: 'Flask API returned non-JSON response. The prediction service may be down.',
+          error: 'Invalid response from prediction service'
+        });
+      }
+
+      data = await response.json();
+    } catch (fetchError) {
+      // Network error
+      console.error('Error calling Flask API:', fetchError.message);
+      
+      // Update log as failed
+      try {
+        const UserLog = (await import('../model/UserLogModel.js')).default;
+        const recentLog = await UserLog.findOne({
+          userId: userId,
+          logType: 'manual_retrain_accident_model',
+          status: 'pending'
+        }).sort({ timestamp: -1 });
+
+        if (recentLog) {
+          recentLog.status = 'failed';
+          recentLog.details = `Retrain failed: ${fetchError.message}`;
+          await recentLog.save();
+        }
+      } catch (logError) {
+        console.error('Failed to update log:', logError.message);
+      }
+      
+      return res.status(500).json({
+        success: false,
+        message: `Failed to connect to prediction service: ${fetchError.message}`,
+        error: 'Network error'
+      });
+    }
 
     // Update log status based on Flask API response
     const logStatus = response.ok && data.success ? 'success' : 'failed';
@@ -999,14 +1063,64 @@ export const cancelRetrainAccidentModel = async (req, res) => {
     const cancelUrl = `${flaskApiBase}/api/accidents/cancel-training`;
     
     // Forward the request to Flask API
-    const response = await fetch(cancelUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    let response;
+    let data;
+    
+    try {
+      response = await fetch(cancelUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const data = await response.json();
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        // Flask returned HTML (error page) instead of JSON
+        const text = await response.text();
+        console.error('Flask API returned non-JSON response:', text.substring(0, 200));
+        
+        // Log as failed
+        await logUserActivity({
+          userId: userId,
+          logType: 'cancel_retrain_accident_model',
+          ipAddress: ipAddress,
+          status: 'failed',
+          details: 'Cancel retrain failed: Flask API returned non-JSON response (may be down or error)'
+        });
+        
+        return res.status(500).json({
+          success: false,
+          message: 'Flask API returned non-JSON response. The prediction service may be down.',
+          error: 'Invalid response from prediction service'
+        });
+      }
+
+      data = await response.json();
+    } catch (fetchError) {
+      // Network error or timeout
+      console.error('Error calling Flask API:', fetchError.message);
+      
+      // Log as failed
+      try {
+        await logUserActivity({
+          userId: userId,
+          logType: 'cancel_retrain_accident_model',
+          ipAddress: ipAddress,
+          status: 'failed',
+          details: `Cancel retrain failed: ${fetchError.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log cancel retrain error:', logError.message);
+      }
+      
+      return res.status(500).json({
+        success: false,
+        message: `Failed to connect to prediction service: ${fetchError.message}`,
+        error: 'Network error'
+      });
+    }
 
     // Log the cancel action
     const logStatus = response.ok && data.success ? 'success' : 'failed';
