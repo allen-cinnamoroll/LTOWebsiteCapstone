@@ -67,6 +67,19 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
     }
   }, [isEditMode, prePopulatedOwner, form]);
 
+  // Clear selected driver when search term changes and doesn't match selected driver
+  useEffect(() => {
+    if (isOwnerEditable && selectedDriver) {
+      const selectedName = selectedDriver.ownerRepresentativeName?.toUpperCase() || '';
+      const currentSearchTerm = searchTerm.toUpperCase();
+      // If search term doesn't match selected driver's name, clear the selection
+      if (currentSearchTerm !== selectedName && currentSearchTerm.length > 0) {
+        setSelectedDriver(null);
+        form.setValue("driver", null);
+      }
+    }
+  }, [searchTerm, isOwnerEditable, selectedDriver, form]);
+
   // Search owners when search term changes
   useEffect(() => {
     const searchOwners = async () => {
@@ -734,29 +747,44 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                           ))}
                           
                           {/* Add Owner Option - only show when no results and not already selected */}
-                          {showNoResults && searchResults.length === 0 && !selectedDriver && (
-                            <div className="border-b border-border last:border-b-0">
-                              {isEditMode ? (
-                                <div className="p-3">
-                                  <div className="text-sm font-medium text-orange-600 dark:text-orange-400">
-                                    Name not found click the new owner button to add a new owner
-                                  </div>
+                          {showNoResults && searchResults.length === 0 && (() => {
+                            // Check if search term matches selected driver name
+                            const selectedName = selectedDriver?.ownerRepresentativeName?.toUpperCase() || '';
+                            const currentSearchTerm = searchTerm.toUpperCase();
+                            const nameMatches = selectedName && currentSearchTerm === selectedName;
+                            
+                            // In edit mode: show message if no results (unless name exactly matches)
+                            // In add mode: show message only if no selectedDriver
+                            const shouldShowInEditMode = isEditMode && !nameMatches;
+                            const shouldShowInAddMode = !isEditMode && !selectedDriver;
+                            
+                            if (shouldShowInEditMode || shouldShowInAddMode) {
+                              return (
+                                <div className="border-b border-border last:border-b-0">
+                                  {isEditMode ? (
+                                    <div className="p-3">
+                                      <div className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                                        Name not found click the new owner button to add a new owner
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div
+                                      className="p-3 hover:bg-accent cursor-pointer bg-accent/50 transition-colors"
+                                      onClick={handleAddDriver}
+                                    >
+                                      <div className="text-sm font-medium text-primary">
+                                        + Add "{searchTerm}" as new owner
+                                      </div>
+                                      <div className="text-xs text-muted-foreground mt-1">
+                                        Click to create a new owner record
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                              ) : (
-                                <div
-                                  className="p-3 hover:bg-accent cursor-pointer bg-accent/50 transition-colors"
-                                  onClick={handleAddDriver}
-                                >
-                                  <div className="text-sm font-medium text-primary">
-                                    + Add "{searchTerm}" as new owner
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-1">
-                                    Click to create a new owner record
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                       )}
 
