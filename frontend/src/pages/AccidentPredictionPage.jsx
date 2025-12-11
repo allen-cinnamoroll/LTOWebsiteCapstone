@@ -216,13 +216,11 @@ export default function AccidentPredictionPage() {
             }
             
             if (progressData.cancelled) {
+              // Don't show toast here - the cancel button handler already shows it
               setProgress(0);
               setEstimatedTimeRemaining('Training cancelled');
               setRetraining(false);
-              toast.info('Training cancelled');
-              setTimeout(() => {
-                setShowRetrainProgressModal(false);
-              }, 2000);
+              // Modal will be closed by the cancel handler, so don't close it here
             } else if (progressData.completed) {
               setProgress(100);
               setEstimatedTimeRemaining('Complete!');

@@ -1075,20 +1075,24 @@ export const cancelRetrainAccidentModel = async (req, res) => {
       });
 
       // Check if response is JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
         // Flask returned HTML (error page) instead of JSON
         const text = await response.text();
         console.error('Flask API returned non-JSON response:', text.substring(0, 200));
         
         // Log as failed
-        await logUserActivity({
-          userId: userId,
-          logType: 'cancel_retrain_accident_model',
-          ipAddress: ipAddress,
-          status: 'failed',
-          details: 'Cancel retrain failed: Flask API returned non-JSON response (may be down or error)'
-        });
+        try {
+          await logUserActivity({
+            userId: userId,
+            logType: 'cancel_retrain_accident_model',
+            ipAddress: ipAddress,
+            status: 'failed',
+            details: 'Cancel retrain failed: Flask API returned non-JSON response (may be down or error)'
+          });
+        } catch (logError) {
+          console.error('Failed to log cancel retrain error:', logError.message);
+        }
         
         return res.status(500).json({
           success: false,
@@ -1097,7 +1101,31 @@ export const cancelRetrainAccidentModel = async (req, res) => {
         });
       }
 
-      data = await response.json();
+      // Try to parse JSON
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError.message);
+        
+        // Log as failed
+        try {
+          await logUserActivity({
+            userId: userId,
+            logType: 'cancel_retrain_accident_model',
+            ipAddress: ipAddress,
+            status: 'failed',
+            details: 'Cancel retrain failed: Invalid JSON response from Flask API'
+          });
+        } catch (logError) {
+          console.error('Failed to log cancel retrain error:', logError.message);
+        }
+        
+        return res.status(500).json({
+          success: false,
+          message: 'Flask API returned invalid JSON response.',
+          error: 'Invalid JSON from prediction service'
+        });
+      }
     } catch (fetchError) {
       // Network error or timeout
       console.error('Error calling Flask API:', fetchError.message);
