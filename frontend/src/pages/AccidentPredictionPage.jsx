@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 
 // Get Flask API URL from environment variable or use default
@@ -49,6 +58,12 @@ export default function AccidentPredictionPage() {
   const [error, setError] = useState(null);
   const [retraining, setRetraining] = useState(false);
   const [showRetrainModal, setShowRetrainModal] = useState(false);
+  const [showRetrainProgressModal, setShowRetrainProgressModal] = useState(false);
+  const abortControllerRef = useRef(null);
+  const [progress, setProgress] = useState(0);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState('');
+  const progressIntervalRef = useRef(null);
+  const startTimeRef = useRef(null);
 
   // Fetch model information on component mount
   useEffect(() => {
@@ -122,41 +137,140 @@ export default function AccidentPredictionPage() {
     try {
       setRetraining(true);
       setError(null);
+      setProgress(0);
+      setEstimatedTimeRemaining('');
+      
+      // Show progress modal immediately
+      setShowRetrainProgressModal(true);
+      
+      startTimeRef.current = Date.now();
       
       const url = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/retrain`;
       console.log('[AccidentPredictionPage] Starting retrain from:', url);
       
-      // Create timeout controller for browser compatibility
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3600000); // 1 hour timeout for training
-      
+      // Start training (async, returns immediately)
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ force: true }),
-        signal: controller.signal,
       });
       
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
         const text = await response.text();
-        console.error('Failed to retrain model', response.status, text);
-        throw new Error(`HTTP ${response.status}: ${text || 'Failed to retrain model'}`);
+        throw new Error(`HTTP ${response.status}: ${text || 'Failed to start retraining'}`);
       }
-
-      const data = await response.json();
       
-      if (data.success) {
-        toast.success('Model retrained successfully! Refreshing model information...');
-        // Refresh model info after successful retrain
-        await fetchModelInfo(false);
-      } else {
-        throw new Error(data.error || data.message || 'Failed to retrain model');
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to start retraining');
       }
+      
+      // Start polling for progress
+      const progressUrl = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/training-progress`;
+      
+      progressIntervalRef.current = setInterval(async () => {
+        try {
+          const progressResponse = await fetch(progressUrl);
+          if (!progressResponse.ok) {
+            return;
+          }
+          
+          const progressData = await progressResponse.json();
+          
+          // Update progress
+          setProgress(progressData.progress || 0);
+          
+          // Calculate estimated time remaining based on progress
+          const elapsed = progressData.elapsed_time || 0;
+          const currentProgress = progressData.progress || 0;
+          
+          let estimatedRemaining = '';
+          if (currentProgress > 0 && currentProgress < 100 && elapsed > 0) {
+            // Calculate estimated total time: elapsed / (progress / 100)
+            const estimatedTotal = elapsed / (currentProgress / 100);
+            const remaining = estimatedTotal - elapsed;
+            
+            if (remaining > 0) {
+              const remainingMinutes = Math.floor(remaining / 60);
+              const remainingSeconds = Math.floor(remaining % 60);
+              
+              if (remainingMinutes > 0) {
+                estimatedRemaining = `~${remainingMinutes}m ${remainingSeconds}s remaining`;
+              } else if (remainingSeconds > 0) {
+                estimatedRemaining = `~${remainingSeconds}s remaining`;
+              }
+            }
+          }
+          
+          const stepName = progressData.step_name || '';
+          const message = progressData.message || '';
+          
+          if (progressData.completed || progressData.cancelled) {
+            // Training completed or cancelled
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+              progressIntervalRef.current = null;
+            }
+            
+            if (progressData.cancelled) {
+              setProgress(0);
+              setEstimatedTimeRemaining('Training cancelled');
+              setRetraining(false);
+              toast.info('Training cancelled');
+              setTimeout(() => {
+                setShowRetrainProgressModal(false);
+              }, 2000);
+            } else if (progressData.completed) {
+              setProgress(100);
+              setEstimatedTimeRemaining('Complete!');
+              setRetraining(false);
+              
+              if (progressData.success) {
+                toast.success('Model retrained successfully! Refreshing model information...');
+                await fetchModelInfo(false);
+                // Close modal after a short delay
+                setTimeout(() => {
+                  setShowRetrainProgressModal(false);
+                }, 2000);
+              } else {
+                throw new Error(progressData.message || 'Training failed');
+              }
+            }
+          } else if (progressData.is_training) {
+            // Still training - show step info and estimated remaining time
+            if (stepName && message) {
+              if (estimatedRemaining) {
+                setEstimatedTimeRemaining(`${stepName}: ${message} | ${estimatedRemaining}`);
+              } else {
+                setEstimatedTimeRemaining(`${stepName}: ${message}`);
+              }
+            } else if (estimatedRemaining) {
+              setEstimatedTimeRemaining(estimatedRemaining);
+            } else {
+              setEstimatedTimeRemaining('Training in progress...');
+            }
+          } else {
+            // Not training
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+              progressIntervalRef.current = null;
+            }
+          }
+        } catch (err) {
+          console.error('Error polling progress:', err);
+          // Continue polling even if one request fails
+        }
+      }, 2000); // Poll every 2 seconds
+
     } catch (err) {
+      // Stop polling on error
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
       console.error('Error retraining model:', err);
       let errorMessage = err.message || 'Failed to retrain model. Please check server logs.';
       
@@ -170,8 +284,55 @@ export default function AccidentPredictionPage() {
       
       setError(errorMessage);
       toast.error(errorMessage);
-    } finally {
       setRetraining(false);
+      setShowRetrainProgressModal(false);
+    }
+  };
+
+  const handleCancelRetrain = async () => {
+    try {
+      // Call cancel endpoint
+      const cancelUrl = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/cancel-training`;
+      const response = await fetch(cancelUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      // Clean up progress tracking
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      setRetraining(false);
+      setProgress(0);
+      setEstimatedTimeRemaining('Cancelling...');
+      
+      // Wait a moment for cancellation to be processed
+      setTimeout(() => {
+        setShowRetrainProgressModal(false);
+        setEstimatedTimeRemaining('');
+      }, 1000);
+      
+      if (response.ok) {
+        toast.info('Training cancellation requested');
+      } else {
+        toast.warning('Could not cancel training. It may complete in the background.');
+      }
+    } catch (err) {
+      console.error('Error cancelling training:', err);
+      // Still clean up UI even if cancel request fails
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      setRetraining(false);
+      setShowRetrainProgressModal(false);
+      setProgress(0);
+      setEstimatedTimeRemaining('');
+      toast.warning('Could not cancel training. It may complete in the background.');
     }
   };
 
@@ -816,6 +977,61 @@ export default function AccidentPredictionPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Retrain Progress Modal */}
+      <Dialog open={showRetrainProgressModal} onOpenChange={() => {}}>
+        <DialogContent 
+          className="sm:max-w-md [&>button]:hidden"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              Retraining Model
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              Retraining the accident prediction model. This may take a while.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-medium text-blue-600 dark:text-blue-400">
+                  {Math.round(progress)}%
+                </span>
+              </div>
+              <div className="relative h-3 w-full overflow-hidden rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <div 
+                  className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
+                  style={{
+                    width: `${progress}%`,
+                  }}
+                />
+              </div>
+              {estimatedTimeRemaining && (
+                <p className="text-xs text-muted-foreground text-center font-medium">
+                  {estimatedTimeRemaining}
+                </p>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground text-center pt-2">
+              The model is being trained with the latest data. This process typically takes several minutes.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancelRetrain}
+              disabled={!retraining}
+            >
+              Cancel Retrain
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
     </div>
   );

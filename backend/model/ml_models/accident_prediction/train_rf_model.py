@@ -28,6 +28,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from data_loader import AccidentDataLoader
+from progress_tracker import ProgressTracker
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,7 +40,7 @@ logger = logging.getLogger(__name__)
 class AccidentRFTrainer:
     """Train Random Forest models (regressor + classifier) for accident prediction"""
     
-    def __init__(self, model_dir=None, high_risk_threshold=None):
+    def __init__(self, model_dir=None, high_risk_threshold=None, progress_tracker=None):
         """
         Initialize trainer
         
@@ -47,6 +48,7 @@ class AccidentRFTrainer:
             model_dir: Directory to save trained model. Default: '../trained'
             high_risk_threshold: Threshold for high-risk classification (percentile or absolute value).
                                  If None, uses 75th percentile of accident counts.
+            progress_tracker: ProgressTracker instance for progress updates (optional)
         """
         if model_dir is None:
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -63,6 +65,7 @@ class AccidentRFTrainer:
         self.metadata = {}
         self.use_log_target = True
         self.high_risk_threshold = high_risk_threshold
+        self.progress_tracker = progress_tracker
     
     def _time_based_split(self, df, test_size=0.2):
         """
@@ -108,8 +111,23 @@ class AccidentRFTrainer:
         logger.info("Starting Random Forest Model Training (Regressor + Classifier)")
         logger.info("=" * 60)
         
+        if self.progress_tracker:
+            self.progress_tracker.reset()
+            self.progress_tracker.update(0, "Initializing", 0, "Starting training process...")
+        
+        # Check for cancellation before starting
+        if self.progress_tracker and self.progress_tracker.is_cancelled():
+            logger.info("Training cancelled before start")
+            return None
+        
         # Load and prepare data
         logger.info("Step 1: Loading data from MongoDB...")
+        if self.progress_tracker:
+            if self.progress_tracker.is_cancelled():
+                logger.info("Training cancelled")
+                return None
+            self.progress_tracker.update(1, "Loading Data", 5, "Connecting to MongoDB and loading accident records...")
+        
         loader = AccidentDataLoader(mongo_uri=mongo_uri)
         
         try:
@@ -123,6 +141,12 @@ class AccidentRFTrainer:
             
             # Aggregate monthly counts
             logger.info("Step 2: Aggregating monthly counts per barangay...")
+            if self.progress_tracker:
+                if self.progress_tracker.is_cancelled():
+                    logger.info("Training cancelled")
+                    return None
+                self.progress_tracker.update(2, "Aggregating Data", 15, f"Aggregating {len(accidents)} records into monthly counts...")
+            
             df_aggregated = loader.aggregate_monthly_counts(accidents)
             
             if df_aggregated.empty:
@@ -130,6 +154,12 @@ class AccidentRFTrainer:
             
             # Prepare training data
             logger.info("Step 3: Preparing training features...")
+            if self.progress_tracker:
+                if self.progress_tracker.is_cancelled():
+                    logger.info("Training cancelled")
+                    return None
+                self.progress_tracker.update(3, "Preparing Features", 25, "Creating feature engineering and encoding...")
+            
             df = loader.prepare_training_data(df_aggregated)
             
             # Store encoders
@@ -173,6 +203,12 @@ class AccidentRFTrainer:
             
             # Split data
             logger.info("Step 4: Splitting data into train/test sets...")
+            if self.progress_tracker:
+                if self.progress_tracker.is_cancelled():
+                    logger.info("Training cancelled")
+                    return None
+                self.progress_tracker.update(4, "Splitting Data", 30, f"Splitting {len(df)} samples into train/test sets...")
+            
             if use_time_split:
                 train_indices, test_indices = self._time_based_split(df)
                 X_train = X.iloc[train_indices]
@@ -195,18 +231,46 @@ class AccidentRFTrainer:
             
             # Train Regressor
             logger.info("Step 5: Training Random Forest Regressor...")
+            if self.progress_tracker:
+                if self.progress_tracker.is_cancelled():
+                    logger.info("Training cancelled")
+                    return None
+                self.progress_tracker.update(5, "Training Regressor", 40, "Training Random Forest Regressor model with hyperparameter tuning...")
+            
             regressor_metrics = self._train_regressor(
                 X_train, y_train_t, y_train_raw, X_test, y_test_t, y_test_raw, random_state
             )
             
+            # Check for cancellation after regressor training
+            if self.progress_tracker and self.progress_tracker.is_cancelled():
+                logger.info("Training cancelled after regressor training")
+                return None
+            
             # Train Classifier
             logger.info("Step 6: Training Random Forest Classifier...")
+            if self.progress_tracker:
+                if self.progress_tracker.is_cancelled():
+                    logger.info("Training cancelled")
+                    return None
+                self.progress_tracker.update(6, "Training Classifier", 70, "Training Random Forest Classifier model with hyperparameter tuning...")
+            
             classifier_metrics = self._train_classifier(
                 X_train, y_train_class, X_test, y_test_class, random_state
             )
             
+            # Check for cancellation after classifier training
+            if self.progress_tracker and self.progress_tracker.is_cancelled():
+                logger.info("Training cancelled after classifier training")
+                return None
+            
             # Save models
             logger.info("Step 7: Saving models and metadata...")
+            if self.progress_tracker:
+                if self.progress_tracker.is_cancelled():
+                    logger.info("Training cancelled")
+                    return None
+                self.progress_tracker.update(7, "Saving Models", 90, "Saving trained models and metadata to disk...")
+            
             self._save_models()
             
             # Store metadata
@@ -249,11 +313,29 @@ class AccidentRFTrainer:
             logger.info(f"CV Accuracy (mean ± std): {classifier_metrics['cv_accuracy_mean']:.4f} ± {classifier_metrics['cv_accuracy_std']:.4f}")
             logger.info("=" * 60)
             
+            if self.progress_tracker:
+                self.progress_tracker.complete(
+                    success=True,
+                    message="Model training completed successfully!",
+                    details={
+                        'regressor_metrics': regressor_metrics,
+                        'classifier_metrics': classifier_metrics
+                    }
+                )
+            
             return {
                 'regressor': regressor_metrics,
                 'classifier': classifier_metrics
             }
             
+        except Exception as e:
+            if self.progress_tracker:
+                self.progress_tracker.complete(
+                    success=False,
+                    message=f"Training failed: {str(e)}",
+                    details={'error': str(e)}
+                )
+            raise
         finally:
             loader.disconnect()
     
@@ -535,7 +617,8 @@ class AccidentRFTrainer:
 
 if __name__ == '__main__':
     # Train the models
-    trainer = AccidentRFTrainer()
+    progress_tracker = ProgressTracker()
+    trainer = AccidentRFTrainer(progress_tracker=progress_tracker)
     
     try:
         results = trainer.train(use_time_split=True)

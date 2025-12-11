@@ -770,16 +770,16 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                                   ) : (
                                     <div
                                       className="p-3 hover:bg-accent cursor-pointer bg-accent/50 transition-colors"
-                                      onClick={handleAddDriver}
-                                    >
-                                      <div className="text-sm font-medium text-primary">
-                                        + Add "{searchTerm}" as new owner
-                                      </div>
-                                      <div className="text-xs text-muted-foreground mt-1">
-                                        Click to create a new owner record
-                                      </div>
-                                    </div>
-                                  )}
+                              onClick={handleAddDriver}
+                            >
+                              <div className="text-sm font-medium text-primary">
+                                + Add "{searchTerm}" as new owner
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Click to create a new owner record
+                              </div>
+                            </div>
+                          )}
                                 </div>
                               );
                             }

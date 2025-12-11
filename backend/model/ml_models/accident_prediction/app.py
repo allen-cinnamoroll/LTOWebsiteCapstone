@@ -26,6 +26,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 from data_loader import AccidentDataLoader
+from progress_tracker import ProgressTracker
 
 # Set up logging
 logging.basicConfig(
@@ -281,15 +282,14 @@ def prepare_features(year, month, municipality, barangay, historical_data=None):
 @app.route('/api/accidents/retrain', methods=['POST'])
 def retrain_model():
     """
-    Retrain the accident prediction models (Random Forest Regressor and Classifier)
+    Start retraining the accident prediction models (runs asynchronously)
     
     Optional JSON Body:
     - force (bool): Force retrain even if model exists (default: false)
     
     Returns:
-    - success: Boolean indicating success
+    - success: Boolean indicating training was started
     - message: Status message
-    - training_info: Information about the training process
     """
     import subprocess
     import threading
@@ -310,10 +310,27 @@ def retrain_model():
                 'timestamp': datetime.now().isoformat()
             }), 500
         
+        # Initialize progress tracker
+        progress_tracker = ProgressTracker()
+        
+        # Check if training is already in progress
+        current_progress = progress_tracker.get()
+        if current_progress and current_progress.get('is_training', False):
+            return jsonify({
+                'success': False,
+                'error': 'Training is already in progress',
+                'timestamp': datetime.now().isoformat()
+            }), 409  # Conflict status
+        
+        # Reset progress tracker
+        progress_tracker.reset()
+        
         # Run training in a separate thread to avoid blocking
         def run_retrain():
             try:
-                logger.info("Starting model retraining...")
+                logger.info("Starting model retraining in background thread...")
+                progress_tracker.update(0, "Starting", 0, "Initializing training process...")
+                
                 result = subprocess.run(
                     [sys.executable, train_script],
                     cwd=current_dir,
@@ -324,49 +341,147 @@ def retrain_model():
                 
                 if result.returncode != 0:
                     logger.error(f"Retraining failed: {result.stderr}")
-                    return {
-                        'success': False,
-                        'error': result.stderr or 'Training failed',
-                        'stdout': result.stdout
-                    }
+                    progress_tracker.complete(
+                        success=False,
+                        message="Training failed",
+                        details={'error': result.stderr or 'Training failed'}
+                    )
+                    return
                 
                 # Reload model after successful training
                 logger.info("Reloading model after retraining...")
+                progress_tracker.update(8, "Reloading Model", 95, "Reloading trained models into memory...")
                 initialize_model()
                 
-                return {
-                    'success': True,
-                    'message': 'Model retrained and reloaded successfully',
-                    'stdout': result.stdout
-                }
+                progress_tracker.complete(
+                    success=True,
+                    message="Model retrained and reloaded successfully",
+                    details={'stdout': result.stdout}
+                )
+                logger.info("Training completed successfully!")
+                
             except subprocess.TimeoutExpired:
                 logger.error("Retraining timed out after 1 hour")
-                return {
-                    'success': False,
-                    'error': 'Training process timed out after 1 hour'
-                }
+                progress_tracker.complete(
+                    success=False,
+                    message="Training timed out after 1 hour",
+                    details={'error': 'Training process timed out'}
+                )
             except Exception as e:
                 logger.error(f"Error during retraining: {str(e)}")
                 traceback.print_exc()
-                return {
-                    'success': False,
-                    'error': str(e)
-                }
+                progress_tracker.complete(
+                    success=False,
+                    message=f"Training failed: {str(e)}",
+                    details={'error': str(e)}
+                )
         
-        # For now, run synchronously (can be made async later)
-        # In production, you might want to use a task queue like Celery
-        result = run_retrain()
+        # Start training in background thread
+        thread = threading.Thread(target=run_retrain, daemon=True)
+        thread.start()
         
         return jsonify({
-            'success': result['success'],
-            'message': result.get('message', 'Retraining completed'),
-            'error': result.get('error'),
+            'success': True,
+            'message': 'Training started successfully. Use /api/accidents/training-progress to track progress.',
             'timestamp': datetime.now().isoformat()
-        }), 200 if result['success'] else 500
+        }), 202  # Accepted status
         
     except Exception as e:
         logger.error(f"Error initiating retrain: {str(e)}")
         traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+
+@app.route('/api/accidents/training-progress', methods=['GET'])
+def get_training_progress():
+    """
+    Get current training progress
+    
+    Returns:
+    - progress: Progress percentage (0-100)
+    - step: Current step number
+    - step_name: Name of current step
+    - message: Status message
+    - is_training: Whether training is in progress
+    - completed: Whether training is completed
+    - success: Whether training completed successfully (if completed)
+    - elapsed_time: Time elapsed since start (in seconds)
+    """
+    try:
+        progress_tracker = ProgressTracker()
+        progress_data = progress_tracker.get()
+        
+        if progress_data is None:
+            return jsonify({
+                'is_training': False,
+                'completed': False,
+                'message': 'No training in progress'
+            }), 200
+        
+        # Calculate elapsed time
+        elapsed_time = None
+        if 'start_time' in progress_data:
+            start_time = datetime.fromisoformat(progress_data['start_time'])
+            elapsed_time = (datetime.now() - start_time).total_seconds()
+        
+        return jsonify({
+            'progress': progress_data.get('progress', 0),
+            'step': progress_data.get('step', 0),
+            'step_name': progress_data.get('step_name', ''),
+            'message': progress_data.get('message', ''),
+            'is_training': progress_data.get('is_training', False),
+            'completed': progress_data.get('completed', False),
+            'cancelled': progress_data.get('cancelled', False),
+            'success': progress_data.get('success', None),
+            'elapsed_time': elapsed_time,
+            'timestamp': progress_data.get('timestamp', datetime.now().isoformat()),
+            'details': progress_data.get('details', {})
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting training progress: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+
+@app.route('/api/accidents/cancel-training', methods=['POST'])
+def cancel_training():
+    """
+    Cancel ongoing training
+    
+    Returns:
+    - success: Boolean indicating if cancellation was successful
+    - message: Status message
+    """
+    try:
+        progress_tracker = ProgressTracker()
+        current_progress = progress_tracker.get()
+        
+        if not current_progress or not current_progress.get('is_training', False):
+            return jsonify({
+                'success': False,
+                'error': 'No training in progress to cancel',
+                'timestamp': datetime.now().isoformat()
+            }), 400
+        
+        # Mark as cancelled
+        progress_tracker.cancel()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Training cancellation requested. The current training step will complete but no new steps will start.',
+            'timestamp': datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error cancelling training: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e),
