@@ -735,16 +735,26 @@ const FormComponent = ({ onSubmit, form, submitting, hideDateOfRenewal = false, 
                           
                           {/* Add Owner Option - only show when no results and not already selected */}
                           {showNoResults && searchResults.length === 0 && !selectedDriver && (
-                            <div
-                              className="p-3 hover:bg-accent cursor-pointer border-b border-border last:border-b-0 bg-accent/50 transition-colors"
-                              onClick={handleAddDriver}
-                            >
-                              <div className="text-sm font-medium text-primary">
-                                + Add "{searchTerm}" as new owner
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                Click to create a new owner record
-                              </div>
+                            <div className="border-b border-border last:border-b-0">
+                              {isEditMode ? (
+                                <div className="p-3">
+                                  <div className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                                    Name not found click the new owner button to add a new owner
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  className="p-3 hover:bg-accent cursor-pointer bg-accent/50 transition-colors"
+                                  onClick={handleAddDriver}
+                                >
+                                  <div className="text-sm font-medium text-primary">
+                                    + Add "{searchTerm}" as new owner
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    Click to create a new owner record
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
