@@ -65,6 +65,7 @@ export default function AccidentPredictionPage() {
   const [showRetrainSuccessModal, setShowRetrainSuccessModal] = useState(false);
   const abortControllerRef = useRef(null);
   const [progress, setProgress] = useState(0);
+  const completionHandledRef = useRef(false);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState('');
   const progressIntervalRef = useRef(null);
   const startTimeRef = useRef(null);
@@ -146,6 +147,7 @@ export default function AccidentPredictionPage() {
       
       // Show progress modal immediately
       setShowRetrainProgressModal(true);
+      completionHandledRef.current = false; // Reset completion flag
       
       startTimeRef.current = Date.now();
       
@@ -209,8 +211,16 @@ export default function AccidentPredictionPage() {
           const stepName = progressData.step_name || '';
           const message = progressData.message || '';
           
+          // Skip if we've already handled completion
+          if (completionHandledRef.current) {
+            return;
+          }
+
           if (progressData.completed || progressData.cancelled) {
-            // Training completed or cancelled
+            // Mark as handled to prevent duplicate processing
+            completionHandledRef.current = true;
+            
+            // Training completed or cancelled - stop polling immediately
             if (progressIntervalRef.current) {
               clearInterval(progressIntervalRef.current);
               progressIntervalRef.current = null;
@@ -222,19 +232,30 @@ export default function AccidentPredictionPage() {
               setEstimatedTimeRemaining('Training cancelled');
               setRetraining(false);
               // Modal will be closed by the cancel handler, so don't close it here
+              return; // Exit early to prevent further processing
             } else if (progressData.completed) {
+              // Update UI state first
+              setRetraining(false);
               setProgress(100);
               setEstimatedTimeRemaining('Complete!');
-              setRetraining(false);
               
               if (progressData.success) {
-                // Close progress modal and show success modal
+                // Close progress modal
                 setShowRetrainProgressModal(false);
-                await fetchModelInfo(false);
-                // Show success modal after a brief delay
+                
+                // Refresh model info
+                try {
+                  await fetchModelInfo(false);
+                } catch (err) {
+                  console.error('Error refreshing model info:', err);
+                }
+                
+                // Show success modal after a brief delay to ensure progress modal is closed
                 setTimeout(() => {
                   setShowRetrainSuccessModal(true);
-                }, 300);
+                }, 500);
+                
+                return; // Exit early to prevent further processing
               } else {
                 throw new Error(progressData.message || 'Training failed');
               }
@@ -995,11 +1016,33 @@ export default function AccidentPredictionPage() {
       </AlertDialog>
 
       {/* Retrain Progress Modal */}
-      <Dialog open={showRetrainProgressModal} onOpenChange={() => {}}>
+      <Dialog 
+        open={showRetrainProgressModal} 
+        onOpenChange={(open) => {
+          // Allow closing only if not currently training
+          if (!open && !retraining) {
+            setShowRetrainProgressModal(false);
+          }
+        }}
+      >
         <DialogContent 
           className="sm:max-w-md [&>button]:hidden"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => {
+            // Allow closing only if not currently training
+            if (!retraining) {
+              setShowRetrainProgressModal(false);
+            } else {
+              e.preventDefault();
+            }
+          }}
+          onEscapeKeyDown={(e) => {
+            // Allow closing only if not currently training
+            if (!retraining) {
+              setShowRetrainProgressModal(false);
+            } else {
+              e.preventDefault();
+            }
+          }}
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
