@@ -62,6 +62,7 @@ export default function AccidentPredictionPage() {
   const [retraining, setRetraining] = useState(false);
   const [showRetrainModal, setShowRetrainModal] = useState(false);
   const [showRetrainProgressModal, setShowRetrainProgressModal] = useState(false);
+  const [showRetrainSuccessModal, setShowRetrainSuccessModal] = useState(false);
   const abortControllerRef = useRef(null);
   const [progress, setProgress] = useState(0);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState('');
@@ -227,12 +228,13 @@ export default function AccidentPredictionPage() {
               setRetraining(false);
               
               if (progressData.success) {
-                toast.success('Model retrained successfully! Refreshing model information...');
+                // Close progress modal and show success modal
+                setShowRetrainProgressModal(false);
                 await fetchModelInfo(false);
-                // Close modal after a short delay
+                // Show success modal after a brief delay
                 setTimeout(() => {
-                  setShowRetrainProgressModal(false);
-                }, 2000);
+                  setShowRetrainSuccessModal(true);
+                }, 300);
               } else {
                 throw new Error(progressData.message || 'Training failed');
               }
@@ -1042,6 +1044,38 @@ export default function AccidentPredictionPage() {
               disabled={!retraining}
             >
               Cancel Retrain
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Retrain Success Modal */}
+      <Dialog open={showRetrainSuccessModal} onOpenChange={setShowRetrainSuccessModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              Retraining Completed Successfully
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              The accident prediction model has been successfully retrained with the latest data and is now ready to use.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center justify-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+              <CheckCircle2 className="h-12 w-12 text-green-600" />
+            </div>
+            <p className="text-sm text-muted-foreground text-center">
+              The model has been updated and is now using the most recent accident data for predictions.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() => setShowRetrainSuccessModal(false)}
+              className="w-full sm:w-auto"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
