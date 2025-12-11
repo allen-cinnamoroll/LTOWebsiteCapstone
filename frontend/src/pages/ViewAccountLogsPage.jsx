@@ -62,6 +62,7 @@ const logTypes = [
   { value: "download_automated_report", label: "Download Automated Report" },
   { value: "automatic_retrain_accident", label: "Automatic Retrain - Accident Model" },
   { value: "automatic_retrain_mv_registration", label: "Automatic Retrain - MV Registration Model" },
+  { value: "manual_retrain_accident_model", label: "Manual Retrain - Accident Model" },
 ];
 
 export default function ViewAccountLogsPage() {

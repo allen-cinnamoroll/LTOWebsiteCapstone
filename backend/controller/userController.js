@@ -648,7 +648,10 @@ const getLogTypeLabel = (logType) => {
     "export_accidents": "Export Accidents",
     "export_dashboard_report": "Export Dashboard Report",
     "export_account_logs": "Export Account Logs",
-    "download_automated_report": "Download Automated Report"
+    "download_automated_report": "Download Automated Report",
+    "automatic_retrain_accident": "Automatic Retrain - Accident Model",
+    "automatic_retrain_mv_registration": "Automatic Retrain - MV Registration Model",
+    "manual_retrain_accident_model": "Manual Retrain - Accident Model"
   };
   return logTypes[logType] || logType;
 };
@@ -861,6 +864,113 @@ export const logAutomaticRetrain = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: err.message,
+    });
+  }
+};
+
+// Manual retrain accident model endpoint with logging
+export const retrainAccidentModel = async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    const userId = req.user.userId;
+    const ipAddress = getClientIP(req);
+    
+    // Get Flask API base URL from environment or use default
+    const flaskApiBase = process.env.ACCIDENT_PREDICTION_API_URL || 
+                         (process.env.NODE_ENV === 'production' 
+                           ? 'http://localhost:5004' 
+                           : 'http://localhost:5004');
+    
+    const retrainUrl = `${flaskApiBase}/api/accidents/retrain`;
+    
+    // Log the retrain attempt with pending status
+    try {
+      await logUserActivity({
+        userId: userId,
+        logType: 'manual_retrain_accident_model',
+        ipAddress: ipAddress,
+        status: 'pending',
+        details: 'Manual retrain of accident prediction model initiated'
+      });
+    } catch (logError) {
+      console.error('Failed to log retrain activity:', logError.message);
+      // Continue even if logging fails
+    }
+
+    // Forward the request to Flask API
+    const response = await fetch(retrainUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ force: true }),
+    });
+
+    const data = await response.json();
+
+    // Update log status based on Flask API response
+    const logStatus = response.ok && data.success ? 'success' : 'failed';
+    const logDetails = response.ok && data.success 
+      ? 'Manual retrain of accident prediction model started successfully'
+      : `Manual retrain failed: ${data.error || data.message || 'Unknown error'}`;
+
+    try {
+      // Find the most recent pending log for this user and update it
+      const UserLog = (await import('../model/UserLogModel.js')).default;
+      const recentLog = await UserLog.findOne({
+        userId: userId,
+        logType: 'manual_retrain_accident_model',
+        status: 'pending'
+      }).sort({ timestamp: -1 });
+
+      if (recentLog) {
+        recentLog.status = logStatus;
+        recentLog.details = logDetails;
+        await recentLog.save();
+      } else {
+        // If no pending log found, create a new one
+        await logUserActivity({
+          userId: userId,
+          logType: 'manual_retrain_accident_model',
+          ipAddress: ipAddress,
+          status: logStatus,
+          details: logDetails
+        });
+      }
+    } catch (logError) {
+      console.error('Failed to update retrain activity log:', logError.message);
+      // Continue even if logging fails
+    }
+
+    // Return the Flask API response
+    return res.status(response.status).json(data);
+  } catch (err) {
+    // Log as failed if there's an error
+    if (req.user && req.user.userId) {
+      try {
+        await logUserActivity({
+          userId: req.user.userId,
+          logType: 'manual_retrain_accident_model',
+          ipAddress: getClientIP(req),
+          status: 'failed',
+          details: `Manual retrain failed: ${err.message}`
+        });
+      } catch (logError) {
+        console.error('Failed to log retrain error:', logError.message);
+      }
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+      error: 'Failed to retrain model'
     });
   }
 };

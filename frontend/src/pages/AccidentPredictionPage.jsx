@@ -35,6 +35,8 @@ import {
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import apiClient from '@/api/axios';
+import { useAuth } from '@/context/AuthContext';
 
 // Get Flask API URL from environment variable or use default
 const getAccidentPredictionAPIBase = () => {
@@ -52,6 +54,7 @@ const getAccidentPredictionAPIBase = () => {
 const ACCIDENT_PREDICTION_API_BASE = getAccidentPredictionAPIBase();
 
 export default function AccidentPredictionPage() {
+  const { token } = useAuth();
   const [modelInfo, setModelInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -145,26 +148,24 @@ export default function AccidentPredictionPage() {
       
       startTimeRef.current = Date.now();
       
-      const url = `${ACCIDENT_PREDICTION_API_BASE}/api/accidents/retrain`;
-      console.log('[AccidentPredictionPage] Starting retrain from:', url);
+      // Call Node.js backend endpoint which logs the activity and proxies to Flask API
+      console.log('[AccidentPredictionPage] Starting retrain via backend API');
       
       // Start training (async, returns immediately)
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ force: true }),
-      });
+      // Use apiClient to call Node.js backend endpoint which handles logging
+      const response = await apiClient.post('/user/retrain-accident-model', 
+        { force: true },
+        {
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
       
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`HTTP ${response.status}: ${text || 'Failed to start retraining'}`);
-      }
-      
-      const data = await response.json();
+      const data = response.data;
       if (!data.success) {
-        throw new Error(data.error || 'Failed to start retraining');
+        throw new Error(data.error || data.message || 'Failed to start retraining');
       }
       
       // Start polling for progress
