@@ -1128,15 +1128,6 @@ export default function AccidentPredictionPage() {
               The model has been updated and is now using the most recent accident data for predictions.
             </p>
           </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              onClick={() => setShowRetrainSuccessModal(false)}
-              className="w-full sm:w-auto"
-            >
-              Close
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
       </div>
