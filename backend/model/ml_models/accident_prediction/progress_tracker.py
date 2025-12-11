@@ -5,6 +5,7 @@ Stores progress in a JSON file for frontend polling
 
 import json
 import os
+import numpy as np
 from datetime import datetime
 from pathlib import Path
 
@@ -115,13 +116,41 @@ class ProgressTracker:
         except (json.JSONDecodeError, IOError):
             return None
     
+    def _convert_to_json_serializable(self, obj):
+        """
+        Recursively convert numpy types to native Python types for JSON serialization
+        
+        Args:
+            obj: Object to convert (can be dict, list, numpy type, etc.)
+            
+        Returns:
+            JSON-serializable version of the object
+        """
+        if isinstance(obj, dict):
+            return {key: self._convert_to_json_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self._convert_to_json_serializable(item) for item in obj]
+        elif isinstance(obj, (np.integer, np.int64, np.int32, np.int16, np.int8)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32, np.float16)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, np.bool_):
+            return bool(obj)
+        else:
+            return obj
+    
     def _write_progress(self, data):
         """Write progress to file"""
         try:
+            # Convert numpy types to native Python types
+            serializable_data = self._convert_to_json_serializable(data)
+            
             # Write atomically by writing to temp file first, then renaming
             temp_file = self.progress_file + '.tmp'
             with open(temp_file, 'w') as f:
-                json.dump(data, f, indent=2)
+                json.dump(serializable_data, f, indent=2)
             
             # Atomic rename
             if os.path.exists(self.progress_file):

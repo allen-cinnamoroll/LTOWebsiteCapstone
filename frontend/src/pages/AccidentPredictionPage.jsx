@@ -240,6 +240,22 @@ export default function AccidentPredictionPage() {
               setEstimatedTimeRemaining('Complete!');
               
               if (progressData.success) {
+                // Log completion in account logs
+                try {
+                  await apiClient.post('/user/log-retrain-completion', 
+                    {},
+                    {
+                      headers: {
+                        Authorization: token,
+                        'Content-Type': 'application/json',
+                      },
+                    }
+                  );
+                } catch (logError) {
+                  console.error('Failed to log retrain completion:', logError);
+                  // Don't fail the flow if logging fails
+                }
+                
                 // Close progress modal
                 setShowRetrainProgressModal(false);
                 

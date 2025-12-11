@@ -1,5 +1,5 @@
 import express from "express";
-import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat, logAutomaticRetrain, retrainAccidentModel, cancelRetrainAccidentModel } from "../controller/userController.js";
+import { findUser, getAllUsers, updateUser, deleteUser, getUserLogs, exportUserLogs, getUserById, getOnlineUsers, updateHeartbeat, logAutomaticRetrain, retrainAccidentModel, cancelRetrainAccidentModel, logRetrainCompletion } from "../controller/userController.js";
 import authenticate, { authorizeRole } from "../middleware/authMiddleware.js";
 
 const userRouter = express.Router();
@@ -40,5 +40,8 @@ userRouter.post("/retrain-accident-model", authenticate, authorizeRole("admin", 
 
 // Cancel retrain accident model endpoint (with logging)
 userRouter.post("/cancel-retrain-accident-model", authenticate, authorizeRole("admin", "superadmin"), cancelRetrainAccidentModel);
+
+// Log retrain completion endpoint
+userRouter.post("/log-retrain-completion", authenticate, authorizeRole("admin", "superadmin"), logRetrainCompletion);
 
 export default userRouter;

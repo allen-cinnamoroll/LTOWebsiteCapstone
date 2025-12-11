@@ -652,7 +652,8 @@ const getLogTypeLabel = (logType) => {
     "automatic_retrain_accident": "Automatic Retrain - Accident Model",
     "automatic_retrain_mv_registration": "Automatic Retrain - MV Registration Model",
     "manual_retrain_accident_model": "Manual Retrain - Accident Model",
-    "cancel_retrain_accident_model": "Cancel Retrain - Accident Model"
+    "cancel_retrain_accident_model": "Cancel Retrain - Accident Model",
+    "retrain_completed_accident_model": "Retrain Completed - Accident Model"
   };
   return logTypes[logType] || logType;
 };
@@ -1191,6 +1192,51 @@ export const cancelRetrainAccidentModel = async (req, res) => {
       success: false,
       message: err.message,
       error: 'Failed to cancel training'
+    });
+  }
+};
+
+// Log retrain completion endpoint
+export const logRetrainCompletion = async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    const userId = req.user.userId;
+    const ipAddress = getClientIP(req);
+    
+    // Log the completion
+    try {
+      await logUserActivity({
+        userId: userId,
+        logType: 'retrain_completed_accident_model',
+        ipAddress: ipAddress,
+        status: 'success',
+        details: 'Accident prediction model retraining completed successfully'
+      });
+    } catch (logError) {
+      console.error('Failed to log retrain completion:', logError.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to log completion',
+        error: logError.message
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Retrain completion logged successfully'
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+      error: 'Failed to log retrain completion'
     });
   }
 };
